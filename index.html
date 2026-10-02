@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Mobile-first : plein écran, pas de zoom pinch sur la page (la carte gère son propre zoom) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>Street Food Map</title>
+
+  <!-- Leaflet (CSS + JS) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Tailwind CSS (build navigateur) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* ============ BASE : plein écran, style app native ============ */
+    html, body { height: 100%; margin: 0; overflow: hidden; overscroll-behavior: none; }
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    #map { position: fixed; inset: 0; height: 100vh; height: 100dvh; width: 100%; z-index: 0; background: #f3f4f6; }
+    .leaflet-control-zoom { display: none; } /* zoom au doigt, UI épurée */
+
+    /* ============ POINT BLEU PULSANT (position utilisateur) ============ */
+    .user-dot { position: relative; width: 18px; height: 18px; }
+    .user-dot::before, .user-dot::after { content: ""; position: absolute; border-radius: 50%; }
+    .user-dot::after { inset: 0; background: #2563eb; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
+    .user-dot::before { inset: 0; background: rgba(37,99,235,.45); animation: pulse 2s ease-out infinite; }
+    @keyframes pulse { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(3.2); opacity: 0; } }
+
+    /* ============ MARQUEURS COMMERCES ============ */
+    .shop-pin { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;
+      border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid #fff;
+      box-shadow: 0 3px 8px rgba(0,0,0,.3); transition: transform .15s; }
+    .shop-pin > span { transform: rotate(45deg); font-size: 18px; line-height: 1; }
+    .shop-pin.open { background: #16a34a; }
+    .shop-pin.closed { background: #9ca3af; }
+    .shop-pin.active { transform: rotate(-45deg) scale(1.2); }
+
+    /* ============ BOTTOM SHEET ============ */
+    #sheet { transform: translateY(110%); transition: transform .3s cubic-bezier(.2,.8,.2,1); padding-bottom: env(safe-area-inset-bottom); }
+    #sheet.show { transform: translateY(0); }
+    /* Le bouton GPS remonte quand la fiche est ouverte */
+    #locate-btn { transition: bottom .3s cubic-bezier(.2,.8,.2,1); bottom: calc(24px + env(safe-area-inset-bottom)); }
+    body.sheet-open #locate-btn { bottom: calc(300px + env(safe-area-inset-bottom)); }
+
+    /* ============ MODALE ============ */
+    #welcome.hide { opacity: 0; pointer-events: none; }
+    #welcome { transition: opacity .35s; }
+  </style>
+</head>
+
+<body class="bg-gray-100 text-gray-900">
+
+  <!-- ============ CARTE ============ -->
+  <div id="map"></div>
+
+  <!-- ============ BOUTON FLOTTANT : RECENTRER SUR MA POSITION ============ -->
+  <button id="locate-btn" aria-label="Me localiser"
+    class="fixed right-4 z-[500] w-14 h-14 rounded-full bg-white shadow-xl flex items-center justify-center active:scale-95 transition-transform">
+    <!-- Icône cible / GPS -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="3.5" />
+      <circle cx="12" cy="12" r="8" />
+      <path stroke-linecap="round" d="M12 1v3M12 20v3M1 12h3M20 12h3" />
+    </svg>
+  </button>
+
+  <!-- ============ TOAST (messages brefs) ============ -->
+  <div id="toast" class="fixed left-1/2 -translate-x-1/2 z-[800] px-4 py-2 rounded-full bg-gray-900/90 text-white text-sm opacity-0 pointer-events-none transition-opacity"
+       style="top: calc(16px + env(safe-area-inset-top));"></div>
+
+  <!-- ============ BOTTOM SHEET : FICHE COMMERCE ============ -->
+  <div id="sheet" class="fixed inset-x-0 bottom-0 z-[600] bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,.2)] px-5 pt-3 pb-5 max-w-xl mx-auto">
+    <div class="w-10 h-1.5 bg-gray-300 rounded-full mx-auto mb-3"></div>
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <h2 id="sh-name" class="text-xl font-bold leading-tight"></h2>
+        <p id="sh-cat" class="text-sm text-gray-500 mt-0.5"></p>
+      </div>
+      <button id="sh-close" aria-label="Fermer" class="text-gray-400 text-2xl leading-none p-1">&times;</button>
+    </div>
+    <span id="sh-status" class="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-sm font-medium"></span>
+    <div class="mt-4 p-3 rounded-2xl bg-amber-50 border border-amber-200 flex gap-3 items-center">
+      <span class="text-2xl">🎁</span>
+      <div>
+        <p class="text-xs uppercase tracking-wide text-amber-700 font-semibold">Offre du moment</p>
+        <p id="sh-promo" class="font-semibold text-amber-900"></p>
+      </div>
+    </div>
+    <p id="sh-addr" class="text-sm text-gray-600 mt-3"></p>
+    <!-- "Y aller" ouvre l'itinéraire dans l'app de navigation du téléphone -->
+    <a id="sh-go" target="_blank" rel="noopener"
+       class="mt-4 w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-blue-600 text-white font-semibold text-base shadow active:scale-[.98] transition-transform">
+      🧭 Y aller
+    </a>
+  </div>
+
+  <!-- ============ MODALE DE BIENVENUE ============ -->
+  <div id="welcome" class="fixed inset-0 z-[1000] bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6" style="padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));">
+      <div class="text-4xl text-center">🌮</div>
+      <h1 class="text-2xl font-bold text-center mt-2">Bienvenue !</h1>
+      <p class="text-center text-gray-600 mt-1">Dans quelle ville vous trouvez-vous ?</p>
+
+      <!-- Choix par défaut mis en valeur : Nantes -->
+      <button id="pick-nantes"
+        class="mt-5 w-full flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg active:scale-[.98] transition-transform">
+        <span class="text-2xl">📍</span>
+        <span class="text-left flex-1">
+          <span class="block font-bold text-lg">Nantes</span>
+          <span class="block text-xs text-blue-100">Pays de la Loire · Recommandé</span>
+        </span>
+        <span class="text-xl">→</span>
+      </button>
+
+      <div class="flex items-center gap-3 my-4 text-xs text-gray-400">
+        <div class="flex-1 h-px bg-gray-200"></div>ou une autre ville<div class="flex-1 h-px bg-gray-200"></div>
+      </div>
+
+      <!-- Recherche d'une autre ville (liste locale filtrée) -->
+      <input id="city-search" type="search" placeholder="Rechercher une ville…" autocomplete="off"
+        class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base" />
+      <ul id="city-list" class="mt-2 max-h-40 overflow-y-auto rounded-xl divide-y divide-gray-100"></ul>
+      <p class="text-xs text-gray-400 text-center mt-3">Les commerces de démo ne sont disponibles qu'à Nantes.</p>
+    </div>
+  </div>
+
+<script>
+/* =====================================================================
+   1. DONNÉES
+   ===================================================================== */
+
+/** Villes proposées dans le sélecteur (centre + zoom). Nantes est la ville par défaut. */
+const CITIES = [
+  { name: "Nantes",      coords: [47.2138, -1.5566], zoom: 16 }, // Place du Commerce / Bouffay
+  { name: "Rennes",      coords: [48.1113, -1.6800], zoom: 15 },
+  { name: "Angers",      coords: [47.4784, -0.5632], zoom: 15 },
+  { name: "Bordeaux",    coords: [44.8378, -0.5792], zoom: 15 },
+  { name: "Lyon",        coords: [45.7640,  4.8357], zoom: 15 },
+  { name: "Marseille",   coords: [43.2965,  5.3698], zoom: 15 },
+  { name: "Paris",       coords: [48.8566,  2.3522], zoom: 14 },
+  { name: "Toulouse",    coords: [43.6047,  1.4442], zoom: 15 },
+  { name: "Lille",       coords: [50.6292,  3.0573], zoom: 15 },
+  { name: "Strasbourg",  coords: [48.5734,  7.7521], zoom: 15 },
+];
+
+/** Commerces fictifs à Nantes. */
+const SHOPS = [
+  { id: 1, name: "Le Camion du Bouffay", category: "Food-truck", open: true,
+    promo: "-10% sur la formule midi", coords: [47.2150, -1.5515], address: "Place du Bouffay, Nantes" },
+  { id: 2, name: "Kebab de la Commerce", category: "Kebab", open: true,
+    promo: "Boisson offerte dès 8 €", coords: [47.2133, -1.5577], address: "Place du Commerce, Nantes" },
+  { id: 3, name: "Burger Hangar", category: "Burger", open: false,
+    promo: "Frites offertes le soir", coords: [47.2063, -1.5712], address: "Hangar à Bananes, Île de Nantes" },
+  { id: 4, name: "Sweet Tertre", category: "Sweets", open: true,
+    promo: "2e gaufre à -50%", coords: [47.2185, -1.5472], address: "Rue du Tertre, Nantes" },
+  { id: 5, name: "Bouffay Street Burger", category: "Burger", open: false,
+    promo: "Menu enfant offert", coords: [47.2142, -1.5528], address: "Rue de la Juiverie, Nantes" },
+];
+
+/** Emoji par catégorie pour les marqueurs. */
+const ICONS = { "Food-truck": "🚚", "Kebab": "🥙", "Burger": "🍔", "Sweets": "🧁" };
+
+/* =====================================================================
+   2. CARTE LEAFLET
+   ===================================================================== */
+
+// Vue initiale : France (derrière la modale)
+const map = L.map("map", { zoomControl: false, attributionControl: true, tap: true })
+  .setView([46.6, 2.5], 6);
+
+// Fonds de carte CartoDB Voyager : rues et grands axes très lisibles (tuiles @2x pour écrans retina)
+L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  subdomains: "abcd",
+  maxZoom: 20,
+  updateWhenZooming: false,   // fluidité pendant le zoom
+  keepBuffer: 4,
+}).addTo(map);
+
+/* =====================================================================
+   3. MARQUEURS & BOTTOM SHEET
+   ===================================================================== */
+
+const $ = (id) => document.getElementById(id);
+const markerEls = new Map();   // id -> élément DOM du pin (pour l'état actif)
+
+/** Crée un marqueur par commerce. */
+SHOPS.forEach((shop) => {
+  const icon = L.divIcon({
+    className: "",
+    html: `<div class="shop-pin ${shop.open ? "open" : "closed"}" data-id="${shop.id}"><span>${ICONS[shop.category] || "📍"}</span></div>`,
+    iconSize: [40, 40],
+    iconAnchor: [8, 38],        // pointe du pin sur la coordonnée
+  });
+  L.marker(shop.coords, { icon, title: shop.name })
+    .addTo(map)
+    .on("click", () => openSheet(shop));
+});
+
+/** Ouvre la fiche détaillée en bas de page. */
+function openSheet(shop) {
+  $("sh-name").textContent = shop.name;
+  $("sh-cat").textContent = shop.category;
+  $("sh-promo").textContent = shop.promo;
+  $("sh-addr").textContent = "📍 " + shop.address;
+
+  // Statut : vert si ouvert, gris si fermé
+  const st = $("sh-status");
+  st.textContent = shop.open ? "● Ouvert" : "● Fermé";
+  st.className = "inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-sm font-medium " +
+    (shop.open ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600");
+
+  // "Y aller" : lien d'itinéraire Google Maps (s'ouvre dans l'app de navigation sur mobile)
+  const [lat, lng] = shop.coords;
+  $("sh-go").href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
+
+  // Marqueur actif mis en avant
+  document.querySelectorAll(".shop-pin.active").forEach((e) => e.classList.remove("active"));
+  document.querySelector(`.shop-pin[data-id="${shop.id}"]`)?.classList.add("active");
+
+  $("sheet").classList.add("show");
+  document.body.classList.add("sheet-open");
+
+  // Décale la carte pour que le marqueur reste visible au-dessus de la fiche
+  const offset = Math.round(window.innerHeight * 0.18);
+  const target = map.project(shop.coords, map.getZoom()).add([0, offset]);
+  map.flyTo(map.unproject(target, map.getZoom()), map.getZoom(), { duration: 0.5 });
+}
+
+function closeSheet() {
+  $("sheet").classList.remove("show");
+  document.body.classList.remove("sheet-open");
+  document.querySelectorAll(".shop-pin.active").forEach((e) => e.classList.remove("active"));
+}
+$("sh-close").addEventListener("click", closeSheet);
+map.on("click", closeSheet);   // clic sur la carte = ferme la fiche
+
+/* =====================================================================
+   4. MODALE DE BIENVENUE & CHOIX DE VILLE
+   ===================================================================== */
+
+const STORAGE_KEY = "sfm_city";
+
+/** Ferme la modale et zoome en douceur sur la ville choisie. */
+function selectCity(city) {
+  try { localStorage.setItem(STORAGE_KEY, city.name); } catch (e) { /* stockage indisponible */ }
+  $("welcome").classList.add("hide");
+  setTimeout(() => $("welcome").remove(), 400);
+  map.flyTo(city.coords, city.zoom, { duration: 2.2, easeLinearity: 0.25 });
+  if (city.name !== "Nantes") toast("Pas encore de commerces à " + city.name + " (démo)");
+  startGeolocation();   // demande la géolocalisation juste après le choix
+}
+
+$("pick-nantes").addEventListener("click", () => selectCity(CITIES[0]));
+
+// Liste filtrable des autres villes
+function renderCities(filter = "") {
+  const q = filter.trim().toLowerCase();
+  const list = CITIES.slice(1).filter((c) => c.name.toLowerCase().includes(q));
+  $("city-list").innerHTML = list.length
+    ? list.map((c) => `<li><button data-city="${c.name}" class="w-full text-left px-4 py-3 hover:bg-gray-50 active:bg-gray-100">${c.name}</button></li>`).join("")
+    : `<li class="px-4 py-3 text-sm text-gray-400">Aucune ville trouvée</li>`;
+}
+$("city-search").addEventListener("input", (e) => renderCities(e.target.value));
+$("city-list").addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-city]");
+  if (btn) selectCity(CITIES.find((c) => c.name === btn.dataset.city));
+});
+renderCities();
+
+// Si la ville a déjà été choisie lors d'une visite précédente, on saute la modale
+(function init() {
+  let saved = null;
+  try { saved = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+  const city = CITIES.find((c) => c.name === saved);
+  if (city) {
+    $("welcome").remove();
+    map.setView(city.coords, city.zoom);
+    startGeolocation();
+  }
+})();
+
+/* =====================================================================
+   5. GÉOLOCALISATION & BOUTON RECENTRAGE
+   ===================================================================== */
+
+let userMarker = null;
+let userPos = null;
+let watchId = null;
+
+/** Demande l'autorisation et suit la position (point bleu pulsant). */
+function startGeolocation() {
+  if (!("geolocation" in navigator) || watchId !== null) return;
+  watchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      userPos = [pos.coords.latitude, pos.coords.longitude];
+      if (!userMarker) {
+        userMarker = L.marker(userPos, {
+          icon: L.divIcon({ className: "", html: '<div class="user-dot"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }),
+          interactive: false, zIndexOffset: 1000,
+        }).addTo(map);
+      } else {
+        userMarker.setLatLng(userPos);
+      }
+    },
+    (err) => {
+      if (err.code === err.PERMISSION_DENIED) toast("Géolocalisation refusée");
+      watchId = null;
+    },
+    { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
+  );
+}
+
+/** Bouton cible : recentre avec animation fluide. */
+$("locate-btn").addEventListener("click", () => {
+  if (userPos) {
+    map.flyTo(userPos, Math.max(map.getZoom(), 16), { duration: 1.2 });
+  } else if ("geolocation" in navigator) {
+    toast("Recherche de votre position…");
+    startGeolocation();
+    // Premier fix ponctuel pour centrer dès que disponible
+    navigator.geolocation.getCurrentPosition(
+      (p) => map.flyTo([p.coords.latitude, p.coords.longitude], 16, { duration: 1.2 }),
+      () => toast("Position indisponible"),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  } else {
+    toast("Géolocalisation non supportée");
+  }
+});
+
+/* =====================================================================
+   6. UTILITAIRES & PWA
+   ===================================================================== */
+
+let toastTimer;
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.style.opacity = 1;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => (t.style.opacity = 0), 2800);
+}
+
+// Manifeste PWA généré dynamiquement (fichier unique, aucun fichier externe requis)
+(function injectManifest() {
+  const svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%232563eb'/><text x='50' y='68' font-size='56' text-anchor='middle'>🌮</text></svg>";
+  const icon = "data:image/svg+xml," + svg;
+  const manifest = {
+    name: "Street Food Map", short_name: "StreetFood", start_url: ".", display: "standalone",
+    background_color: "#ffffff", theme_color: "#ffffff", orientation: "portrait",
+    icons: [{ src: icon, sizes: "any", type: "image/svg+xml", purpose: "any" }],
+  };
+  const link = document.createElement("link");
+  link.rel = "manifest";
+  link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" }));
+  document.head.appendChild(link);
+})();
+</script>
+</body>
+</html>
