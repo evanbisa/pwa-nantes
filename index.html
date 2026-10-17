@@ -105,13 +105,13 @@
       <h1 class="text-2xl font-bold text-center mt-2">Bienvenue !</h1>
       <p class="text-center text-gray-600 mt-1">Dans quelle ville vous trouvez-vous ?</p>
 
-      <!-- Choix par défaut mis en valeur : Nantes -->
-      <button id="pick-nantes"
+      <!-- Choix par défaut mis en valeur : La Roche-sur-Yon -->
+      <button id="pick-default"
         class="mt-5 w-full flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg active:scale-[.98] transition-transform">
         <span class="text-2xl">📍</span>
         <span class="text-left flex-1">
-          <span class="block font-bold text-lg">Nantes</span>
-          <span class="block text-xs text-blue-100">Pays de la Loire · Recommandé</span>
+          <span class="block font-bold text-lg">La Roche-sur-Yon</span>
+          <span class="block text-xs text-blue-100">Vendée · Recommandé</span>
         </span>
         <span class="text-xl">→</span>
       </button>
@@ -133,8 +133,9 @@
    1. DONNÉES
    ===================================================================== */
 
-/** Villes proposées dans le sélecteur (centre + zoom). Nantes est la ville par défaut. */
+/** Villes proposées dans le sélecteur (centre + zoom). La Roche-sur-Yon est la ville par défaut. */
 const CITIES = [
+  { name: "La Roche-sur-Yon", coords: [46.6705, -1.4269], zoom: 16 }, // Place Napoléon
   { name: "Nantes",      coords: [47.2138, -1.5566], zoom: 16 }, // Place du Commerce / Bouffay
   { name: "Rennes",      coords: [48.1113, -1.6800], zoom: 15 },
   { name: "Angers",      coords: [47.4784, -0.5632], zoom: 15 },
@@ -255,7 +256,7 @@ function selectCity(city) {
   startGeolocation();   // demande la géolocalisation juste après le choix
 }
 
-$("pick-nantes").addEventListener("click", () => selectCity(CITIES[0]));
+$("pick-default").addEventListener("click", () => selectCity(CITIES[0]));
 
 // Liste filtrable des autres villes
 function renderCities(filter = "") {
