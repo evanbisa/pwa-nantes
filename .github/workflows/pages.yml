@@ -1,0 +1,36 @@
+# Publie automatiquement le site sur GitHub Pages (branche gh-pages)
+# à chaque modification de index.html sur la branche principale du projet.
+name: Publier sur GitHub Pages
+
+on:
+  push:
+    branches: [claude/street-food-map-pwa-lr1xu2]
+    paths: [index.html]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copier le site sur la branche gh-pages
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/site"
+          cp index.html "$RUNNER_TEMP/site/"
+          touch "$RUNNER_TEMP/site/.nojekyll"
+          cd "$RUNNER_TEMP/site"
+          git init -q -b gh-pages
+          git add -A
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Publication de ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
