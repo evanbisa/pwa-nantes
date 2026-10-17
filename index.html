@@ -1,17 +1,28 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Carte interactive des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon." />
-  <meta name="color-scheme" content="dark" />
-  <meta name="theme-color" content="#05070d" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#f4f0e8" id="meta-theme" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Roche Street Food" />
   <title>Roche Street Food</title>
+
+  <!-- Thème appliqué avant le premier affichage (évite un flash de la mauvaise couleur) -->
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('roche-street-food:theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+      document.getElementById('meta-theme').setAttribute('content', t === 'dark' ? '#15171c' : '#f4f0e8');
+    })();
+  </script>
 
   <!-- Préconnexions : accélèrent le premier affichage de la carte -->
   <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin />
@@ -22,34 +33,74 @@
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css" />
   <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
 
-  <!-- Typographies : Space Grotesk (titres, aspect "tech") + Inter (texte) -->
+  <!-- Typographies : Space Grotesk (titres) + Inter (texte) -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" />
 
   <style>
     /* =====================================================================
-       1. DESIGN TOKENS
+       1. DESIGN TOKENS — mode jour (défaut) et mode nuit
        ===================================================================== */
     :root {
-      --bg: #05070d;
-      --panel: rgba(11, 16, 27, 0.82);
-      --panel-solid: #0b101b;
-      --line: rgba(148, 163, 184, 0.14);
-      --line-strong: rgba(148, 163, 184, 0.26);
-      --text: #e6edf7;
-      --muted: #8a99b2;
-      --cyan: #38e1ff;
-      --cyan-deep: #0ea5e9;
-      --violet: #b98cff;
-      --green: #2ee59d;
-      --gray: #64748b;
-      --amber: #fbbf24;
-      --danger: #fb7185;
       --radius: 20px;
+      --sidebar-w: 372px;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
       --ease-out: cubic-bezier(.2, .8, .2, 1);
+      --blue: #2563eb;
+    }
+    :root[data-theme="light"] {
+      --bg: #f4f0e8;
+      --panel: rgba(255, 253, 249, 0.9);
+      --panel-solid: #fffdf9;
+      --hover: rgba(120, 70, 55, 0.06);
+      --line: rgba(87, 58, 48, 0.12);
+      --line-strong: rgba(87, 58, 48, 0.22);
+      --text: #2b2220;
+      --muted: #7b6b65;
+      --accent: #b5362c;
+      --accent-strong: #8f271f;
+      --accent-soft: rgba(181, 54, 44, 0.09);
+      --accent-line: rgba(181, 54, 44, 0.32);
+      --on-accent: #ffffff;
+      --green: #1a8f5a;
+      --green-soft: rgba(26, 143, 90, 0.1);
+      --gray: #9a8f8a;
+      --amber: #b86e00;
+      --danger: #c2412f;
+      --input-bg: #ffffff;
+      --shadow: 0 10px 30px rgba(70, 40, 30, 0.14), 0 2px 6px rgba(70, 40, 30, 0.06);
+      --scrim: rgba(244, 240, 232, 0.94);
+      --scrim-soft: rgba(244, 240, 232, 0.25);
+      --backdrop: rgba(43, 34, 32, 0.28);
+      --vignette: rgba(244, 240, 232, 0.55);
+    }
+    :root[data-theme="dark"] {
+      --bg: #15171c;
+      --panel: rgba(28, 30, 37, 0.88);
+      --panel-solid: #1c1e25;
+      --hover: rgba(255, 235, 225, 0.05);
+      --line: rgba(255, 235, 225, 0.1);
+      --line-strong: rgba(255, 235, 225, 0.2);
+      --text: #f1ebe7;
+      --muted: #a3958f;
+      --accent: #ef6b5e;
+      --accent-strong: #d9493c;
+      --accent-soft: rgba(239, 107, 94, 0.12);
+      --accent-line: rgba(239, 107, 94, 0.4);
+      --on-accent: #1b0d0b;
+      --green: #34d399;
+      --green-soft: rgba(52, 211, 153, 0.12);
+      --gray: #6f6866;
+      --amber: #fbbf24;
+      --danger: #fb7185;
+      --input-bg: rgba(0, 0, 0, 0.25);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.25);
+      --scrim: rgba(21, 23, 28, 0.94);
+      --scrim-soft: rgba(21, 23, 28, 0.2);
+      --backdrop: rgba(5, 6, 9, 0.55);
+      --vignette: rgba(21, 23, 28, 0.6);
     }
 
     /* =====================================================================
@@ -67,16 +118,15 @@
     input { -webkit-user-select: text; user-select: text; }
     button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
     a { color: inherit; }
-    :focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     #map { position: fixed; inset: 0; width: 100%; height: 100vh; height: 100dvh; background: var(--bg); }
 
-    /* Vignettage : assombrit les bords pour la profondeur et la lisibilité des contrôles */
+    /* Léger fondu sur les bords : met en valeur les contrôles flottants */
     .vignette {
       position: fixed; inset: 0; pointer-events: none; z-index: 1;
-      background:
-        radial-gradient(120% 80% at 50% 50%, transparent 55%, rgba(5, 7, 13, .65) 100%),
-        linear-gradient(to bottom, rgba(5, 7, 13, .55), transparent 18%, transparent 80%, rgba(5, 7, 13, .6));
+      background: linear-gradient(to bottom, var(--vignette), transparent 14%, transparent 86%, var(--vignette));
+      transition: background .6s;
     }
 
     /* Surface "verre dépoli" commune aux éléments flottants */
@@ -85,7 +135,8 @@
       border: 1px solid var(--line);
       -webkit-backdrop-filter: blur(18px) saturate(150%);
       backdrop-filter: blur(18px) saturate(150%);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .04);
+      box-shadow: var(--shadow);
+      transition: background-color .5s, border-color .5s, color .5s;
     }
 
     /* Interface masquée tant que l'onboarding est affiché, puis révélée en douceur */
@@ -93,6 +144,7 @@
     body:not(.ui-ready) .ui { opacity: 0; pointer-events: none; }
     body:not(.ui-ready) .topbar, body:not(.ui-ready) .controls { transform: translateY(-12px); }
     body:not(.ui-ready) .filters { transform: translateY(12px); }
+    body:not(.ui-ready) .sidebar { transform: translateX(-16px); }
 
     /* =====================================================================
        3. BARRE SUPÉRIEURE (profil) & CONTRÔLES (en haut à droite)
@@ -107,9 +159,8 @@
     }
     .avatar {
       flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
-      font-family: var(--font-display); font-weight: 700; font-size: 17px; color: #041018;
-      background: linear-gradient(135deg, var(--cyan), var(--violet));
-      box-shadow: 0 0 18px rgba(56, 225, 255, .35);
+      font-family: var(--font-display); font-weight: 700; font-size: 17px; color: #fff;
+      background: linear-gradient(135deg, var(--accent), #e0894f);
     }
     .brand-text { display: flex; flex-direction: column; min-width: 0; }
     .brand-text strong {
@@ -120,7 +171,7 @@
       font-size: 11px; color: var(--muted); letter-spacing: .14em; text-transform: uppercase;
       display: flex; align-items: center; gap: 6px;
     }
-    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
 
     .controls {
       position: fixed; z-index: 20; right: 12px; top: calc(var(--safe-top) + 12px);
@@ -128,39 +179,41 @@
     }
     .ctrl {
       position: relative; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px;
-      transition: transform .15s var(--ease-out), background-color .25s, border-color .25s, box-shadow .25s;
+      transition: transform .15s var(--ease-out), background-color .25s, border-color .25s, box-shadow .25s, color .25s;
     }
     .ctrl:active { transform: scale(.92); }
     .ctrl svg { width: 24px; height: 24px; }
     .ctrl-text { font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: .04em; }
     #compass-btn svg { transition: transform .1s linear; }
 
+    /* Bouton jour/nuit : affiche l'icône du mode vers lequel on bascule */
+    :root[data-theme="light"] #theme-btn .ico-sun, :root[data-theme="dark"] #theme-btn .ico-moon { display: none; }
+
     /* --- Bouton de localisation : un état visuel par situation --- */
-    #locate-btn { width: 56px; height: 56px; border-radius: 18px; color: var(--text); }
+    #locate-btn { width: 56px; height: 56px; border-radius: 18px; }
     #locate-btn .ico-slash, #locate-btn .spinner { display: none; }
-    #locate-btn[data-state="active"] { color: var(--cyan); border-color: rgba(56, 225, 255, .45); }
+    #locate-btn[data-state="active"] { color: var(--accent); border-color: var(--accent-line); }
     #locate-btn[data-state="active"][data-follow="true"] {
-      color: #041018; background: var(--cyan); border-color: var(--cyan);
-      box-shadow: 0 0 24px rgba(56, 225, 255, .55);
+      color: var(--on-accent); background: var(--accent); border-color: var(--accent);
     }
-    #locate-btn[data-state="denied"] { color: var(--amber); border-color: rgba(251, 191, 36, .4); }
+    #locate-btn[data-state="denied"] { color: var(--amber); }
     #locate-btn[data-state="denied"] .ico-slash { display: inline; }
     #locate-btn[data-state="searching"] .ico-target { opacity: .35; }
     #locate-btn[data-state="searching"] .spinner {
       display: block; position: absolute; inset: 7px; border-radius: 50%;
-      border: 2px solid rgba(56, 225, 255, .15); border-top-color: var(--cyan);
+      border: 2px solid var(--accent-soft); border-top-color: var(--accent);
       animation: spin .8s linear infinite;
     }
     /* Halo d'invitation quand la localisation n'est pas encore active */
     #locate-btn.hint::after {
       content: ""; position: absolute; inset: -2px; border-radius: inherit; pointer-events: none;
-      border: 2px solid var(--cyan); animation: hint 1.8s ease-out infinite;
+      border: 2px solid var(--accent); animation: hint 1.8s ease-out infinite;
     }
     @keyframes hint { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.35); } }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* =====================================================================
-       4. FILTRES (bas de l'écran, à portée de pouce)
+       4. FILTRES (téléphone : bas de l'écran, à portée de pouce)
        ===================================================================== */
     .filters {
       position: fixed; z-index: 20; left: 0; right: 0; bottom: calc(var(--safe-bottom) + 14px);
@@ -175,67 +228,113 @@
     .chip {
       flex: none; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px;
       border-radius: 999px; font-weight: 500; font-size: 14px; white-space: nowrap; scroll-snap-align: start;
-      transition: background-color .2s, color .2s, border-color .2s, box-shadow .2s;
+      transition: background-color .2s, color .2s, border-color .2s;
     }
-    .chip[aria-pressed="true"] {
-      background: rgba(56, 225, 255, .14); color: #dff9ff; border-color: rgba(56, 225, 255, .55);
-      box-shadow: 0 0 16px rgba(56, 225, 255, .2), inset 0 0 0 1px rgba(56, 225, 255, .25);
-    }
+    .chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
     .chip-sep { flex: none; width: 1px; margin: 8px 2px; background: var(--line-strong); }
-    .dot-green { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .dot-green { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+    .chip[aria-pressed="true"] .dot-green { background: currentColor; }
 
     /* =====================================================================
-       5. MARQUEURS (commerces & position de l'utilisateur)
+       5. PANNEAU LATÉRAL (ordinateur uniquement)
+       ===================================================================== */
+    .sidebar {
+      display: none; position: fixed; z-index: 20; left: 16px; top: 16px; bottom: 16px; width: var(--sidebar-w);
+      flex-direction: column; border-radius: 24px; overflow: hidden;
+    }
+    .sb-brand { padding: 12px 12px 4px; }
+    .sidebar .brand { width: 100%; padding: 6px 10px 6px 6px; border-radius: 18px; background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+    .sidebar .brand:hover { background: var(--hover); }
+    .sb-search { position: relative; margin: 8px 16px 10px; }
+    .sb-search svg { position: absolute; left: 14px; top: 50%; width: 18px; height: 18px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+    .sb-search input {
+      width: 100%; height: 44px; padding: 0 44px 0 42px; border-radius: 14px; font: inherit; color: var(--text);
+      background: var(--input-bg); border: 1px solid var(--line-strong); outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    .sb-search input::placeholder { color: var(--muted); }
+    .sb-search input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+    .sb-search kbd {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%); padding: 1px 7px; border-radius: 6px;
+      font: 600 12px var(--font-ui); color: var(--muted); border: 1px solid var(--line-strong);
+    }
+    .sb-filters { padding: 0 16px 8px; }
+    .sb-filters .filters-track { flex-wrap: wrap; overflow: visible; padding: 0; gap: 6px; }
+    .sb-filters .chip { height: 34px; padding: 0 12px; font-size: 13px; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--hover); }
+    .sb-filters .chip[aria-pressed="true"] { background: var(--accent); }
+    .sb-filters .chip-sep { margin: 6px 2px; }
+    .sb-count { margin: 6px 20px 6px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .shop-list { list-style: none; margin: 0; padding: 0 10px 12px; overflow-y: auto; flex: 1; scrollbar-width: thin; }
+    .shop-item {
+      width: 100%; display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 16px; text-align: left;
+      transition: background-color .15s;
+    }
+    .shop-item:hover, .shop-item.is-hover { background: var(--hover); }
+    .shop-item[aria-current="true"] { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); }
+    .si-emoji { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; font-size: 22px; background: var(--hover); border: 1px solid var(--line); }
+    .si-body { flex: 1; min-width: 0; display: grid; gap: 2px; }
+    .si-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+    .si-top strong { font-family: var(--font-display); font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .si-dist { flex: none; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .si-status { font-size: 12.5px; font-weight: 600; }
+    .si-status.is-open { color: var(--green); }
+    .si-status.is-closed { color: var(--muted); }
+    .si-promo { font-size: 12.5px; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sb-empty { margin: 24px 20px; text-align: center; color: var(--muted); font-size: 14px; }
+
+    /* =====================================================================
+       6. MARQUEURS (commerces & position de l'utilisateur)
        ===================================================================== */
     .pin { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
     .pin-badge {
       position: relative; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%;
-      font-size: 22px; line-height: 1; background: #0d1422;
-      border: 2px solid var(--gray); box-shadow: 0 6px 16px rgba(0, 0, 0, .55);
-      transition: transform .2s var(--ease-out), box-shadow .25s;
+      font-size: 22px; line-height: 1; background: var(--panel-solid);
+      border: 2.5px solid var(--gray); box-shadow: 0 6px 14px rgba(40, 20, 15, .28);
+      transform-origin: 50% 100%;
+      transition: transform .2s var(--ease-out), scale .3s var(--ease-out), background-color .5s;
     }
     .pin-badge::after { /* pointe du marqueur */
       content: ""; position: absolute; bottom: -8px; left: 50%; width: 12px; height: 12px;
       background: inherit; border-right: inherit; border-bottom: inherit;
       transform: translateX(-50%) rotate(45deg); border-radius: 0 0 3px 0;
     }
-    .pin.is-open .pin-badge { border-color: var(--green); box-shadow: 0 0 0 4px rgba(46, 229, 157, .14), 0 0 22px rgba(46, 229, 157, .45); }
-    .pin.is-open .pin-badge::before { /* onde lumineuse : le commerce est ouvert */
+    .pin.is-open .pin-badge { border-color: var(--green); }
+    .pin.is-open .pin-badge::before { /* onde : le commerce est ouvert */
       content: ""; position: absolute; inset: -6px; border-radius: 50%;
       border: 2px solid var(--green); animation: ripple 2.4s ease-out infinite;
     }
-    .pin.is-closed .pin-badge { filter: grayscale(.85) brightness(.75); }
-    .pin.is-selected .pin-badge { transform: translateY(-6px) scale(1.15); }
+    .pin.is-closed .pin-badge { filter: grayscale(.9) opacity(.85); }
+    .pin:hover .pin-badge, .pin.is-hover .pin-badge { transform: translateY(-3px); }
+    .pin.is-selected .pin-badge { transform: translateY(-6px) scale(1.15); border-color: var(--accent); }
     .pin.is-selected.is-closed .pin-badge { filter: none; }
     @keyframes ripple { 0% { opacity: .8; transform: scale(.9); } 100% { opacity: 0; transform: scale(1.6); } }
     .pin-label {
       margin-top: 12px; padding: 3px 9px; border-radius: 8px; font-size: 12px; font-weight: 600; white-space: nowrap;
-      background: rgba(11, 16, 27, .88); border: 1px solid var(--line); color: var(--text);
+      background: var(--panel); border: 1px solid var(--line); color: var(--text); box-shadow: 0 2px 6px rgba(40, 20, 15, .12);
       opacity: 0; transform: translateY(-4px); transition: opacity .25s, transform .25s; pointer-events: none;
     }
-    #map.show-labels .pin-label, .pin.is-selected .pin-label { opacity: 1; transform: none; }
+    #map.show-labels .pin-label, .pin.is-selected .pin-label, .pin.is-hover .pin-label { opacity: 1; transform: none; }
     .pin.is-filtered { display: none; }
     /* Vue éloignée : marqueurs compacts pour éviter qu'ils se chevauchent */
-    .pin-badge { transform-origin: 50% 100%; transition: transform .2s var(--ease-out), box-shadow .25s, scale .3s var(--ease-out); }
     #map.zoom-far .pin-badge { scale: .62; }
     #map.zoom-far .pin.is-open .pin-badge::before { animation: none; opacity: 0; }
 
     .me { position: relative; width: 22px; height: 22px; pointer-events: none; }
     .me-dot {
-      position: absolute; inset: 0; border-radius: 50%; background: #3b82f6;
-      border: 3px solid #fff; box-shadow: 0 0 0 1px rgba(0, 0, 0, .2), 0 0 18px rgba(59, 130, 246, .9);
+      position: absolute; inset: 0; border-radius: 50%; background: var(--blue);
+      border: 3px solid #fff; box-shadow: 0 0 0 1px rgba(0, 0, 0, .15), 0 2px 10px rgba(37, 99, 235, .6);
     }
     .me-pulse {
-      position: absolute; inset: 0; border-radius: 50%; background: rgba(59, 130, 246, .55);
+      position: absolute; inset: 0; border-radius: 50%; background: rgba(37, 99, 235, .45);
       animation: me-pulse 2s ease-out infinite;
     }
     @keyframes me-pulse { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(3.6); opacity: 0; } }
 
     /* =====================================================================
-       6. PANNEAUX BAS (fiche commerce, profil, aide localisation)
+       7. PANNEAUX (fiche commerce, profil, aide localisation)
+       Téléphone : panneaux glissant du bas. Ordinateur : voir section 10.
        ===================================================================== */
     .backdrop {
-      position: fixed; inset: 0; z-index: 40; background: rgba(2, 4, 9, .55);
+      position: fixed; inset: 0; z-index: 40; background: var(--backdrop);
       opacity: 0; pointer-events: none; transition: opacity .3s;
     }
     .backdrop.is-visible { opacity: 1; pointer-events: auto; }
@@ -245,16 +344,16 @@
       padding: 10px 20px calc(var(--safe-bottom) + 20px);
       border-radius: 28px 28px 0 0; border-bottom: 0;
       transform: translateY(110%); visibility: hidden;
-      transition: transform .38s var(--ease-out), visibility 0s linear .38s;
+      transition: transform .38s var(--ease-out), visibility 0s linear .38s, background-color .5s;
     }
-    .sheet.is-open { transform: translateY(0); visibility: visible; transition: transform .38s var(--ease-out), visibility 0s; }
+    .sheet.is-open { transform: translateY(0); visibility: visible; transition: transform .38s var(--ease-out), visibility 0s, background-color .5s; }
     .sheet.is-dragging { transition: none; }
     .sheet-grab { display: block; width: 100%; padding: 4px 0 12px; cursor: grab; touch-action: none; }
     .sheet-grab::before { content: ""; display: block; width: 42px; height: 5px; border-radius: 3px; margin: 0 auto; background: var(--line-strong); }
     .sheet-head { display: flex; align-items: flex-start; gap: 14px; }
     .sheet-emoji {
       flex: none; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 18px; font-size: 28px;
-      background: linear-gradient(145deg, rgba(56, 225, 255, .14), rgba(185, 140, 255, .12)); border: 1px solid var(--line);
+      background: var(--accent-soft); border: 1px solid var(--line);
     }
     .sheet-title { flex: 1; min-width: 0; }
     .sheet h2, .sheet h3 { margin: 0; font-family: var(--font-display); font-weight: 600; letter-spacing: -.01em; }
@@ -263,73 +362,64 @@
     .eyebrow { margin: 2px 0 0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
     .icon-btn {
       flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
-      background: rgba(148, 163, 184, .12); color: var(--muted); font-size: 20px; line-height: 1;
+      background: var(--hover); color: var(--muted); font-size: 20px; line-height: 1;
     }
+    .icon-btn:hover { color: var(--text); }
     .status {
       display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; padding: 6px 12px;
       border-radius: 999px; font-size: 13px; font-weight: 600;
     }
     .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
-    .status.is-open { color: var(--green); background: rgba(46, 229, 157, .12); box-shadow: inset 0 0 0 1px rgba(46, 229, 157, .3); }
-    .status.is-open::before { box-shadow: 0 0 8px currentColor; }
-    .status.is-closed { color: #a3adbd; background: rgba(148, 163, 184, .12); box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .2); }
+    .status.is-open { color: var(--green); background: var(--green-soft); }
+    .status.is-closed { color: var(--muted); background: var(--hover); box-shadow: inset 0 0 0 1px var(--line); }
     .promo {
-      position: relative; overflow: hidden; display: flex; align-items: center; gap: 14px;
-      margin-top: 16px; padding: 14px 16px; border-radius: 18px;
-      background: linear-gradient(120deg, rgba(185, 140, 255, .16), rgba(56, 225, 255, .1));
-      border: 1px solid rgba(185, 140, 255, .35);
+      display: flex; align-items: center; gap: 14px; margin-top: 16px; padding: 14px 16px; border-radius: 18px;
+      background: var(--accent-soft); border: 1px solid var(--accent-line);
     }
-    .promo::after { /* reflet animé */
-      content: ""; position: absolute; inset: 0; pointer-events: none;
-      background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .08) 50%, transparent 70%);
-      transform: translateX(-100%); animation: sheen 3.5s ease-in-out infinite;
-    }
-    @keyframes sheen { 60%, 100% { transform: translateX(100%); } }
     .promo-ico { font-size: 26px; }
-    .promo small { display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--violet); font-weight: 600; }
+    .promo small { display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
     .promo strong { font-size: 16px; }
     .meta { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: 14px; }
     .meta li { display: flex; gap: 10px; align-items: flex-start; }
-    .meta svg { flex: none; width: 18px; height: 18px; margin-top: 1px; color: var(--cyan); }
+    .meta svg { flex: none; width: 18px; height: 18px; margin-top: 1px; color: var(--accent); }
     .meta b { color: var(--text); font-weight: 500; }
 
     .btn {
       display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 54px;
       margin-top: 18px; padding: 0 20px; border-radius: 16px; text-decoration: none;
       font-family: var(--font-display); font-weight: 600; font-size: 16px; letter-spacing: .01em;
-      transition: transform .15s var(--ease-out), box-shadow .2s, opacity .2s;
+      transition: transform .15s var(--ease-out), box-shadow .2s, opacity .2s, background-color .2s;
     }
     .btn:active { transform: scale(.98); }
     .btn svg { width: 20px; height: 20px; }
-    .btn-primary {
-      color: #041018; background: linear-gradient(135deg, var(--cyan), #7cc4ff 55%, var(--violet));
-      box-shadow: 0 8px 28px rgba(56, 225, 255, .35);
-    }
+    .btn-primary { color: var(--on-accent); background: var(--accent); box-shadow: 0 8px 22px var(--accent-soft); }
+    .btn-primary:hover { background: var(--accent-strong); }
     .btn-primary[disabled] { opacity: .6; pointer-events: none; }
-    .btn-ghost { margin-top: 10px; color: var(--muted); background: rgba(148, 163, 184, .08); border: 1px solid var(--line); }
-    .btn-danger { margin-top: 10px; color: var(--danger); background: rgba(251, 113, 133, .08); border: 1px solid rgba(251, 113, 133, .25); }
+    .btn-ghost { margin-top: 10px; color: var(--muted); background: var(--hover); border: 1px solid var(--line); }
+    .btn-ghost:hover { color: var(--text); }
+    .btn-danger { margin-top: 10px; color: var(--danger); background: transparent; border: 1px solid var(--line-strong); }
 
     .help-steps { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
-    .help-steps li { padding: 12px 14px; border-radius: 14px; background: rgba(148, 163, 184, .07); border: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+    .help-steps li { padding: 12px 14px; border-radius: 14px; background: var(--hover); border: 1px solid var(--line); font-size: 14px; color: var(--muted); }
     .help-steps li b { display: block; color: var(--text); margin-bottom: 2px; }
-    .help-steps li.is-current { border-color: rgba(56, 225, 255, .45); background: rgba(56, 225, 255, .07); }
+    .help-steps li.is-current { border-color: var(--accent-line); background: var(--accent-soft); }
     .lead { margin: 10px 0 0; color: var(--muted); }
     .inline-note { margin: 12px 0 0; font-size: 13px; color: var(--amber); min-height: 1em; }
 
     .profile-card { display: flex; align-items: center; gap: 14px; }
     .profile-card .avatar { width: 56px; height: 56px; font-size: 22px; }
     .kv { margin: 18px 0 0; display: grid; gap: 8px; }
-    .kv div { display: flex; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 14px; background: rgba(148, 163, 184, .07); font-size: 14px; }
+    .kv div { display: flex; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--hover); font-size: 14px; }
     .kv dt { color: var(--muted); }
     .kv dd { margin: 0; text-align: right; font-weight: 500; overflow: hidden; text-overflow: ellipsis; }
 
     /* =====================================================================
-       7. ONBOARDING (création de compte + autorisation de localisation)
+       8. ONBOARDING (création de compte + autorisation de localisation)
        ===================================================================== */
     .onboarding {
       position: fixed; inset: 0; z-index: 100; display: flex; align-items: flex-end; justify-content: center;
       padding: 16px 16px calc(var(--safe-bottom) + 16px);
-      background: linear-gradient(to bottom, rgba(5, 7, 13, .1) 0%, rgba(5, 7, 13, .55) 40%, rgba(5, 7, 13, .92) 100%);
+      background: linear-gradient(to bottom, var(--scrim-soft) 0%, var(--scrim-soft) 30%, var(--scrim) 100%);
       transition: opacity .55s var(--ease-out);
     }
     .onboarding.is-leaving { opacity: 0; pointer-events: none; }
@@ -343,37 +433,37 @@
     .ob-logo .avatar { width: 34px; height: 34px; font-size: 16px; }
     .ob-progress { display: flex; gap: 6px; }
     .ob-progress span { width: 22px; height: 4px; border-radius: 2px; background: var(--line-strong); transition: background-color .3s, width .3s; }
-    .ob-progress span.is-active { width: 34px; background: var(--cyan); box-shadow: 0 0 10px rgba(56, 225, 255, .6); }
+    .ob-progress span.is-active { width: 34px; background: var(--accent); }
     .ob-step { animation: rise .45s var(--ease-out) both; }
     .ob-step h1, .ob-step h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 27px; line-height: 1.15; letter-spacing: -.02em; }
-    .ob-step h1 em, .ob-step h2 em { font-style: normal; background: linear-gradient(90deg, var(--cyan), var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .ob-step h1 em, .ob-step h2 em { font-style: normal; color: var(--accent); }
     .field { display: block; margin-top: 16px; }
     .field > span { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
     .field input {
       width: 100%; height: 52px; padding: 0 16px; border-radius: 14px; font: inherit; font-size: 16px; color: var(--text);
-      background: rgba(5, 7, 13, .6); border: 1px solid var(--line-strong); outline: none;
+      background: var(--input-bg); border: 1px solid var(--line-strong); outline: none;
       transition: border-color .2s, box-shadow .2s;
     }
-    .field input::placeholder { color: #4d5b72; }
-    .field input:focus { border-color: var(--cyan); box-shadow: 0 0 0 4px rgba(56, 225, 255, .15); }
-    .field.has-error input { border-color: var(--danger); box-shadow: 0 0 0 4px rgba(251, 113, 133, .12); }
+    .field input::placeholder { color: var(--muted); opacity: .7; }
+    .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+    .field.has-error input { border-color: var(--danger); }
     .field-error { display: block; min-height: 18px; margin-top: 4px; font-size: 12px; color: var(--danger); }
     .fineprint { margin: 12px 0 0; font-size: 12px; text-align: center; color: var(--muted); }
 
     /* Radar animé de l'étape localisation */
     .radar { position: relative; width: 132px; height: 132px; margin: 0 auto 20px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(56, 225, 255, .14) 0 22%, transparent 23% 44%, rgba(56, 225, 255, .08) 45% 46%, transparent 47% 70%, rgba(56, 225, 255, .06) 71% 72%, transparent 73%);
-      border: 1px solid rgba(56, 225, 255, .25); overflow: hidden; }
+      background: radial-gradient(circle, var(--accent-soft) 0 22%, transparent 23% 44%, var(--accent-soft) 45% 46%, transparent 47% 70%, var(--accent-soft) 71% 72%, transparent 73%);
+      border: 1px solid var(--accent-line); overflow: hidden; }
     .radar::before { content: ""; position: absolute; inset: 0; border-radius: 50%;
-      background: conic-gradient(from 0deg, rgba(56, 225, 255, .55), transparent 25%); animation: spin 2.6s linear infinite; }
+      background: conic-gradient(from 0deg, var(--accent-line), transparent 25%); animation: spin 2.6s linear infinite; }
     .radar::after { content: ""; position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px;
-      border-radius: 50%; background: #3b82f6; border: 3px solid #fff; box-shadow: 0 0 18px #3b82f6; }
+      border-radius: 50%; background: var(--blue); border: 3px solid #fff; box-shadow: 0 2px 10px rgba(37, 99, 235, .6); }
     .perks { margin: 16px 0 4px; padding: 0; list-style: none; display: grid; gap: 10px; }
     .perks li { display: flex; gap: 12px; align-items: center; font-size: 14px; color: var(--muted); }
-    .perks li span { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; background: rgba(56, 225, 255, .1); font-size: 17px; }
+    .perks li span { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; background: var(--accent-soft); font-size: 17px; }
 
     /* =====================================================================
-       8. TOAST, ÉCRAN D'ERREUR, ATTRIBUTION
+       9. TOAST, ÉCRAN D'ERREUR, ATTRIBUTION
        ===================================================================== */
     .toast {
       /* sous la barre de profil, sans recouvrir la colonne de contrôles à droite */
@@ -384,7 +474,7 @@
       transition: opacity .25s, transform .3s var(--ease-out);
     }
     .toast.is-visible { opacity: 1; transform: none; pointer-events: auto; }
-    .toast button { flex: none; color: var(--cyan); font-weight: 600; }
+    .toast button { flex: none; color: var(--accent); font-weight: 600; }
 
     .fatal { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 24px; text-align: center; background: var(--bg); }
     .fatal > div { max-width: 340px; }
@@ -392,15 +482,45 @@
     .fatal p { color: var(--muted); margin: 0; }
 
     .maplibregl-ctrl-bottom-right { bottom: calc(var(--safe-bottom) + 66px); right: 4px; }
-    .maplibregl-ctrl.maplibregl-ctrl-attrib { background: rgba(11, 16, 27, .75); color: var(--muted); font-size: 11px; }
+    .maplibregl-ctrl.maplibregl-ctrl-attrib { background: var(--panel); color: var(--muted); font-size: 11px; }
     .maplibregl-ctrl-attrib a { color: var(--muted); }
     .maplibregl-ctrl-attrib.maplibregl-compact { min-height: 24px; }
-    .maplibregl-ctrl-attrib-button { filter: invert(1) opacity(.7); }
+    :root[data-theme="dark"] .maplibregl-ctrl-attrib-button { filter: invert(1) opacity(.7); }
     .maplibregl-canvas:focus-visible { outline: none; }
 
-    @media (min-width: 720px) {
-      .onboarding { align-items: center; }
-      .sheet { bottom: 16px; border-radius: 28px; border-bottom: 1px solid var(--line); }
+    /* =====================================================================
+       10. ORDINATEUR (≥ 900 px) : panneau latéral, fiche flottante, fenêtres centrées
+       ===================================================================== */
+    @media (min-width: 900px) {
+      .topbar, .filters { display: none; }
+      .sidebar { display: flex; }
+      .controls { top: 16px; right: 16px; }
+      .toast { top: 16px; left: calc(var(--sidebar-w) + 32px); right: 84px; }
+      .maplibregl-ctrl-bottom-right { bottom: 0; }
+
+      /* Fiche commerce : carte flottante à droite du panneau */
+      #shop-sheet {
+        left: calc(var(--sidebar-w) + 28px); right: auto; top: 16px; bottom: auto; width: 380px; max-width: 380px; margin: 0;
+        max-height: calc(100dvh - 32px); padding: 20px; border-radius: 24px; border-bottom: 1px solid var(--line);
+        opacity: 0; transform: translateX(-16px);
+        transition: transform .3s var(--ease-out), opacity .25s, visibility 0s linear .3s, background-color .5s;
+      }
+      #shop-sheet.is-open { opacity: 1; transform: none; transition: transform .3s var(--ease-out), opacity .25s, visibility 0s, background-color .5s; }
+      #shop-sheet .sheet-grab { display: none; }
+
+      /* Profil et aide : fenêtres centrées */
+      #geo-help, #profile-sheet {
+        top: 50%; bottom: auto; left: 50%; right: auto; width: min(460px, calc(100% - 32px)); max-width: none; margin: 0;
+        max-height: calc(100dvh - 48px); padding: 24px; border-radius: 24px; border-bottom: 1px solid var(--line);
+        opacity: 0; transform: translate(-50%, -46%) scale(.98);
+        transition: transform .3s var(--ease-out), opacity .25s, visibility 0s linear .3s, background-color .5s;
+      }
+      #geo-help.is-open, #profile-sheet.is-open { opacity: 1; transform: translate(-50%, -50%); transition: transform .3s var(--ease-out), opacity .25s, visibility 0s, background-color .5s; }
+      #geo-help .sheet-grab, #profile-sheet .sheet-grab { display: none; }
+
+      .onboarding { align-items: center; background: linear-gradient(to right, var(--scrim) 0%, var(--scrim-soft) 70%); justify-content: flex-start; padding-left: 8vw; }
+      .ob-panel { max-width: 460px; padding: 32px 30px 28px; }
+      .ob-step h1, .ob-step h2 { font-size: 32px; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
@@ -413,8 +533,8 @@
   <div id="map" role="application" aria-label="Carte de La Roche-sur-Yon"></div>
   <div class="vignette" aria-hidden="true"></div>
 
-  <!-- ===================== BARRE SUPÉRIEURE : profil ===================== -->
-  <header class="topbar ui">
+  <!-- ===================== BARRE SUPÉRIEURE (téléphone) : profil ===================== -->
+  <header class="topbar ui" id="topbar">
     <button id="profile-btn" class="brand glass" type="button" aria-label="Ouvrir mon profil">
       <span class="avatar" id="avatar" aria-hidden="true">?</span>
       <span class="brand-text">
@@ -424,10 +544,24 @@
     </button>
   </header>
 
+  <!-- ===================== PANNEAU LATÉRAL (ordinateur) ===================== -->
+  <aside class="sidebar glass ui" id="sidebar" aria-label="Liste des commerces">
+    <div class="sb-brand" id="sb-brand-slot"></div>
+    <div class="sb-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="search" type="search" placeholder="Rechercher un commerce" autocomplete="off" aria-label="Rechercher un commerce" />
+      <kbd aria-hidden="true">/</kbd>
+    </div>
+    <div class="sb-filters" id="sb-filters-slot"></div>
+    <p class="sb-count" id="shop-count"></p>
+    <ul class="shop-list" id="shop-list"></ul>
+    <p class="sb-empty" id="shop-empty" hidden>Aucun commerce ne correspond à votre recherche.</p>
+  </aside>
+
   <!-- ===================== CONTRÔLES CARTE (en haut à droite) ===================== -->
   <div class="controls ui">
     <!-- Recentrer sur ma position (redemande l'autorisation si elle a été refusée) -->
-    <button id="locate-btn" class="ctrl glass" type="button" data-state="idle" data-follow="false" aria-label="Me localiser">
+    <button id="locate-btn" class="ctrl glass" type="button" data-state="idle" data-follow="false" aria-label="Me localiser" title="Me localiser">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
         <g class="ico-target">
           <circle cx="12" cy="12" r="7" />
@@ -438,21 +572,26 @@
       </svg>
       <span class="spinner" aria-hidden="true"></span>
     </button>
+    <!-- Mode jour / nuit -->
+    <button id="theme-btn" class="ctrl glass" type="button" aria-label="Passer en mode nuit" title="Mode jour / nuit">
+      <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z"/></svg>
+      <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
     <!-- Bascule vue 2D / 3D -->
-    <button id="pitch-btn" class="ctrl glass" type="button" aria-label="Passer en vue 2D">
-      <span class="ctrl-text" id="pitch-label">2D</span>
+    <button id="pitch-btn" class="ctrl glass" type="button" aria-label="Passer en vue 3D" title="Vue 2D / 3D">
+      <span class="ctrl-text" id="pitch-label">3D</span>
     </button>
     <!-- Boussole : réoriente la carte vers le nord -->
-    <button id="compass-btn" class="ctrl glass" type="button" aria-label="Réorienter vers le nord">
+    <button id="compass-btn" class="ctrl glass" type="button" aria-label="Réorienter vers le nord" title="Réorienter vers le nord">
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 3l3.2 9H8.8z" fill="#fb7185" />
-        <path d="M12 21l-3.2-9h6.4z" fill="#cbd5e1" />
+        <path d="M12 3l3.2 9H8.8z" fill="#d6453a" />
+        <path d="M12 21l-3.2-9h6.4z" fill="#a39893" />
       </svg>
     </button>
   </div>
 
-  <!-- ===================== FILTRES ===================== -->
-  <nav class="filters ui" aria-label="Filtrer les commerces">
+  <!-- ===================== FILTRES (téléphone : en bas ; ordinateur : déplacés dans le panneau) ===================== -->
+  <nav class="filters ui" id="filters" aria-label="Filtrer les commerces">
     <div class="filters-track" id="filters-track">
       <button class="chip glass" type="button" data-cat="all" aria-pressed="true">Tout</button>
       <button class="chip glass" type="button" data-cat="Food-truck" aria-pressed="false">🚚 Food-truck</button>
@@ -464,7 +603,7 @@
     </div>
   </nav>
 
-  <!-- ===================== FICHE COMMERCE (bottom sheet) ===================== -->
+  <!-- ===================== FICHE COMMERCE ===================== -->
   <section id="shop-sheet" class="sheet glass" role="dialog" aria-modal="false" aria-labelledby="shop-name" aria-hidden="true">
     <button class="sheet-grab" type="button" data-close aria-label="Fermer la fiche"></button>
     <div class="sheet-head">
@@ -494,7 +633,7 @@
         <span id="shop-distance"></span>
       </li>
     </ul>
-    <!-- "Y aller" : itinéraire piéton dans l'application de navigation du téléphone -->
+    <!-- "Y aller" : itinéraire piéton dans l'application de navigation -->
     <a id="shop-go" class="btn btn-primary" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.7 2.3a1 1 0 00-1.05-.23l-18 7a1 1 0 00.08 1.9l7.6 2.1 2.1 7.6a1 1 0 001.9.08l7-18a1 1 0 00-.23-1.05z"/></svg>
       Y aller
@@ -539,6 +678,7 @@
       <div><dt>Ville</dt><dd>La Roche-sur-Yon</dd></div>
       <div><dt>Membre depuis</dt><dd id="profile-since"></dd></div>
       <div><dt>Localisation</dt><dd id="profile-geo"></dd></div>
+      <div><dt>Affichage</dt><dd id="profile-theme"></dd></div>
     </dl>
     <button class="btn btn-primary" type="button" id="profile-locate">Activer la localisation</button>
     <button class="btn btn-danger" type="button" id="profile-reset">Supprimer mon compte de cet appareil</button>
@@ -614,13 +754,15 @@
     bounds: [[-1.56, 46.60], [-1.30, 46.74]],   // la carte ne sort pas de l'agglomération
     minZoom: 12,
     maxZoom: 19.5,
-    // Vue d'arrivée (3D inclinée) et vue d'ensemble (derrière l'onboarding)
-    heroView: { zoom: 15.8, pitch: 58, bearing: -24 },
-    overview: { zoom: 13.6, pitch: 45, bearing: 10 },
+    heroView: { zoom: 15.6, pitch: 0, bearing: 0 },     // vue d'arrivée (à plat, comme un plan)
+    overview: { zoom: 13.6, pitch: 45, bearing: 10 },   // vue derrière l'onboarding
+    pitch3d: 55,
     tileJson: 'https://tiles.openfreemap.org/planet',
     glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
     storageKey: 'roche-street-food:v1',
+    themeKey: 'roche-street-food:theme',
     walkSpeed: 80,                              // mètres par minute (~4,8 km/h)
+    desktopQuery: '(min-width: 900px)',
   };
 
   const CATEGORIES = {
@@ -664,6 +806,8 @@
   ];
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const desktopMQ = window.matchMedia(CONFIG.desktopQuery);
+  const isDesktop = () => desktopMQ.matches;
 
   /* =====================================================================
      2. UTILITAIRES
@@ -701,6 +845,9 @@
     const [[w, s], [e, n]] = CONFIG.bounds;
     return lng >= w && lng <= e && lat >= s && lat <= n;
   }
+
+  /** Texte sans accents ni majuscules (recherche tolérante). */
+  const normalize = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
   /** Polygone GeoJSON approximant un cercle (rayon en mètres) : halo de précision GPS. */
   function circlePolygon([lng, lat], radius, steps = 64) {
@@ -784,109 +931,116 @@
   }
 
   /* =====================================================================
-     3. STYLE DE CARTE : sombre, néon, hiérarchie des routes marquée
-     Les voies principales sont nettement plus larges et lumineuses que les
-     rues secondaires (épaisseur interpolée selon le niveau de zoom).
+     3. STYLE DE CARTE — « plan rouge » en mode jour et en mode nuit
+     Toutes les routes sont dessinées en rouge : plus une voie est importante,
+     plus elle est épaisse et plus son rouge est soutenu.
      Données : schéma OpenMapTiles servi par OpenFreeMap (sans clé API).
      ===================================================================== */
 
+  const PALETTES = {
+    light: {
+      background: '#f4f0e8', landuse: '#efe8dc', landuseBusy: '#ebe2d4', landcover: '#e2ead4', park: '#dbe7cc', parkLine: '#cbdcb9',
+      water: '#bfdfe8', waterway: '#a5d0de',
+      motorway: '#a52a21', primary: '#b5362c', secondary: '#c65049', tertiary: '#d06f68', minor: '#dc9690', path: '#e4b3ae',
+      tunnel: '#ddb0ab', rail: '#b7aba1',
+      building: ['#e9e0d3', '#e1d6c7', '#d6c8b6'],
+      label: '#6e5f59', labelMajor: '#7f2a22', halo: '#f4f0e8', place: '#8c7d76',
+      sky: { 'sky-color': '#dcebf2', 'horizon-color': '#f4f0e8', 'fog-color': '#f4f0e8' },
+      light: { color: '#ffffff', intensity: 0.22 },
+    },
+    dark: {
+      background: '#15171c', landuse: '#191b21', landuseBusy: '#1c1d24', landcover: '#182019', park: '#19251e', parkLine: '#21302a',
+      water: '#10283a', waterway: '#16354b',
+      motorway: '#f26a5c', primary: '#e2574b', secondary: '#b7463d', tertiary: '#8b3b35', minor: '#5e3532', path: '#4a302e',
+      tunnel: '#5a3a37', rail: '#4a4a54',
+      building: ['#1f2128', '#262931', '#30333d'],
+      label: '#a99c96', labelMajor: '#f4a69d', halo: '#15171c', place: '#867974',
+      sky: { 'sky-color': '#15171c', 'horizon-color': '#2a2226', 'fog-color': '#15171c' },
+      light: { color: '#ffd9c7', intensity: 0.2 },
+    },
+  };
+
   /** Largeur de ligne interpolée exponentiellement selon le zoom. */
-  const width = (stops, factor = 1) =>
-    ['interpolate', ['exponential', 1.5], ['zoom'], ...stops.flatMap(([z, w]) => [z, w * factor])];
+  const width = (stops) => ['interpolate', ['exponential', 1.5], ['zoom'], ...stops.flat()];
   const roadClass = (classes) => ['match', ['get', 'class'], classes, true, false];
   const isLine = ['match', ['geometry-type'], ['LineString', 'MultiLineString'], true, false];
   const notTunnel = ['!=', ['get', 'brunnel'], 'tunnel'];
   const nameField = ['coalesce', ['get', 'name:fr'], ['get', 'name:latin'], ['get', 'name']];
 
-  // Hiérarchie des routes : épaisseur (px) par niveau de zoom
+  // Hiérarchie des routes : classes OpenMapTiles et épaisseur (px) par niveau de zoom
   const ROADS = {
-    motorway:  { classes: ['motorway'],                   color: '#d6b8ff', glow: '#a855f7', w: [[6, 0.8], [10, 2], [13, 4.5], [16, 11], [19, 34]] },
-    primary:   { classes: ['trunk', 'primary'],           color: '#38e1ff', glow: '#0ea5e9', w: [[8, 0.6], [11, 1.6], [13, 3.2], [16, 8], [19, 26]] },
-    secondary: { classes: ['secondary'],                  color: '#2b7bb0', w: [[10, 0.5], [13, 1.8], [16, 5.5], [19, 18]] },
-    tertiary:  { classes: ['tertiary'],                   color: '#24496b', w: [[11, 0.4], [13, 1.3], [16, 4.2], [19, 14]] },
-    minor:     { classes: ['minor', 'service', 'busway'], color: '#1a283b', w: [[12, 0.2], [14, 0.6], [16, 2], [19, 9]] },
-    path:      { classes: ['path', 'track'],              color: '#1d2a3d', w: [[14, 0.3], [16, 0.9], [19, 2.2]] },
+    motorway:  { classes: ['motorway'],                   w: [[6, 1], [10, 2.4], [13, 5], [16, 12], [19, 36]] },
+    primary:   { classes: ['trunk', 'primary'],           w: [[8, 0.8], [11, 2], [13, 3.8], [16, 9], [19, 28]] },
+    secondary: { classes: ['secondary'],                  w: [[10, 0.7], [13, 2.2], [16, 6], [19, 19]] },
+    tertiary:  { classes: ['tertiary'],                   w: [[11, 0.6], [13, 1.6], [16, 4.6], [19, 15]] },
+    minor:     { classes: ['minor', 'service', 'busway'], w: [[12, 0.4], [14, 1], [16, 2.6], [19, 10]] },
+    path:      { classes: ['path', 'track'],              w: [[14, 0.4], [16, 1], [19, 2.4]] },
   };
 
-  function buildStyle() {
-    const roadLayer = (id, def, extra = {}) => ({
-      id, type: 'line', source: 'omt', 'source-layer': 'transportation',
-      filter: ['all', isLine, notTunnel, roadClass(def.classes)],
+  function buildStyle(theme) {
+    const p = PALETTES[theme];
+    const roadLayer = (key, extra = {}) => ({
+      id: 'road-' + key, type: 'line', source: 'omt', 'source-layer': 'transportation',
+      filter: ['all', isLine, notTunnel, roadClass(ROADS[key].classes)],
       layout: { 'line-cap': 'round', 'line-join': 'round' },
-      paint: { 'line-color': def.color, 'line-width': width(def.w), ...extra },
+      paint: { 'line-color': p[key], 'line-width': width(ROADS[key].w), ...extra },
     });
-    // Halo lumineux sous les grands axes (opacité 0 au départ, allumé pendant l'intro)
-    const glowLayer = (id, def) => ({
-      id, type: 'line', source: 'omt', 'source-layer': 'transportation',
-      filter: ['all', isLine, notTunnel, roadClass(def.classes)],
-      layout: { 'line-cap': 'round', 'line-join': 'round' },
-      paint: {
-        'line-color': def.glow, 'line-width': width(def.w, 3.2), 'line-blur': width(def.w, 2.4),
-        'line-opacity': 0, 'line-opacity-transition': { duration: 2200, delay: 300 },
-      },
-    });
+    const [b0, b1, b2] = p.building;
 
     return {
       version: 8,
-      name: 'Roche Street Food — Neon Night',
+      name: 'Roche Street Food — Plan rouge (' + theme + ')',
       glyphs: CONFIG.glyphs,
+      transition: { duration: 600, delay: 0 },  // fondu des couleurs lors du changement jour/nuit
       sources: {
         omt: {
           type: 'vector', url: CONFIG.tileJson,
           attribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> © <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> Données © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">contributeurs OpenStreetMap</a>',
         },
       },
-      // Ciel et brume visibles quand la carte est inclinée
-      sky: {
-        'sky-color': '#05070d', 'horizon-color': '#0d1b38', 'fog-color': '#05070d',
-        'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.7, 'fog-ground-blend': 0.75, 'atmosphere-blend': 0,
-      },
-      light: { anchor: 'viewport', color: '#9fd8ff', intensity: 0.3, position: [1.4, 210, 35] },
+      sky: { ...p.sky, 'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.7, 'fog-ground-blend': 0.75, 'atmosphere-blend': 0 },
+      light: { anchor: 'viewport', position: [1.4, 210, 35], ...p.light },
       layers: [
-        { id: 'background', type: 'background', paint: { 'background-color': '#05070d' } },
+        { id: 'background', type: 'background', paint: { 'background-color': p.background } },
 
         // ---- Occupation du sol ----
         { id: 'landuse', type: 'fill', source: 'omt', 'source-layer': 'landuse',
-          paint: { 'fill-color': ['match', ['get', 'class'], ['commercial', 'retail', 'industrial'], '#0c1220', '#090e18'], 'fill-opacity': 0.9 } },
+          paint: { 'fill-color': ['match', ['get', 'class'], ['commercial', 'retail', 'industrial'], p.landuseBusy, p.landuse] } },
         { id: 'landcover', type: 'fill', source: 'omt', 'source-layer': 'landcover',
           filter: roadClass(['wood', 'grass', 'farmland', 'wetland']),
-          paint: { 'fill-color': '#061410', 'fill-opacity': 0.8 } },
+          paint: { 'fill-color': p.landcover } },
         { id: 'park', type: 'fill', source: 'omt', 'source-layer': 'park',
-          paint: { 'fill-color': '#06191a', 'fill-outline-color': '#0d2e2c' } },
+          paint: { 'fill-color': p.park, 'fill-outline-color': p.parkLine } },
 
         // ---- Eau ----
-        { id: 'water', type: 'fill', source: 'omt', 'source-layer': 'water',
-          paint: { 'fill-color': '#061b30' } },
+        { id: 'water', type: 'fill', source: 'omt', 'source-layer': 'water', paint: { 'fill-color': p.water } },
         { id: 'waterway', type: 'line', source: 'omt', 'source-layer': 'waterway',
-          paint: { 'line-color': '#0b3556', 'line-width': width([[10, 0.6], [14, 1.6], [18, 5]]) } },
+          paint: { 'line-color': p.waterway, 'line-width': width([[10, 0.6], [14, 1.6], [18, 5]]) } },
+
+        // ---- Bâtiments (à plat vus de dessus, en relief en vue 3D) ----
+        { id: 'building-3d', type: 'fill-extrusion', source: 'omt', 'source-layer': 'building', minzoom: 13.5,
+          filter: ['!=', ['get', 'hide_3d'], true],
+          paint: {
+            'fill-extrusion-color': ['interpolate', ['linear'], ['coalesce', ['get', 'render_height'], 8], 0, b0, 20, b1, 60, b2],
+            'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 14, 0, 15.5, ['coalesce', ['get', 'render_height'], 8]],
+            'fill-extrusion-base': ['interpolate', ['linear'], ['zoom'], 14, 0, 15.5, ['coalesce', ['get', 'render_min_height'], 0]],
+            'fill-extrusion-opacity': ['interpolate', ['linear'], ['zoom'], 13.5, 0, 14.5, 0.9],
+            'fill-extrusion-vertical-gradient': true,
+          } },
 
         // ---- Réseau routier (du plus fin au plus important) ----
         { id: 'road-tunnel', type: 'line', source: 'omt', 'source-layer': 'transportation',
           filter: ['all', isLine, ['==', ['get', 'brunnel'], 'tunnel'], roadClass(['motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'minor'])],
-          paint: { 'line-color': '#1f3047', 'line-width': width(ROADS.secondary.w), 'line-dasharray': [1.5, 1.2], 'line-opacity': 0.7 } },
-        roadLayer('road-path', ROADS.path, { 'line-dasharray': [1.5, 1.5] }),
-        roadLayer('road-minor', ROADS.minor),
-        roadLayer('road-tertiary', ROADS.tertiary),
-        roadLayer('road-secondary', ROADS.secondary),
-        glowLayer('road-primary-glow', ROADS.primary),
-        roadLayer('road-primary', ROADS.primary),
-        glowLayer('road-motorway-glow', ROADS.motorway),
-        roadLayer('road-motorway', ROADS.motorway),
+          paint: { 'line-color': p.tunnel, 'line-width': width(ROADS.secondary.w), 'line-dasharray': [1.5, 1.2] } },
+        roadLayer('path', { 'line-dasharray': [1.5, 1.5] }),
+        roadLayer('minor'),
+        roadLayer('tertiary'),
+        roadLayer('secondary'),
+        roadLayer('primary'),
+        roadLayer('motorway'),
         { id: 'rail', type: 'line', source: 'omt', 'source-layer': 'transportation',
           filter: ['all', isLine, roadClass(['rail', 'transit'])],
-          paint: { 'line-color': '#3a4662', 'line-width': width([[12, 0.5], [16, 1.6], [19, 3]]), 'line-dasharray': [2, 2] } },
-
-        // ---- Bâtiments 3D (surgissent progressivement avec le zoom) ----
-        { id: 'building-3d', type: 'fill-extrusion', source: 'omt', 'source-layer': 'building', minzoom: 14,
-          filter: ['!=', ['get', 'hide_3d'], true],
-          paint: {
-            'fill-extrusion-color': ['interpolate', ['linear'], ['coalesce', ['get', 'render_height'], 8],
-              0, '#0e1524', 15, '#141f36', 40, '#1c2c4e', 80, '#27406e'],
-            'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 14, 0, 15.5, ['coalesce', ['get', 'render_height'], 8]],
-            'fill-extrusion-base': ['interpolate', ['linear'], ['zoom'], 14, 0, 15.5, ['coalesce', ['get', 'render_min_height'], 0]],
-            'fill-extrusion-opacity': ['interpolate', ['linear'], ['zoom'], 14, 0, 15, 0.88],
-            'fill-extrusion-vertical-gradient': true,
-          } },
+          paint: { 'line-color': p.rail, 'line-width': width([[12, 0.6], [16, 1.6], [19, 3]]), 'line-dasharray': [2, 2] } },
 
         // ---- Libellés ----
         { id: 'road-label', type: 'symbol', source: 'omt', 'source-layer': 'transportation_name', minzoom: 14,
@@ -895,21 +1049,21 @@
             'symbol-placement': 'line', 'text-field': nameField, 'text-font': ['Noto Sans Regular'],
             'text-size': ['interpolate', ['linear'], ['zoom'], 14, 10, 18, 13], 'text-max-angle': 30, 'text-padding': 8,
           },
-          paint: { 'text-color': '#7f8ea8', 'text-halo-color': '#05070d', 'text-halo-width': 1.5 } },
+          paint: { 'text-color': p.label, 'text-halo-color': p.halo, 'text-halo-width': 1.6 } },
         { id: 'road-label-major', type: 'symbol', source: 'omt', 'source-layer': 'transportation_name', minzoom: 12.5,
           filter: roadClass(['motorway', 'trunk', 'primary']),
           layout: {
             'symbol-placement': 'line', 'text-field': nameField, 'text-font': ['Noto Sans Bold'],
-            'text-size': ['interpolate', ['linear'], ['zoom'], 12.5, 10, 18, 14.5], 'text-letter-spacing': 0.04, 'text-max-angle': 30,
+            'text-size': ['interpolate', ['linear'], ['zoom'], 12.5, 10, 18, 14.5], 'text-letter-spacing': 0.03, 'text-max-angle': 30,
           },
-          paint: { 'text-color': '#a5f0ff', 'text-halo-color': '#04121c', 'text-halo-width': 1.8 } },
+          paint: { 'text-color': p.labelMajor, 'text-halo-color': p.halo, 'text-halo-width': 1.8 } },
         { id: 'place-label', type: 'symbol', source: 'omt', 'source-layer': 'place', minzoom: 12,
           filter: roadClass(['suburb', 'quarter', 'neighbourhood', 'hamlet', 'village']),
           layout: {
             'text-field': nameField, 'text-font': ['Noto Sans Bold'], 'text-transform': 'uppercase',
-            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 10, 16, 13], 'text-letter-spacing': 0.22, 'text-max-width': 8,
+            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 10, 16, 13], 'text-letter-spacing': 0.2, 'text-max-width': 8,
           },
-          paint: { 'text-color': '#5d6d88', 'text-halo-color': '#05070d', 'text-halo-width': 1.4 } },
+          paint: { 'text-color': p.place, 'text-halo-color': p.halo, 'text-halo-width': 1.4 } },
       ],
     };
   }
@@ -923,11 +1077,13 @@
     return;
   }
 
+  const currentTheme = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+
   let map;
   try {
     map = new maplibregl.Map({
       container: 'map',
-      style: buildStyle(),
+      style: buildStyle(currentTheme()),
       center: CONFIG.center,
       zoom: CONFIG.overview.zoom,
       pitch: CONFIG.overview.pitch,
@@ -976,11 +1132,77 @@
   updateLabelVisibility();
 
   /* =====================================================================
-     5. MARQUEURS DES COMMERCES & FILTRES
+     5. MODE JOUR / NUIT
+     Par défaut : réglage du système. Un choix manuel est mémorisé.
      ===================================================================== */
 
-  const markers = new Map();          // id → { shop, marker, el }
-  const filters = { category: 'all', openOnly: false };
+  function readThemeChoice() {
+    try { const t = localStorage.getItem(CONFIG.themeKey); return t === 'light' || t === 'dark' ? t : null; } catch (e) { return null; }
+  }
+
+  /** Recolore la carte sans la recharger (les couleurs se fondent grâce à style.transition). */
+  function applyMapTheme(theme) {
+    const style = buildStyle(theme);
+    style.layers.forEach((layer) => {
+      if (!layer.paint || !map.getLayer(layer.id)) return;
+      Object.entries(layer.paint).forEach(([prop, value]) => map.setPaintProperty(layer.id, prop, value));
+    });
+    map.setSky(style.sky);
+    map.setLight(style.light);
+  }
+
+  function setTheme(theme, { persist = false } = {}) {
+    document.documentElement.setAttribute('data-theme', theme);
+    $('meta-theme').setAttribute('content', PALETTES[theme].background);
+    $('theme-btn').setAttribute('aria-label', theme === 'dark' ? 'Passer en mode jour' : 'Passer en mode nuit');
+    $('profile-theme').textContent = (theme === 'dark' ? 'Mode nuit' : 'Mode jour') + (readThemeChoice() || persist ? '' : ' (automatique)');
+    if (persist) { try { localStorage.setItem(CONFIG.themeKey, theme); } catch (e) { /* ignore */ } }
+    whenMapReady(() => applyMapTheme(theme));
+  }
+
+  $('theme-btn').addEventListener('click', () => setTheme(currentTheme() === 'dark' ? 'light' : 'dark', { persist: true }));
+  // Suit le réglage du système tant que l'utilisateur n'a rien choisi
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!readThemeChoice()) setTheme(e.matches ? 'dark' : 'light');
+  });
+  setTheme(currentTheme());
+
+  /* =====================================================================
+     6. MISE EN PAGE TÉLÉPHONE / ORDINATEUR
+     Sur ordinateur, le profil et les filtres sont déplacés dans le panneau latéral,
+     et la carte est décalée pour rester centrée dans la zone visible.
+     ===================================================================== */
+
+  const SIDEBAR_SPACE = 16 + 372;   // marge + largeur du panneau (cf. --sidebar-w)
+  const SHEET_SPACE = 12 + 380;     // fiche flottante (ordinateur)
+
+  function basePadding() {
+    return { top: 0, bottom: 0, right: 0, left: isDesktop() ? SIDEBAR_SPACE : 0 };
+  }
+
+  function applyLayout() {
+    const desktop = isDesktop();
+    document.body.classList.toggle('is-desktop', desktop);
+    (desktop ? $('sb-brand-slot') : $('topbar')).appendChild($('profile-btn'));
+    (desktop ? $('sb-filters-slot') : $('filters')).appendChild($('filters-track'));
+    map.setPadding(selectedId ? shopPadding() : basePadding());
+  }
+  desktopMQ.addEventListener('change', applyLayout);
+
+  // Raccourci clavier « / » : rechercher (ordinateur)
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === '/' && isDesktop() && document.activeElement.tagName !== 'INPUT' && document.body.classList.contains('ui-ready')) {
+      ev.preventDefault();
+      $('search').focus();
+    }
+  });
+
+  /* =====================================================================
+     7. MARQUEURS, LISTE DES COMMERCES & FILTRES
+     ===================================================================== */
+
+  const markers = new Map();          // id → { shop, marker, el, status }
+  const filters = { category: 'all', openOnly: false, query: '' };
   let selectedId = null;
 
   function createShopMarker(shop) {
@@ -991,9 +1213,19 @@
     el.querySelector('.pin-badge').textContent = CATEGORIES[shop.category].emoji;
     el.querySelector('.pin-label').textContent = shop.name;
     el.addEventListener('click', (ev) => { ev.stopPropagation(); openShop(shop.id); });
+    el.addEventListener('mouseenter', () => setHover(shop.id, true));
+    el.addEventListener('mouseleave', () => setHover(shop.id, false));
 
     const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat(shop.coords).addTo(map);
     markers.set(shop.id, { shop, marker, el });
+  }
+
+  /** Survol synchronisé entre la liste (ordinateur) et la carte. */
+  function setHover(id, on) {
+    const m = markers.get(id);
+    if (m) m.el.classList.toggle('is-hover', on);
+    const item = document.querySelector('.shop-item[data-id="' + id + '"]');
+    if (item) item.classList.toggle('is-hover', on);
   }
 
   /** Met à jour l'état ouvert/fermé des marqueurs (appelé chaque minute). */
@@ -1009,11 +1241,62 @@
     if (selectedId) renderShop(markers.get(selectedId));
   }
 
+  const matchesFilters = (m) =>
+    (filters.category === 'all' || m.shop.category === filters.category) &&
+    (!filters.openOnly || m.status.open) &&
+    (!filters.query || normalize(m.shop.name + ' ' + m.shop.category + ' ' + m.shop.address).includes(filters.query));
+
   function applyFilters() {
     markers.forEach((m) => {
-      const visible = (filters.category === 'all' || m.shop.category === filters.category) && (!filters.openOnly || m.status.open);
+      const visible = matchesFilters(m);
       m.el.classList.toggle('is-filtered', !visible);
       if (!visible && m.shop.id === selectedId) closeShop();
+    });
+    renderList();
+  }
+
+  /** Liste du panneau latéral : triée par distance si la position est connue, sinon ouverts d'abord. */
+  let listSignature = '';
+  function renderList() {
+    const all = [...markers.values()];
+    const items = all.filter(matchesFilters).map((m) => ({ m, d: Geo.position ? distance(Geo.position, m.shop.coords) : null }));
+    items.sort((a, b) => (a.d !== null ? a.d - b.d : (b.m.status.open - a.m.status.open) || a.m.shop.name.localeCompare(b.m.shop.name)));
+
+    const openCount = all.filter((m) => m.status.open).length;
+    $('shop-count').textContent = all.length + ' adresses · ' + openCount + ' ouvertes';
+    $('shop-empty').hidden = items.length > 0;
+
+    // Évite de reconstruire la liste si rien n'a changé (positions GPS fréquentes)
+    const signature = items.map(({ m, d }) => m.shop.id + m.status.label + (d === null ? '' : formatDistance(d))).join('|') + selectedId;
+    if (signature === listSignature) return;
+    listSignature = signature;
+
+    const list = $('shop-list');
+    list.textContent = '';
+    items.forEach(({ m, d }) => {
+      const { shop, status } = m;
+      const li = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'shop-item';
+      btn.dataset.id = shop.id;
+      if (shop.id === selectedId) btn.setAttribute('aria-current', 'true');
+      btn.innerHTML =
+        '<span class="si-emoji" aria-hidden="true"></span>' +
+        '<span class="si-body"><span class="si-top"><strong></strong><span class="si-dist"></span></span>' +
+        '<span class="si-status"></span><span class="si-promo"></span></span>';
+      btn.querySelector('.si-emoji').textContent = CATEGORIES[shop.category].emoji;
+      btn.querySelector('strong').textContent = shop.name;
+      btn.querySelector('.si-dist').textContent = d === null ? CATEGORIES[shop.category].label : formatDistance(d);
+      const st = btn.querySelector('.si-status');
+      st.textContent = status.label;
+      st.className = 'si-status ' + (status.open ? 'is-open' : 'is-closed');
+      btn.querySelector('.si-promo').textContent = '🎁 ' + shop.promo;
+      btn.addEventListener('click', () => openShop(shop.id));
+      btn.addEventListener('mouseenter', () => setHover(shop.id, true));
+      btn.addEventListener('mouseleave', () => setHover(shop.id, false));
+      li.appendChild(btn);
+      list.appendChild(li);
     });
   }
 
@@ -1028,12 +1311,22 @@
       document.querySelectorAll('.chip[data-cat]').forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
     }
     applyFilters();
-    const count = [...markers.values()].filter((m) => !m.el.classList.contains('is-filtered')).length;
-    if (count === 0) toast('Aucun commerce ne correspond à ce filtre pour le moment.');
+    const count = [...markers.values()].filter(matchesFilters).length;
+    if (count === 0 && !isDesktop()) toast('Aucun commerce ne correspond à ce filtre pour le moment.');
+  });
+
+  $('search').addEventListener('input', (ev) => {
+    filters.query = normalize(ev.target.value.trim());
+    applyFilters();
+  });
+  $('search').addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') { const first = document.querySelector('.shop-item'); if (first) openShop(first.dataset.id); }
+    // Échap : efface la recherche uniquement (ne ferme pas la fiche ouverte)
+    if (ev.key === 'Escape') { ev.target.value = ''; filters.query = ''; applyFilters(); ev.target.blur(); }
   });
 
   /* =====================================================================
-     6. PANNEAUX BAS (fiche commerce, profil, aide) — ouverture, fermeture, glisser
+     8. PANNEAUX (fiche commerce, profil, aide) — ouverture, fermeture, glisser
      ===================================================================== */
 
   let activePanel = null;
@@ -1069,9 +1362,11 @@
     enableDragToClose(panel);
   });
   $('backdrop').addEventListener('click', () => closePanel(activePanel));
-  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && activePanel) closePanel(activePanel); });
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape' && activePanel && ev.target !== $('search')) closePanel(activePanel);
+  });
 
-  /** Glisser la poignée vers le bas pour fermer le panneau. */
+  /** Téléphone : glisser la poignée vers le bas pour fermer le panneau. */
   function enableDragToClose(panel) {
     const grab = panel.querySelector('.sheet-grab');
     let startY = 0, dy = 0, startT = 0, dragging = false;
@@ -1126,6 +1421,13 @@
     $('shop-go').setAttribute('aria-label', 'Itinéraire vers ' + shop.name);
   }
 
+  /** Marges de la carte quand une fiche est ouverte : le commerce reste visible à côté ou au-dessus. */
+  function shopPadding() {
+    if (isDesktop()) return { top: 0, bottom: 0, right: 0, left: Math.min(SIDEBAR_SPACE + SHEET_SPACE, window.innerWidth * 0.62) };
+    const sheetH = $('shop-sheet').offsetHeight;
+    return { top: 80, bottom: Math.min(sheetH, window.innerHeight * 0.6), left: 0, right: 0 };
+  }
+
   function openShop(id) {
     const m = markers.get(id);
     if (!m) return;
@@ -1133,14 +1435,13 @@
     selectedId = id;
     m.el.classList.add('is-selected');
     renderShop(m);
+    renderList();
     openPanel($('shop-sheet'));
     setFollow(false);
-    // Centre le commerce dans la partie visible au-dessus de la fiche
-    const sheetH = $('shop-sheet').offsetHeight;
     map.easeTo({
       center: m.shop.coords,
       zoom: Math.max(map.getZoom(), 16.2),
-      padding: { top: 80, bottom: Math.min(sheetH, window.innerHeight * 0.6), left: 0, right: 0 },
+      padding: shopPadding(),
       duration: reduceMotion ? 0 : 900,
     });
   }
@@ -1149,7 +1450,8 @@
     if (!selectedId) return;
     markers.get(selectedId).el.classList.remove('is-selected');
     selectedId = null;
-    map.easeTo({ padding: { top: 0, bottom: 0, left: 0, right: 0 }, duration: reduceMotion ? 0 : 500 });
+    renderList();
+    map.easeTo({ padding: basePadding(), duration: reduceMotion ? 0 : 500 });
   }
 
   function closeShop() { closePanel($('shop-sheet')); }
@@ -1160,7 +1462,7 @@
   });
 
   /* =====================================================================
-     7. GÉOLOCALISATION
+     9. GÉOLOCALISATION
      - Demandée à la création du compte (onboarding)
      - En cas de refus, le bouton en haut à droite redemande l'autorisation.
        Si le navigateur a mémorisé un refus définitif (il n'affiche alors plus
@@ -1186,6 +1488,7 @@
       unavailable: 'Localisation indisponible',
     };
     locateBtn.setAttribute('aria-label', labels[state] || labels.idle);
+    locateBtn.title = labels[state] || labels.idle;
     locateBtn.classList.toggle('hint', state === 'idle' || state === 'denied');
     if (state !== 'active') setFollow(false);
     updateProfileGeo();
@@ -1275,6 +1578,7 @@
     Geo.accuracy = pos.coords.accuracy;
     drawUserLocation();
     setLocateState('active');
+    renderList();
 
     if (!isInBounds(Geo.position)) {
       if (fly || !Geo.outsideWarned) {
@@ -1327,6 +1631,7 @@
     Geo.position = null;
     const source = map.getSource('user-accuracy');
     if (source) source.setData({ type: 'FeatureCollection', features: [] });
+    renderList();
   }
 
   function flyToUser() {
@@ -1334,7 +1639,6 @@
     map.flyTo({
       center: Geo.position,
       zoom: Math.max(map.getZoom(), 16.5),
-      pitch: map.getPitch() > 5 ? CONFIG.heroView.pitch : 0,
       duration: reduceMotion ? 0 : 1600,
       curve: 1.3,
     });
@@ -1388,7 +1692,7 @@
   });
 
   /* =====================================================================
-     8. CONTRÔLES : vue 2D/3D et boussole
+     10. CONTRÔLES : vue 2D/3D et boussole
      ===================================================================== */
 
   function syncCameraControls() {
@@ -1403,12 +1707,12 @@
 
   $('pitch-btn').addEventListener('click', () => {
     const to3d = map.getPitch() <= 5;
-    map.easeTo({ pitch: to3d ? CONFIG.heroView.pitch : 0, bearing: to3d ? map.getBearing() : 0, duration: reduceMotion ? 0 : 900 });
+    map.easeTo({ pitch: to3d ? CONFIG.pitch3d : 0, bearing: to3d ? -20 : 0, duration: reduceMotion ? 0 : 900 });
   });
   $('compass-btn').addEventListener('click', () => map.easeTo({ bearing: 0, duration: reduceMotion ? 0 : 700 }));
 
   /* =====================================================================
-     9. COMPTE : onboarding & profil
+     11. COMPTE : onboarding & profil
      ===================================================================== */
 
   const initial = (name) => (name || '?').trim().charAt(0).toUpperCase() || '?';
@@ -1513,7 +1817,7 @@
   }
 
   /* =====================================================================
-     10. ANIMATIONS DE CAMÉRA
+     12. ANIMATIONS DE CAMÉRA
      ===================================================================== */
 
   // Rotation lente et continue derrière l'onboarding
@@ -1529,30 +1833,28 @@
     whenMapReady(step);
   }
 
-  /** Lance l'application : révèle l'interface, allume les néons, vol d'arrivée. */
+  /** Lance l'application : révèle l'interface puis vol d'arrivée (vue plan, à plat). */
   function startApp() {
     idleRotation = false;
     document.body.classList.add('ui-ready');
-    const fly = () => {
-      ['road-primary-glow', 'road-motorway-glow'].forEach((id) => map.setPaintProperty(id, 'line-opacity', id === 'road-primary-glow' ? 0.28 : 0.32));
+    whenMapReady(() => {
       const target = Geo.position && isInBounds(Geo.position) ? Geo.position : CONFIG.center;
       if (Geo.position && isInBounds(Geo.position)) setFollow(true);
-      map.flyTo({ center: target, ...CONFIG.heroView, duration: reduceMotion ? 0 : 3200, curve: 1.2 });
-    };
-    whenMapReady(fly);
+      map.flyTo({ center: target, ...CONFIG.heroView, padding: basePadding(), duration: reduceMotion ? 0 : 3000, curve: 1.2 });
+    });
   }
 
   /* =====================================================================
-     11. DÉMARRAGE
+     13. DÉMARRAGE
      ===================================================================== */
 
   map.on('load', () => {
     // Halo de précision GPS (sous les libellés)
     map.addSource('user-accuracy', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
     map.addLayer({ id: 'user-accuracy-fill', type: 'fill', source: 'user-accuracy',
-      paint: { 'fill-color': '#3b82f6', 'fill-opacity': 0.12 } }, 'road-label');
+      paint: { 'fill-color': '#2563eb', 'fill-opacity': 0.12 } }, 'road-label');
     map.addLayer({ id: 'user-accuracy-line', type: 'line', source: 'user-accuracy',
-      paint: { 'line-color': '#60a5fa', 'line-width': 1, 'line-opacity': 0.5 } }, 'road-label');
+      paint: { 'line-color': '#3b82f6', 'line-width': 1, 'line-opacity': 0.5 } }, 'road-label');
     if (Geo.position) drawUserLocation();
     // Attribution compacte repliée (consultable via le bouton ⓘ)
     const attrib = document.querySelector('.maplibregl-ctrl-attrib');
@@ -1564,6 +1866,7 @@
   SHOPS.forEach(createShopMarker);
   refreshStatuses();
   setInterval(refreshStatuses, 60 * 1000);
+  applyLayout();
 
   const saved = store.read();
   if (!saved.account) {
@@ -1589,35 +1892,34 @@
   }
 
   /* =====================================================================
-     12. PWA : manifeste généré à la volée (fichier unique)
+     14. PWA : manifeste généré à la volée (fichier unique)
      ===================================================================== */
   (function injectManifest() {
     const svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'>" +
-      "<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%2338e1ff'/><stop offset='1' stop-color='%23b98cff'/></linearGradient></defs>" +
-      "<rect width='512' height='512' rx='112' fill='%2305070d'/>" +
-      "<path d='M256 96c-66 0-120 54-120 120 0 90 120 200 120 200s120-110 120-200c0-66-54-120-120-120z' fill='url(%23g)'/>" +
-      "<circle cx='256' cy='216' r='44' fill='%2305070d'/></svg>";
+      "<rect width='512' height='512' rx='112' fill='%23f4f0e8'/>" +
+      "<path d='M256 96c-66 0-120 54-120 120 0 90 120 200 120 200s120-110 120-200c0-66-54-120-120-120z' fill='%23b5362c'/>" +
+      "<circle cx='256' cy='216' r='44' fill='%23f4f0e8'/></svg>";
     const icon = 'data:image/svg+xml,' + svg;
     const base = location.href.split('#')[0].split('?')[0];
     const manifest = {
       name: 'Roche Street Food', short_name: 'Street Food',
       description: 'Le street-food de La Roche-sur-Yon sur une carte interactive.',
-      start_url: base, scope: base.replace(/[^/]*$/, ''), display: 'standalone', orientation: 'portrait',
-      background_color: '#05070d', theme_color: '#05070d', lang: 'fr',
+      start_url: base, scope: base.replace(/[^/]*$/, ''), display: 'standalone', orientation: 'any',
+      background_color: '#f4f0e8', theme_color: '#f4f0e8', lang: 'fr',
       icons: [{ src: icon, sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
     };
     const link = document.createElement('link');
     link.rel = 'manifest';
     link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
     document.head.appendChild(link);
-    const touchIcon = document.createElement('link');
-    touchIcon.rel = 'icon';
-    touchIcon.href = icon;
-    document.head.appendChild(touchIcon);
+    const favicon = document.createElement('link');
+    favicon.rel = 'icon';
+    favicon.href = icon;
+    document.head.appendChild(favicon);
   })();
 
   // Point d'accès pour le débogage depuis la console
-  window.RocheStreetFood = { map, Geo, SHOPS, getStatus };
+  window.RocheStreetFood = { map, Geo, SHOPS, getStatus, setTheme };
 
 })();
 </script>
