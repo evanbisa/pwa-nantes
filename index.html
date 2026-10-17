@@ -2,363 +2,1623 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <!-- Mobile-first : plein écran, pas de zoom pinch sur la page (la carte gère son propre zoom) -->
+  <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#ffffff" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="description" content="Carte interactive des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon." />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#05070d" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <title>Street Food Map</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Roche Street Food" />
+  <title>Roche Street Food</title>
 
-  <!-- Leaflet (CSS + JS) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Tailwind CSS (build navigateur) -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Préconnexions : accélèrent le premier affichage de la carte -->
+  <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- MapLibre GL : rendu vectoriel WebGL (fluide, 3D, style entièrement personnalisable) -->
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css" />
+  <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+
+  <!-- Typographies : Space Grotesk (titres, aspect "tech") + Inter (texte) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" />
 
   <style>
-    /* ============ BASE : plein écran, style app native ============ */
-    html, body { height: 100%; margin: 0; overflow: hidden; overscroll-behavior: none; }
-    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    #map { position: fixed; inset: 0; height: 100vh; height: 100dvh; width: 100%; z-index: 0; background: #f3f4f6; }
-    .leaflet-control-zoom { display: none; } /* zoom au doigt, UI épurée */
+    /* =====================================================================
+       1. DESIGN TOKENS
+       ===================================================================== */
+    :root {
+      --bg: #05070d;
+      --panel: rgba(11, 16, 27, 0.82);
+      --panel-solid: #0b101b;
+      --line: rgba(148, 163, 184, 0.14);
+      --line-strong: rgba(148, 163, 184, 0.26);
+      --text: #e6edf7;
+      --muted: #8a99b2;
+      --cyan: #38e1ff;
+      --cyan-deep: #0ea5e9;
+      --violet: #b98cff;
+      --green: #2ee59d;
+      --gray: #64748b;
+      --amber: #fbbf24;
+      --danger: #fb7185;
+      --radius: 20px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+      --ease-out: cubic-bezier(.2, .8, .2, 1);
+    }
 
-    /* ============ POINT BLEU PULSANT (position utilisateur) ============ */
-    .user-dot { position: relative; width: 18px; height: 18px; }
-    .user-dot::before, .user-dot::after { content: ""; position: absolute; border-radius: 50%; }
-    .user-dot::after { inset: 0; background: #2563eb; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
-    .user-dot::before { inset: 0; background: rgba(37,99,235,.45); animation: pulse 2s ease-out infinite; }
-    @keyframes pulse { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(3.2); opacity: 0; } }
+    /* =====================================================================
+       2. BASE : plein écran, comportement d'application native
+       ===================================================================== */
+    *, *::before, *::after { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html, body {
+      height: 100%; margin: 0; overflow: hidden;
+      overscroll-behavior: none; background: var(--bg); color: var(--text);
+      font-family: var(--font-ui); font-size: 15px; line-height: 1.45;
+      -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none; user-select: none;
+    }
+    input { -webkit-user-select: text; user-select: text; }
+    button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+    a { color: inherit; }
+    :focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 
-    /* ============ MARQUEURS COMMERCES ============ */
-    .shop-pin { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;
-      border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid #fff;
-      box-shadow: 0 3px 8px rgba(0,0,0,.3); transition: transform .15s; }
-    .shop-pin > span { transform: rotate(45deg); font-size: 18px; line-height: 1; }
-    .shop-pin.open { background: #16a34a; }
-    .shop-pin.closed { background: #9ca3af; }
-    .shop-pin.active { transform: rotate(-45deg) scale(1.2); }
+    #map { position: fixed; inset: 0; width: 100%; height: 100vh; height: 100dvh; background: var(--bg); }
 
-    /* ============ BOTTOM SHEET ============ */
-    #sheet { transform: translateY(110%); transition: transform .3s cubic-bezier(.2,.8,.2,1); padding-bottom: env(safe-area-inset-bottom); }
-    #sheet.show { transform: translateY(0); }
-    /* Le bouton GPS remonte quand la fiche est ouverte */
-    #locate-btn { transition: bottom .3s cubic-bezier(.2,.8,.2,1); bottom: calc(24px + env(safe-area-inset-bottom)); }
-    body.sheet-open #locate-btn { bottom: calc(300px + env(safe-area-inset-bottom)); }
+    /* Vignettage : assombrit les bords pour la profondeur et la lisibilité des contrôles */
+    .vignette {
+      position: fixed; inset: 0; pointer-events: none; z-index: 1;
+      background:
+        radial-gradient(120% 80% at 50% 50%, transparent 55%, rgba(5, 7, 13, .65) 100%),
+        linear-gradient(to bottom, rgba(5, 7, 13, .55), transparent 18%, transparent 80%, rgba(5, 7, 13, .6));
+    }
 
-    /* ============ MODALE ============ */
-    #welcome.hide { opacity: 0; pointer-events: none; }
-    #welcome { transition: opacity .35s; }
+    /* Surface "verre dépoli" commune aux éléments flottants */
+    .glass {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      -webkit-backdrop-filter: blur(18px) saturate(150%);
+      backdrop-filter: blur(18px) saturate(150%);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .04);
+    }
+
+    /* Interface masquée tant que l'onboarding est affiché, puis révélée en douceur */
+    .ui { transition: opacity .5s var(--ease-out), transform .5s var(--ease-out); }
+    body:not(.ui-ready) .ui { opacity: 0; pointer-events: none; }
+    body:not(.ui-ready) .topbar, body:not(.ui-ready) .controls { transform: translateY(-12px); }
+    body:not(.ui-ready) .filters { transform: translateY(12px); }
+
+    /* =====================================================================
+       3. BARRE SUPÉRIEURE (profil) & CONTRÔLES (en haut à droite)
+       ===================================================================== */
+    .topbar {
+      position: fixed; z-index: 20; left: 12px; top: calc(var(--safe-top) + 12px);
+      max-width: calc(100% - 92px);
+    }
+    .brand {
+      display: flex; align-items: center; gap: 10px; min-height: 52px;
+      padding: 6px 16px 6px 6px; border-radius: 999px; text-align: left;
+    }
+    .avatar {
+      flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
+      font-family: var(--font-display); font-weight: 700; font-size: 17px; color: #041018;
+      background: linear-gradient(135deg, var(--cyan), var(--violet));
+      box-shadow: 0 0 18px rgba(56, 225, 255, .35);
+    }
+    .brand-text { display: flex; flex-direction: column; min-width: 0; }
+    .brand-text strong {
+      font-family: var(--font-display); font-weight: 600; font-size: 15px; letter-spacing: .01em;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .brand-text small {
+      font-size: 11px; color: var(--muted); letter-spacing: .14em; text-transform: uppercase;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+
+    .controls {
+      position: fixed; z-index: 20; right: 12px; top: calc(var(--safe-top) + 12px);
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .ctrl {
+      position: relative; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px;
+      transition: transform .15s var(--ease-out), background-color .25s, border-color .25s, box-shadow .25s;
+    }
+    .ctrl:active { transform: scale(.92); }
+    .ctrl svg { width: 24px; height: 24px; }
+    .ctrl-text { font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: .04em; }
+    #compass-btn svg { transition: transform .1s linear; }
+
+    /* --- Bouton de localisation : un état visuel par situation --- */
+    #locate-btn { width: 56px; height: 56px; border-radius: 18px; color: var(--text); }
+    #locate-btn .ico-slash, #locate-btn .spinner { display: none; }
+    #locate-btn[data-state="active"] { color: var(--cyan); border-color: rgba(56, 225, 255, .45); }
+    #locate-btn[data-state="active"][data-follow="true"] {
+      color: #041018; background: var(--cyan); border-color: var(--cyan);
+      box-shadow: 0 0 24px rgba(56, 225, 255, .55);
+    }
+    #locate-btn[data-state="denied"] { color: var(--amber); border-color: rgba(251, 191, 36, .4); }
+    #locate-btn[data-state="denied"] .ico-slash { display: inline; }
+    #locate-btn[data-state="searching"] .ico-target { opacity: .35; }
+    #locate-btn[data-state="searching"] .spinner {
+      display: block; position: absolute; inset: 7px; border-radius: 50%;
+      border: 2px solid rgba(56, 225, 255, .15); border-top-color: var(--cyan);
+      animation: spin .8s linear infinite;
+    }
+    /* Halo d'invitation quand la localisation n'est pas encore active */
+    #locate-btn.hint::after {
+      content: ""; position: absolute; inset: -2px; border-radius: inherit; pointer-events: none;
+      border: 2px solid var(--cyan); animation: hint 1.8s ease-out infinite;
+    }
+    @keyframes hint { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.35); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* =====================================================================
+       4. FILTRES (bas de l'écran, à portée de pouce)
+       ===================================================================== */
+    .filters {
+      position: fixed; z-index: 20; left: 0; right: 0; bottom: calc(var(--safe-bottom) + 14px);
+      transition: opacity .3s var(--ease-out), transform .35s var(--ease-out);
+    }
+    body.sheet-open .filters { opacity: 0; transform: translateY(16px); pointer-events: none; }
+    .filters-track {
+      display: flex; gap: 8px; overflow-x: auto; padding: 4px 12px; scrollbar-width: none;
+      -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity;
+    }
+    .filters-track::-webkit-scrollbar { display: none; }
+    .chip {
+      flex: none; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px;
+      border-radius: 999px; font-weight: 500; font-size: 14px; white-space: nowrap; scroll-snap-align: start;
+      transition: background-color .2s, color .2s, border-color .2s, box-shadow .2s;
+    }
+    .chip[aria-pressed="true"] {
+      background: rgba(56, 225, 255, .14); color: #dff9ff; border-color: rgba(56, 225, 255, .55);
+      box-shadow: 0 0 16px rgba(56, 225, 255, .2), inset 0 0 0 1px rgba(56, 225, 255, .25);
+    }
+    .chip-sep { flex: none; width: 1px; margin: 8px 2px; background: var(--line-strong); }
+    .dot-green { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+
+    /* =====================================================================
+       5. MARQUEURS (commerces & position de l'utilisateur)
+       ===================================================================== */
+    .pin { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+    .pin-badge {
+      position: relative; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%;
+      font-size: 22px; line-height: 1; background: #0d1422;
+      border: 2px solid var(--gray); box-shadow: 0 6px 16px rgba(0, 0, 0, .55);
+      transition: transform .2s var(--ease-out), box-shadow .25s;
+    }
+    .pin-badge::after { /* pointe du marqueur */
+      content: ""; position: absolute; bottom: -8px; left: 50%; width: 12px; height: 12px;
+      background: inherit; border-right: inherit; border-bottom: inherit;
+      transform: translateX(-50%) rotate(45deg); border-radius: 0 0 3px 0;
+    }
+    .pin.is-open .pin-badge { border-color: var(--green); box-shadow: 0 0 0 4px rgba(46, 229, 157, .14), 0 0 22px rgba(46, 229, 157, .45); }
+    .pin.is-open .pin-badge::before { /* onde lumineuse : le commerce est ouvert */
+      content: ""; position: absolute; inset: -6px; border-radius: 50%;
+      border: 2px solid var(--green); animation: ripple 2.4s ease-out infinite;
+    }
+    .pin.is-closed .pin-badge { filter: grayscale(.85) brightness(.75); }
+    .pin.is-selected .pin-badge { transform: translateY(-6px) scale(1.15); }
+    .pin.is-selected.is-closed .pin-badge { filter: none; }
+    @keyframes ripple { 0% { opacity: .8; transform: scale(.9); } 100% { opacity: 0; transform: scale(1.6); } }
+    .pin-label {
+      margin-top: 12px; padding: 3px 9px; border-radius: 8px; font-size: 12px; font-weight: 600; white-space: nowrap;
+      background: rgba(11, 16, 27, .88); border: 1px solid var(--line); color: var(--text);
+      opacity: 0; transform: translateY(-4px); transition: opacity .25s, transform .25s; pointer-events: none;
+    }
+    #map.show-labels .pin-label, .pin.is-selected .pin-label { opacity: 1; transform: none; }
+    .pin.is-filtered { display: none; }
+    /* Vue éloignée : marqueurs compacts pour éviter qu'ils se chevauchent */
+    .pin-badge { transform-origin: 50% 100%; transition: transform .2s var(--ease-out), box-shadow .25s, scale .3s var(--ease-out); }
+    #map.zoom-far .pin-badge { scale: .62; }
+    #map.zoom-far .pin.is-open .pin-badge::before { animation: none; opacity: 0; }
+
+    .me { position: relative; width: 22px; height: 22px; pointer-events: none; }
+    .me-dot {
+      position: absolute; inset: 0; border-radius: 50%; background: #3b82f6;
+      border: 3px solid #fff; box-shadow: 0 0 0 1px rgba(0, 0, 0, .2), 0 0 18px rgba(59, 130, 246, .9);
+    }
+    .me-pulse {
+      position: absolute; inset: 0; border-radius: 50%; background: rgba(59, 130, 246, .55);
+      animation: me-pulse 2s ease-out infinite;
+    }
+    @keyframes me-pulse { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(3.6); opacity: 0; } }
+
+    /* =====================================================================
+       6. PANNEAUX BAS (fiche commerce, profil, aide localisation)
+       ===================================================================== */
+    .backdrop {
+      position: fixed; inset: 0; z-index: 40; background: rgba(2, 4, 9, .55);
+      opacity: 0; pointer-events: none; transition: opacity .3s;
+    }
+    .backdrop.is-visible { opacity: 1; pointer-events: auto; }
+    .sheet {
+      position: fixed; z-index: 50; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 560px;
+      max-height: 85dvh; overflow-y: auto;
+      padding: 10px 20px calc(var(--safe-bottom) + 20px);
+      border-radius: 28px 28px 0 0; border-bottom: 0;
+      transform: translateY(110%); visibility: hidden;
+      transition: transform .38s var(--ease-out), visibility 0s linear .38s;
+    }
+    .sheet.is-open { transform: translateY(0); visibility: visible; transition: transform .38s var(--ease-out), visibility 0s; }
+    .sheet.is-dragging { transition: none; }
+    .sheet-grab { display: block; width: 100%; padding: 4px 0 12px; cursor: grab; touch-action: none; }
+    .sheet-grab::before { content: ""; display: block; width: 42px; height: 5px; border-radius: 3px; margin: 0 auto; background: var(--line-strong); }
+    .sheet-head { display: flex; align-items: flex-start; gap: 14px; }
+    .sheet-emoji {
+      flex: none; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 18px; font-size: 28px;
+      background: linear-gradient(145deg, rgba(56, 225, 255, .14), rgba(185, 140, 255, .12)); border: 1px solid var(--line);
+    }
+    .sheet-title { flex: 1; min-width: 0; }
+    .sheet h2, .sheet h3 { margin: 0; font-family: var(--font-display); font-weight: 600; letter-spacing: -.01em; }
+    .sheet h2 { font-size: 22px; line-height: 1.2; }
+    .sheet h3 { font-size: 20px; }
+    .eyebrow { margin: 2px 0 0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .icon-btn {
+      flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(148, 163, 184, .12); color: var(--muted); font-size: 20px; line-height: 1;
+    }
+    .status {
+      display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; padding: 6px 12px;
+      border-radius: 999px; font-size: 13px; font-weight: 600;
+    }
+    .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+    .status.is-open { color: var(--green); background: rgba(46, 229, 157, .12); box-shadow: inset 0 0 0 1px rgba(46, 229, 157, .3); }
+    .status.is-open::before { box-shadow: 0 0 8px currentColor; }
+    .status.is-closed { color: #a3adbd; background: rgba(148, 163, 184, .12); box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .2); }
+    .promo {
+      position: relative; overflow: hidden; display: flex; align-items: center; gap: 14px;
+      margin-top: 16px; padding: 14px 16px; border-radius: 18px;
+      background: linear-gradient(120deg, rgba(185, 140, 255, .16), rgba(56, 225, 255, .1));
+      border: 1px solid rgba(185, 140, 255, .35);
+    }
+    .promo::after { /* reflet animé */
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .08) 50%, transparent 70%);
+      transform: translateX(-100%); animation: sheen 3.5s ease-in-out infinite;
+    }
+    @keyframes sheen { 60%, 100% { transform: translateX(100%); } }
+    .promo-ico { font-size: 26px; }
+    .promo small { display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--violet); font-weight: 600; }
+    .promo strong { font-size: 16px; }
+    .meta { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: 14px; }
+    .meta li { display: flex; gap: 10px; align-items: flex-start; }
+    .meta svg { flex: none; width: 18px; height: 18px; margin-top: 1px; color: var(--cyan); }
+    .meta b { color: var(--text); font-weight: 500; }
+
+    .btn {
+      display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 54px;
+      margin-top: 18px; padding: 0 20px; border-radius: 16px; text-decoration: none;
+      font-family: var(--font-display); font-weight: 600; font-size: 16px; letter-spacing: .01em;
+      transition: transform .15s var(--ease-out), box-shadow .2s, opacity .2s;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn svg { width: 20px; height: 20px; }
+    .btn-primary {
+      color: #041018; background: linear-gradient(135deg, var(--cyan), #7cc4ff 55%, var(--violet));
+      box-shadow: 0 8px 28px rgba(56, 225, 255, .35);
+    }
+    .btn-primary[disabled] { opacity: .6; pointer-events: none; }
+    .btn-ghost { margin-top: 10px; color: var(--muted); background: rgba(148, 163, 184, .08); border: 1px solid var(--line); }
+    .btn-danger { margin-top: 10px; color: var(--danger); background: rgba(251, 113, 133, .08); border: 1px solid rgba(251, 113, 133, .25); }
+
+    .help-steps { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+    .help-steps li { padding: 12px 14px; border-radius: 14px; background: rgba(148, 163, 184, .07); border: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+    .help-steps li b { display: block; color: var(--text); margin-bottom: 2px; }
+    .help-steps li.is-current { border-color: rgba(56, 225, 255, .45); background: rgba(56, 225, 255, .07); }
+    .lead { margin: 10px 0 0; color: var(--muted); }
+    .inline-note { margin: 12px 0 0; font-size: 13px; color: var(--amber); min-height: 1em; }
+
+    .profile-card { display: flex; align-items: center; gap: 14px; }
+    .profile-card .avatar { width: 56px; height: 56px; font-size: 22px; }
+    .kv { margin: 18px 0 0; display: grid; gap: 8px; }
+    .kv div { display: flex; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 14px; background: rgba(148, 163, 184, .07); font-size: 14px; }
+    .kv dt { color: var(--muted); }
+    .kv dd { margin: 0; text-align: right; font-weight: 500; overflow: hidden; text-overflow: ellipsis; }
+
+    /* =====================================================================
+       7. ONBOARDING (création de compte + autorisation de localisation)
+       ===================================================================== */
+    .onboarding {
+      position: fixed; inset: 0; z-index: 100; display: flex; align-items: flex-end; justify-content: center;
+      padding: 16px 16px calc(var(--safe-bottom) + 16px);
+      background: linear-gradient(to bottom, rgba(5, 7, 13, .1) 0%, rgba(5, 7, 13, .55) 40%, rgba(5, 7, 13, .92) 100%);
+      transition: opacity .55s var(--ease-out);
+    }
+    .onboarding.is-leaving { opacity: 0; pointer-events: none; }
+    .ob-panel {
+      width: 100%; max-width: 440px; padding: 24px 22px 22px; border-radius: 28px;
+      animation: rise .7s var(--ease-out) both;
+    }
+    @keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+    .ob-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .ob-logo { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 600; }
+    .ob-logo .avatar { width: 34px; height: 34px; font-size: 16px; }
+    .ob-progress { display: flex; gap: 6px; }
+    .ob-progress span { width: 22px; height: 4px; border-radius: 2px; background: var(--line-strong); transition: background-color .3s, width .3s; }
+    .ob-progress span.is-active { width: 34px; background: var(--cyan); box-shadow: 0 0 10px rgba(56, 225, 255, .6); }
+    .ob-step { animation: rise .45s var(--ease-out) both; }
+    .ob-step h1, .ob-step h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: 27px; line-height: 1.15; letter-spacing: -.02em; }
+    .ob-step h1 em, .ob-step h2 em { font-style: normal; background: linear-gradient(90deg, var(--cyan), var(--violet)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .field { display: block; margin-top: 16px; }
+    .field > span { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
+    .field input {
+      width: 100%; height: 52px; padding: 0 16px; border-radius: 14px; font: inherit; font-size: 16px; color: var(--text);
+      background: rgba(5, 7, 13, .6); border: 1px solid var(--line-strong); outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field input::placeholder { color: #4d5b72; }
+    .field input:focus { border-color: var(--cyan); box-shadow: 0 0 0 4px rgba(56, 225, 255, .15); }
+    .field.has-error input { border-color: var(--danger); box-shadow: 0 0 0 4px rgba(251, 113, 133, .12); }
+    .field-error { display: block; min-height: 18px; margin-top: 4px; font-size: 12px; color: var(--danger); }
+    .fineprint { margin: 12px 0 0; font-size: 12px; text-align: center; color: var(--muted); }
+
+    /* Radar animé de l'étape localisation */
+    .radar { position: relative; width: 132px; height: 132px; margin: 0 auto 20px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(56, 225, 255, .14) 0 22%, transparent 23% 44%, rgba(56, 225, 255, .08) 45% 46%, transparent 47% 70%, rgba(56, 225, 255, .06) 71% 72%, transparent 73%);
+      border: 1px solid rgba(56, 225, 255, .25); overflow: hidden; }
+    .radar::before { content: ""; position: absolute; inset: 0; border-radius: 50%;
+      background: conic-gradient(from 0deg, rgba(56, 225, 255, .55), transparent 25%); animation: spin 2.6s linear infinite; }
+    .radar::after { content: ""; position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px;
+      border-radius: 50%; background: #3b82f6; border: 3px solid #fff; box-shadow: 0 0 18px #3b82f6; }
+    .perks { margin: 16px 0 4px; padding: 0; list-style: none; display: grid; gap: 10px; }
+    .perks li { display: flex; gap: 12px; align-items: center; font-size: 14px; color: var(--muted); }
+    .perks li span { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; background: rgba(56, 225, 255, .1); font-size: 17px; }
+
+    /* =====================================================================
+       8. TOAST, ÉCRAN D'ERREUR, ATTRIBUTION
+       ===================================================================== */
+    .toast {
+      /* sous la barre de profil, sans recouvrir la colonne de contrôles à droite */
+      position: fixed; z-index: 120; left: 12px; right: 76px; top: calc(var(--safe-top) + 76px);
+      width: fit-content; max-width: 480px; margin: 0 auto;
+      display: flex; align-items: center; gap: 12px; padding: 11px 14px 11px 16px;
+      border-radius: 16px; font-size: 14px; transform: translateY(-12px); opacity: 0; pointer-events: none;
+      transition: opacity .25s, transform .3s var(--ease-out);
+    }
+    .toast.is-visible { opacity: 1; transform: none; pointer-events: auto; }
+    .toast button { flex: none; color: var(--cyan); font-weight: 600; }
+
+    .fatal { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 24px; text-align: center; background: var(--bg); }
+    .fatal > div { max-width: 340px; }
+    .fatal h1 { font-family: var(--font-display); font-size: 22px; margin: 0 0 8px; }
+    .fatal p { color: var(--muted); margin: 0; }
+
+    .maplibregl-ctrl-bottom-right { bottom: calc(var(--safe-bottom) + 66px); right: 4px; }
+    .maplibregl-ctrl.maplibregl-ctrl-attrib { background: rgba(11, 16, 27, .75); color: var(--muted); font-size: 11px; }
+    .maplibregl-ctrl-attrib a { color: var(--muted); }
+    .maplibregl-ctrl-attrib.maplibregl-compact { min-height: 24px; }
+    .maplibregl-ctrl-attrib-button { filter: invert(1) opacity(.7); }
+    .maplibregl-canvas:focus-visible { outline: none; }
+
+    @media (min-width: 720px) {
+      .onboarding { align-items: center; }
+      .sheet { bottom: 16px; border-radius: 28px; border-bottom: 1px solid var(--line); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
   </style>
 </head>
 
-<body class="bg-gray-100 text-gray-900">
+<body>
+  <!-- ===================== CARTE ===================== -->
+  <div id="map" role="application" aria-label="Carte de La Roche-sur-Yon"></div>
+  <div class="vignette" aria-hidden="true"></div>
 
-  <!-- ============ CARTE ============ -->
-  <div id="map"></div>
+  <!-- ===================== BARRE SUPÉRIEURE : profil ===================== -->
+  <header class="topbar ui">
+    <button id="profile-btn" class="brand glass" type="button" aria-label="Ouvrir mon profil">
+      <span class="avatar" id="avatar" aria-hidden="true">?</span>
+      <span class="brand-text">
+        <strong>Roche Street Food</strong>
+        <small><span class="live-dot" aria-hidden="true"></span>La Roche-sur-Yon</small>
+      </span>
+    </button>
+  </header>
 
-  <!-- ============ BOUTON FLOTTANT : RECENTRER SUR MA POSITION ============ -->
-  <button id="locate-btn" aria-label="Me localiser"
-    class="fixed right-4 z-[500] w-14 h-14 rounded-full bg-white shadow-xl flex items-center justify-center active:scale-95 transition-transform">
-    <!-- Icône cible / GPS -->
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <circle cx="12" cy="12" r="3.5" />
-      <circle cx="12" cy="12" r="8" />
-      <path stroke-linecap="round" d="M12 1v3M12 20v3M1 12h3M20 12h3" />
-    </svg>
-  </button>
+  <!-- ===================== CONTRÔLES CARTE (en haut à droite) ===================== -->
+  <div class="controls ui">
+    <!-- Recentrer sur ma position (redemande l'autorisation si elle a été refusée) -->
+    <button id="locate-btn" class="ctrl glass" type="button" data-state="idle" data-follow="false" aria-label="Me localiser">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <g class="ico-target">
+          <circle cx="12" cy="12" r="7" />
+          <circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none" />
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+        </g>
+        <path class="ico-slash" d="M4 4l16 16" stroke-width="2.4" />
+      </svg>
+      <span class="spinner" aria-hidden="true"></span>
+    </button>
+    <!-- Bascule vue 2D / 3D -->
+    <button id="pitch-btn" class="ctrl glass" type="button" aria-label="Passer en vue 2D">
+      <span class="ctrl-text" id="pitch-label">2D</span>
+    </button>
+    <!-- Boussole : réoriente la carte vers le nord -->
+    <button id="compass-btn" class="ctrl glass" type="button" aria-label="Réorienter vers le nord">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3l3.2 9H8.8z" fill="#fb7185" />
+        <path d="M12 21l-3.2-9h6.4z" fill="#cbd5e1" />
+      </svg>
+    </button>
+  </div>
 
-  <!-- ============ TOAST (messages brefs) ============ -->
-  <div id="toast" class="fixed left-1/2 -translate-x-1/2 z-[800] px-4 py-2 rounded-full bg-gray-900/90 text-white text-sm opacity-0 pointer-events-none transition-opacity"
-       style="top: calc(16px + env(safe-area-inset-top));"></div>
-
-  <!-- ============ BOTTOM SHEET : FICHE COMMERCE ============ -->
-  <div id="sheet" class="fixed inset-x-0 bottom-0 z-[600] bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,.2)] px-5 pt-3 pb-5 max-w-xl mx-auto">
-    <div class="w-10 h-1.5 bg-gray-300 rounded-full mx-auto mb-3"></div>
-    <div class="flex items-start justify-between gap-3">
-      <div>
-        <h2 id="sh-name" class="text-xl font-bold leading-tight"></h2>
-        <p id="sh-cat" class="text-sm text-gray-500 mt-0.5"></p>
-      </div>
-      <button id="sh-close" aria-label="Fermer" class="text-gray-400 text-2xl leading-none p-1">&times;</button>
+  <!-- ===================== FILTRES ===================== -->
+  <nav class="filters ui" aria-label="Filtrer les commerces">
+    <div class="filters-track" id="filters-track">
+      <button class="chip glass" type="button" data-cat="all" aria-pressed="true">Tout</button>
+      <button class="chip glass" type="button" data-cat="Food-truck" aria-pressed="false">🚚 Food-truck</button>
+      <button class="chip glass" type="button" data-cat="Kebab" aria-pressed="false">🥙 Kebab</button>
+      <button class="chip glass" type="button" data-cat="Burger" aria-pressed="false">🍔 Burger</button>
+      <button class="chip glass" type="button" data-cat="Sweets" aria-pressed="false">🧁 Sweets</button>
+      <span class="chip-sep" aria-hidden="true"></span>
+      <button class="chip glass" type="button" id="open-only" aria-pressed="false"><span class="dot-green" aria-hidden="true"></span>Ouverts</button>
     </div>
-    <span id="sh-status" class="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-sm font-medium"></span>
-    <div class="mt-4 p-3 rounded-2xl bg-amber-50 border border-amber-200 flex gap-3 items-center">
-      <span class="text-2xl">🎁</span>
-      <div>
-        <p class="text-xs uppercase tracking-wide text-amber-700 font-semibold">Offre du moment</p>
-        <p id="sh-promo" class="font-semibold text-amber-900"></p>
+  </nav>
+
+  <!-- ===================== FICHE COMMERCE (bottom sheet) ===================== -->
+  <section id="shop-sheet" class="sheet glass" role="dialog" aria-modal="false" aria-labelledby="shop-name" aria-hidden="true">
+    <button class="sheet-grab" type="button" data-close aria-label="Fermer la fiche"></button>
+    <div class="sheet-head">
+      <div class="sheet-emoji" id="shop-emoji" aria-hidden="true"></div>
+      <div class="sheet-title">
+        <h2 id="shop-name"></h2>
+        <p class="eyebrow" id="shop-cat"></p>
       </div>
+      <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
     </div>
-    <p id="sh-addr" class="text-sm text-gray-600 mt-3"></p>
-    <!-- "Y aller" ouvre l'itinéraire dans l'app de navigation du téléphone -->
-    <a id="sh-go" target="_blank" rel="noopener"
-       class="mt-4 w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-blue-600 text-white font-semibold text-base shadow active:scale-[.98] transition-transform">
-      🧭 Y aller
+    <span class="status" id="shop-status"></span>
+    <div class="promo">
+      <span class="promo-ico" aria-hidden="true">🎁</span>
+      <div><small>Offre du moment</small><strong id="shop-promo"></strong></div>
+    </div>
+    <ul class="meta">
+      <li>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 1114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <span id="shop-address"></span>
+      </li>
+      <li>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <span id="shop-hours"></span>
+      </li>
+      <li>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM9 21l2-6 2.5 2.5V21M8 12l2-4.5 3.5 1 2 3.5 2.5 1M10 7.5L7.5 9 7 12"/></svg>
+        <span id="shop-distance"></span>
+      </li>
+    </ul>
+    <!-- "Y aller" : itinéraire piéton dans l'application de navigation du téléphone -->
+    <a id="shop-go" class="btn btn-primary" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.7 2.3a1 1 0 00-1.05-.23l-18 7a1 1 0 00.08 1.9l7.6 2.1 2.1 7.6a1 1 0 001.9.08l7-18a1 1 0 00-.23-1.05z"/></svg>
+      Y aller
     </a>
-  </div>
+  </section>
 
-  <!-- ============ MODALE DE BIENVENUE ============ -->
-  <div id="welcome" class="fixed inset-0 z-[1000] bg-black/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
-    <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6" style="padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));">
-      <div class="text-4xl text-center">🌮</div>
-      <h1 class="text-2xl font-bold text-center mt-2">Bienvenue !</h1>
-      <p class="text-center text-gray-600 mt-1">Dans quelle ville vous trouvez-vous ?</p>
+  <!-- ===================== AIDE : LOCALISATION BLOQUÉE ===================== -->
+  <div class="backdrop" id="backdrop"></div>
+  <section id="geo-help" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="geo-help-title" aria-hidden="true">
+    <button class="sheet-grab" type="button" data-close aria-label="Fermer"></button>
+    <div class="sheet-head">
+      <div class="sheet-emoji" aria-hidden="true">📍</div>
+      <div class="sheet-title">
+        <h3 id="geo-help-title">Localisation bloquée</h3>
+        <p class="eyebrow">Autorisation nécessaire</p>
+      </div>
+      <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
+    </div>
+    <p class="lead">Votre navigateur a mémorisé un refus et ne peut plus afficher la demande. Réactivez la position pour ce site, puis touchez « Réessayer ».</p>
+    <ul class="help-steps">
+      <li data-platform="ios"><b>iPhone / iPad (Safari)</b>Touchez « aA » dans la barre d'adresse › Réglages du site web › Position › Autoriser. Vérifiez aussi Réglages › Confidentialité › Service de localisation › Safari.</li>
+      <li data-platform="android"><b>Android (Chrome)</b>Touchez l'icône à gauche de l'adresse › Autorisations › Position › Autoriser.</li>
+      <li data-platform="desktop"><b>Ordinateur</b>Cliquez sur l'icône à gauche de l'adresse et autorisez « Position ».</li>
+    </ul>
+    <p class="inline-note" id="geo-help-note" role="status"></p>
+    <button class="btn btn-primary" type="button" id="geo-retry">Réessayer</button>
+    <button class="btn btn-ghost" type="button" data-close>Plus tard</button>
+  </section>
 
-      <!-- Choix par défaut mis en valeur : Nantes -->
-      <button id="pick-nantes"
-        class="mt-5 w-full flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg active:scale-[.98] transition-transform">
-        <span class="text-2xl">📍</span>
-        <span class="text-left flex-1">
-          <span class="block font-bold text-lg">Nantes</span>
-          <span class="block text-xs text-blue-100">Pays de la Loire · Recommandé</span>
-        </span>
-        <span class="text-xl">→</span>
-      </button>
+  <!-- ===================== PROFIL ===================== -->
+  <section id="profile-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="profile-name" aria-hidden="true">
+    <button class="sheet-grab" type="button" data-close aria-label="Fermer"></button>
+    <div class="profile-card">
+      <span class="avatar" id="profile-avatar" aria-hidden="true"></span>
+      <div class="sheet-title">
+        <h3 id="profile-name"></h3>
+        <p class="eyebrow" id="profile-email"></p>
+      </div>
+      <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
+    </div>
+    <dl class="kv">
+      <div><dt>Ville</dt><dd>La Roche-sur-Yon</dd></div>
+      <div><dt>Membre depuis</dt><dd id="profile-since"></dd></div>
+      <div><dt>Localisation</dt><dd id="profile-geo"></dd></div>
+    </dl>
+    <button class="btn btn-primary" type="button" id="profile-locate">Activer la localisation</button>
+    <button class="btn btn-danger" type="button" id="profile-reset">Supprimer mon compte de cet appareil</button>
+  </section>
 
-      <div class="flex items-center gap-3 my-4 text-xs text-gray-400">
-        <div class="flex-1 h-px bg-gray-200"></div>ou une autre ville<div class="flex-1 h-px bg-gray-200"></div>
+  <!-- ===================== ONBOARDING ===================== -->
+  <div id="onboarding" class="onboarding" role="dialog" aria-modal="true" aria-labelledby="ob-title" hidden>
+    <div class="ob-panel glass">
+      <div class="ob-top">
+        <div class="ob-logo"><span class="avatar" aria-hidden="true">R</span>Roche Street Food</div>
+        <div class="ob-progress" aria-hidden="true"><span class="is-active" id="ob-dot-1"></span><span id="ob-dot-2"></span></div>
       </div>
 
-      <!-- Recherche d'une autre ville (liste locale filtrée) -->
-      <input id="city-search" type="search" placeholder="Rechercher une ville…" autocomplete="off"
-        class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base" />
-      <ul id="city-list" class="mt-2 max-h-40 overflow-y-auto rounded-xl divide-y divide-gray-100"></ul>
-      <p class="text-xs text-gray-400 text-center mt-3">Les commerces de démo ne sont disponibles qu'à Nantes.</p>
+      <!-- Étape 1 : création du compte -->
+      <form id="ob-account" class="ob-step" novalidate>
+        <h1 id="ob-title">Le meilleur du <em>street-food</em> yonnais</h1>
+        <p class="lead">Créez votre compte pour découvrir les food-trucks, kebabs, burgers et douceurs autour de vous.</p>
+        <label class="field" id="field-name">
+          <span>Prénom</span>
+          <input id="ob-name" name="name" type="text" autocomplete="given-name" autocapitalize="words" maxlength="40" placeholder="Camille" required />
+          <small class="field-error" id="err-name" aria-live="polite"></small>
+        </label>
+        <label class="field" id="field-email">
+          <span>Adresse e-mail</span>
+          <input id="ob-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" maxlength="120" placeholder="camille@exemple.fr" required />
+          <small class="field-error" id="err-email" aria-live="polite"></small>
+        </label>
+        <button class="btn btn-primary" type="submit">Créer mon compte</button>
+        <p class="fineprint">Vos informations restent stockées sur cet appareil.</p>
+      </form>
+
+      <!-- Étape 2 : autorisation de localisation -->
+      <section id="ob-location" class="ob-step" hidden aria-labelledby="ob-loc-title">
+        <div class="radar" aria-hidden="true"></div>
+        <h2 id="ob-loc-title">Activez votre <em>localisation</em></h2>
+        <ul class="perks">
+          <li><span aria-hidden="true">🎯</span>Voir les commerces les plus proches de vous</li>
+          <li><span aria-hidden="true">🚶</span>Connaître la distance et le temps de marche</li>
+          <li><span aria-hidden="true">🔒</span>Votre position n'est jamais partagée</li>
+        </ul>
+        <button class="btn btn-primary" type="button" id="ob-allow">Autoriser la localisation</button>
+        <button class="btn btn-ghost" type="button" id="ob-later">Plus tard</button>
+      </section>
     </div>
   </div>
+
+  <!-- ===================== TOAST ===================== -->
+  <div id="toast" class="toast glass" role="status" aria-live="polite"><span id="toast-text"></span><button id="toast-action" type="button" hidden></button></div>
+
+  <!-- ===================== ÉCRAN D'ERREUR ===================== -->
+  <div id="fatal" class="fatal" hidden>
+    <div>
+      <h1 id="fatal-title">Carte indisponible</h1>
+      <p id="fatal-text">Vérifiez votre connexion internet puis réessayez.</p>
+      <button class="btn btn-primary" type="button" onclick="location.reload()">Réessayer</button>
+    </div>
+  </div>
+
+  <noscript><div class="fatal"><div><h1>JavaScript requis</h1><p>Activez JavaScript pour afficher la carte.</p></div></div></noscript>
 
 <script>
-/* =====================================================================
-   1. DONNÉES
-   ===================================================================== */
+'use strict';
 
-/** Villes proposées dans le sélecteur (centre + zoom). Nantes est la ville par défaut. */
-const CITIES = [
-  { name: "Nantes",      coords: [47.2138, -1.5566], zoom: 16 }, // Place du Commerce / Bouffay
-  { name: "Rennes",      coords: [48.1113, -1.6800], zoom: 15 },
-  { name: "Angers",      coords: [47.4784, -0.5632], zoom: 15 },
-  { name: "Bordeaux",    coords: [44.8378, -0.5792], zoom: 15 },
-  { name: "Lyon",        coords: [45.7640,  4.8357], zoom: 15 },
-  { name: "Marseille",   coords: [43.2965,  5.3698], zoom: 15 },
-  { name: "Paris",       coords: [48.8566,  2.3522], zoom: 14 },
-  { name: "Toulouse",    coords: [43.6047,  1.4442], zoom: 15 },
-  { name: "Lille",       coords: [50.6292,  3.0573], zoom: 15 },
-  { name: "Strasbourg",  coords: [48.5734,  7.7521], zoom: 15 },
-];
+(function () {
 
-/** Commerces fictifs à Nantes. */
-const SHOPS = [
-  { id: 1, name: "Le Camion du Bouffay", category: "Food-truck", open: true,
-    promo: "-10% sur la formule midi", coords: [47.2150, -1.5515], address: "Place du Bouffay, Nantes" },
-  { id: 2, name: "Kebab de la Commerce", category: "Kebab", open: true,
-    promo: "Boisson offerte dès 8 €", coords: [47.2133, -1.5577], address: "Place du Commerce, Nantes" },
-  { id: 3, name: "Burger Hangar", category: "Burger", open: false,
-    promo: "Frites offertes le soir", coords: [47.2063, -1.5712], address: "Hangar à Bananes, Île de Nantes" },
-  { id: 4, name: "Sweet Tertre", category: "Sweets", open: true,
-    promo: "2e gaufre à -50%", coords: [47.2185, -1.5472], address: "Rue du Tertre, Nantes" },
-  { id: 5, name: "Bouffay Street Burger", category: "Burger", open: false,
-    promo: "Menu enfant offert", coords: [47.2142, -1.5528], address: "Rue de la Juiverie, Nantes" },
-];
+  /* =====================================================================
+     1. CONFIGURATION
+     ===================================================================== */
 
-/** Emoji par catégorie pour les marqueurs. */
-const ICONS = { "Food-truck": "🚚", "Kebab": "🥙", "Burger": "🍔", "Sweets": "🧁" };
-
-/* =====================================================================
-   2. CARTE LEAFLET
-   ===================================================================== */
-
-// Vue initiale : France (derrière la modale)
-const map = L.map("map", { zoomControl: false, attributionControl: true, tap: true })
-  .setView([46.6, 2.5], 6);
-
-// Fonds de carte CartoDB Voyager : rues et grands axes très lisibles (tuiles @2x pour écrans retina)
-L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-  subdomains: "abcd",
-  maxZoom: 20,
-  updateWhenZooming: false,   // fluidité pendant le zoom
-  keepBuffer: 4,
-}).addTo(map);
-
-/* =====================================================================
-   3. MARQUEURS & BOTTOM SHEET
-   ===================================================================== */
-
-const $ = (id) => document.getElementById(id);
-const markerEls = new Map();   // id -> élément DOM du pin (pour l'état actif)
-
-/** Crée un marqueur par commerce. */
-SHOPS.forEach((shop) => {
-  const icon = L.divIcon({
-    className: "",
-    html: `<div class="shop-pin ${shop.open ? "open" : "closed"}" data-id="${shop.id}"><span>${ICONS[shop.category] || "📍"}</span></div>`,
-    iconSize: [40, 40],
-    iconAnchor: [8, 38],        // pointe du pin sur la coordonnée
-  });
-  L.marker(shop.coords, { icon, title: shop.name })
-    .addTo(map)
-    .on("click", () => openSheet(shop));
-});
-
-/** Ouvre la fiche détaillée en bas de page. */
-function openSheet(shop) {
-  $("sh-name").textContent = shop.name;
-  $("sh-cat").textContent = shop.category;
-  $("sh-promo").textContent = shop.promo;
-  $("sh-addr").textContent = "📍 " + shop.address;
-
-  // Statut : vert si ouvert, gris si fermé
-  const st = $("sh-status");
-  st.textContent = shop.open ? "● Ouvert" : "● Fermé";
-  st.className = "inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-sm font-medium " +
-    (shop.open ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600");
-
-  // "Y aller" : lien d'itinéraire Google Maps (s'ouvre dans l'app de navigation sur mobile)
-  const [lat, lng] = shop.coords;
-  $("sh-go").href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
-
-  // Marqueur actif mis en avant
-  document.querySelectorAll(".shop-pin.active").forEach((e) => e.classList.remove("active"));
-  document.querySelector(`.shop-pin[data-id="${shop.id}"]`)?.classList.add("active");
-
-  $("sheet").classList.add("show");
-  document.body.classList.add("sheet-open");
-
-  // Décale la carte pour que le marqueur reste visible au-dessus de la fiche
-  const offset = Math.round(window.innerHeight * 0.18);
-  const target = map.project(shop.coords, map.getZoom()).add([0, offset]);
-  map.flyTo(map.unproject(target, map.getZoom()), map.getZoom(), { duration: 0.5 });
-}
-
-function closeSheet() {
-  $("sheet").classList.remove("show");
-  document.body.classList.remove("sheet-open");
-  document.querySelectorAll(".shop-pin.active").forEach((e) => e.classList.remove("active"));
-}
-$("sh-close").addEventListener("click", closeSheet);
-map.on("click", closeSheet);   // clic sur la carte = ferme la fiche
-
-/* =====================================================================
-   4. MODALE DE BIENVENUE & CHOIX DE VILLE
-   ===================================================================== */
-
-const STORAGE_KEY = "sfm_city";
-
-/** Ferme la modale et zoome en douceur sur la ville choisie. */
-function selectCity(city) {
-  try { localStorage.setItem(STORAGE_KEY, city.name); } catch (e) { /* stockage indisponible */ }
-  $("welcome").classList.add("hide");
-  setTimeout(() => $("welcome").remove(), 400);
-  map.flyTo(city.coords, city.zoom, { duration: 2.2, easeLinearity: 0.25 });
-  if (city.name !== "Nantes") toast("Pas encore de commerces à " + city.name + " (démo)");
-  startGeolocation();   // demande la géolocalisation juste après le choix
-}
-
-$("pick-nantes").addEventListener("click", () => selectCity(CITIES[0]));
-
-// Liste filtrable des autres villes
-function renderCities(filter = "") {
-  const q = filter.trim().toLowerCase();
-  const list = CITIES.slice(1).filter((c) => c.name.toLowerCase().includes(q));
-  $("city-list").innerHTML = list.length
-    ? list.map((c) => `<li><button data-city="${c.name}" class="w-full text-left px-4 py-3 hover:bg-gray-50 active:bg-gray-100">${c.name}</button></li>`).join("")
-    : `<li class="px-4 py-3 text-sm text-gray-400">Aucune ville trouvée</li>`;
-}
-$("city-search").addEventListener("input", (e) => renderCities(e.target.value));
-$("city-list").addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-city]");
-  if (btn) selectCity(CITIES.find((c) => c.name === btn.dataset.city));
-});
-renderCities();
-
-// Si la ville a déjà été choisie lors d'une visite précédente, on saute la modale
-(function init() {
-  let saved = null;
-  try { saved = localStorage.getItem(STORAGE_KEY); } catch (e) {}
-  const city = CITIES.find((c) => c.name === saved);
-  if (city) {
-    $("welcome").remove();
-    map.setView(city.coords, city.zoom);
-    startGeolocation();
-  }
-})();
-
-/* =====================================================================
-   5. GÉOLOCALISATION & BOUTON RECENTRAGE
-   ===================================================================== */
-
-let userMarker = null;
-let userPos = null;
-let watchId = null;
-
-/** Demande l'autorisation et suit la position (point bleu pulsant). */
-function startGeolocation() {
-  if (!("geolocation" in navigator) || watchId !== null) return;
-  watchId = navigator.geolocation.watchPosition(
-    (pos) => {
-      userPos = [pos.coords.latitude, pos.coords.longitude];
-      if (!userMarker) {
-        userMarker = L.marker(userPos, {
-          icon: L.divIcon({ className: "", html: '<div class="user-dot"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }),
-          interactive: false, zIndexOffset: 1000,
-        }).addTo(map);
-      } else {
-        userMarker.setLatLng(userPos);
-      }
-    },
-    (err) => {
-      if (err.code === err.PERMISSION_DENIED) toast("Géolocalisation refusée");
-      watchId = null;
-    },
-    { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
-  );
-}
-
-/** Bouton cible : recentre avec animation fluide. */
-$("locate-btn").addEventListener("click", () => {
-  if (userPos) {
-    map.flyTo(userPos, Math.max(map.getZoom(), 16), { duration: 1.2 });
-  } else if ("geolocation" in navigator) {
-    toast("Recherche de votre position…");
-    startGeolocation();
-    // Premier fix ponctuel pour centrer dès que disponible
-    navigator.geolocation.getCurrentPosition(
-      (p) => map.flyTo([p.coords.latitude, p.coords.longitude], 16, { duration: 1.2 }),
-      () => toast("Position indisponible"),
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  } else {
-    toast("Géolocalisation non supportée");
-  }
-});
-
-/* =====================================================================
-   6. UTILITAIRES & PWA
-   ===================================================================== */
-
-let toastTimer;
-function toast(msg) {
-  const t = $("toast");
-  t.textContent = msg;
-  t.style.opacity = 1;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => (t.style.opacity = 0), 2800);
-}
-
-// Manifeste PWA généré dynamiquement (fichier unique, aucun fichier externe requis)
-(function injectManifest() {
-  const svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%232563eb'/><text x='50' y='68' font-size='56' text-anchor='middle'>🌮</text></svg>";
-  const icon = "data:image/svg+xml," + svg;
-  const manifest = {
-    name: "Street Food Map", short_name: "StreetFood", start_url: ".", display: "standalone",
-    background_color: "#ffffff", theme_color: "#ffffff", orientation: "portrait",
-    icons: [{ src: icon, sizes: "any", type: "image/svg+xml", purpose: "any" }],
+  const CONFIG = {
+    city: 'La Roche-sur-Yon',
+    center: [-1.4270, 46.6705],                 // Place Napoléon [lng, lat]
+    bounds: [[-1.56, 46.60], [-1.30, 46.74]],   // la carte ne sort pas de l'agglomération
+    minZoom: 12,
+    maxZoom: 19.5,
+    // Vue d'arrivée (3D inclinée) et vue d'ensemble (derrière l'onboarding)
+    heroView: { zoom: 15.8, pitch: 58, bearing: -24 },
+    overview: { zoom: 13.6, pitch: 45, bearing: 10 },
+    tileJson: 'https://tiles.openfreemap.org/planet',
+    glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+    storageKey: 'roche-street-food:v1',
+    walkSpeed: 80,                              // mètres par minute (~4,8 km/h)
   };
-  const link = document.createElement("link");
-  link.rel = "manifest";
-  link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" }));
-  document.head.appendChild(link);
+
+  const CATEGORIES = {
+    'Food-truck': { emoji: '🚚', label: 'Food-truck' },
+    'Kebab':      { emoji: '🥙', label: 'Kebab' },
+    'Burger':     { emoji: '🍔', label: 'Burger' },
+    'Sweets':     { emoji: '🧁', label: 'Sweets' },
+  };
+
+  /**
+   * Commerces de démonstration (fictifs) à La Roche-sur-Yon.
+   * hours   : créneaux d'ouverture quotidiens ["HH:MM","HH:MM"] (une fin inférieure au début = après minuit)
+   * closedOn: jours de fermeture (0 = dimanche … 6 = samedi)
+   * closedTemporarily : force le statut « Fermé » (travaux, congés…)
+   */
+  const SHOPS = [
+    { id: 'camion-napoleon', name: 'Le Camion Vendéen', category: 'Food-truck',
+      address: 'Place Napoléon', coords: [-1.4262, 46.6709],
+      hours: [['11:00', '14:30'], ['18:00', '22:30']], closedOn: [0],
+      promo: '-10 % sur la formule midi' },
+    { id: 'kebab-clemenceau', name: 'Kebab Napoléon', category: 'Kebab',
+      address: 'Rue Georges Clemenceau', coords: [-1.4247, 46.6697],
+      hours: [['11:00', '02:00']], closedOn: [],
+      promo: 'Boisson offerte dès 8 €' },
+    { id: 'burger-halles', name: 'Les Halles Burger', category: 'Burger',
+      address: 'Les Halles, place du Marché', coords: [-1.4297, 46.6718],
+      hours: [['11:30', '14:30'], ['18:30', '22:30']], closedOn: [1],
+      promo: 'Frites offertes le soir' },
+    { id: 'gaufres-halles', name: 'La Gaufrerie du Yon', category: 'Sweets',
+      address: 'Rue des Halles', coords: [-1.4283, 46.6727],
+      hours: [['10:00', '19:30']], closedOn: [0],
+      promo: '2ᵉ gaufre à -50 %' },
+    { id: 'truck-gare', name: 'Gare Gourmande', category: 'Food-truck',
+      address: 'Parvis de la gare', coords: [-1.4199, 46.6678],
+      hours: [['07:00', '10:30'], ['16:30', '21:30']], closedOn: [],
+      promo: 'Café offert avant 9 h' },
+    { id: 'smash-briand', name: 'Smash Yon Burger', category: 'Burger',
+      address: 'Boulevard Aristide Briand', coords: [-1.4322, 46.6689],
+      hours: [['11:30', '23:00']], closedOn: [], closedTemporarily: true,
+      promo: 'Menu étudiant à 9,90 €' },
+  ];
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* =====================================================================
+     2. UTILITAIRES
+     ===================================================================== */
+
+  const $ = (id) => document.getElementById(id);
+
+  /** Stockage local tolérant aux erreurs (navigation privée, quota…). */
+  const store = {
+    read() {
+      try { return JSON.parse(localStorage.getItem(CONFIG.storageKey)) || {}; } catch (e) { return {}; }
+    },
+    write(patch) {
+      const next = Object.assign(store.read(), patch);
+      try { localStorage.setItem(CONFIG.storageKey, JSON.stringify(next)); } catch (e) { /* stockage indisponible */ }
+      return next;
+    },
+    clear() { try { localStorage.removeItem(CONFIG.storageKey); } catch (e) { /* ignore */ } },
+  };
+
+  /** Distance à vol d'oiseau en mètres entre deux points [lng, lat]. */
+  function distance(a, b) {
+    const R = 6371000, rad = Math.PI / 180;
+    const dLat = (b[1] - a[1]) * rad, dLng = (b[0] - a[0]) * rad;
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[1] * rad) * Math.cos(b[1] * rad) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  function formatDistance(m) {
+    if (m < 1000) return Math.max(10, Math.round(m / 10) * 10) + ' m';
+    return (m / 1000).toLocaleString('fr-FR', { maximumFractionDigits: m < 10000 ? 1 : 0 }) + ' km';
+  }
+
+  function isInBounds([lng, lat]) {
+    const [[w, s], [e, n]] = CONFIG.bounds;
+    return lng >= w && lng <= e && lat >= s && lat <= n;
+  }
+
+  /** Polygone GeoJSON approximant un cercle (rayon en mètres) : halo de précision GPS. */
+  function circlePolygon([lng, lat], radius, steps = 64) {
+    const coords = [];
+    const dLat = radius / 111320;
+    const dLng = radius / (111320 * Math.cos(lat * Math.PI / 180));
+    for (let i = 0; i <= steps; i++) {
+      const t = (i / steps) * 2 * Math.PI;
+      coords.push([lng + dLng * Math.cos(t), lat + dLat * Math.sin(t)]);
+    }
+    return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] }, properties: {} };
+  }
+
+  /* ---------- Horaires d'ouverture ---------- */
+
+  const DAYS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+  const toMin = (hhmm) => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
+  const fmtTime = (min) => { const h = Math.floor(min / 60) % 24, m = min % 60; return h + 'h' + (m ? String(m).padStart(2, '0') : ''); };
+
+  /**
+   * Calcule le statut d'un commerce à l'instant `now`.
+   * Les créneaux sont projetés sur une semaine en minutes (gère les ouvertures après minuit).
+   */
+  function getStatus(shop, now = new Date()) {
+    if (shop.closedTemporarily) return { open: false, label: 'Fermé temporairement' };
+    const WEEK = 7 * 1440;
+    const nowMin = now.getDay() * 1440 + now.getHours() * 60 + now.getMinutes();
+    const slots = [];
+    for (let d = 0; d < 7; d++) {
+      if (shop.closedOn.includes(d)) continue;
+      for (const [s, e] of shop.hours) {
+        const start = d * 1440 + toMin(s);
+        let end = d * 1440 + toMin(e);
+        if (end <= start) end += 1440;
+        slots.push([start, end], [start - WEEK, end - WEEK]); // copie décalée : gère la nuit de samedi à dimanche
+      }
+    }
+    const current = slots.find(([s, e]) => nowMin >= s && nowMin < e);
+    if (current) return { open: true, label: 'Ouvert · ferme à ' + fmtTime(current[1] % 1440) };
+
+    // Prochaine ouverture
+    let next = Infinity;
+    for (const [s] of slots) {
+      const delta = ((s - nowMin) % WEEK + WEEK) % WEEK;
+      if (delta > 0 && delta < next) next = delta;
+    }
+    if (next === Infinity) return { open: false, label: 'Fermé' };
+    const at = nowMin + next;
+    const dayDiff = Math.floor(at / 1440) - Math.floor(nowMin / 1440);
+    const when = dayDiff === 0 ? '' : dayDiff === 1 ? 'demain ' : DAYS[Math.floor(at / 1440) % 7] + ' ';
+    return { open: false, label: 'Fermé · ouvre ' + when + 'à ' + fmtTime(at % 1440) };
+  }
+
+  function formatHours(shop) {
+    const slots = shop.hours.map(([s, e]) => fmtTime(toMin(s)) + ' – ' + fmtTime(toMin(e))).join(' · ');
+    const closed = shop.closedOn.length ? ' (fermé le ' + shop.closedOn.map((d) => DAYS[d]).join(', ') + ')' : ' (7j/7)';
+    return slots + closed;
+  }
+
+  /* ---------- Toast ---------- */
+
+  let toastTimer = null;
+  function toast(message, action) {
+    const el = $('toast'), btn = $('toast-action');
+    $('toast-text').textContent = message;
+    btn.hidden = !action;
+    if (action) {
+      btn.textContent = action.label;
+      btn.onclick = () => { hideToast(); action.run(); };
+    }
+    el.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, action ? 6000 : 3200);
+  }
+  function hideToast() { $('toast').classList.remove('is-visible'); }
+
+  function fatal(title, text) {
+    $('fatal-title').textContent = title;
+    $('fatal-text').textContent = text;
+    $('fatal').hidden = false;
+  }
+
+  /* =====================================================================
+     3. STYLE DE CARTE : sombre, néon, hiérarchie des routes marquée
+     Les voies principales sont nettement plus larges et lumineuses que les
+     rues secondaires (épaisseur interpolée selon le niveau de zoom).
+     Données : schéma OpenMapTiles servi par OpenFreeMap (sans clé API).
+     ===================================================================== */
+
+  /** Largeur de ligne interpolée exponentiellement selon le zoom. */
+  const width = (stops, factor = 1) =>
+    ['interpolate', ['exponential', 1.5], ['zoom'], ...stops.flatMap(([z, w]) => [z, w * factor])];
+  const roadClass = (classes) => ['match', ['get', 'class'], classes, true, false];
+  const isLine = ['match', ['geometry-type'], ['LineString', 'MultiLineString'], true, false];
+  const notTunnel = ['!=', ['get', 'brunnel'], 'tunnel'];
+  const nameField = ['coalesce', ['get', 'name:fr'], ['get', 'name:latin'], ['get', 'name']];
+
+  // Hiérarchie des routes : épaisseur (px) par niveau de zoom
+  const ROADS = {
+    motorway:  { classes: ['motorway'],                   color: '#d6b8ff', glow: '#a855f7', w: [[6, 0.8], [10, 2], [13, 4.5], [16, 11], [19, 34]] },
+    primary:   { classes: ['trunk', 'primary'],           color: '#38e1ff', glow: '#0ea5e9', w: [[8, 0.6], [11, 1.6], [13, 3.2], [16, 8], [19, 26]] },
+    secondary: { classes: ['secondary'],                  color: '#2b7bb0', w: [[10, 0.5], [13, 1.8], [16, 5.5], [19, 18]] },
+    tertiary:  { classes: ['tertiary'],                   color: '#24496b', w: [[11, 0.4], [13, 1.3], [16, 4.2], [19, 14]] },
+    minor:     { classes: ['minor', 'service', 'busway'], color: '#1a283b', w: [[12, 0.2], [14, 0.6], [16, 2], [19, 9]] },
+    path:      { classes: ['path', 'track'],              color: '#1d2a3d', w: [[14, 0.3], [16, 0.9], [19, 2.2]] },
+  };
+
+  function buildStyle() {
+    const roadLayer = (id, def, extra = {}) => ({
+      id, type: 'line', source: 'omt', 'source-layer': 'transportation',
+      filter: ['all', isLine, notTunnel, roadClass(def.classes)],
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': def.color, 'line-width': width(def.w), ...extra },
+    });
+    // Halo lumineux sous les grands axes (opacité 0 au départ, allumé pendant l'intro)
+    const glowLayer = (id, def) => ({
+      id, type: 'line', source: 'omt', 'source-layer': 'transportation',
+      filter: ['all', isLine, notTunnel, roadClass(def.classes)],
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: {
+        'line-color': def.glow, 'line-width': width(def.w, 3.2), 'line-blur': width(def.w, 2.4),
+        'line-opacity': 0, 'line-opacity-transition': { duration: 2200, delay: 300 },
+      },
+    });
+
+    return {
+      version: 8,
+      name: 'Roche Street Food — Neon Night',
+      glyphs: CONFIG.glyphs,
+      sources: {
+        omt: {
+          type: 'vector', url: CONFIG.tileJson,
+          attribution: '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> © <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> Données © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">contributeurs OpenStreetMap</a>',
+        },
+      },
+      // Ciel et brume visibles quand la carte est inclinée
+      sky: {
+        'sky-color': '#05070d', 'horizon-color': '#0d1b38', 'fog-color': '#05070d',
+        'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.7, 'fog-ground-blend': 0.75, 'atmosphere-blend': 0,
+      },
+      light: { anchor: 'viewport', color: '#9fd8ff', intensity: 0.3, position: [1.4, 210, 35] },
+      layers: [
+        { id: 'background', type: 'background', paint: { 'background-color': '#05070d' } },
+
+        // ---- Occupation du sol ----
+        { id: 'landuse', type: 'fill', source: 'omt', 'source-layer': 'landuse',
+          paint: { 'fill-color': ['match', ['get', 'class'], ['commercial', 'retail', 'industrial'], '#0c1220', '#090e18'], 'fill-opacity': 0.9 } },
+        { id: 'landcover', type: 'fill', source: 'omt', 'source-layer': 'landcover',
+          filter: roadClass(['wood', 'grass', 'farmland', 'wetland']),
+          paint: { 'fill-color': '#061410', 'fill-opacity': 0.8 } },
+        { id: 'park', type: 'fill', source: 'omt', 'source-layer': 'park',
+          paint: { 'fill-color': '#06191a', 'fill-outline-color': '#0d2e2c' } },
+
+        // ---- Eau ----
+        { id: 'water', type: 'fill', source: 'omt', 'source-layer': 'water',
+          paint: { 'fill-color': '#061b30' } },
+        { id: 'waterway', type: 'line', source: 'omt', 'source-layer': 'waterway',
+          paint: { 'line-color': '#0b3556', 'line-width': width([[10, 0.6], [14, 1.6], [18, 5]]) } },
+
+        // ---- Réseau routier (du plus fin au plus important) ----
+        { id: 'road-tunnel', type: 'line', source: 'omt', 'source-layer': 'transportation',
+          filter: ['all', isLine, ['==', ['get', 'brunnel'], 'tunnel'], roadClass(['motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'minor'])],
+          paint: { 'line-color': '#1f3047', 'line-width': width(ROADS.secondary.w), 'line-dasharray': [1.5, 1.2], 'line-opacity': 0.7 } },
+        roadLayer('road-path', ROADS.path, { 'line-dasharray': [1.5, 1.5] }),
+        roadLayer('road-minor', ROADS.minor),
+        roadLayer('road-tertiary', ROADS.tertiary),
+        roadLayer('road-secondary', ROADS.secondary),
+        glowLayer('road-primary-glow', ROADS.primary),
+        roadLayer('road-primary', ROADS.primary),
+        glowLayer('road-motorway-glow', ROADS.motorway),
+        roadLayer('road-motorway', ROADS.motorway),
+        { id: 'rail', type: 'line', source: 'omt', 'source-layer': 'transportation',
+          filter: ['all', isLine, roadClass(['rail', 'transit'])],
+          paint: { 'line-color': '#3a4662', 'line-width': width([[12, 0.5], [16, 1.6], [19, 3]]), 'line-dasharray': [2, 2] } },
+
+        // ---- Bâtiments 3D (surgissent progressivement avec le zoom) ----
+        { id: 'building-3d', type: 'fill-extrusion', source: 'omt', 'source-layer': 'building', minzoom: 14,
+          filter: ['!=', ['get', 'hide_3d'], true],
+          paint: {
+            'fill-extrusion-color': ['interpolate', ['linear'], ['coalesce', ['get', 'render_height'], 8],
+              0, '#0e1524', 15, '#141f36', 40, '#1c2c4e', 80, '#27406e'],
+            'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 14, 0, 15.5, ['coalesce', ['get', 'render_height'], 8]],
+            'fill-extrusion-base': ['interpolate', ['linear'], ['zoom'], 14, 0, 15.5, ['coalesce', ['get', 'render_min_height'], 0]],
+            'fill-extrusion-opacity': ['interpolate', ['linear'], ['zoom'], 14, 0, 15, 0.88],
+            'fill-extrusion-vertical-gradient': true,
+          } },
+
+        // ---- Libellés ----
+        { id: 'road-label', type: 'symbol', source: 'omt', 'source-layer': 'transportation_name', minzoom: 14,
+          filter: roadClass(['secondary', 'tertiary', 'minor']),
+          layout: {
+            'symbol-placement': 'line', 'text-field': nameField, 'text-font': ['Noto Sans Regular'],
+            'text-size': ['interpolate', ['linear'], ['zoom'], 14, 10, 18, 13], 'text-max-angle': 30, 'text-padding': 8,
+          },
+          paint: { 'text-color': '#7f8ea8', 'text-halo-color': '#05070d', 'text-halo-width': 1.5 } },
+        { id: 'road-label-major', type: 'symbol', source: 'omt', 'source-layer': 'transportation_name', minzoom: 12.5,
+          filter: roadClass(['motorway', 'trunk', 'primary']),
+          layout: {
+            'symbol-placement': 'line', 'text-field': nameField, 'text-font': ['Noto Sans Bold'],
+            'text-size': ['interpolate', ['linear'], ['zoom'], 12.5, 10, 18, 14.5], 'text-letter-spacing': 0.04, 'text-max-angle': 30,
+          },
+          paint: { 'text-color': '#a5f0ff', 'text-halo-color': '#04121c', 'text-halo-width': 1.8 } },
+        { id: 'place-label', type: 'symbol', source: 'omt', 'source-layer': 'place', minzoom: 12,
+          filter: roadClass(['suburb', 'quarter', 'neighbourhood', 'hamlet', 'village']),
+          layout: {
+            'text-field': nameField, 'text-font': ['Noto Sans Bold'], 'text-transform': 'uppercase',
+            'text-size': ['interpolate', ['linear'], ['zoom'], 12, 10, 16, 13], 'text-letter-spacing': 0.22, 'text-max-width': 8,
+          },
+          paint: { 'text-color': '#5d6d88', 'text-halo-color': '#05070d', 'text-halo-width': 1.4 } },
+      ],
+    };
+  }
+
+  /* =====================================================================
+     4. INITIALISATION DE LA CARTE
+     ===================================================================== */
+
+  if (typeof maplibregl === 'undefined') {
+    fatal('Carte indisponible', 'La bibliothèque cartographique n\'a pas pu être chargée. Vérifiez votre connexion internet puis réessayez.');
+    return;
+  }
+
+  let map;
+  try {
+    map = new maplibregl.Map({
+      container: 'map',
+      style: buildStyle(),
+      center: CONFIG.center,
+      zoom: CONFIG.overview.zoom,
+      pitch: CONFIG.overview.pitch,
+      bearing: CONFIG.overview.bearing,
+      minZoom: CONFIG.minZoom,
+      maxZoom: CONFIG.maxZoom,
+      maxPitch: 70,
+      maxBounds: CONFIG.bounds,
+      renderWorldCopies: false,
+      attributionControl: false,
+      fadeDuration: 200,
+      canvasContextAttributes: { antialias: true },
+    });
+  } catch (err) {
+    console.error(err);
+    fatal('Appareil non compatible', 'Votre navigateur ne prend pas en charge WebGL, nécessaire à l\'affichage de la carte.');
+    return;
+  }
+
+  map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+
+  // File d'attente exécutée une fois le style chargé (map.loaded() est faux pendant chaque animation)
+  let mapReady = false;
+  const readyQueue = [];
+  const whenMapReady = (fn) => (mapReady ? fn() : readyQueue.push(fn));
+
+  // Erreurs de chargement (réseau, tuiles) : un seul message, sans bloquer l'application
+  let networkWarned = false;
+  map.on('error', (e) => {
+    console.warn('[carte]', e && e.error ? e.error.message || e.error : e);
+    if (!networkWarned && navigator.onLine === false) {
+      networkWarned = true;
+      toast('Hors connexion : la carte ne peut pas se mettre à jour.');
+    }
+  });
+  window.addEventListener('offline', () => toast('Vous êtes hors connexion.'));
+  window.addEventListener('online', () => toast('Connexion rétablie.'));
+
+  // Libellés visibles de près, marqueurs compacts de loin
+  const updateLabelVisibility = () => {
+    const z = map.getZoom(), el = map.getContainer();
+    el.classList.toggle('show-labels', z >= 15.3);
+    el.classList.toggle('zoom-far', z < 14.2);
+  };
+  map.on('zoom', updateLabelVisibility);
+  updateLabelVisibility();
+
+  /* =====================================================================
+     5. MARQUEURS DES COMMERCES & FILTRES
+     ===================================================================== */
+
+  const markers = new Map();          // id → { shop, marker, el }
+  const filters = { category: 'all', openOnly: false };
+  let selectedId = null;
+
+  function createShopMarker(shop) {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'pin';
+    el.innerHTML = '<span class="pin-badge" aria-hidden="true"></span><span class="pin-label"></span>';
+    el.querySelector('.pin-badge').textContent = CATEGORIES[shop.category].emoji;
+    el.querySelector('.pin-label').textContent = shop.name;
+    el.addEventListener('click', (ev) => { ev.stopPropagation(); openShop(shop.id); });
+
+    const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat(shop.coords).addTo(map);
+    markers.set(shop.id, { shop, marker, el });
+  }
+
+  /** Met à jour l'état ouvert/fermé des marqueurs (appelé chaque minute). */
+  function refreshStatuses() {
+    const now = new Date();
+    markers.forEach((m) => {
+      m.status = getStatus(m.shop, now);
+      m.el.classList.toggle('is-open', m.status.open);
+      m.el.classList.toggle('is-closed', !m.status.open);
+      m.el.setAttribute('aria-label', m.shop.name + ', ' + CATEGORIES[m.shop.category].label + ', ' + m.status.label);
+    });
+    applyFilters();
+    if (selectedId) renderShop(markers.get(selectedId));
+  }
+
+  function applyFilters() {
+    markers.forEach((m) => {
+      const visible = (filters.category === 'all' || m.shop.category === filters.category) && (!filters.openOnly || m.status.open);
+      m.el.classList.toggle('is-filtered', !visible);
+      if (!visible && m.shop.id === selectedId) closeShop();
+    });
+  }
+
+  $('filters-track').addEventListener('click', (ev) => {
+    const chip = ev.target.closest('.chip');
+    if (!chip) return;
+    if (chip.id === 'open-only') {
+      filters.openOnly = !filters.openOnly;
+      chip.setAttribute('aria-pressed', String(filters.openOnly));
+    } else {
+      filters.category = chip.dataset.cat;
+      document.querySelectorAll('.chip[data-cat]').forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+    }
+    applyFilters();
+    const count = [...markers.values()].filter((m) => !m.el.classList.contains('is-filtered')).length;
+    if (count === 0) toast('Aucun commerce ne correspond à ce filtre pour le moment.');
+  });
+
+  /* =====================================================================
+     6. PANNEAUX BAS (fiche commerce, profil, aide) — ouverture, fermeture, glisser
+     ===================================================================== */
+
+  let activePanel = null;
+
+  function openPanel(panel, { modal = false } = {}) {
+    if (activePanel && activePanel !== panel) closePanel(activePanel, { silent: true });
+    activePanel = panel;
+    panel.classList.add('is-open');
+    panel.setAttribute('aria-hidden', 'false');
+    $('backdrop').classList.toggle('is-visible', modal);
+    document.body.classList.add('sheet-open');
+    if (modal) {
+      hideToast();
+      setTimeout(() => (panel.querySelector('.btn') || panel).focus({ preventScroll: true }), 60);
+    }
+  }
+
+  function closePanel(panel, { silent = false } = {}) {
+    if (!panel || !panel.classList.contains('is-open')) return;
+    panel.classList.remove('is-open');
+    panel.setAttribute('aria-hidden', 'true');
+    panel.style.transform = '';
+    if (activePanel === panel) activePanel = null;
+    if (panel.id === 'shop-sheet') deselectShop();
+    if (!silent) {
+      $('backdrop').classList.remove('is-visible');
+      document.body.classList.remove('sheet-open');
+    }
+  }
+
+  document.querySelectorAll('.sheet').forEach((panel) => {
+    panel.addEventListener('click', (ev) => { if (ev.target.closest('[data-close]')) closePanel(panel); });
+    enableDragToClose(panel);
+  });
+  $('backdrop').addEventListener('click', () => closePanel(activePanel));
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && activePanel) closePanel(activePanel); });
+
+  /** Glisser la poignée vers le bas pour fermer le panneau. */
+  function enableDragToClose(panel) {
+    const grab = panel.querySelector('.sheet-grab');
+    let startY = 0, dy = 0, startT = 0, dragging = false;
+    grab.addEventListener('pointerdown', (ev) => {
+      dragging = true; startY = ev.clientY; dy = 0; startT = performance.now();
+      panel.classList.add('is-dragging');
+      grab.setPointerCapture(ev.pointerId);
+    });
+    grab.addEventListener('pointermove', (ev) => {
+      if (!dragging) return;
+      dy = Math.max(0, ev.clientY - startY);
+      panel.style.transform = 'translateY(' + dy + 'px)';
+    });
+    const end = () => {
+      if (!dragging) return;
+      dragging = false;
+      panel.classList.remove('is-dragging');
+      const velocity = dy / Math.max(1, performance.now() - startT);
+      panel.style.transform = '';
+      if (dy > 90 || velocity > 0.6) closePanel(panel);
+    };
+    grab.addEventListener('pointerup', end);
+    grab.addEventListener('pointercancel', end);
+  }
+
+  /* ---------- Fiche commerce ---------- */
+
+  function renderShop(m) {
+    const { shop } = m;
+    const status = m.status || getStatus(shop);
+    $('shop-emoji').textContent = CATEGORIES[shop.category].emoji;
+    $('shop-name').textContent = shop.name;
+    $('shop-cat').textContent = CATEGORIES[shop.category].label;
+    $('shop-status').textContent = status.label;
+    $('shop-status').className = 'status ' + (status.open ? 'is-open' : 'is-closed');
+    $('shop-promo').textContent = shop.promo;
+    $('shop-address').textContent = shop.address + ', ' + CONFIG.city;
+    $('shop-hours').textContent = formatHours(shop);
+
+    const dist = $('shop-distance');
+    if (Geo.position) {
+      const d = distance(Geo.position, shop.coords);
+      dist.innerHTML = '<b></b> · environ <b></b> à pied';
+      dist.children[0].textContent = formatDistance(d);
+      dist.children[1].textContent = Math.max(1, Math.round(d / CONFIG.walkSpeed)) + ' min';
+    } else {
+      dist.textContent = 'Activez la localisation pour connaître la distance';
+    }
+
+    const [lng, lat] = shop.coords;
+    $('shop-go').href = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng + '&travelmode=walking';
+    $('shop-go').setAttribute('aria-label', 'Itinéraire vers ' + shop.name);
+  }
+
+  function openShop(id) {
+    const m = markers.get(id);
+    if (!m) return;
+    if (selectedId && selectedId !== id) markers.get(selectedId).el.classList.remove('is-selected');
+    selectedId = id;
+    m.el.classList.add('is-selected');
+    renderShop(m);
+    openPanel($('shop-sheet'));
+    setFollow(false);
+    // Centre le commerce dans la partie visible au-dessus de la fiche
+    const sheetH = $('shop-sheet').offsetHeight;
+    map.easeTo({
+      center: m.shop.coords,
+      zoom: Math.max(map.getZoom(), 16.2),
+      padding: { top: 80, bottom: Math.min(sheetH, window.innerHeight * 0.6), left: 0, right: 0 },
+      duration: reduceMotion ? 0 : 900,
+    });
+  }
+
+  function deselectShop() {
+    if (!selectedId) return;
+    markers.get(selectedId).el.classList.remove('is-selected');
+    selectedId = null;
+    map.easeTo({ padding: { top: 0, bottom: 0, left: 0, right: 0 }, duration: reduceMotion ? 0 : 500 });
+  }
+
+  function closeShop() { closePanel($('shop-sheet')); }
+
+  map.on('click', (ev) => {
+    if (ev.originalEvent && ev.originalEvent.target.closest && ev.originalEvent.target.closest('.pin')) return;
+    if (activePanel && activePanel.id === 'shop-sheet') closeShop();
+  });
+
+  /* =====================================================================
+     7. GÉOLOCALISATION
+     - Demandée à la création du compte (onboarding)
+     - En cas de refus, le bouton en haut à droite redemande l'autorisation.
+       Si le navigateur a mémorisé un refus définitif (il n'affiche alors plus
+       la demande), on affiche la marche à suivre pour la réactiver.
+     ===================================================================== */
+
+  const Geo = {
+    position: null,        // [lng, lat]
+    accuracy: null,        // mètres
+    watchId: null,
+    follow: false,         // la caméra suit l'utilisateur
+    permission: 'unknown', // 'granted' | 'denied' | 'prompt' | 'unknown'
+    marker: null,
+    outsideWarned: false,
+  };
+  const locateBtn = $('locate-btn');
+
+  function setLocateState(state) {
+    locateBtn.dataset.state = state;
+    const labels = {
+      idle: 'Me localiser', searching: 'Recherche de votre position…',
+      active: 'Recentrer sur ma position', denied: 'Localisation refusée — toucher pour réessayer',
+      unavailable: 'Localisation indisponible',
+    };
+    locateBtn.setAttribute('aria-label', labels[state] || labels.idle);
+    locateBtn.classList.toggle('hint', state === 'idle' || state === 'denied');
+    if (state !== 'active') setFollow(false);
+    updateProfileGeo();
+  }
+
+  function setFollow(on) {
+    Geo.follow = on;
+    locateBtn.dataset.follow = String(on);
+  }
+
+  // Suivi de l'état d'autorisation (Permissions API, si disponible)
+  if (navigator.permissions && navigator.permissions.query) {
+    navigator.permissions.query({ name: 'geolocation' }).then((status) => {
+      Geo.permission = status.state;
+      status.addEventListener('change', () => {
+        Geo.permission = status.state;
+        // L'utilisateur vient de réactiver la position dans les réglages : on reprend automatiquement
+        if (status.state === 'granted' && Geo.watchId === null && document.body.classList.contains('ui-ready')) {
+          closePanel($('geo-help'));
+          requestLocation({ fly: true });
+        }
+        updateProfileGeo();
+      });
+      updateProfileGeo();
+    }).catch(() => { /* non supporté */ });
+  }
+
+  /**
+   * Demande la position. Déclenche la fenêtre d'autorisation native du navigateur
+   * si l'autorisation n'a pas encore été accordée. Une seule demande à la fois.
+   * @returns {Promise<'granted'|'blocked'|'denied'|'error'|'unavailable'>}
+   *   'blocked' = refus mémorisé par le navigateur (aucune fenêtre n'a pu s'afficher)
+   */
+  let pendingRequest = null;
+  function requestLocation({ fly = false, fromButton = false } = {}) {
+    if (pendingRequest) return pendingRequest;
+    if (!('geolocation' in navigator)) {
+      setLocateState('unavailable');
+      toast('Votre navigateur ne permet pas la géolocalisation.');
+      return Promise.resolve('unavailable');
+    }
+    if (!window.isSecureContext) {
+      setLocateState('unavailable');
+      toast('La localisation nécessite une connexion sécurisée (HTTPS).');
+      return Promise.resolve('unavailable');
+    }
+    setLocateState('searching');
+    const startedAt = performance.now();
+    pendingRequest = new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          store.write({ geoConsent: 'accepted' });
+          Geo.permission = 'granted';
+          onPosition(pos, { fly });
+          startWatch();
+          resolve('granted');
+        },
+        (err) => resolve(onLocationError(err, { fromButton, elapsed: performance.now() - startedAt })),
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
+    }).finally(() => { pendingRequest = null; });
+    return pendingRequest;
+  }
+
+  function startWatch() {
+    if (Geo.watchId !== null) return;
+    Geo.watchId = navigator.geolocation.watchPosition(
+      (pos) => onPosition(pos),
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) { // autorisation retirée en cours d'utilisation
+          stopWatch();
+          removeUserMarker();
+          setLocateState('denied');
+        }
+      },
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 30000 }
+    );
+  }
+
+  function stopWatch() {
+    if (Geo.watchId !== null) navigator.geolocation.clearWatch(Geo.watchId);
+    Geo.watchId = null;
+  }
+
+  function onPosition(pos, { fly = false } = {}) {
+    Geo.position = [pos.coords.longitude, pos.coords.latitude];
+    Geo.accuracy = pos.coords.accuracy;
+    drawUserLocation();
+    setLocateState('active');
+
+    if (!isInBounds(Geo.position)) {
+      if (fly || !Geo.outsideWarned) {
+        Geo.outsideWarned = true;
+        const km = formatDistance(distance(Geo.position, CONFIG.center));
+        toast('Vous êtes à ' + km + ' de La Roche-sur-Yon. La carte reste centrée sur la ville.');
+      }
+      if (fly) flyToCity();
+      return;
+    }
+    if (fly) flyToUser();
+    else if (Geo.follow && !map.isEasing()) map.easeTo({ center: Geo.position, duration: 800 });
+    if (selectedId) renderShop(markers.get(selectedId));
+  }
+
+  function onLocationError(err, { fromButton, elapsed }) {
+    if (err.code === err.PERMISSION_DENIED) {
+      Geo.permission = 'denied';
+      setLocateState('denied');
+      // Réponse quasi immédiate = le navigateur n'a pas affiché la demande (refus mémorisé)
+      const blocked = elapsed < 600;
+      if (fromButton && blocked) openGeoHelp();
+      else if (fromButton) toast('Localisation refusée.', { label: 'Aide', run: openGeoHelp });
+      return blocked ? 'blocked' : 'denied';
+    }
+    setLocateState(Geo.position ? 'active' : 'idle');
+    toast(err.code === err.TIMEOUT
+      ? 'Position introuvable pour le moment. Réessayez dans un instant.'
+      : 'Impossible de déterminer votre position. Vérifiez que le GPS est activé.');
+    return 'error';
+  }
+
+  /** Point bleu pulsant + halo de précision. */
+  function drawUserLocation() {
+    if (!Geo.marker) {
+      const el = document.createElement('div');
+      el.className = 'me';
+      el.innerHTML = '<span class="me-pulse"></span><span class="me-dot"></span>';
+      Geo.marker = new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(Geo.position).addTo(map);
+    } else {
+      Geo.marker.setLngLat(Geo.position);
+    }
+    const source = map.getSource('user-accuracy');
+    if (source) source.setData(circlePolygon(Geo.position, Math.min(Geo.accuracy || 0, 2000)));
+  }
+
+  function removeUserMarker() {
+    if (Geo.marker) Geo.marker.remove();
+    Geo.marker = null;
+    Geo.position = null;
+    const source = map.getSource('user-accuracy');
+    if (source) source.setData({ type: 'FeatureCollection', features: [] });
+  }
+
+  function flyToUser() {
+    setFollow(true);
+    map.flyTo({
+      center: Geo.position,
+      zoom: Math.max(map.getZoom(), 16.5),
+      pitch: map.getPitch() > 5 ? CONFIG.heroView.pitch : 0,
+      duration: reduceMotion ? 0 : 1600,
+      curve: 1.3,
+    });
+  }
+
+  function flyToCity() {
+    map.flyTo({ center: CONFIG.center, ...CONFIG.heroView, duration: reduceMotion ? 0 : 1800 });
+  }
+
+  // Bouton en haut à droite : recentre, ou (re)demande l'autorisation si besoin
+  locateBtn.addEventListener('click', () => {
+    if (locateBtn.dataset.state === 'searching') return;
+    if (Geo.position && Geo.watchId !== null) {
+      if (isInBounds(Geo.position)) flyToUser();
+      else toast('Vous êtes en dehors de La Roche-sur-Yon.');
+      return;
+    }
+    requestLocation({ fly: true, fromButton: true });
+  });
+
+  // L'utilisateur déplace la carte : on arrête de le suivre
+  map.on('dragstart', () => setFollow(false));
+
+  /* ---------- Aide « localisation bloquée » ---------- */
+
+  function detectPlatform() {
+    const ua = navigator.userAgent;
+    if (/iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return 'ios';
+    if (/Android/.test(ua)) return 'android';
+    return 'desktop';
+  }
+
+  function openGeoHelp() {
+    const platform = detectPlatform();
+    const list = document.querySelector('.help-steps');
+    list.querySelectorAll('li').forEach((li) => li.classList.toggle('is-current', li.dataset.platform === platform));
+    list.prepend(list.querySelector('[data-platform="' + platform + '"]'));
+    $('geo-help-note').textContent = '';
+    openPanel($('geo-help'), { modal: true });
+  }
+
+  $('geo-retry').addEventListener('click', async () => {
+    const btn = $('geo-retry');
+    btn.disabled = true;
+    $('geo-help-note').textContent = '';
+    const result = await requestLocation({ fly: true });
+    btn.disabled = false;
+    if (result === 'granted') closePanel($('geo-help'));
+    else if (result === 'blocked') $('geo-help-note').textContent = 'La position est toujours bloquée. Modifiez le réglage indiqué ci-dessus.';
+    else if (result === 'denied') $('geo-help-note').textContent = 'Vous avez refusé l\'accès à votre position.';
+  });
+
+  /* =====================================================================
+     8. CONTRÔLES : vue 2D/3D et boussole
+     ===================================================================== */
+
+  function syncCameraControls() {
+    const bearing = map.getBearing(), pitch = map.getPitch();
+    $('compass-btn').querySelector('svg').style.transform = 'rotate(' + (-bearing) + 'deg)';
+    $('pitch-label').textContent = pitch > 5 ? '2D' : '3D';
+    $('pitch-btn').setAttribute('aria-label', pitch > 5 ? 'Passer en vue 2D' : 'Passer en vue 3D');
+  }
+  map.on('rotate', syncCameraControls);
+  map.on('pitch', syncCameraControls);
+  syncCameraControls();
+
+  $('pitch-btn').addEventListener('click', () => {
+    const to3d = map.getPitch() <= 5;
+    map.easeTo({ pitch: to3d ? CONFIG.heroView.pitch : 0, bearing: to3d ? map.getBearing() : 0, duration: reduceMotion ? 0 : 900 });
+  });
+  $('compass-btn').addEventListener('click', () => map.easeTo({ bearing: 0, duration: reduceMotion ? 0 : 700 }));
+
+  /* =====================================================================
+     9. COMPTE : onboarding & profil
+     ===================================================================== */
+
+  const initial = (name) => (name || '?').trim().charAt(0).toUpperCase() || '?';
+
+  function applyAccount(account) {
+    $('avatar').textContent = initial(account.name);
+    $('profile-btn').setAttribute('aria-label', 'Profil de ' + account.name);
+  }
+
+  function updateProfileGeo() {
+    const state = locateBtn.dataset.state;
+    const text = state === 'active' ? 'Activée'
+      : state === 'searching' ? 'Recherche…'
+      : state === 'unavailable' ? 'Indisponible'
+      : (state === 'denied' || Geo.permission === 'denied') ? 'Refusée' : 'Désactivée';
+    $('profile-geo').textContent = text;
+    $('profile-locate').hidden = state === 'active' || state === 'unavailable';
+  }
+
+  $('profile-btn').addEventListener('click', () => {
+    const { account } = store.read();
+    if (!account) return;
+    $('profile-avatar').textContent = initial(account.name);
+    $('profile-name').textContent = account.name;
+    $('profile-email').textContent = account.email;
+    $('profile-since').textContent = new Date(account.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    updateProfileGeo();
+    openPanel($('profile-sheet'), { modal: true });
+  });
+  $('profile-locate').addEventListener('click', () => {
+    closePanel($('profile-sheet'));
+    requestLocation({ fly: true, fromButton: true });
+  });
+  $('profile-reset').addEventListener('click', () => {
+    if (!window.confirm('Supprimer votre compte de cet appareil ?')) return;
+    store.clear();
+    location.reload();
+  });
+
+  /* ---------- Onboarding ---------- */
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  function setFieldError(fieldId, errId, message) {
+    $(fieldId).classList.toggle('has-error', !!message);
+    $(errId).textContent = message || '';
+  }
+
+  function showOnboarding() {
+    $('onboarding').hidden = false;
+    startIdleRotation();
+    setTimeout(() => $('ob-name').focus({ preventScroll: true }), 500);
+  }
+
+  $('ob-name').addEventListener('input', () => setFieldError('field-name', 'err-name', ''));
+  $('ob-email').addEventListener('input', () => setFieldError('field-email', 'err-email', ''));
+
+  $('ob-account').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const name = $('ob-name').value.trim().replace(/\s+/g, ' ');
+    const email = $('ob-email').value.trim().toLowerCase();
+    let valid = true;
+    if (name.length < 2) { setFieldError('field-name', 'err-name', 'Indiquez votre prénom (2 caractères minimum).'); valid = false; }
+    if (!EMAIL_RE.test(email)) { setFieldError('field-email', 'err-email', 'Adresse e-mail invalide.'); valid = false; }
+    if (!valid) { (name.length < 2 ? $('ob-name') : $('ob-email')).focus(); return; }
+
+    const account = { name, email, createdAt: new Date().toISOString() };
+    store.write({ account });
+    applyAccount(account);
+
+    // Étape suivante : localisation
+    $('ob-account').hidden = true;
+    $('ob-location').hidden = false;
+    $('ob-dot-1').classList.remove('is-active');
+    $('ob-dot-2').classList.add('is-active');
+    $('ob-allow').focus({ preventScroll: true });
+  });
+
+  $('ob-allow').addEventListener('click', async () => {
+    const btn = $('ob-allow');
+    btn.disabled = true;
+    btn.textContent = 'En attente de votre réponse…';
+    const ok = (await requestLocation({ fly: false })) === 'granted';
+    if (!ok) store.write({ geoConsent: 'refused' });
+    finishOnboarding(ok);
+  });
+
+  $('ob-later').addEventListener('click', () => {
+    store.write({ geoConsent: 'later' });
+    setLocateState('idle');
+    finishOnboarding(false);
+  });
+
+  function finishOnboarding(located) {
+    const ob = $('onboarding');
+    ob.classList.add('is-leaving');
+    setTimeout(() => { ob.hidden = true; }, 600);
+    startApp();
+    if (!located) {
+      setTimeout(() => toast('Activez la localisation à tout moment avec le bouton en haut à droite.'), 2600);
+    }
+  }
+
+  /* =====================================================================
+     10. ANIMATIONS DE CAMÉRA
+     ===================================================================== */
+
+  // Rotation lente et continue derrière l'onboarding
+  let idleRotation = false;
+  function startIdleRotation() {
+    if (reduceMotion) return;
+    idleRotation = true;
+    const step = () => {
+      if (!idleRotation) return;
+      map.easeTo({ bearing: map.getBearing() + 30, duration: 20000, easing: (t) => t });
+    };
+    map.on('moveend', () => { if (idleRotation) step(); });
+    whenMapReady(step);
+  }
+
+  /** Lance l'application : révèle l'interface, allume les néons, vol d'arrivée. */
+  function startApp() {
+    idleRotation = false;
+    document.body.classList.add('ui-ready');
+    const fly = () => {
+      ['road-primary-glow', 'road-motorway-glow'].forEach((id) => map.setPaintProperty(id, 'line-opacity', id === 'road-primary-glow' ? 0.28 : 0.32));
+      const target = Geo.position && isInBounds(Geo.position) ? Geo.position : CONFIG.center;
+      if (Geo.position && isInBounds(Geo.position)) setFollow(true);
+      map.flyTo({ center: target, ...CONFIG.heroView, duration: reduceMotion ? 0 : 3200, curve: 1.2 });
+    };
+    whenMapReady(fly);
+  }
+
+  /* =====================================================================
+     11. DÉMARRAGE
+     ===================================================================== */
+
+  map.on('load', () => {
+    // Halo de précision GPS (sous les libellés)
+    map.addSource('user-accuracy', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    map.addLayer({ id: 'user-accuracy-fill', type: 'fill', source: 'user-accuracy',
+      paint: { 'fill-color': '#3b82f6', 'fill-opacity': 0.12 } }, 'road-label');
+    map.addLayer({ id: 'user-accuracy-line', type: 'line', source: 'user-accuracy',
+      paint: { 'line-color': '#60a5fa', 'line-width': 1, 'line-opacity': 0.5 } }, 'road-label');
+    if (Geo.position) drawUserLocation();
+    // Attribution compacte repliée (consultable via le bouton ⓘ)
+    const attrib = document.querySelector('.maplibregl-ctrl-attrib');
+    if (attrib) attrib.classList.remove('maplibregl-compact-show');
+    mapReady = true;
+    readyQueue.splice(0).forEach((fn) => fn());
+  });
+
+  SHOPS.forEach(createShopMarker);
+  refreshStatuses();
+  setInterval(refreshStatuses, 60 * 1000);
+
+  const saved = store.read();
+  if (!saved.account) {
+    setLocateState('idle');
+    showOnboarding();
+  } else {
+    // Utilisateur déjà inscrit : pas de nouvelle demande intrusive au démarrage.
+    applyAccount(saved.account);
+    setLocateState(saved.geoConsent === 'accepted' ? 'searching' : 'idle');
+    startApp();
+    const resume = () => { if (saved.geoConsent === 'accepted') requestLocation({ fly: true }); };
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' })
+        .then((s) => {
+          if (s.state === 'granted') requestLocation({ fly: true });
+          else if (s.state === 'prompt') resume();
+          else setLocateState('denied');
+        })
+        .catch(resume);
+    } else {
+      resume();
+    }
+  }
+
+  /* =====================================================================
+     12. PWA : manifeste généré à la volée (fichier unique)
+     ===================================================================== */
+  (function injectManifest() {
+    const svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'>" +
+      "<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%2338e1ff'/><stop offset='1' stop-color='%23b98cff'/></linearGradient></defs>" +
+      "<rect width='512' height='512' rx='112' fill='%2305070d'/>" +
+      "<path d='M256 96c-66 0-120 54-120 120 0 90 120 200 120 200s120-110 120-200c0-66-54-120-120-120z' fill='url(%23g)'/>" +
+      "<circle cx='256' cy='216' r='44' fill='%2305070d'/></svg>";
+    const icon = 'data:image/svg+xml,' + svg;
+    const base = location.href.split('#')[0].split('?')[0];
+    const manifest = {
+      name: 'Roche Street Food', short_name: 'Street Food',
+      description: 'Le street-food de La Roche-sur-Yon sur une carte interactive.',
+      start_url: base, scope: base.replace(/[^/]*$/, ''), display: 'standalone', orientation: 'portrait',
+      background_color: '#05070d', theme_color: '#05070d', lang: 'fr',
+      icons: [{ src: icon, sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
+    };
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
+    document.head.appendChild(link);
+    const touchIcon = document.createElement('link');
+    touchIcon.rel = 'icon';
+    touchIcon.href = icon;
+    document.head.appendChild(touchIcon);
+  })();
+
+  // Point d'accès pour le débogage depuis la console
+  window.RocheStreetFood = { map, Geo, SHOPS, getStatus };
+
 })();
 </script>
 </body>
