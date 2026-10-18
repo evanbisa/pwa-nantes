@@ -29,6 +29,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/site"
           cp index.html "$RUNNER_TEMP/site/"
           touch "$RUNNER_TEMP/site/.nojekyll"
+          printf 'User-agent: *\nAllow: /\n' > "$RUNNER_TEMP/site/robots.txt"
           # Toute adresse inconnue du site renvoie vers l'accueil
           printf '%s\n' '<!DOCTYPE html><html lang="fr"><meta charset="utf-8"><title>Roche Street Food</title>' \
             '<meta http-equiv="refresh" content="0; url=/pwa-nantes/"><a href="/pwa-nantes/">Retour à la carte</a></html>' > "$RUNNER_TEMP/site/404.html"
