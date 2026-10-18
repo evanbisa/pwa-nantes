@@ -49,6 +49,41 @@ Dans `index.html`, section « 1. CONFIGURATION », objet `proPlan` :
 - Un restaurant publié n'est **visible que sur l'appareil où il a été créé**. Pour qu'il apparaisse chez tous les utilisateurs,
   il faut une base de données en ligne (Firebase, Supabase…) — c'est la prochaine étape indispensable.
 
+## Vérification de l'adresse e-mail (code à 6 chiffres)
+
+À la **création d'un compte** (client ou restaurateur) et à **chaque connexion**, un code à 6 chiffres est envoyé à l'adresse
+e-mail : le compte n'est créé, et la session ouverte, qu'une fois le bon code saisi.
+Code valable 10 minutes, 5 essais au maximum, renvoi possible après 60 secondes, 5 codes au plus par adresse et par quart d'heure.
+Les comptes créés avant cette fonction doivent vérifier leur adresse à leur prochaine ouverture.
+
+Tant que l'envoi n'est pas configuré, le site fonctionne en **mode démonstration** : le code est affiché à l'écran (clairement signalé).
+
+### Activer l'envoi des e-mails avec EmailJS (gratuit jusqu'à 200 e-mails/mois)
+
+1. Créez un compte sur https://www.emailjs.com/.
+2. **Email Services** › *Add New Service* › Gmail (ou votre messagerie) › connectez l'adresse d'expédition. Notez le **Service ID**.
+3. **Email Templates** › *Create New Template* :
+   - *To Email* : `{{to_email}}`
+   - *Subject* : `{{code}} est votre code Roche Street Food`
+   - *Content* :
+     ```
+     Bonjour {{to_name}},
+
+     Voici votre code pour {{purpose}} : {{code}}
+     Il est valable {{validity}}.
+
+     Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.
+     {{site_name}} — {{site_url}}
+     ```
+   Notez le **Template ID**.
+4. **Account** › *General* : copiez la **Public Key**.
+5. Dans `index.html`, section « 1. CONFIGURATION », renseignez `email: { … publicKey, serviceId, templateId }`, puis poussez :
+   le site est republié automatiquement.
+
+⚠️ Sans serveur, le code est généré et contrôlé dans le navigateur : la vérification prouve qu'un utilisateur honnête possède
+bien son adresse, mais une personne techniquement avertie pourrait la contourner. Pour une vérification inviolable, il faudra
+la confier à un serveur (par exemple Supabase Auth ou Firebase Authentication), en même temps que la base de données partagée.
+
 ## Activer la vraie carte Google Maps
 
 Sans clé, le site affiche une carte de secours au style Google Maps (données OpenStreetMap).

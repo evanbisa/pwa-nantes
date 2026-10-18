@@ -390,6 +390,14 @@
     .perks li { display: flex; gap: 12px; align-items: center; font-size: 14px; color: var(--muted); }
     .perks li span { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--accent-soft); font-size: 16px; }
 
+    /* ---------- Code de vérification e-mail ---------- */
+    .mail-badge { display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%; font-size: 30px; background: var(--accent-soft); }
+    .code-input { text-align: center; font-size: 26px !important; font-weight: 500; letter-spacing: .5em; padding-left: calc(16px + .5em) !important; font-variant-numeric: tabular-nums; }
+    .demo-code { display: grid; gap: 4px; margin-top: 14px; padding: 12px 14px; border-radius: 12px; font-size: 13.5px; color: var(--amber); background: rgba(176, 96, 0, .08); border: 1px solid rgba(176, 96, 0, .25); }
+    .demo-code b { font-size: 22px; letter-spacing: .3em; color: var(--text); }
+    .hint.center { text-align: center; }
+    .link-btn[disabled] { color: var(--muted); pointer-events: none; text-decoration: none; }
+
     /* ---------- Choix du type de compte ---------- */
     .onboarding[data-role="client"] [data-only="pro"], .onboarding[data-role="pro"] [data-only="client"] { display: none !important; }
     .onboarding[data-mode="create"] [data-mode="edit"], .onboarding[data-mode="edit"] [data-mode="create"] { display: none !important; }
@@ -839,6 +847,27 @@
         <p class="ob-switch">Pas encore de compte ? <button class="link-btn" type="button" data-goto="signup">Créer un compte</button></p>
       </form>
 
+      <!-- Vérification de l'adresse e-mail par code (création de compte et connexion) -->
+      <form id="ob-email-code" class="ob-step" novalidate data-step="verify-email" hidden aria-labelledby="ec-title">
+        <div class="mail-badge" aria-hidden="true">✉️</div>
+        <h2 id="ec-title">Vérifiez votre <em>adresse e-mail</em></h2>
+        <p class="lead" id="ec-lead">Un code à 6 chiffres a été envoyé à <b id="ec-email"></b>. Il est valable 10 minutes.</p>
+        <div class="demo-code" id="ec-demo" hidden role="status">
+          <strong>Mode démonstration</strong>
+          <span>L'envoi d'e-mails n'est pas encore configuré : aucun e-mail n'est envoyé. Votre code est :</span>
+          <b id="ec-demo-code"></b>
+        </div>
+        <label class="field" id="field-ec-code">
+          <span>Code de vérification</span>
+          <input id="ec-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="––––––" aria-describedby="ec-lead" />
+          <small class="field-error" id="err-ec-code" aria-live="polite"></small>
+        </label>
+        <p class="form-error" id="err-email-code" role="alert"></p>
+        <button class="btn btn-primary" type="submit" id="ec-submit">Valider le code</button>
+        <p class="ob-switch">Pas reçu ? <button class="link-btn" type="button" id="ec-resend">Renvoyer le code</button></p>
+        <p class="hint center">Pensez à regarder dans vos courriers indésirables. <button class="link-btn" type="button" id="ec-change">Modifier l'adresse</button></p>
+      </form>
+
       <!-- Autorisation de localisation (après la création d'un compte client) -->
       <section id="ob-location" class="ob-step" data-step="location" hidden aria-labelledby="ob-loc-title">
         <div class="radar" aria-hidden="true"></div>
@@ -1031,6 +1060,12 @@
      *   Dans Stripe, réglez la redirection après paiement sur : https://evanbisa.github.io/pwa-nantes/?paiement=ok
      */
     proPlan: { name: 'Abonnement Roche Street Food Pro', amount: null, period: 'mois', stripePaymentLink: '' },
+    /**
+     * Envoi des codes de vérification par e-mail via EmailJS (https://www.emailjs.com, gratuit jusqu'à 200 e-mails/mois).
+     * Les trois identifiants vides = mode démonstration : le code est affiché à l'écran, aucun e-mail n'est envoyé.
+     * Variables disponibles dans le modèle EmailJS : {{to_email}}, {{to_name}}, {{code}}, {{purpose}}, {{validity}}, {{site_name}}, {{site_url}}.
+     */
+    email: { endpoint: 'https://api.emailjs.com/api/v1.0/email/send', publicKey: '', serviceId: '', templateId: '' },
   };
   // Surcharge possible depuis la page (ex. : window.ROCHE_CONFIG = { googleMapsApiKey: '…' })
   Object.assign(CONFIG, window.ROCHE_CONFIG || {});
@@ -2392,7 +2427,7 @@
     input.addEventListener('input', () => {
       const field = input.closest('.field').id.replace('field-', '');
       if ($('err-' + field)) setFieldError(field, '');
-      ['err-signup', 'err-login', 'err-pro-verify', 'err-pro-listing'].forEach((id) => { $(id).textContent = ''; });
+      ['err-signup', 'err-login', 'err-pro-verify', 'err-pro-listing', 'err-email-code'].forEach((id) => { $(id).textContent = ''; });
     });
   });
   document.querySelectorAll('[data-toggle-pw]').forEach((btn) => {
@@ -2427,12 +2462,14 @@
   });
 
   const PRO_STEP_INDEX = { 'pro-verify': 2, 'pro-payment': 3, 'pro-listing': 4 };
-  const STEP_TITLES = { signup: 'auth-title', login: 'login-title', location: 'ob-loc-title', 'pro-verify': 'pv-title', 'pro-payment': 'pp-title', 'pro-listing': 'pl-title' };
+  const STEP_TITLES = { signup: 'auth-title', login: 'login-title', 'verify-email': 'ec-title', location: 'ob-loc-title', 'pro-verify': 'pv-title', 'pro-payment': 'pp-title', 'pro-listing': 'pl-title' };
 
   /** Progression : 2 points (client) ou frise en 4 étapes (restaurateur). */
   function updateProgress(step, mode) {
-    const proIndex = PRO_STEP_INDEX[step] || (step === 'signup' && authRole === 'pro' ? 1 : 0);
-    $('onboarding').dataset.flow = proIndex || (step === 'login' && authRole === 'pro') ? 'pro' : 'client';
+    // La saisie du code fait partie de l'étape « Compte » lors d'une création de compte
+    const signupLike = step === 'signup' || (step === 'verify-email' && emailCheck && emailCheck.purpose === 'signup');
+    const proIndex = PRO_STEP_INDEX[step] || (signupLike && authRole === 'pro' ? 1 : 0);
+    $('onboarding').dataset.flow = proIndex || ((step === 'login' || step === 'verify-email') && authRole === 'pro') ? 'pro' : 'client';
     $('pro-steps').hidden = !proIndex || mode === 'edit';
     $('pro-steps').querySelectorAll('li').forEach((li) => {
       const n = Number(li.dataset.pstep);
@@ -2440,8 +2477,8 @@
       li.classList.toggle('is-current', n === proIndex);
       if (n === proIndex) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
     });
-    $('ob-progress').hidden = proIndex > 0 || step === 'login';
-    $('ob-dot-1').classList.toggle('is-active', step === 'signup');
+    $('ob-progress').hidden = proIndex > 0 || !(signupLike || step === 'location');
+    $('ob-dot-1').classList.toggle('is-active', signupLike);
     $('ob-dot-2').classList.toggle('is-active', step === 'location');
   }
 
@@ -2460,7 +2497,7 @@
     if (step === 'pro-verify') enterVerifyStep();
     if (step === 'pro-payment') renderPlan();
     if (step === 'pro-listing') enterListingStep(mode);
-    const focus = { signup: 'su-name', login: $('li-email').value ? 'li-password' : 'li-email', location: 'ob-allow', 'pro-verify': 'pv-siret', 'pro-payment': 'pay-btn', 'pro-listing': 'pl-name' }[step];
+    const focus = { signup: 'su-name', login: $('li-email').value ? 'li-password' : 'li-email', 'verify-email': 'ec-code', location: 'ob-allow', 'pro-verify': 'pv-siret', 'pro-payment': 'pay-btn', 'pro-listing': 'pl-name' }[step];
     setTimeout(() => $(focus).focus({ preventScroll: true }), 350);
   }
 
@@ -2476,6 +2513,177 @@
     store.write({ rememberedEmail: remember ? account.email : null, lastEmail: account.email, lastRole: account.role || 'client' });
     applyAccount(account);
   }
+
+  /* ---------- Vérification de l'adresse e-mail par code à 6 chiffres ---------- */
+
+  const CODE_TTL = 10 * 60 * 1000;          // durée de validité d'un code
+  const CODE_MAX_ATTEMPTS = 5;              // essais autorisés par code
+  const RESEND_DELAY = 60 * 1000;           // délai avant de pouvoir redemander un code
+  const MAX_SENDS = 5;                      // codes au plus par adresse…
+  const SEND_WINDOW = 15 * 60 * 1000;       // … sur 15 minutes
+  const MAIL_LOG_KEY = 'roche-street-food:mail-log';
+  const CODE_PURPOSES = { signup: 'la création de votre compte', login: 'votre connexion', existing: 'la vérification de votre adresse e-mail' };
+
+  let emailCheck = null;                    // vérification en cours
+  let resendTimer = null;
+
+  const emailConfigured = () => !!(CONFIG.email && CONFIG.email.publicKey && CONFIG.email.serviceId && CONFIG.email.templateId);
+  async function sha256(text) { return toB64(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))); }
+  const randomCode = () => String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, '0');
+
+  /** Codes envoyés récemment à une adresse (limite anti-abus). */
+  function recentSends(email) {
+    let log = {};
+    try { log = JSON.parse(localStorage.getItem(MAIL_LOG_KEY)) || {}; } catch (e) { /* ignore */ }
+    const now = Date.now();
+    return (log[email] || []).filter((t) => now - t < SEND_WINDOW);
+  }
+  function logSend(email) {
+    let log = {};
+    try { log = JSON.parse(localStorage.getItem(MAIL_LOG_KEY)) || {}; } catch (e) { /* ignore */ }
+    log[email] = [...recentSends(email), Date.now()];
+    try { localStorage.setItem(MAIL_LOG_KEY, JSON.stringify(log)); } catch (e) { /* ignore */ }
+  }
+
+  /** Envoie le code par e-mail (EmailJS). Renvoie 'sent', ou 'demo' si l'envoi n'est pas configuré. */
+  async function deliverCode(email, name, code, purpose) {
+    if (!emailConfigured()) return 'demo';
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 15000);
+    try {
+      const res = await fetch(CONFIG.email.endpoint, {
+        method: 'POST', signal: ctrl.signal, headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_id: CONFIG.email.serviceId, template_id: CONFIG.email.templateId, user_id: CONFIG.email.publicKey,
+          template_params: {
+            to_email: email, to_name: name || '', code, purpose: CODE_PURPOSES[purpose], validity: '10 minutes',
+            site_name: 'Roche Street Food', site_url: location.origin + location.pathname,
+          },
+        }),
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return 'sent';
+    } finally { clearTimeout(timer); }
+  }
+
+  /**
+   * Lance une vérification : un code est envoyé à `email`, puis l'écran de saisie s'affiche.
+   * onSuccess est appelé une fois le bon code saisi ; back = étape à rouvrir via « Modifier l'adresse ».
+   */
+  function startEmailVerification({ email, name, purpose, onSuccess, back }) {
+    clearInterval(resendTimer);
+    emailCheck = { email, name, purpose, onSuccess, back, codeHash: null, salt: null, expiresAt: 0, attempts: 0, sends: 0 };
+    $('ec-email').textContent = email;
+    $('ec-code').value = '';
+    setFieldError('ec-code', '');
+    $('err-email-code').textContent = '';
+    $('ec-demo').hidden = true;
+    $('ec-demo-code').textContent = '';
+    showAuthStep('verify-email');
+    sendCode();
+  }
+
+  async function sendCode() {
+    const check = emailCheck;
+    if (!check) return;
+    const errBox = $('err-email-code');
+    const resend = $('ec-resend');
+    errBox.textContent = '';
+    const recent = recentSends(check.email);
+    if (recent.length >= MAX_SENDS) {
+      const waitMs = SEND_WINDOW - (Date.now() - recent[0]);
+      errBox.textContent = 'Trop de codes demandés pour cette adresse. Réessayez dans ' + Math.ceil(waitMs / 60000) + ' min.';
+      startResendCooldown(waitMs);
+      return;
+    }
+    const code = randomCode();
+    const salt = toB64(crypto.getRandomValues(new Uint8Array(16)));
+    resend.disabled = true;
+    resend.textContent = 'Envoi en cours…';
+    let mode;
+    try {
+      mode = await deliverCode(check.email, check.name, code, check.purpose);
+    } catch (e) {
+      if (check !== emailCheck) return;
+      errBox.textContent = 'L\'e-mail n\'a pas pu être envoyé. Vérifiez votre connexion internet puis cliquez sur « Renvoyer le code ».';
+      resend.disabled = false;
+      resend.textContent = 'Renvoyer le code';
+      return;
+    }
+    if (check !== emailCheck) return;   // l'utilisateur a quitté l'écran entre-temps
+    // Seule l'empreinte salée du code est conservée, jamais le code lui-même
+    Object.assign(check, { codeHash: await sha256(salt + code), salt, expiresAt: Date.now() + CODE_TTL, attempts: 0 });
+    logSend(check.email);
+    $('ec-demo').hidden = mode !== 'demo';
+    $('ec-demo-code').textContent = mode === 'demo' ? code : '';
+    if (check.sends++ > 0) toast(mode === 'demo' ? 'Nouveau code généré.' : 'Un nouveau code a été envoyé à ' + check.email + '.');
+    $('ec-code').value = '';
+    startResendCooldown(RESEND_DELAY);
+  }
+
+  function startResendCooldown(ms) {
+    const btn = $('ec-resend');
+    const end = Date.now() + ms;
+    clearInterval(resendTimer);
+    const tick = () => {
+      const left = Math.ceil((end - Date.now()) / 1000);
+      if (left <= 0) { clearInterval(resendTimer); btn.disabled = false; btn.textContent = 'Renvoyer le code'; return; }
+      btn.disabled = true;
+      btn.textContent = 'Renvoyer le code (' + (left >= 120 ? Math.ceil(left / 60) + ' min' : left + ' s') + ')';
+    };
+    tick();
+    resendTimer = setInterval(tick, 1000);
+  }
+
+  $('ec-resend').addEventListener('click', () => sendCode());
+  $('ec-change').addEventListener('click', () => {
+    const back = emailCheck && emailCheck.back;
+    clearInterval(resendTimer);
+    emailCheck = null;
+    if (back) { showAuthStep(back); return; }
+    // Compte déjà ouvert sur cet appareil : on se déconnecte pour changer d'adresse
+    session.set(null);
+    store.write({ rememberedEmail: null });
+    location.reload();
+  });
+  $('ec-code').addEventListener('input', () => {
+    const input = $('ec-code');
+    const digits = onlyDigits(input.value).slice(0, 6);
+    if (digits !== input.value) input.value = digits;
+    $('err-email-code').textContent = '';
+    if (digits.length === 6) $('ob-email-code').requestSubmit();   // validation automatique au 6e chiffre
+  });
+
+  $('ob-email-code').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const check = emailCheck;
+    if (!check) return;
+    const code = onlyDigits($('ec-code').value);
+    if (code.length !== 6) { setFieldError('ec-code', 'Saisissez les 6 chiffres reçus par e-mail.'); return; }
+    if (!check.codeHash) { setFieldError('ec-code', 'Aucun code valide : cliquez sur « Renvoyer le code ».'); return; }
+    if (Date.now() > check.expiresAt) {
+      check.codeHash = null;
+      setFieldError('ec-code', 'Ce code a expiré (validité : 10 minutes). Demandez-en un nouveau.');
+      return;
+    }
+    check.attempts++;
+    if (!sameHash(await sha256(check.salt + code), check.codeHash)) {
+      const left = CODE_MAX_ATTEMPTS - check.attempts;
+      if (left <= 0) {
+        check.codeHash = null;
+        setFieldError('ec-code', 'Trop d\'essais incorrects : ce code est désactivé. Demandez un nouveau code.');
+      } else {
+        setFieldError('ec-code', 'Code incorrect. Il vous reste ' + left + ' essai' + (left > 1 ? 's' : '') + '.');
+      }
+      $('ec-code').select();
+      return;
+    }
+    clearInterval(resendTimer);
+    emailCheck = null;
+    $('ec-code').value = '';
+    $('ec-demo').hidden = true;
+    check.onSuccess();
+  });
 
   /** Étape à reprendre pour un restaurateur dont l'inscription n'est pas terminée (null = terminée). */
   function proStepFor(account) {
@@ -2511,12 +2719,21 @@
     const { salt, hash } = await hashPassword(password);
     const account = { role, name, email, salt, hash, createdAt: new Date().toISOString() };
     if (role === 'pro') Object.assign(account, { lastName, phone: formatPhone(phone), pro: { status: 'verification' } });
-    store.write({ accounts: { ...accounts(), [email]: account } });
-    try { localStorage.removeItem(CONFIG.legacyStorageKey); } catch (e) { /* ignore */ }
-    startSession(account, $('su-remember').checked);
+    const remember = $('su-remember').checked;
     btn.disabled = false;
-    $('su-password').value = '';
-    showAuthStep(role === 'pro' ? 'pro-verify' : 'location');
+    // Le compte n'est créé qu'une fois l'adresse e-mail vérifiée par le code reçu
+    startEmailVerification({
+      email, name, purpose: 'signup', back: 'signup',
+      onSuccess: () => {
+        if (accounts()[email]) { showAuthStep('signup'); $('err-signup').textContent = 'Un compte existe déjà avec cet e-mail.'; return; }
+        account.emailVerifiedAt = new Date().toISOString();
+        store.write({ accounts: { ...accounts(), [email]: account } });
+        try { localStorage.removeItem(CONFIG.legacyStorageKey); } catch (e) { /* ignore */ }
+        startSession(account, remember);
+        $('su-password').value = '';
+        showAuthStep(role === 'pro' ? 'pro-verify' : 'location');
+      },
+    });
   });
 
   $('form-login').addEventListener('submit', async (ev) => {
@@ -2548,12 +2765,27 @@
       $('switch-role').addEventListener('click', () => { setAuthRole(role); $('form-login').requestSubmit(); });
       return;
     }
-    $('li-password').value = '';
-    startSession(account, $('li-remember').checked);
-    const step = proStepFor(account);
-    if (step) showAuthStep(step);       // inscription restaurateur à terminer
-    else finishAuth({ fresh: false });
+    const remember = $('li-remember').checked;
+    // Second facteur : un code est envoyé à l'adresse du compte
+    startEmailVerification({
+      email, name: account.name, purpose: 'login', back: 'login',
+      onSuccess: () => {
+        const now = new Date().toISOString();
+        const verified = updateAccount(email, { emailVerifiedAt: account.emailVerifiedAt || now, lastLoginAt: now });
+        $('li-password').value = '';
+        startSession(verified, remember);
+        routeAfterLogin(verified);
+      },
+    });
   });
+
+  /** Après connexion : inscription restaurateur à reprendre, sinon la carte. */
+  function routeAfterLogin(account, { boot = false } = {}) {
+    const step = proStepFor(account);
+    if (step) showAuthStep(step);
+    else if (boot) { startApp(); resumeLocation(); }
+    else finishAuth({ fresh: false });
+  }
 
   /** Supprime un compte et tout ce qui lui appartient (restaurant, photos, justificatifs). */
   async function deleteAccountData(email) {
@@ -3168,7 +3400,7 @@
     if (!account) return;
     $('profile-avatar').textContent = initial(account.name);
     $('profile-name').textContent = account.role === 'pro' && account.lastName ? account.name + ' ' + account.lastName : account.name;
-    $('profile-email').textContent = account.email + (account.role === 'pro' ? ' · Restaurateur' : '');
+    $('profile-email').textContent = account.email + (account.emailVerifiedAt ? ' ✓' : '') + (account.role === 'pro' ? ' · Restaurateur' : '');
     $('profile-since').textContent = new Date(account.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
     updateProfileGeo();
     renderProDashboard(account);
@@ -3243,13 +3475,16 @@
     setAuthRole(user.role || 'client');
     // Retour de la page de paiement Stripe
     // (en production, la confirmation doit venir d'un serveur via un webhook Stripe)
-    if (params.get('paiement') === 'ok' && !isDemoPayment() && user.pro && user.pro.status === 'payment') {
+    if (!user.emailVerifiedAt) {
+      // Compte créé avant la vérification par code : on vérifie l'adresse avant d'aller plus loin
+      startEmailVerification({
+        email: user.email, name: user.name, purpose: 'existing', back: null,
+        onSuccess: () => routeAfterLogin(updateAccount(user.email, { emailVerifiedAt: new Date().toISOString() }), { boot: true }),
+      });
+    } else if (params.get('paiement') === 'ok' && !isDemoPayment() && user.pro && user.pro.status === 'payment') {
       markPaid(user.email, { mode: 'stripe', reference: params.get('session_id') || '' });
-    } else if (proStepFor(user)) {
-      showAuthStep(proStepFor(user));
     } else {
-      startApp();
-      resumeLocation();
+      routeAfterLogin(user, { boot: true });
     }
   } else if (Object.keys(accounts()).length > 0) {
     setAuthRole(store.read().lastRole || 'client');
