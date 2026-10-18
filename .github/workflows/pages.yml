@@ -29,6 +29,9 @@ jobs:
           mkdir -p "$RUNNER_TEMP/site"
           cp index.html "$RUNNER_TEMP/site/"
           touch "$RUNNER_TEMP/site/.nojekyll"
+          # Toute adresse inconnue du site renvoie vers l'accueil
+          printf '%s\n' '<!DOCTYPE html><html lang="fr"><meta charset="utf-8"><title>Roche Street Food</title>' \
+            '<meta http-equiv="refresh" content="0; url=/pwa-nantes/"><a href="/pwa-nantes/">Retour à la carte</a></html>' > "$RUNNER_TEMP/site/404.html"
           cd "$RUNNER_TEMP/site"
           git init -q -b gh-pages
           git add -A
@@ -41,4 +44,6 @@ jobs:
       - name: Demander la reconstruction du site
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" --silent
+        run: |
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" --silent \
+            || echo "::warning::GitHub Pages n'est pas activé pour ce dépôt (dépôt privé sur un compte gratuit ?) : le site n'est pas publié."
