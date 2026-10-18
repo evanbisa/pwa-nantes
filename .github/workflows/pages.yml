@@ -5,11 +5,12 @@ name: Publier sur GitHub Pages
 on:
   push:
     branches: [claude/street-food-map-pwa-lr1xu2]
-    paths: [index.html]
+    paths: [index.html, .github/workflows/pages.yml]
   workflow_dispatch:
 
 permissions:
   contents: write
+  pages: write
 
 concurrency:
   group: pages
@@ -34,3 +35,10 @@ jobs:
           git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
             commit -q -m "Publication de ${GITHUB_SHA::7}"
           git push -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+
+      # Le push effectué avec le jeton du workflow ne déclenche pas toujours la reconstruction du site :
+      # on la demande explicitement à GitHub Pages.
+      - name: Demander la reconstruction du site
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" --silent
