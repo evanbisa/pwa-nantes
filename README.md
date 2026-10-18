@@ -25,7 +25,9 @@ Tout le site tient dans un seul fichier : `index.html`.
      obligatoires ; récépissé de déclaration DDPP et licence facultatifs ;
    - attestation sur l'honneur.
 3. **Paiement de l'abonnement** (voir ci-dessous).
-4. **Fiche restaurant** : nom, catégorie, description, 1 à 6 photos, adresse (suggestions de la Base Adresse Nationale via la
+4. **Fiche restaurant** : nom, catégorie, description, 1 à 6 photos au **format unique 16:9** (une photo d'un autre format
+   s'ouvre dans un outil de recadrage : glisser pour déplacer, curseur, molette ou pincement pour zoomer ; export JPEG
+   jusqu'à 1600 × 900), adresse (suggestions de la Base Adresse Nationale via la
    [Géoplateforme de l'IGN](https://data.geopf.fr/geocodage/search)), horaires, offre du moment, téléphone → publication sur la carte.
 
 Le restaurateur retrouve ensuite son espace dans le profil (statut, SIRET, abonnement, « Modifier ma fiche »).
@@ -51,10 +53,12 @@ Dans `index.html`, section « 1. CONFIGURATION », objet `proPlan` :
 
 ## Vérification de l'adresse e-mail (code à 6 chiffres)
 
-À la **création d'un compte** (client ou restaurateur) et à **chaque connexion**, un code à 6 chiffres est envoyé à l'adresse
-e-mail : le compte n'est créé, et la session ouverte, qu'une fois le bon code saisi.
+**Réservée aux restaurateurs** : à la création d'un compte restaurateur et à chaque connexion d'un restaurateur, un code à
+6 chiffres est envoyé à l'adresse e-mail ; le compte n'est créé, et la session ouverte, qu'une fois le bon code saisi.
+Les **clients ne reçoivent aucun code** (inscription et connexion immédiates) : le quota gratuit d'EmailJS reste donc
+largement suffisant, quel que soit le nombre de clients.
 Code valable 10 minutes, 5 essais au maximum, renvoi possible après 60 secondes, 5 codes au plus par adresse et par quart d'heure.
-Les comptes créés avant cette fonction doivent vérifier leur adresse à leur prochaine ouverture.
+Les comptes restaurateurs créés avant cette fonction doivent vérifier leur adresse à leur prochaine ouverture.
 
 Tant que l'envoi n'est pas configuré, le site fonctionne en **mode démonstration** : le code est affiché à l'écran (clairement signalé).
 

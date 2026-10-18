@@ -481,7 +481,7 @@
     .cat-picker button[aria-checked="true"] { background: #e8f0fe; color: #1967d2; border-color: var(--accent-line); }
     :root[data-theme="dark"] .cat-picker button[aria-checked="true"] { background: var(--accent-soft); color: var(--accent); }
     .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .photo-item, .photo-add { position: relative; aspect-ratio: 4 / 3; border-radius: 10px; overflow: hidden; }
+    .photo-item, .photo-add { position: relative; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; }
     .photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .photo-item .photo-del { position: absolute; top: 4px; right: 4px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0, 0, 0, .6); color: #fff; font-size: 16px; line-height: 1; }
     .photo-item .photo-main { position: absolute; left: 4px; bottom: 4px; padding: 1px 6px; border-radius: 4px; font-size: 11px; color: #fff; background: rgba(0, 0, 0, .6); }
@@ -489,6 +489,31 @@
     .photo-add span { font-size: 22px; line-height: 1; }
     .photo-add:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
     .photo-add.is-busy { opacity: .6; pointer-events: none; }
+
+    /* Recadrage des photos (format unique 16:9) */
+    .cropper { position: fixed; inset: 0; z-index: 110; display: flex; align-items: center; justify-content: center; padding: calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 16px); background: rgba(0, 0, 0, .72); overflow-y: auto; overscroll-behavior: contain; }
+    .cropper[hidden] { display: none; }
+    .crop-panel { width: 100%; max-width: 640px; margin: auto; padding: 20px; border-radius: 20px; background: var(--panel-solid); animation: rise .35s var(--ease-out) both; }
+    .crop-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+    .crop-head h2 { margin: 0; font-size: 18px; font-weight: 500; }
+    .crop-head span { flex: none; font-size: 13px; color: var(--muted); }
+    .crop-frame { position: relative; margin-top: 14px; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: #000; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+    .crop-frame.is-dragging { cursor: grabbing; }
+    .crop-frame:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .crop-frame canvas { display: block; width: 100%; height: 100%; }
+    /* grille des tiers, pour aider à composer */
+    .crop-frame::after { content: ""; position: absolute; inset: 0; pointer-events: none; border: 1px solid rgba(255, 255, 255, .5); border-radius: 10px;
+      background:
+        linear-gradient(to right, transparent calc(33.333% - .5px), rgba(255, 255, 255, .35) calc(33.333% - .5px), rgba(255, 255, 255, .35) calc(33.333% + .5px), transparent calc(33.333% + .5px), transparent calc(66.666% - .5px), rgba(255, 255, 255, .35) calc(66.666% - .5px), rgba(255, 255, 255, .35) calc(66.666% + .5px), transparent calc(66.666% + .5px)),
+        linear-gradient(to bottom, transparent calc(33.333% - .5px), rgba(255, 255, 255, .35) calc(33.333% - .5px), rgba(255, 255, 255, .35) calc(33.333% + .5px), transparent calc(33.333% + .5px), transparent calc(66.666% - .5px), rgba(255, 255, 255, .35) calc(66.666% - .5px), rgba(255, 255, 255, .35) calc(66.666% + .5px), transparent calc(66.666% + .5px)); }
+    .crop-zoom { display: flex; align-items: center; gap: 12px; margin-top: 14px; color: var(--muted); font-size: 20px; line-height: 1; }
+    .crop-zoom input { flex: 1; accent-color: var(--accent); }
+    .crop-zoom button { width: 36px; height: 36px; border-radius: 50%; color: var(--text); font-size: 20px; }
+    .crop-zoom button:hover { background: var(--hover); }
+    .crop-actions { display: flex; gap: 10px; }
+    .crop-actions .btn { margin-top: 16px; }
+    .crop-actions .btn-ghost { order: -1; }
+    @media (max-width: 480px) { .crop-panel { padding: 16px; } .crop-actions { flex-direction: column; } .crop-actions .btn-ghost { order: 0; margin-top: 0; } }
     .addr-wrap { position: relative; }
     .addr-wrap input { width: 100%; height: 50px; padding: 0 16px; border-radius: 8px; font: inherit; font-size: 16px; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); outline: none; }
     .addr-wrap input:focus { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
@@ -515,7 +540,7 @@
     /* Fiche commerce : galerie, description, badge */
     .gallery { display: flex; gap: 8px; margin: 14px -20px 0; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
     .gallery::-webkit-scrollbar { display: none; }
-    .gallery img { flex: none; width: 78%; max-width: 320px; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; scroll-snap-align: start; background: var(--hover); }
+    .gallery img { flex: none; width: 78%; max-width: 320px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; scroll-snap-align: start; background: var(--hover); }
     .gallery img:only-child { width: 100%; max-width: none; }
     .shop-desc { margin: 10px 0 0; font-size: 14.5px; color: var(--text); white-space: pre-line; }
     .verified { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; color: var(--green); background: var(--green-soft); }
@@ -952,7 +977,7 @@
         </label>
 
         <div class="field" id="field-pl-photos">
-          <span>Photos (1 à 6 · la première est la photo principale)</span>
+          <span>Photos (1 à 6 · format paysage 16:9 · la première est la photo principale)</span>
           <div class="photo-grid" id="pl-photos">
             <label class="photo-add" id="pl-photo-add">
               <input type="file" id="pl-photo-input" accept="image/jpeg,image/png,image/webp" multiple hidden />
@@ -998,6 +1023,26 @@
         <button class="btn btn-ghost" type="button" id="pl-cancel" data-mode="edit">Annuler</button>
         <button class="link-btn later-btn" type="button" data-pro-later data-mode="create">Terminer plus tard</button>
       </form>
+    </div>
+  </div>
+
+  <!-- ===================== RECADRAGE DES PHOTOS ===================== -->
+  <div id="cropper" class="cropper" role="dialog" aria-modal="true" aria-labelledby="crop-title" aria-describedby="crop-hint" hidden>
+    <div class="crop-panel">
+      <div class="crop-head"><h2 id="crop-title">Recadrer la photo</h2><span id="crop-count"></span></div>
+      <p class="hint" id="crop-hint">Toutes les photos sont au format 16:9. Faites glisser l'image pour choisir le cadrage, zoomez avec le curseur, la molette ou en pinçant.</p>
+      <div class="crop-frame" id="crop-frame" tabindex="0" role="img" aria-label="Aperçu du cadrage. Flèches : déplacer, + et − : zoomer.">
+        <canvas id="crop-canvas"></canvas>
+      </div>
+      <div class="crop-zoom">
+        <button type="button" id="crop-zoom-out" aria-label="Dézoomer">−</button>
+        <input type="range" id="crop-zoom" min="1" max="4" step="0.01" value="1" aria-label="Zoom" />
+        <button type="button" id="crop-zoom-in" aria-label="Zoomer">+</button>
+      </div>
+      <div class="crop-actions">
+        <button class="btn btn-primary" type="button" id="crop-ok">Valider le cadrage</button>
+        <button class="btn btn-ghost" type="button" id="crop-skip">Ignorer cette photo</button>
+      </div>
     </div>
   </div>
 
@@ -1062,6 +1107,8 @@
     proPlan: { name: 'Abonnement Roche Street Food Pro', amount: null, period: 'mois', stripePaymentLink: '' },
     /**
      * Envoi des codes de vérification par e-mail via EmailJS (https://www.emailjs.com, gratuit jusqu'à 200 e-mails/mois).
+     * Seuls les restaurateurs reçoivent un code (inscription et connexion) : les clients n'en reçoivent jamais,
+     * le quota gratuit suffit donc quel que soit le nombre d'utilisateurs.
      * Les trois identifiants vides = mode démonstration : le code est affiché à l'écran, aucun e-mail n'est envoyé.
      * Variables disponibles dans le modèle EmailJS : {{to_email}}, {{to_name}}, {{code}}, {{purpose}}, {{validity}}, {{site_name}}, {{site_url}}.
      */
@@ -1223,16 +1270,39 @@
     };
   })();
 
-  /** Réduit une photo (1600 px maximum, JPEG) pour limiter l'espace occupé. */
-  async function resizePhoto(file, max = 1600) {
-    let bitmap;
-    try { bitmap = await createImageBitmap(file); } catch (e) { throw new Error('format'); }
-    const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+  /* ---------- Photos : format unique 16:9 ---------- */
+
+  const PHOTO_RATIO = 16 / 9;
+  const PHOTO_MIN_W = 640;          // largeur minimale exportée (les petites images sont agrandies)
+  const PHOTO_MAX_W = 1600;         // largeur maximale exportée (1600 × 900)
+  const PHOTO_RATIO_TOLERANCE = 0.01;
+
+  async function decodeImage(file) {
+    try { return await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+    catch (e) {
+      try { return await createImageBitmap(file); } catch (e2) { throw new Error('format'); }
+    }
+  }
+
+  /** Plus grand cadre 16:9 contenu dans l'image, centré. */
+  function fullCrop(w, h) {
+    const cw = w / h > PHOTO_RATIO ? h * PHOTO_RATIO : w;
+    const ch = cw / PHOTO_RATIO;
+    return { x: (w - cw) / 2, y: (h - ch) / 2, w: cw, h: ch };
+  }
+
+  const isPhotoRatio = (w, h) => Math.abs(w / h / PHOTO_RATIO - 1) <= PHOTO_RATIO_TOLERANCE;
+
+  /** Exporte la zone `crop` (coordonnées de l'image source) en JPEG 16:9. */
+  function exportCrop(bitmap, crop) {
+    const outW = Math.round(Math.min(PHOTO_MAX_W, Math.max(PHOTO_MIN_W, crop.w)));
+    const outH = Math.round(outW / PHOTO_RATIO);
     const canvas = document.createElement('canvas');
-    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    if (bitmap.close) bitmap.close();
+    canvas.width = outW;
+    canvas.height = outH;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bitmap, crop.x, crop.y, crop.w, crop.h, 0, 0, outW, outH);
     return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('format'))), 'image/jpeg', 0.85));
   }
 
@@ -2721,18 +2791,19 @@
     if (role === 'pro') Object.assign(account, { lastName, phone: formatPhone(phone), pro: { status: 'verification' } });
     const remember = $('su-remember').checked;
     btn.disabled = false;
-    // Le compte n'est créé qu'une fois l'adresse e-mail vérifiée par le code reçu
+    const createAccount = () => {
+      if (accounts()[email]) { showAuthStep('signup'); $('err-signup').textContent = 'Un compte existe déjà avec cet e-mail.'; return; }
+      store.write({ accounts: { ...accounts(), [email]: account } });
+      try { localStorage.removeItem(CONFIG.legacyStorageKey); } catch (e) { /* ignore */ }
+      startSession(account, remember);
+      $('su-password').value = '';
+      showAuthStep(role === 'pro' ? 'pro-verify' : 'location');
+    };
+    if (role !== 'pro') { createAccount(); return; }   // clients : pas de code (aucun e-mail envoyé)
+    // Restaurateurs : le compte n'est créé qu'une fois l'adresse e-mail vérifiée par le code reçu
     startEmailVerification({
       email, name, purpose: 'signup', back: 'signup',
-      onSuccess: () => {
-        if (accounts()[email]) { showAuthStep('signup'); $('err-signup').textContent = 'Un compte existe déjà avec cet e-mail.'; return; }
-        account.emailVerifiedAt = new Date().toISOString();
-        store.write({ accounts: { ...accounts(), [email]: account } });
-        try { localStorage.removeItem(CONFIG.legacyStorageKey); } catch (e) { /* ignore */ }
-        startSession(account, remember);
-        $('su-password').value = '';
-        showAuthStep(role === 'pro' ? 'pro-verify' : 'location');
-      },
+      onSuccess: () => { account.emailVerifiedAt = new Date().toISOString(); createAccount(); },
     });
   });
 
@@ -2766,16 +2837,17 @@
       return;
     }
     const remember = $('li-remember').checked;
-    // Second facteur : un code est envoyé à l'adresse du compte
+    const openSession = (patch = {}) => {
+      const updated = updateAccount(email, { lastLoginAt: new Date().toISOString(), ...patch });
+      $('li-password').value = '';
+      startSession(updated, remember);
+      routeAfterLogin(updated);
+    };
+    if (role !== 'pro') { openSession(); return; }       // clients : connexion directe
+    // Restaurateurs : second facteur, un code est envoyé à l'adresse du compte
     startEmailVerification({
       email, name: account.name, purpose: 'login', back: 'login',
-      onSuccess: () => {
-        const now = new Date().toISOString();
-        const verified = updateAccount(email, { emailVerifiedAt: account.emailVerifiedAt || now, lastLoginAt: now });
-        $('li-password').value = '';
-        startSession(verified, remember);
-        routeAfterLogin(verified);
-      },
+      onSuccess: () => openSession({ emailVerifiedAt: account.emailVerifiedAt || new Date().toISOString() }),
     });
   });
 
@@ -3172,28 +3244,199 @@
     add.hidden = ids.length >= MAX_PHOTOS;
   }
 
-  $('pl-photo-input').addEventListener('change', async (ev) => {
+  // Les ajouts sont traités l'un après l'autre : un seul recadrage ouvert à la fois.
+  let photoQueue = Promise.resolve();
+  $('pl-photo-input').addEventListener('change', (ev) => {
     const files = [...ev.target.files];
     ev.target.value = '';
+    photoQueue = photoQueue.then(() => addPhotos(files)).catch(() => {});
+  });
+
+  async function addPhotos(files) {
     setFieldError('pl-photos', '');
     const room = MAX_PHOTOS - proDraft.photos.length;
     if (files.length > room) setFieldError('pl-photos', 'Maximum ' + MAX_PHOTOS + ' photos : seules les ' + room + ' premières ont été ajoutées.');
     $('pl-photo-add').classList.add('is-busy');
-    for (const file of files.slice(0, room)) {
+    const batch = files.slice(0, room);
+    for (const [i, file] of batch.entries()) {
       if (!/^image\//.test(file.type)) { setFieldError('pl-photos', '« ' + file.name + ' » n\'est pas une image.'); continue; }
+      let bitmap;
       try {
-        const blob = await resizePhoto(file);
+        bitmap = await decodeImage(file);
+        // Déjà au format 16:9 : pas besoin de recadrer. Sinon, le restaurateur choisit son cadrage.
+        const crop = isPhotoRatio(bitmap.width, bitmap.height)
+          ? fullCrop(bitmap.width, bitmap.height)
+          : await cropPhoto(bitmap, { index: i + 1, total: batch.length });
+        if (!crop) continue;               // photo ignorée
+        const blob = await exportCrop(bitmap, crop);
         const id = 'photo-' + uid();
         await fileStore.put(id, blob);
         proDraft.photos.push(id);
         proDraft.addedPhotos.push(id);
+        renderPhotos();
       } catch (e) {
         setFieldError('pl-photos', '« ' + file.name + ' » : format d\'image non pris en charge (utilisez JPG ou PNG).');
+      } finally {
+        if (bitmap && bitmap.close) bitmap.close();
       }
     }
     $('pl-photo-add').classList.remove('is-busy');
     renderPhotos();
-  });
+  }
+
+  /* ---------- Recadreur 16:9 ---------- */
+
+  /**
+   * Ouvre le recadreur sur `bitmap`. Résout avec la zone choisie { x, y, w, h } (pixels de l'image),
+   * ou null si le restaurateur ignore la photo.
+   */
+  const cropPhoto = (() => {
+    const root = $('cropper');
+    const frame = $('crop-frame');
+    const canvas = $('crop-canvas');
+    const slider = $('crop-zoom');
+    const MAX_ZOOM = 4;
+    let st = null;                         // { bitmap, base, zoom, cx, cy, resolve, returnFocus }
+    const pointers = new Map();
+    let pinch = null, drag = null;
+
+    const cropRect = () => {
+      const w = st.base.w / st.zoom, h = st.base.h / st.zoom;
+      return { x: st.cx - w / 2, y: st.cy - h / 2, w, h };
+    };
+    /** Garde le cadre à l'intérieur de l'image. */
+    function clamp() {
+      st.zoom = Math.min(MAX_ZOOM, Math.max(1, st.zoom));
+      const w = st.base.w / st.zoom, h = st.base.h / st.zoom;
+      st.cx = Math.min(st.bitmap.width - w / 2, Math.max(w / 2, st.cx));
+      st.cy = Math.min(st.bitmap.height - h / 2, Math.max(h / 2, st.cy));
+    }
+    function draw() {
+      if (!st) return;
+      clamp();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const cw = Math.max(1, Math.round(frame.clientWidth * dpr)), ch = Math.max(1, Math.round(frame.clientHeight * dpr));
+      if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
+      const r = cropRect();
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingQuality = 'high';
+      ctx.clearRect(0, 0, cw, ch);
+      ctx.drawImage(st.bitmap, r.x, r.y, r.w, r.h, 0, 0, cw, ch);
+      slider.value = String(st.zoom);
+      slider.setAttribute('aria-valuetext', Math.round(st.zoom * 100) + ' %');
+    }
+    /** Zoome en gardant fixe le point (fx, fy) du cadre (fractions 0–1). */
+    function zoomTo(z, fx = 0.5, fy = 0.5) {
+      const r = cropRect();
+      const px = r.x + fx * r.w, py = r.y + fy * r.h;
+      st.zoom = Math.min(MAX_ZOOM, Math.max(1, z));
+      const w = st.base.w / st.zoom, h = st.base.h / st.zoom;
+      st.cx = px - fx * w + w / 2;
+      st.cy = py - fy * h + h / 2;
+      draw();
+    }
+    /** Déplace l'image de (dx, dy) pixels écran. */
+    function panBy(dx, dy) {
+      const k = cropRect().w / frame.clientWidth;
+      st.cx -= dx * k;
+      st.cy -= dy * k;
+      draw();
+    }
+    const framePoint = (ev) => {
+      const b = frame.getBoundingClientRect();
+      return { fx: (ev.clientX - b.left) / b.width, fy: (ev.clientY - b.top) / b.height };
+    };
+
+    frame.addEventListener('pointerdown', (ev) => {
+      if (!st) return;
+      try { frame.setPointerCapture(ev.pointerId); } catch (e) { /* pointeur déjà relâché */ }
+      pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+      if (pointers.size === 2) {
+        const [a, b] = [...pointers.values()];
+        pinch = { dist: Math.hypot(a.x - b.x, a.y - b.y) || 1, zoom: st.zoom };
+        drag = null;
+      } else if (pointers.size === 1) {
+        drag = { x: ev.clientX, y: ev.clientY };
+        frame.classList.add('is-dragging');
+      }
+    });
+    frame.addEventListener('pointermove', (ev) => {
+      if (!st || !pointers.has(ev.pointerId)) return;
+      pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+      if (pinch && pointers.size >= 2) {
+        const [a, b] = [...pointers.values()];
+        const bx = frame.getBoundingClientRect();
+        const mid = { fx: ((a.x + b.x) / 2 - bx.left) / bx.width, fy: ((a.y + b.y) / 2 - bx.top) / bx.height };
+        zoomTo(pinch.zoom * Math.hypot(a.x - b.x, a.y - b.y) / pinch.dist, mid.fx, mid.fy);
+      } else if (drag) {
+        panBy(ev.clientX - drag.x, ev.clientY - drag.y);
+        drag = { x: ev.clientX, y: ev.clientY };
+      }
+    });
+    const release = (ev) => {
+      pointers.delete(ev.pointerId);
+      if (pointers.size < 2) pinch = null;
+      if (pointers.size === 1) { const [p] = [...pointers.values()]; drag = { x: p.x, y: p.y }; }
+      if (pointers.size === 0) { drag = null; frame.classList.remove('is-dragging'); }
+    };
+    frame.addEventListener('pointerup', release);
+    frame.addEventListener('pointercancel', release);
+    frame.addEventListener('wheel', (ev) => {
+      if (!st) return;
+      ev.preventDefault();
+      const { fx, fy } = framePoint(ev);
+      zoomTo(st.zoom * Math.exp(-ev.deltaY * 0.002), fx, fy);
+    }, { passive: false });
+
+    slider.addEventListener('input', () => st && zoomTo(Number(slider.value)));
+    $('crop-zoom-in').addEventListener('click', () => st && zoomTo(st.zoom * 1.25));
+    $('crop-zoom-out').addEventListener('click', () => st && zoomTo(st.zoom / 1.25));
+
+    root.addEventListener('keydown', (ev) => {
+      if (!st) return;
+      if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); close(null); return; }
+      if (ev.key === 'Tab') {              // le focus reste dans la fenêtre de recadrage
+        const items = [...root.querySelectorAll('button, input, [tabindex="0"]')].filter((el) => !el.disabled);
+        const first = items[0], last = items[items.length - 1];
+        if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+        else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+        return;
+      }
+      if (ev.target !== frame) return;
+      const step = ev.shiftKey ? 40 : 10;
+      const moves = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] };
+      if (moves[ev.key]) { ev.preventDefault(); panBy(...moves[ev.key]); }
+      else if (ev.key === '+' || ev.key === '=') { ev.preventDefault(); zoomTo(st.zoom * 1.25); }
+      else if (ev.key === '-' || ev.key === '_') { ev.preventDefault(); zoomTo(st.zoom / 1.25); }
+    });
+
+    $('crop-ok').addEventListener('click', () => st && close(cropRect()));
+    $('crop-skip').addEventListener('click', () => st && close(null));
+    window.addEventListener('resize', () => st && draw());
+
+    function close(result) {
+      const { resolve, returnFocus } = st;
+      if (result) {                        // arrondi au pixel, sans sortir de l'image
+        const w = Math.min(st.bitmap.width, Math.round(result.w)), h = Math.min(st.bitmap.height, Math.round(w / PHOTO_RATIO));
+        result = { x: Math.min(st.bitmap.width - w, Math.max(0, Math.round(result.x))), y: Math.min(st.bitmap.height - h, Math.max(0, Math.round(result.y))), w, h };
+      }
+      st = null;
+      pointers.clear(); pinch = drag = null;
+      frame.classList.remove('is-dragging');
+      root.hidden = true;
+      if (returnFocus && returnFocus.focus) returnFocus.focus({ preventScroll: true });
+      resolve(result);
+    }
+
+    return (bitmap, { index = 1, total = 1 } = {}) => new Promise((resolve) => {
+      const base = fullCrop(bitmap.width, bitmap.height);
+      st = { bitmap, base, zoom: 1, cx: bitmap.width / 2, cy: bitmap.height / 2, resolve, returnFocus: document.activeElement };
+      $('crop-count').textContent = total > 1 ? 'Photo ' + index + ' sur ' + total : '';
+      root.hidden = false;
+      draw();
+      frame.focus({ preventScroll: true });
+    });
+  })();
 
   function removePhoto(id) {
     proDraft.photos = proDraft.photos.filter((p) => p !== id);
@@ -3475,8 +3718,8 @@
     setAuthRole(user.role || 'client');
     // Retour de la page de paiement Stripe
     // (en production, la confirmation doit venir d'un serveur via un webhook Stripe)
-    if (!user.emailVerifiedAt) {
-      // Compte créé avant la vérification par code : on vérifie l'adresse avant d'aller plus loin
+    if (user.role === 'pro' && !user.emailVerifiedAt) {
+      // Restaurateur inscrit avant la vérification par code : on vérifie l'adresse avant d'aller plus loin
       startEmailVerification({
         email: user.email, name: user.name, purpose: 'existing', back: null,
         onSuccess: () => routeAfterLogin(updateAccount(user.email, { emailVerifiedAt: new Date().toISOString() }), { boot: true }),
