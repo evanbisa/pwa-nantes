@@ -233,6 +233,7 @@
     .si-status { font-size: 13px; font-weight: 500; }
     .si-status.is-open { color: var(--green); }
     .si-status.is-closed { color: var(--danger); }
+    .si-top .verified { margin-left: 6px; padding: 0 5px; font-size: 11px; vertical-align: 1px; }
     .si-promo { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sb-empty { margin: 24px 20px; text-align: center; color: var(--muted); font-size: 14px; }
 
@@ -291,7 +292,7 @@
     .sheet h2, .sheet h3 { margin: 0; font-weight: 400; }
     .sheet h2 { font-size: 22px; line-height: 1.25; }
     .sheet h3 { font-size: 20px; }
-    .eyebrow { margin: 2px 0 0; font-size: 14px; color: var(--muted); }
+    .eyebrow { margin: 2px 0 0; font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
     .icon-btn { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--hover); color: var(--muted); font-size: 20px; line-height: 1; }
     .icon-btn:hover { color: var(--text); }
     .status { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 14px; font-weight: 500; }
@@ -338,13 +339,15 @@
        8. ÉCRAN DE COMPTE (création, connexion) + autorisation de localisation
        ===================================================================== */
     .onboarding {
-      position: fixed; inset: 0; z-index: 100; display: flex; align-items: flex-end; justify-content: center;
-      padding: 16px 16px calc(var(--safe-bottom) + 16px); overflow-y: auto;
+      /* colonne défilante : le panneau reste entièrement accessible même s'il dépasse la hauteur de l'écran */
+      position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column;
+      padding: calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 16px); overflow-y: auto; overscroll-behavior: contain;
       background: linear-gradient(to bottom, var(--scrim-soft) 0%, var(--scrim-soft) 25%, var(--scrim) 100%);
       transition: opacity .5s var(--ease-out);
     }
     .onboarding.is-leaving { opacity: 0; pointer-events: none; }
-    .ob-panel { width: 100%; max-width: 440px; padding: 24px 22px 22px; border-radius: 24px; animation: rise .6s var(--ease-out) both; }
+    .ob-panel { width: 100%; max-width: 440px; margin: auto auto 0; padding: 24px 22px 22px; border-radius: 24px; animation: rise .6s var(--ease-out) both; flex: none; }
+    .onboarding[data-flow="pro"] .ob-panel { max-width: 560px; }
     @keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
     .ob-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
     .ob-logo { display: flex; align-items: center; gap: 10px; font-weight: 500; }
@@ -387,6 +390,131 @@
     .perks li { display: flex; gap: 12px; align-items: center; font-size: 14px; color: var(--muted); }
     .perks li span { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--accent-soft); font-size: 16px; }
 
+    /* ---------- Choix du type de compte ---------- */
+    .onboarding[data-role="client"] [data-only="pro"], .onboarding[data-role="pro"] [data-only="client"] { display: none !important; }
+    .onboarding[data-mode="create"] [data-mode="edit"], .onboarding[data-mode="edit"] [data-mode="create"] { display: none !important; }
+    .role-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin: 0 0 18px; border-radius: 999px; background: var(--hover); border: 1px solid var(--line); }
+    .role-switch button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; border-radius: 999px; font-weight: 500; font-size: 14px; color: var(--muted); transition: background-color .2s, color .2s, box-shadow .2s; }
+    .role-switch button[aria-checked="true"] { background: var(--panel-solid); color: var(--accent); box-shadow: 0 1px 3px rgba(0, 0, 0, .18); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+    .onboarding[data-role="client"] #form-signup .field-row { grid-template-columns: 1fr; }
+    @media (max-width: 380px) { .field-row { grid-template-columns: 1fr; } }
+
+    /* ---------- Étapes du parcours restaurateur ---------- */
+    .pro-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: -4px 0 20px; padding: 0; list-style: none; }
+    .pro-steps li { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 500; color: var(--muted); text-align: center; position: relative; }
+    .pro-steps li span { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; font-size: 13px; background: var(--panel-solid); border: 1px solid var(--line-strong); position: relative; z-index: 1; }
+    .pro-steps li + li::before { content: ""; position: absolute; top: 14px; right: 50%; width: 100%; height: 2px; background: var(--line-strong); }
+    .pro-steps li.is-done span { background: var(--green); border-color: var(--green); color: #fff; }
+    .pro-steps li.is-done + li::before, .pro-steps li.is-done::before { background: var(--green); }
+    .pro-steps li.is-current { color: var(--accent); }
+    .pro-steps li.is-current span { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+    .ob-sub { margin: 22px 0 0; font-size: 16px; font-weight: 500; }
+    .hint { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+    .check-block { align-items: flex-start; margin-top: 16px; line-height: 1.4; }
+    .check-block input { margin-top: 1px; flex: none; }
+    .later-btn { display: block; margin: 14px auto 0; font-size: 14px; color: var(--muted); }
+
+    /* Champ SIRET + bouton */
+    .field > .input-action { display: flex; gap: 8px; margin: 0; font-size: inherit; font-weight: inherit; color: inherit; }
+    .input-action input { flex: 1; min-width: 0; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+    .btn-inline { flex: none; min-height: 50px; padding: 0 18px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--on-accent); background: var(--accent); }
+    .btn-inline[disabled] { opacity: .6; pointer-events: none; }
+    .verify-card { margin-top: 4px; padding: 14px 16px; border-radius: 12px; font-size: 14px; border: 1px solid var(--line-strong); background: var(--hover); }
+    .verify-card.is-ok { border-color: rgba(24, 128, 56, .4); background: var(--green-soft); }
+    .verify-card.is-ko { border-color: rgba(217, 48, 37, .35); background: rgba(217, 48, 37, .06); }
+    .verify-card.is-wait { color: var(--muted); }
+    .verify-card h4 { margin: 0 0 8px; font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .verify-card.is-ok h4 { color: var(--green); }
+    .verify-card.is-ko h4 { color: var(--danger); }
+    .verify-card dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; }
+    .verify-card dt { color: var(--muted); }
+    .verify-card dd { margin: 0; font-weight: 500; overflow-wrap: anywhere; }
+    .verify-card p { margin: 6px 0 0; color: var(--muted); }
+
+    /* Justificatifs */
+    .docs { display: grid; gap: 10px; margin-top: 10px; }
+    .doc { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 4px 12px; padding: 12px 14px; border-radius: 12px; border: 1px dashed var(--line-strong); }
+    @media (max-width: 520px) {
+      .doc { grid-template-columns: auto 1fr; }
+      .doc-btn { grid-column: 2; justify-self: start; margin-top: 4px; padding: 6px 12px; }
+    }
+    .doc.has-file { border-style: solid; border-color: rgba(24, 128, 56, .4); background: var(--green-soft); }
+    .doc.has-error { border-color: var(--danger); }
+    .doc-ico { flex: none; font-size: 22px; }
+    .doc-info { flex: 1; min-width: 0; display: grid; gap: 2px; font-size: 14px; }
+    .doc-info b { font-weight: 500; }
+    .doc-info small { color: var(--muted); font-size: 12.5px; overflow-wrap: anywhere; }
+    .doc-tag { font-size: 11px; font-weight: 500; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: 1px; }
+    .doc-tag.req { color: var(--danger); background: rgba(217, 48, 37, .08); }
+    .doc-tag.opt { color: var(--muted); background: var(--hover); }
+    .doc-btn { flex: none; padding: 8px 14px; border-radius: 18px; font-size: 13px; font-weight: 500; color: var(--accent); border: 1px solid var(--line-strong); cursor: pointer; }
+    .doc-btn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* Abonnement */
+    .plan-card { margin-top: 18px; padding: 18px; border-radius: 16px; border: 1px solid var(--accent-line); background: var(--accent-soft); }
+    .plan-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+    .plan-head strong { font-size: 17px; font-weight: 500; }
+    .plan-price { font-size: 20px; font-weight: 700; color: var(--accent); }
+    .plan-price small { font-size: 13px; font-weight: 400; color: var(--muted); }
+    .plan-features { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 14px; }
+    .plan-features li { display: flex; gap: 10px; }
+    .plan-features li::before { content: "✓"; color: var(--green); font-weight: 700; }
+    .notice { margin: 14px 0 0; padding: 12px 14px; border-radius: 12px; font-size: 13.5px; color: var(--amber); background: rgba(176, 96, 0, .08); border: 1px solid rgba(176, 96, 0, .25); }
+    .notice:empty { display: none; }
+
+    /* Fiche restaurant : catégories, photos, adresse, horaires */
+    .field textarea { width: 100%; padding: 12px 16px; border-radius: 8px; font: inherit; font-size: 15px; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); outline: none; resize: vertical; min-height: 96px; }
+    .field textarea:focus { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    .field.has-error textarea { border-color: var(--danger); }
+    .counter { float: right; font-weight: 400; }
+    .cat-picker { display: flex; flex-wrap: wrap; gap: 6px; }
+    .cat-picker button { height: 36px; padding: 0 12px; border-radius: 18px; font-size: 14px; border: 1px solid var(--line-strong); }
+    .cat-picker button[aria-checked="true"] { background: #e8f0fe; color: #1967d2; border-color: var(--accent-line); }
+    :root[data-theme="dark"] .cat-picker button[aria-checked="true"] { background: var(--accent-soft); color: var(--accent); }
+    .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .photo-item, .photo-add { position: relative; aspect-ratio: 4 / 3; border-radius: 10px; overflow: hidden; }
+    .photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .photo-item .photo-del { position: absolute; top: 4px; right: 4px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0, 0, 0, .6); color: #fff; font-size: 16px; line-height: 1; }
+    .photo-item .photo-main { position: absolute; left: 4px; bottom: 4px; padding: 1px 6px; border-radius: 4px; font-size: 11px; color: #fff; background: rgba(0, 0, 0, .6); }
+    .photo-add { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; color: var(--accent); border: 1px dashed var(--accent-line); cursor: pointer; }
+    .photo-add span { font-size: 22px; line-height: 1; }
+    .photo-add:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .photo-add.is-busy { opacity: .6; pointer-events: none; }
+    .addr-wrap { position: relative; }
+    .addr-wrap input { width: 100%; height: 50px; padding: 0 16px; border-radius: 8px; font: inherit; font-size: 16px; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); outline: none; }
+    .addr-wrap input:focus { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    .field.has-error .addr-wrap input { border-color: var(--danger); }
+    .addr-list { position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px; list-style: none; border-radius: 10px; background: var(--panel-solid); box-shadow: var(--shadow); max-height: 240px; overflow-y: auto; }
+    .addr-list li { padding: 10px 12px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+    .addr-list li[aria-selected="true"], .addr-list li:hover { background: var(--hover); }
+    .addr-list li small { display: block; color: var(--muted); }
+    .addr-status { display: block; margin-top: 6px; font-size: 13px; color: var(--green); }
+    .addr-status:empty { display: none; }
+    .addr-sirene { display: block; margin-top: 6px; font-size: 13px; text-align: left; }
+    .hours-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; margin-bottom: 8px; }
+    .hours-row .check { margin: 0; white-space: nowrap; }
+    .hours-row input[type="time"] { width: 100%; min-width: 0; height: 40px; padding: 0 6px; border-radius: 8px; font: inherit; font-size: 14px; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); }
+    .hours-row input[type="time"]:disabled { opacity: .45; }
+    .days { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; }
+    .days-label { font-size: 13px; color: var(--muted); margin-right: 2px; }
+    .days label { cursor: pointer; }
+    .days input { position: absolute; opacity: 0; pointer-events: none; }
+    .days span.day { display: grid; place-items: center; min-width: 40px; height: 32px; padding: 0 6px; border-radius: 16px; font-size: 13px; border: 1px solid var(--line-strong); }
+    .days input:checked + span.day { background: rgba(217, 48, 37, .1); color: var(--danger); border-color: rgba(217, 48, 37, .4); text-decoration: line-through; }
+    .days input:focus-visible + span.day { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* Fiche commerce : galerie, description, badge */
+    .gallery { display: flex; gap: 8px; margin: 14px -20px 0; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+    .gallery::-webkit-scrollbar { display: none; }
+    .gallery img { flex: none; width: 78%; max-width: 320px; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; scroll-snap-align: start; background: var(--hover); }
+    .gallery img:only-child { width: 100%; max-width: none; }
+    .shop-desc { margin: 10px 0 0; font-size: 14.5px; color: var(--text); white-space: pre-line; }
+    .verified { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; color: var(--green); background: var(--green-soft); }
+    .pro-dash { margin-top: 20px; }
+    .pro-dash h4 { margin: 0; font-size: 15px; font-weight: 500; }
+    .pro-dash .kv { margin-top: 10px; }
+
     /* =====================================================================
        9. TOAST, ÉCRAN D'ERREUR, ATTRIBUTION
        ===================================================================== */
@@ -418,7 +546,9 @@
       .sidebar { display: flex; }
       .zoom-group { display: flex; }
       .controls { top: 16px; right: 16px; }
-      .toast { top: 16px; left: calc(var(--sidebar-w) + 32px); right: 80px; }
+      /* en bas de la carte : ne recouvre ni la fiche flottante ni les contrôles */
+      .toast { top: auto; bottom: 24px; left: calc(var(--sidebar-w) + 32px); right: 16px; transform: translateY(12px); }
+      body.sheet-open .toast { left: calc(var(--sidebar-w) + 424px); }   /* à droite de la fiche flottante */
       .maplibregl-ctrl-bottom-right { bottom: 0; }
 
       #shop-sheet {
@@ -439,8 +569,8 @@
       #geo-help.is-open, #profile-sheet.is-open { opacity: 1; transform: translate(-50%, -50%); transition: transform .3s var(--ease-out), opacity .25s, visibility 0s, background-color .4s; }
       #geo-help .sheet-grab, #profile-sheet .sheet-grab { display: none; }
 
-      .onboarding { align-items: center; }
-      .ob-panel { max-width: 440px; padding: 32px 32px 28px; }
+      .ob-panel { margin: auto; padding: 32px 32px 28px; }
+      #shop-sheet .gallery { margin: 14px -20px 0; }
       .ob-step h1, .ob-step h2 { font-size: 30px; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -516,6 +646,8 @@
       <button class="chip glass" type="button" data-cat="Kebab" aria-pressed="false">🥙 Kebab</button>
       <button class="chip glass" type="button" data-cat="Burger" aria-pressed="false">🍔 Burger</button>
       <button class="chip glass" type="button" data-cat="Sweets" aria-pressed="false">🧁 Sweets</button>
+      <button class="chip glass" type="button" data-cat="Pizza" aria-pressed="false">🍕 Pizza</button>
+      <button class="chip glass" type="button" data-cat="Autre" aria-pressed="false">🍽️ Autres</button>
       <span class="chip-sep" aria-hidden="true"></span>
       <button class="chip glass" type="button" id="open-only" aria-pressed="false"><span class="dot-green" aria-hidden="true"></span>Ouverts</button>
     </div>
@@ -528,12 +660,14 @@
       <div class="sheet-emoji" id="shop-emoji" aria-hidden="true"></div>
       <div class="sheet-title">
         <h2 id="shop-name"></h2>
-        <p class="eyebrow" id="shop-cat"></p>
+        <p class="eyebrow"><span id="shop-cat"></span><span class="verified" id="shop-verified" hidden title="SIRET vérifié auprès du répertoire Sirene">✓ Établissement vérifié</span></p>
       </div>
       <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
     </div>
+    <div class="gallery" id="shop-gallery" hidden></div>
     <span class="status" id="shop-status"></span>
-    <div class="promo">
+    <p class="shop-desc" id="shop-desc" hidden></p>
+    <div class="promo" id="shop-promo-box">
       <span class="promo-ico" aria-hidden="true">🎁</span>
       <div><small>Offre du moment</small><strong id="shop-promo"></strong></div>
     </div>
@@ -549,6 +683,10 @@
       <li>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM9 21l2-6 2.5 2.5V21M8 12l2-4.5 3.5 1 2 3.5 2.5 1M10 7.5L7.5 9 7 12"/></svg>
         <span id="shop-distance"></span>
+      </li>
+      <li id="shop-phone-row" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.4 1.8.7 2.7a2 2 0 01-.5 2.1L8 9.8a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.7.7a2 2 0 011.7 2z"/></svg>
+        <a id="shop-phone" href="#"></a>
       </li>
     </ul>
     <!-- "Y aller" : itinéraire piéton dans Google Maps -->
@@ -599,32 +737,69 @@
       <div><dt>Affichage</dt><dd id="profile-theme"></dd></div>
       <div><dt>Carte</dt><dd id="profile-engine"></dd></div>
     </dl>
+    <div class="pro-dash" id="pro-dash" hidden>
+      <h4>Mon établissement</h4>
+      <dl class="kv">
+        <div><dt>Restaurant</dt><dd id="pd-name"></dd></div>
+        <div><dt>Statut</dt><dd id="pd-status"></dd></div>
+        <div><dt>SIRET</dt><dd id="pd-siret"></dd></div>
+        <div><dt>Abonnement</dt><dd id="pd-plan"></dd></div>
+      </dl>
+      <button class="btn btn-primary" type="button" id="pd-edit">Modifier ma fiche</button>
+      <button class="btn btn-ghost" type="button" id="pd-show">Voir sur la carte</button>
+    </div>
     <button class="btn btn-primary" type="button" id="profile-locate">Activer la localisation</button>
     <button class="btn btn-ghost" type="button" id="profile-logout">Se déconnecter</button>
     <button class="btn btn-danger" type="button" id="profile-delete">Supprimer mon compte</button>
   </section>
 
   <!-- ===================== ÉCRAN DE COMPTE ===================== -->
-  <div id="onboarding" class="onboarding" role="dialog" aria-modal="true" aria-labelledby="auth-title" hidden>
+  <div id="onboarding" class="onboarding" role="dialog" aria-modal="true" aria-labelledby="auth-title" data-role="client" hidden>
     <div class="ob-panel glass">
       <div class="ob-top">
         <div class="ob-logo"><span class="avatar" aria-hidden="true">R</span>Roche Street Food</div>
         <div class="ob-progress" id="ob-progress" aria-hidden="true"><span class="is-active" id="ob-dot-1"></span><span id="ob-dot-2"></span></div>
       </div>
+      <!-- Étapes du parcours restaurateur -->
+      <ol class="pro-steps" id="pro-steps" hidden>
+        <li data-pstep="1"><span>1</span>Compte</li>
+        <li data-pstep="2"><span>2</span>Vérification</li>
+        <li data-pstep="3"><span>3</span>Paiement</li>
+        <li data-pstep="4"><span>4</span>Restaurant</li>
+      </ol>
 
-      <!-- Création de compte -->
+      <!-- Choix du type de compte -->
+      <div class="role-switch" id="role-switch" role="radiogroup" aria-label="Type de compte">
+        <button type="button" role="radio" data-role="client" aria-checked="true"><span aria-hidden="true">👤</span> Client</button>
+        <button type="button" role="radio" data-role="pro" aria-checked="false"><span aria-hidden="true">🍽️</span> Restaurateur</button>
+      </div>
+
+      <!-- Création de compte (client ou restaurateur) -->
       <form id="form-signup" class="ob-step" novalidate data-step="signup" hidden>
-        <h1 id="auth-title">Créez votre <em>compte</em></h1>
-        <p class="lead">Découvrez les food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon.</p>
-        <label class="field" id="field-su-name">
-          <span>Prénom</span>
-          <input id="su-name" type="text" autocomplete="given-name" autocapitalize="words" maxlength="40" placeholder="Camille" required />
-          <small class="field-error" id="err-su-name" aria-live="polite"></small>
-        </label>
+        <h1 id="auth-title"><span data-only="client">Créez votre <em>compte</em></span><span data-only="pro">Inscrivez votre <em>restaurant</em></span></h1>
+        <p class="lead" data-only="client">Découvrez les food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon.</p>
+        <p class="lead" data-only="pro">Restaurateur à La Roche-sur-Yon ? Rejoignez la carte en 4 étapes : compte, vérification de votre établissement, abonnement, fiche restaurant.</p>
+        <div class="field-row">
+          <label class="field" id="field-su-name">
+            <span>Prénom</span>
+            <input id="su-name" type="text" autocomplete="given-name" autocapitalize="words" maxlength="40" placeholder="Camille" required />
+            <small class="field-error" id="err-su-name" aria-live="polite"></small>
+          </label>
+          <label class="field" id="field-su-lastname" data-only="pro">
+            <span>Nom</span>
+            <input id="su-lastname" type="text" autocomplete="family-name" autocapitalize="words" maxlength="60" placeholder="Martin" />
+            <small class="field-error" id="err-su-lastname" aria-live="polite"></small>
+          </label>
+        </div>
         <label class="field" id="field-su-email">
-          <span>Adresse e-mail</span>
+          <span><span data-only="client">Adresse e-mail</span><span data-only="pro">E-mail professionnel</span></span>
           <input id="su-email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" maxlength="120" placeholder="camille@exemple.fr" required />
           <small class="field-error" id="err-su-email" aria-live="polite"></small>
+        </label>
+        <label class="field" id="field-su-phone" data-only="pro">
+          <span>Téléphone professionnel</span>
+          <input id="su-phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="06 12 34 56 78" />
+          <small class="field-error" id="err-su-phone" aria-live="polite"></small>
         </label>
         <label class="field" id="field-su-password">
           <span>Mot de passe (8 caractères minimum)</span>
@@ -636,14 +811,14 @@
         </label>
         <label class="check"><input type="checkbox" id="su-remember" /> Rester connecté sur cet appareil</label>
         <p class="form-error" id="err-signup" role="alert"></p>
-        <button class="btn btn-primary" type="submit">Créer mon compte</button>
+        <button class="btn btn-primary" type="submit"><span data-only="client">Créer mon compte</span><span data-only="pro">Continuer : vérification</span></button>
         <p class="ob-switch">Déjà un compte ? <button class="link-btn" type="button" data-goto="login">Se connecter</button></p>
       </form>
 
       <!-- Connexion -->
       <form id="form-login" class="ob-step" novalidate data-step="login" hidden>
-        <h1 id="login-title">Bon retour <em>parmi nous</em></h1>
-        <p class="lead">Connectez-vous pour retrouver la carte et vos commerces.</p>
+        <h1 id="login-title"><span data-only="client">Bon retour <em>parmi nous</em></span><span data-only="pro">Espace <em>restaurateur</em></span></h1>
+        <p class="lead"><span data-only="client">Connectez-vous pour retrouver la carte et vos commerces.</span><span data-only="pro">Connectez-vous pour gérer la fiche de votre restaurant.</span></p>
         <label class="field" id="field-li-email">
           <span>Adresse e-mail</span>
           <input id="li-email" type="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false" maxlength="120" required />
@@ -664,7 +839,7 @@
         <p class="ob-switch">Pas encore de compte ? <button class="link-btn" type="button" data-goto="signup">Créer un compte</button></p>
       </form>
 
-      <!-- Autorisation de localisation (après la création du compte) -->
+      <!-- Autorisation de localisation (après la création d'un compte client) -->
       <section id="ob-location" class="ob-step" data-step="location" hidden aria-labelledby="ob-loc-title">
         <div class="radar" aria-hidden="true"></div>
         <h2 id="ob-loc-title">Activez votre <em>localisation</em></h2>
@@ -676,6 +851,124 @@
         <button class="btn btn-primary" type="button" id="ob-allow">Autoriser la localisation</button>
         <button class="btn btn-ghost" type="button" id="ob-later">Plus tard</button>
       </section>
+
+      <!-- Restaurateur — étape 2 : vérification de l'établissement -->
+      <form id="form-pro-verify" class="ob-step" novalidate data-step="pro-verify" hidden aria-labelledby="pv-title">
+        <h2 id="pv-title">Vérification de votre <em>établissement</em></h2>
+        <p class="lead">Votre numéro SIRET est contrôlé auprès du répertoire officiel Sirene de l'INSEE : l'établissement doit être en activité et exercer une activité de restauration.</p>
+        <label class="field" id="field-pv-siret">
+          <span>Numéro SIRET (14 chiffres)</span>
+          <span class="input-action">
+            <input id="pv-siret" type="text" inputmode="numeric" autocomplete="off" maxlength="17" placeholder="123 456 789 00012" />
+            <button class="btn-inline" type="button" id="pv-check">Vérifier</button>
+          </span>
+          <small class="field-error" id="err-pv-siret" aria-live="polite"></small>
+        </label>
+        <div class="verify-card" id="pv-result" hidden aria-live="polite"></div>
+
+        <h3 class="ob-sub">Justificatifs</h3>
+        <p class="hint">PDF, JPG ou PNG · 10 Mo maximum par fichier.</p>
+        <div class="docs" id="pv-docs"></div>
+
+        <label class="check check-block"><input type="checkbox" id="pv-honor" /> Je certifie sur l'honneur l'exactitude de ces informations et être habilité(e) à représenter cet établissement.</label>
+        <p class="form-error" id="err-pro-verify" role="alert"></p>
+        <button class="btn btn-primary" type="submit">Continuer vers le paiement</button>
+        <button class="link-btn later-btn" type="button" data-pro-later>Terminer plus tard</button>
+      </form>
+
+      <!-- Restaurateur — étape 3 : paiement de l'abonnement -->
+      <section id="pro-payment" class="ob-step" data-step="pro-payment" hidden aria-labelledby="pp-title">
+        <h2 id="pp-title">Activez votre <em>abonnement</em></h2>
+        <p class="lead">Votre établissement est vérifié. L'abonnement permet d'apparaître sur la carte de La Roche-sur-Yon.</p>
+        <div class="plan-card">
+          <div class="plan-head">
+            <strong id="plan-name"></strong>
+            <span class="plan-price" id="plan-price"></span>
+          </div>
+          <ul class="plan-features">
+            <li>Votre restaurant affiché sur la carte, avec un badge « Établissement vérifié »</li>
+            <li>Fiche complète : photos, description, horaires, adresse</li>
+            <li>Mise en avant de votre offre du moment</li>
+            <li>Itinéraire « Y aller » pour vos clients</li>
+          </ul>
+        </div>
+        <p class="notice" id="pay-notice"></p>
+        <p class="form-error" id="err-pro-payment" role="alert"></p>
+        <button class="btn btn-primary" type="button" id="pay-btn"></button>
+        <button class="btn btn-ghost" type="button" data-pro-back="pro-verify">Retour à la vérification</button>
+        <button class="link-btn later-btn" type="button" data-pro-later>Terminer plus tard</button>
+      </section>
+
+      <!-- Restaurateur — étape 4 : fiche du restaurant -->
+      <form id="form-pro-listing" class="ob-step" novalidate data-step="pro-listing" hidden aria-labelledby="pl-title">
+        <h2 id="pl-title"><span data-mode="create">Votre <em>restaurant</em> sur la carte</span><span data-mode="edit">Modifier ma <em>fiche</em></span></h2>
+        <p class="lead" data-mode="create">Dernière étape : présentez votre établissement. Ces informations seront visibles par tous les utilisateurs.</p>
+
+        <label class="field" id="field-pl-name">
+          <span>Nom du restaurant</span>
+          <input id="pl-name" type="text" maxlength="60" autocomplete="organization" required />
+          <small class="field-error" id="err-pl-name" aria-live="polite"></small>
+        </label>
+
+        <div class="field" id="field-pl-category">
+          <span>Catégorie</span>
+          <div class="cat-picker" id="pl-category" role="radiogroup" aria-label="Catégorie"></div>
+          <small class="field-error" id="err-pl-category" aria-live="polite"></small>
+        </div>
+
+        <label class="field" id="field-pl-desc">
+          <span>Description <small class="counter" id="pl-desc-count">0 / 600</small></span>
+          <textarea id="pl-desc" rows="4" maxlength="600" placeholder="Votre cuisine, vos spécialités, ce qui vous rend unique…"></textarea>
+          <small class="field-error" id="err-pl-desc" aria-live="polite"></small>
+        </label>
+
+        <div class="field" id="field-pl-photos">
+          <span>Photos (1 à 6 · la première est la photo principale)</span>
+          <div class="photo-grid" id="pl-photos">
+            <label class="photo-add" id="pl-photo-add">
+              <input type="file" id="pl-photo-input" accept="image/jpeg,image/png,image/webp" multiple hidden />
+              <span aria-hidden="true">＋</span>Ajouter
+            </label>
+          </div>
+          <small class="field-error" id="err-pl-photos" aria-live="polite"></small>
+        </div>
+
+        <div class="field" id="field-pl-address">
+          <span>Adresse du restaurant</span>
+          <div class="addr-wrap">
+            <input id="pl-address" type="text" autocomplete="off" placeholder="Ex. : 12 place Napoléon, La Roche-sur-Yon" role="combobox" aria-autocomplete="list" aria-controls="pl-address-list" aria-expanded="false" />
+            <ul class="addr-list" id="pl-address-list" role="listbox" hidden></ul>
+          </div>
+          <button class="link-btn addr-sirene" type="button" id="pl-use-sirene" hidden>Utiliser l'adresse enregistrée au répertoire Sirene</button>
+          <small class="addr-status" id="pl-address-status"></small>
+          <small class="field-error" id="err-pl-address" aria-live="polite"></small>
+        </div>
+
+        <div class="field" id="field-pl-hours">
+          <span>Horaires d'ouverture</span>
+          <div class="hours-row"><label class="check"><input type="checkbox" id="pl-h1-on" checked /> Service 1</label><input type="time" id="pl-h1-from" value="11:30" aria-label="Service 1 : ouverture" /><span>–</span><input type="time" id="pl-h1-to" value="14:30" aria-label="Service 1 : fermeture" /></div>
+          <div class="hours-row"><label class="check"><input type="checkbox" id="pl-h2-on" checked /> Service 2</label><input type="time" id="pl-h2-from" value="18:30" aria-label="Service 2 : ouverture" /><span>–</span><input type="time" id="pl-h2-to" value="22:30" aria-label="Service 2 : fermeture" /></div>
+          <div class="days" id="pl-closed" aria-label="Jours de fermeture"><span class="days-label">Fermé le :</span></div>
+          <small class="field-error" id="err-pl-hours" aria-live="polite"></small>
+        </div>
+
+        <div class="field-row">
+          <label class="field" id="field-pl-promo">
+            <span>Offre du moment (facultatif)</span>
+            <input id="pl-promo" type="text" maxlength="60" placeholder="Ex. : boisson offerte le midi" />
+          </label>
+          <label class="field" id="field-pl-phone">
+            <span>Téléphone (facultatif)</span>
+            <input id="pl-phone" type="tel" inputmode="tel" maxlength="20" placeholder="02 51 00 00 00" />
+            <small class="field-error" id="err-pl-phone" aria-live="polite"></small>
+          </label>
+        </div>
+
+        <p class="form-error" id="err-pro-listing" role="alert"></p>
+        <button class="btn btn-primary" type="submit"><span data-mode="create">Publier sur la carte</span><span data-mode="edit">Enregistrer les modifications</span></button>
+        <button class="btn btn-ghost" type="button" id="pl-cancel" data-mode="edit">Annuler</button>
+        <button class="link-btn later-btn" type="button" data-pro-later data-mode="create">Terminer plus tard</button>
+      </form>
     </div>
   </div>
 
@@ -727,6 +1020,17 @@
     fallbackKey: 'roche-street-food:google-failed',
     walkSpeed: 80,                              // mètres par minute (~4,8 km/h)
     desktopQuery: '(min-width: 900px)',
+    // Vérification des restaurateurs : API publique « Recherche d'entreprises » (répertoire Sirene de l'INSEE)
+    sireneApi: 'https://recherche-entreprises.api.gouv.fr/search',
+    // Géocodage des adresses : Géoplateforme de l'IGN (Base Adresse Nationale)
+    geocoderApi: 'https://data.geopf.fr/geocodage/search',
+    /**
+     * Abonnement des restaurateurs.
+     * amount : montant en euros (null = « Montant à définir »).
+     * stripePaymentLink : lien de paiement Stripe (« Payment Link »). Vide = mode démonstration, aucun paiement réel.
+     *   Dans Stripe, réglez la redirection après paiement sur : https://evanbisa.github.io/pwa-nantes/?paiement=ok
+     */
+    proPlan: { name: 'Abonnement Roche Street Food Pro', amount: null, period: 'mois', stripePaymentLink: '' },
   };
   // Surcharge possible depuis la page (ex. : window.ROCHE_CONFIG = { googleMapsApiKey: '…' })
   Object.assign(CONFIG, window.ROCHE_CONFIG || {});
@@ -736,7 +1040,10 @@
     'Kebab':      { emoji: '🥙', label: 'Kebab' },
     'Burger':     { emoji: '🍔', label: 'Burger' },
     'Sweets':     { emoji: '🧁', label: 'Sweets' },
+    'Pizza':      { emoji: '🍕', label: 'Pizza' },
+    'Autre':      { emoji: '🍽️', label: 'Autre restauration' },
   };
+  const catOf = (shop) => CATEGORIES[shop.category] || CATEGORIES.Autre;
 
   /**
    * Commerces de démonstration (fictifs), placés sur les vraies rues de La Roche-sur-Yon.
@@ -770,6 +1077,29 @@
       hours: [['11:30', '23:00']], closedOn: [], closedTemporarily: true,
       promo: 'Menu étudiant à 9,90 €' },
   ];
+
+  /** Codes NAF acceptés pour un restaurateur (nomenclature NAF rév. 2 de l'INSEE). */
+  const NAF_RESTAURATION = {
+    '56.10A': 'Restauration traditionnelle',
+    '56.10B': 'Cafétérias et autres libres-services',
+    '56.10C': 'Restauration de type rapide',
+    '56.21Z': 'Services des traiteurs',
+    '56.30Z': 'Débits de boissons',
+    '10.71C': 'Boulangerie et boulangerie-pâtisserie',
+    '10.71D': 'Pâtisserie',
+    '10.52Z': 'Fabrication de glaces et sorbets',
+    '47.24Z': 'Commerce de détail de pain, pâtisserie et confiserie',
+    '47.81Z': 'Commerce de détail alimentaire sur éventaires et marchés',
+  };
+  /** Justificatifs demandés aux restaurateurs. */
+  const DOC_TYPES = [
+    { key: 'kbis', icon: '📄', label: 'Extrait Kbis, avis de situation Sirene ou extrait D1', detail: 'Datant de moins de 3 mois', required: true },
+    { key: 'hygiene', icon: '🧑‍🍳', label: 'Attestation de formation à l\'hygiène alimentaire (HACCP)', detail: 'Obligatoire en restauration commerciale', required: true },
+    { key: 'ddpp', icon: '🏛️', label: 'Récépissé de déclaration DDPP (Cerfa n° 13984)', detail: 'Déclaration de manipulation de denrées animales', required: false },
+    { key: 'licence', icon: '🍷', label: 'Licence de débit de boissons ou licence restaurant', detail: 'Si vous servez de l\'alcool', required: false },
+  ];
+  const MAX_DOC_SIZE = 10 * 1024 * 1024;
+  const MAX_PHOTOS = 6;
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const desktopMQ = window.matchMedia(CONFIG.desktopQuery);
@@ -828,6 +1158,121 @@
       coords.push([lng + dLng * Math.cos(t), lat + dLat * Math.sin(t)]);
     }
     return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] }, properties: {} };
+  }
+
+  const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+  const formatSize = (b) => (b < 1024 * 1024 ? Math.max(1, Math.round(b / 1024)) + ' Ko' : (b / 1024 / 1024).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' Mo');
+
+  /** Fichiers (photos, justificatifs) stockés dans le navigateur (IndexedDB). */
+  const fileStore = (() => {
+    let dbPromise = null;
+    const open = () => dbPromise || (dbPromise = new Promise((resolve, reject) => {
+      const req = indexedDB.open('roche-street-food', 1);
+      req.onupgradeneeded = () => req.result.createObjectStore('files');
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => { dbPromise = null; reject(req.error); };
+    }));
+    const run = async (mode, op) => {
+      const db = await open();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('files', mode);
+        const req = op(tx.objectStore('files'));
+        tx.oncomplete = () => resolve(req.result);
+        tx.onerror = tx.onabort = () => reject(tx.error);
+      });
+    };
+    return {
+      put: (id, blob) => run('readwrite', (st) => st.put(blob, id)),
+      get: (id) => run('readonly', (st) => st.get(id)),
+      remove: (ids) => Promise.all([].concat(ids).filter(Boolean).map((id) => run('readwrite', (st) => st.delete(id)))),
+    };
+  })();
+
+  /** Réduit une photo (1600 px maximum, JPEG) pour limiter l'espace occupé. */
+  async function resizePhoto(file, max = 1600) {
+    let bitmap;
+    try { bitmap = await createImageBitmap(file); } catch (e) { throw new Error('format'); }
+    const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    if (bitmap.close) bitmap.close();
+    return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('format'))), 'image/jpeg', 0.85));
+  }
+
+  /* ---------- SIRET ---------- */
+
+  const onlyDigits = (s) => (s || '').replace(/\D/g, '');
+  /** « 12345678900012 » → « 123 456 789 00012 » (saisie progressive acceptée). */
+  const formatSiret = (s) => { const d = onlyDigits(s).slice(0, 14); return [d.slice(0, 3), d.slice(3, 6), d.slice(6, 9), d.slice(9)].filter(Boolean).join(' '); };
+
+  /** Clé de contrôle du SIRET : algorithme de Luhn (exception : établissements de La Poste). */
+  function isValidSiret(siret) {
+    if (!/^\d{14}$/.test(siret)) return false;
+    if (siret.startsWith('356000000')) return [...siret].reduce((a, c) => a + Number(c), 0) % 5 === 0;
+    let sum = 0;
+    for (let i = 0; i < 14; i++) {
+      let d = Number(siret[13 - i]);
+      if (i % 2 === 1) { d *= 2; if (d > 9) d -= 9; }
+      sum += d;
+    }
+    return sum % 10 === 0;
+  }
+
+  async function fetchJson(url, timeout = 10000) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeout);
+    try {
+      const res = await fetch(url, { signal: ctrl.signal, headers: { Accept: 'application/json' } });
+      if (!res.ok) { const err = new Error('HTTP ' + res.status); err.status = res.status; throw err; }
+      return await res.json();
+    } finally { clearTimeout(timer); }
+  }
+
+  /**
+   * Vérifie un SIRET dans le répertoire Sirene (API Recherche d'entreprises).
+   * Conditions : établissement trouvé, en activité, code NAF de restauration.
+   * @returns {Promise<{ok: boolean, code?: 'notfound'|'closed'|'naf'|'rate'|'network', company?: object}>}
+   */
+  async function lookupSiret(siret) {
+    let data;
+    try {
+      data = await fetchJson(CONFIG.sireneApi + '?' + new URLSearchParams({ q: siret, limite_matching_etablissements: '1' }));
+    } catch (err) {
+      return { ok: false, code: err.status === 429 ? 'rate' : 'network' };
+    }
+    const unit = data && data.results && data.results[0];
+    const etab = unit && ((unit.matching_etablissements || []).find((e) => e.siret === siret) || (unit.siege && unit.siege.siret === siret ? unit.siege : null));
+    if (!etab) return { ok: false, code: 'notfound' };
+    const naf = etab.activite_principale || unit.activite_principale || '';
+    const lng = parseFloat(etab.longitude), lat = parseFloat(etab.latitude);
+    const company = {
+      siren: unit.siren, siret,
+      legalName: unit.nom_complet || unit.nom_raison_sociale || '',
+      tradeName: (etab.liste_enseignes || [])[0] || '',
+      address: etab.adresse || etab.geo_adresse || '',
+      postcode: etab.code_postal || '', city: etab.libelle_commune || '',
+      coords: Number.isFinite(lng) && Number.isFinite(lat) ? [lng, lat] : null,
+      naf, nafLabel: NAF_RESTAURATION[naf] || '',
+    };
+    if (etab.etat_administratif !== 'A' || unit.etat_administratif === 'C') return { ok: false, code: 'closed', company };
+    if (!NAF_RESTAURATION[naf]) return { ok: false, code: 'naf', company };
+    return { ok: true, company };
+  }
+
+  /** Suggestions d'adresses (Base Adresse Nationale), limitées à l'agglomération de La Roche-sur-Yon. */
+  async function geocode(query) {
+    const data = await fetchJson(CONFIG.geocoderApi + '?' + new URLSearchParams({
+      q: query, index: 'address', limit: '6', lat: String(CONFIG.center[1]), lon: String(CONFIG.center[0]),
+    }), 8000);
+    return (data.features || [])
+      .map((f) => ({
+        label: f.properties.label, name: f.properties.name || f.properties.label,
+        city: [f.properties.postcode, f.properties.city].filter(Boolean).join(' '),
+        coords: f.geometry && f.geometry.coordinates,
+      }))
+      .filter((a) => Array.isArray(a.coords) && isInBounds(a.coords));
   }
 
   /* ---------- Horaires d'ouverture ---------- */
@@ -1299,7 +1744,7 @@
       if (activePanel && activePanel.id === 'shop-sheet') closeShop();
     });
     updateLabelVisibility();
-    SHOPS.forEach(createShopMarker);
+    allShops().forEach(createShopMarker);
     refreshStatuses();
     view.setPadding(selectedId ? shopPadding() : basePadding());
     readyQueue.splice(0).forEach((fn) => fn());
@@ -1382,13 +1827,37 @@
     el.className = 'pin';
     el.dataset.id = shop.id;
     el.innerHTML = '<span class="pin-badge" aria-hidden="true"></span><span class="pin-label"></span>';
-    el.querySelector('.pin-badge').textContent = CATEGORIES[shop.category].emoji;
+    el.querySelector('.pin-badge').textContent = catOf(shop).emoji;
     el.querySelector('.pin-label').textContent = shop.name;
     el.addEventListener('click', (ev) => { ev.stopPropagation(); openShop(shop.id); });
     el.addEventListener('mouseenter', () => setHover(shop.id, true));
     el.addEventListener('mouseleave', () => setHover(shop.id, false));
     const marker = view.addMarker(el, shop.coords, 'bottom');
     markers.set(shop.id, { shop, marker, el, status: getStatus(shop) });
+  }
+
+  /** Restaurants publiés par les restaurateurs (enregistrés sur cet appareil). */
+  const restaurants = () => store.read().restaurants || {};
+  const restaurantToShop = (r) => ({ ...r, isPro: true });
+  const allShops = () => [...SHOPS, ...Object.values(restaurants()).filter((r) => r.published).map(restaurantToShop)];
+
+  /** Ajoute ou remplace le marqueur d'un commerce (après publication ou modification d'une fiche). */
+  function upsertShopMarker(shop) {
+    const old = markers.get(shop.id);
+    if (old) { old.marker.remove(); markers.delete(shop.id); }
+    createShopMarker(shop);
+    if (selectedId === shop.id) { markers.get(shop.id).el.classList.add('is-selected'); galleryFor = null; }
+    listSignature = '';
+    refreshStatuses();
+  }
+  function removeShopMarker(id) {
+    const m = markers.get(id);
+    if (!m) return;
+    if (selectedId === id) closeShop();
+    m.marker.remove();
+    markers.delete(id);
+    listSignature = '';
+    renderList();
   }
 
   function setHover(id, on) {
@@ -1404,7 +1873,7 @@
       m.status = getStatus(m.shop, now);
       m.el.classList.toggle('is-open', m.status.open);
       m.el.classList.toggle('is-closed', !m.status.open);
-      m.el.setAttribute('aria-label', m.shop.name + ', ' + CATEGORIES[m.shop.category].label + ', ' + m.status.label);
+      m.el.setAttribute('aria-label', m.shop.name + ', ' + catOf(m.shop).label + ', ' + m.status.label);
     });
     applyFilters();
     if (selectedId) renderShop(markers.get(selectedId));
@@ -1413,7 +1882,7 @@
   const matchesFilters = (m) =>
     (filters.category === 'all' || m.shop.category === filters.category) &&
     (!filters.openOnly || m.status.open) &&
-    (!filters.query || normalize(m.shop.name + ' ' + m.shop.category + ' ' + m.shop.address).includes(filters.query));
+    (!filters.query || normalize([m.shop.name, catOf(m.shop).label, m.shop.address, m.shop.description || ''].join(' ')).includes(filters.query));
 
   function applyFilters() {
     markers.forEach((m) => {
@@ -1452,13 +1921,14 @@
         '<span class="si-emoji" aria-hidden="true"></span>' +
         '<span class="si-body"><span class="si-top"><strong></strong><span class="si-dist"></span></span>' +
         '<span class="si-status"></span><span class="si-promo"></span></span>';
-      btn.querySelector('.si-emoji').textContent = CATEGORIES[shop.category].emoji;
+      btn.querySelector('.si-emoji').textContent = catOf(shop).emoji;
       btn.querySelector('strong').textContent = shop.name;
-      btn.querySelector('.si-dist').textContent = d === null ? CATEGORIES[shop.category].label : formatDistance(d);
+      btn.querySelector('.si-dist').textContent = d === null ? catOf(shop).label : formatDistance(d);
       const st = btn.querySelector('.si-status');
       st.textContent = status.label;
       st.className = 'si-status ' + (status.open ? 'is-open' : 'is-closed');
-      btn.querySelector('.si-promo').textContent = '🎁 ' + shop.promo;
+      btn.querySelector('.si-promo').textContent = shop.promo ? '🎁 ' + shop.promo : (shop.description || '').slice(0, 90);
+      if (shop.isPro) { const v = document.createElement('span'); v.className = 'verified'; v.textContent = '✓'; v.title = 'Établissement vérifié'; btn.querySelector('strong').appendChild(v); }
       btn.addEventListener('click', () => openShop(shop.id));
       btn.addEventListener('mouseenter', () => setHover(shop.id, true));
       btn.addEventListener('mouseleave', () => setHover(shop.id, false));
@@ -1564,13 +2034,22 @@
   function renderShop(m) {
     const { shop } = m;
     const status = m.status || getStatus(shop);
-    $('shop-emoji').textContent = CATEGORIES[shop.category].emoji;
+    $('shop-emoji').textContent = catOf(shop).emoji;
     $('shop-name').textContent = shop.name;
-    $('shop-cat').textContent = CATEGORIES[shop.category].label;
+    $('shop-cat').textContent = catOf(shop).label;
+    // Restaurants inscrits : badge « vérifié », description, photos, téléphone ; l'offre est facultative
+    $('shop-verified').hidden = !shop.isPro;
+    $('shop-desc').hidden = !shop.description;
+    $('shop-desc').textContent = shop.description || '';
+    $('shop-promo-box').hidden = !shop.promo;
+    $('shop-phone-row').hidden = !shop.phone;
+    if (shop.phone) { $('shop-phone').textContent = shop.phone; $('shop-phone').href = 'tel:' + compactPhone(shop.phone); }
+    renderGallery(shop);
     $('shop-status').textContent = status.label;
     $('shop-status').className = 'status ' + (status.open ? 'is-open' : 'is-closed');
     $('shop-promo').textContent = shop.promo;
-    $('shop-address').textContent = shop.address + ', ' + CONFIG.city;
+    // Les adresses géocodées contiennent déjà la ville : on ne l'ajoute qu'aux autres
+    $('shop-address').textContent = normalize(shop.address).includes(normalize(CONFIG.city)) ? shop.address : shop.address + ', ' + CONFIG.city;
     $('shop-hours').textContent = formatHours(shop);
 
     const dist = $('shop-distance');
@@ -1586,6 +2065,34 @@
     const [lng, lat] = shop.coords;
     $('shop-go').href = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng + '&travelmode=walking';
     $('shop-go').setAttribute('aria-label', 'Itinéraire vers ' + shop.name);
+  }
+
+  /** Galerie de photos d'un restaurant (chargées depuis le stockage de l'appareil). */
+  let galleryFor = null;
+  let galleryUrls = [];
+  async function renderGallery(shop) {
+    const key = shop.id + ':' + (shop.updatedAt || '');
+    if (key === galleryFor) return;            // déjà affichée
+    galleryFor = key;
+    galleryUrls.forEach((u) => URL.revokeObjectURL(u));
+    galleryUrls = [];
+    const box = $('shop-gallery');
+    box.textContent = '';
+    box.hidden = true;
+    if (!shop.photoIds || !shop.photoIds.length) return;
+    const blobs = await Promise.all(shop.photoIds.map((id) => fileStore.get(id).catch(() => null)));
+    if (galleryFor !== key) return;            // une autre fiche a été ouverte entre-temps
+    blobs.forEach((blob, i) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      galleryUrls.push(url);
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = shop.name + ' — photo ' + (i + 1);
+      img.decoding = 'async';
+      box.appendChild(img);
+    });
+    box.hidden = !box.childElementCount;
   }
 
   /** Marges de la carte quand une fiche est ouverte : le commerce reste visible à côté ou au-dessus. */
@@ -1835,15 +2342,19 @@
   });
 
   /* =====================================================================
-     10. COMPTES : création, connexion, déconnexion
+     10. COMPTES : création, connexion, déconnexion (clients et restaurateurs)
      Les comptes sont enregistrés sur cet appareil (aucun serveur) ;
      le mot de passe n'est jamais stocké en clair (dérivation PBKDF2-SHA-256 salée).
      ===================================================================== */
 
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const PHONE_RE = /^(?:\+33|0033|0)[1-9]\d{8}$/;
   const PBKDF2_ITERATIONS = 150000;
   const toB64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
   const fromB64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  const compactPhone = (s) => (s || '').replace(/[\s.\-()]/g, '');
+  /** « 0612345678 » → « 06 12 34 56 78 » (numéros français). */
+  const formatPhone = (s) => { const d = compactPhone(s).replace(/^(\+33|0033)/, '0'); return /^0\d{9}$/.test(d) ? d.replace(/(\d{2})(?=\d)/g, '$1 ') : s.trim(); };
 
   async function hashPassword(password, saltB64) {
     const salt = saltB64 ? fromB64(saltB64) : crypto.getRandomValues(new Uint8Array(16));
@@ -1864,16 +2375,24 @@
     const email = session.get() || store.read().rememberedEmail || null;
     return email ? accounts()[email] || null : null;
   };
+  /** Met à jour un compte enregistré et renvoie sa nouvelle version. */
+  function updateAccount(email, patch) {
+    const all = accounts();
+    all[email] = { ...all[email], ...patch };
+    store.write({ accounts: all });
+    return all[email];
+  }
+  const updatePro = (email, patch) => updateAccount(email, { pro: { ...(accounts()[email].pro || {}), ...patch } });
 
   function setFieldError(field, message) {
     $('field-' + field).classList.toggle('has-error', !!message);
     $('err-' + field).textContent = message || '';
   }
-  document.querySelectorAll('.field input').forEach((input) => {
+  document.querySelectorAll('#onboarding .field input, #onboarding .field textarea').forEach((input) => {
     input.addEventListener('input', () => {
       const field = input.closest('.field').id.replace('field-', '');
-      setFieldError(field, '');
-      $('err-signup').textContent = ''; $('err-login').textContent = '';
+      if ($('err-' + field)) setFieldError(field, '');
+      ['err-signup', 'err-login', 'err-pro-verify', 'err-pro-listing'].forEach((id) => { $(id).textContent = ''; });
     });
   });
   document.querySelectorAll('[data-toggle-pw]').forEach((btn) => {
@@ -1885,16 +2404,63 @@
     });
   });
 
-  /** Affiche une étape de l'écran de compte : 'signup', 'login' ou 'location'. */
-  function showAuthStep(step) {
-    $('onboarding').hidden = false;
-    $('onboarding').classList.remove('is-leaving');
-    document.querySelectorAll('#onboarding .ob-step').forEach((el) => { el.hidden = el.dataset.step !== step; });
-    $('ob-progress').hidden = step === 'login';
+  /* ---------- Choix du type de compte : client ou restaurateur ---------- */
+
+  let authRole = 'client';
+  let currentStep = null;
+  function setAuthRole(role) {
+    authRole = role === 'pro' ? 'pro' : 'client';
+    $('onboarding').dataset.role = authRole;
+    document.querySelectorAll('#role-switch [data-role]').forEach((b) => {
+      b.setAttribute('aria-checked', String(b.dataset.role === authRole));
+      b.tabIndex = b.dataset.role === authRole ? 0 : -1;
+    });
+    $('err-signup').textContent = ''; $('err-login').textContent = '';
+    if (currentStep === 'signup' || currentStep === 'login') updateProgress(currentStep, 'create');
+  }
+  $('role-switch').addEventListener('click', (ev) => { const b = ev.target.closest('[data-role]'); if (b) setAuthRole(b.dataset.role); });
+  $('role-switch').addEventListener('keydown', (ev) => {
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(ev.key)) return;
+    ev.preventDefault();
+    setAuthRole(authRole === 'pro' ? 'client' : 'pro');
+    $('role-switch').querySelector('[aria-checked="true"]').focus();
+  });
+
+  const PRO_STEP_INDEX = { 'pro-verify': 2, 'pro-payment': 3, 'pro-listing': 4 };
+  const STEP_TITLES = { signup: 'auth-title', login: 'login-title', location: 'ob-loc-title', 'pro-verify': 'pv-title', 'pro-payment': 'pp-title', 'pro-listing': 'pl-title' };
+
+  /** Progression : 2 points (client) ou frise en 4 étapes (restaurateur). */
+  function updateProgress(step, mode) {
+    const proIndex = PRO_STEP_INDEX[step] || (step === 'signup' && authRole === 'pro' ? 1 : 0);
+    $('onboarding').dataset.flow = proIndex || (step === 'login' && authRole === 'pro') ? 'pro' : 'client';
+    $('pro-steps').hidden = !proIndex || mode === 'edit';
+    $('pro-steps').querySelectorAll('li').forEach((li) => {
+      const n = Number(li.dataset.pstep);
+      li.classList.toggle('is-done', n < proIndex);
+      li.classList.toggle('is-current', n === proIndex);
+      if (n === proIndex) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+    });
+    $('ob-progress').hidden = proIndex > 0 || step === 'login';
     $('ob-dot-1').classList.toggle('is-active', step === 'signup');
     $('ob-dot-2').classList.toggle('is-active', step === 'location');
-    $('onboarding').setAttribute('aria-labelledby', step === 'login' ? 'login-title' : step === 'location' ? 'ob-loc-title' : 'auth-title');
-    const focus = { signup: 'su-name', login: $('li-email').value ? 'li-password' : 'li-email', location: 'ob-allow' }[step];
+  }
+
+  /** Affiche une étape de l'écran de compte. mode 'edit' : modification de la fiche d'un restaurant déjà publié. */
+  function showAuthStep(step, { mode = 'create' } = {}) {
+    const ob = $('onboarding');
+    currentStep = step;
+    ob.hidden = false;
+    ob.classList.remove('is-leaving');
+    ob.dataset.mode = mode;
+    document.querySelectorAll('#onboarding .ob-step').forEach((el) => { el.hidden = el.dataset.step !== step; });
+    $('role-switch').hidden = !(step === 'signup' || step === 'login');
+    updateProgress(step, mode);
+    ob.setAttribute('aria-labelledby', STEP_TITLES[step]);
+    ob.scrollTop = 0;
+    if (step === 'pro-verify') enterVerifyStep();
+    if (step === 'pro-payment') renderPlan();
+    if (step === 'pro-listing') enterListingStep(mode);
+    const focus = { signup: 'su-name', login: $('li-email').value ? 'li-password' : 'li-email', location: 'ob-allow', 'pro-verify': 'pv-siret', 'pro-payment': 'pay-btn', 'pro-listing': 'pl-name' }[step];
     setTimeout(() => $(focus).focus({ preventScroll: true }), 350);
   }
 
@@ -1907,19 +2473,30 @@
   /** Ouvre la session (mémorisée si « Rester connecté » est coché). */
   function startSession(account, remember) {
     session.set(account.email);
-    store.write({ rememberedEmail: remember ? account.email : null, lastEmail: account.email });
+    store.write({ rememberedEmail: remember ? account.email : null, lastEmail: account.email, lastRole: account.role || 'client' });
     applyAccount(account);
+  }
+
+  /** Étape à reprendre pour un restaurateur dont l'inscription n'est pas terminée (null = terminée). */
+  function proStepFor(account) {
+    if (!account || account.role !== 'pro') return null;
+    return { verification: 'pro-verify', payment: 'pro-payment', listing: 'pro-listing' }[(account.pro || {}).status] || null;
   }
 
   $('form-signup').addEventListener('submit', async (ev) => {
     ev.preventDefault();
+    const role = authRole;
     const name = $('su-name').value.trim().replace(/\s+/g, ' ');
+    const lastName = $('su-lastname').value.trim().replace(/\s+/g, ' ');
     const email = $('su-email').value.trim().toLowerCase();
+    const phone = $('su-phone').value.trim();
     const password = $('su-password').value;
     let firstInvalid = null;
     const fail = (field, msg) => { setFieldError(field, msg); firstInvalid = firstInvalid || field; };
     if (name.length < 2) fail('su-name', 'Indiquez votre prénom (2 caractères minimum).');
+    if (role === 'pro' && lastName.length < 2) fail('su-lastname', 'Indiquez votre nom.');
     if (!EMAIL_RE.test(email)) fail('su-email', 'Adresse e-mail invalide.');
+    if (role === 'pro' && !PHONE_RE.test(compactPhone(phone))) fail('su-phone', 'Numéro de téléphone invalide (ex. : 06 12 34 56 78).');
     if (password.length < 8) fail('su-password', 'Le mot de passe doit contenir au moins 8 caractères.');
     if (firstInvalid) { $(firstInvalid).focus(); return; }
     if (accounts()[email]) {
@@ -1932,13 +2509,14 @@
     const btn = ev.submitter || $('form-signup').querySelector('[type=submit]');
     btn.disabled = true;
     const { salt, hash } = await hashPassword(password);
-    const account = { name, email, salt, hash, createdAt: new Date().toISOString() };
+    const account = { role, name, email, salt, hash, createdAt: new Date().toISOString() };
+    if (role === 'pro') Object.assign(account, { lastName, phone: formatPhone(phone), pro: { status: 'verification' } });
     store.write({ accounts: { ...accounts(), [email]: account } });
     try { localStorage.removeItem(CONFIG.legacyStorageKey); } catch (e) { /* ignore */ }
     startSession(account, $('su-remember').checked);
     btn.disabled = false;
     $('su-password').value = '';
-    showAuthStep('location');   // étape suivante : la localisation
+    showAuthStep(role === 'pro' ? 'pro-verify' : 'location');
   });
 
   $('form-login').addEventListener('submit', async (ev) => {
@@ -1962,21 +2540,43 @@
       $('li-password').select();
       return;
     }
+    // Le type de compte choisi doit correspondre au compte
+    const role = account.role || 'client';
+    if (role !== authRole) {
+      $('err-login').innerHTML = (role === 'pro' ? 'Ce compte est un compte restaurateur.' : 'Ce compte est un compte client.') +
+        ' <button class="link-btn" type="button" id="switch-role">Passer en mode ' + (role === 'pro' ? 'Restaurateur' : 'Client') + '</button>';
+      $('switch-role').addEventListener('click', () => { setAuthRole(role); $('form-login').requestSubmit(); });
+      return;
+    }
     $('li-password').value = '';
     startSession(account, $('li-remember').checked);
-    finishAuth({ fresh: false });
+    const step = proStepFor(account);
+    if (step) showAuthStep(step);       // inscription restaurateur à terminer
+    else finishAuth({ fresh: false });
   });
 
-  $('forgot-btn').addEventListener('click', () => {
+  /** Supprime un compte et tout ce qui lui appartient (restaurant, photos, justificatifs). */
+  async function deleteAccountData(email) {
+    const account = accounts()[email];
+    const all = accounts(); delete all[email];
+    const restos = restaurants();
+    const owned = Object.values(restos).filter((r) => r.ownerEmail === email);
+    owned.forEach((r) => { delete restos[r.id]; removeShopMarker(r.id); });
+    store.write({ accounts: all, restaurants: restos, rememberedEmail: null });
+    const fileIds = owned.flatMap((r) => r.photoIds || []).concat(Object.values((account && account.pro && account.pro.docs) || {}).map((d) => d.fileId));
+    try { await fileStore.remove(fileIds); } catch (e) { /* stockage indisponible */ }
+  }
+
+  $('forgot-btn').addEventListener('click', async () => {
     const email = $('li-email').value.trim().toLowerCase();
     const account = accounts()[email];
     if (!account) { $('err-login').textContent = 'Saisissez l\'e-mail du compte concerné.'; $('li-email').focus(); return; }
     // Sans serveur, aucun e-mail de réinitialisation ne peut être envoyé : on propose de recréer le compte
-    if (!window.confirm('Les comptes sont enregistrés uniquement sur cet appareil : le mot de passe ne peut pas être renvoyé.\n\nSupprimer le compte ' + email + ' pour en créer un nouveau ?')) return;
-    const all = accounts(); delete all[email];
-    store.write({ accounts: all, rememberedEmail: null });
+    if (!window.confirm('Les comptes sont enregistrés uniquement sur cet appareil : le mot de passe ne peut pas être renvoyé.\n\nSupprimer le compte ' + email + ' pour en créer un nouveau ?' + (account.role === 'pro' ? '\n\nLa fiche de votre restaurant sera également supprimée.' : ''))) return;
+    await deleteAccountData(email);
     $('su-email').value = email;
     $('su-name').value = account.name;
+    setAuthRole(account.role || 'client');
     showAuthStep('signup');
   });
 
@@ -1997,15 +2597,28 @@
     finishAuth({ fresh: true, located: false });
   });
 
-  /** Ferme l'écran de compte et lance la carte. */
-  function finishAuth({ fresh, located = false }) {
-    const ob = $('onboarding');
-    ob.classList.add('is-leaving');
-    setTimeout(() => { ob.hidden = true; }, 550);
-    startApp();
-    if (fresh && !located) setTimeout(() => toast('Activez la localisation à tout moment avec le bouton en haut à droite.'), 2200);
+  /** Ferme l'écran de compte et lance la carte (focus : restaurant à afficher). */
+  function finishAuth({ fresh, located = false, focus = null }) {
+    hideOnboarding();
+    startApp({ focus });
+    if (fresh && !located && !focus) setTimeout(() => toast('Activez la localisation à tout moment avec le bouton en haut à droite.'), 2200);
     if (!fresh) resumeLocation();
   }
+  function hideOnboarding() {
+    const ob = $('onboarding');
+    ob.classList.add('is-leaving');
+    currentStep = null;
+    setTimeout(() => { if (ob.classList.contains('is-leaving')) ob.hidden = true; }, 550);
+  }
+
+  /** Restaurateur : « Terminer plus tard » → déconnexion, reprise à la prochaine connexion. */
+  document.querySelectorAll('[data-pro-later]').forEach((btn) => btn.addEventListener('click', async () => {
+    await discardDraftPhotos();
+    session.set(null);
+    store.write({ rememberedEmail: null, lastRole: 'pro' });
+    location.reload();
+  }));
+  document.querySelectorAll('[data-pro-back]').forEach((btn) => btn.addEventListener('click', () => showAuthStep(btn.dataset.proBack)));
 
   /** Utilisateur connecté qui avait déjà accepté la localisation : on la reprend sans redemander. */
   function resumeLocation() {
@@ -2024,6 +2637,495 @@
       resume();
     }
   }
+
+  /* =====================================================================
+     10 bis. RESTAURATEURS : vérification, paiement, fiche restaurant
+     ===================================================================== */
+
+  // Brouillon en cours (non encore enregistré dans le compte)
+  const proDraft = { company: null, photos: [], addedPhotos: [], removedPhotos: [], address: null, category: null };
+  const photoUrls = new Map();   // id de photo → URL d'aperçu
+
+  /* ---------- Étape 2 : vérification SIRET + justificatifs ---------- */
+
+  function enterVerifyStep() {
+    const me = currentUser();
+    const pro = (me && me.pro) || {};
+    renderDocs(pro.docs || {});
+    if (pro.siret && !onlyDigits($('pv-siret').value)) $('pv-siret').value = formatSiret(pro.siret);
+    proDraft.company = pro.company && pro.company.siret === onlyDigits($('pv-siret').value) ? pro.company : proDraft.company;
+    if (proDraft.company) showVerifyResult({ ok: true, company: proDraft.company });
+    $('pv-honor').checked = !!pro.honorAt;
+  }
+
+  /** Lignes des justificatifs (une par type de document). */
+  function renderDocs(docs) {
+    const box = $('pv-docs');
+    box.textContent = '';
+    DOC_TYPES.forEach((type) => {
+      const meta = docs[type.key];
+      const row = document.createElement('div');
+      row.className = 'doc' + (meta ? ' has-file' : '');
+      row.dataset.doc = type.key;
+      row.innerHTML =
+        '<span class="doc-ico" aria-hidden="true"></span>' +
+        '<div class="doc-info"><b></b><small></small></div>' +
+        '<label class="doc-btn"><input type="file" accept=".pdf,application/pdf,image/jpeg,image/png" hidden /><span></span></label>';
+      row.querySelector('.doc-ico').textContent = meta ? '✅' : type.icon;
+      const title = row.querySelector('b');
+      title.textContent = type.label;
+      const tag = document.createElement('span');
+      tag.className = 'doc-tag ' + (type.required ? 'req' : 'opt');
+      tag.textContent = type.required ? 'Obligatoire' : 'Facultatif';
+      title.appendChild(tag);
+      row.querySelector('small').textContent = meta ? meta.name + ' · ' + formatSize(meta.size) : type.detail;
+      row.querySelector('.doc-btn span').textContent = meta ? 'Remplacer' : 'Ajouter';
+      row.querySelector('input').setAttribute('aria-label', type.label);
+      row.querySelector('input').addEventListener('change', (ev) => onDocSelected(type, ev.target.files[0], row));
+      box.appendChild(row);
+    });
+  }
+
+  async function onDocSelected(type, file, row) {
+    if (!file) return;
+    const okType = /^(application\/pdf|image\/jpeg|image\/png)$/.test(file.type) || /\.(pdf|jpe?g|png)$/i.test(file.name);
+    $('err-pro-verify').textContent = '';
+    if (!okType) { $('err-pro-verify').textContent = '« ' + file.name + ' » : format non accepté (PDF, JPG ou PNG).'; return; }
+    if (file.size > MAX_DOC_SIZE) { $('err-pro-verify').textContent = '« ' + file.name + ' » dépasse 10 Mo.'; return; }
+    const fileId = 'doc-' + uid();
+    try {
+      await fileStore.put(fileId, file);
+    } catch (e) {
+      $('err-pro-verify').textContent = 'Impossible d\'enregistrer ce fichier sur cet appareil (espace de stockage insuffisant ?).';
+      return;
+    }
+    // Relecture APRÈS l'enregistrement : un autre justificatif a pu être ajouté entre-temps
+    const me = currentUser();
+    const docs = { ...((me.pro && me.pro.docs) || {}) };
+    const previous = docs[type.key];
+    docs[type.key] = { fileId, name: file.name, size: file.size, type: file.type, addedAt: new Date().toISOString() };
+    updatePro(me.email, { docs });
+    if (previous) fileStore.remove(previous.fileId).catch(() => {});
+    renderDocs(docs);
+  }
+
+  // Saisie du SIRET : groupes de chiffres « 123 456 789 00012 » ; toute modification annule la vérification
+  $('pv-siret').addEventListener('input', () => {
+    const input = $('pv-siret');
+    const formatted = formatSiret(input.value);
+    if (formatted !== input.value) input.value = formatted;
+    if (proDraft.company && proDraft.company.siret !== onlyDigits(input.value)) {
+      proDraft.company = null;
+      $('pv-result').hidden = true;
+    }
+  });
+  $('pv-siret').addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); runSiretCheck(); } });
+  $('pv-check').addEventListener('click', () => runSiretCheck());
+
+  async function runSiretCheck() {
+    const me = currentUser();
+    const siret = onlyDigits($('pv-siret').value);
+    setFieldError('pv-siret', '');
+    $('err-pro-verify').textContent = '';
+    proDraft.company = null;
+    $('pv-result').hidden = true;
+    if (siret.length !== 14) { setFieldError('pv-siret', 'Le numéro SIRET comporte 14 chiffres (9 chiffres du SIREN + 5 chiffres).'); return; }
+    if (!isValidSiret(siret)) { setFieldError('pv-siret', 'Ce numéro SIRET n\'est pas valide (clé de contrôle incorrecte). Recopiez-le depuis votre Kbis.'); return; }
+    const taken = Object.values(accounts()).some((a) => a.email !== me.email && a.pro && a.pro.siret === siret && a.pro.verifiedAt);
+    if (taken) { setFieldError('pv-siret', 'Ce SIRET est déjà associé à un autre compte restaurateur.'); return; }
+
+    const btn = $('pv-check');
+    btn.disabled = true;
+    btn.textContent = 'Vérification…';
+    showVerifyResult({ pending: true });
+    const result = await lookupSiret(siret);
+    btn.disabled = false;
+    btn.textContent = 'Vérifier';
+    // L'utilisateur a pu modifier le numéro pendant la vérification
+    if (onlyDigits($('pv-siret').value) !== siret) { $('pv-result').hidden = true; return; }
+    showVerifyResult(result);
+    if (result.ok) {
+      proDraft.company = result.company;
+      updatePro(me.email, { siret, company: result.company, verifiedAt: new Date().toISOString() });
+    } else {
+      updatePro(me.email, { siret, company: null, verifiedAt: null });
+    }
+  }
+
+  /** Encadré du résultat de la vérification Sirene. */
+  function showVerifyResult(result) {
+    const card = $('pv-result');
+    card.hidden = false;
+    card.className = 'verify-card ' + (result.pending ? 'is-wait' : result.ok ? 'is-ok' : 'is-ko');
+    card.textContent = '';
+    const h = document.createElement('h4');
+    card.appendChild(h);
+    const p = (text) => { const el = document.createElement('p'); el.textContent = text; card.appendChild(el); };
+    if (result.pending) { h.textContent = 'Interrogation du répertoire Sirene…'; return; }
+    const c = result.company;
+    const messages = {
+      notfound: ['Établissement introuvable', 'Aucun établissement ne correspond à ce SIRET dans le répertoire Sirene. Vérifiez le numéro indiqué sur votre Kbis.'],
+      closed: ['Établissement fermé', 'Le répertoire Sirene indique que cet établissement n\'est plus en activité. Seuls les établissements actifs peuvent s\'inscrire.'],
+      naf: ['Activité non éligible', 'L\'activité déclarée ne relève pas de la restauration. Activités acceptées : ' + Object.values(NAF_RESTAURATION).join(', ').toLowerCase() + '. Si votre activité a changé, mettez à jour votre déclaration auprès de l\'INSEE.'],
+      rate: ['Trop de vérifications', 'Trop de vérifications en peu de temps. Patientez quelques secondes puis réessayez.'],
+      network: ['Vérification momentanément indisponible', 'Le répertoire Sirene n\'a pas pu être joint. Vérifiez votre connexion internet puis cliquez à nouveau sur « Vérifier ».'],
+    };
+    h.textContent = result.ok ? '✓ Établissement vérifié' : '✕ ' + messages[result.code][0];
+    if (c) {
+      const dl = document.createElement('dl');
+      const row = (k, v) => { if (!v) return; const dt = document.createElement('dt'); dt.textContent = k; const dd = document.createElement('dd'); dd.textContent = v; dl.append(dt, dd); };
+      row('Entreprise', c.legalName);
+      row('Enseigne', c.tradeName);
+      row('SIRET', formatSiret(c.siret));
+      row('Adresse', c.address);
+      row('Activité', c.naf + (c.nafLabel ? ' — ' + c.nafLabel : ''));
+      row('État', result.code === 'closed' ? 'Fermé' : 'En activité');
+      card.appendChild(dl);
+    }
+    if (result.ok) p('Source : répertoire Sirene de l\'INSEE (API Recherche d\'entreprises).');
+    else p(messages[result.code][1]);
+  }
+
+  $('form-pro-verify').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const me = currentUser();
+    const pro = me.pro || {};
+    const errors = [];
+    const siret = onlyDigits($('pv-siret').value);
+    if (!proDraft.company || proDraft.company.siret !== siret) {
+      errors.push('Faites vérifier votre numéro SIRET (bouton « Vérifier »).');
+      if (!$('err-pv-siret').textContent) setFieldError('pv-siret', 'SIRET non vérifié.');
+    }
+    const docs = pro.docs || {};
+    const missing = DOC_TYPES.filter((t) => t.required && !docs[t.key]);
+    document.querySelectorAll('#pv-docs .doc').forEach((row) => row.classList.toggle('has-error', missing.some((t) => t.key === row.dataset.doc)));
+    if (missing.length) errors.push('Ajoutez les justificatifs obligatoires : ' + missing.map((t) => t.label.split(',')[0].toLowerCase()).join(' ; ') + '.');
+    if (!$('pv-honor').checked) errors.push('Cochez l\'attestation sur l\'honneur.');
+    if (errors.length) { $('err-pro-verify').textContent = errors.join(' '); return; }
+
+    const paid = pro.payment && pro.payment.status === 'paid';
+    const status = pro.status === 'published' ? 'published' : paid ? 'listing' : 'payment';
+    updatePro(me.email, { status, honorAt: pro.honorAt || new Date().toISOString() });
+    showAuthStep(paid ? 'pro-listing' : 'pro-payment');
+  });
+
+  /* ---------- Étape 3 : paiement de l'abonnement ---------- */
+
+  const formatEuro = (n) => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+  const isDemoPayment = () => !CONFIG.proPlan.stripePaymentLink;
+
+  function renderPlan() {
+    const plan = CONFIG.proPlan;
+    $('plan-name').textContent = plan.name;
+    const price = $('plan-price');
+    price.textContent = plan.amount == null ? 'Montant à définir' : formatEuro(plan.amount);
+    if (plan.amount != null) { const per = document.createElement('small'); per.textContent = ' / ' + plan.period; price.appendChild(per); }
+    $('pay-notice').textContent = isDemoPayment()
+      ? 'Mode démonstration : aucun paiement réel n\'est effectué. Le montant et le moyen de paiement seront configurés ultérieurement.'
+      : 'Vous allez être redirigé vers la page de paiement sécurisée Stripe.';
+    $('pay-btn').textContent = isDemoPayment() ? 'Valider l\'abonnement (démonstration)' : 'Payer par carte bancaire';
+    $('err-pro-payment').textContent = '';
+  }
+
+  $('pay-btn').addEventListener('click', () => {
+    const me = currentUser();
+    if (isDemoPayment()) { markPaid(me.email, { mode: 'demo', reference: 'DEMO-' + Date.now().toString(36).toUpperCase() }); return; }
+    // Stripe Payment Link : e-mail prérempli et référence du compte, retour sur le site avec ?paiement=ok
+    const url = new URL(CONFIG.proPlan.stripePaymentLink);
+    url.searchParams.set('prefilled_email', me.email);
+    url.searchParams.set('client_reference_id', onlyDigits((me.pro && me.pro.siret) || '') || 'compte');
+    location.href = url.toString();
+  });
+
+  function markPaid(email, info) {
+    const pro = accounts()[email].pro || {};
+    updatePro(email, {
+      status: pro.status === 'published' ? 'published' : 'listing',
+      payment: { status: 'paid', paidAt: new Date().toISOString(), amount: CONFIG.proPlan.amount, period: CONFIG.proPlan.period, ...info },
+    });
+    showAuthStep('pro-listing');
+    toast(info.mode === 'demo' ? 'Abonnement activé (démonstration).' : 'Paiement confirmé, merci !');
+  }
+
+  /* ---------- Étape 4 : fiche du restaurant ---------- */
+
+  const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+  const DAY_SHORT = { 0: 'Dim', 1: 'Lun', 2: 'Mar', 3: 'Mer', 4: 'Jeu', 5: 'Ven', 6: 'Sam' };
+
+  // Sélecteur de catégorie et jours de fermeture (construits une fois)
+  Object.entries(CATEGORIES).forEach(([key, cat]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.cat = key; b.setAttribute('aria-checked', 'false');
+    b.textContent = cat.emoji + ' ' + cat.label;
+    $('pl-category').appendChild(b);
+  });
+  $('pl-category').addEventListener('click', (ev) => { const b = ev.target.closest('[data-cat]'); if (b) setListingCategory(b.dataset.cat); });
+  function setListingCategory(key) {
+    proDraft.category = key;
+    $('pl-category').querySelectorAll('[data-cat]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.cat === key)));
+    setFieldError('pl-category', '');
+  }
+  DAY_ORDER.forEach((d) => {
+    const label = document.createElement('label');
+    label.innerHTML = '<input type="checkbox" /><span class="day"></span>';
+    label.querySelector('input').value = String(d);
+    label.querySelector('input').setAttribute('aria-label', 'Fermé le ' + DAYS[d]);
+    label.querySelector('.day').textContent = DAY_SHORT[d];
+    $('pl-closed').appendChild(label);
+  });
+  ['1', '2'].forEach((n) => $('pl-h' + n + '-on').addEventListener('change', syncHoursInputs));
+  function syncHoursInputs() {
+    ['1', '2'].forEach((n) => { const on = $('pl-h' + n + '-on').checked; $('pl-h' + n + '-from').disabled = !on; $('pl-h' + n + '-to').disabled = !on; });
+  }
+  $('pl-desc').addEventListener('input', () => { $('pl-desc-count').textContent = $('pl-desc').value.length + ' / 600'; });
+
+  const myRestaurant = (account = currentUser()) => (account && account.pro && account.pro.restaurantId ? restaurants()[account.pro.restaurantId] || null : null);
+
+  /** Préremplit le formulaire : fiche existante, sinon données Sirene. */
+  function enterListingStep(mode) {
+    const me = currentUser();
+    const pro = me.pro || {};
+    const company = pro.company || {};
+    const r = myRestaurant(me);
+    proDraft.addedPhotos = []; proDraft.removedPhotos = [];
+    proDraft.photos = r ? [...(r.photoIds || [])] : [];
+    proDraft.address = r ? { label: r.address, coords: r.coords } : null;
+    $('pl-name').value = r ? r.name : (company.tradeName || company.legalName || '').replace(/\s+\(.*\)$/, '');
+    setListingCategory(r ? r.category : null);
+    $('pl-desc').value = r ? r.description : '';
+    $('pl-desc-count').textContent = $('pl-desc').value.length + ' / 600';
+    $('pl-address').value = r ? r.address : '';
+    $('pl-address-status').textContent = r ? '📍 Adresse localisée sur la carte' : '';
+    $('pl-use-sirene').hidden = !company.address || !!r;
+    const [s1, s2] = r ? r.hours : [['11:30', '14:30'], ['18:30', '22:30']];
+    $('pl-h1-on').checked = !!s1; if (s1) { $('pl-h1-from').value = s1[0]; $('pl-h1-to').value = s1[1]; }
+    $('pl-h2-on').checked = !!s2; if (s2) { $('pl-h2-from').value = s2[0]; $('pl-h2-to').value = s2[1]; }
+    syncHoursInputs();
+    const closed = r ? r.closedOn : [];
+    $('pl-closed').querySelectorAll('input').forEach((i) => { i.checked = closed.includes(Number(i.value)); });
+    $('pl-promo').value = r ? r.promo || '' : '';
+    $('pl-phone').value = r ? r.phone || '' : (me.phone || '');
+    ['pl-name', 'pl-category', 'pl-desc', 'pl-photos', 'pl-address', 'pl-hours', 'pl-phone'].forEach((f) => setFieldError(f, ''));
+    $('err-pro-listing').textContent = '';
+    renderPhotos();
+  }
+
+  /* Photos : redimensionnées puis stockées sur l'appareil */
+  let photoRender = 0;
+  async function renderPhotos() {
+    const token = ++photoRender;
+    const ids = [...proDraft.photos];
+    // 1) Préparer les aperçus (lecture asynchrone)…
+    for (const id of ids) {
+      if (photoUrls.has(id)) continue;
+      const blob = await fileStore.get(id).catch(() => null);
+      if (blob) photoUrls.set(id, URL.createObjectURL(blob));
+    }
+    if (token !== photoRender) return;      // un affichage plus récent a été demandé
+    // 2) … puis mettre à jour la grille en une fois
+    const grid = $('pl-photos');
+    const add = $('pl-photo-add');
+    grid.querySelectorAll('.photo-item').forEach((el) => el.remove());
+    ids.filter((id) => photoUrls.has(id)).forEach((id, i) => {
+      const item = document.createElement('div');
+      item.className = 'photo-item';
+      item.innerHTML = '<img alt="" /><button class="photo-del" type="button">×</button>';
+      item.querySelector('img').src = photoUrls.get(id);
+      item.querySelector('img').alt = 'Photo ' + (i + 1);
+      item.querySelector('.photo-del').setAttribute('aria-label', 'Retirer la photo ' + (i + 1));
+      item.querySelector('.photo-del').addEventListener('click', () => removePhoto(id));
+      if (i === 0) { const tag = document.createElement('span'); tag.className = 'photo-main'; tag.textContent = 'Principale'; item.appendChild(tag); }
+      grid.insertBefore(item, add);
+    });
+    add.hidden = ids.length >= MAX_PHOTOS;
+  }
+
+  $('pl-photo-input').addEventListener('change', async (ev) => {
+    const files = [...ev.target.files];
+    ev.target.value = '';
+    setFieldError('pl-photos', '');
+    const room = MAX_PHOTOS - proDraft.photos.length;
+    if (files.length > room) setFieldError('pl-photos', 'Maximum ' + MAX_PHOTOS + ' photos : seules les ' + room + ' premières ont été ajoutées.');
+    $('pl-photo-add').classList.add('is-busy');
+    for (const file of files.slice(0, room)) {
+      if (!/^image\//.test(file.type)) { setFieldError('pl-photos', '« ' + file.name + ' » n\'est pas une image.'); continue; }
+      try {
+        const blob = await resizePhoto(file);
+        const id = 'photo-' + uid();
+        await fileStore.put(id, blob);
+        proDraft.photos.push(id);
+        proDraft.addedPhotos.push(id);
+      } catch (e) {
+        setFieldError('pl-photos', '« ' + file.name + ' » : format d\'image non pris en charge (utilisez JPG ou PNG).');
+      }
+    }
+    $('pl-photo-add').classList.remove('is-busy');
+    renderPhotos();
+  });
+
+  function removePhoto(id) {
+    proDraft.photos = proDraft.photos.filter((p) => p !== id);
+    if (proDraft.addedPhotos.includes(id)) {
+      proDraft.addedPhotos = proDraft.addedPhotos.filter((p) => p !== id);
+      fileStore.remove(id).catch(() => {});
+    } else {
+      proDraft.removedPhotos.push(id);
+    }
+    const url = photoUrls.get(id);
+    if (url) { URL.revokeObjectURL(url); photoUrls.delete(id); }
+    renderPhotos();
+  }
+
+  /** Abandon de la saisie : les photos ajoutées mais non publiées sont supprimées. */
+  async function discardDraftPhotos() {
+    const ids = proDraft.addedPhotos;
+    proDraft.addedPhotos = [];
+    await fileStore.remove(ids).catch(() => {});
+  }
+
+  /* Adresse : suggestions de la Base Adresse Nationale (Géoplateforme IGN) */
+  let addrTimer = null, addrSeq = 0, addrResults = [], addrIndex = -1;
+  const addrInput = $('pl-address'), addrList = $('pl-address-list');
+
+  function closeAddrList() { addrList.hidden = true; addrInput.setAttribute('aria-expanded', 'false'); addrIndex = -1; }
+  function renderAddrList(items, message) {
+    addrList.textContent = '';
+    addrResults = items;
+    addrIndex = -1;
+    if (message) { const li = document.createElement('li'); li.setAttribute('aria-disabled', 'true'); li.textContent = message; addrList.appendChild(li); }
+    items.forEach((a, i) => {
+      const li = document.createElement('li');
+      li.setAttribute('role', 'option');
+      li.id = 'addr-opt-' + i;
+      li.textContent = a.name;
+      const small = document.createElement('small'); small.textContent = a.city; li.appendChild(small);
+      li.addEventListener('mousedown', (ev) => { ev.preventDefault(); chooseAddress(a); });
+      addrList.appendChild(li);
+    });
+    addrList.hidden = !items.length && !message;
+    addrInput.setAttribute('aria-expanded', String(!addrList.hidden));
+  }
+  function chooseAddress(a) {
+    proDraft.address = { label: a.label, coords: a.coords };
+    addrInput.value = a.label;
+    $('pl-address-status').textContent = '📍 Adresse localisée sur la carte';
+    setFieldError('pl-address', '');
+    closeAddrList();
+  }
+  addrInput.addEventListener('input', () => {
+    proDraft.address = null;
+    $('pl-address-status').textContent = '';
+    clearTimeout(addrTimer);
+    const q = addrInput.value.trim();
+    if (q.length < 3) { closeAddrList(); return; }
+    addrTimer = setTimeout(async () => {
+      const seq = ++addrSeq;
+      try {
+        const items = await geocode(q);
+        if (seq !== addrSeq) return;
+        renderAddrList(items, items.length ? '' : 'Aucune adresse trouvée à La Roche-sur-Yon');
+      } catch (e) {
+        if (seq === addrSeq) renderAddrList([], 'Recherche d\'adresse momentanément indisponible');
+      }
+    }, 300);
+  });
+  addrInput.addEventListener('keydown', (ev) => {
+    if (addrList.hidden || !addrResults.length) return;
+    if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+      ev.preventDefault();
+      addrIndex = (addrIndex + (ev.key === 'ArrowDown' ? 1 : -1) + addrResults.length) % addrResults.length;
+      addrList.querySelectorAll('[role=option]').forEach((li, i) => li.setAttribute('aria-selected', String(i === addrIndex)));
+      addrInput.setAttribute('aria-activedescendant', 'addr-opt-' + addrIndex);
+    } else if (ev.key === 'Enter' && addrIndex >= 0) {
+      ev.preventDefault();
+      chooseAddress(addrResults[addrIndex]);
+    } else if (ev.key === 'Escape') {
+      closeAddrList();
+    }
+  });
+  addrInput.addEventListener('blur', () => setTimeout(closeAddrList, 150));
+
+  $('pl-use-sirene').addEventListener('click', async () => {
+    const company = (currentUser().pro || {}).company || {};
+    if (company.coords && isInBounds(company.coords)) { chooseAddress({ label: company.address, coords: company.coords }); return; }
+    try {
+      const [first] = await geocode(company.address);
+      if (first) chooseAddress(first);
+      else setFieldError('pl-address', 'L\'adresse enregistrée au répertoire Sirene n\'est pas située à La Roche-sur-Yon.');
+    } catch (e) { setFieldError('pl-address', 'Recherche d\'adresse momentanément indisponible.'); }
+  });
+
+  $('pl-cancel').addEventListener('click', async () => {
+    await discardDraftPhotos();
+    hideOnboarding();
+  });
+
+  $('form-pro-listing').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const me = currentUser();
+    const pro = me.pro || {};
+    const mode = $('onboarding').dataset.mode;
+    const name = $('pl-name').value.trim().replace(/\s+/g, ' ');
+    const description = $('pl-desc').value.trim();
+    const phone = $('pl-phone').value.trim();
+    let firstInvalid = null;
+    const fail = (field, msg) => { setFieldError(field, msg); firstInvalid = firstInvalid || field; };
+    if (name.length < 2) fail('pl-name', 'Indiquez le nom de votre restaurant.');
+    if (!proDraft.category) fail('pl-category', 'Choisissez une catégorie.');
+    if (description.length < 20) fail('pl-desc', 'Décrivez votre restaurant en quelques phrases (20 caractères minimum).');
+    if (!proDraft.photos.length) fail('pl-photos', 'Ajoutez au moins une photo.');
+
+    // Adresse : suggestion choisie, sinon première correspondance trouvée
+    if (!proDraft.address && addrInput.value.trim().length >= 3) {
+      try { const [first] = await geocode(addrInput.value.trim()); if (first) chooseAddress(first); } catch (e) { /* message ci-dessous */ }
+    }
+    if (!proDraft.address) fail('pl-address', 'Choisissez l\'adresse de votre restaurant dans la liste des suggestions (La Roche-sur-Yon).');
+    else if (!isInBounds(proDraft.address.coords)) fail('pl-address', 'L\'adresse doit se situer à La Roche-sur-Yon.');
+
+    const hours = [];
+    ['1', '2'].forEach((n) => {
+      if (!$('pl-h' + n + '-on').checked) return;
+      const from = $('pl-h' + n + '-from').value, to = $('pl-h' + n + '-to').value;
+      if (!from || !to || from === to) fail('pl-hours', 'Indiquez une heure d\'ouverture et de fermeture différentes.');
+      else hours.push([from, to]);
+    });
+    const closedOn = [...$('pl-closed').querySelectorAll('input:checked')].map((i) => Number(i.value));
+    if (!hours.length && !firstInvalid) fail('pl-hours', 'Activez au moins un service.');
+    if (closedOn.length === 7) fail('pl-hours', 'Votre restaurant ne peut pas être fermé tous les jours.');
+    if (phone && !PHONE_RE.test(compactPhone(phone))) fail('pl-phone', 'Numéro de téléphone invalide.');
+    if (firstInvalid) {
+      $('err-pro-listing').textContent = 'Certaines informations sont à compléter.';
+      const target = $(firstInvalid) || $('field-' + firstInvalid);
+      ($('field-' + firstInvalid) || target).scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+      if (target && target.focus) target.focus({ preventScroll: true });
+      return;
+    }
+
+    const old = myRestaurant(me);
+    const now = new Date().toISOString();
+    const restaurant = {
+      id: old ? old.id : 'resto-' + pro.siret,
+      ownerEmail: me.email, siret: pro.siret,
+      name, category: proDraft.category, description,
+      photoIds: [...proDraft.photos],
+      address: proDraft.address.label, coords: proDraft.address.coords,
+      hours, closedOn, promo: $('pl-promo').value.trim(), phone: phone ? formatPhone(phone) : '',
+      published: true, publishedAt: old ? old.publishedAt : now, updatedAt: now,
+    };
+    store.write({ restaurants: { ...restaurants(), [restaurant.id]: restaurant } });
+    await fileStore.remove(proDraft.removedPhotos).catch(() => {});
+    proDraft.removedPhotos = []; proDraft.addedPhotos = [];
+    updatePro(me.email, { status: 'published', restaurantId: restaurant.id });
+
+    if (mode === 'edit') {
+      hideOnboarding();
+      whenMapReady(() => { upsertShopMarker(restaurantToShop(restaurant)); openShop(restaurant.id); });
+      toast('Votre fiche a été mise à jour.');
+    } else {
+      finishAuth({ fresh: true, focus: restaurant.id });
+      setTimeout(() => toast('Félicitations ! « ' + restaurant.name + ' » est maintenant visible sur la carte.'), 1200);
+    }
+  });
 
   /* ---------- Profil ---------- */
 
@@ -2044,15 +3146,43 @@
     $('profile-locate').hidden = state === 'active' || state === 'unavailable';
   }
 
+  /** Espace restaurateur dans le profil. */
+  function renderProDashboard(account) {
+    const isPro = account.role === 'pro';
+    $('pro-dash').hidden = !isPro;
+    if (!isPro) return;
+    const pro = account.pro || {};
+    const r = myRestaurant(account);
+    const date = (iso) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    $('pd-name').textContent = r ? r.name : '—';
+    $('pd-status').textContent = r && r.published ? 'En ligne sur la carte' : 'Inscription à terminer';
+    $('pd-siret').textContent = pro.siret ? formatSiret(pro.siret) : '—';
+    $('pd-plan').textContent = pro.payment && pro.payment.status === 'paid'
+      ? 'Actif depuis le ' + date(pro.payment.paidAt) + (pro.payment.mode === 'demo' ? ' (démonstration)' : '')
+      : 'Non souscrit';
+    $('pd-show').hidden = !r;
+  }
+
   $('profile-btn').addEventListener('click', () => {
     const account = currentUser();
     if (!account) return;
     $('profile-avatar').textContent = initial(account.name);
-    $('profile-name').textContent = account.name;
-    $('profile-email').textContent = account.email;
+    $('profile-name').textContent = account.role === 'pro' && account.lastName ? account.name + ' ' + account.lastName : account.name;
+    $('profile-email').textContent = account.email + (account.role === 'pro' ? ' · Restaurateur' : '');
     $('profile-since').textContent = new Date(account.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
     updateProfileGeo();
+    renderProDashboard(account);
     openPanel($('profile-sheet'), { modal: true });
+  });
+  $('pd-edit').addEventListener('click', () => {
+    closePanel($('profile-sheet'));
+    const step = proStepFor(currentUser());
+    showAuthStep(step || 'pro-listing', { mode: step ? 'create' : 'edit' });
+  });
+  $('pd-show').addEventListener('click', () => {
+    const r = myRestaurant();
+    closePanel($('profile-sheet'));
+    if (r) whenMapReady(() => openShop(r.id));
   });
   $('profile-locate').addEventListener('click', () => {
     closePanel($('profile-sheet'));
@@ -2063,12 +3193,12 @@
     store.write({ rememberedEmail: null });
     location.reload();   // retour à l'écran de connexion
   });
-  $('profile-delete').addEventListener('click', () => {
+  $('profile-delete').addEventListener('click', async () => {
     const account = currentUser();
-    if (!account || !window.confirm('Supprimer définitivement votre compte de cet appareil ?')) return;
-    const all = accounts(); delete all[account.email];
+    if (!account || !window.confirm('Supprimer définitivement votre compte de cet appareil ?' + (account.role === 'pro' ? '\n\nLa fiche de votre restaurant sera retirée de la carte.' : ''))) return;
+    await deleteAccountData(account.email);
     session.set(null);
-    store.write({ accounts: all, rememberedEmail: null, lastEmail: null });
+    store.write({ lastEmail: null });
     location.reload();
   });
 
@@ -2076,10 +3206,14 @@
      11. LANCEMENT DE LA CARTE APRÈS CONNEXION
      ===================================================================== */
 
-  function startApp() {
+  function startApp({ focus = null } = {}) {
     document.body.classList.add('ui-ready');
     whenMapReady(() => {
       view.setPadding(basePadding());
+      if (focus) {
+        const r = restaurants()[focus];
+        if (r) { upsertShopMarker(restaurantToShop(r)); openShop(r.id); return; }
+      }
       const target = Geo.position && isInBounds(Geo.position) ? Geo.position : CONFIG.center;
       if (Geo.position && isInBounds(Geo.position)) setFollow(true);
       view.flyTo({ center: target, zoom: CONFIG.heroZoom, duration: 2200 });
@@ -2089,22 +3223,36 @@
   /* =====================================================================
      12. DÉMARRAGE
      1re visite → création de compte ; compte existant non connecté → connexion ;
-     session ouverte (ou « Rester connecté ») → carte directement.
+     session ouverte (ou « Rester connecté ») → carte directement ;
+     restaurateur dont l'inscription n'est pas terminée → reprise à la bonne étape.
      ===================================================================== */
 
-  window.RocheStreetFood = { view: null, Geo, SHOPS, getStatus, setTheme };
+  window.RocheStreetFood = { view: null, Geo, SHOPS, getStatus, setTheme, isValidSiret, restaurants };
 
   setTheme(currentTheme());
   applyLayout();
   setLocateState('idle');
 
   const user = currentUser();
+  const params = new URLSearchParams(location.search);
+  if (params.has('paiement')) history.replaceState(null, '', location.pathname + location.hash);
+
   if (user) {
     session.set(user.email);
     applyAccount(user);
-    startApp();
-    resumeLocation();
+    setAuthRole(user.role || 'client');
+    // Retour de la page de paiement Stripe
+    // (en production, la confirmation doit venir d'un serveur via un webhook Stripe)
+    if (params.get('paiement') === 'ok' && !isDemoPayment() && user.pro && user.pro.status === 'payment') {
+      markPaid(user.email, { mode: 'stripe', reference: params.get('session_id') || '' });
+    } else if (proStepFor(user)) {
+      showAuthStep(proStepFor(user));
+    } else {
+      startApp();
+      resumeLocation();
+    }
   } else if (Object.keys(accounts()).length > 0) {
+    setAuthRole(store.read().lastRole || 'client');
     $('li-email').value = store.read().lastEmail || '';
     showAuthStep('login');
   } else {
@@ -2113,6 +3261,7 @@
       const legacy = JSON.parse(localStorage.getItem(CONFIG.legacyStorageKey) || '{}').account;
       if (legacy) { $('su-name').value = legacy.name || ''; $('su-email').value = legacy.email || ''; }
     } catch (e) { /* ignore */ }
+    setAuthRole('client');
     showAuthStep('signup');
   }
 

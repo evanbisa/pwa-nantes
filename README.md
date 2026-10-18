@@ -12,6 +12,42 @@ Tout le site tient dans un seul fichier : `index.html`.
 - Demande de la localisation juste après l'inscription ; si elle est refusée, le bouton en haut à droite la redemande.
 - Carte Google Maps (avec une clé API, voir ci-dessous), à plat (sans 3D), en mode jour ou nuit.
 - Mise en page adaptée : téléphone (filtres en bas, fiches qui montent du bas) et ordinateur (panneau latéral avec recherche et liste).
+- Espace restaurateur : choix « Client / Restaurateur » à l'inscription et à la connexion, puis inscription en 4 étapes (voir ci-dessous).
+
+## Inscription des restaurateurs
+
+1. **Compte** : prénom, nom, e-mail et téléphone professionnels, mot de passe.
+2. **Vérification** :
+   - le numéro **SIRET** est contrôlé (clé de contrôle), puis interrogé dans le répertoire officiel **Sirene de l'INSEE**
+     via l'API publique [Recherche d'entreprises](https://recherche-entreprises.api.gouv.fr) : l'établissement doit exister,
+     être **en activité** et avoir un **code NAF de restauration** (56.10A/B/C, 56.21Z, 56.30Z, 10.71C/D, 10.52Z, 47.24Z, 47.81Z) ;
+   - justificatifs : **Kbis** (ou avis de situation Sirene / extrait D1) et **attestation de formation à l'hygiène alimentaire (HACCP)**
+     obligatoires ; récépissé de déclaration DDPP et licence facultatifs ;
+   - attestation sur l'honneur.
+3. **Paiement de l'abonnement** (voir ci-dessous).
+4. **Fiche restaurant** : nom, catégorie, description, 1 à 6 photos, adresse (suggestions de la Base Adresse Nationale via la
+   [Géoplateforme de l'IGN](https://data.geopf.fr/geocodage/search)), horaires, offre du moment, téléphone → publication sur la carte.
+
+Le restaurateur retrouve ensuite son espace dans le profil (statut, SIRET, abonnement, « Modifier ma fiche »).
+Une inscription interrompue (« Terminer plus tard ») reprend à la bonne étape à la connexion suivante.
+
+### Régler l'abonnement
+
+Dans `index.html`, section « 1. CONFIGURATION », objet `proPlan` :
+
+- `amount` : montant en euros (`null` affiche « Montant à définir ») ; `period` : `'mois'`, `'an'`…
+- `stripePaymentLink` : lien de paiement [Stripe Payment Links](https://stripe.com/fr/payments/payment-links).
+  Vide = **mode démonstration** (aucun paiement réel, clairement signalé). Dans Stripe, réglez la redirection après paiement sur
+  `https://evanbisa.github.io/pwa-nantes/?paiement=ok`.
+  ⚠️ Pour un vrai paiement, la confirmation doit être vérifiée par un serveur (webhook Stripe) : sans serveur, le retour
+  `?paiement=ok` ne peut pas être authentifié.
+
+### Limites actuelles (pas de serveur)
+
+- Les justificatifs sont conservés sur l'appareil du restaurateur ; **aucun contrôle humain** n'est possible tant qu'il n'y a pas
+  de base de données partagée.
+- Un restaurant publié n'est **visible que sur l'appareil où il a été créé**. Pour qu'il apparaisse chez tous les utilisateurs,
+  il faut une base de données en ligne (Firebase, Supabase…) — c'est la prochaine étape indispensable.
 
 ## Activer la vraie carte Google Maps
 
