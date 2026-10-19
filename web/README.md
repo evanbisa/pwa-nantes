@@ -1,7 +1,7 @@
 # Roche Street Food — application Next.js
 
 Version de production du prototype (`../index.html`) : **Next.js 16 + Supabase (Auth + base de données)**,
-pensée pour démarrer à **0 €/mois** (Supabase Free, Netlify Free, tuiles OpenStreetMap).
+pensée pour démarrer à **0 €/mois** (Supabase Free, GitHub Pages, tuiles OpenStreetMap).
 Zone couverte : La Roche-sur-Yon et sa couronne.
 
 ## Avancement
@@ -27,7 +27,7 @@ Zone couverte : La Roche-sur-Yon et sa couronne.
 - *Sign In / Providers › Email* : **Confirm email** activé.
 - *Sign In / Providers › Email* : mot de passe de **8 caractères minimum**, exigences
   « minuscules, majuscules, chiffres et symboles » (même règle que le prototype).
-- *URL Configuration* : *Site URL* = l'adresse Netlify (ex. `https://roche-street-food.netlify.app`) ;
+- *URL Configuration* : *Site URL* = `https://evanbisa.github.io/pwa-nantes/app/` ;
   *Redirect URLs* : ajouter aussi `http://localhost:3000/**`.
 - *Emails › SMTP Settings* : **indispensable pour de vrais utilisateurs**. Sans SMTP personnalisé, Supabase
   n'envoie les e-mails de confirmation qu'aux membres de l'équipe du projet, avec une limite très basse.
@@ -39,13 +39,13 @@ Zone couverte : La Roche-sur-Yon et sa couronne.
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | *Project URL* | oui (normal) |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | clé **publishable** (`sb_publishable_…`, ou l'ancienne clé `anon`) | oui (normal, protégée par la RLS) |
-| `SUPABASE_SECRET_KEY` | clé **secret** (`sb_secret_…`, ou l'ancienne `service_role`) | **jamais** |
+| clé **secret** | (`sb_secret_…`, ou l'ancienne `service_role`) | **jamais** : n'est utilisée par aucun fichier de ce dépôt. Les traitements serveur (vérification du SIRET) passeront par une *Edge Function* Supabase, qui y a accès sans qu'on la recopie nulle part. |
 
 ### 5. Brancher l'application
 ```bash
 cd web
 npm install
-cp .env.example .env.local   # coller les 3 valeurs
+cp .env.example .env.local   # coller les 2 valeurs publiques
 npm run db:check             # vérifie la connexion ET ce qu'un visiteur anonyme peut lire
 npm run dev                  # http://localhost:3000
 ```
@@ -53,16 +53,16 @@ npm run dev                  # http://localhost:3000
 e-mails et mots de passe inaccessibles ; aucune écriture anonyme. Il refuse de tourner si une clé secrète
 a été mise par erreur dans la variable publique.
 
-### 6. Déployer sur Netlify (offre Free, usage commercial autorisé)
-La configuration est dans `netlify.toml` (à la racine du dépôt) : dossier `web`, Node 22, en-têtes de sécurité.
-1. https://app.netlify.com › *Add new site › Import an existing project* › **GitHub** › dépôt `evanbisa/pwa-nantes`.
-2. Branche à déployer : `claude/street-food-map-pwa-lr1xu2` (branche par défaut du dépôt). Les réglages de build
-   sont lus dans `netlify.toml` : ne rien modifier.
-3. *Environment variables* : ajouter `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-   et `SUPABASE_SECRET_KEY` (pour celle-ci, cocher « Contains secret values »).
-4. *Deploy*. Ensuite, reporter l'adresse `https://….netlify.app` dans Supabase › *Authentication › URL Configuration*
-   (*Site URL* et *Redirect URLs*).
-Chaque `git push` redéploie automatiquement le site.
+### 6. Mise en ligne : automatique, sur GitHub Pages (gratuit)
+Rien à faire : à chaque `git push` sur la branche `claude/street-food-map-pwa-lr1xu2`, le workflow
+`.github/workflows/pages.yml` contrôle le code (lint, types), construit l'application en **site statique**
+(`output: "export"`, pas de serveur) et la publie :
+- https://evanbisa.github.io/pwa-nantes/app/ → cette application ;
+- https://evanbisa.github.io/pwa-nantes/ → le prototype, jusqu'à ce que l'application le remplace.
+
+Pourquoi un site statique suffit : l'inscription, la connexion et la lecture / écriture des données se font
+depuis le navigateur avec Supabase, et c'est la RLS de la base qui protège les données. Le seul traitement
+qui exige la clé secrète (enregistrer un SIRET vérifié) sera une Edge Function Supabase (gratuite).
 
 ## Sécurité des données
 
@@ -86,9 +86,11 @@ Chaque `git push` redéploie automatiquement le site.
 - **Supabase Free** : 500 Mo de base, 50 000 utilisateurs actifs/mois, 1 Go de fichiers, 200 connexions temps
   réel simultanées. Le projet est **mis en pause après 7 jours sans activité** (réactivation en un clic) ;
   pas de sauvegardes automatiques téléchargeables : exporter la base régulièrement.
-- **Netlify Free** : usage commercial autorisé ; quota mensuel gratuit (bande passante, déploiements, fonctions).
-  Si le quota est atteint, le site est mis en pause jusqu'au mois suivant : pas de facturation surprise.
-  Suivre la consommation dans *Team settings › Usage* et éviter de multiplier les déploiements inutiles.
+- **GitHub Pages** : gratuit pour un dépôt public, HTTPS inclus. Ses conditions excluent les sites dont l'objet
+  principal est la vente (e-commerce, logiciel payant). Tant que l'application est gratuite pour tous, c'est bon ;
+  le jour où les restaurateurs paieront un abonnement, prévoir le passage sur Cloudflare Pages (gratuit, usage
+  commercial autorisé) : le site étant statique, c'est un simple changement d'hébergeur.
+- **Supabase Edge Functions** (pour la vérification du SIRET) : 500 000 appels/mois gratuits.
 - **Tuiles OpenStreetMap** : gratuites avec attribution, pour un trafic modéré (politique d'usage OSM).
 
 ## Arborescence
@@ -97,10 +99,9 @@ web/
 ├─ app/                 layout · page (carte)
 ├─ components/map/      MapView (chargement navigateur) · MerchantMap (Leaflet) · useGeolocation
 ├─ components/home/     HomeMap (carte + filtres + aperçu)
-├─ lib/supabase/        client.ts (navigateur) · server.ts (serveur, avec session) · admin.ts (clé secrète) · env.ts
+├─ lib/supabase/        client.ts (navigateur) · env.ts
 ├─ lib/geo/             centre, limites, fonds de carte, distance
 ├─ types/               database.ts (à régénérer : npx supabase gen types) · merchant.ts
 ├─ scripts/             check-supabase.mjs
-(../netlify.toml       configuration du déploiement Netlify)
 └─ supabase/            migrations/ (init, hardening) · tests/rls/
 ```

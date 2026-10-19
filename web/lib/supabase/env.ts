@@ -1,7 +1,7 @@
 /**
  * Variables de connexion à Supabase (Project Settings › API Keys).
  * - URL et clé « publishable » : publiques par nature (envoyées au navigateur), protégées par la RLS.
- * - La clé secrète n'est lue que côté serveur, dans `admin.ts`.
+ * - La clé secrète n'est jamais utilisée par le site (100 % statique) : elle reste dans Supabase.
  */
 export function supabasePublicEnv() {
   // Références littérales : Next.js remplace ces variables au moment du build
