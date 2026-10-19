@@ -116,6 +116,7 @@ delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
 select t.ok((select count(*) = 0 from profiles where id = '11111111-1111-1111-1111-111111111111') and (select count(*) = 0 from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001')
   and (select count(*) = 0 from merchant_private where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'suppression du compte : profil, fiche et SIRET supprimés');
 select t.ok((select count(*) = 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'merchants'), 'temps réel activé sur merchants');
+select t.ok(not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.prosecdef and has_function_privilege('anon', p.oid, 'execute')), 'aucune fonction SECURITY DEFINER appelable par un visiteur via l''API');
 select t.ok((select bool_and(c.relrowsecurity) and count(*) = (select count(*) from pg_tables where schemaname = 'public')
   from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relkind = 'r'), 'RLS activée sur TOUTES les tables publiques');
 

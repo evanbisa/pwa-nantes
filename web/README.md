@@ -8,7 +8,7 @@ Zone couverte : La Roche-sur-Yon et sa couronne.
 
 | Action | Contenu | État |
 | --- | --- | --- |
-| 1 | Script SQL sécurisé (`profiles`, `merchants`, RLS) + connexion du projet | ✅ fait |
+| 1 | Script SQL sécurisé (`profiles`, `merchants`, RLS) + connexion du projet | ✅ appliqué sur le projet Supabase `fnypgfyxbyaqrnklhjxc` (0 alerte de sécurité) |
 | 2 | Supabase Auth : inscription / connexion (remplace le code local et EmailJS) | à faire |
 | 3 | Carte : vrais commerces en temps réel, tuiles OpenStreetMap | à faire |
 
@@ -19,7 +19,8 @@ Zone couverte : La Roche-sur-Yon et sa couronne.
 2. Région : **West EU (Paris)**. Choisir un mot de passe de base de données fort (gestionnaire de mots de passe).
 
 ### 2. Créer les tables et la sécurité
-1. *SQL Editor* › *New query* › coller tout `supabase/migrations/20261020090000_init.sql` › **Run**.
+1. *SQL Editor* › *New query* › coller et exécuter, dans l'ordre, chaque fichier de `supabase/migrations/`
+   (`…_init.sql` puis `…_hardening.sql`). Déjà fait sur le projet actuel.
 2. Vérifier dans *Table Editor* : `profiles`, `merchants`, `merchant_private` affichent le badge **RLS enabled**.
 
 ### 3. Régler l'authentification (*Authentication*)
@@ -72,7 +73,7 @@ Ensuite, reporter l'adresse obtenue dans *Site URL* de Supabase (étape 3).
   (adresse dans la zone, description, 1 photo, 1 service) : c'est la base qui refuse, pas l'interface.
 - Un restaurateur ne peut ni changer le propriétaire d'une fiche, ni son SIRET, ni se déclarer vérifié,
   ni toucher la fiche d'un autre, ni republier une fiche suspendue.
-- Tests : `npm run db:test` (45 scénarios sur un PostgreSQL local : `PGHOST=… PGPORT=… PGUSER=postgres`).
+- Tests : `npm run db:test` (46 scénarios sur un PostgreSQL local : `PGHOST=… PGPORT=… PGUSER=postgres`).
 
 ## Limites des offres gratuites à connaître
 - **Supabase Free** : 500 Mo de base, 50 000 utilisateurs actifs/mois, 1 Go de fichiers, 200 connexions temps
@@ -93,5 +94,5 @@ web/
 ├─ lib/geo/             centre, limites, fonds de carte, distance
 ├─ types/               database.ts (à régénérer : npx supabase gen types) · merchant.ts
 ├─ scripts/             check-supabase.mjs
-└─ supabase/            migrations/20261020090000_init.sql · tests/rls/
+└─ supabase/            migrations/ (init, hardening) · tests/rls/
 ```
