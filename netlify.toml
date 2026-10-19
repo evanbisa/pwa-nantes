@@ -1,0 +1,23 @@
+# Déploiement Netlify de l'application Next.js (dossier web/).
+# Netlify détecte Next.js et installe automatiquement son adaptateur (@netlify/plugin-nextjs).
+[build]
+  base = "web"
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # Ces deux valeurs sont publiques par nature (intégrées au site, protégées par la RLS Supabase) :
+  # on les exclut de l'analyse de secrets de Netlify, qui sinon bloquerait le déploiement.
+  # La clé secrète SUPABASE_SECRET_KEY, elle, reste analysée.
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
+
+# En-têtes de sécurité pour toutes les pages
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(self)"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"

@@ -1,7 +1,7 @@
 # Roche Street Food — application Next.js
 
 Version de production du prototype (`../index.html`) : **Next.js 16 + Supabase (Auth + base de données)**,
-pensée pour démarrer à **0 €/mois** (Supabase Free, Vercel Hobby, tuiles OpenStreetMap).
+pensée pour démarrer à **0 €/mois** (Supabase Free, Netlify Free, tuiles OpenStreetMap).
 Zone couverte : La Roche-sur-Yon et sa couronne.
 
 ## Avancement
@@ -27,7 +27,7 @@ Zone couverte : La Roche-sur-Yon et sa couronne.
 - *Sign In / Providers › Email* : **Confirm email** activé.
 - *Sign In / Providers › Email* : mot de passe de **8 caractères minimum**, exigences
   « minuscules, majuscules, chiffres et symboles » (même règle que le prototype).
-- *URL Configuration* : *Site URL* = l'adresse Vercel (ex. `https://roche-street-food.vercel.app`) ;
+- *URL Configuration* : *Site URL* = l'adresse Netlify (ex. `https://roche-street-food.netlify.app`) ;
   *Redirect URLs* : ajouter aussi `http://localhost:3000/**`.
 - *Emails › SMTP Settings* : **indispensable pour de vrais utilisateurs**. Sans SMTP personnalisé, Supabase
   n'envoie les e-mails de confirmation qu'aux membres de l'équipe du projet, avec une limite très basse.
@@ -53,9 +53,16 @@ npm run dev                  # http://localhost:3000
 e-mails et mots de passe inaccessibles ; aucune écriture anonyme. Il refuse de tourner si une clé secrète
 a été mise par erreur dans la variable publique.
 
-### 6. Déployer sur Vercel (Hobby, gratuit)
-*Add New › Project* › importer le dépôt › **Root Directory = `web`** › ajouter les 3 variables › *Deploy*.
-Ensuite, reporter l'adresse obtenue dans *Site URL* de Supabase (étape 3).
+### 6. Déployer sur Netlify (offre Free, usage commercial autorisé)
+La configuration est dans `netlify.toml` (à la racine du dépôt) : dossier `web`, Node 22, en-têtes de sécurité.
+1. https://app.netlify.com › *Add new site › Import an existing project* › **GitHub** › dépôt `evanbisa/pwa-nantes`.
+2. Branche à déployer : `claude/street-food-map-pwa-lr1xu2` (branche par défaut du dépôt). Les réglages de build
+   sont lus dans `netlify.toml` : ne rien modifier.
+3. *Environment variables* : ajouter `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+   et `SUPABASE_SECRET_KEY` (pour celle-ci, cocher « Contains secret values »).
+4. *Deploy*. Ensuite, reporter l'adresse `https://….netlify.app` dans Supabase › *Authentication › URL Configuration*
+   (*Site URL* et *Redirect URLs*).
+Chaque `git push` redéploie automatiquement le site.
 
 ## Sécurité des données
 
@@ -79,9 +86,9 @@ Ensuite, reporter l'adresse obtenue dans *Site URL* de Supabase (étape 3).
 - **Supabase Free** : 500 Mo de base, 50 000 utilisateurs actifs/mois, 1 Go de fichiers, 200 connexions temps
   réel simultanées. Le projet est **mis en pause après 7 jours sans activité** (réactivation en un clic) ;
   pas de sauvegardes automatiques téléchargeables : exporter la base régulièrement.
-- **Vercel Hobby** : réservé à un usage **non commercial**. Dès que les restaurateurs paieront un abonnement,
-  il faudra passer en Pro (20 $/mois) ou héberger sur une offre gratuite qui autorise le commercial
-  (Cloudflare Workers, Netlify).
+- **Netlify Free** : usage commercial autorisé ; quota mensuel gratuit (bande passante, déploiements, fonctions).
+  Si le quota est atteint, le site est mis en pause jusqu'au mois suivant : pas de facturation surprise.
+  Suivre la consommation dans *Team settings › Usage* et éviter de multiplier les déploiements inutiles.
 - **Tuiles OpenStreetMap** : gratuites avec attribution, pour un trafic modéré (politique d'usage OSM).
 
 ## Arborescence
@@ -94,5 +101,6 @@ web/
 ├─ lib/geo/             centre, limites, fonds de carte, distance
 ├─ types/               database.ts (à régénérer : npx supabase gen types) · merchant.ts
 ├─ scripts/             check-supabase.mjs
+(../netlify.toml       configuration du déploiement Netlify)
 └─ supabase/            migrations/ (init, hardening) · tests/rls/
 ```
