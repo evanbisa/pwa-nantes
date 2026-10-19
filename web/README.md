@@ -22,7 +22,7 @@ Zone couverte : La Roche-sur-Yon et sa couronne.
 
 ### 2. Créer les tables et la sécurité
 1. *SQL Editor* › *New query* › coller et exécuter, dans l'ordre, chaque fichier de `supabase/migrations/`
-   (`…_init.sql` puis `…_hardening.sql`). Déjà fait sur le projet actuel.
+   (`…_init.sql`, `…_hardening.sql`, `…_follows_stats.sql`, `…_visitors_tidy.sql`). Déjà fait sur le projet actuel.
 2. Vérifier dans *Table Editor* : `profiles`, `merchants`, `merchant_private` affichent le badge **RLS enabled**.
 
 ### 3. Régler l'authentification (*Authentication*)
@@ -94,6 +94,8 @@ aussi le projet Supabase actif (l'offre gratuite le met en pause après 7 jours 
 | Prénom, nom, téléphone | `profiles` | son propriétaire | son propriétaire (pas le rôle) |
 | Fiche : nom, catégorie, menu, horaires, statut… | `merchants` | **tout le monde**, si publiée et ouverte | son propriétaire |
 | SIRET, raison sociale | `merchant_private` | son propriétaire | le serveur uniquement (clé secrète) |
+| Restaurants suivis | `follows` | l'étudiant concerné (le restaurateur ne voit que le **nombre**) | l'étudiant (s'abonner / se désabonner) |
+| Statistiques (vues, personnes, clics) | `merchant_stats`, `merchant_visitors` | le restaurateur, en **chiffres** uniquement | personne en direct : fonction `track_merchant_event` |
 
 - **RLS activée sur toutes les tables**, privilèges accordés explicitement, colonne par colonne pour les modifications.
 - Le SIRET n'est pas dans `merchants` : la RLS filtre des lignes, pas des colonnes.
@@ -101,7 +103,7 @@ aussi le projet Supabase actif (l'offre gratuite le met en pause après 7 jours 
   (adresse dans la zone, description, 1 photo, 1 service) : c'est la base qui refuse, pas l'interface.
 - Un restaurateur ne peut ni changer le propriétaire d'une fiche, ni son SIRET, ni se déclarer vérifié,
   ni toucher la fiche d'un autre, ni republier une fiche suspendue.
-- Tests : `npm run db:test` (46 scénarios sur un PostgreSQL local : `PGHOST=… PGPORT=… PGUSER=postgres`).
+- Tests : `npm run db:test` (69 scénarios sur un PostgreSQL local : `PGHOST=… PGPORT=… PGUSER=postgres`).
 
 ## Limites des offres gratuites à connaître
 - **Supabase Free** : 500 Mo de base, 50 000 utilisateurs actifs/mois, 1 Go de fichiers, 200 connexions temps
@@ -122,5 +124,5 @@ web/
 ├─ types/               database.ts (à régénérer : npx supabase gen types) · merchant.ts
 ├─ scripts/             check-supabase.mjs
 ├─ public/_headers      en-têtes de sécurité (Cloudflare Pages)
-└─ supabase/            migrations/ (init, hardening) · functions/verify-siret/ · tests/ (rls, smoke.ts)
+└─ supabase/            migrations/ (init, hardening, follows_stats, visitors_tidy) · functions/verify-siret/ · tests/ (rls, smoke.ts)
 ```

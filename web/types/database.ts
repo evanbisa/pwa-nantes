@@ -19,6 +19,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      follows: {
+        Row: {
+          created_at: string
+          merchant_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          merchant_id: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          merchant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follows_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_private: {
         Row: {
           created_at: string
@@ -56,6 +89,80 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: true
             referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_stats: {
+        Row: {
+          car_clicks: number
+          day: string
+          menu_views: number
+          merchant_id: string
+          phone_clicks: number
+          photo_views: number
+          views: number
+          walk_clicks: number
+        }
+        Insert: {
+          car_clicks?: number
+          day?: string
+          menu_views?: number
+          merchant_id: string
+          phone_clicks?: number
+          photo_views?: number
+          views?: number
+          walk_clicks?: number
+        }
+        Update: {
+          car_clicks?: number
+          day?: string
+          menu_views?: number
+          merchant_id?: string
+          phone_clicks?: number
+          photo_views?: number
+          views?: number
+          walk_clicks?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_stats_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_visitors: {
+        Row: {
+          day: string
+          merchant_id: string
+          visitor_id: string
+        }
+        Insert: {
+          day: string
+          merchant_id: string
+          visitor_id: string
+        }
+        Update: {
+          day?: string
+          merchant_id?: string
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_visitors_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_visitors_visitor_id_fkey"
+            columns: ["visitor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -166,6 +273,10 @@ export type Database = {
       in_service_area: { Args: { lat: number; lng: number }; Returns: boolean }
       is_valid_hours: { Args: { hours: Json }; Returns: boolean }
       is_valid_menu: { Args: { menu: Json }; Returns: boolean }
+      merchant_follower_count: {
+        Args: { p_merchant_id: string }
+        Returns: number
+      }
       my_merchant: {
         Args: never
         Returns: {
@@ -193,6 +304,31 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      my_merchant_stats: {
+        Args: { p_days?: number }
+        Returns: {
+          car_clicks: number
+          day: string
+          menu_views: number
+          new_followers: number
+          phone_clicks: number
+          photo_views: number
+          views: number
+          visitors: number
+          walk_clicks: number
+        }[]
+      }
+      my_merchant_totals: {
+        Args: { p_days?: number }
+        Returns: {
+          followers: number
+          visitors: number
+        }[]
+      }
+      track_merchant_event: {
+        Args: { p_event: string; p_merchant_id: string }
+        Returns: undefined
       }
     }
     Enums: {
@@ -349,3 +485,5 @@ export const Constants = {
 // Alias utilisés dans l'application
 export type MerchantRecord = Tables<"merchants">
 export type ProfileRecord = Tables<"profiles">
+export type FollowRecord = Tables<"follows">
+export type MerchantStatsRecord = Tables<"merchant_stats">

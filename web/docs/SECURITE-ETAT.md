@@ -9,7 +9,10 @@
 ### Base de données Supabase (projet « FlashMiam project », `fnypgfyxbyaqrnklhjxc`, région Stockholm, UE)
 - Tables `profiles` (étudiants / restaurateurs), `merchants` (fiches publiques), `merchant_private` (SIRET),
   avec la **RLS activée sur toutes les tables** et des privilèges accordés explicitement.
-  Migrations : `supabase/migrations/20261020090000_init.sql` puis `…093000_hardening.sql`.
+  Migrations : `supabase/migrations/20261020090000_init.sql`, `…093000_hardening.sql`, `…100000_follows_stats.sql`, `…101000_visitors_tidy.sql`.
+- Abonnements et statistiques (`follows`, `merchant_stats`, `merchant_visitors`) : un étudiant ne voit que ses propres
+  abonnements ; un restaurateur ne voit que des **chiffres** (abonnés, vues, personnes, clics), jamais qui le suit
+  ou le consulte. Les compteurs ne s'incrémentent que via `track_merchant_event` ; personne ne peut les modifier en direct.
 - Mots de passe et e-mails : gérés par Supabase Auth (mots de passe hachés), jamais copiés dans nos tables.
 - Le SIRET est dans une table à part : lisible par le seul restaurateur concerné, modifiable par le serveur seulement.
 - Un restaurateur ne peut modifier que sa propre fiche ; il ne peut ni changer son SIRET, ni se déclarer vérifié,
@@ -18,7 +21,7 @@
   (adresse dans la zone, description, 1 photo, 1 service).
 - Analyse de sécurité de Supabase (Advisors) : **0 alerte**.
 - 16 scénarios de sécurité rejoués sur la vraie base (transaction annulée, aucune donnée laissée),
-  46 scénarios sur une base locale (`npm run db:test`).
+  69 scénarios sur une base locale (`npm run db:test`).
 
 ### Fonction serveur `verify-siret` (Supabase Edge Function, déployée)
 - Vérifie : restaurateur connecté, clé de contrôle du SIRET, existence dans le répertoire Sirene,

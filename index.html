@@ -46,6 +46,7 @@
        1. DESIGN TOKENS — mode jour (défaut) et mode nuit, palette Google
        ===================================================================== */
     :root {
+      --chart: #1a73e8;                 /* couleur des graphiques (validée sur fond clair) */
       --sidebar-w: 372px;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -79,6 +80,7 @@
       --backdrop: rgba(32, 33, 36, 0.32);
     }
     :root[data-theme="dark"] {
+      --chart: #4c8df6;                 /* validée sur fond sombre */
       --bg: #242f3e;
       --panel: rgba(32, 33, 36, 0.95);
       --panel-solid: #202124;
@@ -398,6 +400,8 @@
       opacity: 0; transition: opacity .25s var(--ease-out); }
     .loader[hidden] { display: none; }
     .loader.is-visible { opacity: 1; }
+    /* sécurité : un écran de chargement qui n'est pas affiché ne bloque jamais les clics */
+    .loader:not(.is-visible):not(.is-boot) { pointer-events: none; }
     /* Au tout premier affichage (avant même le JavaScript) : n'apparaît qu'après 350 ms d'attente */
     .loader.is-boot { animation: loader-in .25s var(--ease-out) .35s forwards; }
     @keyframes loader-in { to { opacity: 1; } }
@@ -649,6 +653,94 @@
     .menu-list li small { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); }
     .menu-list .price { flex: none; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
     .verified { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; color: var(--green); background: var(--green-soft); }
+    /* ---------- Fiche commerce : onglets, abonnement, photos ---------- */
+    .follow-btn { margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 18px;
+      font-size: 14px; font-weight: 500; color: var(--accent); border: 1px solid var(--line-strong); background: transparent; }
+    .follow-btn svg { width: 18px; height: 18px; }
+    .follow-btn[hidden] { display: none; }
+    .follow-btn[aria-pressed="true"] { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
+    .follow-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .shop-tabs { display: flex; gap: 4px; margin: 14px 0 0; border-bottom: 1px solid var(--line); }
+    .shop-tabs[hidden] { display: none; }
+    .shop-tabs button { position: relative; flex: 1; padding: 10px 6px 12px; font-size: 14px; font-weight: 500; color: var(--muted); }
+    .shop-tabs button small { margin-left: 4px; font-size: 12px; font-weight: 400; }
+    .shop-tabs button[aria-selected="true"] { color: var(--accent); }
+    .shop-tabs button[aria-selected="true"]::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: -1px; height: 3px; border-radius: 3px 3px 0 0; background: var(--accent); }
+    .shop-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 8px; }
+    .tab-panel[hidden] { display: none; }
+    .gallery img { cursor: zoom-in; }
+    .menu-head { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
+    .menu-empty, .photos-empty { margin: 18px 0 4px; font-size: 14px; color: var(--muted); }
+    .photo-grid-view { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+    .photo-grid-view button { padding: 0; border-radius: 10px; overflow: hidden; aspect-ratio: 16 / 9; background: var(--hover); cursor: zoom-in; }
+    .photo-grid-view button:first-child { grid-column: 1 / -1; }
+    .photo-grid-view img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .photo-grid-view button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* Visionneuse plein écran */
+    .lightbox { position: fixed; inset: 0; z-index: 112; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, .92); touch-action: pan-y; }
+    .lightbox[hidden] { display: none; }
+    .lightbox img { max-width: 100%; max-height: calc(100dvh - 120px); aspect-ratio: 16 / 9; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+    .lb-btn { position: absolute; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: #fff; background: rgba(255, 255, 255, .14); font-size: 26px; line-height: 1; }
+    .lb-btn:hover { background: rgba(255, 255, 255, .24); }
+    .lb-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+    .lb-close { top: calc(var(--safe-top) + 12px); right: 12px; }
+    .lb-prev { left: 12px; top: 50%; transform: translateY(-50%); }
+    .lb-next { right: 12px; top: 50%; transform: translateY(-50%); }
+    .lb-count { position: absolute; bottom: calc(var(--safe-bottom) + 18px); left: 0; right: 0; text-align: center; color: #e8eaed; font-size: 14px; }
+
+    /* Restaurants suivis (profil client) */
+    .follows { margin-top: 20px; }
+    .follows h4 { margin: 0 0 6px; font-size: 15px; font-weight: 500; }
+    .follows ul { margin: 0; padding: 0; list-style: none; }
+    .follows li button { display: flex; width: 100%; align-items: center; gap: 12px; padding: 10px 4px; text-align: left; border-bottom: 1px solid var(--line); }
+    .follows li span.f-emoji { font-size: 22px; }
+    .follows li strong { display: block; font-size: 14.5px; font-weight: 500; }
+    .follows li small { display: block; font-size: 13px; color: var(--muted); }
+
+    /* ---------- Statistiques du restaurateur ---------- */
+    .stats { margin-top: 22px; }
+    .stats-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .stats-head h4 { margin: 0; font-size: 15px; font-weight: 500; }
+    .seg { display: inline-flex; padding: 3px; border-radius: 18px; background: var(--hover); }
+    .seg button { height: 30px; padding: 0 12px; border-radius: 15px; font-size: 13px; font-weight: 500; color: var(--muted); }
+    .seg button[aria-pressed="true"] { color: var(--text); background: var(--panel-solid); box-shadow: 0 1px 2px rgba(0, 0, 0, .15); }
+    .kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+    .kpi { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); }
+    .kpi-label { display: block; font-size: 12.5px; color: var(--muted); }
+    .kpi strong { display: block; margin-top: 2px; font-size: 24px; font-weight: 500; color: var(--text); line-height: 1.2; }
+    .kpi small { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
+    .kpi.is-hero { grid-column: 1 / -1; }
+    .kpi.is-hero strong { font-size: 40px; }
+    .chart { margin: 14px 0 0; padding: 12px 14px 10px; border-radius: 12px; border: 1px solid var(--line); position: relative; }
+    .chart figcaption { font-size: 13px; font-weight: 500; color: var(--text); }
+    .chart figcaption small { display: block; font-weight: 400; color: var(--muted); }
+    .chart-box { position: relative; margin-top: 8px; }
+    .chart-box svg { display: block; width: 100%; overflow: visible; }
+    .chart-box .grid-line { stroke: var(--line); stroke-width: 1; shape-rendering: crispEdges; }
+    .chart-box .axis-text { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+    .chart-box .value-text { fill: var(--text); font-size: 11px; font-weight: 500; }
+    .chart-box .bar { fill: var(--chart); }
+    .chart-box .hit { fill: transparent; cursor: default; }
+    .chart-box .hit:focus { outline: none; }
+    .chart-box .col.is-hover .bar { fill: color-mix(in srgb, var(--chart) 80%, var(--panel-solid)); }
+    .chart-box .hit:focus-visible + .bar, .chart-box .col.is-hover .bar { stroke: none; }
+    .chart-empty { position: absolute; inset: 0 0 18px; display: grid; place-items: center; font-size: 13px; color: var(--muted); }
+    .chart-tip { position: absolute; z-index: 2; pointer-events: none; padding: 6px 10px; border-radius: 8px; font-size: 12.5px; color: #e8eaed; background: #323232; white-space: nowrap; transform: translate(-50%, -100%); }
+    .chart-tip b { display: block; font-size: 14px; font-weight: 500; color: #fff; }
+    .chart-table { margin-top: 10px; font-size: 13px; }
+    .chart-table summary { cursor: pointer; color: var(--accent); font-weight: 500; }
+    .chart-table table { width: 100%; margin-top: 8px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    .chart-table th, .chart-table td { padding: 6px 4px; border-bottom: 1px solid var(--line); text-align: right; }
+    .chart-table th:first-child, .chart-table td:first-child { text-align: left; }
+    .chart-table th { font-weight: 500; color: var(--muted); }
+    @media (min-width: 900px) {
+      #profile-sheet.is-pro { width: min(560px, calc(100% - 32px)); }
+      .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .kpi.is-hero { grid-column: auto; }
+      .kpi.is-hero strong { font-size: 24px; }
+    }
+
     .pro-dash { margin-top: 20px; }
     .pro-dash h4 { margin: 0; font-size: 15px; font-weight: 500; }
     .pro-dash .kv { margin-top: 10px; }
@@ -807,10 +899,20 @@
       <div class="sheet-emoji" id="shop-emoji" aria-hidden="true"></div>
       <div class="sheet-title">
         <h2 id="shop-name"></h2>
-        <p class="eyebrow"><span id="shop-cat"></span><span class="verified" id="shop-verified" hidden title="SIRET vérifié auprès du répertoire Sirene">✓ Établissement vérifié</span></p>
+        <p class="eyebrow"><span id="shop-cat"></span><span class="verified" id="shop-verified" hidden title="SIRET vérifié auprès du répertoire Sirene">✓ Établissement vérifié</span><span id="shop-followers" hidden></span></p>
+        <button class="follow-btn" type="button" id="shop-follow" aria-pressed="false" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg>
+          <span id="shop-follow-label">Suivre</span>
+        </button>
       </div>
       <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
     </div>
+    <div class="shop-tabs" id="shop-tabs" role="tablist" aria-label="Contenu de la fiche" hidden>
+      <button type="button" role="tab" id="tab-infos" aria-controls="panel-infos" aria-selected="true" data-tab="infos">Infos</button>
+      <button type="button" role="tab" id="tab-menu" aria-controls="panel-menu" aria-selected="false" tabindex="-1" data-tab="menu">Menu<small id="tab-menu-n"></small></button>
+      <button type="button" role="tab" id="tab-photos" aria-controls="panel-photos" aria-selected="false" tabindex="-1" data-tab="photos">Photos<small id="tab-photos-n"></small></button>
+    </div>
+    <div class="tab-panel" id="panel-infos" role="tabpanel" aria-labelledby="tab-infos">
     <div class="gallery" id="shop-gallery" hidden></div>
     <span class="status" id="shop-status"></span>
     <p class="shop-desc" id="shop-desc" hidden></p>
@@ -818,10 +920,6 @@
       <span class="promo-ico" aria-hidden="true">🎁</span>
       <div><small>Offre du moment</small><strong id="shop-promo"></strong></div>
     </div>
-    <details class="menu" id="shop-menu" hidden>
-      <summary><span class="menu-ico" aria-hidden="true">📋</span><span><strong>La carte</strong><small id="shop-menu-count"></small></span></summary>
-      <div class="menu-list" id="shop-menu-list"></div>
-    </details>
     <ul class="meta">
       <li>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 1114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
@@ -851,7 +949,26 @@
         En voiture
       </a>
     </div>
+    </div>
+    <div class="tab-panel" id="panel-menu" role="tabpanel" aria-labelledby="tab-menu" hidden>
+      <p class="menu-head" id="shop-menu-count"></p>
+      <div class="menu-list" id="shop-menu-list"></div>
+      <p class="menu-empty" id="shop-menu-empty" hidden>Ce restaurant n'a pas encore publié sa carte.</p>
+    </div>
+    <div class="tab-panel" id="panel-photos" role="tabpanel" aria-labelledby="tab-photos" hidden>
+      <div class="photo-grid-view" id="shop-photo-grid"></div>
+      <p class="photos-empty" id="shop-photos-empty" hidden>Pas encore de photo.</p>
+    </div>
   </section>
+
+  <!-- ===================== VISIONNEUSE DE PHOTOS ===================== -->
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Photos du restaurant" hidden>
+    <img id="lb-img" alt="" />
+    <button class="lb-btn lb-close" type="button" id="lb-close" aria-label="Fermer">&times;</button>
+    <button class="lb-btn lb-prev" type="button" id="lb-prev" aria-label="Photo précédente">‹</button>
+    <button class="lb-btn lb-next" type="button" id="lb-next" aria-label="Photo suivante">›</button>
+    <p class="lb-count" id="lb-count" aria-live="polite"></p>
+  </div>
 
   <!-- ===================== AIDE : LOCALISATION BLOQUÉE ===================== -->
   <div class="backdrop" id="backdrop"></div>
@@ -902,8 +1019,39 @@
         <div><dt>SIRET</dt><dd id="pd-siret"></dd></div>
         <div><dt>Abonnement</dt><dd id="pd-plan"></dd></div>
       </dl>
+      <section class="stats" id="pd-stats" aria-labelledby="pd-stats-title" hidden>
+        <div class="stats-head">
+          <h4 id="pd-stats-title">Statistiques</h4>
+          <div class="seg" role="group" aria-label="Période">
+            <button type="button" data-days="7" aria-pressed="true">7 jours</button>
+            <button type="button" data-days="30" aria-pressed="false">30 jours</button>
+          </div>
+        </div>
+        <div class="kpis">
+          <div class="kpi is-hero"><span class="kpi-label">Abonnés</span><strong id="k-followers">0</strong><small id="k-followers-d"></small></div>
+          <div class="kpi"><span class="kpi-label">Vues de la fiche</span><strong id="k-views">0</strong><small id="k-visitors"></small></div>
+          <div class="kpi"><span class="kpi-label">Itinéraires demandés</span><strong id="k-routes">0</strong><small id="k-routes-d"></small></div>
+          <div class="kpi"><span class="kpi-label">Appels</span><strong id="k-calls">0</strong><small>bouton du téléphone</small></div>
+          <div class="kpi"><span class="kpi-label">Menu consulté</span><strong id="k-menu">0</strong><small>ouvertures de l'onglet</small></div>
+          <div class="kpi"><span class="kpi-label">Photos regardées</span><strong id="k-photos">0</strong><small>ouvertures de la galerie</small></div>
+        </div>
+        <figure class="chart">
+          <figcaption>Vues de la fiche par jour<small id="pd-chart-sub"></small></figcaption>
+          <div class="chart-box" id="pd-chart"></div>
+          <div class="chart-tip" id="pd-tip" role="status" hidden></div>
+        </figure>
+        <details class="chart-table">
+          <summary>Voir le détail par jour</summary>
+          <table id="pd-table"><thead><tr><th scope="col">Jour</th><th scope="col">Vues</th><th scope="col">Personnes</th><th scope="col">Itinéraires</th><th scope="col">Abonnés +</th></tr></thead><tbody></tbody></table>
+        </details>
+        <p class="hint">Version de démonstration : les chiffres sont enregistrés sur cet appareil. Une fois l'application reliée à Supabase, ils regrouperont tous les visiteurs, sans jamais révéler qui ils sont.</p>
+      </section>
       <button class="btn btn-primary" type="button" id="pd-edit">Modifier ma fiche</button>
       <button class="btn btn-ghost" type="button" id="pd-show">Voir sur la carte</button>
+    </div>
+    <div class="follows" id="follows-box" hidden>
+      <h4>Restaurants suivis</h4>
+      <ul id="follows-list"></ul>
     </div>
     <button class="btn btn-primary" type="button" id="profile-locate">Activer la localisation</button>
     <button class="btn btn-ghost" type="button" id="profile-logout">Se déconnecter</button>
@@ -1292,19 +1440,31 @@
     { id: 'camion-napoleon', name: 'Le Camion Vendéen', category: 'Food-truck',
       address: 'Place Napoléon', coords: [-1.4274, 46.6705],
       hours: [['11:00', '14:30'], ['18:00', '22:30']], closedOn: [0],
-      promo: '-10 % sur la formule midi' },
+      promo: '-10 % sur la formule midi',
+      description: 'Cuisine vendéenne de saison servie au camion : préfou, mogettes et produits du marché local.',
+      menu: [{ section: 'Plats', name: 'Préfou à l\'ail', price: 4.5 }, { section: 'Plats', name: 'Galette saucisse', price: 6.5, desc: 'Saucisse de Vendée, oignons confits' },
+        { section: 'Formules', name: 'Formule midi', price: 11, desc: 'Plat + boisson + dessert' }, { section: 'Boissons', name: 'Jus de pomme fermier', price: 3 }] },
     { id: 'kebab-clemenceau', name: 'Kebab Clemenceau', category: 'Kebab',
       address: 'Rue Georges Clemenceau', coords: [-1.4303, 46.6698],
       hours: [['11:00', '02:00']], closedOn: [],
-      promo: 'Boisson offerte dès 8 €' },
+      promo: 'Boisson offerte dès 8 €',
+      description: 'Kebab maison, pain cuit sur place et sauces faites chaque matin. Ouvert tard, idéal après les cours.',
+      menu: [{ section: 'Sandwichs', name: 'Kebab classique', price: 7.5, desc: 'Salade, tomate, oignon, sauce blanche' }, { section: 'Sandwichs', name: 'Galette kebab', price: 8 },
+        { section: 'Assiettes', name: 'Assiette kebab frites', price: 11.5 }, { section: 'Boissons', name: 'Ayran', price: 2.5 }] },
     { id: 'burger-halles', name: 'Les Halles Burger', category: 'Burger',
       address: 'Rue des Halles', coords: [-1.4254, 46.6693],
       hours: [['11:30', '14:30'], ['18:30', '22:30']], closedOn: [1],
-      promo: 'Frites offertes le soir' },
+      promo: 'Frites offertes le soir',
+      description: 'Burgers au bœuf de Vendée et pain brioché de la boulangerie des Halles.',
+      menu: [{ section: 'Burgers', name: 'Le Halles', price: 10.5, desc: 'Bœuf, cheddar, oignons caramélisés' }, { section: 'Burgers', name: 'Le Veggie', price: 10 },
+        { section: 'Accompagnements', name: 'Frites maison', price: 3.5 }] },
     { id: 'gaufres-marche', name: 'La Gaufrerie du Yon', category: 'Sweets',
       address: 'Place du Marché', coords: [-1.4237, 46.6700],
       hours: [['10:00', '19:30']], closedOn: [0],
-      promo: '2ᵉ gaufre à -50 %' },
+      promo: '2ᵉ gaufre à -50 %',
+      description: 'Gaufres de Liège et de Bruxelles, crêpes et chocolat chaud, à deux pas du marché.',
+      menu: [{ section: 'Gaufres', name: 'Gaufre au sucre', price: 3.5 }, { section: 'Gaufres', name: 'Gaufre chocolat chantilly', price: 5.5 },
+        { section: 'Boissons', name: 'Chocolat chaud', price: 3 }] },
     { id: 'truck-gare', name: 'Gare Gourmande', category: 'Food-truck',
       address: 'Parvis de la gare, boulevard Louis Blanc', coords: [-1.4345, 46.6719],
       hours: [['07:00', '10:30'], ['16:30', '21:30']], closedOn: [],
@@ -1439,7 +1599,8 @@
         shownAt = Date.now();
         if (pending) setText(); else setTimeout(() => { if (!pending) hide(); }, 200);
       } else if (pending) {
-        timer = setTimeout(() => { timer = null; show(); }, DELAY);
+        box.hidden = true;                     // invisible : retiré de la page en attendant un éventuel affichage
+        if (!timer) timer = setTimeout(() => { timer = null; show(); }, DELAY);
       } else {
         box.hidden = true;
       }
@@ -2380,6 +2541,8 @@
     if (shop.phone) { $('shop-phone').textContent = shop.phone; $('shop-phone').href = 'tel:' + compactPhone(shop.phone); }
     renderGallery(shop);
     renderMenu(shop);
+    syncShopTabs(shop);
+    renderFollow(shop);
     $('shop-status').textContent = status.label;
     $('shop-status').className = 'status ' + (status.open ? 'is-open' : 'is-closed');
     $('shop-promo').textContent = shop.promo;
@@ -2417,23 +2580,321 @@
     galleryUrls.forEach((u) => URL.revokeObjectURL(u));
     galleryUrls = [];
     const box = $('shop-gallery');
+    const grid = $('shop-photo-grid');
     box.textContent = '';
+    grid.textContent = '';
     box.hidden = true;
+    $('tab-photos-n').textContent = '';
+    $('shop-photos-empty').hidden = false;
     if (!shop.photoIds || !shop.photoIds.length) return;
     const blobs = await Promise.all(shop.photoIds.map((id) => fileStore.get(id).catch(() => null)));
     if (galleryFor !== key) return;            // une autre fiche a été ouverte entre-temps
-    blobs.forEach((blob, i) => {
-      if (!blob) return;
-      const url = URL.createObjectURL(blob);
-      galleryUrls.push(url);
+    blobs.filter(Boolean).forEach((blob) => galleryUrls.push(URL.createObjectURL(blob)));
+    galleryUrls.forEach((url, i) => {
+      const alt = shop.name + ' — photo ' + (i + 1);
       const img = document.createElement('img');
-      img.src = url;
-      img.alt = shop.name + ' — photo ' + (i + 1);
-      img.decoding = 'async';
+      img.src = url; img.alt = alt; img.decoding = 'async';
+      img.addEventListener('click', () => Lightbox.open(i));
       box.appendChild(img);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.setAttribute('aria-label', 'Agrandir la photo ' + (i + 1));
+      btn.innerHTML = '<img alt="" decoding="async" />';
+      btn.firstChild.src = url;
+      btn.addEventListener('click', () => Lightbox.open(i));
+      grid.appendChild(btn);
     });
-    box.hidden = !box.childElementCount;
+    box.hidden = !galleryUrls.length;
+    $('tab-photos-n').textContent = galleryUrls.length ? ' ' + galleryUrls.length : '';
+    $('shop-photos-empty').hidden = !!galleryUrls.length;
+    syncShopTabs(shop);
   }
+
+  /* ---------- Onglets de la fiche : Infos · Menu · Photos ---------- */
+  function syncShopTabs(shop) {
+    const hasMenu = !!(shop.menu && shop.menu.length);
+    const hasPhotos = !!(shop.photoIds && shop.photoIds.length);
+    $('shop-tabs').hidden = !hasMenu && !hasPhotos;
+    $('tab-menu').hidden = !hasMenu;
+    $('tab-photos').hidden = !hasPhotos;
+  }
+  let tabsSeen = new Set();                    // onglets déjà ouverts pour cette consultation (statistiques)
+  function setShopTab(name, { focus = false } = {}) {
+    document.querySelectorAll('#shop-tabs [role="tab"]').forEach((tab) => {
+      const on = tab.dataset.tab === name;
+      tab.setAttribute('aria-selected', String(on));
+      tab.tabIndex = on ? 0 : -1;
+      if (on && focus) tab.focus();
+      $('panel-' + tab.dataset.tab).hidden = !on;
+    });
+    if (selectedId && name !== 'infos' && !tabsSeen.has(name)) {
+      tabsSeen.add(name);
+      Stats.track(selectedId, name === 'menu' ? 'menu' : 'photos');
+    }
+  }
+  $('shop-tabs').addEventListener('click', (ev) => {
+    const tab = ev.target.closest('[role="tab"]');
+    if (tab) setShopTab(tab.dataset.tab);
+  });
+  $('shop-tabs').addEventListener('keydown', (ev) => {
+    if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return;
+    const tabs = [...document.querySelectorAll('#shop-tabs [role="tab"]')].filter((t) => !t.hidden);
+    const i = tabs.findIndex((t) => t.getAttribute('aria-selected') === 'true');
+    const next = tabs[(i + (ev.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+    ev.preventDefault();
+    setShopTab(next.dataset.tab, { focus: true });
+  });
+
+  /* ---------- Visionneuse plein écran (glisser, flèches, Échap) ---------- */
+  const Lightbox = (() => {
+    const root = $('lightbox'), img = $('lb-img');
+    let index = 0, returnFocus = null, startX = null, swiped = false;
+    function show(i) {
+      const n = galleryUrls.length;
+      index = (i + n) % n;
+      img.src = galleryUrls[index];
+      img.alt = ($('shop-name').textContent || 'Restaurant') + ' — photo ' + (index + 1) + ' sur ' + n;
+      $('lb-count').textContent = (index + 1) + ' / ' + n;
+      $('lb-prev').hidden = $('lb-next').hidden = n < 2;
+    }
+    function open(i) {
+      if (!galleryUrls.length) return;
+      returnFocus = document.activeElement;
+      root.hidden = false;
+      show(i);
+      $('lb-close').focus();
+      if (selectedId && !tabsSeen.has('photos')) { tabsSeen.add('photos'); Stats.track(selectedId, 'photos'); }
+    }
+    function close() {
+      root.hidden = true;
+      img.removeAttribute('src');
+      if (returnFocus && returnFocus.focus) returnFocus.focus();
+    }
+    $('lb-close').addEventListener('click', close);
+    $('lb-prev').addEventListener('click', () => show(index - 1));
+    $('lb-next').addEventListener('click', () => show(index + 1));
+    // Clic sur le fond noir : fermeture (sauf à la fin d'un glissement)
+    root.addEventListener('click', (ev) => { if (ev.target === root && !swiped) close(); swiped = false; });
+    // Échap et flèches, où que soit le focus, tant que la visionneuse est ouverte (avant les autres raccourcis)
+    document.addEventListener('keydown', (ev) => {
+      if (root.hidden) return;
+      if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); close(); return; }
+      if (ev.target.closest && !ev.target.closest('#lightbox') && (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight')) {
+        ev.preventDefault(); show(index + (ev.key === 'ArrowRight' ? 1 : -1));
+      }
+    }, true);
+    root.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape') return;            // géré ci-dessus
+      else if (ev.key === 'ArrowLeft') show(index - 1);
+      else if (ev.key === 'ArrowRight') show(index + 1);
+      else if (ev.key === 'Tab') {             // le focus reste dans la visionneuse
+        const items = [...root.querySelectorAll('button')].filter((b) => !b.hidden);
+        const at = items.indexOf(document.activeElement);
+        ev.preventDefault();
+        items[(at + (ev.shiftKey ? items.length - 1 : 1)) % items.length].focus();
+      }
+    });
+    root.addEventListener('pointerdown', (ev) => { startX = ev.clientX; swiped = false; });
+    root.addEventListener('pointerup', (ev) => {
+      if (startX === null) return;
+      const dx = ev.clientX - startX;
+      startX = null;
+      if (Math.abs(dx) > 50) { swiped = true; show(index + (dx < 0 ? 1 : -1)); }
+    });
+    return { open, close, isOpen: () => !root.hidden };
+  })();
+
+  /* ---------- Abonnements (« Suivre » un restaurant) ---------- */
+  const followersOf = (shopId) => Object.values(accounts()).filter((a) => a.follows && a.follows[shopId]);
+  function isOwnShop(shopId, account = currentUser()) {
+    const r = restaurants()[shopId];
+    return !!(r && account && r.ownerEmail === account.email);
+  }
+  function renderFollow(shop) {
+    const me = currentUser();
+    const canFollow = !!(shop.isPro && me && !isOwnShop(shop.id, me));
+    const btn = $('shop-follow');
+    btn.hidden = !canFollow;
+    const following = canFollow && !!(me.follows && me.follows[shop.id]);
+    btn.setAttribute('aria-pressed', String(following));
+    $('shop-follow-label').textContent = following ? 'Abonné' : 'Suivre';
+    btn.setAttribute('aria-label', following ? 'Ne plus suivre ' + shop.name : 'Suivre ' + shop.name + ' (offres et nouveautés)');
+    const n = shop.isPro ? followersOf(shop.id).length : 0;
+    $('shop-followers').hidden = !n;
+    $('shop-followers').textContent = n + (n > 1 ? ' abonnés' : ' abonné');
+  }
+  $('shop-follow').addEventListener('click', () => {
+    const me = currentUser();
+    if (!me || !selectedId) return;
+    const follows = { ...(me.follows || {}) };
+    const name = markers.get(selectedId).shop.name;
+    if (follows[selectedId]) { delete follows[selectedId]; toast('Vous ne suivez plus ' + name + '.'); }
+    else { follows[selectedId] = new Date().toISOString(); toast('Vous suivez ' + name + ' : ses offres apparaîtront dans votre profil.'); }
+    updateAccount(me.email, { follows });
+    renderFollow(markers.get(selectedId).shop);
+  });
+
+  /* ---------- Statistiques de fréquentation (par restaurant inscrit, par jour) ---------- */
+  const Stats = (() => {
+    const KEY = 'roche-street-food:stats';
+    const KEEP_DAYS = 90;
+    const EMPTY = () => ({ views: 0, visitors: [], walk: 0, car: 0, phone: 0, menu: 0, photos: 0 });
+    const pad = (n) => String(n).padStart(2, '0');
+    const dayKey = (d = new Date()) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    /** Empreinte courte et non réversible du visiteur (FNV-1a) : on compte des personnes sans stocker leur e-mail. */
+    const visitorId = (email) => { let h = 0x811c9dc5; for (const c of email) { h ^= c.charCodeAt(0); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(36); };
+    const read = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; } };
+    const write = (d) => { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) { /* stockage plein ou bloqué */ } };
+    function track(shopId, event) {
+      if (!restaurants()[shopId]) return;      // seulement les restaurants inscrits
+      const me = currentUser();
+      if (isOwnShop(shopId, me)) return;       // le restaurateur ne compte pas ses propres visites
+      const all = read();
+      const days = all[shopId] || (all[shopId] = {});
+      const today = dayKey();
+      const day = days[today] || (days[today] = EMPTY());
+      day[event] = (day[event] || 0) + 1;
+      if (event === 'views' && me) { const v = visitorId(me.email); if (!day.visitors.includes(v)) day.visitors.push(v); }
+      const limit = dayKey(new Date(Date.now() - KEEP_DAYS * 864e5));
+      Object.keys(days).forEach((k) => { if (k < limit) delete days[k]; });
+      write(all);
+    }
+    /** Totaux et série quotidienne sur les `n` derniers jours (aujourd'hui inclus). */
+    function summary(shopId, n) {
+      const days = read()[shopId] || {};
+      const followers = followersOf(shopId);
+      const series = [];
+      const people = new Set();
+      const totals = { views: 0, walk: 0, car: 0, phone: 0, menu: 0, photos: 0 };
+      for (let i = n - 1; i >= 0; i--) {
+        const date = new Date(); date.setHours(12, 0, 0, 0); date.setDate(date.getDate() - i);
+        const key = dayKey(date);
+        const d = days[key] || EMPTY();
+        Object.keys(totals).forEach((k) => { totals[k] += d[k] || 0; });
+        d.visitors.forEach((v) => people.add(v));
+        const newFollowers = followers.filter((a) => dayKey(new Date(a.follows[shopId])) === key).length;
+        series.push({ key, date, views: d.views, visitors: d.visitors.length, routes: d.walk + d.car, newFollowers });
+      }
+      const since = series[0].key;
+      return { ...totals, visitors: people.size, followers: followers.length,
+        newFollowers: followers.filter((a) => dayKey(new Date(a.follows[shopId])) >= since).length, series };
+    }
+    return { track, summary };
+  })();
+
+  /** Graphique en colonnes (une série : vues par jour), avec info-bulle au survol et au clavier. */
+  function renderViewsChart(box, tip, series) {
+    const W = Math.max(260, box.clientWidth), H = 150, top = 16, bottom = 20, left = 26, right = 4;
+    const plotW = W - left - right, plotH = H - top - bottom;
+    const max = Math.max(...series.map((d) => d.views));
+    const step = max <= 4 ? 1 : max <= 10 ? 2 : max <= 25 ? 5 : max <= 50 ? 10 : Math.ceil(max / 50) * 10;
+    const yMax = Math.max(step * 2, Math.ceil(max / (step * 2)) * step * 2);   // 0, milieu et haut : toujours des nombres entiers
+    const y = (v) => top + plotH - (v / yMax) * plotH;
+    const slot = plotW / series.length;
+    const barW = Math.min(24, Math.max(3, slot - 2));            // 24 px au plus, 2 px d'écart entre colonnes
+    const ns = 'http://www.w3.org/2000/svg';
+    const el = (tag, attrs) => { const n = document.createElementNS(ns, tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); return n; };
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, height: H, role: 'img', 'aria-label': 'Vues de la fiche par jour' });
+    [0, yMax / 2, yMax].forEach((v) => {
+      svg.appendChild(el('line', { class: 'grid-line', x1: left, x2: W - right, y1: Math.round(y(v)) + 0.5, y2: Math.round(y(v)) + 0.5 }));
+      const t = el('text', { class: 'axis-text', x: left - 6, y: y(v) + 4, 'text-anchor': 'end' }); t.textContent = String(v); svg.appendChild(t);
+    });
+    const fmt = (d) => d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    const labelAt = new Set([0, Math.floor((series.length - 1) / 2), series.length - 1]);
+    const maxIndex = max > 0 ? series.map((d) => d.views).lastIndexOf(max) : -1;
+    series.forEach((d, i) => {
+      const cx = left + slot * i + slot / 2, x = cx - barW / 2;
+      const g = el('g', { class: 'col' });
+      if (d.views > 0) {
+        const h = Math.max(2, (d.views / yMax) * plotH), r = Math.min(4, barW / 2, h);
+        const yb = top + plotH;                                     // coins arrondis en haut, carrés sur la ligne de base
+        g.appendChild(el('path', { class: 'bar', d: `M${x},${yb}V${yb - h + r}Q${x},${yb - h} ${x + r},${yb - h}H${x + barW - r}Q${x + barW},${yb - h} ${x + barW},${yb - h + r}V${yb}Z` }));
+      }
+      const label = fmt(d.date) + ' : ' + d.views + (d.views > 1 ? ' vues' : ' vue') + ', ' + d.visitors + (d.visitors > 1 ? ' personnes' : ' personne');
+      const hit = el('rect', { class: 'hit', x: left + slot * i, y: top, width: slot, height: plotH + bottom, tabindex: 0, role: 'img', 'aria-label': label });
+      const showTip = () => {
+        g.classList.add('is-hover');
+        tip.innerHTML = '<b></b><span></span>';
+        tip.firstChild.textContent = d.views + (d.views > 1 ? ' vues' : ' vue');
+        tip.lastChild.textContent = d.date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }) + ' · ' + d.visitors + (d.visitors > 1 ? ' personnes' : ' personne');
+        tip.hidden = false;
+        const scale = box.clientWidth / W;
+        tip.style.left = Math.min(Math.max(cx * scale, 60), box.clientWidth - 60) + 'px';
+        tip.style.top = (box.offsetTop + (d.views ? y(d.views) : top + plotH) * scale - 6) + 'px';
+      };
+      const hideTip = () => { g.classList.remove('is-hover'); tip.hidden = true; };
+      hit.addEventListener('pointerenter', showTip); hit.addEventListener('pointerleave', hideTip);
+      hit.addEventListener('focus', showTip); hit.addEventListener('blur', hideTip);
+      g.appendChild(hit);
+      if (i === maxIndex) {                                         // une seule valeur affichée : le maximum
+        const t = el('text', { class: 'value-text', x: cx, y: y(d.views) - 5, 'text-anchor': 'middle' }); t.textContent = String(d.views); g.appendChild(t);
+      }
+      if (labelAt.has(i)) {
+        const t = el('text', { class: 'axis-text', x: cx, y: H - 4, 'text-anchor': i === 0 ? 'start' : i === series.length - 1 ? 'end' : 'middle' });
+        if (i === 0) t.setAttribute('x', left); if (i === series.length - 1) t.setAttribute('x', W - right);
+        t.textContent = fmt(d.date); g.appendChild(t);
+      }
+      svg.appendChild(g);
+    });
+    box.textContent = '';
+    box.appendChild(svg);
+    if (max === 0) { const p = document.createElement('p'); p.className = 'chart-empty'; p.textContent = 'Pas encore de visite sur la période'; box.appendChild(p); }
+  }
+
+  let statsDays = 7;
+  function renderStats(account) {
+    const r = myRestaurant(account);
+    $('pd-stats').hidden = !(r && r.published);
+    if (!r || !r.published) return;
+    const st = Stats.summary(r.id, statsDays);
+    const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
+    const period = statsDays === 7 ? 'sur 7 jours' : 'sur 30 jours';
+    $('k-followers').textContent = st.followers.toLocaleString('fr-FR');
+    $('k-followers-d').textContent = st.newFollowers ? '+' + st.newFollowers + ' ' + period : 'aucun nouveau ' + period;
+    $('k-views').textContent = st.views.toLocaleString('fr-FR');
+    $('k-visitors').textContent = plural(st.visitors, 'personne', 'personnes');
+    $('k-routes').textContent = (st.walk + st.car).toLocaleString('fr-FR');
+    $('k-routes-d').textContent = 'à pied ' + st.walk + ' · en voiture ' + st.car;
+    $('k-calls').textContent = st.phone.toLocaleString('fr-FR');
+    $('k-menu').textContent = st.menu.toLocaleString('fr-FR');
+    $('k-photos').textContent = st.photos.toLocaleString('fr-FR');
+    $('pd-chart-sub').textContent = period;
+    document.querySelectorAll('#pd-stats .seg button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.days) === statsDays)));
+    requestAnimationFrame(() => renderViewsChart($('pd-chart'), $('pd-tip'), st.series));
+    const tbody = $('pd-table').tBodies[0];
+    tbody.textContent = '';
+    st.series.slice().reverse().forEach((d) => {
+      const tr = tbody.insertRow();
+      [d.date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }), d.views, d.visitors, d.routes, d.newFollowers]
+        .forEach((v) => { tr.insertCell().textContent = String(v); });
+    });
+  }
+  document.querySelectorAll('#pd-stats .seg button').forEach((b) => b.addEventListener('click', () => {
+    statsDays = Number(b.dataset.days);
+    renderStats(currentUser());
+  }));
+
+  /** Profil client : restaurants suivis, avec leur offre du moment. */
+  function renderFollows(account) {
+    const ids = Object.keys(account.follows || {}).filter((id) => restaurants()[id] && restaurants()[id].published);
+    $('follows-box').hidden = !ids.length;
+    const list = $('follows-list');
+    list.textContent = '';
+    ids.forEach((id) => {
+      const r = restaurants()[id];
+      const li = document.createElement('li');
+      li.innerHTML = '<button type="button"><span class="f-emoji" aria-hidden="true"></span><span><strong></strong><small></small></span></button>';
+      li.querySelector('.f-emoji').textContent = catOf(r).emoji;
+      li.querySelector('strong').textContent = r.name;
+      li.querySelector('small').textContent = r.promo ? '🎁 ' + r.promo : catOf(r).label;
+      li.querySelector('button').addEventListener('click', () => { closePanel($('profile-sheet')); whenMapReady(() => openShop(id)); });
+      list.appendChild(li);
+    });
+  }
+
+  $('shop-go').addEventListener('click', () => selectedId && Stats.track(selectedId, 'walk'));
+  $('shop-go-car').addEventListener('click', () => selectedId && Stats.track(selectedId, 'car'));
+  $('shop-phone').addEventListener('click', () => selectedId && Stats.track(selectedId, 'phone'));
 
   /** Marges de la carte quand une fiche est ouverte : le commerce reste visible à côté ou au-dessus. */
   function shopPadding() {
@@ -2446,9 +2907,11 @@
     const m = markers.get(id);
     if (!m) return;
     if (selectedId && selectedId !== id) markers.get(selectedId).el.classList.remove('is-selected');
+    const isNewVisit = selectedId !== id || !$('shop-sheet').classList.contains('is-open');
     selectedId = id;
     m.el.classList.add('is-selected');
     renderShop(m);
+    if (isNewVisit) { tabsSeen = new Set(); setShopTab('infos'); Stats.track(id, 'views'); }
     renderList();
     openPanel($('shop-sheet'));
     setFollow(false);
@@ -3549,14 +4012,14 @@
   let menuFor = null;
   function renderMenu(shop) {
     const items = shop.menu || [];
-    const box = $('shop-menu');
     const key = shop.id + ':' + (shop.updatedAt || '');
-    box.hidden = !items.length;
+    $('tab-menu-n').textContent = items.length ? ' ' + items.length : '';
+    $('shop-menu-empty').hidden = !!items.length;
     if (key === menuFor) return;
     menuFor = key;
-    box.open = false;
     const list = $('shop-menu-list');
     list.textContent = '';
+    $('shop-menu-count').textContent = '';
     if (!items.length) return;
     const groups = new Map();
     items.forEach((it) => { if (!groups.has(it.section)) groups.set(it.section, []); groups.get(it.section).push(it); });
@@ -4008,6 +4471,7 @@
       ? 'Actif depuis le ' + date(pro.payment.paidAt) + (pro.payment.mode === 'demo' ? ' (démonstration)' : '')
       : 'Non souscrit';
     $('pd-show').hidden = !r;
+    renderStats(account);
   }
 
   $('profile-btn').addEventListener('click', () => {
@@ -4018,7 +4482,9 @@
     $('profile-email').textContent = account.email + (account.emailVerifiedAt ? ' ✓' : '') + (account.role === 'pro' ? ' · Restaurateur' : '');
     $('profile-since').textContent = new Date(account.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
     updateProfileGeo();
+    $('profile-sheet').classList.toggle('is-pro', account.role === 'pro');
     renderProDashboard(account);
+    renderFollows(account);
     openPanel($('profile-sheet'), { modal: true });
   });
   $('pd-edit').addEventListener('click', () => {

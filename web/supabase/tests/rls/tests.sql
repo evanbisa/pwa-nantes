@@ -96,6 +96,53 @@ select t.fails($$update merchants set name = 'Tag'$$, 'anonyme : aucune écritur
 select t.fails($$delete from merchants$$, 'anonyme : aucune suppression possible');
 reset role;
 
+-- ===== Abonnements et statistiques =====
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok(t.affected($$insert into follows (merchant_id) values ('aaaaaaaa-0000-0000-0000-000000000001')$$) = 1, 'étudiante : s''abonne à un commerce en ligne');
+select t.fails($$insert into follows (merchant_id) values ('aaaaaaaa-0000-0000-0000-000000000001')$$, 'abonnement en double refusé');
+select t.fails($$insert into follows (merchant_id) values ('aaaaaaaa-0000-0000-0000-000000000002')$$, 'abonnement à une fiche non publiée refusé');
+select t.fails($$insert into follows (user_id, merchant_id) values ('22222222-2222-2222-2222-222222222222', 'aaaaaaaa-0000-0000-0000-000000000001')$$, 'impossible d''abonner quelqu''un d''autre');
+select t.ok((select count(*) = 1 from follows), 'étudiante : voit son abonnement');
+select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'view');
+select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'view');
+select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'walk');
+select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'car');
+select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'menu');
+select t.ok((select count(*) = 0 from merchant_stats), 'étudiante : ne voit aucune statistique');
+select t.ok((select count(*) = 0 from my_merchant_stats(7)), 'étudiante : my_merchant_stats ne renvoie rien');
+select t.fails($$select * from merchant_visitors$$, 'étudiante : liste des visiteurs inaccessible');
+reset role;
+select set_config('request.jwt.claims', '', false);
+set role anon;
+select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'view');
+select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000002', 'view');   -- brouillon : ignoré
+select t.ok((select merchant_follower_count('aaaaaaaa-0000-0000-0000-000000000001') = 1), 'anonyme : nombre d''abonnés visible (1)');
+select t.fails($$select * from follows$$, 'anonyme : liste des abonnés inaccessible');
+select t.fails($$select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'hack')$$, 'évènement inconnu refusé');
+select t.fails($$update merchant_stats set views = 9999$$, 'anonyme : compteurs non modifiables');
+select t.fails($$select * from my_merchant_stats(7)$$, 'anonyme : tableau de bord inaccessible');
+select t.fails($$select * from private.my_merchant_stats(7)$$, 'anonyme : fonction privée du tableau de bord inappelable');
+select t.fails($$select private.can_follow('aaaaaaaa-0000-0000-0000-000000000001')$$, 'anonyme : fonction privée d''abonnement inappelable');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated;
+select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'view');   -- le propriétaire : non compté
+select t.fails($$insert into follows (merchant_id) values ('aaaaaaaa-0000-0000-0000-000000000001')$$, 'restaurateur : ne peut pas suivre sa propre fiche');
+select t.ok((select count(*) = 0 from follows), 'restaurateur : ne voit PAS qui le suit');
+select t.fails($$select * from merchant_visitors$$, 'restaurateur : ne voit PAS qui l''a consulté');
+select t.ok((select views = 3 and visitors = 1 and walk_clicks = 1 and car_clicks = 1 and menu_views = 1 and new_followers = 1
+  from my_merchant_stats(7) order by day desc limit 1), 'restaurateur : 3 vues (sa visite non comptée), 1 personne, 1 à pied, 1 en voiture, 1 menu, 1 nouvel abonné');
+select t.ok((select count(*) = 7 from my_merchant_stats(7)) and (select count(*) = 30 from my_merchant_stats(30)) and (select count(*) = 90 from my_merchant_stats(500)), 'tableau de bord : 7, 30 jours, plafonné à 90');
+select t.ok((select followers = 1 and visitors = 1 from my_merchant_totals(7)), 'totaux : 1 abonné, 1 personne');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok(t.affected($$delete from follows where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 1, 'étudiante : se désabonne');
+select t.ok(merchant_follower_count('aaaaaaaa-0000-0000-0000-000000000001') = 0, 'après désabonnement : 0 abonné');
+insert into follows (merchant_id) values ('aaaaaaaa-0000-0000-0000-000000000001');
+reset role;
+
 -- ===== Masquage, modération, suppression =====
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
 set role authenticated;
@@ -114,7 +161,8 @@ select t.fails($$update merchants set status = 'published' where id = 'aaaaaaaa-
 reset role;
 delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
 select t.ok((select count(*) = 0 from profiles where id = '11111111-1111-1111-1111-111111111111') and (select count(*) = 0 from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001')
-  and (select count(*) = 0 from merchant_private where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'suppression du compte : profil, fiche et SIRET supprimés');
+  and (select count(*) = 0 from merchant_private where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001')
+  and (select count(*) = 0 from follows) and (select count(*) = 0 from merchant_stats) and (select count(*) = 0 from merchant_visitors), 'suppression du compte : profil, fiche, SIRET, abonnés et statistiques supprimés');
 select t.ok((select count(*) = 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'merchants'), 'temps réel activé sur merchants');
 select t.ok(not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.prosecdef and has_function_privilege('anon', p.oid, 'execute')), 'aucune fonction SECURITY DEFINER appelable par un visiteur via l''API');
 select t.ok((select bool_and(c.relrowsecurity) and count(*) = (select count(*) from pg_tables where schemaname = 'public')
