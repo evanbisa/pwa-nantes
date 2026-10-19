@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import FoodLoader from "@/components/ui/FoodLoader";
 import type { MerchantMapProps } from "./MerchantMap";
 
 /**
@@ -10,8 +11,8 @@ import type { MerchantMapProps } from "./MerchantMap";
 const MerchantMap = dynamic(() => import("./MerchantMap"), {
   ssr: false,
   loading: () => (
-    <div className="grid h-full w-full place-items-center bg-[#e8eaed] text-sm text-[#5f6368] dark:bg-[#1f2329] dark:text-[#9aa0a6]">
-      <span className="animate-pulse">Chargement de la carte…</span>
+    <div className="h-full w-full bg-[#e8eaed] dark:bg-[#1f2329]">
+      <FoodLoader label="Chargement de la carte…" detail="Les commerces de La Roche-sur-Yon arrivent" />
     </div>
   ),
 });

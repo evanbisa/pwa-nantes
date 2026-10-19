@@ -3,6 +3,9 @@ import type { LatLng } from "./config";
 const EARTH_RADIUS_M = 6_371_000;
 /** Vitesse de marche moyenne, en mètres par minute (≈ 4,8 km/h). */
 const WALK_SPEED_M_PER_MIN = 80;
+/** Vitesse moyenne en voiture en ville, feux compris (≈ 25 km/h), et allongement moyen de la route. */
+const DRIVE_SPEED_M_PER_MIN = 420;
+const ROAD_DETOUR = 1.3;
 
 /** Distance à vol d'oiseau (formule de haversine), en mètres. */
 export function distanceMeters([lat1, lng1]: LatLng, [lat2, lng2]: LatLng): number {
@@ -22,6 +25,9 @@ export function formatDistance(meters: number): string {
 /** Temps de marche arrondi à la minute (1 min au minimum). */
 export const walkingMinutes = (meters: number) => Math.max(1, Math.round(meters / WALK_SPEED_M_PER_MIN));
 
-/** Itinéraire à pied dans Google Maps (ouvre l'application sur téléphone). */
-export const directionsUrl = ([lat, lng]: LatLng) =>
-  `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
+/** Temps en voiture estimé, arrondi à la minute (1 min au minimum). */
+export const drivingMinutes = (meters: number) => Math.max(1, Math.round((meters * ROAD_DETOUR) / DRIVE_SPEED_M_PER_MIN));
+
+/** Itinéraire dans Google Maps, à pied ou en voiture (ouvre l'application sur téléphone). */
+export const directionsUrl = ([lat, lng]: LatLng, mode: "walking" | "driving" = "walking") =>
+  `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=${mode}`;

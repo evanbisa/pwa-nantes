@@ -29,12 +29,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <!-- MapLibre GL : moteur de secours (carte « style Google Maps ») utilisé tant qu'aucune clé Google n'est configurée -->
-  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css" />
-  <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+  <!-- MapLibre GL : moteur de secours (carte « style Google Maps ») utilisé tant qu'aucune clé Google n'est configurée.
+       Feuilles de style chargées sans bloquer l'affichage (l'écran de chargement peut apparaître tout de suite) ;
+       le script du moteur est chargé en bas de page. -->
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css" media="print" onload="this.media='all'" />
 
   <!-- Typographie : Roboto (police de Google Maps) -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" media="print" onload="this.media='all'" />
+  <noscript>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" />
+  </noscript>
 
   <style>
     /* =====================================================================
@@ -379,6 +384,67 @@
     .pw-rules li.is-ok { color: var(--green); }
     .pw-rules li.is-ok::before { border: 0; background: var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 10px no-repeat; }
     .field.has-error .pw-rules li:not(.is-ok) { color: var(--danger); }
+    /* Confirmation du mot de passe */
+    .pw-match { display: flex; align-items: center; gap: 6px; min-height: 18px; margin: 6px 0 0; font-size: 12.5px; color: var(--muted); }
+    .pw-match.is-ok { color: var(--green); }
+    .pw-match.is-ko { color: var(--danger); }
+
+    /* =====================================================================
+       Écran de chargement : burger, sushi et pizza en orbite.
+       Affiché seulement quand un chargement dure (voir Loader dans le script).
+       ===================================================================== */
+    .loader { position: fixed; inset: 0; z-index: 115; display: grid; place-items: center; padding: 24px;
+      background: var(--scrim-soft); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+      opacity: 0; transition: opacity .25s var(--ease-out); }
+    .loader[hidden] { display: none; }
+    .loader.is-visible { opacity: 1; }
+    /* Au tout premier affichage (avant même le JavaScript) : n'apparaît qu'après 350 ms d'attente */
+    .loader.is-boot { animation: loader-in .25s var(--ease-out) .35s forwards; }
+    @keyframes loader-in { to { opacity: 1; } }
+    .loader-card { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 28px 32px 24px; border-radius: 24px;
+      background: var(--panel-solid); box-shadow: var(--shadow); text-align: center; max-width: 320px; }
+    .loader-card p { margin: 0; font-size: 15px; font-weight: 500; color: var(--text); }
+    .loader-card small { display: block; margin-top: 2px; font-size: 13px; font-weight: 400; color: var(--muted); }
+    .orbit { position: relative; width: 132px; height: 132px; flex: none; }
+    .orbit::before { content: ""; position: absolute; inset: 22px; border-radius: 50%; border: 2px dashed var(--line-strong); }
+    .orbit-ring { position: absolute; inset: 0; animation: orbit-spin 2.6s linear infinite; }
+    .orbit-item { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; display: grid; place-items: center;
+      border-radius: 50%; background: var(--panel-solid); box-shadow: 0 2px 8px rgba(0, 0, 0, .18); }
+    .orbit-item svg { width: 34px; height: 34px; animation: orbit-self 2.6s linear infinite; }
+    /* trois positions à 120° sur le cercle */
+    .orbit-item:nth-child(1) { transform: rotate(0deg) translateY(-48px); }
+    .orbit-item:nth-child(2) { transform: rotate(120deg) translateY(-48px); }
+    .orbit-item:nth-child(3) { transform: rotate(240deg) translateY(-48px); }
+    .orbit-item:nth-child(1) svg { --base: 0deg; }
+    .orbit-item:nth-child(2) svg { --base: -120deg; }
+    .orbit-item:nth-child(3) svg { --base: -240deg; }
+    .orbit-center { position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--accent);
+      animation: orbit-pulse 1.3s ease-in-out infinite; }
+    /* chaque logo tourne aussi sur lui-même (un tour et quart pendant que l'anneau en fait un) */
+    @keyframes orbit-spin { to { transform: rotate(360deg); } }
+    @keyframes orbit-self { from { transform: rotate(var(--base)); } to { transform: rotate(calc(var(--base) + 90deg)); } }
+    @keyframes orbit-pulse { 50% { transform: scale(.6); opacity: .5; } }
+    .orbit.is-small { width: 64px; height: 64px; }
+    .orbit.is-small::before { inset: 11px; }
+    .orbit.is-small .orbit-item { width: 24px; height: 24px; margin: -12px 0 0 -12px; box-shadow: 0 1px 4px rgba(0, 0, 0, .2); }
+    .orbit.is-small .orbit-item svg { width: 18px; height: 18px; }
+    .orbit.is-small .orbit-item:nth-child(1) { transform: rotate(0deg) translateY(-23px); }
+    .orbit.is-small .orbit-item:nth-child(2) { transform: rotate(120deg) translateY(-23px); }
+    .orbit.is-small .orbit-item:nth-child(3) { transform: rotate(240deg) translateY(-23px); }
+    .orbit.is-small .orbit-center { width: 8px; height: 8px; margin: -4px 0 0 -4px; }
+    .verify-card.is-wait h4 { gap: 14px; }
+    @media (prefers-reduced-motion: reduce) {
+      .orbit-ring, .orbit-item svg { animation: none; }
+      .orbit-item { animation: orbit-fade 1.8s ease-in-out infinite; }
+      .orbit-item:nth-child(2) { animation-delay: .6s; }
+      .orbit-item:nth-child(3) { animation-delay: 1.2s; }
+      @keyframes orbit-fade { 50% { opacity: .35; } }
+    }
+
+    /* Itinéraire : à pied ou en voiture */
+    .go-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+    .go-row .btn { margin-top: 0; }
+    .meta .travel { display: block; margin-top: 2px; color: var(--muted); }
     .check input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
     .form-error { margin: 12px 0 0; min-height: 0; font-size: 14px; color: var(--danger); }
     .form-error:empty { display: none; }
@@ -652,6 +718,15 @@
 </head>
 
 <body>
+  <!-- ===================== ÉCRAN DE CHARGEMENT ===================== -->
+  <div id="loader" class="loader is-boot" role="status" aria-live="polite">
+    <div class="loader-card">
+      <div class="orbit" aria-hidden="true"><span class="orbit-ring"><span class="orbit-item"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 22a16 12 0 0132 0z" fill="#F4A63A"/><path d="M8 22h32" stroke="#E08E22" stroke-width="2"/><g fill="#FFF3D6"><ellipse cx="17" cy="15" rx="1.4" ry=".8"/><ellipse cx="24" cy="13" rx="1.4" ry=".8"/><ellipse cx="31" cy="15.5" rx="1.4" ry=".8"/><ellipse cx="21" cy="18" rx="1.4" ry=".8"/><ellipse cx="28" cy="19" rx="1.4" ry=".8"/></g><path d="M7 25c3-2.5 5 1.5 8-1s5 1.5 8-1 5 1.5 8-1 5 1.5 10-.5v2H7z" fill="#6CC24A"/><path d="M9 26h30l-4 6-3-3-4 4-3-4-3 3-4-3z" fill="#FFD23F"/><rect x="8" y="27.5" width="32" height="6" rx="3" fill="#7B3F1D"/><path d="M9 35h30a1 1 0 011 1 5 5 0 01-5 5H13a5 5 0 01-5-5 1 1 0 011-1z" fill="#E8962E"/></svg></span><span class="orbit-item"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="19" fill="#1F2D2B"/><circle cx="24" cy="24" r="15" fill="#FFFFFF"/><circle cx="24" cy="24" r="15" fill="none" stroke="#E6E9EC" stroke-width="1"/><g fill="#EEF1F3"><circle cx="15" cy="20" r="1.3"/><circle cx="32" cy="18" r="1.3"/><circle cx="31" cy="31" r="1.3"/><circle cx="17" cy="31" r="1.3"/></g><circle cx="24" cy="24" r="7.5" fill="#FF7A59"/><path d="M19.5 22.5c3 1 6 1 9 0M19.5 26c3 1 6 1 9 0" stroke="#FFB19B" stroke-width="1.4" fill="none" stroke-linecap="round"/><circle cx="27.5" cy="20" r="2.2" fill="#7BC67E"/></svg></span><span class="orbit-item"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 44L6.5 10.5a32 32 0 0135 0z" fill="#FFD45C"/><path d="M6.5 10.5a32 32 0 0135 0l-2.4 4.6a27 27 0 00-30.2 0z" fill="#E9A23B"/><g fill="#D9452B"><circle cx="20" cy="20" r="3.4"/><circle cx="29" cy="22" r="3"/><circle cx="24" cy="31" r="2.8"/></g><g fill="#6CC24A"><circle cx="25" cy="17.5" r="1.1"/><circle cx="18" cy="27" r="1.1"/><circle cx="29.5" cy="29" r="1.1"/></g></svg></span></span><span class="orbit-center"></span></div>
+      <p><span id="loader-text">Chargement…</span><small id="loader-sub">Roche Street Food</small></p>
+    </div>
+  </div>
+  <template id="orbit-small"><div class="orbit is-small" aria-hidden="true"><span class="orbit-ring"><span class="orbit-item"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 22a16 12 0 0132 0z" fill="#F4A63A"/><path d="M8 22h32" stroke="#E08E22" stroke-width="2"/><g fill="#FFF3D6"><ellipse cx="17" cy="15" rx="1.4" ry=".8"/><ellipse cx="24" cy="13" rx="1.4" ry=".8"/><ellipse cx="31" cy="15.5" rx="1.4" ry=".8"/><ellipse cx="21" cy="18" rx="1.4" ry=".8"/><ellipse cx="28" cy="19" rx="1.4" ry=".8"/></g><path d="M7 25c3-2.5 5 1.5 8-1s5 1.5 8-1 5 1.5 8-1 5 1.5 10-.5v2H7z" fill="#6CC24A"/><path d="M9 26h30l-4 6-3-3-4 4-3-4-3 3-4-3z" fill="#FFD23F"/><rect x="8" y="27.5" width="32" height="6" rx="3" fill="#7B3F1D"/><path d="M9 35h30a1 1 0 011 1 5 5 0 01-5 5H13a5 5 0 01-5-5 1 1 0 011-1z" fill="#E8962E"/></svg></span><span class="orbit-item"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="19" fill="#1F2D2B"/><circle cx="24" cy="24" r="15" fill="#FFFFFF"/><circle cx="24" cy="24" r="15" fill="none" stroke="#E6E9EC" stroke-width="1"/><g fill="#EEF1F3"><circle cx="15" cy="20" r="1.3"/><circle cx="32" cy="18" r="1.3"/><circle cx="31" cy="31" r="1.3"/><circle cx="17" cy="31" r="1.3"/></g><circle cx="24" cy="24" r="7.5" fill="#FF7A59"/><path d="M19.5 22.5c3 1 6 1 9 0M19.5 26c3 1 6 1 9 0" stroke="#FFB19B" stroke-width="1.4" fill="none" stroke-linecap="round"/><circle cx="27.5" cy="20" r="2.2" fill="#7BC67E"/></svg></span><span class="orbit-item"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 44L6.5 10.5a32 32 0 0135 0z" fill="#FFD45C"/><path d="M6.5 10.5a32 32 0 0135 0l-2.4 4.6a27 27 0 00-30.2 0z" fill="#E9A23B"/><g fill="#D9452B"><circle cx="20" cy="20" r="3.4"/><circle cx="29" cy="22" r="3"/><circle cx="24" cy="31" r="2.8"/></g><g fill="#6CC24A"><circle cx="25" cy="17.5" r="1.1"/><circle cx="18" cy="27" r="1.1"/><circle cx="29.5" cy="29" r="1.1"/></g></svg></span></span><span class="orbit-center"></span></div></template>
+
   <!-- ===================== CARTE ===================== -->
   <div id="map" role="application" aria-label="Carte de La Roche-sur-Yon"></div>
 
@@ -765,11 +840,17 @@
         <a id="shop-phone" href="#"></a>
       </li>
     </ul>
-    <!-- "Y aller" : itinéraire piéton dans Google Maps -->
-    <a id="shop-go" class="btn btn-primary" target="_blank" rel="noopener">
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.7 2.3a1 1 0 00-1.05-.23l-18 7a1 1 0 00.08 1.9l7.6 2.1 2.1 7.6a1 1 0 001.9.08l7-18a1 1 0 00-.23-1.05z"/></svg>
-      Y aller
-    </a>
+    <!-- Itinéraires dans Google Maps : à pied ou en voiture -->
+    <div class="go-row">
+      <a id="shop-go" class="btn btn-primary" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM9 21l2-6 2.5 2.5V21M8 12l2-4.5 3.5 1 2 3.5 2.5 1M10 7.5L7.5 9 7 12"/></svg>
+        À pied
+      </a>
+      <a id="shop-go-car" class="btn btn-ghost" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17h14M6.5 17v2M17.5 17v2M4 17v-4.5L6 7.5A2 2 0 017.9 6h8.2A2 2 0 0118 7.5l2 5V17"/><path d="M4 12.5h16"/><circle cx="7.5" cy="14.75" r=".9" fill="currentColor"/><circle cx="16.5" cy="14.75" r=".9" fill="currentColor"/></svg>
+        En voiture
+      </a>
+    </div>
   </section>
 
   <!-- ===================== AIDE : LOCALISATION BLOQUÉE ===================== -->
@@ -891,6 +972,15 @@
             <li data-rule="special">1 caractère spécial</li>
           </ul>
           <small class="field-error" id="err-su-password" aria-live="polite"></small>
+        </label>
+        <label class="field" id="field-su-password2">
+          <span>Confirmer le mot de passe</span>
+          <span class="pw-wrap">
+            <input id="su-password2" type="password" autocomplete="new-password" maxlength="128" required aria-describedby="pw-match" />
+            <button class="pw-toggle" type="button" data-toggle-pw="su-password2">Afficher</button>
+          </span>
+          <p class="pw-match" id="pw-match" aria-live="polite"></p>
+          <small class="field-error" id="err-su-password2" aria-live="polite"></small>
         </label>
         <label class="check"><input type="checkbox" id="su-remember" /> Rester connecté sur cet appareil</label>
         <p class="form-error" id="err-signup" role="alert"></p>
@@ -1120,8 +1210,9 @@
     </div>
   </div>
 
-  <noscript><div class="fatal"><div><h1>JavaScript requis</h1><p>Activez JavaScript pour afficher la carte.</p></div></div></noscript>
+  <noscript><style>.loader { display: none !important; }</style><div class="fatal"><div><h1>JavaScript requis</h1><p>Activez JavaScript pour afficher la carte.</p></div></div></noscript>
 
+<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
 <script>
 'use strict';
 
@@ -1155,6 +1246,8 @@
     themeKey: 'roche-street-food:theme',
     fallbackKey: 'roche-street-food:google-failed',
     walkSpeed: 80,                              // mètres par minute (~4,8 km/h)
+    driveSpeed: 420,                            // mètres par minute (~25 km/h : vitesse moyenne en ville, feux compris)
+    roadDetour: 1.3,                            // la route est en moyenne 30 % plus longue que la ligne droite
     desktopQuery: '(min-width: 900px)',
     // Vérification des restaurateurs : API publique « Recherche d'entreprises » (répertoire Sirene de l'INSEE)
     sireneApi: 'https://recherche-entreprises.api.gouv.fr/search',
@@ -1284,6 +1377,77 @@
     if (m < 1000) return Math.max(10, Math.round(m / 10) * 10) + ' m';
     return (m / 1000).toLocaleString('fr-FR', { maximumFractionDigits: m < 10000 ? 1 : 0 }) + ' km';
   }
+
+  /** Temps de trajet estimés (minutes), à partir de la distance à vol d'oiseau. */
+  const walkMinutes = (m) => Math.max(1, Math.round(m / CONFIG.walkSpeed));
+  const driveMinutes = (m) => Math.max(1, Math.round((m * CONFIG.roadDetour) / CONFIG.driveSpeed));
+  const formatMinutes = (min) => (min < 60 ? min + ' min' : Math.floor(min / 60) + ' h ' + String(min % 60).padStart(2, '0'));
+
+  /* ---------- Écran de chargement ----------
+   * Loader.run(promesse, « texte ») : l'écran n'apparaît que si l'attente dépasse 350 ms (pas de clignotement
+   * pour les actions rapides) et reste ensuite affiché au moins 600 ms. Plusieurs chargements peuvent se chevaucher.
+   */
+  const Loader = (() => {
+    const DELAY = 350, MIN_VISIBLE = 600;
+    let pending = 0, timer = null, shownAt = 0, text = '', sub = '';
+    const el = () => document.getElementById('loader');
+    const setText = () => {
+      document.getElementById('loader-text').textContent = text;
+      document.getElementById('loader-sub').textContent = sub;
+    };
+    function show() {
+      setText();
+      const box = el();
+      box.hidden = false;
+      requestAnimationFrame(() => box.classList.add('is-visible'));
+      shownAt = Date.now();
+    }
+    function hide() {
+      const box = el();
+      box.classList.remove('is-visible');
+      setTimeout(() => { if (!pending) box.hidden = true; }, 260);
+      shownAt = 0;
+    }
+    const booting = () => el().classList.contains('is-boot');
+    async function run(promise, label, detail = '') {
+      pending++;
+      text = label; sub = detail;
+      if (booting()) { /* l'écran de démarrage prend le relais (voir endBoot) */ }
+      else if (shownAt) setText();
+      else if (!timer) timer = setTimeout(() => { timer = null; show(); }, DELAY);
+      try {
+        return await promise;
+      } finally {
+        pending--;
+        if (!pending) {
+          if (timer) { clearTimeout(timer); timer = null; }
+          else if (shownAt) {
+            const wait = Math.max(0, MIN_VISIBLE - (Date.now() - shownAt));
+            setTimeout(() => { if (!pending) hide(); }, wait);
+          }
+        }
+      }
+    }
+    /** Fin du démarrage : l'écran affiché d'office (s'il est apparu) est retiré, ou relayé par un chargement en cours. */
+    function endBoot() {
+      const box = el();
+      if (!booting()) return;
+      const visible = parseFloat(getComputedStyle(box).opacity) > 0.05;
+      box.classList.remove('is-boot');
+      if (visible) {
+        box.classList.add('is-visible');
+        shownAt = Date.now();
+        if (pending) setText(); else setTimeout(() => { if (!pending) hide(); }, 200);
+      } else if (pending) {
+        timer = setTimeout(() => { timer = null; show(); }, DELAY);
+      } else {
+        box.hidden = true;
+      }
+    }
+    /** Petite version, à insérer dans un encadré (ex. : vérification du SIRET). */
+    const small = () => document.getElementById('orbit-small').content.firstElementChild.cloneNode(true);
+    return { run, endBoot, small };
+  })();
 
   function isInBounds([lng, lat]) {
     const [[w, s], [e, n]] = CONFIG.bounds;
@@ -2226,16 +2390,21 @@
     const dist = $('shop-distance');
     if (Geo.position) {
       const d = distance(Geo.position, shop.coords);
-      dist.innerHTML = '<b></b> · environ <b></b> à pied';
-      dist.children[0].textContent = formatDistance(d);
-      dist.children[1].textContent = Math.max(1, Math.round(d / CONFIG.walkSpeed)) + ' min';
+      dist.innerHTML = '<b></b> · environ <b></b> à pied<span class="travel">🚗 environ <b></b> en voiture</span>';
+      const [km, walk, car] = dist.querySelectorAll('b');
+      km.textContent = formatDistance(d);
+      walk.textContent = formatMinutes(walkMinutes(d));
+      car.textContent = formatMinutes(driveMinutes(d));
     } else {
-      dist.textContent = 'Activez la localisation pour connaître la distance';
+      dist.textContent = 'Activez la localisation pour connaître la distance et les temps de trajet';
     }
 
     const [lng, lat] = shop.coords;
-    $('shop-go').href = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng + '&travelmode=walking';
-    $('shop-go').setAttribute('aria-label', 'Itinéraire vers ' + shop.name);
+    const route = (mode) => 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng + '&travelmode=' + mode;
+    $('shop-go').href = route('walking');
+    $('shop-go').setAttribute('aria-label', 'Itinéraire à pied vers ' + shop.name);
+    $('shop-go-car').href = route('driving');
+    $('shop-go-car').setAttribute('aria-label', 'Itinéraire en voiture vers ' + shop.name);
   }
 
   /** Galerie de photos d'un restaurant (chargées depuis le stockage de l'appareil). */
@@ -2841,7 +3010,18 @@
     const p = $('su-password').value;
     PASSWORD_RULES.forEach((r) => $('pw-rules').querySelector('[data-rule="' + r.id + '"]').classList.toggle('is-ok', r.test(p)));
   }
-  $('su-password').addEventListener('input', renderPasswordRules);
+  $('su-password').addEventListener('input', () => { renderPasswordRules(); renderPasswordMatch(); });
+
+  /** Indique en direct si la confirmation correspond (une fois qu'on a commencé à la saisir). */
+  function renderPasswordMatch() {
+    const a = $('su-password').value, b = $('su-password2').value;
+    const box = $('pw-match');
+    if (!b) { box.textContent = ''; box.className = 'pw-match'; return; }
+    const same = a === b;
+    box.textContent = same ? '✓ Les mots de passe correspondent' : (a.startsWith(b) ? 'Continuez la saisie…' : '✗ Les mots de passe ne correspondent pas');
+    box.className = 'pw-match ' + (same ? 'is-ok' : a.startsWith(b) ? '' : 'is-ko');
+  }
+  $('su-password2').addEventListener('input', renderPasswordMatch);
 
   $('form-signup').addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -2859,6 +3039,9 @@
     if (role === 'pro' && !PHONE_RE.test(compactPhone(phone))) fail('su-phone', 'Numéro de téléphone invalide (ex. : 06 12 34 56 78).');
     const missing = missingPasswordRules(password);
     if (missing.length) fail('su-password', 'Mot de passe trop faible : il manque ' + listFr(missing.map((r) => r.label)) + '.');
+    const confirmation = $('su-password2').value;
+    if (!confirmation) fail('su-password2', 'Confirmez votre mot de passe.');
+    else if (confirmation !== password) fail('su-password2', 'Les deux mots de passe ne sont pas identiques.');
     if (firstInvalid) { $(firstInvalid).focus(); return; }
     if (accounts()[email]) {
       $('err-signup').innerHTML = 'Un compte existe déjà avec cet e-mail. <button class="link-btn" type="button" id="to-login">Se connecter</button>';
@@ -2869,7 +3052,7 @@
 
     const btn = ev.submitter || $('form-signup').querySelector('[type=submit]');
     btn.disabled = true;
-    const { salt, hash } = await hashPassword(password);
+    const { salt, hash } = await Loader.run(hashPassword(password), 'Création de votre compte…', 'Chiffrement du mot de passe');
     const account = { role, name, email, salt, hash, createdAt: new Date().toISOString() };
     if (role === 'pro') Object.assign(account, { lastName, phone: formatPhone(phone), pro: { status: 'verification' } });
     const remember = $('su-remember').checked;
@@ -2880,7 +3063,9 @@
       try { localStorage.removeItem(CONFIG.legacyStorageKey); } catch (e) { /* ignore */ }
       startSession(account, remember);
       $('su-password').value = '';
+      $('su-password2').value = '';
       renderPasswordRules();
+      renderPasswordMatch();
       showAuthStep(role === 'pro' ? 'pro-verify' : 'location');
     };
     if (role !== 'pro') { createAccount(); return; }   // clients : pas de code (aucun e-mail envoyé)
@@ -2905,7 +3090,7 @@
     }
     const btn = ev.submitter || $('form-login').querySelector('[type=submit]');
     btn.disabled = true;
-    const { hash } = await hashPassword(password, account.salt);
+    const { hash } = await Loader.run(hashPassword(password, account.salt), 'Connexion…');
     btn.disabled = false;
     if (!sameHash(hash, account.hash)) {
       setFieldError('li-password', 'Mot de passe incorrect.');
@@ -3122,7 +3307,7 @@
     btn.disabled = true;
     btn.textContent = 'Vérification…';
     showVerifyResult({ pending: true });
-    const result = await lookupSiret(siret);
+    const result = await lookupSiret(siret);   // attente affichée dans l'encadré (petite orbite)
     btn.disabled = false;
     btn.textContent = 'Vérifier';
     // L'utilisateur a pu modifier le numéro pendant la vérification
@@ -3145,7 +3330,7 @@
     const h = document.createElement('h4');
     card.appendChild(h);
     const p = (text) => { const el = document.createElement('p'); el.textContent = text; card.appendChild(el); };
-    if (result.pending) { h.textContent = 'Interrogation du répertoire Sirene…'; return; }
+    if (result.pending) { h.append(Loader.small(), 'Interrogation du répertoire Sirene…'); return; }
     const c = result.company;
     const messages = {
       notfound: ['Établissement introuvable', 'Aucun établissement ne correspond à ce SIRET dans le répertoire Sirene. Vérifiez le numéro indiqué sur votre Kbis.'],
@@ -3738,7 +3923,7 @@
 
     // Adresse : suggestion choisie, sinon première correspondance trouvée
     if (!proDraft.address && addrInput.value.trim().length >= 3) {
-      try { const [first] = await geocode(addrInput.value.trim()); if (first) chooseAddress(first); } catch (e) { /* message ci-dessous */ }
+      try { const [first] = await Loader.run(geocode(addrInput.value.trim()), 'Localisation de l\'adresse…'); if (first) chooseAddress(first); } catch (e) { /* message ci-dessous */ }
     }
     if (!proDraft.address) fail('pl-address', 'Choisissez l\'adresse de votre restaurant dans la liste des suggestions (La Roche-sur-Yon).');
     else if (!isInBounds(proDraft.address.coords)) fail('pl-address', 'L\'adresse doit se situer à La Roche-sur-Yon.');
@@ -3870,6 +4055,8 @@
 
   function startApp({ focus = null } = {}) {
     document.body.classList.add('ui-ready');
+    // Carte pas encore prête (connexion lente) : écran de chargement le temps qu'elle arrive
+    if (!view) Loader.run(new Promise((resolve) => whenMapReady(resolve)), 'Chargement de la carte…', 'Les commerces de La Roche-sur-Yon arrivent');
     whenMapReady(() => {
       view.setPadding(basePadding());
       if (focus) {
@@ -3930,6 +4117,8 @@
     showAuthStep('signup');
   }
 
+  // Fin du démarrage : avant initMap, pour que l'écran de chargement ne puisse jamais rester bloqué
+  Loader.endBoot();
   initMap();
   setInterval(refreshStatuses, 60 * 1000);
 

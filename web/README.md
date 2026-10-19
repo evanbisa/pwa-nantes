@@ -4,6 +4,8 @@ Version de production du prototype (`../index.html`) : **Next.js 16 + Supabase (
 pensée pour démarrer à **0 €/mois** (Supabase Free, Cloudflare Pages, tuiles OpenStreetMap).
 Zone couverte : La Roche-sur-Yon et sa couronne.
 
+> 📌 Point d'étape sécurité / mise en ligne (ce qui est fait, ce qu'il reste à faire) : [`docs/SECURITE-ETAT.md`](docs/SECURITE-ETAT.md)
+
 ## Avancement
 
 | Action | Contenu | État |

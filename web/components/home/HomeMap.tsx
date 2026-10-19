@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import MapView from "@/components/map/MapView";
 import type { LatLng, MapTheme } from "@/lib/geo/config";
-import { directionsUrl, distanceMeters, formatDistance, walkingMinutes } from "@/lib/geo/distance";
+import { directionsUrl, distanceMeters, drivingMinutes, formatDistance, walkingMinutes } from "@/lib/geo/distance";
 import { CATEGORIES, type MapMerchant, type MerchantCategory } from "@/types/merchant";
 
 /**
@@ -98,18 +98,35 @@ export default function HomeMap({ merchants }: { merchants: MapMerchant[] }) {
             {selected.openNow ? "Ouvert" : "Fermé"}
           </p>
           <p className="mt-1 text-sm text-[#3c4043] dark:text-[#e8eaed]">
-            {distance !== null
-              ? `${formatDistance(distance)} · environ ${walkingMinutes(distance)} min à pied`
-              : "Activez la localisation pour connaître la distance"}
+            {distance !== null ? (
+              <>
+                {`${formatDistance(distance)} · environ ${walkingMinutes(distance)} min à pied`}
+                <span className="block text-[#5f6368] dark:text-[#9aa0a6]">🚗 environ {drivingMinutes(distance)} min en voiture</span>
+              </>
+            ) : (
+              "Activez la localisation pour connaître la distance et les temps de trajet"
+            )}
           </p>
-          <a
-            href={directionsUrl(selected.position)}
-            target="_blank"
-            rel="noopener"
-            className="mt-4 flex h-12 items-center justify-center rounded-full bg-[#1a73e8] font-medium text-white hover:bg-[#1765cc]"
-          >
-            Y aller
-          </a>
+          <div className="mt-4 grid grid-cols-2 gap-2.5">
+            <a
+              href={directionsUrl(selected.position, "walking")}
+              target="_blank"
+              rel="noopener"
+              aria-label={`Itinéraire à pied vers ${selected.name}`}
+              className="flex h-12 items-center justify-center rounded-full bg-[#1a73e8] font-medium text-white hover:bg-[#1765cc]"
+            >
+              À pied
+            </a>
+            <a
+              href={directionsUrl(selected.position, "driving")}
+              target="_blank"
+              rel="noopener"
+              aria-label={`Itinéraire en voiture vers ${selected.name}`}
+              className="flex h-12 items-center justify-center rounded-full border border-black/15 font-medium text-[#1a73e8] hover:bg-[#e8f0fe] dark:border-white/15 dark:text-[#8ab4f8] dark:hover:bg-white/5"
+            >
+              En voiture
+            </a>
+          </div>
         </section>
       )}
     </div>
