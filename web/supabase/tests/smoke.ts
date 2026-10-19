@@ -26,10 +26,14 @@ await r.body?.cancel();
 check(!r.headers.get("access-control-allow-origin"), "CORS : site inconnu non autorisé");
 
 // 2. Le répertoire Sirene répond au format attendu, pour un vrai restaurant de La Roche-sur-Yon
-const search = await fetch("https://recherche-entreprises.api.gouv.fr/search?q=restaurant&code_postal=85000&activite_principale=56.10C&etat_administratif=A&per_page=5&limite_matching_etablissements=1");
-const list = await search.json();
-const siret = list.results?.flatMap((u: { matching_etablissements?: { siret: string; etat_administratif: string; code_postal?: string }[] }) => u.matching_etablissements ?? [])
-  .find((e: { siret: string; etat_administratif: string }) => e.etat_administratif === "A")?.siret;
+type Etab = { siret: string; etat_administratif: string; activite_principale?: string; code_postal?: string };
+const search = await fetch("https://recherche-entreprises.api.gouv.fr/search?q=restaurant&code_postal=85000&per_page=25");
+const list = await search.json().catch(() => ({}));
+// Établissements candidats : ceux qui correspondent à la recherche, sinon le siège
+const candidates: Etab[] = (list.results ?? []).flatMap((u: { matching_etablissements?: Etab[]; siege?: Etab }) =>
+  [...(u.matching_etablissements ?? []), ...(u.siege ? [u.siege] : [])]);
+const siret = candidates.find((e) => e.etat_administratif === "A" && /^56\./.test(e.activite_principale ?? "") && e.code_postal === "85000")?.siret;
+if (!siret) console.log(`  (diagnostic : HTTP ${search.status}, ${list.total_results ?? "?"} résultats, ${candidates.length} établissements, clés : ${Object.keys(list.results?.[0] ?? {}).join(", ")})`);
 check(typeof siret === "string" && isValidSiret(siret), `Sirene : restaurant réel trouvé à La Roche-sur-Yon (SIRET ${siret}, clé de contrôle valide)`);
 if (siret) {
   const res = await fetch(sireneUrl(siret));
