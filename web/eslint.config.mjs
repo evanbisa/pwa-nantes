@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Code Deno (fonctions et tests Supabase), vérifié avec « deno check » / « deno test »
+    "supabase/**",
   ]),
 ]);
 

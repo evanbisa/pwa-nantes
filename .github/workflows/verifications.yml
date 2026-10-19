@@ -1,0 +1,41 @@
+# Vérifications contre le vrai projet Supabase (depuis Internet, comme un visiteur) :
+# sécurité des données en accès anonyme, fonction verify-siret, répertoire Sirene.
+name: Vérifier Supabase en ligne
+
+on:
+  push:
+    branches: [claude/street-food-map-pwa-lr1xu2]
+    paths: ['web/supabase/**', 'web/scripts/**', .github/workflows/verifications.yml]
+  schedule:
+    - cron: '17 6 * * 1'   # chaque lundi matin : garde aussi le projet Supabase actif (pause après 7 jours d'inactivité)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://fnypgfyxbyaqrnklhjxc.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_W-2Gra6O-pRBEf0a_XsyKw_8UlhHTzb
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Ce qu'un visiteur anonyme peut lire (RLS)
+        working-directory: web
+        run: node scripts/check-supabase.mjs
+
+      - name: Tests de la fonction verify-siret (sans réseau)
+        working-directory: web
+        run: deno test supabase/functions/
+
+      - name: Fonction en ligne et répertoire Sirene réel
+        working-directory: web
+        run: deno run --allow-net --allow-env supabase/tests/smoke.ts

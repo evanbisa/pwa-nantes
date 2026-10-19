@@ -1,7 +1,7 @@
 # Roche Street Food — application Next.js
 
 Version de production du prototype (`../index.html`) : **Next.js 16 + Supabase (Auth + base de données)**,
-pensée pour démarrer à **0 €/mois** (Supabase Free, GitHub Pages, tuiles OpenStreetMap).
+pensée pour démarrer à **0 €/mois** (Supabase Free, Cloudflare Pages, tuiles OpenStreetMap).
 Zone couverte : La Roche-sur-Yon et sa couronne.
 
 ## Avancement
@@ -27,8 +27,8 @@ Zone couverte : La Roche-sur-Yon et sa couronne.
 - *Sign In / Providers › Email* : **Confirm email** activé.
 - *Sign In / Providers › Email* : mot de passe de **8 caractères minimum**, exigences
   « minuscules, majuscules, chiffres et symboles » (même règle que le prototype).
-- *URL Configuration* : *Site URL* = `https://evanbisa.github.io/pwa-nantes/app/` ;
-  *Redirect URLs* : ajouter aussi `http://localhost:3000/**`.
+- *URL Configuration* : *Site URL* = `https://roche-street-food.pages.dev` ;
+  *Redirect URLs* : `https://roche-street-food.pages.dev/**`, `https://evanbisa.github.io/pwa-nantes/app/**` et `http://localhost:3000/**`.
 - *Emails › SMTP Settings* : **indispensable pour de vrais utilisateurs**. Sans SMTP personnalisé, Supabase
   n'envoie les e-mails de confirmation qu'aux membres de l'équipe du projet, avec une limite très basse.
   Option à 0 € : **Gmail** (`smtp.gmail.com`, port 587, un « mot de passe d'application » Google,
@@ -53,16 +53,35 @@ npm run dev                  # http://localhost:3000
 e-mails et mots de passe inaccessibles ; aucune écriture anonyme. Il refuse de tourner si une clé secrète
 a été mise par erreur dans la variable publique.
 
-### 6. Mise en ligne : automatique, sur GitHub Pages (gratuit)
-Rien à faire : à chaque `git push` sur la branche `claude/street-food-map-pwa-lr1xu2`, le workflow
-`.github/workflows/pages.yml` contrôle le code (lint, types), construit l'application en **site statique**
-(`output: "export"`, pas de serveur) et la publie :
-- https://evanbisa.github.io/pwa-nantes/app/ → cette application ;
-- https://evanbisa.github.io/pwa-nantes/ → le prototype, jusqu'à ce que l'application le remplace.
+### 6. Mise en ligne : Cloudflare Pages (gratuit, usage commercial autorisé)
+Le site est **100 % statique** (`output: "export"`) : inscription, connexion et données passent par Supabase
+depuis le navigateur, protégées par la RLS. Le workflow `.github/workflows/cloudflare.yml` contrôle le code,
+construit le site et le publie sur **https://roche-street-food.pages.dev** à chaque `git push`.
 
-Pourquoi un site statique suffit : l'inscription, la connexion et la lecture / écriture des données se font
-depuis le navigateur avec Supabase, et c'est la RLS de la base qui protège les données. Le seul traitement
-qui exige la clé secrète (enregistrer un SIRET vérifié) sera une Edge Function Supabase (gratuite).
+À faire une seule fois (le workflow attend ces deux secrets ; sans eux il construit sans publier) :
+1. Créer un compte gratuit sur https://dash.cloudflare.com.
+2. *Account ID* : dans *Workers & Pages*, colonne de droite (ou dans l'URL du tableau de bord) → le copier.
+3. *My Profile › API Tokens › Create Token › Create Custom Token* : permission **Account › Cloudflare Pages › Edit**,
+   ressource : votre compte → *Create* → copier le jeton (affiché une seule fois).
+4. GitHub › dépôt `evanbisa/pwa-nantes` › *Settings › Secrets and variables › Actions › New repository secret* :
+   `CLOUDFLARE_API_TOKEN` (le jeton) et `CLOUDFLARE_ACCOUNT_ID` (l'identifiant).
+5. Le prochain `git push` (ou *Actions › Publier sur Cloudflare Pages › Run workflow*) publie le site.
+
+En attendant, la même application est aussi publiée sur https://evanbisa.github.io/pwa-nantes/app/
+(le prototype reste sur https://evanbisa.github.io/pwa-nantes/).
+
+### 7. Fonction serveur « verify-siret » (Supabase Edge Function, déjà déployée)
+`supabase/functions/verify-siret/` : vérifie le SIRET d'un restaurateur connecté (clé de contrôle, répertoire Sirene,
+établissement en activité, code NAF de restauration, SIRET non déjà pris), puis crée sa fiche en brouillon et
+enregistre le SIRET vérifié. La clé secrète est fournie par Supabase à la fonction : elle n'est écrite nulle part.
+Appel depuis le site : `supabase.functions.invoke("verify-siret", { body: { siret } })`.
+Tests : `deno test supabase/functions/` (sans réseau).
+
+### 8. Vérifications automatiques en ligne
+`.github/workflows/verifications.yml` (à chaque modification de `supabase/`, et chaque lundi) : depuis Internet,
+comme un visiteur, contrôle que SIRET / profils / e-mails restent inaccessibles, que la fonction refuse les appels
+sans session, et que l'analyse Sirene fonctionne sur un vrai restaurant yonnais. Le passage hebdomadaire garde
+aussi le projet Supabase actif (l'offre gratuite le met en pause après 7 jours sans activité).
 
 ## Sécurité des données
 
@@ -86,10 +105,7 @@ qui exige la clé secrète (enregistrer un SIRET vérifié) sera une Edge Functi
 - **Supabase Free** : 500 Mo de base, 50 000 utilisateurs actifs/mois, 1 Go de fichiers, 200 connexions temps
   réel simultanées. Le projet est **mis en pause après 7 jours sans activité** (réactivation en un clic) ;
   pas de sauvegardes automatiques téléchargeables : exporter la base régulièrement.
-- **GitHub Pages** : gratuit pour un dépôt public, HTTPS inclus. Ses conditions excluent les sites dont l'objet
-  principal est la vente (e-commerce, logiciel payant). Tant que l'application est gratuite pour tous, c'est bon ;
-  le jour où les restaurateurs paieront un abonnement, prévoir le passage sur Cloudflare Pages (gratuit, usage
-  commercial autorisé) : le site étant statique, c'est un simple changement d'hébergeur.
+- **Cloudflare Pages** : gratuit, usage commercial autorisé, bande passante illimitée, 500 publications/mois.
 - **Supabase Edge Functions** (pour la vérification du SIRET) : 500 000 appels/mois gratuits.
 - **Tuiles OpenStreetMap** : gratuites avec attribution, pour un trafic modéré (politique d'usage OSM).
 
@@ -103,5 +119,6 @@ web/
 ├─ lib/geo/             centre, limites, fonds de carte, distance
 ├─ types/               database.ts (à régénérer : npx supabase gen types) · merchant.ts
 ├─ scripts/             check-supabase.mjs
-└─ supabase/            migrations/ (init, hardening) · tests/rls/
+├─ public/_headers      en-têtes de sécurité (Cloudflare Pages)
+└─ supabase/            migrations/ (init, hardening) · functions/verify-siret/ · tests/ (rls, smoke.ts)
 ```
