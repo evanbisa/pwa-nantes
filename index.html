@@ -269,6 +269,7 @@
       opacity: 0; transform: translateY(-4px); transition: opacity .25s, transform .25s; pointer-events: none;
     }
     #map.show-labels .pin-label, .pin.is-selected .pin-label, .pin.is-hover .pin-label { opacity: 1; transform: none; }
+    #map.show-labels .pin.label-hidden:not(.is-selected):not(.is-hover) .pin-label { opacity: 0; }
     .pin.is-filtered { display: none; }
     #map.zoom-far .pin-badge { scale: .62; }
     #map.zoom-far .pin.is-open .pin-badge::before { animation: none; opacity: 0; }
@@ -628,7 +629,7 @@
     .days input:focus-visible + span.day { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     /* Fiche commerce : galerie, description, badge */
-    .gallery { display: flex; gap: 8px; margin: 14px -20px 0; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+    .gallery { display: flex; gap: 8px; margin: 14px -20px 0; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 20px; scrollbar-width: none; }
     .gallery::-webkit-scrollbar { display: none; }
     .gallery img { flex: none; width: 78%; max-width: 320px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; scroll-snap-align: start; background: var(--hover); }
     .gallery img:only-child { width: 100%; max-width: none; }
@@ -643,7 +644,7 @@
     .menu-ico { font-size: 22px; }
     .menu summary strong { display: block; font-size: 15px; font-weight: 500; }
     .menu summary small { display: block; font-size: 12.5px; color: var(--muted); }
-    .menu-list { padding: 0 16px 8px; }
+    .menu-list { padding: 0 0 8px; }
     .menu-list h4 { margin: 10px 0 2px; font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
     .menu-list ul { margin: 0; padding: 0; list-style: none; }
     .menu-list li { display: flex; align-items: baseline; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
@@ -653,6 +654,8 @@
     .menu-list li small { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); }
     .menu-list .price { flex: none; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
     .verified { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; color: var(--green); background: var(--green-soft); }
+    .role-tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; white-space: nowrap; color: var(--accent); background: var(--accent-soft); }
+    .verified.is-test { color: var(--amber); background: rgba(176, 96, 0, .1); }
     /* ---------- Fiche commerce : onglets, abonnement, photos ---------- */
     .follow-btn { margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 18px;
       font-size: 14px; font-weight: 500; color: var(--accent); border: 1px solid var(--line-strong); background: transparent; }
@@ -712,6 +715,7 @@
     .kpi small { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
     .kpi.is-hero { grid-column: 1 / -1; }
     .kpi.is-hero strong { font-size: 40px; }
+    .kpi:not(.is-hero):nth-child(even):last-child { grid-column: 1 / -1; }   /* pas de case orpheline */
     .chart { margin: 14px 0 0; padding: 12px 14px 10px; border-radius: 12px; border: 1px solid var(--line); position: relative; }
     .chart figcaption { font-size: 13px; font-weight: 500; color: var(--text); }
     .chart figcaption small { display: block; font-weight: 400; color: var(--muted); }
@@ -738,6 +742,7 @@
       #profile-sheet.is-pro { width: min(560px, calc(100% - 32px)); }
       .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .kpi.is-hero { grid-column: auto; }
+      .kpi:not(.is-hero):nth-child(even):last-child { grid-column: auto; }
       .kpi.is-hero strong { font-size: 24px; }
     }
 
@@ -1031,9 +1036,9 @@
           <div class="kpi is-hero"><span class="kpi-label">Abonnés</span><strong id="k-followers">0</strong><small id="k-followers-d"></small></div>
           <div class="kpi"><span class="kpi-label">Vues de la fiche</span><strong id="k-views">0</strong><small id="k-visitors"></small></div>
           <div class="kpi"><span class="kpi-label">Itinéraires demandés</span><strong id="k-routes">0</strong><small id="k-routes-d"></small></div>
-          <div class="kpi"><span class="kpi-label">Appels</span><strong id="k-calls">0</strong><small>bouton du téléphone</small></div>
-          <div class="kpi"><span class="kpi-label">Menu consulté</span><strong id="k-menu">0</strong><small>ouvertures de l'onglet</small></div>
-          <div class="kpi"><span class="kpi-label">Photos regardées</span><strong id="k-photos">0</strong><small>ouvertures de la galerie</small></div>
+          <div class="kpi"><span class="kpi-label">Appels</span><strong id="k-calls">0</strong><small>clics sur le numéro</small></div>
+          <div class="kpi"><span class="kpi-label">Menu consulté</span><strong id="k-menu">0</strong><small>onglet Menu ouvert</small></div>
+          <div class="kpi"><span class="kpi-label">Photos regardées</span><strong id="k-photos">0</strong><small>onglet Photos ouvert</small></div>
         </div>
         <figure class="chart">
           <figcaption>Vues de la fiche par jour<small id="pd-chart-sub"></small></figcaption>
@@ -1206,6 +1211,7 @@
           </span>
           <small class="field-error" id="err-pv-siret" aria-live="polite"></small>
         </label>
+        <p class="hint" id="pv-test-hint">Pour essayer sans établissement réel : <button type="button" class="link-btn" id="pv-test">utiliser le SIRET de test <b>999 999 999 00009</b></button></p>
         <div class="verify-card" id="pv-result" hidden aria-live="polite"></div>
 
         <h3 class="ob-sub">Justificatifs</h3>
@@ -1399,6 +1405,11 @@
     desktopQuery: '(min-width: 900px)',
     // Vérification des restaurateurs : API publique « Recherche d'entreprises » (répertoire Sirene de l'INSEE)
     sireneApi: 'https://recherche-entreprises.api.gouv.fr/search',
+    /**
+     * SIRET fictif pour essayer l'espace restaurateur sans établissement réel (clé de contrôle valide,
+     * jamais envoyé au répertoire Sirene, réutilisable par plusieurs comptes). Vide = désactivé.
+     */
+    testSiret: '99999999900009',
     // Géocodage des adresses : Géoplateforme de l'IGN (Base Adresse Nationale)
     geocoderApi: 'https://data.geopf.fr/geocodage/search',
     /**
@@ -1702,6 +1713,8 @@
   /** « 12345678900012 » → « 123 456 789 00012 » (saisie progressive acceptée). */
   const formatSiret = (s) => { const d = onlyDigits(s).slice(0, 14); return [d.slice(0, 3), d.slice(3, 6), d.slice(6, 9), d.slice(9)].filter(Boolean).join(' '); };
 
+  const isTestSiret = (siret) => !!CONFIG.testSiret && siret === CONFIG.testSiret;
+
   /** Clé de contrôle du SIRET : algorithme de Luhn (exception : établissements de La Poste). */
   function isValidSiret(siret) {
     if (!/^\d{14}$/.test(siret)) return false;
@@ -1731,6 +1744,15 @@
    * @returns {Promise<{ok: boolean, code?: 'notfound'|'closed'|'naf'|'rate'|'network', company?: object}>}
    */
   async function lookupSiret(siret) {
+    if (isTestSiret(siret)) {
+      await new Promise((r) => setTimeout(r, 600));
+      return { ok: true, company: {
+        siren: siret.slice(0, 9), siret, test: true,
+        legalName: 'ÉTABLISSEMENT DE TEST (fictif)', tradeName: 'Restaurant de test',
+        address: '1 Place Napoléon 85000 La Roche-sur-Yon', postcode: '85000', city: 'La Roche-sur-Yon',
+        coords: CONFIG.center.slice(), naf: '56.10C', nafLabel: NAF_RESTAURATION['56.10C'] || '',
+      } };
+    }
     let data;
     try {
       data = await fetchJson(CONFIG.sireneApi + '?' + new URLSearchParams({ q: siret, limite_matching_etablissements: '1' }));
@@ -2115,6 +2137,7 @@
       on(event, fn) {
         if (event === 'zoom') gmap.addListener('zoom_changed', fn);
         if (event === 'dragstart') gmap.addListener('dragstart', fn);
+        if (event === 'moveend') gmap.addListener('idle', fn);
         if (event === 'click') gmap.addListener('click', (ev) => fn(ev && ev.domEvent));
       },
     };
@@ -2233,6 +2256,7 @@
     }
     $('profile-engine').textContent = view.engine === 'google' ? 'Google Maps' : 'Style Google Maps (OpenStreetMap)';
     view.on('zoom', updateLabelVisibility);
+    view.on('moveend', declutterLabels);
     view.on('dragstart', () => setFollow(false));
     view.on('click', (domEvent) => {
       if (domEvent && domEvent.target && domEvent.target.closest && domEvent.target.closest('.pin')) return;
@@ -2254,6 +2278,21 @@
     const z = view.getZoom(), el = $('map');
     el.classList.toggle('show-labels', z >= 15.3);
     el.classList.toggle('zoom-far', z < 14.2);
+  }
+
+  /** Libellés qui se chevauchent : priorité au commerce sélectionné, puis aux commerces ouverts. */
+  function declutterLabels() {
+    if (!$('map').classList.contains('show-labels')) return;
+    const rank = (el) => (el.classList.contains('is-selected') ? 0 : el.classList.contains('is-open') ? 1 : 2);
+    const kept = [];
+    [...markers.values()].map((m) => m.el).filter((el) => !el.classList.contains('is-filtered'))
+      .sort((a, b) => rank(a) - rank(b))
+      .forEach((el) => {
+        const r = el.querySelector('.pin-label').getBoundingClientRect();
+        const hit = kept.some((k) => r.left < k.right + 4 && r.right > k.left - 4 && r.top < k.bottom + 2 && r.bottom > k.top - 2);
+        el.classList.toggle('label-hidden', hit);
+        if (!hit && r.width) kept.push(r);
+      });
   }
 
   $('zoom-in').addEventListener('click', () => whenMapReady(() => view.zoomBy(1)));
@@ -2333,7 +2372,7 @@
 
   /** Restaurants publiés par les restaurateurs (enregistrés sur cet appareil). */
   const restaurants = () => store.read().restaurants || {};
-  const restaurantToShop = (r) => ({ ...r, isPro: true });
+  const restaurantToShop = (r) => ({ ...r, isPro: true, isTest: isTestSiret(r.siret) });
   const allShops = () => [...SHOPS, ...Object.values(restaurants()).filter((r) => r.published).map(restaurantToShop)];
 
   /** Ajoute ou remplace le marqueur d'un commerce (après publication ou modification d'une fiche). */
@@ -2394,6 +2433,7 @@
     const items = all.filter(matchesFilters).map((m) => ({ m, d: Geo.position ? distance(Geo.position, m.shop.coords) : null }));
     items.sort((a, b) => (a.d !== null ? a.d - b.d : (b.m.status.open - a.m.status.open) || a.m.shop.name.localeCompare(b.m.shop.name)));
 
+    if (view) requestAnimationFrame(declutterLabels);
     const openCount = all.filter((m) => m.status.open).length;
     $('shop-count').textContent = all.length + ' adresses · ' + openCount + ' ouvertes';
     $('shop-empty').hidden = items.length > 0;
@@ -2423,7 +2463,7 @@
       st.textContent = status.label;
       st.className = 'si-status ' + (status.open ? 'is-open' : 'is-closed');
       btn.querySelector('.si-promo').textContent = shop.promo ? '🎁 ' + shop.promo : (shop.description || '').slice(0, 90);
-      if (shop.isPro) { const v = document.createElement('span'); v.className = 'verified'; v.textContent = '✓'; v.title = 'Établissement vérifié'; btn.querySelector('strong').appendChild(v); }
+      if (shop.isPro && !shop.isTest) { const v = document.createElement('span'); v.className = 'verified'; v.textContent = '✓'; v.title = 'Établissement vérifié'; btn.querySelector('strong').appendChild(v); }
       btn.addEventListener('click', () => openShop(shop.id));
       btn.addEventListener('mouseenter', () => setHover(shop.id, true));
       btn.addEventListener('mouseleave', () => setHover(shop.id, false));
@@ -2534,6 +2574,9 @@
     $('shop-cat').textContent = catOf(shop).label;
     // Restaurants inscrits : badge « vérifié », description, photos, téléphone ; l'offre est facultative
     $('shop-verified').hidden = !shop.isPro;
+    $('shop-verified').classList.toggle('is-test', !!shop.isTest);
+    $('shop-verified').textContent = shop.isTest ? 'Fiche de test' : '✓ Établissement vérifié';
+    $('shop-verified').title = shop.isTest ? 'Créée avec le SIRET de test : établissement fictif' : 'SIRET vérifié auprès du répertoire Sirene';
     $('shop-desc').hidden = !shop.description;
     $('shop-desc').textContent = shop.description || '';
     $('shop-promo-box').hidden = !shop.promo;
@@ -3753,6 +3796,8 @@
   });
   $('pv-siret').addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); runSiretCheck(); } });
   $('pv-check').addEventListener('click', () => runSiretCheck());
+  $('pv-test-hint').hidden = !CONFIG.testSiret;
+  $('pv-test').addEventListener('click', () => { $('pv-siret').value = formatSiret(CONFIG.testSiret); runSiretCheck(); });
 
   async function runSiretCheck() {
     const me = currentUser();
@@ -3763,7 +3808,7 @@
     $('pv-result').hidden = true;
     if (siret.length !== 14) { setFieldError('pv-siret', 'Le numéro SIRET comporte 14 chiffres (9 chiffres du SIREN + 5 chiffres).'); return; }
     if (!isValidSiret(siret)) { setFieldError('pv-siret', 'Ce numéro SIRET n\'est pas valide (clé de contrôle incorrecte). Recopiez-le depuis votre Kbis.'); return; }
-    const taken = Object.values(accounts()).some((a) => a.email !== me.email && a.pro && a.pro.siret === siret && a.pro.verifiedAt);
+    const taken = !isTestSiret(siret) && Object.values(accounts()).some((a) => a.email !== me.email && a.pro && a.pro.siret === siret && a.pro.verifiedAt);
     if (taken) { setFieldError('pv-siret', 'Ce SIRET est déjà associé à un autre compte restaurateur.'); return; }
 
     const btn = $('pv-check');
@@ -3814,7 +3859,8 @@
       row('État', result.code === 'closed' ? 'Fermé' : 'En activité');
       card.appendChild(dl);
     }
-    if (result.ok) p('Source : répertoire Sirene de l\'INSEE (API Recherche d\'entreprises).');
+    if (result.ok && c && c.test) p('SIRET de test : établissement fictif, aucune vérification réelle n\'a été faite.');
+    else if (result.ok) p('Source : répertoire Sirene de l\'INSEE (API Recherche d\'entreprises).');
     else p(messages[result.code][1]);
   }
 
@@ -4413,7 +4459,7 @@
     const old = myRestaurant(me);
     const now = new Date().toISOString();
     const restaurant = {
-      id: old ? old.id : 'resto-' + pro.siret,
+      id: old ? old.id : 'resto-' + (isTestSiret(pro.siret) ? 'test-' + uid() : pro.siret),
       ownerEmail: me.email, siret: pro.siret,
       name, category: proDraft.category, description,
       photoIds: [...proDraft.photos],
@@ -4466,7 +4512,7 @@
     const date = (iso) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
     $('pd-name').textContent = r ? r.name : '—';
     $('pd-status').textContent = r && r.published ? 'En ligne sur la carte' : 'Inscription à terminer';
-    $('pd-siret').textContent = pro.siret ? formatSiret(pro.siret) : '—';
+    $('pd-siret').textContent = pro.siret ? formatSiret(pro.siret) + (isTestSiret(pro.siret) ? ' (test)' : '') : '—';
     $('pd-plan').textContent = pro.payment && pro.payment.status === 'paid'
       ? 'Actif depuis le ' + date(pro.payment.paidAt) + (pro.payment.mode === 'demo' ? ' (démonstration)' : '')
       : 'Non souscrit';
@@ -4479,7 +4525,8 @@
     if (!account) return;
     $('profile-avatar').textContent = initial(account.name);
     $('profile-name').textContent = account.role === 'pro' && account.lastName ? account.name + ' ' + account.lastName : account.name;
-    $('profile-email').textContent = account.email + (account.emailVerifiedAt ? ' ✓' : '') + (account.role === 'pro' ? ' · Restaurateur' : '');
+    $('profile-email').textContent = account.email + (account.emailVerifiedAt ? ' ✓' : '');
+    if (account.role === 'pro') { const tag = document.createElement('span'); tag.className = 'role-tag'; tag.textContent = 'Restaurateur'; $('profile-email').append(' ', tag); }
     $('profile-since').textContent = new Date(account.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
     updateProfileGeo();
     $('profile-sheet').classList.toggle('is-pro', account.role === 'pro');
