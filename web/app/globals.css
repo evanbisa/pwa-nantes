@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+/* « dark: » suit le mode nuit choisi sur la carte (attribut data-theme), pas seulement le système */
+@custom-variant dark (&:where([data-theme="night"], [data-theme="night"] *));
+
+:root {
+  --background: #ffffff;
+  --foreground: #202124;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #202124;
+    --foreground: #e8eaed;
+  }
+}
+
+html,
+body {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
