@@ -372,6 +372,13 @@
     .pw-wrap input { padding-right: 84px; }
     .pw-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); padding: 8px 10px; border-radius: 6px; font-size: 13px; font-weight: 500; color: var(--accent); }
     .check { display: flex; align-items: center; gap: 10px; margin-top: 6px; font-size: 14px; color: var(--muted); cursor: pointer; }
+    /* Règles du mot de passe, cochées au fur et à mesure de la saisie */
+    .pw-rules { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 6px 0 0; padding: 0; list-style: none; font-size: 12.5px; color: var(--muted); }
+    .pw-rules li { display: flex; align-items: center; gap: 5px; }
+    .pw-rules li::before { content: ""; width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--line-strong); box-sizing: border-box; flex: none; }
+    .pw-rules li.is-ok { color: var(--green); }
+    .pw-rules li.is-ok::before { border: 0; background: var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 10px no-repeat; }
+    .field.has-error .pw-rules li:not(.is-ok) { color: var(--danger); }
     .check input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
     .form-error { margin: 12px 0 0; min-height: 0; font-size: 14px; color: var(--danger); }
     .form-error:empty { display: none; }
@@ -490,6 +497,19 @@
     .photo-add:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
     .photo-add.is-busy { opacity: .6; pointer-events: none; }
 
+    /* Éditeur de la carte (fiche restaurant) */
+    .menu-edit { display: grid; gap: 8px; }
+    .menu-row { display: grid; grid-template-columns: minmax(0, 1fr) 104px 36px; gap: 6px; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-solid); }
+    .field .menu-row input { height: 40px; padding: 0 10px; font-size: 15px; }
+    .menu-row .m-section { grid-column: 1 / 3; }
+    .menu-row .m-del { grid-column: 3; grid-row: 1; align-self: center; }
+    .menu-row .m-name { grid-column: 1; }
+    .menu-row .m-price { grid-column: 2 / 4; text-align: right; font-variant-numeric: tabular-nums; }
+    .menu-row .m-desc { grid-column: 1 / 4; }
+    .field .menu-row input.is-invalid { border-color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
+    .menu-add { margin-top: 8px; min-height: 42px; }
+    .menu-add[hidden] { display: none; }
+
     /* Recadrage des photos (format unique 16:9) */
     .cropper { position: fixed; inset: 0; z-index: 110; display: flex; align-items: center; justify-content: center; padding: calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 16px); background: rgba(0, 0, 0, .72); overflow-y: auto; overscroll-behavior: contain; }
     .cropper[hidden] { display: none; }
@@ -543,6 +563,25 @@
     .gallery img { flex: none; width: 78%; max-width: 320px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; scroll-snap-align: start; background: var(--hover); }
     .gallery img:only-child { width: 100%; max-width: none; }
     .shop-desc { margin: 10px 0 0; font-size: 14.5px; color: var(--text); white-space: pre-line; }
+    /* La carte du restaurant (fiche) */
+    .menu { margin-top: 16px; border: 1px solid var(--line); border-radius: 12px; }
+    .menu summary { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; list-style: none; }
+    .menu summary::-webkit-details-marker { display: none; }
+    .menu summary::after { content: ""; margin-left: auto; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); transition: transform .2s; }
+    .menu[open] summary::after { transform: rotate(-135deg); }
+    .menu summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 12px; }
+    .menu-ico { font-size: 22px; }
+    .menu summary strong { display: block; font-size: 15px; font-weight: 500; }
+    .menu summary small { display: block; font-size: 12.5px; color: var(--muted); }
+    .menu-list { padding: 0 16px 8px; }
+    .menu-list h4 { margin: 10px 0 2px; font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+    .menu-list ul { margin: 0; padding: 0; list-style: none; }
+    .menu-list li { display: flex; align-items: baseline; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+    .menu-list ul:last-child li:last-child { border-bottom: 0; }
+    .menu-list li > div { flex: 1; min-width: 0; }
+    .menu-list b { font-weight: 500; }
+    .menu-list li small { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); }
+    .menu-list .price { flex: none; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
     .verified { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; color: var(--green); background: var(--green-soft); }
     .pro-dash { margin-top: 20px; }
     .pro-dash h4 { margin: 0; font-size: 15px; font-weight: 500; }
@@ -704,6 +743,10 @@
       <span class="promo-ico" aria-hidden="true">🎁</span>
       <div><small>Offre du moment</small><strong id="shop-promo"></strong></div>
     </div>
+    <details class="menu" id="shop-menu" hidden>
+      <summary><span class="menu-ico" aria-hidden="true">📋</span><span><strong>La carte</strong><small id="shop-menu-count"></small></span></summary>
+      <div class="menu-list" id="shop-menu-list"></div>
+    </details>
     <ul class="meta">
       <li>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 1114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
@@ -835,11 +878,18 @@
           <small class="field-error" id="err-su-phone" aria-live="polite"></small>
         </label>
         <label class="field" id="field-su-password">
-          <span>Mot de passe (8 caractères minimum)</span>
+          <span>Mot de passe</span>
           <span class="pw-wrap">
-            <input id="su-password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required />
+            <input id="su-password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required aria-describedby="pw-rules" />
             <button class="pw-toggle" type="button" data-toggle-pw="su-password">Afficher</button>
           </span>
+          <ul class="pw-rules" id="pw-rules" aria-label="Le mot de passe doit contenir">
+            <li data-rule="length">8 caractères</li>
+            <li data-rule="upper">1 majuscule</li>
+            <li data-rule="lower">1 minuscule</li>
+            <li data-rule="digit">1 chiffre</li>
+            <li data-rule="special">1 caractère spécial</li>
+          </ul>
           <small class="field-error" id="err-su-password" aria-live="polite"></small>
         </label>
         <label class="check"><input type="checkbox" id="su-remember" /> Rester connecté sur cet appareil</label>
@@ -977,7 +1027,7 @@
         </label>
 
         <div class="field" id="field-pl-photos">
-          <span>Photos (1 à 6 · format paysage 16:9 · la première est la photo principale)</span>
+          <span>Photos (1 à 10 · format paysage 16:9 · la première est la photo principale)</span>
           <div class="photo-grid" id="pl-photos">
             <label class="photo-add" id="pl-photo-add">
               <input type="file" id="pl-photo-input" accept="image/jpeg,image/png,image/webp" multiple hidden />
@@ -985,6 +1035,18 @@
             </label>
           </div>
           <small class="field-error" id="err-pl-photos" aria-live="polite"></small>
+        </div>
+
+        <div class="field" id="field-pl-menu">
+          <span>La carte (facultatif) <small class="counter" id="pl-menu-count"></small></span>
+          <p class="hint menu-hint">Vos plats et leurs prix, classés par rubrique (Entrées, Plats, Desserts, Boissons…).</p>
+          <div class="menu-edit" id="pl-menu"></div>
+          <button class="btn btn-ghost menu-add" type="button" id="pl-menu-add">＋ Ajouter un plat</button>
+          <datalist id="menu-sections">
+            <option value="Entrées"></option><option value="Plats"></option><option value="Burgers"></option><option value="Pizzas"></option>
+            <option value="Menus"></option><option value="Accompagnements"></option><option value="Desserts"></option><option value="Boissons"></option>
+          </datalist>
+          <small class="field-error" id="err-pl-menu" aria-live="polite"></small>
         </div>
 
         <div class="field" id="field-pl-address">
@@ -1107,8 +1169,8 @@
     proPlan: { name: 'Abonnement Roche Street Food Pro', amount: null, period: 'mois', stripePaymentLink: '' },
     /**
      * Envoi des codes de vérification par e-mail via EmailJS (https://www.emailjs.com, gratuit jusqu'à 200 e-mails/mois).
-     * Seuls les restaurateurs reçoivent un code (inscription et connexion) : les clients n'en reçoivent jamais,
-     * le quota gratuit suffit donc quel que soit le nombre d'utilisateurs.
+     * Seuls les restaurateurs reçoivent un code, une seule fois, à l'inscription : les clients n'en reçoivent jamais,
+     * et les connexions se font sans code. Le quota gratuit suffit donc largement.
      * Les trois identifiants vides = mode démonstration : le code est affiché à l'écran, aucun e-mail n'est envoyé.
      * Variables disponibles dans le modèle EmailJS : {{to_email}}, {{to_name}}, {{code}}, {{purpose}}, {{validity}}, {{site_name}}, {{site_url}}.
      */
@@ -1181,7 +1243,8 @@
     { key: 'licence', icon: '🍷', label: 'Licence de débit de boissons ou licence restaurant', detail: 'Si vous servez de l\'alcool', required: false },
   ];
   const MAX_DOC_SIZE = 10 * 1024 * 1024;
-  const MAX_PHOTOS = 6;
+  const MAX_PHOTOS = 10;
+  const MAX_MENU_ITEMS = 80;
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const desktopMQ = window.matchMedia(CONFIG.desktopQuery);
@@ -1229,6 +1292,8 @@
 
   /** Texte sans accents ni majuscules (recherche tolérante). */
   const normalize = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  /** ['a', 'b', 'c'] → « a, b et c » */
+  const listFr = (items) => (items.length > 1 ? items.slice(0, -1).join(', ') + ' et ' + items[items.length - 1] : items.join(''));
 
   /** Polygone GeoJSON approximant un cercle (rayon en mètres) : halo de précision GPS. */
   function circlePolygon([lng, lat], radius, steps = 64) {
@@ -1987,7 +2052,7 @@
   const matchesFilters = (m) =>
     (filters.category === 'all' || m.shop.category === filters.category) &&
     (!filters.openOnly || m.status.open) &&
-    (!filters.query || normalize([m.shop.name, catOf(m.shop).label, m.shop.address, m.shop.description || ''].join(' ')).includes(filters.query));
+    (!filters.query || normalize([m.shop.name, catOf(m.shop).label, m.shop.address, m.shop.description || '', ...(m.shop.menu || []).map((it) => it.name)].join(' ')).includes(filters.query));
 
   function applyFilters() {
     markers.forEach((m) => {
@@ -2150,6 +2215,7 @@
     $('shop-phone-row').hidden = !shop.phone;
     if (shop.phone) { $('shop-phone').textContent = shop.phone; $('shop-phone').href = 'tel:' + compactPhone(shop.phone); }
     renderGallery(shop);
+    renderMenu(shop);
     $('shop-status').textContent = status.label;
     $('shop-status').className = 'status ' + (status.open ? 'is-open' : 'is-closed');
     $('shop-promo').textContent = shop.promo;
@@ -2592,7 +2658,7 @@
   const MAX_SENDS = 5;                      // codes au plus par adresse…
   const SEND_WINDOW = 15 * 60 * 1000;       // … sur 15 minutes
   const MAIL_LOG_KEY = 'roche-street-food:mail-log';
-  const CODE_PURPOSES = { signup: 'la création de votre compte', login: 'votre connexion', existing: 'la vérification de votre adresse e-mail' };
+  const CODE_PURPOSES = { signup: 'la création de votre compte', existing: 'la vérification de votre adresse e-mail' };
 
   let emailCheck = null;                    // vérification en cours
   let resendTimer = null;
@@ -2761,6 +2827,22 @@
     return { verification: 'pro-verify', payment: 'pro-payment', listing: 'pro-listing' }[(account.pro || {}).status] || null;
   }
 
+  /* ---------- Mot de passe : complexité minimale à l'inscription ---------- */
+
+  const PASSWORD_RULES = [
+    { id: 'length', label: '8 caractères', test: (p) => p.length >= 8 },
+    { id: 'upper', label: 'une majuscule', test: (p) => /\p{Lu}/u.test(p) },
+    { id: 'lower', label: 'une minuscule', test: (p) => /\p{Ll}/u.test(p) },
+    { id: 'digit', label: 'un chiffre', test: (p) => /\d/.test(p) },
+    { id: 'special', label: 'un caractère spécial (! ? @ # € % …)', test: (p) => /[^\p{L}\p{N}\s]/u.test(p) },
+  ];
+  const missingPasswordRules = (p) => PASSWORD_RULES.filter((r) => !r.test(p));
+  function renderPasswordRules() {
+    const p = $('su-password').value;
+    PASSWORD_RULES.forEach((r) => $('pw-rules').querySelector('[data-rule="' + r.id + '"]').classList.toggle('is-ok', r.test(p)));
+  }
+  $('su-password').addEventListener('input', renderPasswordRules);
+
   $('form-signup').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const role = authRole;
@@ -2775,7 +2857,8 @@
     if (role === 'pro' && lastName.length < 2) fail('su-lastname', 'Indiquez votre nom.');
     if (!EMAIL_RE.test(email)) fail('su-email', 'Adresse e-mail invalide.');
     if (role === 'pro' && !PHONE_RE.test(compactPhone(phone))) fail('su-phone', 'Numéro de téléphone invalide (ex. : 06 12 34 56 78).');
-    if (password.length < 8) fail('su-password', 'Le mot de passe doit contenir au moins 8 caractères.');
+    const missing = missingPasswordRules(password);
+    if (missing.length) fail('su-password', 'Mot de passe trop faible : il manque ' + listFr(missing.map((r) => r.label)) + '.');
     if (firstInvalid) { $(firstInvalid).focus(); return; }
     if (accounts()[email]) {
       $('err-signup').innerHTML = 'Un compte existe déjà avec cet e-mail. <button class="link-btn" type="button" id="to-login">Se connecter</button>';
@@ -2797,6 +2880,7 @@
       try { localStorage.removeItem(CONFIG.legacyStorageKey); } catch (e) { /* ignore */ }
       startSession(account, remember);
       $('su-password').value = '';
+      renderPasswordRules();
       showAuthStep(role === 'pro' ? 'pro-verify' : 'location');
     };
     if (role !== 'pro') { createAccount(); return; }   // clients : pas de code (aucun e-mail envoyé)
@@ -2843,12 +2927,8 @@
       startSession(updated, remember);
       routeAfterLogin(updated);
     };
-    if (role !== 'pro') { openSession(); return; }       // clients : connexion directe
-    // Restaurateurs : second facteur, un code est envoyé à l'adresse du compte
-    startEmailVerification({
-      email, name: account.name, purpose: 'login', back: 'login',
-      onSuccess: () => openSession({ emailVerifiedAt: account.emailVerifiedAt || new Date().toISOString() }),
-    });
+    // Pas de code à la connexion : l'adresse des restaurateurs a été vérifiée une fois pour toutes à l'inscription
+    openSession();
   });
 
   /** Après connexion : inscription restaurateur à reprendre, sinon la carte. */
@@ -3209,9 +3289,109 @@
     $('pl-closed').querySelectorAll('input').forEach((i) => { i.checked = closed.includes(Number(i.value)); });
     $('pl-promo').value = r ? r.promo || '' : '';
     $('pl-phone').value = r ? r.phone || '' : (me.phone || '');
-    ['pl-name', 'pl-category', 'pl-desc', 'pl-photos', 'pl-address', 'pl-hours', 'pl-phone'].forEach((f) => setFieldError(f, ''));
+    $('pl-menu').textContent = '';
+    ((r && r.menu) || []).forEach((it) => addMenuRow(it));
+    if (!$('pl-menu').childElementCount) addMenuRow();
+    syncMenuEditor();
+    ['pl-name', 'pl-category', 'pl-desc', 'pl-photos', 'pl-menu', 'pl-address', 'pl-hours', 'pl-phone'].forEach((f) => setFieldError(f, ''));
     $('err-pro-listing').textContent = '';
     renderPhotos();
+  }
+
+  /* ---------- La carte (plats et prix) ---------- */
+
+  const priceFmt = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' });
+  const formatPrice = (n) => priceFmt.format(n).replace(/\u202f|\u00a0/g, ' ');
+  /** « 9 », « 9,5 », « 9.50 € » → 9.5 ; null si le prix est invalide. */
+  function parsePrice(text) {
+    const t = (text || '').replace(/[\s€]/g, '').replace(',', '.');
+    if (!/^\d{1,3}(\.\d{1,2})?$/.test(t)) return null;
+    return Math.round(Number(t) * 100) / 100;
+  }
+
+  function addMenuRow(item = {}, { focus = false } = {}) {
+    const list = $('pl-menu');
+    const prev = list.lastElementChild;
+    const row = document.createElement('div');
+    row.className = 'menu-row';
+    row.innerHTML = '<input class="m-section" list="menu-sections" maxlength="30" placeholder="Rubrique (ex. : Plats)" aria-label="Rubrique" />' +
+      '<button class="icon-btn m-del" type="button">×</button>' +
+      '<input class="m-name" maxlength="60" placeholder="Nom du plat" aria-label="Nom du plat" />' +
+      '<input class="m-price" inputmode="decimal" maxlength="9" placeholder="Prix €" aria-label="Prix en euros" />' +
+      '<input class="m-desc" maxlength="120" placeholder="Détail (facultatif) : ingrédients, taille…" aria-label="Détail du plat" />';
+    // Nouvelle ligne : même rubrique que la précédente
+    row.querySelector('.m-section').value = item.section != null ? item.section : (prev ? prev.querySelector('.m-section').value : '');
+    row.querySelector('.m-name').value = item.name || '';
+    row.querySelector('.m-price').value = item.price != null ? String(item.price.toFixed(2)).replace('.', ',') : '';
+    row.querySelector('.m-desc').value = item.desc || '';
+    row.querySelector('.m-del').addEventListener('click', () => {
+      const next = row.nextElementSibling || row.previousElementSibling;
+      row.remove();
+      syncMenuEditor();
+      (next ? next.querySelector('.m-name') : $('pl-menu-add')).focus();
+    });
+    row.addEventListener('input', (ev) => { ev.target.classList.remove('is-invalid'); if (!list.querySelector('.is-invalid')) setFieldError('pl-menu', ''); });
+    list.appendChild(row);
+    syncMenuEditor();
+    if (focus) row.querySelector(row.querySelector('.m-section').value ? '.m-name' : '.m-section').focus();
+  }
+
+  function syncMenuEditor() {
+    const rows = [...$('pl-menu').children];
+    rows.forEach((row, i) => row.querySelector('.m-del').setAttribute('aria-label', 'Retirer le plat ' + (i + 1)));
+    $('pl-menu-count').textContent = rows.length ? rows.length + ' / ' + MAX_MENU_ITEMS : '';
+    $('pl-menu-add').hidden = rows.length >= MAX_MENU_ITEMS;
+  }
+
+  $('pl-menu-add').addEventListener('click', () => addMenuRow({}, { focus: true }));
+
+  /** Lit l'éditeur : { items } si tout est valide, sinon { error }. Les lignes vides sont ignorées. */
+  function readMenu() {
+    const items = [];
+    for (const [i, row] of [...$('pl-menu').children].entries()) {
+      const get = (c) => row.querySelector(c).value.trim().replace(/\s+/g, ' ');
+      const section = get('.m-section'), name = get('.m-name'), priceText = get('.m-price'), desc = get('.m-desc');
+      if (!name && !priceText && !desc) continue;   // ligne vide (la rubrique seule, reprise automatiquement, ne compte pas)
+      if (name.length < 2) { row.querySelector('.m-name').classList.add('is-invalid'); return { error: 'Plat n° ' + (i + 1) + ' : indiquez son nom.', input: row.querySelector('.m-name') }; }
+      const price = parsePrice(priceText);
+      if (price === null) { row.querySelector('.m-price').classList.add('is-invalid'); return { error: '« ' + name + ' » : prix invalide (ex. : 9,50).', input: row.querySelector('.m-price') }; }
+      items.push({ section, name, price, desc });
+    }
+    return { items };
+  }
+
+  /** Affiche la carte dans la fiche, groupée par rubrique (dans l'ordre de saisie). */
+  let menuFor = null;
+  function renderMenu(shop) {
+    const items = shop.menu || [];
+    const box = $('shop-menu');
+    const key = shop.id + ':' + (shop.updatedAt || '');
+    box.hidden = !items.length;
+    if (key === menuFor) return;
+    menuFor = key;
+    box.open = false;
+    const list = $('shop-menu-list');
+    list.textContent = '';
+    if (!items.length) return;
+    const groups = new Map();
+    items.forEach((it) => { if (!groups.has(it.section)) groups.set(it.section, []); groups.get(it.section).push(it); });
+    groups.forEach((group, section) => {
+      if (section) { const h = document.createElement('h4'); h.textContent = section; list.appendChild(h); }
+      const ul = document.createElement('ul');
+      group.forEach((it) => {
+        const li = document.createElement('li');
+        li.innerHTML = '<div><b></b><small></small></div><span class="price"></span>';
+        li.querySelector('b').textContent = it.name;
+        li.querySelector('small').textContent = it.desc || '';
+        li.querySelector('small').hidden = !it.desc;
+        li.querySelector('.price').textContent = formatPrice(it.price);
+        ul.appendChild(li);
+      });
+      list.appendChild(ul);
+    });
+    const sections = [...groups.keys()].filter(Boolean);
+    $('shop-menu-count').textContent = items.length + (items.length > 1 ? ' plats' : ' plat') +
+      (sections.length ? ' · ' + sections.slice(0, 3).join(', ') + (sections.length > 3 ? '…' : '') : '');
   }
 
   /* Photos : redimensionnées puis stockées sur l'appareil */
@@ -3255,7 +3435,10 @@
   async function addPhotos(files) {
     setFieldError('pl-photos', '');
     const room = MAX_PHOTOS - proDraft.photos.length;
-    if (files.length > room) setFieldError('pl-photos', 'Maximum ' + MAX_PHOTOS + ' photos : seules les ' + room + ' premières ont été ajoutées.');
+    if (files.length > room) {
+      setFieldError('pl-photos', 'Maximum ' + MAX_PHOTOS + ' photos' + (room <= 0 ? ' : retirez-en une pour en ajouter une autre.'
+        : room === 1 ? ' : seule la première a été ajoutée.' : ' : seules les ' + room + ' premières ont été ajoutées.'));
+    }
     $('pl-photo-add').classList.add('is-busy');
     const batch = files.slice(0, room);
     for (const [i, file] of batch.entries()) {
@@ -3439,6 +3622,7 @@
   })();
 
   function removePhoto(id) {
+    setFieldError('pl-photos', '');
     proDraft.photos = proDraft.photos.filter((p) => p !== id);
     if (proDraft.addedPhotos.includes(id)) {
       proDraft.addedPhotos = proDraft.addedPhotos.filter((p) => p !== id);
@@ -3549,6 +3733,8 @@
     if (!proDraft.category) fail('pl-category', 'Choisissez une catégorie.');
     if (description.length < 20) fail('pl-desc', 'Décrivez votre restaurant en quelques phrases (20 caractères minimum).');
     if (!proDraft.photos.length) fail('pl-photos', 'Ajoutez au moins une photo.');
+    const menu = readMenu();
+    if (menu.error) fail('pl-menu', menu.error);
 
     // Adresse : suggestion choisie, sinon première correspondance trouvée
     if (!proDraft.address && addrInput.value.trim().length >= 3) {
@@ -3570,7 +3756,7 @@
     if (phone && !PHONE_RE.test(compactPhone(phone))) fail('pl-phone', 'Numéro de téléphone invalide.');
     if (firstInvalid) {
       $('err-pro-listing').textContent = 'Certaines informations sont à compléter.';
-      const target = $(firstInvalid) || $('field-' + firstInvalid);
+      const target = (firstInvalid === 'pl-menu' && menu.input) || $(firstInvalid) || $('field-' + firstInvalid);
       ($('field-' + firstInvalid) || target).scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
       if (target && target.focus) target.focus({ preventScroll: true });
       return;
@@ -3583,6 +3769,7 @@
       ownerEmail: me.email, siret: pro.siret,
       name, category: proDraft.category, description,
       photoIds: [...proDraft.photos],
+      menu: menu.items,
       address: proDraft.address.label, coords: proDraft.address.coords,
       hours, closedOn, promo: $('pl-promo').value.trim(), phone: phone ? formatPhone(phone) : '',
       published: true, publishedAt: old ? old.publishedAt : now, updatedAt: now,

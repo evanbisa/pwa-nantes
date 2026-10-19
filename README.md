@@ -8,7 +8,8 @@ Tout le site tient dans un seul fichier : `index.html`.
 
 ## Fonctionnalités
 
-- Création de compte (prénom, e-mail, mot de passe) à la première visite, écran de connexion ensuite, option « Rester connecté », déconnexion.
+- Création de compte (prénom, e-mail, mot de passe) à la première visite — mot de passe d'au moins 8 caractères avec
+  une majuscule, une minuscule, un chiffre et un caractère spécial (règles cochées en direct pendant la saisie) — écran de connexion ensuite, option « Rester connecté », déconnexion.
 - Demande de la localisation juste après l'inscription ; si elle est refusée, le bouton en haut à droite la redemande.
 - Carte Google Maps (avec une clé API, voir ci-dessous), à plat (sans 3D), en mode jour ou nuit.
 - Mise en page adaptée : téléphone (filtres en bas, fiches qui montent du bas) et ordinateur (panneau latéral avec recherche et liste).
@@ -25,10 +26,12 @@ Tout le site tient dans un seul fichier : `index.html`.
      obligatoires ; récépissé de déclaration DDPP et licence facultatifs ;
    - attestation sur l'honneur.
 3. **Paiement de l'abonnement** (voir ci-dessous).
-4. **Fiche restaurant** : nom, catégorie, description, 1 à 6 photos au **format unique 16:9** (une photo d'un autre format
+4. **Fiche restaurant** : nom, catégorie, description, 1 à 10 photos au **format unique 16:9** (une photo d'un autre format
    s'ouvre dans un outil de recadrage : glisser pour déplacer, curseur, molette ou pincement pour zoomer ; export JPEG
    jusqu'à 1600 × 900), adresse (suggestions de la Base Adresse Nationale via la
-   [Géoplateforme de l'IGN](https://data.geopf.fr/geocodage/search)), horaires, offre du moment, téléphone → publication sur la carte.
+   [Géoplateforme de l'IGN](https://data.geopf.fr/geocodage/search)), horaires, offre du moment, téléphone,
+   **la carte** (facultative : plats, prix et détail, classés par rubrique ; jusqu'à 80 plats) → publication sur la carte.
+   Les clients voient la carte dans la fiche du restaurant, et la recherche trouve aussi les plats.
 
 Le restaurateur retrouve ensuite son espace dans le profil (statut, SIRET, abonnement, « Modifier ma fiche »).
 Une inscription interrompue (« Terminer plus tard ») reprend à la bonne étape à la connexion suivante.
@@ -53,10 +56,10 @@ Dans `index.html`, section « 1. CONFIGURATION », objet `proPlan` :
 
 ## Vérification de l'adresse e-mail (code à 6 chiffres)
 
-**Réservée aux restaurateurs** : à la création d'un compte restaurateur et à chaque connexion d'un restaurateur, un code à
-6 chiffres est envoyé à l'adresse e-mail ; le compte n'est créé, et la session ouverte, qu'une fois le bon code saisi.
-Les **clients ne reçoivent aucun code** (inscription et connexion immédiates) : le quota gratuit d'EmailJS reste donc
-largement suffisant, quel que soit le nombre de clients.
+**Réservée aux restaurateurs, une seule fois, à l'inscription** : un code à 6 chiffres est envoyé à l'adresse e-mail et
+le compte n'est créé qu'une fois le bon code saisi. Les connexions suivantes se font avec le mot de passe seul.
+Les **clients ne reçoivent aucun code** : un seul e-mail par restaurateur, le quota gratuit d'EmailJS reste donc
+largement suffisant.
 Code valable 10 minutes, 5 essais au maximum, renvoi possible après 60 secondes, 5 codes au plus par adresse et par quart d'heure.
 Les comptes restaurateurs créés avant cette fonction doivent vérifier leur adresse à leur prochaine ouverture.
 
