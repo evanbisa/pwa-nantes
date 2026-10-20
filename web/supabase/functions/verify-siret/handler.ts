@@ -19,7 +19,12 @@ export interface Deps {
 }
 
 /** Sites autorisés à appeler la fonction depuis un navigateur */
-const ALLOWED_ORIGINS = [/^https:\/\/([a-z0-9-]+\.)?roche-street-food\.pages\.dev$/, /^https:\/\/evanbisa\.github\.io$/, /^http:\/\/localhost:\d+$/];
+const ALLOWED_ORIGINS = [
+  /^https:\/\/([a-z0-9-]+\.)?roche-street-food\.pages\.dev$/,   // Cloudflare Pages (et ses aperçus)
+  /^https:\/\/roche-street-food\.vercel\.app$/,                  // Vercel : adresse de production uniquement
+  /^https:\/\/evanbisa\.github\.io$/,
+  /^http:\/\/localhost:\d+$/,
+];
 
 function corsHeaders(origin: string | null): Record<string, string> {
   const allowed = origin && ALLOWED_ORIGINS.some((re) => re.test(origin));

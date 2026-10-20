@@ -69,6 +69,20 @@ construit le site et le publie sur **https://roche-street-food.pages.dev** à ch
    `CLOUDFLARE_API_TOKEN` (le jeton) et `CLOUDFLARE_ACCOUNT_ID` (l'identifiant).
 5. Le prochain `git push` (ou *Actions › Publier sur Cloudflare Pages › Run workflow*) publie le site.
 
+### 6 bis. Autre hébergeur possible : Vercel (offre Hobby gratuite)
+⚠️ L'offre gratuite **Hobby** de Vercel est réservée à un **usage non commercial**. Elle convient tant que le site est
+en test (paiement en mode démonstration). Dès que les restaurateurs paieront un abonnement, il faudra passer à
+l'offre Pro de Vercel (payante) ou utiliser Cloudflare Pages (gratuit, usage commercial autorisé, voir ci-dessus).
+
+Tout est prêt dans le dépôt (`web/vercel.json` : construction et en-têtes de sécurité ; `web/.env.production` :
+les deux valeurs publiques de Supabase). Il n'y a **aucune variable à saisir** dans Vercel. À faire une seule fois :
+1. https://vercel.com/signup › *Continue with GitHub* (offre **Hobby**).
+2. *Add New… › Project* › importer `evanbisa/pwa-nantes` (autoriser l'accès au dépôt si Vercel le demande).
+3. *Project Name* : `roche-street-food` → adresse `https://roche-street-food.vercel.app`.
+4. *Root Directory* : **Edit** › choisir `web`. *Framework Preset* : Next.js (détecté). Laisser le reste par défaut.
+5. *Deploy*. Ensuite, chaque `git push` sur la branche par défaut republie le site automatiquement.
+6. Supabase › *Authentication › URL Configuration* › *Redirect URLs* : ajouter `https://roche-street-food.vercel.app/**`.
+
 En attendant, la même application est aussi publiée sur https://evanbisa.github.io/pwa-nantes/app/
 (le prototype reste sur https://evanbisa.github.io/pwa-nantes/).
 

@@ -38,14 +38,24 @@
 ### Hébergement
 - Publication automatique sur **Cloudflare Pages** prête (`cloudflare.yml`) → https://roche-street-food.pages.dev ;
   elle construit le site mais ne publie pas tant que l'accès Cloudflare n'est pas fourni (voir ci-dessous).
-- En-têtes de sécurité (`public/_headers`) : HTTPS forcé, pas d'intégration dans une page tierce,
+- **Vercel** (au choix, à la place de Cloudflare) prêt aussi : `vercel.json` + `.env.production`
+  (valeurs publiques uniquement). L'offre gratuite Hobby est **non commerciale** : OK pendant la phase de test,
+  à remplacer (Vercel Pro ou Cloudflare) quand les abonnements des restaurateurs deviendront payants.
+  La fonction `verify-siret` accepte l'adresse `https://roche-street-food.vercel.app` (dépôt à jour ;
+  à redéployer sur Supabase, voir ci-dessous).
+- En-têtes de sécurité (`public/_headers` pour Cloudflare, `vercel.json` pour Vercel) : HTTPS forcé, pas d'intégration dans une page tierce,
   localisation réservée au site.
 - En attendant, l'application est en ligne sur https://evanbisa.github.io/pwa-nantes/app/
   (le prototype reste sur https://evanbisa.github.io/pwa-nantes/).
 
 ## Ce qu'il te reste à faire (une seule fois, ≈ 15 min)
 
-### 1. Cloudflare
+### 1. Hébergement : Cloudflare **ou** Vercel (un seul des deux suffit)
+**Vercel** (le plus simple, aucun jeton à copier) : https://vercel.com/signup › *Continue with GitHub* ›
+*Add New… › Project* › importer `evanbisa/pwa-nantes` › *Project Name* `roche-street-food` ›
+*Root Directory* : `web` › *Deploy*. Puis ajouter `https://roche-street-food.vercel.app/**` aux *Redirect URLs* de Supabase.
+
+**Cloudflare** :
 1. Créer un compte gratuit sur https://dash.cloudflare.com.
 2. Copier l'**Account ID** (*Workers & Pages*, colonne de droite).
 3. *My Profile › API Tokens › Create Token › Create Custom Token* : permission **Account › Cloudflare Pages › Edit**
