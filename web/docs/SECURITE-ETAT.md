@@ -53,7 +53,7 @@
 - **Vercel** (hébergeur choisi) prêt : `vercel.json` à la racine (site complet + application sous `/app/`) + `web/.env.production`
   (valeurs publiques uniquement). L'offre gratuite Hobby est **non commerciale** : OK pendant la phase de test,
   à remplacer (Vercel Pro ou Cloudflare) quand les abonnements des restaurateurs deviendront payants.
-  La fonction `verify-siret` (déployée, version 2) accepte l'adresse `https://roche-street-food.vercel.app`.
+  La fonction `verify-siret` (déployée, version 2) accepte l'adresse `https://pwa-nantes-web.vercel.app`.
 - En-têtes de sécurité (`public/_headers` pour Cloudflare, `vercel.json` pour Vercel) : HTTPS forcé, pas d'intégration dans une page tierce,
   localisation réservée au site.
 - En attendant, l'application est en ligne sur https://evanbisa.github.io/pwa-nantes/app/
@@ -63,9 +63,9 @@
 
 ### 1. Hébergement : Cloudflare **ou** Vercel (un seul des deux suffit)
 **Vercel** (choisi ; aucun jeton à copier) : https://vercel.com/signup › *Continue with GitHub* ›
-*Add New… › Project* › importer `evanbisa/pwa-nantes` › *Project Name* `roche-street-food` › ne rien changer d'autre ›
-*Deploy*. Puis, dans Supabase, *Site URL* = `https://roche-street-food.vercel.app` et ajouter
-`https://roche-street-food.vercel.app/**` aux *Redirect URLs*.
+*Add New… › Project* › importer `evanbisa/pwa-nantes` › *Project Name* `pwa-nantes-web` › ne rien changer d'autre ›
+*Deploy*. Puis, dans Supabase, *Site URL* = `https://pwa-nantes-web.vercel.app` et ajouter
+`https://pwa-nantes-web.vercel.app/**` aux *Redirect URLs*.
 
 **Cloudflare** :
 1. Créer un compte gratuit sur https://dash.cloudflare.com.
@@ -81,7 +81,7 @@
 2. *API et services › Écran de consentement OAuth* : type **Externe**, nom de l'application, e-mail d'assistance,
    puis **Publier l'application** (sinon seuls les comptes « testeurs » peuvent se connecter).
 3. *API et services › Identifiants › Créer des identifiants › ID client OAuth* › type **Application Web** :
-   - *Origines JavaScript autorisées* : `https://roche-street-food.vercel.app` et `https://evanbisa.github.io` ;
+   - *Origines JavaScript autorisées* : `https://pwa-nantes-web.vercel.app` et `https://evanbisa.github.io` ;
    - *URI de redirection autorisés* : `https://fnypgfyxbyaqrnklhjxc.supabase.co/auth/v1/callback`.
 4. Envoyer à Claude l'**ID client** (`…apps.googleusercontent.com`) : il est public, Claude l'ajoute au site.
 5. Supabase › *Authentication › Sign In / Providers › Google* : activer, coller l'ID client **et le code secret

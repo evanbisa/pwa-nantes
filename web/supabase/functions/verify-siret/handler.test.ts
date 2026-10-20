@@ -92,6 +92,8 @@ Deno.test("CORS : préflight OK, origine inconnue non autorisée, GET refusé", 
   assertEquals(evil.res.headers.get("Access-Control-Allow-Origin"), null);
   const vercel = await call(req(null, { method: "OPTIONS", origin: "https://roche-street-food.vercel.app" }), fakeDeps().deps);
   assertEquals(vercel.res.headers.get("Access-Control-Allow-Origin"), "https://roche-street-food.vercel.app");
+  const vercel2 = await call(req(null, { method: "OPTIONS", origin: "https://pwa-nantes-web.vercel.app" }), fakeDeps().deps);
+  assertEquals(vercel2.res.headers.get("Access-Control-Allow-Origin"), "https://pwa-nantes-web.vercel.app");
   // un autre projet Vercel au nom approchant n'est pas autorisé
   const lookalike = await call(req(null, { method: "OPTIONS", origin: "https://roche-street-food-pirate.vercel.app" }), fakeDeps().deps);
   assertEquals(lookalike.res.headers.get("Access-Control-Allow-Origin"), null);

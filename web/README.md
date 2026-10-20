@@ -81,12 +81,12 @@ Tout est prêt dans le dépôt : `vercel.json` (à la racine) et `scripts/build-
 `web/.env.production` contient les deux valeurs publiques de Supabase. **Aucune variable ni aucun réglage à saisir.**
 1. https://vercel.com/signup › *Continue with GitHub* (offre **Hobby**).
 2. *Add New… › Project* › importer `evanbisa/pwa-nantes` (autoriser l'accès au dépôt si Vercel le demande).
-3. *Project Name* : `roche-street-food` → adresse `https://roche-street-food.vercel.app`.
+3. *Project Name* : `pwa-nantes-web` (proposé par Vercel) → adresse `https://pwa-nantes-web.vercel.app`.
    Ne rien changer d'autre (*Root Directory* `./`, *Framework Preset* « Other » : tout est lu dans `vercel.json`).
 4. *Deploy*. Ensuite, chaque `git push` sur la branche par défaut republie le site automatiquement
    (la branche `gh-pages` est ignorée).
-5. Supabase › *Authentication › URL Configuration* : *Site URL* `https://roche-street-food.vercel.app`,
-   *Redirect URLs* : ajouter `https://roche-street-food.vercel.app/**`.
+5. Supabase › *Authentication › URL Configuration* : *Site URL* `https://pwa-nantes-web.vercel.app`,
+   *Redirect URLs* : ajouter `https://pwa-nantes-web.vercel.app/**`.
 
 En attendant, la même application est aussi publiée sur https://evanbisa.github.io/pwa-nantes/app/
 (le prototype reste sur https://evanbisa.github.io/pwa-nantes/).
