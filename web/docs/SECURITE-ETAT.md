@@ -21,7 +21,20 @@
   (adresse dans la zone, description, 1 photo, 1 service).
 - Analyse de sécurité de Supabase (Advisors) : **0 alerte**.
 - 16 scénarios de sécurité rejoués sur la vraie base (transaction annulée, aucune donnée laissée),
-  69 scénarios sur une base locale (`npm run db:test`).
+  99 scénarios sur une base locale (`npm run db:test`).
+
+### Stories et promotions (migration `20261021090000_stories_promotions.sql`, **à appliquer**)
+- Lecture publique (visiteurs compris) des seules stories non expirées et promotions en cours des fiches en ligne.
+- Le restaurateur ne publie / supprime que sur sa fiche ; la base impose 24 h maximum par story,
+  la fin des promos du jour (minuit) et de la semaine (dimanche soir), 10 stories et 6 promotions au plus.
+- Photos : stockage `stories` (5 Mo, JPG/PNG/WebP), dépôt uniquement dans le dossier de sa propre fiche.
+- Le connecteur Supabase était déconnecté : migration testée en local (99/99), pas encore appliquée.
+
+### Connexion avec Google (clients)
+- Prototype : bouton Google (Google Identity Services) affiché dès que `CONFIG.googleClientId` est renseigné.
+  Sans serveur, le jeton est contrôlé (destinataire, émetteur, expiration, e-mail vérifié) mais pas sa signature :
+  ce sera fait par Supabase Auth (`signInWithIdToken`) dans la version en ligne.
+- Un restaurateur ne peut pas se connecter avec Google (compte vérifié par SIRET et mot de passe).
 
 ### Fonction serveur `verify-siret` (Supabase Edge Function, déployée)
 - Vérifie : restaurateur connecté, clé de contrôle du SIRET, existence dans le répertoire Sirene,
@@ -63,6 +76,18 @@
 4. GitHub › `evanbisa/pwa-nantes` › *Settings › Secrets and variables › Actions › New repository secret* :
    `CLOUDFLARE_API_TOKEN` (le jeton) et `CLOUDFLARE_ACCOUNT_ID` (l'identifiant).
 5. Prévenir Claude : il relance la publication et vérifie le site.
+
+### 1 bis. Google (connexion des clients, gratuit)
+1. https://console.cloud.google.com › créer un projet « Roche Street Food ».
+2. *API et services › Écran de consentement OAuth* : type **Externe**, nom de l'application, e-mail d'assistance,
+   puis **Publier l'application** (sinon seuls les comptes « testeurs » peuvent se connecter).
+3. *API et services › Identifiants › Créer des identifiants › ID client OAuth* › type **Application Web** :
+   - *Origines JavaScript autorisées* : `https://evanbisa.github.io` (et plus tard `https://roche-street-food.pages.dev`
+     ou `https://roche-street-food.vercel.app`) ;
+   - *URI de redirection autorisés* : `https://fnypgfyxbyaqrnklhjxc.supabase.co/auth/v1/callback`.
+4. Envoyer à Claude l'**ID client** (`…apps.googleusercontent.com`) : il est public, Claude l'ajoute au site.
+5. Supabase › *Authentication › Sign In / Providers › Google* : activer, coller l'ID client **et le code secret
+   du client** (le secret se colle uniquement dans Supabase, jamais dans la conversation ni dans le dépôt).
 
 ### 2. Supabase › Authentication (le connecteur n'a pas accès à ces réglages)
 - *Sign In / Providers › Email* : activer **Confirm email** ; mot de passe de 8 caractères minimum avec

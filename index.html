@@ -111,6 +111,7 @@
        ===================================================================== */
     *, *::before, *::after { box-sizing: border-box; }
     [hidden] { display: none !important; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
     html, body {
       height: 100%; margin: 0; overflow: hidden;
       overscroll-behavior: none; background: var(--bg); color: var(--text);
@@ -138,7 +139,7 @@
     /* Interface masquée tant que l'écran de compte est affiché */
     .ui { transition: opacity .45s var(--ease-out), transform .45s var(--ease-out); }
     body:not(.ui-ready) .ui { opacity: 0; pointer-events: none; }
-    body:not(.ui-ready) .topbar, body:not(.ui-ready) .controls { transform: translateY(-12px); }
+    body:not(.ui-ready) .topbar, body:not(.ui-ready) .controls, body:not(.ui-ready) .stories { transform: translateY(-12px); }
     body:not(.ui-ready) .filters { transform: translateY(12px); }
     body:not(.ui-ready) .sidebar { transform: translateX(-16px); }
 
@@ -741,10 +742,125 @@
     @media (min-width: 900px) {
       #profile-sheet.is-pro { width: min(560px, calc(100% - 32px)); }
       .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .kpi.is-hero { grid-column: auto; }
-      .kpi:not(.is-hero):nth-child(even):last-child { grid-column: auto; }
-      .kpi.is-hero strong { font-size: 24px; }
+      .kpi.is-hero strong { font-size: 32px; }
     }
+
+    /* ---------- Promotions ---------- */
+    .promos { display: grid; gap: 8px; margin-top: 16px; }
+    .promos .promo { margin-top: 0; }
+    .promo.is-student { background: rgba(24, 128, 56, .1); }
+    .promo.is-student small { color: var(--green); }
+    .promo.is-day, .promo.is-week { background: rgba(217, 48, 37, .08); }
+    .promo.is-day small, .promo.is-week small { color: var(--danger); }
+    .promo-more { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); }
+    .pin-flag { position: absolute; top: -5px; right: -7px; display: none; place-items: center; min-width: 20px; height: 20px; padding: 0 4px; border-radius: 10px;
+      font-size: 12px; font-weight: 700; line-height: 1; color: #fff; background: #e8505b; border: 2px solid var(--panel-solid); }
+    .pin.has-promo .pin-flag { display: grid; }
+    #map.zoom-far .pin-flag { display: none; }
+
+    /* ---------- Stories (bandeau, visionneuse, éditeur) ---------- */
+    .stories { position: fixed; z-index: 19; left: 12px; top: calc(var(--safe-top) + 74px); max-width: calc(100% - 88px); border-radius: 16px; transition: opacity .25s, transform .3s var(--ease-out); }
+    body.sheet-open .stories { opacity: 0; transform: translateY(-8px); pointer-events: none; }
+    .stories-track { display: flex; gap: 12px; overflow-x: auto; padding: 8px 10px 6px; scrollbar-width: none; scroll-snap-type: x proximity; }
+    .stories-track::-webkit-scrollbar { display: none; }
+    .story-chip { flex: none; width: 64px; display: grid; justify-items: center; gap: 4px; scroll-snap-align: start; }
+    .story-ring { display: grid; place-items: center; width: 58px; height: 58px; border-radius: 50%; padding: 2.5px;
+      background: conic-gradient(from 210deg, #f9ce34, #ee2a7b, #6228d7, #f9ce34); }
+    .story-chip.is-seen .story-ring { background: var(--line-strong); }
+    .story-avatar { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; font-size: 26px; background: var(--panel-solid); border: 2.5px solid var(--panel-solid); }
+    .story-name { max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11.5px; color: var(--text); }
+    .story-chip:focus-visible { outline: none; }
+    .story-chip:focus-visible .story-ring { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .sb-stories { padding: 0 6px 2px; }
+    .sb-stories .stories-track { padding: 4px 10px 8px; }
+    .sheet-emoji.has-story { padding: 2.5px; background: conic-gradient(from 210deg, #f9ce34, #ee2a7b, #6228d7, #f9ce34); cursor: pointer; }
+    .sheet-emoji.has-story > span { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 12px; background: var(--panel-solid); }
+    .sheet-emoji:not(.has-story) { cursor: default; }
+
+    .story-viewer { position: fixed; inset: 0; z-index: 115; display: flex; align-items: center; justify-content: center; background: #000; touch-action: none; }
+    .story-viewer[hidden] { display: none; }
+    .sv-frame { position: relative; width: 100%; height: 100%; max-width: calc(100dvh * 9 / 16); overflow: hidden; background: #111; color: #fff; }
+    .sv-media { position: absolute; inset: 0; display: grid; place-items: center; }
+    .sv-media .sv-blur { position: absolute; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); object-fit: cover; filter: blur(28px) brightness(.55); }
+    .sv-media .sv-img { position: relative; max-width: 100%; max-height: 100%; object-fit: contain; -webkit-user-drag: none; }
+    .sv-media .sv-img.is-cover { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; }
+    .sv-text { position: absolute; inset: 0; display: grid; place-items: center; padding: 96px 28px 120px; text-align: center;
+      font-size: clamp(24px, 7vw, 32px); font-weight: 500; line-height: 1.25; text-wrap: balance; overflow-wrap: anywhere; text-shadow: 0 1px 8px rgba(0, 0, 0, .25); }
+    .sv-top { position: absolute; z-index: 3; left: 0; right: 0; top: 0; padding: calc(var(--safe-top) + 10px) 12px 24px; background: linear-gradient(rgba(0, 0, 0, .45), transparent); }
+    .sv-bars { display: flex; gap: 4px; }
+    .sv-bars span { flex: 1; height: 3px; border-radius: 2px; overflow: hidden; background: rgba(255, 255, 255, .35); }
+    .sv-bars i { display: block; height: 100%; width: 0; background: #fff; }
+    .sv-head { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+    .sv-avatar { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 50%; font-size: 19px; background: rgba(255, 255, 255, .92); }
+    .sv-head div { flex: 1; min-width: 0; }
+    .sv-head strong { display: block; font-size: 14.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sv-head small { display: block; font-size: 12px; opacity: .8; }
+    .sv-close, .sv-pause { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; font-size: 26px; line-height: 1; color: #fff; }
+    .sv-pause { font-size: 16px; }
+    .sv-close:focus-visible, .sv-pause:focus-visible, .sv-cta:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+    .sv-caption { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; margin: 0; padding: 48px 20px calc(var(--safe-bottom) + 84px);
+      font-size: 16px; line-height: 1.4; text-align: center; background: linear-gradient(transparent, rgba(0, 0, 0, .55)); }
+    .sv-caption:empty { display: none; }
+    .sv-cta { position: absolute; z-index: 3; left: 50%; bottom: calc(var(--safe-bottom) + 20px); transform: translateX(-50%); display: inline-flex; align-items: center; gap: 8px;
+      height: 44px; padding: 0 20px; border-radius: 22px; font-weight: 500; color: #202124; background: rgba(255, 255, 255, .95); white-space: nowrap; }
+    .sv-nav { position: absolute; z-index: 1; top: 90px; bottom: 80px; }
+    .sv-prev { left: 0; width: 32%; }
+    .sv-next { right: 0; width: 68%; }
+    .sv-nav:focus-visible { outline: none; }
+    @media (min-width: 900px) { .sv-frame { height: calc(100dvh - 32px); border-radius: 16px; } }
+
+    .story-composer { position: fixed; inset: 0; z-index: 116; display: flex; align-items: flex-end; justify-content: center; background: var(--backdrop); }
+    .story-composer[hidden] { display: none; }
+    .sc-panel { width: 100%; max-width: 480px; max-height: 92dvh; overflow-y: auto; padding: 16px 20px calc(var(--safe-bottom) + 20px); border-radius: 20px 20px 0 0; background: var(--panel-solid); }
+    .sc-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .sc-head h3 { margin: 0; font-size: 19px; font-weight: 400; }
+    .sc-body { display: grid; grid-template-columns: 132px 1fr; gap: 16px; margin-top: 14px; align-items: start; }
+    .sc-preview { position: relative; aspect-ratio: 9 / 16; border-radius: 12px; overflow: hidden; background: #111; color: #fff; }
+    .sc-preview .sv-text { padding: 12px; font-size: 14px; }
+    .sc-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .sc-preview .sc-cap { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; padding: 18px 8px 8px; font-size: 11px; text-align: center; background: linear-gradient(transparent, rgba(0, 0, 0, .6)); }
+    .sc-preview .sc-cap:empty { display: none; }
+    .sc-bgs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .sc-bgs button { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--panel-solid); box-shadow: 0 0 0 1px var(--line-strong); }
+    .sc-bgs button[aria-checked="true"] { box-shadow: 0 0 0 2px var(--accent); }
+    .sc-file { margin-top: 12px; }
+    .sc-file input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .sc-file .btn { margin-top: 0; cursor: pointer; }
+    .sc-file:focus-within .btn { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (min-width: 900px) { .story-composer { align-items: center; } .sc-panel { border-radius: 16px; } }
+    @media (max-width: 380px) { .sc-body { grid-template-columns: 1fr; } .sc-preview { width: 132px; } }
+
+    /* Espace restaurateur : stories et promotions */
+    .pd-block { margin-top: 22px; }
+    .pd-block .hint { margin-top: 4px; }
+    .pill-btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: 17px; font-size: 13.5px; font-weight: 500; color: var(--on-accent); background: var(--accent); }
+    .pill-btn[disabled] { opacity: .5; pointer-events: none; }
+    .story-admin { display: flex; gap: 10px; margin: 12px 0 0; padding: 0 0 4px; list-style: none; overflow-x: auto; }
+    .story-admin li { position: relative; flex: none; width: 84px; }
+    .story-admin .sa-thumb { position: relative; display: block; width: 84px; aspect-ratio: 9 / 16; border-radius: 10px; overflow: hidden; background: #111; color: #fff; }
+    .story-admin .sa-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .story-admin .sa-thumb .sv-text { padding: 6px; font-size: 10.5px; text-shadow: none; }
+    .story-admin small { display: block; margin-top: 4px; font-size: 11.5px; line-height: 1.3; color: var(--muted); white-space: pre-line; }
+    .story-admin .sa-del { position: absolute; top: 4px; right: 4px; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-size: 17px; line-height: 1; color: #fff; background: rgba(0, 0, 0, .55); }
+    .story-admin .sa-empty, .promo-admin .pa-empty { width: auto; flex: 1; padding: 12px 0; font-size: 13.5px; color: var(--muted); }
+    .promo-admin { margin: 10px 0 0; padding: 0; list-style: none; }
+    .promo-admin li { display: flex; align-items: center; gap: 12px; padding: 10px 2px; border-bottom: 1px solid var(--line); }
+    .promo-admin .pa-ico { font-size: 22px; }
+    .promo-admin div { flex: 1; min-width: 0; }
+    .promo-admin strong { display: block; font-size: 14.5px; font-weight: 500; }
+    .promo-admin small { display: block; font-size: 12.5px; color: var(--muted); }
+    .promo-form { margin-top: 6px; padding: 14px; border-radius: 12px; border: 1px solid var(--line); }
+    .promo-form .btn { margin-top: 12px; }
+    .kind-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .kind-pick button { height: 38px; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-radius: 17px; font-size: 13px; font-weight: 500; color: var(--text); border: 1px solid var(--line-strong); }
+    .kind-pick button[aria-checked="true"] { color: var(--accent); background: var(--accent-soft); border-color: var(--accent-line); }
+
+    /* Connexion avec Google */
+    .oauth { margin-top: 16px; }
+    .g-slot { display: flex; justify-content: center; min-height: 44px; }
+    .g-slot .g-fallback { font-size: 13px; color: var(--muted); align-self: center; }
+    .or-sep { display: flex; align-items: center; gap: 12px; margin: 14px 0 0; font-size: 13px; color: var(--muted); }
+    .or-sep::before, .or-sep::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
     .pro-dash { margin-top: 20px; }
     .pro-dash h4 { margin: 0; font-size: 15px; font-weight: 500; }
@@ -777,7 +893,7 @@
        10. ORDINATEUR (≥ 900 px) : panneau latéral, fiche flottante, fenêtres centrées
        ===================================================================== */
     @media (min-width: 900px) {
-      .topbar, .filters { display: none; }
+      .topbar, .filters, .stories { display: none; }
       .sidebar { display: flex; }
       .zoom-group { display: flex; }
       .controls { top: 16px; right: 16px; }
@@ -838,9 +954,15 @@
     </button>
   </header>
 
+  <!-- ===================== STORIES DES RESTAURANTS (téléphone : sous le profil ; ordinateur : dans le panneau) ===================== -->
+  <div class="stories glass ui" id="stories" hidden>
+    <div class="stories-track" id="stories-track" role="list" aria-label="Stories des restaurants"></div>
+  </div>
+
   <!-- ===================== PANNEAU LATÉRAL (ordinateur) ===================== -->
   <aside class="sidebar glass ui" id="sidebar" aria-label="Liste des commerces">
     <div class="sb-brand" id="sb-brand-slot"></div>
+    <div class="sb-stories" id="sb-stories-slot" hidden></div>
     <div class="sb-search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <input id="search" type="search" placeholder="Rechercher un commerce" autocomplete="off" aria-label="Rechercher un commerce" />
@@ -894,6 +1016,7 @@
       <button class="chip glass" type="button" data-cat="Autre" aria-pressed="false">🍽️ Autres</button>
       <span class="chip-sep" aria-hidden="true"></span>
       <button class="chip glass" type="button" id="open-only" aria-pressed="false"><span class="dot-green" aria-hidden="true"></span>Ouverts</button>
+      <button class="chip glass" type="button" id="promo-only" aria-pressed="false">🎁 Promos</button>
     </div>
   </nav>
 
@@ -901,7 +1024,7 @@
   <section id="shop-sheet" class="sheet glass" role="dialog" aria-modal="false" aria-labelledby="shop-name" aria-hidden="true">
     <button class="sheet-grab" type="button" data-close aria-label="Fermer la fiche"></button>
     <div class="sheet-head">
-      <div class="sheet-emoji" id="shop-emoji" aria-hidden="true"></div>
+      <button class="sheet-emoji" type="button" id="shop-emoji" tabindex="-1" aria-hidden="true"><span id="shop-emoji-in"></span></button>
       <div class="sheet-title">
         <h2 id="shop-name"></h2>
         <p class="eyebrow"><span id="shop-cat"></span><span class="verified" id="shop-verified" hidden title="SIRET vérifié auprès du répertoire Sirene">✓ Établissement vérifié</span><span id="shop-followers" hidden></span></p>
@@ -921,10 +1044,7 @@
     <div class="gallery" id="shop-gallery" hidden></div>
     <span class="status" id="shop-status"></span>
     <p class="shop-desc" id="shop-desc" hidden></p>
-    <div class="promo" id="shop-promo-box">
-      <span class="promo-ico" aria-hidden="true">🎁</span>
-      <div><small>Offre du moment</small><strong id="shop-promo"></strong></div>
-    </div>
+    <div class="promos" id="shop-promos" hidden></div>
     <ul class="meta">
       <li>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 1114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
@@ -973,6 +1093,56 @@
     <button class="lb-btn lb-prev" type="button" id="lb-prev" aria-label="Photo précédente">‹</button>
     <button class="lb-btn lb-next" type="button" id="lb-next" aria-label="Photo suivante">›</button>
     <p class="lb-count" id="lb-count" aria-live="polite"></p>
+  </div>
+
+  <!-- ===================== STORIES : VISIONNEUSE ===================== -->
+  <div id="story-viewer" class="story-viewer" role="dialog" aria-modal="true" aria-label="Stories des restaurants" hidden>
+    <div class="sv-frame" id="sv-frame">
+      <div class="sv-media" id="sv-media"></div>
+      <div class="sv-top">
+        <div class="sv-bars" id="sv-bars" aria-hidden="true"></div>
+        <div class="sv-head">
+          <span class="sv-avatar" id="sv-avatar" aria-hidden="true"></span>
+          <div><strong id="sv-name"></strong><small id="sv-time"></small></div>
+          <button class="sv-pause" type="button" id="sv-pause" aria-label="Mettre en pause">❚❚</button>
+          <button class="sv-close" type="button" id="sv-close" aria-label="Fermer les stories">&times;</button>
+        </div>
+      </div>
+      <button class="sv-nav sv-prev" type="button" id="sv-prev" aria-label="Story précédente"></button>
+      <button class="sv-nav sv-next" type="button" id="sv-next" aria-label="Story suivante"></button>
+      <p class="sv-caption" id="sv-caption"></p>
+      <button class="sv-cta" type="button" id="sv-cta">Voir la fiche du restaurant</button>
+      <p class="visually-hidden" id="sv-live" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <!-- ===================== STORIES : PUBLICATION (restaurateur) ===================== -->
+  <div id="story-composer" class="story-composer" role="dialog" aria-modal="true" aria-labelledby="sc-title" hidden>
+    <form class="sc-panel" id="sc-form" novalidate>
+      <div class="sc-head">
+        <h3 id="sc-title">Nouvelle story</h3>
+        <button class="icon-btn" type="button" id="sc-close" aria-label="Fermer">&times;</button>
+      </div>
+      <div class="seg" role="group" aria-label="Type de story" style="margin-top:12px">
+        <button type="button" data-mode="photo" aria-pressed="true">📷 Photo</button>
+        <button type="button" data-mode="text" aria-pressed="false">Aa Texte</button>
+      </div>
+      <div class="sc-body">
+        <div class="sc-preview" id="sc-preview" aria-label="Aperçu de la story"></div>
+        <div>
+          <label class="sc-file" id="sc-file-box"><input type="file" id="sc-file" accept="image/jpeg,image/png,image/webp" /><span class="btn btn-ghost" id="sc-file-label">Choisir une photo</span></label>
+          <div class="sc-bgs" id="sc-bgs" role="radiogroup" aria-label="Couleur de fond" hidden></div>
+          <label class="field" id="field-sc-text">
+            <span id="sc-text-label">Légende (facultatif) <small class="counter" id="sc-text-count">0 / 150</small></span>
+            <textarea id="sc-text" rows="3" maxlength="150" placeholder="Ex. : Nouveau burger du chef, dispo ce soir !"></textarea>
+            <small class="field-error" id="err-sc-text" aria-live="polite"></small>
+          </label>
+        </div>
+      </div>
+      <p class="hint">Visible par tous les utilisateurs pendant 24 h, puis retirée automatiquement.</p>
+      <p class="form-error" id="err-sc" role="alert"></p>
+      <button class="btn btn-primary" type="submit" id="sc-publish">Publier la story</button>
+    </form>
   </div>
 
   <!-- ===================== AIDE : LOCALISATION BLOQUÉE ===================== -->
@@ -1024,6 +1194,38 @@
         <div><dt>SIRET</dt><dd id="pd-siret"></dd></div>
         <div><dt>Abonnement</dt><dd id="pd-plan"></dd></div>
       </dl>
+      <section class="pd-block" id="pd-stories" aria-labelledby="pd-stories-title" hidden>
+        <div class="stats-head">
+          <h4 id="pd-stories-title">Mes stories</h4>
+          <button class="pill-btn" type="button" id="pd-story-new">＋ Publier une story</button>
+        </div>
+        <p class="hint">Vos stories apparaissent en haut de la carte pour tous les utilisateurs, abonnés ou non, pendant 24 h.</p>
+        <ul class="story-admin" id="pd-story-list"></ul>
+      </section>
+      <section class="pd-block" id="pd-promos" aria-labelledby="pd-promos-title" hidden>
+        <h4 id="pd-promos-title">Mes promotions</h4>
+        <p class="hint">Mises en avant sur votre fiche, dans la liste des commerces et avec le filtre « 🎁 Promos ».</p>
+        <ul class="promo-admin" id="pd-promo-list"></ul>
+        <form class="promo-form" id="pd-promo-form" novalidate>
+          <div class="kind-pick" id="pp-kind" role="radiogroup" aria-label="Type de promotion"></div>
+          <label class="field" id="field-pp-title">
+            <span>Offre <small class="counter" id="pp-title-count">0 / 60</small></span>
+            <input id="pp-title" type="text" maxlength="60" placeholder="Ex. : menu kebab + boisson à 8 €" />
+            <small class="field-error" id="err-pp-title" aria-live="polite"></small>
+          </label>
+          <label class="field" id="field-pp-details">
+            <span>Détails (facultatif)</span>
+            <input id="pp-details" type="text" maxlength="140" placeholder="Ex. : sur présentation de la carte étudiante" />
+          </label>
+          <label class="field" id="field-pp-end">
+            <span>Jusqu'au (facultatif)</span>
+            <input id="pp-end" type="date" />
+            <small class="field-error" id="err-pp-end" aria-live="polite"></small>
+          </label>
+          <p class="hint" id="pp-end-auto"></p>
+          <button class="btn btn-primary" type="submit" id="pp-submit">Publier la promotion</button>
+        </form>
+      </section>
       <section class="stats" id="pd-stats" aria-labelledby="pd-stats-title" hidden>
         <div class="stats-head">
           <h4 id="pd-stats-title">Statistiques</h4>
@@ -1039,6 +1241,7 @@
           <div class="kpi"><span class="kpi-label">Appels</span><strong id="k-calls">0</strong><small>clics sur le numéro</small></div>
           <div class="kpi"><span class="kpi-label">Menu consulté</span><strong id="k-menu">0</strong><small>onglet Menu ouvert</small></div>
           <div class="kpi"><span class="kpi-label">Photos regardées</span><strong id="k-photos">0</strong><small>onglet Photos ouvert</small></div>
+          <div class="kpi"><span class="kpi-label">Stories vues</span><strong id="k-stories">0</strong><small>affichages</small></div>
         </div>
         <figure class="chart">
           <figcaption>Vues de la fiche par jour<small id="pd-chart-sub"></small></figcaption>
@@ -1089,6 +1292,10 @@
         <h1 id="auth-title"><span data-only="client">Créez votre <em>compte</em></span><span data-only="pro">Inscrivez votre <em>restaurant</em></span></h1>
         <p class="lead" data-only="client">Découvrez les food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon.</p>
         <p class="lead" data-only="pro">Restaurateur à La Roche-sur-Yon ? Rejoignez la carte en 4 étapes : compte, vérification de votre établissement, abonnement, fiche restaurant.</p>
+        <div class="oauth" data-only="client" data-google hidden>
+          <div class="g-slot" id="su-google"></div>
+          <p class="or-sep">ou avec votre e-mail</p>
+        </div>
         <div class="field-row">
           <label class="field" id="field-su-name">
             <span>Prénom</span>
@@ -1145,6 +1352,10 @@
       <form id="form-login" class="ob-step" novalidate data-step="login" hidden>
         <h1 id="login-title"><span data-only="client">Bon retour <em>parmi nous</em></span><span data-only="pro">Espace <em>restaurateur</em></span></h1>
         <p class="lead"><span data-only="client">Connectez-vous pour retrouver la carte et vos commerces.</span><span data-only="pro">Connectez-vous pour gérer la fiche de votre restaurant.</span></p>
+        <div class="oauth" data-only="client" data-google hidden>
+          <div class="g-slot" id="li-google"></div>
+          <p class="or-sep">ou avec votre e-mail</p>
+        </div>
         <label class="field" id="field-li-email">
           <span>Adresse e-mail</span>
           <input id="li-email" type="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false" maxlength="120" required />
@@ -1406,6 +1617,12 @@
     // Vérification des restaurateurs : API publique « Recherche d'entreprises » (répertoire Sirene de l'INSEE)
     sireneApi: 'https://recherche-entreprises.api.gouv.fr/search',
     /**
+     * Connexion « Continuer avec Google » (clients). Identifiant client OAuth (public) créé gratuitement dans
+     * Google Cloud Console › API et services › Identifiants › ID client OAuth › Application Web,
+     * origine JavaScript autorisée : https://evanbisa.github.io. Vide = bouton Google masqué.
+     */
+    googleClientId: '',
+    /**
      * SIRET fictif pour essayer l'espace restaurateur sans établissement réel (clé de contrôle valide,
      * jamais envoyé au répertoire Sirene, réutilisable par plusieurs comptes). Vide = désactivé.
      */
@@ -1485,6 +1702,48 @@
       hours: [['11:30', '23:00']], closedOn: [], closedTemporarily: true,
       promo: 'Menu étudiant à 9,90 €' },
   ];
+
+  /* ---------- Promotions et stories : constantes, données de démonstration ---------- */
+  const PROMO_KINDS = {
+    day:     { icon: '⏱️', label: 'Promo du jour', short: 'Du jour' },
+    week:    { icon: '📅', label: 'Promo de la semaine', short: 'De la semaine' },
+    student: { icon: '🎓', label: 'Offre étudiante', short: 'Étudiante' },
+    other:   { icon: '🎁', label: 'Bon plan', short: 'Bon plan' },
+  };
+  const PROMO_ORDER = ['day', 'week', 'student', 'other'];
+  const MAX_PROMOS = 6;
+  const STORY_TTL = 24 * 3600 * 1000;      // une story reste visible 24 h
+  const STORY_DURATION = 6000;             // durée d'affichage d'une story
+  const MAX_STORIES = 10;                  // stories en ligne en même temps, par restaurant
+  const STORY_BGS = {
+    sunset: 'linear-gradient(160deg, #f6a04d, #e8505b)',
+    ocean:  'linear-gradient(160deg, #2bc0e4, #3a6fd8)',
+    berry:  'linear-gradient(160deg, #b061f0, #e8509a)',
+    forest: 'linear-gradient(160deg, #0f9b8e, #2fb36a)',
+    night:  'linear-gradient(160deg, #2b2e33, #4a4f57)',
+  };
+  const endOfDay = (d) => { const e = new Date(d); e.setHours(23, 59, 59, 999); return e; };
+  /** Fin automatique : ce soir (promo du jour), dimanche soir (promo de la semaine) ; sinon aucune. */
+  function promoAutoEnd(kind, now = new Date()) {
+    if (kind === 'day') return endOfDay(now);
+    if (kind === 'week') { const e = endOfDay(now); e.setDate(e.getDate() + ((7 - e.getDay()) % 7)); return e; }
+    return null;
+  }
+  // Commerces de démonstration : quelques stories et promotions, datées par rapport à maintenant
+  (() => {
+    const at = (h) => Date.now() - h * 3600e3;
+    const story = (id, h, bg, text) => ({ id: 'demo-' + id, bg, text, createdAt: new Date(at(h)).toISOString(), expiresAt: new Date(at(h) + STORY_TTL).toISOString() });
+    const add = (id, stories, promos) => Object.assign(SHOPS.find((x) => x.id === id), { stories, promos });
+    add('camion-napoleon',
+      [story('camion-1', 3, 'sunset', '☀️ Le préfou sort du four : venez le goûter tout chaud !'), story('camion-2', 0.6, 'forest', 'Ce midi : galette saucisse + boisson à 7,50 €')],
+      [{ id: 'demo-p1', kind: 'day', title: 'Galette saucisse + boisson à 7,50 €', endsAt: promoAutoEnd('day').toISOString() }]);
+    add('kebab-clemenceau',
+      [story('kebab-1', 2, 'ocean', '🎓 Étudiants : -15 % toute la semaine sur présentation de votre carte')],
+      [{ id: 'demo-p2', kind: 'student', title: '-15 % sur tout le menu', details: 'Sur présentation de la carte étudiante' }]);
+    add('gaufres-marche',
+      [story('gaufres-1', 5, 'berry', 'Nouveau : la gaufre Nutella-banane 🍌')],
+      [{ id: 'demo-p3', kind: 'week', title: '2 gaufres = 1 chocolat chaud offert', endsAt: promoAutoEnd('week').toISOString() }]);
+  })();
 
   /** Codes NAF acceptés pour un restaurateur (nomenclature NAF rév. 2 de l'INSEE). */
   const NAF_RESTAURATION = {
@@ -2278,7 +2537,9 @@
     const z = view.getZoom(), el = $('map');
     el.classList.toggle('show-labels', z >= 15.3);
     el.classList.toggle('zoom-far', z < 14.2);
+    if (!declutterQueued) { declutterQueued = true; requestAnimationFrame(() => { declutterQueued = false; declutterLabels(); }); }
   }
+  let declutterQueued = false;
 
   /** Libellés qui se chevauchent : priorité au commerce sélectionné, puis aux commerces ouverts. */
   function declutterLabels() {
@@ -2336,6 +2597,7 @@
     document.body.classList.toggle('is-desktop', desktop);
     (desktop ? $('sb-brand-slot') : $('topbar')).appendChild($('profile-btn'));
     (desktop ? $('sb-filters-slot') : $('filters')).appendChild($('filters-track'));
+    (desktop ? $('sb-stories-slot') : $('stories')).appendChild($('stories-track'));
     whenMapReady(() => view.setPadding(selectedId ? shopPadding() : basePadding()));
   }
   desktopMQ.addEventListener('change', applyLayout);
@@ -2352,7 +2614,7 @@
      ===================================================================== */
 
   const markers = new Map();          // id → { shop, marker, el, status }
-  const filters = { category: 'all', openOnly: false, query: '' };
+  const filters = { category: 'all', openOnly: false, promoOnly: false, query: '' };
   let selectedId = null;
 
   function createShopMarker(shop) {
@@ -2362,6 +2624,7 @@
     el.dataset.id = shop.id;
     el.innerHTML = '<span class="pin-badge" aria-hidden="true"></span><span class="pin-label"></span>';
     el.querySelector('.pin-badge').textContent = catOf(shop).emoji;
+    el.querySelector('.pin-badge').insertAdjacentHTML('beforeend', '<span class="pin-flag">%</span>');
     el.querySelector('.pin-label').textContent = shop.name;
     el.addEventListener('click', (ev) => { ev.stopPropagation(); openShop(shop.id); });
     el.addEventListener('mouseenter', () => setHover(shop.id, true));
@@ -2407,7 +2670,9 @@
       m.status = getStatus(m.shop, now);
       m.el.classList.toggle('is-open', m.status.open);
       m.el.classList.toggle('is-closed', !m.status.open);
-      m.el.setAttribute('aria-label', m.shop.name + ', ' + catOf(m.shop).label + ', ' + m.status.label);
+      const promos = activePromos(m.shop, now);
+      m.el.classList.toggle('has-promo', promos.length > 0);
+      m.el.setAttribute('aria-label', m.shop.name + ', ' + catOf(m.shop).label + ', ' + m.status.label + (promos.length ? ', promotion en cours' : ''));
     });
     applyFilters();
     if (selectedId) renderShop(markers.get(selectedId));
@@ -2416,6 +2681,7 @@
   const matchesFilters = (m) =>
     (filters.category === 'all' || m.shop.category === filters.category) &&
     (!filters.openOnly || m.status.open) &&
+    (!filters.promoOnly || activePromos(m.shop).length > 0) &&
     (!filters.query || normalize([m.shop.name, catOf(m.shop).label, m.shop.address, m.shop.description || '', ...(m.shop.menu || []).map((it) => it.name)].join(' ')).includes(filters.query));
 
   function applyFilters() {
@@ -2438,7 +2704,7 @@
     $('shop-count').textContent = all.length + ' adresses · ' + openCount + ' ouvertes';
     $('shop-empty').hidden = items.length > 0;
 
-    const signature = items.map(({ m, d }) => m.shop.id + m.status.label + (d === null ? '' : formatDistance(d))).join('|') + selectedId;
+    const signature = items.map(({ m, d }) => m.shop.id + m.status.label + (d === null ? '' : formatDistance(d)) + activePromos(m.shop).length).join('|') + selectedId;
     if (signature === listSignature) return;
     listSignature = signature;
 
@@ -2462,7 +2728,8 @@
       const st = btn.querySelector('.si-status');
       st.textContent = status.label;
       st.className = 'si-status ' + (status.open ? 'is-open' : 'is-closed');
-      btn.querySelector('.si-promo').textContent = shop.promo ? '🎁 ' + shop.promo : (shop.description || '').slice(0, 90);
+      const best = activePromos(shop)[0];
+      btn.querySelector('.si-promo').textContent = best ? promoLine(best) : (shop.description || '').slice(0, 90);
       if (shop.isPro && !shop.isTest) { const v = document.createElement('span'); v.className = 'verified'; v.textContent = '✓'; v.title = 'Établissement vérifié'; btn.querySelector('strong').appendChild(v); }
       btn.addEventListener('click', () => openShop(shop.id));
       btn.addEventListener('mouseenter', () => setHover(shop.id, true));
@@ -2478,6 +2745,9 @@
     if (chip.id === 'open-only') {
       filters.openOnly = !filters.openOnly;
       chip.setAttribute('aria-pressed', String(filters.openOnly));
+    } else if (chip.id === 'promo-only') {
+      filters.promoOnly = !filters.promoOnly;
+      chip.setAttribute('aria-pressed', String(filters.promoOnly));
     } else {
       filters.category = chip.dataset.cat;
       document.querySelectorAll('.chip[data-cat]').forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
@@ -2569,7 +2839,12 @@
   function renderShop(m) {
     const { shop } = m;
     const status = m.status || getStatus(shop);
-    $('shop-emoji').textContent = catOf(shop).emoji;
+    $('shop-emoji-in').textContent = catOf(shop).emoji;
+    const hasStory = liveStories(shop).length > 0;
+    $('shop-emoji').classList.toggle('has-story', hasStory);
+    $('shop-emoji').tabIndex = hasStory ? 0 : -1;
+    if (hasStory) { $('shop-emoji').removeAttribute('aria-hidden'); $('shop-emoji').setAttribute('aria-label', 'Voir la story de ' + shop.name); }
+    else { $('shop-emoji').setAttribute('aria-hidden', 'true'); $('shop-emoji').removeAttribute('aria-label'); }
     $('shop-name').textContent = shop.name;
     $('shop-cat').textContent = catOf(shop).label;
     // Restaurants inscrits : badge « vérifié », description, photos, téléphone ; l'offre est facultative
@@ -2579,7 +2854,7 @@
     $('shop-verified').title = shop.isTest ? 'Créée avec le SIRET de test : établissement fictif' : 'SIRET vérifié auprès du répertoire Sirene';
     $('shop-desc').hidden = !shop.description;
     $('shop-desc').textContent = shop.description || '';
-    $('shop-promo-box').hidden = !shop.promo;
+    renderShopPromos(shop);
     $('shop-phone-row').hidden = !shop.phone;
     if (shop.phone) { $('shop-phone').textContent = shop.phone; $('shop-phone').href = 'tel:' + compactPhone(shop.phone); }
     renderGallery(shop);
@@ -2588,7 +2863,6 @@
     renderFollow(shop);
     $('shop-status').textContent = status.label;
     $('shop-status').className = 'status ' + (status.open ? 'is-open' : 'is-closed');
-    $('shop-promo').textContent = shop.promo;
     // Les adresses géocodées contiennent déjà la ville : on ne l'ajoute qu'aux autres
     $('shop-address').textContent = normalize(shop.address).includes(normalize(CONFIG.city)) ? shop.address : shop.address + ', ' + CONFIG.city;
     $('shop-hours').textContent = formatHours(shop);
@@ -2781,7 +3055,7 @@
   const Stats = (() => {
     const KEY = 'roche-street-food:stats';
     const KEEP_DAYS = 90;
-    const EMPTY = () => ({ views: 0, visitors: [], walk: 0, car: 0, phone: 0, menu: 0, photos: 0 });
+    const EMPTY = () => ({ views: 0, visitors: [], walk: 0, car: 0, phone: 0, menu: 0, photos: 0, stories: 0 });
     const pad = (n) => String(n).padStart(2, '0');
     const dayKey = (d = new Date()) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
     /** Empreinte courte et non réversible du visiteur (FNV-1a) : on compte des personnes sans stocker leur e-mail. */
@@ -2808,7 +3082,7 @@
       const followers = followersOf(shopId);
       const series = [];
       const people = new Set();
-      const totals = { views: 0, walk: 0, car: 0, phone: 0, menu: 0, photos: 0 };
+      const totals = { views: 0, walk: 0, car: 0, phone: 0, menu: 0, photos: 0, stories: 0 };
       for (let i = n - 1; i >= 0; i--) {
         const date = new Date(); date.setHours(12, 0, 0, 0); date.setDate(date.getDate() - i);
         const key = dayKey(date);
@@ -2901,6 +3175,7 @@
     $('k-calls').textContent = st.phone.toLocaleString('fr-FR');
     $('k-menu').textContent = st.menu.toLocaleString('fr-FR');
     $('k-photos').textContent = st.photos.toLocaleString('fr-FR');
+    $('k-stories').textContent = st.stories.toLocaleString('fr-FR');
     $('pd-chart-sub').textContent = period;
     document.querySelectorAll('#pd-stats .seg button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.days) === statsDays)));
     requestAnimationFrame(() => renderViewsChart($('pd-chart'), $('pd-tip'), st.series));
@@ -2929,7 +3204,8 @@
       li.innerHTML = '<button type="button"><span class="f-emoji" aria-hidden="true"></span><span><strong></strong><small></small></span></button>';
       li.querySelector('.f-emoji').textContent = catOf(r).emoji;
       li.querySelector('strong').textContent = r.name;
-      li.querySelector('small').textContent = r.promo ? '🎁 ' + r.promo : catOf(r).label;
+      const best = activePromos(r)[0];
+      li.querySelector('small').textContent = best ? promoLine(best) : catOf(r).label;
       li.querySelector('button').addEventListener('click', () => { closePanel($('profile-sheet')); whenMapReady(() => openShop(id)); });
       list.appendChild(li);
     });
@@ -2938,6 +3214,453 @@
   $('shop-go').addEventListener('click', () => selectedId && Stats.track(selectedId, 'walk'));
   $('shop-go-car').addEventListener('click', () => selectedId && Stats.track(selectedId, 'car'));
   $('shop-phone').addEventListener('click', () => selectedId && Stats.track(selectedId, 'phone'));
+
+  /* ---------- Promotions ---------- */
+  /** Promotions en cours d'un commerce (l'ancienne « offre du moment » compte comme un bon plan), les plus urgentes d'abord. */
+  function activePromos(shop, now = Date.now()) {
+    const list = (shop.promos || []).filter((p) => PROMO_KINDS[p.kind] && (!p.endsAt || new Date(p.endsAt) > now));
+    if (shop.promo) list.push({ id: 'offre', kind: /[ée]tudiant/i.test(shop.promo) ? 'student' : 'other', title: shop.promo });
+    return list.sort((a, b) => PROMO_ORDER.indexOf(a.kind) - PROMO_ORDER.indexOf(b.kind));
+  }
+  const promoLine = (p) => PROMO_KINDS[p.kind].icon + ' ' + p.title;
+  /** « Jusqu'à ce soir », « Jusqu'à dimanche soir », « Jusqu'au 12 novembre » */
+  function promoUntil(p, now = new Date()) {
+    if (!p.endsAt) return '';
+    const end = new Date(p.endsAt);
+    const days = Math.round((endOfDay(end) - endOfDay(now)) / 864e5);
+    if (days <= 0) return 'jusqu\'à ce soir';
+    if (days === 1) return 'jusqu\'à demain soir';
+    if (days < 7) return 'jusqu\'à ' + end.toLocaleDateString('fr-FR', { weekday: 'long' }) + ' soir';
+    return 'jusqu\'au ' + end.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+  }
+  function renderShopPromos(shop) {
+    const box = $('shop-promos');
+    const promos = activePromos(shop);
+    box.hidden = !promos.length;
+    box.textContent = '';
+    promos.forEach((p) => {
+      const card = document.createElement('div');
+      card.className = 'promo is-' + p.kind;
+      card.innerHTML = '<span class="promo-ico" aria-hidden="true"></span><div><small></small><strong></strong><span class="promo-more"></span></div>';
+      card.querySelector('.promo-ico').textContent = PROMO_KINDS[p.kind].icon;
+      const until = promoUntil(p);
+      card.querySelector('small').textContent = PROMO_KINDS[p.kind].label + (until ? ' · ' + until : '');
+      card.querySelector('strong').textContent = p.title;
+      const more = card.querySelector('.promo-more');
+      if (p.details) more.textContent = p.details; else more.remove();
+      box.appendChild(card);
+    });
+  }
+
+  /** Met à jour la fiche d'un restaurant inscrit (promotions, stories) et rafraîchit la carte. */
+  function updateRestaurant(id, patch) {
+    const all = restaurants();
+    all[id] = { ...all[id], ...patch };
+    store.write({ restaurants: all });
+    if (all[id].published) whenMapReady(() => { upsertShopMarker(restaurantToShop(all[id])); renderStories(); });
+    return all[id];
+  }
+
+  /* ---------- Stories des restaurants (24 h, visibles par tous, sans abonnement) ---------- */
+  const SEEN_KEY = 'roche-street-food:stories-seen';
+  const STORY_VIEWS_KEY = 'roche-street-food:story-views';
+  const readJson = (k) => { try { return JSON.parse(localStorage.getItem(k) || '{}'); } catch (e) { return {}; } };
+  const writeJson = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* stockage plein ou bloqué */ } };
+  const liveStories = (shop, now = Date.now()) => (shop.stories || []).filter((st) => new Date(st.expiresAt) > now)
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  function timeAgo(iso) {
+    const min = Math.max(0, Math.round((Date.now() - new Date(iso)) / 60000));
+    if (min < 1) return 'à l\'instant';
+    if (min < 60) return 'il y a ' + min + ' min';
+    return 'il y a ' + Math.floor(min / 60) + ' h';
+  }
+  /** Restaurants qui ont des stories en ligne : non vues d'abord, puis restaurants suivis, puis les plus récentes. */
+  function storyGroups() {
+    const seen = readJson(SEEN_KEY);
+    const me = currentUser();
+    const follows = (me && me.follows) || {};
+    return [...markers.values()]
+      .map((m) => ({ shop: m.shop, stories: liveStories(m.shop) }))
+      .filter((g) => g.stories.length)
+      .map((g) => ({ ...g, unseen: g.stories.some((st) => !seen[st.id]), followed: !!follows[g.shop.id], latest: g.stories[g.stories.length - 1].createdAt }))
+      .sort((a, b) => (b.unseen - a.unseen) || (b.followed - a.followed) || b.latest.localeCompare(a.latest));
+  }
+  function renderStories() {
+    const groups = storyGroups();
+    const track = $('stories-track');
+    track.textContent = '';
+    groups.forEach((g) => {
+      const item = document.createElement('div');
+      item.setAttribute('role', 'listitem');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'story-chip' + (g.unseen ? '' : ' is-seen');
+      btn.dataset.id = g.shop.id;
+      btn.setAttribute('aria-label', 'Story de ' + g.shop.name + (g.unseen ? ' (nouvelle)' : ''));
+      btn.innerHTML = '<span class="story-ring"><span class="story-avatar" aria-hidden="true"></span></span><span class="story-name" aria-hidden="true"></span>';
+      btn.querySelector('.story-avatar').textContent = catOf(g.shop).emoji;
+      btn.querySelector('.story-name').textContent = g.shop.name;
+      btn.addEventListener('click', () => StoryViewer.open(g.shop.id));
+      item.appendChild(btn);
+      track.appendChild(item);
+    });
+    $('stories').hidden = !groups.length;
+    $('sb-stories-slot').hidden = !groups.length;
+  }
+  $('shop-emoji').addEventListener('click', () => { if (selectedId && $('shop-emoji').classList.contains('has-story')) StoryViewer.open(selectedId, { only: true }); });
+
+  /** Contenu d'une story (photo ou texte sur fond coloré) dans `box`. Renvoie l'URL temporaire à libérer. */
+  async function fillStory(box, story, { blur = true } = {}) {
+    box.textContent = '';
+    if (story.fileId) {
+      const blob = await fileStore.get(story.fileId).catch(() => null);
+      if (!blob) { box.style.background = STORY_BGS.night; return null; }
+      const url = URL.createObjectURL(blob);
+      if (blur) { const bg = document.createElement('img'); bg.className = 'sv-blur'; bg.src = url; bg.alt = ''; box.appendChild(bg); }
+      const img = document.createElement('img');
+      img.className = blur ? 'sv-img' : '';
+      if (blur) img.addEventListener('load', () => { if (img.naturalWidth / img.naturalHeight < 0.75) img.classList.add('is-cover'); });
+      img.src = url;
+      img.alt = story.text ? 'Photo : ' + story.text : 'Photo du restaurant';
+      box.appendChild(img);
+      box.style.background = '';
+      return url;
+    }
+    box.style.background = STORY_BGS[story.bg] || STORY_BGS.sunset;
+    const t = document.createElement('div');
+    t.className = 'sv-text';
+    t.textContent = story.text;
+    box.appendChild(t);
+    return null;
+  }
+
+  /** Visionneuse plein écran : progression, appui = suivante / précédente, maintien = pause, Échap ou glisser vers le bas = fermer. */
+  const StoryViewer = (() => {
+    const root = $('story-viewer');
+    let groups = [], gi = 0, si = 0, start = 0, elapsed = 0, raf = 0, paused = false, url = null, token = 0;
+    let returnFocus = null, press = null;
+    const current = () => groups[gi] && groups[gi].stories[si];
+    function open(shopId, { only = false } = {}) {
+      groups = storyGroups();
+      if (only) groups = groups.filter((g) => g.shop.id === shopId);
+      gi = Math.max(0, groups.findIndex((g) => g.shop.id === shopId));
+      if (!groups.length) return;
+      const seen = readJson(SEEN_KEY);
+      si = Math.max(0, groups[gi].stories.findIndex((st) => !seen[st.id]));
+      returnFocus = document.activeElement;
+      root.hidden = false;
+      show();
+      $('sv-close').focus();
+    }
+    function close() {
+      cancelAnimationFrame(raf);
+      token++;
+      root.hidden = true;
+      if (url) { URL.revokeObjectURL(url); url = null; }
+      renderStories();
+      if (selectedId) renderShop(markers.get(selectedId));
+      if (returnFocus && returnFocus.focus && document.contains(returnFocus)) returnFocus.focus();
+    }
+    async function show() {
+      const g = groups[gi], st = current();
+      const my = ++token;
+      cancelAnimationFrame(raf);
+      const bars = $('sv-bars');
+      bars.textContent = '';
+      g.stories.forEach((_, i) => { const b = document.createElement('span'); b.innerHTML = '<i></i>'; if (i < si) b.firstChild.style.width = '100%'; bars.appendChild(b); });
+      $('sv-avatar').textContent = catOf(g.shop).emoji;
+      $('sv-name').textContent = g.shop.name;
+      $('sv-time').textContent = timeAgo(st.createdAt);
+      $('sv-caption').textContent = st.fileId ? (st.text || '') : '';
+      $('sv-live').textContent = 'Story ' + (si + 1) + ' sur ' + g.stories.length + ' de ' + g.shop.name + (st.text ? ' : ' + st.text : '');
+      if (url) { URL.revokeObjectURL(url); url = null; }
+      const media = $('sv-media');
+      const u = await fillStory(media, st);
+      if (my !== token) { if (u) URL.revokeObjectURL(u); return; }
+      url = u;
+      // Vue comptée (une fois par story et par appareil pour « vue », à chaque affichage pour les statistiques)
+      const seen = readJson(SEEN_KEY);
+      if (!seen[st.id]) { seen[st.id] = Date.now(); Object.keys(seen).forEach((k) => { if (Date.now() - seen[k] > 2 * STORY_TTL) delete seen[k]; }); writeJson(SEEN_KEY, seen); }
+      if (restaurants()[g.shop.id] && !isOwnShop(g.shop.id)) {
+        const views = readJson(STORY_VIEWS_KEY);
+        views[st.id] = (views[st.id] || 0) + 1;
+        writeJson(STORY_VIEWS_KEY, views);
+        Stats.track(g.shop.id, 'stories');
+      }
+      elapsed = 0; start = performance.now();
+      setPaused(false);
+      raf = requestAnimationFrame(tick);
+    }
+    function tick(t) {
+      const bar = $('sv-bars').children[si];
+      const p = Math.min(1, (elapsed + (paused ? 0 : t - start)) / STORY_DURATION);
+      if (bar) bar.firstChild.style.width = (p * 100) + '%';
+      if (p >= 1) { next(); return; }
+      raf = requestAnimationFrame(tick);
+    }
+    function setPaused(on) {
+      if (on === paused) return;
+      if (on) elapsed += performance.now() - start; else start = performance.now();
+      paused = on;
+      $('sv-pause').textContent = on ? '▶' : '❚❚';
+      $('sv-pause').setAttribute('aria-label', on ? 'Reprendre' : 'Mettre en pause');
+    }
+    function next() {
+      if (si < groups[gi].stories.length - 1) si++;
+      else if (gi < groups.length - 1) { gi++; si = 0; }
+      else { close(); return; }
+      show();
+    }
+    function prev() {
+      if (si > 0) si--;
+      else if (gi > 0) { gi--; si = groups[gi].stories.length - 1; }
+      show();
+    }
+    $('sv-close').addEventListener('click', close);
+    $('sv-pause').addEventListener('click', () => setPaused(!paused));
+    $('sv-cta').addEventListener('click', () => { const id = groups[gi].shop.id; close(); whenMapReady(() => openShop(id)); });
+    // Appui court : story suivante / précédente ; appui long : pause ; glisser vers le bas : fermer
+    ['sv-prev', 'sv-next'].forEach((id) => {
+      const el = $(id);
+      el.addEventListener('pointerdown', (ev) => { press = { t: Date.now(), y: ev.clientY }; setTimeout(() => { if (press && Date.now() - press.t >= 240) setPaused(true); }, 250); });
+      el.addEventListener('pointerup', (ev) => {
+        if (!press) return;
+        const long = Date.now() - press.t >= 240, dy = ev.clientY - press.y;
+        press = null;
+        if (dy > 80) { close(); return; }
+        if (long) { setPaused(false); return; }
+        if (id === 'sv-next') next(); else prev();
+      });
+      el.addEventListener('pointercancel', () => { press = null; setPaused(false); });
+      el.addEventListener('click', (ev) => { if (ev.detail === 0) { if (id === 'sv-next') next(); else prev(); } });   // clavier (Entrée / Espace)
+    });
+    document.addEventListener('keydown', (ev) => {
+      if (root.hidden) return;
+      if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); close(); }
+      else if (ev.key === 'ArrowRight') { ev.preventDefault(); next(); }
+      else if (ev.key === 'ArrowLeft') { ev.preventDefault(); prev(); }
+      else if (ev.key === 'Tab') {               // le focus reste dans la visionneuse
+        const items = ['sv-close', 'sv-pause', 'sv-cta'].map($);
+        const at = items.indexOf(document.activeElement);
+        ev.preventDefault();
+        items[(at + (ev.shiftKey ? items.length - 1 : 1)) % items.length].focus();
+      }
+    }, true);
+    document.addEventListener('visibilitychange', () => { if (!root.hidden && document.hidden) setPaused(true); });
+    return { open, close, isOpen: () => !root.hidden };
+  })();
+
+  /* ---------- Espace restaurateur : publier une story ---------- */
+  const StoryComposer = (() => {
+    const root = $('story-composer');
+    let mode = 'photo', bg = 'sunset', blob = null, previewUrl = null, returnFocus = null;
+    Object.entries(STORY_BGS).forEach(([key, css]) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.dataset.bg = key; b.setAttribute('role', 'radio'); b.style.background = css;
+      b.setAttribute('aria-label', { sunset: 'Orange', ocean: 'Bleu', berry: 'Violet', forest: 'Vert', night: 'Noir' }[key]);
+      b.addEventListener('click', () => { bg = key; sync(); });
+      $('sc-bgs').appendChild(b);
+    });
+    function sync() {
+      root.querySelectorAll('.seg button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
+      $('sc-file-box').hidden = mode !== 'photo';
+      $('sc-bgs').hidden = mode !== 'text';
+      $('sc-bgs').querySelectorAll('button').forEach((b) => { b.setAttribute('aria-checked', String(b.dataset.bg === bg)); b.tabIndex = b.dataset.bg === bg ? 0 : -1; });
+      $('sc-text-label').firstChild.textContent = mode === 'text' ? 'Votre message ' : 'Légende (facultatif) ';
+      $('sc-text-count').textContent = $('sc-text').value.length + ' / 150';
+      $('sc-file-label').textContent = blob ? 'Changer de photo' : 'Choisir une photo';
+      const box = $('sc-preview');
+      box.textContent = '';
+      if (mode === 'photo') {
+        box.style.background = '#111';
+        if (previewUrl) { const img = document.createElement('img'); img.src = previewUrl; img.alt = ''; box.appendChild(img); }
+        else { const t = document.createElement('div'); t.className = 'sv-text'; t.style.fontSize = '13px'; t.style.opacity = '.7'; t.textContent = 'Aperçu de votre photo'; box.appendChild(t); }
+        const cap = document.createElement('p'); cap.className = 'sc-cap'; cap.textContent = $('sc-text').value.trim(); box.appendChild(cap);
+      } else {
+        box.style.background = STORY_BGS[bg];
+        const t = document.createElement('div'); t.className = 'sv-text'; t.textContent = $('sc-text').value.trim() || 'Votre message'; box.appendChild(t);
+      }
+    }
+    function open() {
+      const r = myRestaurant();
+      if (!r) return;
+      if (liveStories(r).length >= MAX_STORIES) { toast('Vous avez déjà ' + MAX_STORIES + ' stories en ligne : supprimez-en une pour en publier une nouvelle.'); return; }
+      returnFocus = document.activeElement;
+      mode = 'photo'; blob = null; bg = 'sunset';
+      if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
+      $('sc-text').value = ''; $('sc-file').value = '';
+      setFieldError('sc-text', ''); $('err-sc').textContent = '';
+      root.hidden = false;
+      sync();
+      $('sc-close').focus();
+    }
+    function close() {
+      root.hidden = true;
+      if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
+      blob = null;
+      if (returnFocus && returnFocus.focus) returnFocus.focus();
+    }
+    /** Photo réduite (1080 × 1920 au plus), en JPEG. */
+    async function shrink(file) {
+      const bmp = await decodeImage(file);
+      const k = Math.min(1, 1080 / bmp.width, 1920 / bmp.height);
+      const c = document.createElement('canvas');
+      c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(bmp, 0, 0, c.width, c.height);
+      if (bmp.close) bmp.close();
+      return new Promise((resolve, reject) => c.toBlob((b) => (b ? resolve(b) : reject(new Error('format'))), 'image/jpeg', 0.85));
+    }
+    root.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => { mode = b.dataset.mode; $('err-sc').textContent = ''; sync(); }));
+    $('sc-text').addEventListener('input', () => { setFieldError('sc-text', ''); $('err-sc').textContent = ''; sync(); });
+    $('sc-file').addEventListener('change', async (ev) => {
+      const file = ev.target.files[0];
+      if (!file) return;
+      $('err-sc').textContent = '';
+      if (!/^image\//.test(file.type)) { $('err-sc').textContent = 'Choisissez une image (JPG, PNG ou WebP).'; return; }
+      if (file.size > 20 * 1024 * 1024) { $('err-sc').textContent = 'Cette photo dépasse 20 Mo.'; return; }
+      try { blob = await shrink(file); } catch (e) { blob = null; $('err-sc').textContent = 'Cette image n\'a pas pu être lue. Essayez une autre photo.'; sync(); return; }
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = URL.createObjectURL(blob);
+      sync();
+    });
+    $('sc-close').addEventListener('click', close);
+    root.addEventListener('click', (ev) => { if (ev.target === root) close(); });
+    document.addEventListener('keydown', (ev) => { if (!root.hidden && ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); close(); } }, true);
+    $('sc-form').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const r = myRestaurant();
+      if (!r) return;
+      const text = $('sc-text').value.trim().replace(/\s+/g, ' ');
+      if (mode === 'photo' && !blob) { $('err-sc').textContent = 'Ajoutez une photo, ou choisissez « Texte ».'; return; }
+      if (mode === 'text' && text.length < 3) { setFieldError('sc-text', 'Écrivez votre message (3 caractères minimum).'); $('sc-text').focus(); return; }
+      const btn = $('sc-publish');
+      btn.disabled = true;
+      const now = Date.now();
+      const story = { id: 'story-' + uid(), text, createdAt: new Date(now).toISOString(), expiresAt: new Date(now + STORY_TTL).toISOString() };
+      try {
+        if (mode === 'photo') { story.fileId = 'story-' + uid(); await fileStore.put(story.fileId, blob); }
+        else story.bg = bg;
+      } catch (e) {
+        btn.disabled = false;
+        $('err-sc').textContent = 'Impossible d\'enregistrer la photo sur cet appareil (espace de stockage insuffisant ?).';
+        return;
+      }
+      btn.disabled = false;
+      const fresh = restaurants()[r.id];
+      updateRestaurant(r.id, { stories: [...liveStories(fresh), story] });
+      close();
+      renderStoryAdmin(currentUser());
+      toast('Story publiée : elle est visible par tous pendant 24 h.');
+    });
+    return { open, close };
+  })();
+  $('pd-story-new').addEventListener('click', () => StoryComposer.open());
+
+  let storyAdminUrls = [];
+  async function renderStoryAdmin(account) {
+    const r = myRestaurant(account);
+    $('pd-stories').hidden = !(r && r.published);
+    if (!r || !r.published) return;
+    const stories = liveStories(r);
+    const views = readJson(STORY_VIEWS_KEY);
+    storyAdminUrls.forEach((u) => URL.revokeObjectURL(u));
+    storyAdminUrls = [];
+    const list = $('pd-story-list');
+    list.textContent = '';
+    $('pd-story-new').disabled = stories.length >= MAX_STORIES;
+    if (!stories.length) { const li = document.createElement('li'); li.className = 'sa-empty'; li.textContent = 'Aucune story en ligne. Publiez une photo ou un message : nouveauté, plat du jour, ouverture exceptionnelle…'; list.appendChild(li); return; }
+    for (const st of stories.slice().reverse()) {
+      const li = document.createElement('li');
+      li.innerHTML = '<span class="sa-thumb"></span><small></small><button class="sa-del" type="button">&times;</button>';
+      const u = await fillStory(li.querySelector('.sa-thumb'), st, { blur: false });
+      if (u) storyAdminUrls.push(u);
+      const left = Math.max(1, Math.round((new Date(st.expiresAt) - Date.now()) / 3600e3));
+      const n = views[st.id] || 0;
+      li.querySelector('small').textContent = 'encore ' + left + ' h\n' + n + (n > 1 ? ' vues' : ' vue');
+      li.querySelector('.sa-del').setAttribute('aria-label', 'Supprimer la story publiée ' + timeAgo(st.createdAt));
+      li.querySelector('.sa-del').addEventListener('click', async () => {
+        if (!window.confirm('Supprimer cette story ?')) return;
+        const fresh = restaurants()[r.id];
+        updateRestaurant(r.id, { stories: (fresh.stories || []).filter((x) => x.id !== st.id) });
+        if (st.fileId) await fileStore.remove(st.fileId).catch(() => {});
+        renderStoryAdmin(currentUser());
+      });
+      list.appendChild(li);
+    }
+  }
+
+  /* ---------- Espace restaurateur : promotions ---------- */
+  let promoKind = 'day';
+  Object.entries(PROMO_KINDS).forEach(([key, k]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.dataset.kind = key; b.setAttribute('role', 'radio');
+    b.textContent = k.icon + ' ' + k.short;
+    b.setAttribute('aria-label', k.label);
+    b.addEventListener('click', () => setPromoKind(key));
+    $('pp-kind').appendChild(b);
+  });
+  function setPromoKind(kind) {
+    promoKind = kind;
+    $('pp-kind').querySelectorAll('button').forEach((b) => { b.setAttribute('aria-checked', String(b.dataset.kind === kind)); b.tabIndex = b.dataset.kind === kind ? 0 : -1; });
+    const auto = promoAutoEnd(kind);
+    $('field-pp-end').hidden = !!auto;
+    $('pp-end-auto').textContent = kind === 'day' ? 'Affichée aujourd\'hui, retirée automatiquement ce soir à minuit.'
+      : kind === 'week' ? 'Affichée jusqu\'à dimanche soir, puis retirée automatiquement.'
+      : 'Sans date de fin, l\'offre reste affichée jusqu\'à ce que vous la retiriez.';
+    $('pp-title').placeholder = { day: 'Ex. : menu kebab + boisson à 8 €', week: 'Ex. : 2ᵉ burger à -50 %', student: 'Ex. : -15 % sur tout le menu', other: 'Ex. : café offert avant 9 h' }[kind];
+  }
+  setPromoKind('day');
+  $('pp-title').addEventListener('input', () => { setFieldError('pp-title', ''); $('pp-title-count').textContent = $('pp-title').value.length + ' / 60'; });
+  $('pp-end').addEventListener('input', () => setFieldError('pp-end', ''));
+  function renderPromoAdmin(account) {
+    const r = myRestaurant(account);
+    $('pd-promos').hidden = !(r && r.published);
+    if (!r || !r.published) return;
+    const promos = activePromos({ promos: r.promos });
+    const list = $('pd-promo-list');
+    list.textContent = '';
+    if (!promos.length) { const li = document.createElement('li'); li.className = 'pa-empty'; li.textContent = 'Aucune promotion en cours.'; list.appendChild(li); }
+    promos.forEach((p) => {
+      const li = document.createElement('li');
+      li.innerHTML = '<span class="pa-ico" aria-hidden="true"></span><div><strong></strong><small></small></div><button class="icon-btn" type="button">&times;</button>';
+      li.querySelector('.pa-ico').textContent = PROMO_KINDS[p.kind].icon;
+      li.querySelector('strong').textContent = p.title;
+      const until = promoUntil(p);
+      li.querySelector('small').textContent = PROMO_KINDS[p.kind].label + (until ? ' · ' + until : ' · sans date de fin') + (p.details ? ' · ' + p.details : '');
+      li.querySelector('button').setAttribute('aria-label', 'Retirer la promotion « ' + p.title + ' »');
+      li.querySelector('button').addEventListener('click', () => {
+        const fresh = restaurants()[r.id];
+        updateRestaurant(r.id, { promos: activePromos({ promos: fresh.promos }).filter((x) => x.id !== p.id) });
+        renderPromoAdmin(currentUser());
+        toast('Promotion retirée.');
+      });
+      list.appendChild(li);
+    });
+    const full = promos.length >= MAX_PROMOS;
+    $('pp-submit').disabled = full;
+    $('pp-submit').textContent = full ? MAX_PROMOS + ' promotions au maximum' : 'Publier la promotion';
+  }
+  $('pd-promo-form').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const r = myRestaurant();
+    if (!r) return;
+    const title = $('pp-title').value.trim().replace(/\s+/g, ' ');
+    const details = $('pp-details').value.trim().replace(/\s+/g, ' ');
+    if (title.length < 3) { setFieldError('pp-title', 'Décrivez votre offre (3 caractères minimum).'); $('pp-title').focus(); return; }
+    let endsAt = promoAutoEnd(promoKind);
+    if (!endsAt && $('pp-end').value) {
+      endsAt = endOfDay(new Date($('pp-end').value + 'T12:00:00'));
+      if (endsAt < Date.now()) { setFieldError('pp-end', 'Choisissez une date à venir.'); $('pp-end').focus(); return; }
+    }
+    const promo = { id: 'promo-' + uid(), kind: promoKind, title, ...(details ? { details } : {}), createdAt: new Date().toISOString(), ...(endsAt ? { endsAt: endsAt.toISOString() } : {}) };
+    const fresh = restaurants()[r.id];
+    updateRestaurant(r.id, { promos: [...activePromos({ promos: fresh.promos }), promo] });
+    $('pp-title').value = ''; $('pp-details').value = ''; $('pp-end').value = ''; $('pp-title-count').textContent = '0 / 60';
+    renderPromoAdmin(currentUser());
+    toast('Promotion publiée : elle apparaît sur votre fiche et avec le filtre « Promos ».');
+  });
 
   /** Marges de la carte quand une fiche est ouverte : le commerce reste visible à côté ou au-dessus. */
   function shopPadding() {
@@ -3305,6 +4028,7 @@
     updateProgress(step, mode);
     ob.setAttribute('aria-labelledby', STEP_TITLES[step]);
     ob.scrollTop = 0;
+    if (step === 'signup' || step === 'login') GoogleAuth.mount();
     if (step === 'pro-verify') enterVerifyStep();
     if (step === 'pro-payment') renderPlan();
     if (step === 'pro-listing') enterListingStep(mode);
@@ -3594,6 +4318,10 @@
       $('to-signup').addEventListener('click', () => { $('su-email').value = email; showAuthStep('signup'); });
       return;
     }
+    if (!account.hash) {
+      $('err-login').textContent = 'Ce compte a été créé avec Google : utilisez le bouton « Se connecter avec Google ».';
+      return;
+    }
     const btn = ev.submitter || $('form-login').querySelector('[type=submit]');
     btn.disabled = true;
     const { hash } = await Loader.run(hashPassword(password, account.salt), 'Connexion…');
@@ -3622,6 +4350,83 @@
     openSession();
   });
 
+  /* ---------- Connexion avec Google (clients) : Google Identity Services ---------- */
+  const GoogleAuth = (() => {
+    let loading = null, ready = false;
+    const enabled = () => !!CONFIG.googleClientId;
+    const load = () => loading || (loading = new Promise((resolve, reject) => {
+      const sc = document.createElement('script');
+      sc.src = 'https://accounts.google.com/gsi/client';
+      sc.async = true;
+      sc.onload = () => (window.google && google.accounts && google.accounts.id ? resolve() : reject(new Error('gsi')));
+      sc.onerror = () => { loading = null; reject(new Error('gsi')); };
+      document.head.appendChild(sc);
+    }));
+    /** Contenu du jeton d'identité (JWT) renvoyé par Google. */
+    function decode(credential) {
+      const part = credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const bytes = Uint8Array.from(atob(part + '='.repeat((4 - (part.length % 4)) % 4)), (c) => c.charCodeAt(0));
+      return JSON.parse(new TextDecoder().decode(bytes));
+    }
+    async function mount() {
+      if (!enabled()) return;
+      document.querySelectorAll('[data-google]').forEach((el) => { el.hidden = false; });
+      try { await load(); } catch (e) {
+        ['su-google', 'li-google'].forEach((id) => { $(id).innerHTML = '<span class="g-fallback">Connexion Google indisponible pour le moment.</span>'; });
+        return;
+      }
+      if (!ready) {
+        google.accounts.id.initialize({ client_id: CONFIG.googleClientId, callback: onGoogleCredential, ux_mode: 'popup', auto_select: false, cancel_on_tap_outside: true, use_fedcm_for_button: true });
+        ready = true;
+      }
+      ['su-google', 'li-google'].forEach((id) => {
+        const el = $(id);
+        el.textContent = '';
+        google.accounts.id.renderButton(el, {
+          type: 'standard', size: 'large', shape: 'pill', logo_alignment: 'center', locale: 'fr',
+          theme: currentTheme() === 'dark' ? 'filled_black' : 'outline',
+          text: id === 'su-google' ? 'signup_with' : 'signin_with',
+          width: Math.min(400, Math.max(240, $('onboarding').querySelector('.ob-panel').clientWidth - 48)),
+        });
+      });
+    }
+    return { enabled, mount, decode };
+  })();
+
+  /**
+   * Réponse de Google : création du compte client ou connexion.
+   * Version sans serveur : le jeton est contrôlé (destinataire, émetteur, expiration, e-mail vérifié) mais sa signature
+   * ne peut être vérifiée que côté serveur — ce que fera Supabase Auth (signInWithIdToken) dans la version en ligne.
+   */
+  function onGoogleCredential(response) {
+    const errBox = currentStep === 'login' ? $('err-login') : $('err-signup');
+    errBox.textContent = '';
+    let p;
+    try { p = GoogleAuth.decode(response.credential); } catch (e) { p = null; }
+    const valid = p && p.aud === CONFIG.googleClientId && ['accounts.google.com', 'https://accounts.google.com'].includes(p.iss)
+      && p.exp * 1000 > Date.now() && p.sub && p.email && p.email_verified !== false;
+    if (!valid) { errBox.textContent = 'La connexion avec Google a échoué. Réessayez.'; return; }
+    const email = p.email.toLowerCase();
+    const now = new Date().toISOString();
+    let account = accounts()[email];
+    if (account && (account.role || 'client') === 'pro') {
+      errBox.textContent = 'Cette adresse est celle d\'un compte restaurateur : choisissez « Restaurateur » et connectez-vous avec votre mot de passe.';
+      return;
+    }
+    if (account && account.googleSub && account.googleSub !== p.sub) { errBox.textContent = 'Ce compte est associé à un autre compte Google.'; return; }
+    const fresh = !account;
+    if (fresh) {
+      account = { role: 'client', name: String(p.given_name || p.name || email.split('@')[0]).trim().slice(0, 40), email, provider: 'google', googleSub: p.sub, emailVerifiedAt: now, createdAt: now };
+      store.write({ accounts: { ...accounts(), [email]: account } });
+    } else {
+      account = updateAccount(email, { googleSub: p.sub, emailVerifiedAt: account.emailVerifiedAt || now, lastLoginAt: now });
+    }
+    setAuthRole('client');
+    startSession(account, $(currentStep === 'login' ? 'li-remember' : 'su-remember').checked);
+    if (fresh) showAuthStep('location');
+    else routeAfterLogin(account);
+  }
+
   /** Après connexion : inscription restaurateur à reprendre, sinon la carte. */
   function routeAfterLogin(account, { boot = false } = {}) {
     const step = proStepFor(account);
@@ -3638,7 +4443,7 @@
     const owned = Object.values(restos).filter((r) => r.ownerEmail === email);
     owned.forEach((r) => { delete restos[r.id]; removeShopMarker(r.id); });
     store.write({ accounts: all, restaurants: restos, rememberedEmail: null });
-    const fileIds = owned.flatMap((r) => r.photoIds || []).concat(Object.values((account && account.pro && account.pro.docs) || {}).map((d) => d.fileId));
+    const fileIds = owned.flatMap((r) => (r.photoIds || []).concat((r.stories || []).map((st) => st.fileId))).concat(Object.values((account && account.pro && account.pro.docs) || {}).map((d) => d.fileId));
     try { await fileStore.remove(fileIds); } catch (e) { /* stockage indisponible */ }
   }
 
@@ -3646,6 +4451,7 @@
     const email = $('li-email').value.trim().toLowerCase();
     const account = accounts()[email];
     if (!account) { $('err-login').textContent = 'Saisissez l\'e-mail du compte concerné.'; $('li-email').focus(); return; }
+    if (!account.hash) { $('err-login').textContent = 'Ce compte utilise Google : aucun mot de passe à retrouver, touchez « Se connecter avec Google ».'; return; }
     // Sans serveur, aucun e-mail de réinitialisation ne peut être envoyé : on propose de recréer le compte
     if (!window.confirm('Les comptes sont enregistrés uniquement sur cet appareil : le mot de passe ne peut pas être renvoyé.\n\nSupprimer le compte ' + email + ' pour en créer un nouveau ?' + (account.role === 'pro' ? '\n\nLa fiche de votre restaurant sera également supprimée.' : ''))) return;
     await deleteAccountData(email);
@@ -4517,6 +5323,8 @@
       ? 'Actif depuis le ' + date(pro.payment.paidAt) + (pro.payment.mode === 'demo' ? ' (démonstration)' : '')
       : 'Non souscrit';
     $('pd-show').hidden = !r;
+    renderStoryAdmin(account);
+    renderPromoAdmin(account);
     renderStats(account);
   }
 
@@ -4526,6 +5334,7 @@
     $('profile-avatar').textContent = initial(account.name);
     $('profile-name').textContent = account.role === 'pro' && account.lastName ? account.name + ' ' + account.lastName : account.name;
     $('profile-email').textContent = account.email + (account.emailVerifiedAt ? ' ✓' : '');
+    if (account.googleSub) { const tag = document.createElement('span'); tag.className = 'role-tag'; tag.textContent = 'Google'; $('profile-email').append(' ', tag); }
     if (account.role === 'pro') { const tag = document.createElement('span'); tag.className = 'role-tag'; tag.textContent = 'Restaurateur'; $('profile-email').append(' ', tag); }
     $('profile-since').textContent = new Date(account.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
     updateProfileGeo();
@@ -4566,8 +5375,24 @@
      11. LANCEMENT DE LA CARTE APRÈS CONNEXION
      ===================================================================== */
 
+  /** Stories expirées : retirées des fiches et leurs photos supprimées de l'appareil. */
+  function pruneStories() {
+    const all = restaurants();
+    const expired = [];
+    let changed = false;
+    Object.values(all).forEach((r) => {
+      const live = liveStories(r);
+      if ((r.stories || []).length !== live.length) {
+        expired.push(...r.stories.filter((st) => !live.includes(st)).map((st) => st.fileId));
+        r.stories = live; changed = true;
+      }
+    });
+    if (changed) { store.write({ restaurants: all }); fileStore.remove(expired).catch(() => {}); }
+  }
+
   function startApp({ focus = null } = {}) {
     document.body.classList.add('ui-ready');
+    whenMapReady(renderStories);
     // Carte pas encore prête (connexion lente) : écran de chargement le temps qu'elle arrive
     if (!view) Loader.run(new Promise((resolve) => whenMapReady(resolve)), 'Chargement de la carte…', 'Les commerces de La Roche-sur-Yon arrivent');
     whenMapReady(() => {
@@ -4633,7 +5458,8 @@
   // Fin du démarrage : avant initMap, pour que l'écran de chargement ne puisse jamais rester bloqué
   Loader.endBoot();
   initMap();
-  setInterval(refreshStatuses, 60 * 1000);
+  pruneStories();
+  setInterval(() => { refreshStatuses(); if (!StoryViewer.isOpen()) renderStories(); }, 60 * 1000);
 
   /* =====================================================================
      13. PWA : manifeste généré à la volée (fichier unique)

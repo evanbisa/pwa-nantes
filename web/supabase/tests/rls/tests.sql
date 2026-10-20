@@ -143,6 +143,61 @@ select t.ok(merchant_follower_count('aaaaaaaa-0000-0000-0000-000000000001') = 0,
 insert into follows (merchant_id) values ('aaaaaaaa-0000-0000-0000-000000000001');
 reset role;
 
+-- ===== Stories et promotions =====
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated;
+select t.ok(t.affected($$insert into promotions (merchant_id, kind, title, details) values ('aaaaaaaa-0000-0000-0000-000000000001', 'student', 'Menu étudiant à 8,90 €', 'Sur présentation de la carte')$$) = 1, 'restaurateur : publie une offre étudiante');
+select t.ok(t.affected($$insert into promotions (merchant_id, kind, title, ends_at) values ('aaaaaaaa-0000-0000-0000-000000000001', 'day', '2e burger à -50 %', now() + interval '30 days')$$) = 1, 'restaurateur : publie une promo du jour');
+select t.ok((select ends_at <= now() + interval '24 hours' and ends_at > now() from promotions where kind = 'day'), 'promo du jour : fin forcée à ce soir minuit (date choisie ignorée)');
+insert into promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-0000-000000000001', 'week', 'Formule semaine');
+select t.ok((select extract(isodow from (ends_at - interval '1 second') at time zone 'Europe/Paris') = 7 from promotions where kind = 'week'), 'promo de la semaine : jusqu''à dimanche soir');
+select t.fails($$insert into promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-0000-000000000002', 'other', 'Pirate')$$, 'restaurateur : promotion sur la fiche d''un autre refusée');
+select t.fails($$insert into promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'x')$$, 'promotion : titre trop court refusé');
+select t.fails($$insert into promotions (merchant_id, kind, title, created_at) values ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Antidatée', now() - interval '1 year')$$, 'promotion : date de création non modifiable');
+insert into promotions (merchant_id, kind, title) select 'aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Bon plan ' || g from generate_series(1, 3) g;
+select t.fails($$insert into promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Septième')$$, '7e promotion en cours refusée (6 au maximum)');
+delete from promotions where title like 'Bon plan %';
+select t.ok(t.affected($$insert into stories (merchant_id, background, caption) values ('aaaaaaaa-0000-0000-0000-000000000001', 'ocean', 'Nouveau burger au chèvre ce soir !')$$) = 1, 'restaurateur : publie une story texte');
+select t.ok(t.affected($$insert into stories (merchant_id, image_path, caption) values ('aaaaaaaa-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000001/salle.jpg', 'Notre salle')$$) = 1, 'restaurateur : publie une story photo (dans le dossier de sa fiche)');
+select t.ok((select bool_and(expires_at = created_at + interval '24 hours') from stories), 'story : expire automatiquement au bout de 24 h');
+select t.fails($$insert into stories (merchant_id, background, caption, expires_at) values ('aaaaaaaa-0000-0000-0000-000000000001', 'ocean', 'Éternelle', now() + interval '1 year')$$, 'story : durée de vie non modifiable');
+select t.fails($$insert into stories (merchant_id, image_path) values ('aaaaaaaa-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000002/vol.jpg')$$, 'story : photo prise dans le dossier d''un autre refusée');
+select t.fails($$insert into stories (merchant_id, image_path) values ('aaaaaaaa-0000-0000-0000-000000000001', '../../etc/passwd')$$, 'story : chemin de fichier invalide refusé');
+select t.fails($$insert into stories (merchant_id, background) values ('aaaaaaaa-0000-0000-0000-000000000001', 'ocean')$$, 'story texte sans message refusée');
+select t.fails($$insert into stories (merchant_id, background, caption) values ('aaaaaaaa-0000-0000-0000-000000000002', 'ocean', 'Story pirate')$$, 'story sur la fiche d''un autre refusée');
+select t.fails($$update stories set expires_at = now() + interval '10 days'$$, 'story : prolongation interdite');
+select t.ok(t.affected($$insert into storage.objects (bucket_id, name) values ('stories', 'aaaaaaaa-0000-0000-0000-000000000001/salle.jpg')$$) = 1, 'stockage : dépôt dans le dossier de sa fiche');
+select t.fails($$insert into storage.objects (bucket_id, name) values ('stories', 'aaaaaaaa-0000-0000-0000-000000000002/vol.jpg')$$, 'stockage : dépôt dans le dossier d''un autre refusé');
+reset role;
+select t.ok((select count(*) = 1 from storage.buckets where id = 'stories' and public and file_size_limit = 5242880), 'stockage « stories » créé (public, 5 Mo, images)');
+-- Une story expirée (insérée par le serveur pour le test)
+set role service_role;
+insert into stories (merchant_id, background, caption, created_at, expires_at) values ('aaaaaaaa-0000-0000-0000-000000000001', 'night', 'Story d''hier', now() - interval '30 hours', now() - interval '6 hours');
+insert into promotions (merchant_id, kind, title, created_at, ends_at) values ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Offre terminée', now() - interval '10 days', now() - interval '1 day');
+reset role;
+select set_config('request.jwt.claims', '', false);
+set role anon;
+select t.ok((select count(*) = 2 from stories) and (select count(*) = 3 from promotions), 'visiteur sans compte : voit les 2 stories et 3 promotions en cours, sans abonnement');
+select t.ok(not exists (select 1 from stories where caption = 'Story d''hier') and not exists (select 1 from promotions where title = 'Offre terminée'), 'story expirée et promotion terminée : invisibles');
+select t.fails($$insert into stories (merchant_id, background, caption) values ('aaaaaaaa-0000-0000-0000-000000000001', 'ocean', 'Anonyme')$$, 'visiteur : ne peut pas publier de story');
+select t.fails($$delete from promotions$$, 'visiteur : ne peut pas supprimer de promotion');
+select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'story');
+reset role;
+select t.ok((select count(*) = 4 from promotions), 'aucune promotion supprimée (3 en cours + 1 terminée)');
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'story');
+select t.ok(t.affected($$delete from stories$$) = 0, 'étudiante : ne peut pas supprimer les stories d''un restaurant');
+select t.fails($$insert into promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Fausse promo')$$, 'étudiante : ne peut pas publier de promotion');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated;
+select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'story');   -- le propriétaire : non compté
+select t.ok((select story_views = 2 from merchant_stats order by day desc limit 1), 'statistiques : 2 affichages de stories (le restaurateur non compté)');
+select t.ok((select count(*) = 3 from stories), 'restaurateur : voit toutes ses stories, y compris l''expirée');
+select t.ok(t.affected($$delete from stories where caption = 'Story d''hier'$$) = 1 and t.affected($$delete from promotions where title = 'Formule semaine'$$) = 1, 'restaurateur : supprime une story et une promotion');
+reset role;
+
 -- ===== Masquage, modération, suppression =====
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
 set role authenticated;
@@ -162,7 +217,8 @@ reset role;
 delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
 select t.ok((select count(*) = 0 from profiles where id = '11111111-1111-1111-1111-111111111111') and (select count(*) = 0 from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001')
   and (select count(*) = 0 from merchant_private where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001')
-  and (select count(*) = 0 from follows) and (select count(*) = 0 from merchant_stats) and (select count(*) = 0 from merchant_visitors), 'suppression du compte : profil, fiche, SIRET, abonnés et statistiques supprimés');
+  and (select count(*) = 0 from follows) and (select count(*) = 0 from merchant_stats) and (select count(*) = 0 from merchant_visitors)
+  and (select count(*) = 0 from stories) and (select count(*) = 0 from promotions), 'suppression du compte : profil, fiche, SIRET, abonnés, statistiques, stories et promotions supprimés');
 select t.ok((select count(*) = 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'merchants'), 'temps réel activé sur merchants');
 select t.ok(not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.prosecdef and has_function_privilege('anon', p.oid, 'execute')), 'aucune fonction SECURITY DEFINER appelable par un visiteur via l''API');
 select t.ok((select bool_and(c.relrowsecurity) and count(*) = (select count(*) from pg_tables where schemaname = 'public')
