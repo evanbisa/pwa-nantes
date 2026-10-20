@@ -21,7 +21,7 @@ export interface Deps {
 /** Sites autorisés à appeler la fonction depuis un navigateur */
 const ALLOWED_ORIGINS = [
   /^https:\/\/([a-z0-9-]+\.)?roche-street-food\.pages\.dev$/,   // Cloudflare Pages (et ses aperçus)
-  /^https:\/\/(roche-street-food|pwa-nantes-web)\.vercel\.app$/,  // Vercel : adresses de production uniquement
+  /^https:\/\/(roche-street-food|pwa-nantes|pwa-nantes-web)\.vercel\.app$/,  // Vercel : adresses de production uniquement
   /^https:\/\/evanbisa\.github\.io$/,
   /^http:\/\/localhost:\d+$/,
 ];
