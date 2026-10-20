@@ -23,12 +23,11 @@
 - 16 scénarios de sécurité rejoués sur la vraie base (transaction annulée, aucune donnée laissée),
   99 scénarios sur une base locale (`npm run db:test`).
 
-### Stories et promotions (migration `20261021090000_stories_promotions.sql`, **à appliquer**)
+### Stories et promotions (migration `20261021090000_stories_promotions.sql`, appliquée — 0 alerte de sécurité)
 - Lecture publique (visiteurs compris) des seules stories non expirées et promotions en cours des fiches en ligne.
 - Le restaurateur ne publie / supprime que sur sa fiche ; la base impose 24 h maximum par story,
   la fin des promos du jour (minuit) et de la semaine (dimanche soir), 10 stories et 6 promotions au plus.
 - Photos : stockage `stories` (5 Mo, JPG/PNG/WebP), dépôt uniquement dans le dossier de sa propre fiche.
-- Le connecteur Supabase était déconnecté : migration testée en local (99/99), pas encore appliquée.
 
 ### Connexion avec Google (clients)
 - Prototype : bouton Google (Google Identity Services) affiché dès que `CONFIG.googleClientId` est renseigné.
@@ -51,11 +50,10 @@
 ### Hébergement
 - Publication automatique sur **Cloudflare Pages** prête (`cloudflare.yml`) → https://roche-street-food.pages.dev ;
   elle construit le site mais ne publie pas tant que l'accès Cloudflare n'est pas fourni (voir ci-dessous).
-- **Vercel** (au choix, à la place de Cloudflare) prêt aussi : `vercel.json` + `.env.production`
+- **Vercel** (hébergeur choisi) prêt : `vercel.json` à la racine (site complet + application sous `/app/`) + `web/.env.production`
   (valeurs publiques uniquement). L'offre gratuite Hobby est **non commerciale** : OK pendant la phase de test,
   à remplacer (Vercel Pro ou Cloudflare) quand les abonnements des restaurateurs deviendront payants.
-  La fonction `verify-siret` accepte l'adresse `https://roche-street-food.vercel.app` (dépôt à jour ;
-  à redéployer sur Supabase, voir ci-dessous).
+  La fonction `verify-siret` (déployée, version 2) accepte l'adresse `https://roche-street-food.vercel.app`.
 - En-têtes de sécurité (`public/_headers` pour Cloudflare, `vercel.json` pour Vercel) : HTTPS forcé, pas d'intégration dans une page tierce,
   localisation réservée au site.
 - En attendant, l'application est en ligne sur https://evanbisa.github.io/pwa-nantes/app/
@@ -64,9 +62,10 @@
 ## Ce qu'il te reste à faire (une seule fois, ≈ 15 min)
 
 ### 1. Hébergement : Cloudflare **ou** Vercel (un seul des deux suffit)
-**Vercel** (le plus simple, aucun jeton à copier) : https://vercel.com/signup › *Continue with GitHub* ›
-*Add New… › Project* › importer `evanbisa/pwa-nantes` › *Project Name* `roche-street-food` ›
-*Root Directory* : `web` › *Deploy*. Puis ajouter `https://roche-street-food.vercel.app/**` aux *Redirect URLs* de Supabase.
+**Vercel** (choisi ; aucun jeton à copier) : https://vercel.com/signup › *Continue with GitHub* ›
+*Add New… › Project* › importer `evanbisa/pwa-nantes` › *Project Name* `roche-street-food` › ne rien changer d'autre ›
+*Deploy*. Puis, dans Supabase, *Site URL* = `https://roche-street-food.vercel.app` et ajouter
+`https://roche-street-food.vercel.app/**` aux *Redirect URLs*.
 
 **Cloudflare** :
 1. Créer un compte gratuit sur https://dash.cloudflare.com.
@@ -82,8 +81,7 @@
 2. *API et services › Écran de consentement OAuth* : type **Externe**, nom de l'application, e-mail d'assistance,
    puis **Publier l'application** (sinon seuls les comptes « testeurs » peuvent se connecter).
 3. *API et services › Identifiants › Créer des identifiants › ID client OAuth* › type **Application Web** :
-   - *Origines JavaScript autorisées* : `https://evanbisa.github.io` (et plus tard `https://roche-street-food.pages.dev`
-     ou `https://roche-street-food.vercel.app`) ;
+   - *Origines JavaScript autorisées* : `https://roche-street-food.vercel.app` et `https://evanbisa.github.io` ;
    - *URI de redirection autorisés* : `https://fnypgfyxbyaqrnklhjxc.supabase.co/auth/v1/callback`.
 4. Envoyer à Claude l'**ID client** (`…apps.googleusercontent.com`) : il est public, Claude l'ajoute au site.
 5. Supabase › *Authentication › Sign In / Providers › Google* : activer, coller l'ID client **et le code secret

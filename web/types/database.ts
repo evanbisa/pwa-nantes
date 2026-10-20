@@ -101,6 +101,7 @@ export type Database = {
           merchant_id: string
           phone_clicks: number
           photo_views: number
+          story_views: number
           views: number
           walk_clicks: number
         }
@@ -111,6 +112,7 @@ export type Database = {
           merchant_id: string
           phone_clicks?: number
           photo_views?: number
+          story_views?: number
           views?: number
           walk_clicks?: number
         }
@@ -121,6 +123,7 @@ export type Database = {
           merchant_id?: string
           phone_clicks?: number
           photo_views?: number
+          story_views?: number
           views?: number
           walk_clicks?: number
         }
@@ -265,6 +268,82 @@ export type Database = {
         }
         Relationships: []
       }
+      promotions: {
+        Row: {
+          created_at: string
+          details: string | null
+          ends_at: string | null
+          id: string
+          kind: Database["public"]["Enums"]["promotion_kind"]
+          merchant_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          ends_at?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["promotion_kind"]
+          merchant_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          ends_at?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["promotion_kind"]
+          merchant_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stories: {
+        Row: {
+          background: string | null
+          caption: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          image_path: string | null
+          merchant_id: string
+        }
+        Insert: {
+          background?: string | null
+          caption?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          image_path?: string | null
+          merchant_id: string
+        }
+        Update: {
+          background?: string | null
+          caption?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          image_path?: string | null
+          merchant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stories_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -340,6 +419,7 @@ export type Database = {
         | "pizza"
         | "other"
       merchant_status: "draft" | "published" | "suspended"
+      promotion_kind: "day" | "week" | "student" | "other"
       user_role: "student" | "merchant"
     }
     CompositeTypes: {
@@ -477,6 +557,7 @@ export const Constants = {
         "other",
       ],
       merchant_status: ["draft", "published", "suspended"],
+      promotion_kind: ["day", "week", "student", "other"],
       user_role: ["student", "merchant"],
     },
   },
@@ -487,3 +568,5 @@ export type MerchantRecord = Tables<"merchants">
 export type ProfileRecord = Tables<"profiles">
 export type FollowRecord = Tables<"follows">
 export type MerchantStatsRecord = Tables<"merchant_stats">
+export type PromotionRecord = Tables<"promotions">
+export type StoryRecord = Tables<"stories">

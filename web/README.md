@@ -13,7 +13,7 @@ Zone couverte : La Roche-sur-Yon et sa couronne.
 | 1 | Script SQL sécurisé (`profiles`, `merchants`, RLS) + connexion du projet | ✅ appliqué sur le projet Supabase `fnypgfyxbyaqrnklhjxc` (0 alerte de sécurité) |
 | 2 | Supabase Auth : inscription / connexion (remplace le code local et EmailJS) | à faire |
 | 3 | Carte : vrais commerces en temps réel, tuiles OpenStreetMap | à faire |
-| 4 | Stories (24 h) et promotions des restaurateurs : tables `stories`, `promotions`, stockage `stories` | ✍️ migration prête et testée (99 scénarios), à appliquer sur Supabase |
+| 4 | Stories (24 h) et promotions des restaurateurs : tables `stories`, `promotions`, stockage `stories` | ✅ appliqué sur Supabase (99 scénarios de sécurité, 0 alerte) |
 | 5 | Connexion « Continuer avec Google » (clients) | ✅ sur le prototype (identifiant Google à fournir) ; Supabase : fournisseur Google à activer |
 
 ## Connecter le projet à Supabase (≈ 15 min)
@@ -76,14 +76,17 @@ construit le site et le publie sur **https://roche-street-food.pages.dev** à ch
 en test (paiement en mode démonstration). Dès que les restaurateurs paieront un abonnement, il faudra passer à
 l'offre Pro de Vercel (payante) ou utiliser Cloudflare Pages (gratuit, usage commercial autorisé, voir ci-dessus).
 
-Tout est prêt dans le dépôt (`web/vercel.json` : construction et en-têtes de sécurité ; `web/.env.production` :
-les deux valeurs publiques de Supabase). Il n'y a **aucune variable à saisir** dans Vercel. À faire une seule fois :
+Tout est prêt dans le dépôt : `vercel.json` (à la racine) et `scripts/build-vercel.sh` publient le **site complet**
+à la racine (`/`) et la nouvelle application Next.js sous `/app/`, avec les en-têtes de sécurité ;
+`web/.env.production` contient les deux valeurs publiques de Supabase. **Aucune variable ni aucun réglage à saisir.**
 1. https://vercel.com/signup › *Continue with GitHub* (offre **Hobby**).
 2. *Add New… › Project* › importer `evanbisa/pwa-nantes` (autoriser l'accès au dépôt si Vercel le demande).
 3. *Project Name* : `roche-street-food` → adresse `https://roche-street-food.vercel.app`.
-4. *Root Directory* : **Edit** › choisir `web`. *Framework Preset* : Next.js (détecté). Laisser le reste par défaut.
-5. *Deploy*. Ensuite, chaque `git push` sur la branche par défaut republie le site automatiquement.
-6. Supabase › *Authentication › URL Configuration* › *Redirect URLs* : ajouter `https://roche-street-food.vercel.app/**`.
+   Ne rien changer d'autre (*Root Directory* `./`, *Framework Preset* « Other » : tout est lu dans `vercel.json`).
+4. *Deploy*. Ensuite, chaque `git push` sur la branche par défaut republie le site automatiquement
+   (la branche `gh-pages` est ignorée).
+5. Supabase › *Authentication › URL Configuration* : *Site URL* `https://roche-street-food.vercel.app`,
+   *Redirect URLs* : ajouter `https://roche-street-food.vercel.app/**`.
 
 En attendant, la même application est aussi publiée sur https://evanbisa.github.io/pwa-nantes/app/
 (le prototype reste sur https://evanbisa.github.io/pwa-nantes/).
