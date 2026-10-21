@@ -59,46 +59,30 @@
 - En attendant, l'application est en ligne sur https://evanbisa.github.io/pwa-nantes/app/
   (le prototype reste sur https://evanbisa.github.io/pwa-nantes/).
 
-## Ce qu'il te reste à faire (une seule fois, ≈ 15 min)
+## Mise en ligne : où on en est
 
-### 1. Hébergement : Cloudflare **ou** Vercel (un seul des deux suffit)
-**Vercel** (choisi ; aucun jeton à copier) : https://vercel.com/signup › *Continue with GitHub* ›
-*Add New… › Project* › importer `evanbisa/pwa-nantes` › *Project Name* `pwa-nantes` › ne rien changer d'autre ›
-*Deploy*. Puis, dans Supabase, *Site URL* = `https://pwa-nantes.vercel.app` et ajouter
-`https://pwa-nantes.vercel.app/**` aux *Redirect URLs*.
+### ✅ Fait (21 octobre 2026)
+- **Vercel** : projet `pwa-nantes` → https://pwa-nantes.vercel.app (site complet ; application Next.js sous `/app/`).
+- **Google** (projet Google Cloud « FlashMiam », compte flashmiampro@gmail.com) : écran de consentement « FlashMiam »
+  publié, sans logo (évite la vérification de marque) ; client OAuth « FlashMiam - Site web », ID client
+  `87416467106-adp7ojfn62mmkr1pmaa0mpna86drug86.apps.googleusercontent.com` (public) ajouté au site.
+  Fournisseur Google activé dans Supabase (le code secret n'est enregistré que dans Supabase).
+- Pages `confidentialite.html` et `conditions.html` (contact : flashmiampro@gmail.com).
 
-**Cloudflare** :
-1. Créer un compte gratuit sur https://dash.cloudflare.com.
-2. Copier l'**Account ID** (*Workers & Pages*, colonne de droite).
-3. *My Profile › API Tokens › Create Token › Create Custom Token* : permission **Account › Cloudflare Pages › Edit**
-   → *Create* → copier le jeton (affiché une seule fois).
-4. GitHub › `evanbisa/pwa-nantes` › *Settings › Secrets and variables › Actions › New repository secret* :
-   `CLOUDFLARE_API_TOKEN` (le jeton) et `CLOUDFLARE_ACCOUNT_ID` (l'identifiant).
-5. Prévenir Claude : il relance la publication et vérifie le site.
+### ⏳ Reste à faire (pas bloquant pour la version de test)
+- Supabase › *Authentication › URL Configuration* (n'a pas fonctionné la première fois, à refaire ensemble) :
+  *Site URL* `https://pwa-nantes.vercel.app` ; *Redirect URLs* `https://pwa-nantes.vercel.app/**`,
+  `https://evanbisa.github.io/pwa-nantes/**`, `http://localhost:3000/**`.
+- Supabase › *Authentication › Sign In / Providers* : vérifier **Confirm email** (activé par défaut) et les règles
+  de mot de passe (8 caractères, minuscules, majuscules, chiffres, symboles).
+- *Emails › SMTP Settings* : Gmail (mot de passe d'application de flashmiampro@gmail.com) ou Brevo, avant l'ouverture
+  au public (sinon les e-mails de confirmation ne partent qu'aux membres de l'équipe Supabase).
+- Avant les premiers abonnements payants : statut (auto-entrepreneur ou société), page « Mentions légales »,
+  passage à Vercel Pro ou à Cloudflare Pages (offre Hobby de Vercel = usage non commercial).
 
-### 1 bis. Google (connexion des clients, gratuit)
-1. https://console.cloud.google.com › créer un projet « FlashMiam ».
-2. *API et services › Écran de consentement OAuth* : type **Externe**, nom de l'application, e-mail d'assistance,
-   puis **Publier l'application** (sinon seuls les comptes « testeurs » peuvent se connecter).
-3. *API et services › Identifiants › Créer des identifiants › ID client OAuth* › type **Application Web** :
-   - *Origines JavaScript autorisées* : `https://pwa-nantes.vercel.app` et `https://evanbisa.github.io` ;
-   - *URI de redirection autorisés* : `https://fnypgfyxbyaqrnklhjxc.supabase.co/auth/v1/callback`.
-4. Envoyer à Claude l'**ID client** (`…apps.googleusercontent.com`) : il est public, Claude l'ajoute au site.
-5. Supabase › *Authentication › Sign In / Providers › Google* : activer, coller l'ID client **et le code secret
-   du client** (le secret se colle uniquement dans Supabase, jamais dans la conversation ni dans le dépôt).
-
-### 2. Supabase › Authentication (le connecteur n'a pas accès à ces réglages)
-- *Sign In / Providers › Email* : activer **Confirm email** ; mot de passe de 8 caractères minimum avec
-  minuscules, majuscules, chiffres et symboles.
-- *URL Configuration* :
-  - *Site URL* : `https://roche-street-food.pages.dev`
-  - *Redirect URLs* : `https://roche-street-food.pages.dev/**`, `https://evanbisa.github.io/pwa-nantes/app/**`,
-    `http://localhost:3000/**`
-- *Emails › SMTP Settings* : brancher Gmail (mot de passe d'application) ou Brevo. Indispensable : sans cela,
-  les e-mails de confirmation ne partent qu'aux membres de l'équipe Supabase.
-
-Si `roche-street-food.pages.dev` est déjà pris chez Cloudflare, l'adresse aura un suffixe : reporter la bonne
-adresse dans Supabase.
+### Autre hébergeur possible : Cloudflare Pages (gratuit, usage commercial autorisé)
+Workflow `cloudflare.yml` prêt : créer un compte, un jeton « Cloudflare Pages : Edit », puis ajouter les secrets
+GitHub `CLOUDFLARE_API_TOKEN` et `CLOUDFLARE_ACCOUNT_ID`.
 
 ## Ensuite (prévu)
 - Inscription et connexion avec Supabase Auth dans l'application Next.js.
