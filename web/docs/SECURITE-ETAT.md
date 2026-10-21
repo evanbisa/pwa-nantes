@@ -77,7 +77,7 @@
 5. Prévenir Claude : il relance la publication et vérifie le site.
 
 ### 1 bis. Google (connexion des clients, gratuit)
-1. https://console.cloud.google.com › créer un projet « Roche Street Food ».
+1. https://console.cloud.google.com › créer un projet « FlashMiam ».
 2. *API et services › Écran de consentement OAuth* : type **Externe**, nom de l'application, e-mail d'assistance,
    puis **Publier l'application** (sinon seuls les comptes « testeurs » peuvent se connecter).
 3. *API et services › Identifiants › Créer des identifiants › ID client OAuth* › type **Application Web** :

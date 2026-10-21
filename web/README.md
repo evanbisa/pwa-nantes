@@ -1,4 +1,4 @@
-# Roche Street Food — application Next.js
+# FlashMiam — application Next.js
 
 Version de production du prototype (`../index.html`) : **Next.js 16 + Supabase (Auth + base de données)**,
 pensée pour démarrer à **0 €/mois** (Supabase Free, Cloudflare Pages, tuiles OpenStreetMap).
