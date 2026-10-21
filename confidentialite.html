@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Politique de confidentialité — FlashMiam</title>
+  <meta name="description" content="Quelles données FlashMiam utilise, pourquoi, combien de temps, et comment exercer vos droits." />
+  <style>
+    :root { --bg: #f1f3f4; --card: #fff; --text: #202124; --muted: #5f6368; --line: rgba(60, 64, 67, .14); --accent: #1a73e8; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #202124; --card: #2d2e31; --text: #e8eaed; --muted: #9aa0a6; --line: rgba(232, 234, 237, .14); --accent: #8ab4f8; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 Roboto, system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+    main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px 22px; }
+    a { color: var(--accent); }
+    .back { display: inline-block; margin-bottom: 16px; font-weight: 500; text-decoration: none; }
+    h1 { margin: 0 0 4px; font-size: 28px; font-weight: 400; line-height: 1.25; }
+    .updated { margin: 0 0 20px; font-size: 14px; color: var(--muted); }
+    h2 { margin: 28px 0 8px; font-size: 19px; font-weight: 500; }
+    p, li { color: var(--text); }
+    ul { padding-left: 22px; }
+    li { margin: 4px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14.5px; margin-top: 8px; }
+    th, td { text-align: left; vertical-align: top; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+    th { font-weight: 500; color: var(--muted); }
+    .table-wrap { overflow-x: auto; }
+    .todo { padding: 1px 6px; border-radius: 6px; background: rgba(176, 96, 0, .14); }
+    @media (max-width: 600px) {
+      thead { display: none; }
+      tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--line); }
+      td { display: block; padding: 2px 0; border: 0; }
+      td:first-child { font-weight: 500; }
+      td:last-child { font-size: 13.5px; color: var(--muted); }
+      td:last-child::before { content: "Base légale : "; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="./">← Retour à FlashMiam</a>
+    <article class="card">
+      <h1>Politique de confidentialité</h1>
+      <p class="updated">Dernière mise à jour : 21 octobre 2026</p>
+
+      <p>FlashMiam est une carte des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon. Cette page explique,
+        simplement, quelles données sont utilisées, pourquoi, et comment garder la main dessus. FlashMiam ne vend aucune donnée
+        et n'affiche pas de publicité ciblée.</p>
+
+      <h2>Qui est responsable de vos données ?</h2>
+      <p>Le responsable du traitement est <span class="todo">[nom ou raison sociale de l'éditeur]</span>.
+        Pour toute question : <span class="todo">[adresse e-mail de contact]</span>.</p>
+
+      <h2>Quelles données, et pourquoi ?</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">Données</th><th scope="col">Utilisation</th><th scope="col">Base légale</th></tr></thead>
+          <tbody>
+            <tr><td>Prénom, adresse e-mail, mot de passe (jamais stocké en clair)</td><td>Créer et sécuriser votre compte</td><td>Exécution du service</td></tr>
+            <tr><td>Connexion avec Google : prénom, adresse e-mail et identifiant de compte Google</td><td>Créer votre compte et vous connecter sans mot de passe</td><td>Exécution du service</td></tr>
+            <tr><td>Restaurateurs : nom, téléphone, SIRET, justificatifs, fiche du restaurant (description, menu, photos, horaires, stories, promotions)</td><td>Vérifier l'établissement et publier sa fiche</td><td>Exécution du service, obligations légales</td></tr>
+            <tr><td>Votre position (si vous l'autorisez)</td><td>Afficher les distances et temps de trajet. Elle reste sur votre appareil et n'est jamais enregistrée par FlashMiam</td><td>Consentement (retirable à tout moment)</td></tr>
+            <tr><td>Restaurants suivis</td><td>Retrouver vos restaurants préférés et leurs offres</td><td>Exécution du service</td></tr>
+            <tr><td>Statistiques de consultation des fiches</td><td>Donner aux restaurateurs des <strong>chiffres</strong> (nombre de vues, de personnes, d'abonnés…). Un restaurateur ne voit jamais qui le consulte ni qui le suit</td><td>Intérêt légitime</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Où sont stockées les données ?</h2>
+      <ul>
+        <li><strong>Version actuelle (test)</strong> : les comptes, fiches, photos et statistiques sont enregistrés <strong>uniquement dans votre navigateur</strong>,
+          sur votre appareil. Rien n'est envoyé à un serveur FlashMiam.</li>
+        <li><strong>Version en ligne</strong> : les données seront hébergées par Supabase dans l'Union européenne, protégées par des règles d'accès strictes
+          (chacun n'accède qu'à ses propres données ; les fiches publiées sont publiques).</li>
+      </ul>
+
+      <h2>Services tiers utilisés</h2>
+      <ul>
+        <li><strong>Google</strong> : connexion avec Google (si vous la choisissez) et, selon la configuration, fond de carte Google Maps.</li>
+        <li><strong>OpenFreeMap / OpenStreetMap</strong> : fond de carte.</li>
+        <li><strong>INSEE — API Recherche d'entreprises</strong> : vérification du SIRET des restaurateurs.</li>
+        <li><strong>IGN — Géoplateforme</strong> : recherche d'adresses des restaurants.</li>
+        <li><strong>Vercel</strong> : hébergement du site.</li>
+      </ul>
+
+      <h2>Combien de temps ?</h2>
+      <ul>
+        <li>Compte et fiche : jusqu'à la suppression de votre compte.</li>
+        <li>Stories : 24 heures, puis suppression automatique.</li>
+        <li>Statistiques : 90 jours au maximum.</li>
+      </ul>
+
+      <h2>Cookies</h2>
+      <p>FlashMiam n'utilise aucun cookie publicitaire ni de mesure d'audience. Seul le stockage local du navigateur est utilisé,
+        pour faire fonctionner le service (session, préférences, données de la version de test).</p>
+
+      <h2>Vos droits</h2>
+      <p>Vous pouvez accéder à vos données, les corriger, les supprimer, vous opposer à leur utilisation ou demander leur portabilité.
+        Le bouton <strong>« Supprimer mon compte »</strong> de votre profil efface immédiatement votre compte et tout ce qui lui est lié.
+        Pour toute autre demande, écrivez à <span class="todo">[adresse e-mail de contact]</span>. Vous pouvez aussi saisir la
+        <a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">CNIL</a>.</p>
+    </article>
+  </main>
+</body>
+</html>

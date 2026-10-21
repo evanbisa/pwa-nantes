@@ -455,6 +455,9 @@
     .form-error { margin: 12px 0 0; min-height: 0; font-size: 14px; color: var(--danger); }
     .form-error:empty { display: none; }
     .ob-switch { margin: 16px 0 0; text-align: center; font-size: 14px; color: var(--muted); }
+    .legal { margin: 14px 0 0; text-align: center; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+    .legal a { color: var(--accent); text-decoration: none; }
+    .legal a:hover { text-decoration: underline; }
     .link-btn { color: var(--accent); font-weight: 500; }
     .link-btn:hover { text-decoration: underline; }
     .fineprint { margin: 12px 0 0; font-size: 12px; text-align: center; color: var(--muted); }
@@ -1264,6 +1267,7 @@
     <button class="btn btn-primary" type="button" id="profile-locate">Activer la localisation</button>
     <button class="btn btn-ghost" type="button" id="profile-logout">Se déconnecter</button>
     <button class="btn btn-danger" type="button" id="profile-delete">Supprimer mon compte</button>
+    <p class="legal"><a href="confidentialite.html" target="_blank" rel="noopener">Confidentialité</a> · <a href="conditions.html" target="_blank" rel="noopener">Conditions d'utilisation</a></p>
   </section>
 
   <!-- ===================== ÉCRAN DE COMPTE ===================== -->
@@ -1346,6 +1350,7 @@
         <p class="form-error" id="err-signup" role="alert"></p>
         <button class="btn btn-primary" type="submit"><span data-only="client">Créer mon compte</span><span data-only="pro">Continuer : vérification</span></button>
         <p class="ob-switch">Déjà un compte ? <button class="link-btn" type="button" data-goto="login">Se connecter</button></p>
+        <p class="legal">En créant un compte, vous acceptez les <a href="conditions.html" target="_blank" rel="noopener">conditions d'utilisation</a> et la <a href="confidentialite.html" target="_blank" rel="noopener">politique de confidentialité</a>.</p>
       </form>
 
       <!-- Connexion -->

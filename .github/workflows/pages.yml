@@ -6,7 +6,7 @@ name: Publier sur GitHub Pages
 on:
   push:
     branches: [claude/street-food-map-pwa-lr1xu2]
-    paths: [index.html, 'web/**', .github/workflows/pages.yml]
+    paths: ['*.html', 'web/**', .github/workflows/pages.yml]
   workflow_dispatch:
 
 permissions:
@@ -48,7 +48,7 @@ jobs:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p "$RUNNER_TEMP/site"
-          cp index.html "$RUNNER_TEMP/site/"
+          cp index.html confidentialite.html conditions.html "$RUNNER_TEMP/site/"
           cp -r web/out "$RUNNER_TEMP/site/app"
           touch "$RUNNER_TEMP/site/.nojekyll"
           printf 'User-agent: *\nAllow: /\n' > "$RUNNER_TEMP/site/robots.txt"

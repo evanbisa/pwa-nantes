@@ -9,7 +9,7 @@ NEXT_PUBLIC_BASE_PATH=/app npm run build   # inclut la vérification des types
 cd ..
 rm -rf dist
 mkdir -p dist
-cp index.html dist/
+cp index.html confidentialite.html conditions.html dist/
 cp -r web/out dist/app
 printf 'User-agent: *\nAllow: /\n' > dist/robots.txt
 # Toute adresse inconnue renvoie vers la carte
