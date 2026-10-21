@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Roche Street Food",
+  title: "FlashMiam",
   description: "La carte des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon.",
 };
 
