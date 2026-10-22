@@ -15,6 +15,7 @@ Zone couverte : La Roche-sur-Yon et sa couronne.
 | 3 | Carte : vrais commerces en temps réel, tuiles OpenStreetMap | à faire |
 | 4 | Stories (24 h) et promotions des restaurateurs : tables `stories`, `promotions`, stockage `stories` | ✅ appliqué sur Supabase (99 scénarios de sécurité, 0 alerte) |
 | 5 | Connexion « Continuer avec Google » (clients) | ✅ en ligne (vérifiée par Supabase Auth) |
+| 7 | **Espace restaurateur** (plein écran sur téléphone, grand panneau sur ordinateur ; onglets Accueil, Statistiques, Publier, Avis, Ma fiche) et **statistiques détaillées** : provenance des visites, heures, menu, photos, itinéraires, appels, partages, avis lus, lien Google, vues / « j'aime » / clics de chaque story, clics sur chaque offre, plats aimés, abonnés gagnés et perdus, clients qui reviennent ; comparaison avec la période précédente (7, 30 ou 90 jours) ; masquer temporairement sa fiche | ✅ sur le site complet (`../index.html`) ; migration `20261024090000_analytics.sql` |
 | 6 | Avis (1 à 5 étoiles, réponse du restaurateur, signalement), notifications (promos et stories des restaurants suivis, avis, réponses), alertes push, recherche par plat avec budget, partage d'une fiche, « ferme bientôt » (contour orange moins d'une heure avant la fermeture), « Offres autour de moi » (de la plus proche à la plus lointaine) | ✅ sur le site complet (`../index.html`) ; migration `20261023090000_reviews_notifications.sql`, fonction `send-push` |
 
 ## Connecter le projet à Supabase (≈ 15 min)
@@ -137,7 +138,9 @@ aussi le projet Supabase actif (l'offre gratuite le met en pause après 7 jours 
 | Clés du serveur d'alertes | `push_config` | personne (serveur uniquement) | la fonction `send-push` |
 | Stories, promotions | `stories`, `promotions` (+ stockage `stories`) | **tout le monde**, tant qu'elles sont en cours, si la fiche est en ligne | le restaurateur, sur sa fiche uniquement (durée de 24 h et fin des promos du jour / de la semaine imposées par la base) |
 | Restaurants suivis | `follows` | l'étudiant concerné (le restaurateur ne voit que le **nombre**) | l'étudiant (s'abonner / se désabonner) |
-| Statistiques (vues, personnes, clics) | `merchant_stats`, `merchant_visitors` | le restaurateur, en **chiffres** uniquement | personne en direct : fonction `track_merchant_event` |
+| Statistiques (vues, personnes, clics) | `merchant_stats`, `merchant_visitors` | le restaurateur, en **chiffres** uniquement | personne en direct : fonction `track_visit` |
+| Statistiques détaillées (provenance, heures, partages, stories vues, clics sur les offres, désabonnements) | `merchant_event_visitors`, `merchant_view_hours`, `story_viewers`, `promo_clicks` | **personne** en direct : le restaurateur reçoit des **totaux** par `my_merchant_analytics` | fonction `track_visit` (et déclencheur de désabonnement) ; effacées après 90 jours |
+| « J'aime » des stories et des plats | `story_likes`, `dish_likes` | chacun ses propres « j'aime » ; totaux par `dish_like_counts` (public) et `my_merchant_analytics` (restaurateur) | `toggle_story_like`, `toggle_dish_like` (story en ligne / plat de la carte, jamais sur sa propre fiche) |
 
 - **RLS activée sur toutes les tables**, privilèges accordés explicitement, colonne par colonne pour les modifications.
 - Le SIRET n'est pas dans `merchants` : la RLS filtre des lignes, pas des colonnes.
@@ -146,7 +149,7 @@ aussi le projet Supabase actif (l'offre gratuite le met en pause après 7 jours 
   (adresse dans la zone, description, 1 photo, 1 service) : c'est la base qui refuse, pas l'interface.
 - Un restaurateur ne peut ni changer le propriétaire d'une fiche, ni son SIRET, ni se déclarer vérifié,
   ni toucher la fiche d'un autre, ni republier une fiche suspendue.
-- Tests : `npm run db:test` (167 scénarios sur un PostgreSQL local : `PGHOST=… PGPORT=… PGUSER=postgres`).
+- Tests : `npm run db:test` (197 scénarios sur un PostgreSQL local : `PGHOST=… PGPORT=… PGUSER=postgres`).
 
 ## Limites des offres gratuites à connaître
 - **Supabase Free** : 500 Mo de base, 50 000 utilisateurs actifs/mois, 1 Go de fichiers, 200 connexions temps

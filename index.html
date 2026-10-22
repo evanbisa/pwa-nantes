@@ -661,6 +661,13 @@
     .menu-list b { font-weight: 500; }
     .menu-list li small { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); }
     .menu-list .price { flex: none; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .dish-like { flex: none; align-self: center; display: inline-flex; align-items: center; justify-content: center; gap: 3px; min-width: 44px; height: 32px; margin: -4px -6px -4px 0;
+      padding: 0 6px; border-radius: 16px; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--muted); }
+    .dish-like:hover { background: var(--hover); }
+    .dish-like .dl-heart { font-size: 17px; font-weight: 400; line-height: 1; }
+    .dish-like[aria-pressed="true"] { color: #d93025; }
+    :root[data-theme="dark"] .dish-like[aria-pressed="true"] { color: #f28b82; }
+    .dish-like[aria-disabled="true"] { pointer-events: none; }
     .verified { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; color: var(--green); background: var(--green-soft); }
     .role-tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; white-space: nowrap; color: var(--accent); background: var(--accent-soft); }
     .verified.is-test { color: var(--amber); background: rgba(176, 96, 0, .1); }
@@ -724,6 +731,7 @@
     .kpi.is-hero { grid-column: 1 / -1; }
     .kpi.is-hero strong { font-size: 40px; }
     .kpi:not(.is-hero):nth-child(even):last-child { grid-column: 1 / -1; }   /* pas de case orpheline */
+    .ps-kpis .kpi:not(.is-hero):nth-child(even):last-child { grid-column: auto; }
     .chart { margin: 14px 0 0; padding: 12px 14px 10px; border-radius: 12px; border: 1px solid var(--line); position: relative; }
     .chart figcaption { font-size: 13px; font-weight: 500; color: var(--text); }
     .chart figcaption small { display: block; font-weight: 400; color: var(--muted); }
@@ -747,7 +755,6 @@
     .chart-table th:first-child, .chart-table td:first-child { text-align: left; }
     .chart-table th { font-weight: 500; color: var(--muted); }
     @media (min-width: 900px) {
-      #profile-sheet.is-pro { width: min(560px, calc(100% - 32px)); }
       .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .kpi.is-hero strong { font-size: 32px; }
     }
@@ -804,6 +811,11 @@
     .sv-head small { display: block; font-size: 12px; opacity: .8; }
     .sv-close, .sv-pause { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; font-size: 26px; line-height: 1; color: #fff; }
     .sv-pause { font-size: 16px; }
+    .sv-like { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; font-size: 26px; line-height: 1; color: #fff; transition: transform .15s var(--ease-out); }
+    .sv-like[aria-pressed="true"] { color: #ff3040; }
+    .sv-like.pop { animation: like-pop .35s var(--ease-out); }
+    .sv-like:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+    @keyframes like-pop { 50% { transform: scale(1.35); } }
     .sv-close:focus-visible, .sv-pause:focus-visible, .sv-cta:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
     .sv-caption { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; margin: 0; padding: 48px 20px calc(var(--safe-bottom) + 84px);
       font-size: 16px; line-height: 1.4; text-align: center; background: linear-gradient(transparent, rgba(0, 0, 0, .55)); }
@@ -869,9 +881,143 @@
     .or-sep { display: flex; align-items: center; gap: 12px; margin: 14px 0 0; font-size: 13px; color: var(--muted); }
     .or-sep::before, .or-sep::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
-    .pro-dash { margin-top: 20px; }
-    .pro-dash h4 { margin: 0; font-size: 15px; font-weight: 500; }
-    .pro-dash .kv { margin-top: 10px; }
+    .pro-entry { margin-top: 6px; }
+
+    /* ---------- Espace restaurateur (plein écran sur téléphone, grand panneau sur ordinateur) ---------- */
+    .pro-space { position: fixed; inset: 0; z-index: 90; display: flex; justify-content: center; background: var(--backdrop); }
+    .pro-space[hidden] { display: none; }
+    .ps-panel { display: flex; flex-direction: column; width: 100%; height: 100%; color: var(--text); background: var(--panel-solid); animation: rise .25s var(--ease-out) both; }
+    .ps-head { display: flex; align-items: center; gap: 12px; padding: calc(var(--safe-top) + 12px) 16px 12px; border-bottom: 1px solid var(--line); }
+    .ps-emoji { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; font-size: 24px; background: var(--hover); }
+    .ps-title { flex: 1; min-width: 0; }
+    .ps-title h2 { margin: 0; font-size: 18px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ps-title p { margin: 1px 0 0; font-size: 13px; color: var(--muted); }
+    .ps-title p .is-on { color: var(--green); font-weight: 500; }
+    .ps-title p .is-off { color: var(--amber); font-weight: 500; }
+    .ps-body { order: 2; flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 16px 16px 28px; }
+    .ps-tabs { order: 3; display: flex; border-top: 1px solid var(--line); padding-bottom: var(--safe-bottom); background: var(--panel-solid); }
+    .ps-tabs button { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 60px; padding: 8px 2px 6px; font-size: 11.5px; font-weight: 500; color: var(--muted); }
+    .ps-tabs button > span:last-child { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ps-tabs .ps-ico { position: relative; display: grid; place-items: center; width: 56px; height: 30px; border-radius: 15px; font-size: 19px; line-height: 1; transition: background-color .2s; }
+    .ps-tabs button[aria-selected="true"] { color: var(--text); }
+    .ps-tabs button[aria-selected="true"] .ps-ico { background: var(--accent-soft); }
+    .ps-badge { position: absolute; top: -2px; right: 8px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; font-size: 11px; font-weight: 600; line-height: 18px; color: #fff; background: var(--danger); }
+    .ps-pane[hidden] { display: none; }
+    .ps-pane h3 { margin: 0; font-size: 17px; font-weight: 500; }
+    .ps-pane h4 { margin: 0; font-size: 15px; font-weight: 500; }
+    .ps-block { margin-top: 22px; }
+    .ps-block > h3 { margin-bottom: 10px; }
+    .ps-card { padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); }
+    .ps-hello { margin: 0; font-size: 20px; }
+    .ps-hello small { display: block; margin-top: 2px; font-size: 14px; color: var(--muted); }
+    .ps-alert { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 14px 0 0; padding: 12px 14px; border-radius: 12px; font-size: 14px; background: color-mix(in srgb, var(--amber) 14%, transparent); }
+    .ps-alert[hidden], .ps-alert.is-info[hidden] { display: none; }
+    .ps-alert p { flex: 1 1 200px; margin: 0; }
+    .ps-alert.is-info { display: block; background: var(--hover); color: var(--muted); }
+    /* Cartes de chiffres de l'accueil */
+    .ps-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 16px; }
+    .ps-cards button { display: block; padding: 12px 14px; text-align: left; border-radius: 14px; border: 1px solid var(--line); transition: background-color .2s; }
+    .ps-cards button:hover { background: var(--hover); }
+    .ps-cards .kpi-label { display: flex; align-items: center; gap: 6px; }
+    .ps-cards strong { display: block; margin-top: 2px; font-size: 28px; font-weight: 500; line-height: 1.2; }
+    .trend { display: inline-flex; align-items: center; gap: 3px; margin-top: 4px; padding: 1px 7px; border-radius: 10px; font-size: 12px; font-weight: 500; color: var(--muted); background: var(--hover); font-variant-numeric: tabular-nums; }
+    .trend.is-up { color: var(--green); background: var(--green-soft); }
+    .trend.is-down { color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); }
+    .kpi .trend, .ps-cards .trend { display: inline-flex; }
+    .kpi .kpi-sub { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
+    /* À faire */
+    .ps-todo { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+    .ps-todo button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; text-align: left; border-radius: 12px; background: var(--hover); }
+    .ps-todo button:hover { background: var(--accent-soft); }
+    .ps-todo .td-ico { flex: none; font-size: 20px; }
+    .ps-todo .td-txt { flex: 1; min-width: 0; font-size: 14px; }
+    .ps-todo .td-txt b { display: block; font-weight: 500; }
+    .ps-todo .td-txt small { display: block; font-size: 12.5px; color: var(--muted); }
+    .ps-todo .td-go { flex: none; font-size: 13px; font-weight: 500; color: var(--accent); }
+    .ps-todo .is-done { padding: 12px 14px; font-size: 14px; color: var(--green); border-radius: 12px; background: var(--green-soft); }
+    /* Actions rapides */
+    .ps-quick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .ps-quick button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 86px; padding: 10px 6px; text-align: center; font-size: 12.5px; font-weight: 500; line-height: 1.25; border-radius: 14px; border: 1px solid var(--line); }
+    .ps-quick button span { font-size: 24px; }
+    .ps-quick button:hover { background: var(--hover); }
+    /* Points clés */
+    .ps-insights { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+    .ps-insights li { display: flex; gap: 12px; padding: 12px 14px; font-size: 14px; border-radius: 12px; border: 1px solid var(--line); }
+    .ps-insights li > span:first-child { flex: none; font-size: 18px; }
+    .ps-insights b { font-weight: 500; }
+    /* Barres horizontales (provenance, actions, plats) : une seule teinte, valeur écrite */
+    .hbars { display: grid; gap: 10px; margin-top: 12px; }
+    .hbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; align-items: baseline; font-size: 13.5px; }
+    .hbar > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hbar > b { font-weight: 500; font-variant-numeric: tabular-nums; }
+    .hbar > b small { margin-left: 4px; font-weight: 400; color: var(--muted); }
+    .hbar > i { grid-column: 1 / -1; display: block; height: 8px; border-radius: 4px; background: var(--hover); overflow: hidden; }
+    .hbar > i > u { display: block; height: 100%; min-width: 0; border-radius: 4px; background: var(--chart); }
+    .hbars-empty { margin: 12px 0 0; font-size: 13.5px; color: var(--muted); }
+    /* Tableaux (stories, promotions) */
+    .ps-table-wrap { margin-top: 10px; overflow-x: auto; }
+    .ps-table { width: 100%; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+    .ps-table th, .ps-table td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: middle; }
+    .ps-table th:first-child, .ps-table td:first-child { text-align: left; }
+    .ps-table th { font-weight: 500; font-size: 12.5px; color: var(--muted); }
+    .ps-table .st-cell { display: flex; align-items: center; gap: 10px; min-width: 150px; }
+    .ps-table .st-cell .sa-thumb { position: relative; flex: none; width: 34px; aspect-ratio: 9 / 16; border-radius: 6px; overflow: hidden; background: #111; color: #fff; }
+    .ps-table .st-cell .sa-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ps-table .st-cell .sa-thumb .sv-text { padding: 2px; font-size: 5px; text-shadow: none; }
+    .ps-table .st-cell small { display: block; color: var(--muted); font-size: 12px; }
+    .ps-table .is-live { color: var(--green); font-weight: 500; }
+    .ps-table .empty td { text-align: left; color: var(--muted); }
+    .ps-table td:not(:first-child) { white-space: nowrap; }
+    .ps-table td small { color: var(--muted); font-size: 12px; }
+    .ps-privacy { margin-top: 22px; }
+    /* Avis */
+    .ps-rv-summary { display: flex; align-items: center; gap: 16px; margin-top: 12px; }
+    .ps-rv-summary strong { font-size: 34px; font-weight: 500; line-height: 1; }
+    .ps-rv-summary small { display: block; font-size: 13px; color: var(--muted); }
+    .ps-rv-list { margin-top: 12px; }
+    .ps-rv-list .rv-item.is-todo { box-shadow: inset 3px 0 0 var(--amber); padding-left: 12px; }
+    /* Ma fiche */
+    .ps-meter { height: 8px; margin-top: 10px; border-radius: 4px; background: var(--hover); overflow: hidden; }
+    .ps-meter i { display: block; height: 100%; width: 0; border-radius: 4px; background: var(--green); transition: width .4s var(--ease-out); }
+    .ps-check { margin: 10px 0 0; padding: 0; list-style: none; }
+    .ps-check li { display: flex; align-items: center; gap: 10px; padding: 9px 2px; font-size: 14px; border-bottom: 1px solid var(--line); }
+    .ps-check li > span:first-child { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 13px; font-weight: 600; }
+    .ps-check li.is-ok > span:first-child { color: #fff; background: var(--green); }
+    .ps-check li:not(.is-ok) > span:first-child { color: var(--muted); border: 1.5px solid var(--line-strong); }
+    .ps-check li small { margin-left: auto; color: var(--muted); font-size: 12.5px; text-align: right; }
+    .ps-switch-row { display: flex; align-items: center; gap: 14px; margin-top: 10px; }
+    .ps-switch-row > div { flex: 1; min-width: 0; font-size: 14px; }
+    .ps-switch-row b { font-weight: 500; }
+    .ps-switch-row small { display: block; font-size: 12.5px; color: var(--muted); }
+    .switch { flex: none; position: relative; width: 52px; height: 32px; border-radius: 16px; background: var(--line-strong); transition: background-color .2s; }
+    .switch i { position: absolute; top: 4px; left: 4px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transition: transform .2s var(--ease-out); }
+    .switch[aria-checked="true"] { background: var(--green); }
+    .switch[aria-checked="true"] i { transform: translateX(20px); }
+    .switch[disabled] { opacity: .5; pointer-events: none; }
+    #psp-publish .pd-block:first-of-type { margin-top: 0; }
+    #psp-publish .ps-alert + .pd-block { margin-top: 16px; }
+    .story-admin .sa-stats { color: var(--text); }
+    @media (max-width: 380px) { .ps-tabs .ps-lbl { font-size: 0; } .ps-tabs .ps-lbl::after { content: attr(data-short); font-size: 11.5px; } }
+    @media (max-width: 360px) { .ps-quick { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ps-tabs .ps-ico { width: 44px; } }
+    @media (min-width: 900px) {
+      .pro-space { align-items: center; padding: 24px; }
+      .ps-panel { display: grid; grid-template-columns: 220px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); width: min(1080px, 100%); height: min(860px, 100%); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); }
+      .ps-head { grid-column: 1 / -1; padding: 16px 20px; }
+      .ps-tabs { order: 0; grid-column: 1; grid-row: 2; }
+      .ps-body { order: 0; grid-column: 2; grid-row: 2; }
+      .ps-tabs { flex-direction: column; gap: 4px; padding: 12px; border-top: 0; border-right: 1px solid var(--line); }
+      .ps-tabs button { flex: none; flex-direction: row; justify-content: flex-start; gap: 10px; min-height: 46px; padding: 0 8px 0 0; font-size: 14px; border-radius: 23px; }
+      .ps-tabs button[aria-selected="true"] { background: var(--accent-soft); }
+      .ps-tabs button[aria-selected="true"] .ps-ico { background: none; }
+      .ps-tabs .ps-ico { width: 40px; }
+      .ps-badge { right: -6px; }
+      .ps-body { padding: 24px 28px 32px; }
+      .ps-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .ps-quick { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      .ps-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      #psp-stats .ps-card, #psp-fiche .ps-card { max-width: none; }
+      .ps-insights { grid-template-columns: 1fr 1fr; }
+    }
 
     /* =====================================================================
        8 bis. RECHERCHE, NOTIFICATIONS, AVIS
@@ -1361,6 +1507,7 @@
         <div class="sv-head">
           <span class="sv-avatar" id="sv-avatar" aria-hidden="true"></span>
           <div><strong id="sv-name"></strong><small id="sv-time"></small></div>
+          <button class="sv-like" type="button" id="sv-like" aria-pressed="false" aria-label="J'aime cette story" hidden>♡</button>
           <button class="sv-pause" type="button" id="sv-pause" aria-label="Mettre en pause">❚❚</button>
           <button class="sv-close" type="button" id="sv-close" aria-label="Fermer les stories">&times;</button>
         </div>
@@ -1496,78 +1643,8 @@
       <div><dt>Affichage</dt><dd id="profile-theme"></dd></div>
       <div><dt>Carte</dt><dd id="profile-engine"></dd></div>
     </dl>
-    <div class="pro-dash" id="pro-dash" hidden>
-      <h4>Mon établissement</h4>
-      <dl class="kv">
-        <div><dt>Restaurant</dt><dd id="pd-name"></dd></div>
-        <div><dt>Statut</dt><dd id="pd-status"></dd></div>
-        <div><dt>SIRET</dt><dd id="pd-siret"></dd></div>
-        <div><dt>Abonnement</dt><dd id="pd-plan"></dd></div>
-      </dl>
-      <section class="pd-block" id="pd-stories" aria-labelledby="pd-stories-title" hidden>
-        <div class="stats-head">
-          <h4 id="pd-stories-title">Mes stories</h4>
-          <button class="pill-btn" type="button" id="pd-story-new">＋ Publier une story</button>
-        </div>
-        <p class="hint">Vos stories apparaissent en haut de la carte pour tous les utilisateurs, abonnés ou non, pendant 24 h.</p>
-        <ul class="story-admin" id="pd-story-list"></ul>
-      </section>
-      <section class="pd-block" id="pd-promos" aria-labelledby="pd-promos-title" hidden>
-        <h4 id="pd-promos-title">Mes promotions</h4>
-        <p class="hint">Mises en avant sur votre fiche, dans la liste des commerces et avec le filtre « 🎁 Promos ».</p>
-        <ul class="promo-admin" id="pd-promo-list"></ul>
-        <form class="promo-form" id="pd-promo-form" novalidate>
-          <div class="kind-pick" id="pp-kind" role="radiogroup" aria-label="Type de promotion"></div>
-          <label class="field" id="field-pp-title">
-            <span>Offre <small class="counter" id="pp-title-count">0 / 60</small></span>
-            <input id="pp-title" type="text" maxlength="60" placeholder="Ex. : menu kebab + boisson à 8 €" />
-            <small class="field-error" id="err-pp-title" aria-live="polite"></small>
-          </label>
-          <label class="field" id="field-pp-details">
-            <span>Détails (facultatif)</span>
-            <input id="pp-details" type="text" maxlength="140" placeholder="Ex. : sur présentation de la carte étudiante" />
-          </label>
-          <label class="field" id="field-pp-end">
-            <span>Jusqu'au (facultatif)</span>
-            <input id="pp-end" type="date" />
-            <small class="field-error" id="err-pp-end" aria-live="polite"></small>
-          </label>
-          <p class="hint" id="pp-end-auto"></p>
-          <button class="btn btn-primary" type="submit" id="pp-submit">Publier la promotion</button>
-        </form>
-      </section>
-      <section class="stats" id="pd-stats" aria-labelledby="pd-stats-title" hidden>
-        <div class="stats-head">
-          <h4 id="pd-stats-title">Statistiques</h4>
-          <div class="seg" role="group" aria-label="Période">
-            <button type="button" data-days="7" aria-pressed="true">7 jours</button>
-            <button type="button" data-days="30" aria-pressed="false">30 jours</button>
-          </div>
-        </div>
-        <div class="kpis">
-          <div class="kpi is-hero"><span class="kpi-label">Abonnés</span><strong id="k-followers">0</strong><small id="k-followers-d"></small></div>
-          <div class="kpi"><span class="kpi-label">Vues de la fiche</span><strong id="k-views">0</strong><small id="k-visitors"></small></div>
-          <div class="kpi"><span class="kpi-label">Itinéraires demandés</span><strong id="k-routes">0</strong><small id="k-routes-d"></small></div>
-          <div class="kpi"><span class="kpi-label">Appels</span><strong id="k-calls">0</strong><small>clics sur le numéro</small></div>
-          <div class="kpi"><span class="kpi-label">Menu consulté</span><strong id="k-menu">0</strong><small>onglet Menu ouvert</small></div>
-          <div class="kpi"><span class="kpi-label">Photos regardées</span><strong id="k-photos">0</strong><small>onglet Photos ouvert</small></div>
-          <div class="kpi"><span class="kpi-label">Stories vues</span><strong id="k-stories">0</strong><small>affichages</small></div>
-          <div class="kpi"><span class="kpi-label">Note moyenne</span><strong id="k-rating">–</strong><small id="k-rating-d">aucun avis</small></div>
-        </div>
-        <figure class="chart">
-          <figcaption>Vues de la fiche par jour<small id="pd-chart-sub"></small></figcaption>
-          <div class="chart-box" id="pd-chart"></div>
-          <div class="chart-tip" id="pd-tip" role="status" hidden></div>
-        </figure>
-        <details class="chart-table">
-          <summary>Voir le détail par jour</summary>
-          <table id="pd-table"><thead><tr><th scope="col">Jour</th><th scope="col">Vues</th><th scope="col">Personnes</th><th scope="col">Itinéraires</th><th scope="col">Abonnés +</th></tr></thead><tbody></tbody></table>
-        </details>
-        <p class="hint">Chiffres de tous les visiteurs, sans jamais révéler qui ils sont. Vos propres visites ne sont pas comptées.</p>
-      </section>
-      <button class="btn btn-ghost" type="button" id="pd-reviews" hidden>Voir les avis et y répondre</button>
-      <button class="btn btn-primary" type="button" id="pd-edit">Modifier ma fiche</button>
-      <button class="btn btn-ghost" type="button" id="pd-show">Voir sur la carte</button>
+    <div class="pro-entry" id="pro-entry" hidden>
+      <button class="btn btn-primary" type="button" id="profile-pro">🍽️ Ouvrir mon espace restaurateur</button>
     </div>
     <div class="follows" id="follows-box" hidden>
       <h4>Restaurants suivis</h4>
@@ -1578,6 +1655,201 @@
     <button class="btn btn-danger" type="button" id="profile-delete">Supprimer mon compte</button>
     <p class="legal"><a href="confidentialite.html" target="_blank" rel="noopener">Confidentialité</a> · <a href="conditions.html" target="_blank" rel="noopener">Conditions d'utilisation</a></p>
   </section>
+
+  <!-- ===================== ESPACE RESTAURATEUR ===================== -->
+  <div id="pro-space" class="pro-space" role="dialog" aria-modal="true" aria-labelledby="ps-title" hidden>
+    <div class="ps-panel">
+      <header class="ps-head">
+        <span class="ps-emoji" id="ps-emoji" aria-hidden="true">🍽️</span>
+        <div class="ps-title">
+          <h2 id="ps-title">Mon restaurant</h2>
+          <p id="ps-sub"></p>
+        </div>
+        <button class="icon-btn" type="button" id="ps-close" aria-label="Fermer l'espace restaurateur">&times;</button>
+      </header>
+      <nav class="ps-tabs" role="tablist" aria-label="Espace restaurateur">
+        <button type="button" role="tab" id="pst-home" data-tab="home" aria-controls="psp-home" aria-selected="true"><span class="ps-ico" aria-hidden="true">🏠</span><span>Accueil</span></button>
+        <button type="button" role="tab" id="pst-stats" data-tab="stats" aria-controls="psp-stats" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true">📊</span><span class="ps-lbl" data-short="Stats">Statistiques</span></button>
+        <button type="button" role="tab" id="pst-publish" data-tab="publish" aria-controls="psp-publish" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true">✨</span><span>Publier</span></button>
+        <button type="button" role="tab" id="pst-reviews" data-tab="reviews" aria-controls="psp-reviews" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true">⭐<b class="ps-badge" id="ps-reviews-badge" hidden></b></span><span>Avis</span></button>
+        <button type="button" role="tab" id="pst-fiche" data-tab="fiche" aria-controls="psp-fiche" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true">🛠️</span><span>Ma fiche</span></button>
+      </nav>
+      <div class="ps-body" id="ps-body">
+        <!-- Accueil -->
+        <section class="ps-pane" id="psp-home" role="tabpanel" aria-labelledby="pst-home">
+          <p class="ps-hello" id="ps-hello"></p>
+          <div class="ps-alert" id="ps-alert" role="status" hidden><p></p><button class="pill-btn" type="button"></button></div>
+          <div id="ps-home-live">
+            <div class="ps-cards" id="ps-cards"></div>
+            <section class="ps-block" aria-labelledby="ps-todo-title">
+              <h3 id="ps-todo-title">À faire</h3>
+              <ul class="ps-todo" id="ps-todo"></ul>
+            </section>
+            <section class="ps-block" aria-labelledby="ps-quick-title">
+              <h3 id="ps-quick-title">Actions rapides</h3>
+              <div class="ps-quick" id="ps-quick">
+                <button type="button" data-act="story"><span aria-hidden="true">📸</span>Publier une story</button>
+                <button type="button" data-act="promo"><span aria-hidden="true">🎁</span>Créer une promo</button>
+                <button type="button" data-act="reviews"><span aria-hidden="true">💬</span>Répondre aux avis</button>
+                <button type="button" data-act="edit"><span aria-hidden="true">✏️</span>Modifier ma fiche</button>
+                <button type="button" data-act="show"><span aria-hidden="true">👀</span>Voir ma fiche</button>
+                <button type="button" data-act="share"><span aria-hidden="true">🔗</span>Partager ma fiche</button>
+              </div>
+            </section>
+            <section class="ps-block" aria-labelledby="ps-insights-title">
+              <h3 id="ps-insights-title">Ce qu'il faut retenir</h3>
+              <ul class="ps-insights" id="ps-insights"></ul>
+              <button class="btn btn-ghost" type="button" id="ps-more-stats">Voir toutes les statistiques</button>
+            </section>
+          </div>
+        </section>
+
+        <!-- Statistiques -->
+        <section class="ps-pane" id="psp-stats" role="tabpanel" aria-labelledby="pst-stats" hidden>
+          <div class="stats-head">
+            <h3>Ce que font vos clients</h3>
+            <div class="seg" id="ps-period" role="group" aria-label="Période">
+              <button type="button" data-days="7" aria-pressed="true">7 jours</button>
+              <button type="button" data-days="30" aria-pressed="false">30 jours</button>
+              <button type="button" data-days="90" aria-pressed="false">90 jours</button>
+            </div>
+          </div>
+          <p class="hint" id="ps-period-sub"></p>
+          <div class="kpis ps-kpis" id="ps-kpis"></div>
+          <figure class="chart">
+            <figcaption>Vues de la fiche par jour<small id="pd-chart-sub"></small></figcaption>
+            <div class="chart-box" id="pd-chart"></div>
+            <div class="chart-tip" id="pd-tip" role="status" hidden></div>
+            <details class="chart-table">
+              <summary>Voir le détail par jour</summary>
+              <table id="pd-table"><thead><tr><th scope="col">Jour</th><th scope="col">Vues</th><th scope="col">Personnes</th><th scope="col">Itinéraires</th><th scope="col">Appels</th><th scope="col">Stories vues</th><th scope="col">Abonnés +</th></tr></thead><tbody></tbody></table>
+            </details>
+          </figure>
+          <figure class="chart">
+            <figcaption>À quelle heure on regarde votre fiche<small id="ps-hours-sub"></small></figcaption>
+            <div class="chart-box" id="ps-hours"></div>
+            <div class="chart-tip" id="ps-hours-tip" role="status" hidden></div>
+            <details class="chart-table">
+              <summary>Voir le détail par heure</summary>
+              <table id="ps-hours-table"><thead><tr><th scope="col">Heure</th><th scope="col">Vues</th></tr></thead><tbody></tbody></table>
+            </details>
+          </figure>
+          <section class="ps-block ps-card" aria-labelledby="ps-sources-title">
+            <h4 id="ps-sources-title">D'où viennent vos visiteurs</h4>
+            <p class="hint">Comment les gens arrivent sur votre fiche (chaque personne comptée une fois par jour).</p>
+            <div class="hbars" id="ps-sources"></div>
+          </section>
+          <section class="ps-block ps-card" aria-labelledby="ps-acts-title">
+            <h4 id="ps-acts-title">Ce qu'ils font sur votre fiche</h4>
+            <p class="hint">Nombre de fois sur la période. Partages, avis et Google : une fois par personne et par jour.</p>
+            <div class="hbars" id="ps-acts"></div>
+          </section>
+          <section class="ps-block ps-card" aria-labelledby="ps-fans-title">
+            <h4 id="ps-fans-title">Abonnés et clients fidèles</h4>
+            <dl class="kv" id="ps-fans"></dl>
+          </section>
+          <section class="ps-block ps-card" aria-labelledby="ps-st-title">
+            <h4 id="ps-st-title">Vos stories (30 derniers jours)</h4>
+            <p class="hint">Vues : personnes différentes. Fiche ouverte : depuis le bouton de la story.</p>
+            <div class="ps-table-wrap"><table class="ps-table" id="ps-stories-table"><thead><tr><th scope="col">Story</th><th scope="col">Vues</th><th scope="col">♥</th><th scope="col">Fiche ouverte</th></tr></thead><tbody></tbody></table></div>
+          </section>
+          <section class="ps-block ps-card" aria-labelledby="ps-pr-title">
+            <h4 id="ps-pr-title">Vos promotions</h4>
+            <p class="hint">Clics : personnes ayant ouvert votre fiche depuis l'offre (« Offres autour de moi », notification).</p>
+            <div class="ps-table-wrap"><table class="ps-table" id="ps-promos-table"><thead><tr><th scope="col">Offre</th><th scope="col">État</th><th scope="col">Clics</th></tr></thead><tbody></tbody></table></div>
+          </section>
+          <section class="ps-block ps-card" aria-labelledby="ps-dish-title">
+            <h4 id="ps-dish-title">Plats préférés de vos clients</h4>
+            <p class="hint">« J'aime » sur les plats de votre carte, depuis toujours.</p>
+            <div class="hbars" id="ps-dishes"></div>
+          </section>
+          <p class="hint ps-privacy">🔒 Ce sont des totaux : vous ne voyez jamais qui a fait quoi. Vos propres visites ne sont pas comptées. Historique conservé 90 jours.</p>
+        </section>
+
+        <!-- Publier -->
+        <section class="ps-pane" id="psp-publish" role="tabpanel" aria-labelledby="pst-publish" hidden>
+          <p class="ps-alert is-info" id="ps-publish-off" hidden></p>
+          <section class="pd-block" id="pd-stories" aria-labelledby="pd-stories-title" hidden>
+            <div class="stats-head">
+              <h3 id="pd-stories-title">📸 Mes stories</h3>
+              <button class="pill-btn" type="button" id="pd-story-new">＋ Publier une story</button>
+            </div>
+            <p class="hint">Photo ou message affiché en haut de la carte pour tout le monde pendant 24 h. Vos abonnés sont prévenus. Sous chaque story : combien l'ont vue (👁) et aimée (♥).</p>
+            <ul class="story-admin" id="pd-story-list"></ul>
+          </section>
+          <section class="pd-block" id="pd-promos" aria-labelledby="pd-promos-title" hidden>
+            <h3 id="pd-promos-title">🎁 Mes promotions</h3>
+            <p class="hint">Affichées sur votre fiche, dans « Offres autour de moi » et avec le filtre « 🎁 Promos ». Vos abonnés sont prévenus.</p>
+            <ul class="promo-admin" id="pd-promo-list"></ul>
+            <form class="promo-form" id="pd-promo-form" novalidate>
+              <div class="kind-pick" id="pp-kind" role="radiogroup" aria-label="Type de promotion"></div>
+              <label class="field" id="field-pp-title">
+                <span>Offre <small class="counter" id="pp-title-count">0 / 60</small></span>
+                <input id="pp-title" type="text" maxlength="60" placeholder="Ex. : menu kebab + boisson à 8 €" />
+                <small class="field-error" id="err-pp-title" aria-live="polite"></small>
+              </label>
+              <label class="field" id="field-pp-details">
+                <span>Détails (facultatif)</span>
+                <input id="pp-details" type="text" maxlength="140" placeholder="Ex. : sur présentation de la carte étudiante" />
+              </label>
+              <label class="field" id="field-pp-end">
+                <span>Jusqu'au (facultatif)</span>
+                <input id="pp-end" type="date" />
+                <small class="field-error" id="err-pp-end" aria-live="polite"></small>
+              </label>
+              <p class="hint" id="pp-end-auto"></p>
+              <button class="btn btn-primary" type="submit" id="pp-submit">Publier la promotion</button>
+            </form>
+          </section>
+        </section>
+
+        <!-- Avis -->
+        <section class="ps-pane" id="psp-reviews" role="tabpanel" aria-labelledby="pst-reviews" hidden>
+          <div class="stats-head">
+            <h3>Avis de vos clients</h3>
+            <div class="seg" id="ps-rv-filter" role="group" aria-label="Avis affichés">
+              <button type="button" data-f="todo" aria-pressed="true">À répondre</button>
+              <button type="button" data-f="all" aria-pressed="false">Tous</button>
+            </div>
+          </div>
+          <div class="ps-rv-summary" id="ps-rv-summary"></div>
+          <ul class="rv-list ps-rv-list" id="ps-rv-list"></ul>
+          <p class="hint">Votre réponse s'affiche sous l'avis, et le client est prévenu. Un avis abusif ? Signalez-le depuis votre fiche.</p>
+          <button class="btn btn-ghost" type="button" id="pd-reviews">Voir les avis sur ma fiche</button>
+        </section>
+
+        <!-- Ma fiche -->
+        <section class="ps-pane" id="psp-fiche" role="tabpanel" aria-labelledby="pst-fiche" hidden>
+          <section class="ps-card" aria-labelledby="ps-complete-title">
+            <h4 id="ps-complete-title">Fiche complète à <span id="ps-complete-pct">0 %</span></h4>
+            <div class="ps-meter" aria-hidden="true"><i id="ps-complete-bar"></i></div>
+            <p class="hint">Une fiche complète (photos, carte, horaires) attire plus de clients.</p>
+            <ul class="ps-check" id="ps-checklist"></ul>
+            <button class="btn btn-primary" type="button" id="pd-edit">Modifier ma fiche</button>
+          </section>
+          <section class="ps-card ps-block" aria-labelledby="ps-vis-title">
+            <h4 id="ps-vis-title">Visibilité</h4>
+            <div class="ps-switch-row">
+              <div><b id="ps-vis-label">Fiche visible sur la carte</b><small id="ps-vis-hint"></small></div>
+              <button class="switch" type="button" role="switch" id="ps-visible" aria-checked="true" aria-labelledby="ps-vis-label"><i></i></button>
+            </div>
+          </section>
+          <section class="ps-card ps-block" aria-labelledby="ps-info-title">
+            <h4 id="ps-info-title">Mon établissement</h4>
+            <dl class="kv">
+              <div><dt>Restaurant</dt><dd id="pd-name"></dd></div>
+              <div><dt>Statut</dt><dd id="pd-status"></dd></div>
+              <div><dt>SIRET</dt><dd id="pd-siret"></dd></div>
+              <div><dt>Abonnement</dt><dd id="pd-plan"></dd></div>
+            </dl>
+          </section>
+          <button class="btn btn-ghost" type="button" id="pd-show">Voir ma fiche sur la carte</button>
+          <button class="btn btn-ghost" type="button" id="ps-share">Partager le lien de ma fiche</button>
+          <button class="btn btn-ghost" type="button" id="ps-account">Mon compte (profil, déconnexion)</button>
+        </section>
+      </div>
+    </div>
+  </div>
 
   <!-- ===================== ÉCRAN DE COMPTE ===================== -->
   <div id="onboarding" class="onboarding" role="dialog" aria-modal="true" aria-labelledby="auth-title" data-role="client" hidden>
@@ -2174,7 +2446,7 @@
       id: m.id, ownerId: m.user_id, name: m.name, category: CAT_FROM_DB[m.category] || 'Autre', description: m.description || '',
       photos: m.photos_urls || [], menu: m.menu_json || [], address: m.address || '', coords: m.lat != null ? [m.lng, m.lat] : null,
       hours: hours.services || [], closedOn: hours.closed_on || [], phone: m.phone || '',
-      status: m.status, published: m.status === 'published' && m.is_open && m.lat != null, isTest: !!m.is_test, honorAt: m.honor_at,
+      status: m.status, isOpen: m.is_open !== false, published: m.status === 'published' && m.is_open && m.lat != null, isTest: !!m.is_test, honorAt: m.honor_at,
       publishedAt: m.published_at, updatedAt: m.updated_at, promos: promos.map(promoFromRow), stories: stories.map(storyFromRow),
       rating: rating && rating.count ? rating : null,
     };
@@ -2270,6 +2542,7 @@
           await loadRestaurants();
           if (cloud.user && cloud.user.role === 'pro') cloud.user.pro = await loadPro(cloud.user);
           whenMapReady(syncShopMarkers);
+          if (ProSpace.isOpen()) ProSpace.render();
         } catch (e) { console.warn('Actualisation impossible', e); }
         waiters.forEach((w) => w());
       }, delay);
@@ -3081,7 +3354,7 @@
     el.querySelector('.pin-badge').textContent = catOf(shop).emoji;
     el.querySelector('.pin-badge').insertAdjacentHTML('beforeend', '<span class="pin-flag">%</span>');
     el.querySelector('.pin-label').textContent = shop.name;
-    el.addEventListener('click', (ev) => { ev.stopPropagation(); openShop(shop.id); });
+    el.addEventListener('click', (ev) => { ev.stopPropagation(); openShop(shop.id, { source: 'map' }); });
     el.addEventListener('mouseenter', () => setHover(shop.id, true));
     el.addEventListener('mouseleave', () => setHover(shop.id, false));
     const marker = view.addMarker(el, shop.coords, 'bottom');
@@ -3215,7 +3488,7 @@
       }
       btn.addEventListener('click', () => {
         if (hits.length) openDish(shop.id, hits.map((h) => h.idx));
-        else openShop(shop.id);
+        else openShop(shop.id, { source: searching ? 'search' : 'list' });
       });
       btn.addEventListener('mouseenter', () => setHover(shop.id, true));
       btn.addEventListener('mouseleave', () => setHover(shop.id, false));
@@ -3251,7 +3524,7 @@
     applyFilters();
   });
   $('search').addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter') { const first = document.querySelector('.shop-item'); if (first) openShop(first.dataset.id); }
+    if (ev.key === 'Enter') { const first = document.querySelector('.shop-item'); if (first) openShop(first.dataset.id, { source: 'search' }); }
     // Échap : efface la recherche uniquement (ne ferme pas la fiche ouverte)
     if (ev.key === 'Escape') { ev.target.value = ''; filters.query = ''; filters.q = []; applyFilters(); ev.target.blur(); }
   });
@@ -3352,7 +3625,7 @@
   /** Ouvre la fiche d'un restaurant sur sa carte, plats trouvés mis en avant. */
   function openDish(shopId, indexes) {
     whenMapReady(() => {
-      openShop(shopId);
+      openShop(shopId, { source: 'search' });
       if (!markers.get(shopId)) return;
       setShopTab('menu');
       const lis = [...document.querySelectorAll('#shop-menu-list li')];
@@ -3456,7 +3729,7 @@
         small.append(status(m));
         if (m.shop.rating) { const r = document.createElement('span'); r.className = 'sr-rating'; r.textContent = ' · ★ ' + formatRating(m.shop.rating.avg); small.append(r); }
         small.append(' · ' + catOf(m.shop).label + dist(m));
-        b.addEventListener('click', () => { closeSearchPanel({ restoreFocus: false }); whenMapReady(() => openShop(m.shop.id)); });
+        b.addEventListener('click', () => { closeSearchPanel({ restoreFocus: false }); whenMapReady(() => openShop(m.shop.id, { source: 'search' })); });
         li.appendChild(b);
         ul.appendChild(li);
       });
@@ -3747,6 +4020,7 @@
       refreshCloud();
     });
     $('shop-rating').addEventListener('click', () => setShopTab('reviews', { focus: true }));
+    $('rv-google').addEventListener('click', () => { if (selectedId) Stats.track(selectedId, 'google'); });
     return { render, refresh, cache };
   })();
 
@@ -3802,7 +4076,11 @@
           dist.append(formatDistance(d));
           const w = document.createElement('small'); w.textContent = formatMinutes(walkMinutes(d)) + ' à pied'; dist.appendChild(w);
         }
-        b.addEventListener('click', () => { closePanel($('offers-sheet')); whenMapReady(() => openShop(m.shop.id)); });
+        b.addEventListener('click', () => {
+          closePanel($('offers-sheet'));
+          Stats.track(m.shop.id, 'offer', { ref: p.id });
+          whenMapReady(() => openShop(m.shop.id, { source: 'offers' }));
+        });
         li.appendChild(b);
         ul.appendChild(li);
       });
@@ -3829,12 +4107,116 @@
     return { open, refresh, list };
   })();
 
+  /* ---------- « J'aime » : stories et plats (compteurs pour le restaurateur, jamais les noms) ---------- */
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+  /** Fonction absente de la base (migration pas encore appliquée en ligne). */
+  const missingFn = (e) => !!(e && (e.code === 'PGRST202' || e.code === '42883'));
+  const LIKES_SOON = 'Les « j\'aime » arrivent très bientôt sur FlashMiam.';
+  const StoryLikes = (() => {
+    let mine = null, loading = null, cur = null;
+    async function load() {
+      if (!loading) loading = sb.from('story_likes').select('story_id').then(({ data }) => { mine = new Set((data || []).map((r) => r.story_id)); });
+      return loading;
+    }
+    /** Cœur de la story affichée (restaurants inscrits, pas sa propre story). */
+    function paint(shop, st) {
+      cur = { shop, st };
+      const b = $('sv-like');
+      const can = !!(currentUser() && shop.isPro && !isOwnShop(shop.id) && UUID_RE.test(st.id));
+      b.hidden = !can;
+      if (!can) return;
+      if (!mine) { load().then(() => { if (cur && cur.st === st) paint(shop, st); }); }
+      const on = !!(mine && mine.has(st.id));
+      b.setAttribute('aria-pressed', String(on));
+      b.textContent = on ? '♥' : '♡';
+      b.setAttribute('aria-label', on ? 'Je n\'aime plus cette story' : 'J\'aime cette story');
+    }
+    $('sv-like').addEventListener('click', async (ev) => {
+      ev.stopPropagation();
+      if (!cur) return;
+      const { shop, st } = cur;
+      const { data, error } = await sb.rpc('toggle_story_like', { p_story_id: st.id });
+      if (error) { toast(missingFn(error) ? LIKES_SOON : cloudError(error)); return; }
+      await load();
+      if (data) mine.add(st.id); else mine.delete(st.id);
+      if (cur && cur.st === st) {
+        paint(shop, st);
+        if (data) { const b = $('sv-like'); b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); }
+      }
+    });
+    return { paint };
+  })();
+
+  const DishLikes = (() => {
+    const cache = new Map();                 // id de la fiche → { counts, mine, at }
+    async function load(id) {
+      const me = currentUser();
+      const [c, m] = await Promise.all([
+        sb.rpc('dish_like_counts', { p_merchant_id: id }),
+        me ? sb.from('dish_likes').select('dish').eq('merchant_id', id) : Promise.resolve({ data: [] }),
+      ]);
+      cache.set(id, { counts: new Map((c.data || []).map((r) => [r.dish, r.likes])), mine: new Set((m.data || []).map((r) => r.dish)), at: Date.now() });
+    }
+    /** Cœurs de la carte affichée ; compteurs rechargés au besoin. */
+    function render(shop) {
+      if (!shop.isPro || !(shop.menu || []).length) return;
+      const c = cache.get(shop.id);
+      decorate(shop, c);
+      if (!c || Date.now() - c.at > 60 * 1000) load(shop.id).then(() => { if (selectedId === shop.id) decorate(shop, cache.get(shop.id)); }, () => {});
+    }
+    function decorate(shop, c) {
+      const own = isOwnShop(shop.id);
+      document.querySelectorAll('#shop-menu-list li').forEach((li) => {
+        const item = (shop.menu || [])[Number(li.dataset.i)];
+        if (!item) return;
+        const dish = String(item.name).trim();
+        let b = li.querySelector('.dish-like');
+        if (!b) {
+          b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'dish-like';
+          b.innerHTML = '<span class="dl-heart" aria-hidden="true"></span><span class="dl-n"></span>';
+          b.addEventListener('click', () => toggle(shop.id, dish));
+          li.appendChild(b);
+        }
+        const n = c ? c.counts.get(dish) || 0 : 0;
+        const on = !!(c && c.mine.has(dish));
+        b.dataset.dish = dish;
+        b.setAttribute('aria-pressed', String(on));
+        b.querySelector('.dl-heart').textContent = on ? '♥' : '♡';
+        b.querySelector('.dl-n').textContent = n ? String(n) : '';
+        if (own) {
+          b.setAttribute('aria-disabled', 'true');
+          b.setAttribute('aria-label', dish + ' : ' + n + ' « j\'aime » de vos clients');
+        } else {
+          b.removeAttribute('aria-disabled');
+          b.setAttribute('aria-label', (on ? 'Je n\'aime plus « ' : 'J\'aime « ') + dish + ' »' + (n ? ' (' + n + ' j\'aime)' : ''));
+        }
+      });
+    }
+    async function toggle(id, dish) {
+      if (!currentUser()) return;
+      const { data, error } = await sb.rpc('toggle_dish_like', { p_merchant_id: id, p_dish: dish });
+      if (error) { toast(missingFn(error) ? LIKES_SOON : cloudError(error)); return; }
+      const c = cache.get(id) || { counts: new Map(), mine: new Set(), at: 0 };
+      const was = c.mine.has(dish);
+      if (data && !was) { c.mine.add(dish); c.counts.set(dish, (c.counts.get(dish) || 0) + 1); }
+      if (!data && was) { c.mine.delete(dish); c.counts.set(dish, Math.max(0, (c.counts.get(dish) || 1) - 1)); }
+      cache.set(id, c);
+      const m = markers.get(id);
+      if (m && selectedId === id) decorate(m.shop, c);
+      if (data) toast('Vous aimez « ' + dish + ' » : le restaurant le saura (sans votre nom).');
+    }
+    return { render, cache };
+  })();
+
   /* ---------- Partage d'une fiche : lien direct ---------- */
   const shopLink = (id, tab) => location.origin + location.pathname + '?r=' + encodeURIComponent(id) + (tab ? '&t=' + tab : '');
   $('shop-share').addEventListener('click', async () => {
     const m = markers.get(selectedId);
     if (!m) return;
     const url = shopLink(m.shop.id);
+    Stats.track(m.shop.id, 'share');
     const best = activePromos(m.shop)[0];
     const text = m.shop.name + ' sur FlashMiam' + (best ? ' : ' + best.title : '');
     if (navigator.share) {
@@ -3853,7 +4235,7 @@
       const m = markers.get(link.id);
       if (!m) { toast('Ce restaurant n\'est plus visible sur la carte.'); return; }
       if (link.tab === 'story' && liveStories(m.shop).length) { StoryViewer.open(m.shop.id, { only: true }); return; }
-      openShop(m.shop.id);
+      openShop(m.shop.id, { source: link.source || 'link' });
       if (link.tab === 'reviews' || link.tab === 'menu') setShopTab(link.tab);
       if (link.tab === 'reviews') Reviews.refresh(m.shop.id);   // avis ou réponse tout juste publiés
     }));
@@ -3956,7 +4338,8 @@
         sb.from('notifications').update({ read_at: n.read_at }).eq('id', n.id).then(() => {}, () => {});
         paintBadge();
       }
-      if (n.merchant_id) openLink({ id: n.merchant_id, tab: tabFor(n) });
+      if (n.kind === 'promo' && n.merchant_id) Stats.track(n.merchant_id, 'offer', { ref: n.ref_id });
+      if (n.merchant_id) openLink({ id: n.merchant_id, tab: tabFor(n), source: 'notif' });
     }
 
     // Réglages : enregistrés dans le profil (communs à tous les appareils)
@@ -4045,7 +4428,7 @@
       navigator.serviceWorker.addEventListener('message', (ev) => {
         if (!ev.data || ev.data.type !== 'open') return;
         const u = new URL(ev.data.url, location.href);
-        if (u.searchParams.get('r')) openLink({ id: u.searchParams.get('r'), tab: u.searchParams.get('t') });
+        if (u.searchParams.get('r')) openLink({ id: u.searchParams.get('r'), tab: u.searchParams.get('t'), source: 'notif' });
       });
     }
     return { supported, register, renderPref, sync, alert };
@@ -4184,6 +4567,7 @@
     if (shop.phone) { $('shop-phone').textContent = shop.phone; $('shop-phone').href = 'tel:' + compactPhone(shop.phone); }
     renderGallery(shop);
     renderMenu(shop);
+    DishLikes.render(shop);
     syncShopTabs(shop);
     renderFollow(shop);
     Reviews.render(shop);
@@ -4267,7 +4651,7 @@
       if (on && focus) tab.focus();
       $('panel-' + tab.dataset.tab).hidden = !on;
     });
-    if (selectedId && (name === 'menu' || name === 'photos') && !tabsSeen.has(name)) {
+    if (selectedId && (name === 'menu' || name === 'photos' || name === 'reviews') && !tabsSeen.has(name)) {
       tabsSeen.add(name);
       Stats.track(selectedId, name);
     }
@@ -4392,134 +4776,89 @@
 
   /* ---------- Statistiques de fréquentation (par restaurant inscrit, par jour) ---------- */
   const Stats = (() => {
-    const EVENTS = { views: 'view', walk: 'walk', car: 'car', phone: 'phone', menu: 'menu', photos: 'photos', stories: 'story' };
-    const pad = (n) => String(n).padStart(2, '0');
-    const dayKey = (d = new Date()) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    const EVENTS = { views: 'view', walk: 'walk', car: 'car', phone: 'phone', menu: 'menu', photos: 'photos', stories: 'story',
+      share: 'share', reviews: 'reviews', google: 'google', story_cta: 'story_cta', offer: 'offer' };
     /** Évènement sur une fiche inscrite (la base ignore les visites du restaurateur sur sa propre fiche). */
-    function track(shopId, event) {
+    const LEGACY = new Set(['view', 'walk', 'car', 'phone', 'menu', 'photos', 'story']);
+    let legacy = false;   // base en ligne pas encore à jour : ancien compteur (vues et clics) en attendant
+    function track(shopId, event, { ref = null, source = null } = {}) {
       if (!restaurants()[shopId] || !EVENTS[event]) return;
-      sb.rpc('track_merchant_event', { p_merchant_id: shopId, p_event: EVENTS[event] }).then(() => {}, () => {});
+      const ev = EVENTS[event];
+      const old = () => { if (LEGACY.has(ev)) sb.rpc('track_merchant_event', { p_merchant_id: shopId, p_event: ev }).then(() => {}, () => {}); };
+      if (legacy) { old(); return; }
+      sb.rpc('track_visit', { p_merchant_id: shopId, p_event: ev, p_ref: ref && UUID_RE.test(ref) ? ref : null, p_source: source })
+        .then(({ error }) => { if (missingFn(error)) { legacy = true; old(); } }, () => {});
     }
-    /** Totaux et série quotidienne sur les `n` derniers jours (aujourd'hui inclus) du restaurateur connecté. */
-    async function summary(shopId, n) {
-      const since = new Date(); since.setDate(since.getDate() - (n - 1));
-      const [daily, totals, raw] = await Promise.all([
-        sb.rpc('my_merchant_stats', { p_days: n }),
-        sb.rpc('my_merchant_totals', { p_days: n }),
-        sb.from('merchant_stats').select('day, story_views').eq('merchant_id', shopId).gte('day', dayKey(since)),
-      ]);
-      if (daily.error) throw daily.error;
-      const rows = (daily.data || []).slice().sort((a, b) => a.day.localeCompare(b.day));
-      const sum = (k) => rows.reduce((acc, r) => acc + (r[k] || 0), 0);
-      const t = (totals.data && totals.data[0]) || { followers: 0, visitors: 0 };
-      return {
-        views: sum('views'), walk: sum('walk_clicks'), car: sum('car_clicks'), phone: sum('phone_clicks'), menu: sum('menu_views'), photos: sum('photo_views'),
-        stories: (raw.data || []).reduce((acc, r) => acc + (r.story_views || 0), 0),
-        visitors: t.visitors || 0, followers: t.followers || 0, newFollowers: sum('new_followers'),
-        series: rows.map((r) => ({ key: r.day, date: new Date(r.day + 'T12:00:00'), views: r.views, visitors: r.visitors, routes: r.walk_clicks + r.car_clicks, newFollowers: r.new_followers })),
-      };
-    }
-    return { track, summary };
+    return { track };
   })();
 
-  /** Graphique en colonnes (une série : vues par jour), avec info-bulle au survol et au clavier. */
-  function renderViewsChart(box, tip, series) {
+  /** Graphique en colonnes (une série), avec info-bulle au survol et au clavier.
+   *  items : [{ value, axis (étiquette sous la colonne), title et sub (info-bulle), aria }] */
+  function renderColumnChart(box, tip, items, { labelAt = null, ariaLabel = '', empty = 'Rien sur la période' } = {}) {
     const W = Math.max(260, box.clientWidth), H = 150, top = 16, bottom = 20, left = 26, right = 4;
     const plotW = W - left - right, plotH = H - top - bottom;
-    const max = Math.max(...series.map((d) => d.views));
+    const max = Math.max(0, ...items.map((d) => d.value));
     const step = max <= 4 ? 1 : max <= 10 ? 2 : max <= 25 ? 5 : max <= 50 ? 10 : Math.ceil(max / 50) * 10;
     const yMax = Math.max(step * 2, Math.ceil(max / (step * 2)) * step * 2);   // 0, milieu et haut : toujours des nombres entiers
     const y = (v) => top + plotH - (v / yMax) * plotH;
-    const slot = plotW / series.length;
-    const barW = Math.min(24, Math.max(3, slot - 2));            // 24 px au plus, 2 px d'écart entre colonnes
+    const slot = plotW / items.length;
+    const barW = Math.min(24, Math.max(2, slot - 2));            // 24 px au plus, 2 px d'écart entre colonnes
     const ns = 'http://www.w3.org/2000/svg';
     const el = (tag, attrs) => { const n = document.createElementNS(ns, tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); return n; };
-    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, height: H, role: 'img', 'aria-label': 'Vues de la fiche par jour' });
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, height: H, role: 'img', 'aria-label': ariaLabel });
     [0, yMax / 2, yMax].forEach((v) => {
       svg.appendChild(el('line', { class: 'grid-line', x1: left, x2: W - right, y1: Math.round(y(v)) + 0.5, y2: Math.round(y(v)) + 0.5 }));
       const t = el('text', { class: 'axis-text', x: left - 6, y: y(v) + 4, 'text-anchor': 'end' }); t.textContent = String(v); svg.appendChild(t);
     });
-    const fmt = (d) => d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-    const labelAt = new Set([0, Math.floor((series.length - 1) / 2), series.length - 1]);
-    const maxIndex = max > 0 ? series.map((d) => d.views).lastIndexOf(max) : -1;
-    series.forEach((d, i) => {
+    const labels = labelAt || new Set([0, Math.floor((items.length - 1) / 2), items.length - 1]);
+    const maxIndex = max > 0 ? items.map((d) => d.value).lastIndexOf(max) : -1;
+    items.forEach((d, i) => {
       const cx = left + slot * i + slot / 2, x = cx - barW / 2;
       const g = el('g', { class: 'col' });
-      if (d.views > 0) {
-        const h = Math.max(2, (d.views / yMax) * plotH), r = Math.min(4, barW / 2, h);
+      if (d.value > 0) {
+        const h = Math.max(2, (d.value / yMax) * plotH), r = Math.min(4, barW / 2, h);
         const yb = top + plotH;                                     // coins arrondis en haut, carrés sur la ligne de base
         g.appendChild(el('path', { class: 'bar', d: `M${x},${yb}V${yb - h + r}Q${x},${yb - h} ${x + r},${yb - h}H${x + barW - r}Q${x + barW},${yb - h} ${x + barW},${yb - h + r}V${yb}Z` }));
       }
-      const label = fmt(d.date) + ' : ' + d.views + (d.views > 1 ? ' vues' : ' vue') + ', ' + d.visitors + (d.visitors > 1 ? ' personnes' : ' personne');
-      const hit = el('rect', { class: 'hit', x: left + slot * i, y: top, width: slot, height: plotH + bottom, tabindex: 0, role: 'img', 'aria-label': label });
+      const hit = el('rect', { class: 'hit', x: left + slot * i, y: top, width: slot, height: plotH + bottom, tabindex: 0, role: 'img', 'aria-label': d.aria });
       const showTip = () => {
         g.classList.add('is-hover');
         tip.innerHTML = '<b></b><span></span>';
-        tip.firstChild.textContent = d.views + (d.views > 1 ? ' vues' : ' vue');
-        tip.lastChild.textContent = d.date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }) + ' · ' + d.visitors + (d.visitors > 1 ? ' personnes' : ' personne');
+        tip.firstChild.textContent = d.title;
+        tip.lastChild.textContent = d.sub;
         tip.hidden = false;
         const scale = box.clientWidth / W;
         tip.style.left = Math.min(Math.max(cx * scale, 60), box.clientWidth - 60) + 'px';
-        tip.style.top = (box.offsetTop + (d.views ? y(d.views) : top + plotH) * scale - 6) + 'px';
+        tip.style.top = (box.offsetTop + (d.value ? y(d.value) : top + plotH) * scale - 6) + 'px';
       };
       const hideTip = () => { g.classList.remove('is-hover'); tip.hidden = true; };
       hit.addEventListener('pointerenter', showTip); hit.addEventListener('pointerleave', hideTip);
       hit.addEventListener('focus', showTip); hit.addEventListener('blur', hideTip);
       g.appendChild(hit);
       if (i === maxIndex) {                                         // une seule valeur affichée : le maximum
-        const t = el('text', { class: 'value-text', x: cx, y: y(d.views) - 5, 'text-anchor': 'middle' }); t.textContent = String(d.views); g.appendChild(t);
+        const t = el('text', { class: 'value-text', x: cx, y: y(d.value) - 5, 'text-anchor': 'middle' }); t.textContent = String(d.value); g.appendChild(t);
       }
-      if (labelAt.has(i)) {
-        const t = el('text', { class: 'axis-text', x: cx, y: H - 4, 'text-anchor': i === 0 ? 'start' : i === series.length - 1 ? 'end' : 'middle' });
-        if (i === 0) t.setAttribute('x', left); if (i === series.length - 1) t.setAttribute('x', W - right);
-        t.textContent = fmt(d.date); g.appendChild(t);
+      if (labels.has(i)) {
+        const first = i === 0, last = i === items.length - 1;
+        const t = el('text', { class: 'axis-text', x: first ? left : last ? W - right : cx, y: H - 4, 'text-anchor': first ? 'start' : last ? 'end' : 'middle' });
+        t.textContent = d.axis; g.appendChild(t);
       }
       svg.appendChild(g);
     });
     box.textContent = '';
     box.appendChild(svg);
-    if (max === 0) { const p = document.createElement('p'); p.className = 'chart-empty'; p.textContent = 'Pas encore de visite sur la période'; box.appendChild(p); }
+    tip.hidden = true;
+    if (max === 0) { const p = document.createElement('p'); p.className = 'chart-empty'; p.textContent = empty; box.appendChild(p); }
   }
-
-  let statsDays = 7;
-  let statsToken = 0;
-  async function renderStats(account) {
-    const r = myRestaurant(account);
-    $('pd-stats').hidden = !(r && r.published);
-    if (!r || !r.published) return;
-    const token = ++statsToken;
-    let st;
-    try { st = await Stats.summary(r.id, statsDays); } catch (e) { return; }
-    if (token !== statsToken) return;          // période changée entre-temps
-    const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
-    const period = statsDays === 7 ? 'sur 7 jours' : 'sur 30 jours';
-    $('k-followers').textContent = st.followers.toLocaleString('fr-FR');
-    $('k-followers-d').textContent = st.newFollowers ? '+' + st.newFollowers + ' ' + period : 'aucun nouveau ' + period;
-    $('k-views').textContent = st.views.toLocaleString('fr-FR');
-    $('k-visitors').textContent = plural(st.visitors, 'personne', 'personnes');
-    $('k-routes').textContent = (st.walk + st.car).toLocaleString('fr-FR');
-    $('k-routes-d').textContent = 'à pied ' + st.walk + ' · en voiture ' + st.car;
-    $('k-calls').textContent = st.phone.toLocaleString('fr-FR');
-    $('k-menu').textContent = st.menu.toLocaleString('fr-FR');
-    $('k-photos').textContent = st.photos.toLocaleString('fr-FR');
-    $('k-stories').textContent = st.stories.toLocaleString('fr-FR');
-    $('k-rating').textContent = r.rating ? formatRating(r.rating.avg) + ' ★' : '–';
-    $('k-rating-d').textContent = r.rating ? r.rating.count + ' avis' : 'aucun avis pour l\'instant';
-    $('pd-chart-sub').textContent = period;
-    document.querySelectorAll('#pd-stats .seg button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.days) === statsDays)));
-    requestAnimationFrame(() => renderViewsChart($('pd-chart'), $('pd-tip'), st.series));
-    const tbody = $('pd-table').tBodies[0];
-    tbody.textContent = '';
-    st.series.slice().reverse().forEach((d) => {
-      const tr = tbody.insertRow();
-      [d.date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }), d.views, d.visitors, d.routes, d.newFollowers]
-        .forEach((v) => { tr.insertCell().textContent = String(v); });
-    });
+  /** Vues de la fiche par jour. */
+  function renderViewsChart(box, tip, series) {
+    const fmt = (d) => d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    renderColumnChart(box, tip, series.map((d) => ({
+      value: d.views, axis: fmt(d.date), title: plural(d.views, 'vue', 'vues'),
+      sub: d.date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }) + ' · ' + plural(d.visitors, 'personne', 'personnes'),
+      aria: fmt(d.date) + ' : ' + plural(d.views, 'vue', 'vues') + ', ' + plural(d.visitors, 'personne', 'personnes'),
+    })), { ariaLabel: 'Vues de la fiche par jour', empty: 'Pas encore de visite sur la période' });
   }
-  document.querySelectorAll('#pd-stats .seg button').forEach((b) => b.addEventListener('click', () => {
-    statsDays = Number(b.dataset.days);
-    renderStats(currentUser());
-  }));
 
   /** Profil client : restaurants suivis, avec leur offre du moment. */
   function renderFollows(account) {
@@ -4535,7 +4874,7 @@
       li.querySelector('strong').textContent = r.name;
       const best = activePromos(r)[0];
       li.querySelector('small').textContent = best ? promoLine(best) : catOf(r).label;
-      li.querySelector('button').addEventListener('click', () => { closePanel($('profile-sheet')); whenMapReady(() => openShop(id)); });
+      li.querySelector('button').addEventListener('click', () => { closePanel($('profile-sheet')); whenMapReady(() => openShop(id, { source: 'list' })); });
       list.appendChild(li);
     });
   }
@@ -4702,7 +5041,8 @@
       // Vue comptée (une fois par story et par appareil pour « vue », à chaque affichage pour les statistiques)
       const seen = readJson(SEEN_KEY);
       if (!seen[st.id]) { seen[st.id] = Date.now(); Object.keys(seen).forEach((k) => { if (Date.now() - seen[k] > 2 * STORY_TTL) delete seen[k]; }); writeJson(SEEN_KEY, seen); }
-      if (!isOwnShop(g.shop.id)) Stats.track(g.shop.id, 'stories');
+      if (!isOwnShop(g.shop.id)) Stats.track(g.shop.id, 'stories', { ref: st.id });
+      StoryLikes.paint(g.shop, st);
       elapsed = 0; start = performance.now();
       setPaused(false);
       raf = requestAnimationFrame(tick);
@@ -4737,7 +5077,12 @@
     }
     $('sv-close').addEventListener('click', close);
     $('sv-pause').addEventListener('click', () => setPaused(!paused));
-    $('sv-cta').addEventListener('click', () => { const id = groups[gi].shop.id; close(); whenMapReady(() => openShop(id)); });
+    $('sv-cta').addEventListener('click', () => {
+      const id = groups[gi].shop.id, st = current();
+      if (st && !isOwnShop(id)) Stats.track(id, 'story_cta', { ref: st.id });
+      close();
+      whenMapReady(() => openShop(id, { source: 'story' }));
+    });
     // Appui court : story suivante / précédente ; appui long : pause ; glisser vers le bas : fermer
     ['sv-prev', 'sv-next'].forEach((id) => {
       const el = $(id);
@@ -4884,23 +5229,27 @@
   })();
   $('pd-story-new').addEventListener('click', () => StoryComposer.open());
 
+  let storyAdminToken = 0;
   async function renderStoryAdmin(account) {
+    const token = ++storyAdminToken;
     const r = myRestaurant(account);
     $('pd-stories').hidden = !(r && r.published);
     if (!r || !r.published) return;
     const stories = liveStories(r);
-    const expired = (r.stories || []).filter((st) => !stories.includes(st));
-    if (expired.length) cleanupStories(expired);
+    const old = (r.stories || []).filter((st) => Date.now() - new Date(st.expiresAt) > STORY_KEEP_DAYS * 864e5);
+    if (old.length) cleanupStories(old);
     const list = $('pd-story-list');
-    list.textContent = '';
+    const items = document.createDocumentFragment();
     $('pd-story-new').disabled = stories.length >= MAX_STORIES;
-    if (!stories.length) { const li = document.createElement('li'); li.className = 'sa-empty'; li.textContent = 'Aucune story en ligne. Publiez une photo ou un message : nouveauté, plat du jour, ouverture exceptionnelle…'; list.appendChild(li); return; }
+    if (!stories.length) { const li = document.createElement('li'); li.className = 'sa-empty'; li.textContent = 'Aucune story en ligne. Publiez une photo ou un message : nouveauté, plat du jour, ouverture exceptionnelle…'; list.replaceChildren(li); return; }
     for (const st of stories.slice().reverse()) {
       const li = document.createElement('li');
       li.innerHTML = '<span class="sa-thumb"></span><small></small><button class="sa-del" type="button">&times;</button>';
       await fillStory(li.querySelector('.sa-thumb'), st, { blur: false });
       const left = Math.max(1, Math.round((new Date(st.expiresAt) - Date.now()) / 3600e3));
       li.querySelector('small').textContent = 'encore ' + left + ' h\npubliée ' + timeAgo(st.createdAt);
+      const stat = ProSpace.storyStats(st.id);
+      if (stat) { const n = document.createElement('small'); n.className = 'sa-stats'; n.textContent = '👁 ' + stat.views + ' · ♥ ' + stat.likes; n.setAttribute('aria-label', plural(stat.views, 'vue', 'vues') + ', ' + plural(stat.likes, 'j\'aime', 'j\'aime')); li.appendChild(n); }
       li.querySelector('.sa-del').setAttribute('aria-label', 'Supprimer la story publiée ' + timeAgo(st.createdAt));
       li.querySelector('.sa-del').addEventListener('click', async () => {
         if (!window.confirm('Supprimer cette story ?')) return;
@@ -4910,11 +5259,14 @@
         await refreshCloud();
         renderStoryAdmin(currentUser());
       });
-      list.appendChild(li);
+      items.appendChild(li);
     }
+    if (token === storyAdminToken) list.replaceChildren(items);   // une actualisation plus récente l'emporte
   }
 
-  /** Stories expirées du restaurateur : retirées de la base et leurs photos supprimées du stockage. */
+  /** Stories expirées depuis plus de 30 jours : retirées de la base et leurs photos supprimées du stockage
+   *  (gardées 30 jours après la fin de leur diffusion pour les statistiques de l'espace restaurateur). */
+  const STORY_KEEP_DAYS = 30;
   async function cleanupStories(expired) {
     const ids = expired.map((st) => st.id);
     const { error } = await sb.from('stories').delete().in('id', ids);
@@ -4958,7 +5310,8 @@
       li.querySelector('.pa-ico').textContent = PROMO_KINDS[p.kind].icon;
       li.querySelector('strong').textContent = p.title;
       const until = promoUntil(p);
-      li.querySelector('small').textContent = PROMO_KINDS[p.kind].label + (until ? ' · ' + until : ' · sans date de fin') + (p.details ? ' · ' + p.details : '');
+      const stat = ProSpace.promoStats(p.id);
+      li.querySelector('small').textContent = PROMO_KINDS[p.kind].label + (until ? ' · ' + until : ' · sans date de fin') + (p.details ? ' · ' + p.details : '') + (stat ? ' · 👆 ' + plural(stat.clicks, 'clic', 'clics') : '');
       li.querySelector('button').setAttribute('aria-label', 'Retirer la promotion « ' + p.title + ' »');
       li.querySelector('button').addEventListener('click', async () => {
         const { error } = await sb.from('promotions').delete().eq('id', p.id);
@@ -5005,7 +5358,8 @@
     return { top: 80, bottom: Math.min(sheetH, window.innerHeight * 0.6), left: 0, right: 0 };
   }
 
-  function openShop(id) {
+  /** Ouvre la fiche ; `source` : d'où vient la visite (carte, liste, recherche, offres, story, notification, lien partagé). */
+  function openShop(id, { source = null } = {}) {
     const m = markers.get(id);
     if (!m) return;
     if (selectedId && selectedId !== id) markers.get(selectedId).el.classList.remove('is-selected');
@@ -5013,7 +5367,7 @@
     selectedId = id;
     m.el.classList.add('is-selected');
     renderShop(m);
-    if (isNewVisit) { tabsSeen = new Set(); setShopTab('infos'); Stats.track(id, 'views'); }
+    if (isNewVisit) { tabsSeen = new Set(); setShopTab('infos'); Stats.track(id, 'views', { source }); }
     renderList();
     openPanel($('shop-sheet'));
     setFollow(false);
@@ -6576,28 +6930,585 @@
     $('profile-locate').hidden = state === 'active' || state === 'unavailable';
   }
 
-  /** Espace restaurateur dans le profil. */
-  function renderProDashboard(account) {
-    const isPro = account.role === 'pro';
-    $('pro-dash').hidden = !isPro;
-    if (!isPro) return;
-    const pro = account.pro || {};
-    const r = myRestaurant(account);
-    const date = (iso) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-    $('pd-name').textContent = r && r.status !== 'draft' ? r.name : '—';
-    $('pd-status').textContent = pro.suspended ? 'Suspendue par la modération' : r && r.published ? 'En ligne sur la carte' : 'Inscription à terminer';
-    $('pd-siret').textContent = pro.siret ? formatSiret(pro.siret) + (pro.company && pro.company.test ? ' (test)' : '') : '—';
-    $('pd-plan').textContent = pro.payment && pro.payment.status === 'paid'
-      ? 'Actif depuis le ' + date(pro.payment.paidAt) + (pro.payment.mode === 'demo' ? ' (démonstration)' : '')
-      : 'Non souscrit';
-    $('pd-show').hidden = !r;
-    $('pd-reviews').hidden = !(r && r.published);
-    renderStoryAdmin(account);
-    renderPromoAdmin(account);
-    renderStats(account);
-  }
+  /* ---------- Espace restaurateur : accueil, statistiques, publications, avis, fiche ---------- */
+  const ProSpace = (() => {
+    const root = $('pro-space');
+    const TABS = ['home', 'stats', 'publish', 'reviews', 'fiche'];
+    let tab = 'home', days = 7, data = null, token = 0, timer = null, lastFocus = null;
+    let rvList = null, rvFilter = 'todo', replyFor = null, rvToken = 0;
+    const isOpen = () => !root.hidden;
+    const nf = (n) => Number(n || 0).toLocaleString('fr-FR');
+    const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+    const shortDate = (d) => new Date(d + (String(d).length === 10 ? 'T12:00:00' : '')).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    const hourSlot = (h) => h + ' h – ' + ((h + 1) % 24) + ' h';
+    const starText = (n) => '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
 
-  $('profile-btn').addEventListener('click', () => {
+    /** Où en est le restaurateur : inscription, fiche en ligne, masquée, suspendue. */
+    function stateOf(account = currentUser()) {
+      const pro = (account && account.pro) || {};
+      const r = myRestaurant(account);
+      const listed = !!(r && r.status === 'published');
+      return { account, pro, r, step: proStepFor(account), suspended: !!pro.suspended, listed, live: !!(r && r.published), hidden: listed && !r.isOpen };
+    }
+
+    function open(t = 'home') {
+      const account = currentUser();
+      if (!account || account.role !== 'pro') return;
+      if (!isOpen()) lastFocus = document.activeElement;
+      if (activePanel) closePanel(activePanel);
+      root.hidden = false;
+      document.body.classList.add('pro-open');
+      setTab(t, { focus: true });
+      render();
+      load();
+      clearInterval(timer);
+      timer = setInterval(() => { if (!document.hidden && tab !== 'publish') load(); }, 60 * 1000);
+    }
+    function close() {
+      if (!isOpen()) return;
+      root.hidden = true;
+      clearInterval(timer);
+      replyFor = null;
+      document.body.classList.remove('pro-open');
+      if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+    }
+
+    function setTab(t, { focus = false } = {}) {
+      tab = TABS.includes(t) ? t : 'home';
+      TABS.forEach((k) => {
+        const b = $('pst-' + k);
+        b.setAttribute('aria-selected', String(k === tab));
+        b.tabIndex = k === tab ? 0 : -1;
+        $('psp-' + k).hidden = k !== tab;
+      });
+      $('ps-body').scrollTop = 0;
+      if (focus) $('pst-' + tab).focus({ preventScroll: true });
+      if (tab === 'stats') requestAnimationFrame(renderStatsTab);
+      if (tab === 'publish') renderPublish();
+      if (tab === 'reviews') loadReviews();
+      if (tab === 'fiche') renderFiche();
+    }
+    TABS.forEach((k, i) => {
+      const b = $('pst-' + k);
+      b.addEventListener('click', () => setTab(k));
+      b.addEventListener('keydown', (ev) => {
+        const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[ev.key];
+        if (!step) return;
+        ev.preventDefault();
+        setTab(TABS[(i + step + TABS.length) % TABS.length], { focus: true });
+      });
+    });
+    $('ps-close').addEventListener('click', close);
+    root.addEventListener('click', (ev) => { if (ev.target === root) close(); });
+    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && isOpen() && !activePanel && $('onboarding').hidden) { ev.preventDefault(); close(); } });
+
+    /** Chiffres de la période (et de la précédente), calculés par la base. */
+    async function load() {
+      const { r, listed } = stateOf();
+      if (!r || !listed) { data = null; return; }
+      const t = ++token;
+      const { data: d, error } = await sb.rpc('my_merchant_analytics', { p_days: days });
+      if (t !== token || !isOpen()) return;
+      if (error || !d) { if (!data) $('ps-period-sub').textContent = 'Statistiques indisponibles pour le moment.'; return; }
+      data = d;
+      renderHome();
+      badge();
+      if (tab === 'stats') renderStatsTab();
+      if (tab === 'publish') renderPublish();
+    }
+
+    function render() {
+      if (!isOpen()) return;
+      const s = stateOf();
+      const r = s.r;
+      $('ps-title').textContent = r && r.status !== 'draft' && r.name ? r.name : 'Mon restaurant';
+      $('ps-emoji').textContent = r ? catOf(r).emoji : '🍽️';
+      const sub = $('ps-sub');
+      sub.textContent = '';
+      const dot = document.createElement('span');
+      if (s.suspended) { dot.className = 'is-off'; dot.textContent = '● Suspendue'; }
+      else if (s.live) { dot.className = 'is-on'; dot.textContent = '● En ligne sur la carte'; }
+      else if (s.hidden) { dot.className = 'is-off'; dot.textContent = '● Masquée'; }
+      else { dot.className = 'is-off'; dot.textContent = '● Inscription à terminer'; }
+      sub.append(dot);
+      if (r && r.status !== 'draft') sub.append(' · ' + catOf(r).label);
+      renderHome();
+      badge();
+      if (tab === 'stats') renderStatsTab();
+      if (tab === 'publish') renderPublish();
+      if (tab === 'fiche') renderFiche();
+    }
+
+    function badge() {
+      const n = data ? data.totals.unanswered : rvList ? rvList.filter((x) => !x.reply).length : 0;
+      const b = $('ps-reviews-badge');
+      b.hidden = !n;
+      b.textContent = n > 9 ? '9+' : String(n);
+      $('pst-reviews').setAttribute('aria-label', 'Avis' + (n ? ', ' + plural(n, 'avis', 'avis') + ' sans réponse' : ''));
+    }
+
+    /* ----- Évolution par rapport à la période précédente ----- */
+    function trend(cur, prev) {
+      const el = document.createElement('span');
+      el.className = 'trend';
+      const ref = plural(days, 'jour', 'jours') + ' précédents : ' + nf(prev);
+      if (!cur && !prev) { el.textContent = '='; el.title = ref; el.setAttribute('aria-label', 'Stable (' + ref + ')'); return el; }
+      if (!prev) { el.classList.add('is-up'); el.textContent = '▲ +' + nf(cur); }
+      else {
+        const p = Math.round(((cur - prev) / prev) * 100);
+        el.classList.add(p > 0 ? 'is-up' : p < 0 ? 'is-down' : 'is-flat');
+        el.textContent = (p > 0 ? '▲ +' : p < 0 ? '▼ ' : '= ') + p + ' %';
+      }
+      el.title = ref;
+      el.setAttribute('aria-label', el.textContent.replace('▲', 'en hausse').replace('▼', 'en baisse') + ' (' + ref + ')');
+      return el;
+    }
+
+    /* ----- Accueil ----- */
+    function renderHome() {
+      if (!isOpen()) return;
+      const s = stateOf();
+      const { account, r } = s;
+      const hello = $('ps-hello');
+      hello.textContent = 'Bonjour ' + (account.name || '') + ' 👋';
+      const sm = document.createElement('small');
+      sm.textContent = s.listed ? 'Voici ce que vos clients ont fait ces ' + plural(days, 'dernier jour', 'derniers jours') + '.' : 'Bienvenue dans votre espace restaurateur.';
+      hello.appendChild(sm);
+      // Bandeau d'état
+      const alert = $('ps-alert'), btn = alert.querySelector('button');
+      alert.hidden = true; btn.hidden = false; btn.onclick = null;
+      if (s.suspended) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche est suspendue par la modération : elle n\'est plus visible. Écrivez-nous pour en savoir plus.'; btn.hidden = true; }
+      else if (s.step || !s.listed) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre inscription n\'est pas terminée : votre restaurant n\'apparaît pas encore sur la carte.'; btn.textContent = 'Terminer mon inscription'; btn.onclick = editListing; }
+      else if (s.hidden) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche est masquée : les clients ne la voient plus sur la carte.'; btn.textContent = 'Remettre en ligne'; btn.onclick = () => setVisible(true); }
+      $('ps-home-live').hidden = !s.listed;
+      if (!s.listed) return;
+      // Chiffres clés
+      const T = data ? data.totals : null, P = data ? data.previous : null;
+      const cards = $('ps-cards');
+      cards.textContent = '';
+      [
+        { key: 'views', ico: '👁️', label: 'Vues de la fiche', v: T && T.views, prev: P && P.views },
+        { key: 'visitors', ico: '🧑', label: 'Personnes', v: T && T.visitors, prev: P && P.visitors },
+        { key: 'routes', ico: '🧭', label: 'Itinéraires', v: T && T.walk + T.car, prev: P && P.routes },
+        { key: 'followers', ico: '❤️', label: 'Abonnés', v: T && T.followers, extra: T ? (T.new_followers ? '+' + nf(T.new_followers) + (T.new_followers > 1 ? ' nouveaux' : ' nouveau') : 'aucun nouveau') : '' },
+      ].forEach((c) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.id = 'hk-' + c.key;
+        b.innerHTML = '<span class="kpi-label"><span aria-hidden="true"></span><span></span></span><strong></strong>';
+        b.querySelector('.kpi-label span').textContent = c.ico;
+        b.querySelector('.kpi-label span:last-child').textContent = c.label;
+        b.querySelector('strong').textContent = T ? nf(c.v) : '…';
+        if (T && c.prev != null) b.appendChild(trend(c.v, c.prev));
+        if (T && c.extra) { const x = document.createElement('span'); x.className = 'trend' + (T.new_followers ? ' is-up' : ''); x.textContent = c.extra; b.appendChild(x); }
+        b.setAttribute('aria-label', c.label + ' : ' + (T ? nf(c.v) : 'chargement') + ' — voir les statistiques');
+        b.addEventListener('click', () => setTab('stats'));
+        cards.appendChild(b);
+      });
+      renderTodo(s);
+      renderInsights(s);
+    }
+
+    function renderTodo(s) {
+      const { r } = s;
+      const T = data ? data.totals : null;
+      const items = [];
+      if (T && T.unanswered) items.push({ ico: '💬', title: plural(T.unanswered, 'avis attend', 'avis attendent') + ' votre réponse', sub: 'Répondre montre que vous êtes à l\'écoute.', go: 'Répondre', run: () => setTab('reviews') });
+      if (s.live && !liveStories(r).length) items.push({ ico: '📸', title: 'Aucune story en ligne', sub: 'Plat du jour, nouveauté, coulisses : visible par tous pendant 24 h.', go: 'Publier', run: () => StoryComposer.open() });
+      if (s.live && !activePromos({ promos: r.promos }).length) items.push({ ico: '🎁', title: 'Aucune promotion en cours', sub: 'Elle apparaît dans « Offres autour de moi » et vos abonnés sont prévenus.', go: 'Créer', run: goPromo });
+      if (!r.photos.length) items.push({ ico: '🖼️', title: 'Ajoutez des photos', sub: 'Les fiches avec photos sont plus consultées.', go: 'Ajouter', run: editListing });
+      if (!r.menu.length) items.push({ ico: '📖', title: 'Ajoutez votre carte', sub: 'Vos plats deviennent trouvables dans la recherche et les clients peuvent les aimer.', go: 'Ajouter', run: editListing });
+      if (!r.phone) items.push({ ico: '📞', title: 'Ajoutez votre numéro', sub: 'Les clients pourront vous appeler en un geste.', go: 'Ajouter', run: editListing });
+      const ul = $('ps-todo');
+      ul.textContent = '';
+      if (!items.length) { const li = document.createElement('li'); li.className = 'is-done'; li.textContent = '✓ Tout est à jour. Bravo !'; ul.appendChild(li); return; }
+      items.forEach((it) => {
+        const li = document.createElement('li');
+        li.innerHTML = '<button type="button"><span class="td-ico" aria-hidden="true"></span><span class="td-txt"><b></b><small></small></span><span class="td-go"></span></button>';
+        li.querySelector('.td-ico').textContent = it.ico;
+        li.querySelector('b').textContent = it.title;
+        li.querySelector('small').textContent = it.sub;
+        li.querySelector('.td-go').textContent = it.go + ' ›';
+        li.querySelector('button').addEventListener('click', it.run);
+        ul.appendChild(li);
+      });
+    }
+
+    const SOURCES = [
+      ['map', '🗺️', 'la carte'], ['list', '📋', 'la liste des commerces'], ['search', '🔎', 'la recherche'], ['offers', '🎁', '« Offres autour de moi »'],
+      ['story', '📸', 'vos stories'], ['notif', '🔔', 'les notifications'], ['link', '🔗', 'un lien partagé'],
+    ];
+    function renderInsights(s) {
+      const ul = $('ps-insights');
+      ul.textContent = '';
+      const add = (ico, html) => { const li = document.createElement('li'); li.innerHTML = '<span aria-hidden="true"></span><span></span>'; li.firstChild.textContent = ico; li.lastChild.append(...html); ul.appendChild(li); };
+      const b = (t) => { const e = document.createElement('b'); e.textContent = t; return e; };
+      if (!data) { add('⏳', ['Chargement des statistiques…']); return; }
+      const T = data.totals;
+      if (!T.views && !T.followers && !T.story_views) {
+        add('🚀', ['Pas encore de visite sur la période. Partagez le lien de votre fiche et publiez une story pour vous faire connaître.']);
+        return;
+      }
+      const hours = data.hours || [];
+      const maxH = Math.max(0, ...hours);
+      if (maxH > 0) add('🕐', ['On regarde surtout votre fiche ', b('entre ' + hourSlot(hours.indexOf(maxH)).replace(' – ', ' et ')), ' : c\'est le bon moment pour publier une story.']);
+      const src = SOURCES.map(([k, ico, label]) => ({ k, ico, label, n: data.sources[k] || 0 })).sort((a, z) => z.n - a.n);
+      const srcTotal = src.reduce((a, x) => a + x.n, 0);
+      if (srcTotal) add(src[0].ico, ['La plupart de vos visiteurs arrivent par ', b(src[0].label), ' (' + pct(src[0].n, srcTotal) + ' %).']);
+      if (T.views) {
+        const routes = T.walk + T.car;
+        add('🧭', [b(pct(routes, T.views) + ' %'), ' des visites se terminent par une demande d\'itinéraire' + (T.phone ? ', et ' + plural(T.phone, 'personne a', 'personnes ont') + ' appelé.' : '.')]);
+      }
+      const best = (data.stories || []).slice().sort((a, z) => z.views - a.views)[0];
+      if (best && best.views) add('📸', ['Votre meilleure story (' + timeAgo(best.created_at) + ') a été vue par ', b(plural(best.views, 'personne', 'personnes')), best.likes ? ' et aimée ' + plural(best.likes, 'fois', 'fois') + '.' : '.']);
+      if (data.dishes && data.dishes.length) add('♥', ['Plat le plus aimé : ', b('« ' + data.dishes[0].dish + ' »'), ' (' + plural(data.dishes[0].likes, 'j\'aime', 'j\'aime') + ').']);
+      if (T.returning) add('🔁', [b(plural(T.returning, 'client est revenu', 'clients sont revenus')), ' voir votre fiche plusieurs jours différents.']);
+      if (T.shares) add('🔗', ['Votre fiche a été partagée ', b(plural(T.shares, 'fois', 'fois')), '.']);
+    }
+
+    /* ----- Statistiques ----- */
+    function kpi(id, label, value, { trendOf = null, sub = '' } = {}) {
+      const d = document.createElement('div');
+      d.className = 'kpi';
+      d.innerHTML = '<span class="kpi-label"></span><strong></strong>';
+      d.querySelector('.kpi-label').textContent = label;
+      const st = d.querySelector('strong');
+      st.id = 'k-' + id;
+      st.textContent = value;
+      if (trendOf) d.appendChild(trend(trendOf[0], trendOf[1]));
+      if (sub) { const s = document.createElement('small'); s.className = 'kpi-sub'; s.id = 'k-' + id + '-d'; s.textContent = sub; d.appendChild(s); }
+      return d;
+    }
+    function hbars(box, rows, { empty = 'Rien pour l\'instant.', share = false } = {}) {
+      box.textContent = '';
+      const max = Math.max(0, ...rows.map((x) => x.n));
+      const total = rows.reduce((a, x) => a + x.n, 0);
+      if (!max) { const p = document.createElement('p'); p.className = 'hbars-empty'; p.textContent = empty; box.appendChild(p); return; }
+      rows.forEach((x) => {
+        const row = document.createElement('div');
+        row.className = 'hbar';
+        row.dataset.key = x.key || '';
+        row.innerHTML = '<span></span><b></b><i aria-hidden="true"><u></u></i>';
+        row.firstChild.textContent = x.label;
+        row.querySelector('b').textContent = nf(x.n);
+        if (share) { const sm = document.createElement('small'); sm.textContent = pct(x.n, total) + ' %'; row.querySelector('b').appendChild(sm); }
+        row.querySelector('u').style.width = (x.n / max * 100).toFixed(1) + '%';
+        box.appendChild(row);
+      });
+    }
+
+    function renderStatsTab() {
+      if (!isOpen() || tab !== 'stats') return;
+      document.querySelectorAll('#ps-period button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.days) === days)));
+      if (!data) { $('ps-period-sub').textContent = stateOf().listed ? 'Chargement…' : 'Les statistiques apparaîtront quand votre fiche sera en ligne.'; return; }
+      const T = data.totals, P = data.previous;
+      $('ps-period-sub').textContent = 'Du ' + shortDate(data.period.from) + ' au ' + shortDate(data.period.to) + ' · évolution comparée aux ' + plural(days, 'jour', 'jours') + ' précédents';
+      const k = $('ps-kpis');
+      k.textContent = '';
+      k.append(
+        kpi('views', 'Vues de la fiche', nf(T.views), { trendOf: [T.views, P.views] }),
+        kpi('visitors', 'Personnes différentes', nf(T.visitors), { trendOf: [T.visitors, P.visitors] }),
+        kpi('routes', 'Itinéraires demandés', nf(T.walk + T.car), { trendOf: [T.walk + T.car, P.routes], sub: 'à pied ' + nf(T.walk) + ' · en voiture ' + nf(T.car) }),
+        kpi('calls', 'Appels', nf(T.phone), { trendOf: [T.phone, P.phone], sub: 'clics sur le numéro' }),
+        kpi('followers', 'Abonnés', nf(T.followers), { sub: '+' + nf(T.new_followers) + ' · −' + nf(T.lost_followers) + ' sur la période' }),
+        kpi('shares', 'Partages de la fiche', nf(T.shares), { trendOf: [T.shares, P.shares] }),
+        kpi('stories', 'Stories vues', nf(T.story_views), { trendOf: [T.story_views, P.story_views], sub: '♥ ' + nf(T.story_likes) + ' · fiche ouverte ' + nf(T.story_cta) }),
+        kpi('rating', 'Note moyenne', T.rating ? formatRating(T.rating) + ' ★' : '–', { sub: T.reviews ? plural(T.reviews, 'avis', 'avis') + (T.new_reviews ? ' · ' + nf(T.new_reviews) + ' nouveau' + (T.new_reviews > 1 ? 'x' : '') : '') : 'aucun avis pour l\'instant' }),
+      );
+      // Vues par jour
+      const series = (data.daily || []).map((d) => ({ key: d.day, date: new Date(d.day + 'T12:00:00'), views: d.views, visitors: d.visitors, routes: d.routes, phone: d.phone, stories: d.story_views, newFollowers: d.new_followers }));
+      $('pd-chart-sub').textContent = 'sur ' + plural(days, 'jour', 'jours');
+      renderViewsChart($('pd-chart'), $('pd-tip'), series);
+      const tbody = $('pd-table').tBodies[0];
+      tbody.textContent = '';
+      series.slice().reverse().forEach((d) => {
+        const tr = tbody.insertRow();
+        [d.date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }), d.views, d.visitors, d.routes, d.phone, d.stories, d.newFollowers]
+          .forEach((v) => { tr.insertCell().textContent = String(v); });
+      });
+      // Vues par heure
+      const hours = data.hours || [];
+      const maxH = Math.max(0, ...hours);
+      $('ps-hours-sub').textContent = maxH ? 'Pic d\'affluence : ' + hourSlot(hours.indexOf(maxH)) + ' (heure de Paris)' : 'heure de Paris';
+      renderColumnChart($('ps-hours'), $('ps-hours-tip'), hours.map((v, h) => ({
+        value: v, axis: h + ' h', title: plural(v, 'vue', 'vues'), sub: hourSlot(h), aria: hourSlot(h) + ' : ' + plural(v, 'vue', 'vues'),
+      })), { labelAt: new Set([0, 6, 12, 18, 23]), ariaLabel: 'Vues de la fiche selon l\'heure', empty: 'Pas encore de visite sur la période' });
+      const hb = $('ps-hours-table').tBodies[0];
+      hb.textContent = '';
+      hours.forEach((v, h) => { if (!v) return; const tr = hb.insertRow(); tr.insertCell().textContent = hourSlot(h); tr.insertCell().textContent = String(v); });
+      if (!hb.rows.length) { const tr = hb.insertRow(); tr.className = 'empty'; const td = tr.insertCell(); td.colSpan = 2; td.textContent = 'Aucune vue sur la période.'; }
+      // Provenance
+      hbars($('ps-sources'), SOURCES.map(([key, ico, label]) => ({ key, label: ico + ' ' + label.charAt(0).toUpperCase() + label.slice(1), n: data.sources[key] || 0 })).sort((a, z) => z.n - a.n),
+        { share: true, empty: 'Pas encore de visite sur la période.' });
+      // Actions sur la fiche
+      hbars($('ps-acts'), [
+        { key: 'menu', label: '📖 Menu consulté', n: T.menu }, { key: 'photos', label: '🖼️ Photos regardées', n: T.photos },
+        { key: 'reviews', label: '⭐ Avis lus', n: T.reviews_tab }, { key: 'walk', label: '🚶 Itinéraire à pied', n: T.walk },
+        { key: 'car', label: '🚗 Itinéraire en voiture', n: T.car }, { key: 'phone', label: '📞 Appel', n: T.phone },
+        { key: 'share', label: '🔗 Partage de la fiche', n: T.shares }, { key: 'google', label: '🌐 Avis Google ouverts', n: T.google },
+        { key: 'offer', label: '🎁 Clic sur une de vos offres', n: T.offer_clicks }, { key: 'story_cta', label: '📸 Fiche ouverte depuis une story', n: T.story_cta },
+        { key: 'story_like', label: '♥ « J\'aime » sur une story', n: T.story_likes },
+      ], { empty: 'Aucune action sur la période.' });
+      // Abonnés et fidélité
+      const fans = $('ps-fans');
+      fans.textContent = '';
+      [['Abonnés', nf(T.followers)], ['Nouveaux abonnés', '+' + nf(T.new_followers)], ['Désabonnements', '−' + nf(T.lost_followers)],
+        ['Clients revenus (2 jours ou plus)', nf(T.returning) + (T.visitors ? ' sur ' + nf(T.visitors) : '')], ['« J\'aime » sur vos plats', nf(T.dish_likes)]]
+        .forEach(([a, z]) => { const d = document.createElement('div'); d.innerHTML = '<dt></dt><dd></dd>'; d.firstChild.textContent = a; d.lastChild.textContent = z; fans.appendChild(d); });
+      // Stories
+      const sb2 = $('ps-stories-table').tBodies[0];
+      sb2.textContent = '';
+      (data.stories || []).forEach((row) => {
+        const st = storyFromRow({ ...row, merchant_id: stateOf().r.id });
+        const tr = sb2.insertRow();
+        const c = tr.insertCell();
+        c.innerHTML = '<div class="st-cell"><span class="sa-thumb" aria-hidden="true"></span><span><span class="st-cap"></span><small></small></span></div>';
+        fillStory(c.querySelector('.sa-thumb'), st, { blur: false });
+        c.querySelector('.st-cap').textContent = st.text ? (st.text.length > 40 ? st.text.slice(0, 39) + '…' : st.text) : st.imagePath ? 'Photo' : 'Story';
+        const live = new Date(st.expiresAt) > Date.now();
+        const sm = c.querySelector('small');
+        sm.textContent = timeAgo(st.createdAt) + (live ? ' · ' : '');
+        if (live) { const l = document.createElement('span'); l.className = 'is-live'; l.textContent = 'en ligne'; sm.appendChild(l); }
+        tr.insertCell().textContent = nf(row.views);
+        tr.insertCell().textContent = nf(row.likes);
+        const cl = tr.insertCell();
+        cl.textContent = nf(row.clicks);
+        if (row.views) { const sm = document.createElement('small'); sm.textContent = ' · ' + pct(row.clicks, row.views) + ' %'; cl.appendChild(sm); }
+      });
+      if (!sb2.rows.length) { const tr = sb2.insertRow(); tr.className = 'empty'; const td = tr.insertCell(); td.colSpan = 4; td.textContent = 'Aucune story ces 30 derniers jours.'; }
+      // Promotions
+      const pb = $('ps-promos-table').tBodies[0];
+      pb.textContent = '';
+      (data.promos || []).forEach((p) => {
+        const tr = pb.insertRow();
+        tr.insertCell().textContent = ((PROMO_KINDS[p.kind] || {}).icon || '🎁') + ' ' + p.title;
+        const st = tr.insertCell();
+        st.textContent = p.active ? 'en cours' : 'terminée';
+        if (p.active) st.className = 'is-live';
+        tr.insertCell().textContent = nf(p.clicks);
+      });
+      if (!pb.rows.length) { const tr = pb.insertRow(); tr.className = 'empty'; const td = tr.insertCell(); td.colSpan = 3; td.textContent = 'Aucune promotion ces 30 derniers jours.'; }
+      // Plats
+      hbars($('ps-dishes'), (data.dishes || []).map((d) => ({ label: d.dish, n: d.likes })),
+        { empty: stateOf().r.menu.length ? 'Pas encore de « j\'aime » sur vos plats.' : 'Ajoutez votre carte (Ma fiche › Modifier) pour que les clients puissent aimer vos plats.' });
+    }
+    document.querySelectorAll('#ps-period button').forEach((b) => b.addEventListener('click', () => {
+      days = Number(b.dataset.days);
+      data = null;
+      renderStatsTab();
+      load();
+    }));
+    let resizeTimer = null;
+    window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (isOpen() && tab === 'stats') renderStatsTab(); }, 200); });
+
+    /* ----- Publier ----- */
+    function renderPublish() {
+      const s = stateOf();
+      const off = $('ps-publish-off');
+      off.hidden = s.live;
+      off.textContent = s.suspended ? 'Votre fiche est suspendue : publication impossible.'
+        : s.hidden ? 'Votre fiche est masquée : remettez-la en ligne (onglet « Ma fiche ») pour publier des stories et des promotions.'
+        : 'Terminez votre inscription pour publier des stories et des promotions.';
+      renderStoryAdmin(s.account);
+      renderPromoAdmin(s.account);
+    }
+    function goPromo() {
+      setTab('publish');
+      requestAnimationFrame(() => { $('pd-promo-form').scrollIntoView({ block: 'center', behavior: 'smooth' }); $('pp-title').focus({ preventScroll: true }); });
+    }
+    const storyStats = (id) => (data && (data.stories || []).find((x) => x.id === id)) || null;
+    const promoStats = (id) => (data && (data.promos || []).find((x) => x.id === id)) || null;
+
+    /* ----- Avis : lecture et réponse sans quitter l'espace ----- */
+    async function loadReviews() {
+      const r = myRestaurant();
+      if (!r) return;
+      const t = ++rvToken;
+      if (!rvList) renderReviews();
+      const { data: rows, error } = await sb.from('reviews').select('*').eq('merchant_id', r.id).order('created_at', { ascending: false }).limit(200);
+      if (t !== rvToken) return;
+      if (error) { toast(cloudError(error)); return; }
+      rvList = rows || [];
+      renderReviews();
+      badge();
+    }
+    function renderReviews() {
+      const r = myRestaurant();
+      const sum = $('ps-rv-summary'), ul = $('ps-rv-list');
+      sum.textContent = ''; ul.textContent = '';
+      document.querySelectorAll('#ps-rv-filter button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.f === rvFilter)));
+      $('pd-reviews').hidden = !(r && r.published);
+      if (!rvList) { const li = document.createElement('li'); li.className = 'rv-empty'; li.textContent = 'Chargement des avis…'; ul.appendChild(li); return; }
+      const todo = rvList.filter((x) => !x.reply);
+      $('ps-rv-filter').querySelector('[data-f="todo"]').textContent = 'À répondre' + (todo.length ? ' (' + todo.length + ')' : '');
+      if (rvList.length) {
+        const avg = rvList.reduce((a, x) => a + x.rating, 0) / rvList.length;
+        sum.innerHTML = '<strong></strong><div><span class="stars" aria-hidden="true"></span><small></small></div>';
+        sum.querySelector('strong').textContent = formatRating(avg);
+        sum.querySelector('.stars').textContent = starText(Math.round(avg));
+        sum.querySelector('small').textContent = plural(rvList.length, 'avis', 'avis') + ' · ' + (todo.length ? plural(todo.length, 'sans réponse', 'sans réponse') : 'toutes avec réponse');
+      }
+      const list = rvFilter === 'todo' ? todo : rvList;
+      if (!list.length) {
+        const li = document.createElement('li'); li.className = 'rv-empty';
+        li.textContent = !rvList.length ? 'Pas encore d\'avis. Ils apparaîtront ici dès qu\'un client en publiera un.' : 'Vous avez répondu à tous les avis 👍';
+        ul.appendChild(li); return;
+      }
+      list.forEach((x) => ul.appendChild(reviewItem(r, x)));
+    }
+    function reviewItem(r, x) {
+      const li = document.createElement('li');
+      li.className = 'rv-item' + (x.reply ? '' : ' is-todo');
+      li.dataset.id = x.id;
+      li.innerHTML = '<div class="rv-head"><span><span class="stars"></span> <b></b></span><small></small></div>';
+      li.querySelector('.stars').textContent = starText(x.rating);
+      li.querySelector('.stars').setAttribute('aria-label', x.rating + ' sur 5');
+      li.querySelector('b').textContent = x.author_name;
+      li.querySelector('small').textContent = timeAgo(x.created_at);
+      if (x.comment) { const p = document.createElement('p'); p.className = 'rv-text'; p.textContent = x.comment; li.appendChild(p); }
+      if (x.reply && replyFor !== x.id) {
+        const rp = document.createElement('div'); rp.className = 'rv-reply'; rp.innerHTML = '<b></b>';
+        rp.querySelector('b').textContent = 'Votre réponse' + (x.replied_at ? ' · ' + timeAgo(x.replied_at) : '');
+        rp.append(x.reply); li.appendChild(rp);
+      }
+      if (replyFor === x.id) { li.appendChild(replyForm(r, x)); return li; }
+      const tools = document.createElement('div'); tools.className = 'rv-tools';
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = x.reply ? 'Modifier la réponse' : 'Répondre';
+      b.addEventListener('click', () => { replyFor = x.id; renderReviews(); const t = $('ps-rv-list').querySelector('textarea'); if (t) t.focus(); });
+      tools.appendChild(b); li.appendChild(tools);
+      return li;
+    }
+    function replyForm(r, x) {
+      const f = document.createElement('form');
+      f.className = 'rv-reply-form'; f.noValidate = true;
+      f.innerHTML = '<label class="field"><span>Votre réponse <small class="counter">0 / 600</small></span><textarea rows="3" maxlength="600"></textarea><small class="field-error" aria-live="polite"></small></label>' +
+        '<div class="rv-actions"><button class="btn btn-ghost" type="button">Annuler</button><button class="btn btn-primary" type="submit">Publier la réponse</button></div>';
+      const ta = f.querySelector('textarea'), count = f.querySelector('.counter'), err = f.querySelector('.field-error');
+      ta.value = x.reply || '';
+      const upd = () => { count.textContent = ta.value.length + ' / 600'; err.textContent = ''; };
+      upd(); ta.addEventListener('input', upd);
+      f.querySelector('.btn-ghost').addEventListener('click', () => { replyFor = null; renderReviews(); });
+      f.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const text = ta.value.trim();
+        if (text.length < 2) { err.textContent = 'Écrivez votre réponse (2 caractères au moins).'; ta.focus(); return; }
+        const btn = f.querySelector('.btn-primary');
+        btn.disabled = true;
+        const { error } = await sb.from('reviews').update({ reply: text }).eq('id', x.id);
+        btn.disabled = false;
+        if (error) { err.textContent = cloudError(error); return; }
+        Push.send(r.id);
+        Reviews.cache.delete(r.id);
+        replyFor = null;
+        toast('Réponse publiée : le client est prévenu.');
+        await loadReviews();
+        load();
+      });
+      return f;
+    }
+    document.querySelectorAll('#ps-rv-filter button').forEach((b) => b.addEventListener('click', () => { rvFilter = b.dataset.f; replyFor = null; renderReviews(); }));
+
+    /* ----- Ma fiche ----- */
+    function renderFiche() {
+      const s = stateOf();
+      const { pro, r } = s;
+      const date = (iso) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+      $('pd-name').textContent = r && r.status !== 'draft' ? r.name : '—';
+      $('pd-status').textContent = s.suspended ? 'Suspendue par la modération' : s.live ? 'En ligne sur la carte' : s.hidden ? 'Masquée (invisible sur la carte)' : 'Inscription à terminer';
+      $('pd-siret').textContent = pro.siret ? formatSiret(pro.siret) + (pro.company && pro.company.test ? ' (test)' : '') : '—';
+      $('pd-plan').textContent = pro.payment && pro.payment.status === 'paid'
+        ? 'Actif depuis le ' + date(pro.payment.paidAt) + (pro.payment.mode === 'demo' ? ' (démonstration)' : '')
+        : 'Non souscrit';
+      $('pd-show').hidden = !s.live;
+      $('ps-share').hidden = !s.live;
+      $('pd-edit').textContent = s.step ? 'Terminer mon inscription' : 'Modifier ma fiche';
+      // Fiche complète ?
+      const checks = r ? [
+        ['Nom et catégorie', !!(r.name && r.status !== 'draft'), r.status !== 'draft' ? catOf(r).label : ''],
+        ['Adresse sur la carte', !!(r.address && r.coords), r.address ? r.address.split(' ').slice(0, 4).join(' ') + '…' : ''],
+        ['Description', (r.description || '').length >= 30, (r.description || '').length ? plural(r.description.length, 'caractère', 'caractères') : 'à écrire'],
+        ['Photos', r.photos.length > 0, r.photos.length ? plural(r.photos.length, 'photo', 'photos') : 'aucune'],
+        ['Carte (menu)', r.menu.length > 0, r.menu.length ? plural(r.menu.length, 'plat', 'plats') : 'vide'],
+        ['Horaires d\'ouverture', r.hours.length > 0, r.hours.length ? plural(r.hours.length, 'service', 'services') : 'non renseignés'],
+        ['Téléphone', !!r.phone, r.phone || 'non renseigné'],
+      ] : [];
+      const ok = checks.filter((c) => c[1]).length;
+      const p = checks.length ? Math.round((ok / checks.length) * 100) : 0;
+      $('ps-complete-pct').textContent = p + ' %';
+      $('ps-complete-bar').style.width = p + '%';
+      const ul = $('ps-checklist');
+      ul.textContent = '';
+      checks.forEach(([label, done, info]) => {
+        const li = document.createElement('li');
+        li.className = done ? 'is-ok' : '';
+        li.innerHTML = '<span aria-hidden="true"></span><span></span><small></small>';
+        li.firstChild.textContent = done ? '✓' : '';
+        li.children[1].textContent = label;
+        li.lastChild.textContent = info;
+        li.setAttribute('aria-label', label + ' : ' + (done ? 'fait' : 'à compléter') + (info ? ' (' + info + ')' : ''));
+        ul.appendChild(li);
+      });
+      // Visibilité
+      const sw = $('ps-visible');
+      sw.disabled = !s.listed || s.suspended;
+      sw.setAttribute('aria-checked', String(s.live));
+      $('ps-vis-hint').textContent = s.suspended ? 'Fiche suspendue par la modération.'
+        : !s.listed ? 'Disponible une fois votre fiche publiée.'
+        : s.live ? 'Les clients voient votre fiche, vos stories et vos promotions. Masquez-la en cas de fermeture exceptionnelle.'
+        : 'Masquée : personne ne la voit. Vos abonnés, vos avis et vos statistiques sont conservés.';
+    }
+    async function setVisible(on) {
+      const { r, listed } = stateOf();
+      if (!r || !listed) return;
+      if (!on && !window.confirm('Masquer votre fiche ?\n\nElle n\'apparaîtra plus sur la carte, dans la recherche ni dans les offres, jusqu\'à ce que vous la remettiez en ligne.')) return;
+      $('ps-visible').disabled = true;
+      const { error } = await Loader.run(sb.from('merchants').update({ is_open: on }).eq('id', r.id), on ? 'Remise en ligne…' : 'Masquage de la fiche…');
+      $('ps-visible').disabled = false;
+      if (error) { toast(cloudError(error)); return; }
+      await refreshCloud();
+      render();
+      renderFiche();
+      toast(on ? 'Votre fiche est de nouveau visible sur la carte.' : 'Votre fiche est masquée. Remettez-la en ligne quand vous voulez.');
+    }
+    $('ps-visible').addEventListener('click', () => setVisible($('ps-visible').getAttribute('aria-checked') !== 'true'));
+
+    /* ----- Actions ----- */
+    function editListing() {
+      close();
+      const step = proStepFor(currentUser());
+      showAuthStep(step || 'pro-listing', { mode: step ? 'create' : 'edit' });
+    }
+    function showOnMap(tabName) {
+      const r = myRestaurant();
+      if (!r || !r.published) return;
+      close();
+      whenMapReady(() => { openShop(r.id); if (tabName) setShopTab(tabName); });
+    }
+    async function shareListing() {
+      const r = myRestaurant();
+      if (!r || !r.published) return;
+      const url = shopLink(r.id);
+      if (navigator.share) {
+        try { await navigator.share({ title: r.name, text: r.name + ' sur FlashMiam', url }); return; }
+        catch (e) { if (e && e.name === 'AbortError') return; }
+      }
+      try { await navigator.clipboard.writeText(url); toast('Lien de votre fiche copié : collez-le sur vos réseaux, dans un message…'); }
+      catch (e) { toast('Lien de votre fiche : ' + url); }
+    }
+    const ACTIONS = { story: () => StoryComposer.open(), promo: goPromo, reviews: () => setTab('reviews'), edit: editListing, show: () => showOnMap(), share: shareListing };
+    $('ps-quick').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => ACTIONS[b.dataset.act]()));
+    $('ps-more-stats').addEventListener('click', () => setTab('stats'));
+    $('pd-edit').addEventListener('click', editListing);
+    $('pd-show').addEventListener('click', () => showOnMap());
+    $('pd-reviews').addEventListener('click', () => showOnMap('reviews'));
+    $('ps-share').addEventListener('click', shareListing);
+    $('ps-account').addEventListener('click', () => { close(); openProfileSheet(); });
+
+    return { open, close, isOpen, render, refresh: load, storyStats, promoStats, tab: () => tab };
+  })();
+
+  /** Profil (compte) : pour un restaurateur, l'avatar ouvre d'abord son espace restaurateur. */
+  function openProfileSheet() {
     const account = currentUser();
     if (!account) return;
     $('profile-avatar').textContent = initial(account.name);
@@ -6607,26 +7518,17 @@
     if (account.role === 'pro') { const tag = document.createElement('span'); tag.className = 'role-tag'; tag.textContent = 'Restaurateur'; $('profile-email').append(' ', tag); }
     $('profile-since').textContent = new Date(account.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
     updateProfileGeo();
-    $('profile-sheet').classList.toggle('is-pro', account.role === 'pro');
-    renderProDashboard(account);
+    $('pro-entry').hidden = account.role !== 'pro';
     renderFollows(account);
     openPanel($('profile-sheet'), { modal: true });
+  }
+  $('profile-btn').addEventListener('click', () => {
+    const account = currentUser();
+    if (!account) return;
+    if (account.role === 'pro') ProSpace.open();
+    else openProfileSheet();
   });
-  $('pd-edit').addEventListener('click', () => {
-    closePanel($('profile-sheet'));
-    const step = proStepFor(currentUser());
-    showAuthStep(step || 'pro-listing', { mode: step ? 'create' : 'edit' });
-  });
-  $('pd-reviews').addEventListener('click', () => {
-    const r = myRestaurant();
-    closePanel($('profile-sheet'));
-    if (r) whenMapReady(() => { openShop(r.id); setShopTab('reviews'); });
-  });
-  $('pd-show').addEventListener('click', () => {
-    const r = myRestaurant();
-    closePanel($('profile-sheet'));
-    if (r) whenMapReady(() => openShop(r.id));
-  });
+  $('profile-pro').addEventListener('click', () => ProSpace.open());
   $('profile-locate').addEventListener('click', () => {
     closePanel($('profile-sheet'));
     requestLocation({ fly: true, fromButton: true });
@@ -6683,7 +7585,7 @@
   if (params.has('paiement')) history.replaceState(null, '', location.pathname + location.hash);
   // Lien direct vers une fiche (?r=…&t=reviews|menu|story) : ouverte après la connexion
   if (params.get('r')) {
-    pendingLink = { id: params.get('r'), tab: params.get('t') };
+    pendingLink = { id: params.get('r'), tab: params.get('t'), source: params.get('s') === 'notif' ? 'notif' : 'link' };
     history.replaceState(null, '', location.pathname + location.hash);
   }
 

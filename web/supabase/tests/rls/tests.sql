@@ -363,6 +363,80 @@ set role service_role;
 select t.ok((select count(*) > 0 from claim_pending_pushes()) and (select count(*) = 0 from claim_pending_pushes()), 'serveur : chaque notification récente n''est transmise qu''une fois');
 reset role;
 
+-- ===== Statistiques détaillées (interactions des clients) =====
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'view', null, 'map');
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'view', null, 'map');
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'view', null, 'search');
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'share');
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'share');
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'google');
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'reviews');
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'story', (select id from stories where caption like 'Nouveau burger%'));
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'story_cta', (select id from stories where caption like 'Nouveau burger%'));
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'story', gen_random_uuid());
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'offer', (select id from promotions where kind = 'student'));
+select t.ok(toggle_story_like((select id from stories where caption like 'Nouveau burger%')) = true, 'client : aime une story');
+select t.ok(toggle_dish_like('aaaaaaaa-0000-0000-0000-000000000001', 'Le Classique') = true, 'client : aime un plat de la carte');
+select t.fails($$select toggle_dish_like('aaaaaaaa-0000-0000-0000-000000000001', 'Plat inventé')$$, 'j''aime sur un plat absent de la carte refusé');
+select t.fails($$select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'piratage')$$, 'évènement inconnu refusé');
+select t.ok((select count(*) = 1 from story_likes) and (select count(*) = 1 from dish_likes), 'client : retrouve ses propres « j''aime »');
+select t.fails($$select * from merchant_event_visitors$$, 'détail des actions par personne : illisible');
+select t.fails($$select * from story_viewers$$, 'personnes ayant vu une story : illisible');
+select t.fails($$select * from promo_clicks$$, 'personnes ayant cliqué une offre : illisible');
+select t.fails($$insert into story_likes (story_id, user_id) values ((select id from stories where caption like 'Nouveau burger%'), '55555555-5555-5555-5555-555555555555')$$, '« j''aime » au nom d''un autre impossible');
+select t.ok(my_merchant_analytics(7) is null, 'client : aucun tableau de bord restaurateur');
+delete from follows where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001';
+insert into follows (merchant_id) values ('aaaaaaaa-0000-0000-0000-000000000001');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
+set role authenticated;
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'view', null, 'offers');
+select t.ok(toggle_story_like((select id from stories where caption like 'Nouveau burger%')) = true and toggle_story_like((select id from stories where caption like 'Nouveau burger%')) = false and toggle_story_like((select id from stories where caption like 'Nouveau burger%')) = true, '« j''aime » / « je n''aime plus » sur une story');
+select t.ok(toggle_dish_like('aaaaaaaa-0000-0000-0000-000000000001', 'Le Classique') = true, 'un autre client aime le même plat');
+select t.ok(not exists (select 1 from story_likes where user_id <> '55555555-5555-5555-5555-555555555555'), 'ne voit pas les « j''aime » des autres');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated;
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'view', null, 'map');
+select t.fails($$select toggle_story_like((select id from stories where caption like 'Nouveau burger%'))$$, 'restaurateur : ne peut pas aimer sa propre story');
+select t.fails($$select toggle_dish_like('aaaaaaaa-0000-0000-0000-000000000001', 'Le Classique')$$, 'restaurateur : ne peut pas aimer ses propres plats');
+create temp table a as select my_merchant_analytics(7) j;
+reset role;
+select t.ok((select (j #>> '{sources,map}')::int = 1 and (j #>> '{sources,search}')::int = 1 and (j #>> '{sources,offers}')::int = 1 from a),
+  'provenance des visites : carte 1, recherche 1, offres 1 (chaque personne comptée une fois ; restaurateur ignoré)');
+select t.ok((select (j #>> '{totals,shares}')::int = 1 and (j #>> '{totals,google}')::int = 1 and (j #>> '{totals,reviews_tab}')::int = 1 from a),
+  'partages, lien Google, onglet Avis : comptés une fois par personne');
+select t.ok((select (j #>> '{totals,story_likes}')::int = 2 and (j #>> '{totals,story_cta}')::int = 1 and (j #>> '{totals,offer_clicks}')::int = 1
+  and (j #>> '{totals,dish_likes}')::int = 2 and (j #>> '{totals,lost_followers}')::int = 1 from a),
+  'totaux : 2 « j''aime » de story, 1 fiche ouverte depuis une story, 1 clic sur une offre, 2 « j''aime » de plat, 1 désabonnement');
+select t.ok((select exists (select 1 from jsonb_array_elements(j -> 'stories') x where x ->> 'caption' like 'Nouveau burger%'
+  and (x ->> 'views')::int = 1 and (x ->> 'likes')::int = 2 and (x ->> 'clicks')::int = 1) from a), 'par story : 1 vue, 2 « j''aime », 1 clic vers la fiche');
+select t.ok((select exists (select 1 from jsonb_array_elements(j -> 'promos') x where x ->> 'kind' = 'student' and (x ->> 'clicks')::int = 1) from a), 'par offre : 1 clic');
+select t.ok((select j -> 'dishes' = '[{"dish": "Le Classique", "likes": 2}]'::jsonb from a), 'plats les plus aimés : « Le Classique » (2)');
+select t.ok((select jsonb_array_length(j -> 'hours') = 24 and (select sum(v::int) from jsonb_array_elements_text(j -> 'hours') v) = 4 from a), 'heures de consultation : 24 tranches, 4 vues (restaurateur exclu)');
+select t.ok((select jsonb_array_length(j -> 'daily') = 7 and (j #>> '{period,days}')::int = 7 and j ? 'previous' from a), 'série de 7 jours et période précédente pour comparer');
+drop table a;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((my_merchant_analytics(500) #>> '{period,days}')::int = 90, 'période limitée à 90 jours');
+reset role;
+select set_config('request.jwt.claims', '', false);
+set role anon;
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'view', null, 'link');
+select t.ok((select likes = 2 from dish_like_counts('aaaaaaaa-0000-0000-0000-000000000001') where dish = 'Le Classique'), 'nombre de « j''aime » des plats visible par tous');
+select t.fails($$select toggle_story_like((select id from stories where caption like 'Nouveau burger%'))$$, 'visiteur : ne peut pas aimer');
+select t.fails($$select my_merchant_analytics(7)$$, 'visiteur : aucun accès aux statistiques');
+reset role;
+select t.ok((select count(*) = 0 from merchant_event_visitors where event = 'from_link'), 'visite anonyme : comptée dans les vues, sans trace par personne');
+-- Compte supprimé alors qu'il suit un restaurant : suppression possible, pas compté comme désabonnement
+select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
+set role authenticated; insert into follows (merchant_id) values ('aaaaaaaa-0000-0000-0000-000000000001'); reset role;
+delete from auth.users where id = '55555555-5555-5555-5555-555555555555';
+select t.ok((select count(*) = 1 from merchant_event_visitors where event = 'unfollow') and not exists (select 1 from story_likes where user_id = '55555555-5555-5555-5555-555555555555'),
+  'suppression d''un compte abonné : réussie, ses « j''aime » effacés, pas compté comme désabonnement');
+
 -- ===== Masquage, modération, suppression =====
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
 set role authenticated;
@@ -384,7 +458,9 @@ select t.ok((select count(*) = 0 from profiles where id = '11111111-1111-1111-11
   and (select count(*) = 0 from merchant_private where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001')
   and (select count(*) = 0 from follows) and (select count(*) = 0 from merchant_stats) and (select count(*) = 0 from merchant_visitors)
   and (select count(*) = 0 from stories) and (select count(*) = 0 from promotions) and (select count(*) = 0 from merchant_subscriptions)
-  and (select count(*) = 0 from reviews) and (select count(*) = 0 from notifications) and (select count(*) = 0 from push_subscriptions where user_id = '11111111-1111-1111-1111-111111111111'), 'suppression du compte : profil, fiche, SIRET, abonnement, abonnés, statistiques, stories, promotions, avis et notifications supprimés');
+  and (select count(*) = 0 from reviews) and (select count(*) = 0 from notifications)
+  and (select count(*) = 0 from merchant_event_visitors) and (select count(*) = 0 from merchant_view_hours) and (select count(*) = 0 from story_viewers)
+  and (select count(*) = 0 from story_likes) and (select count(*) = 0 from dish_likes) and (select count(*) = 0 from promo_clicks) and (select count(*) = 0 from push_subscriptions where user_id = '11111111-1111-1111-1111-111111111111'), 'suppression du compte : profil, fiche, SIRET, abonnement, abonnés, statistiques, stories, promotions, avis et notifications supprimés');
 select t.ok((select count(*) = 4 from pg_publication_tables where pubname = 'supabase_realtime' and tablename in ('merchants', 'stories', 'reviews', 'notifications')), 'temps réel activé sur merchants, stories, reviews et notifications');
 select t.ok(not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.prosecdef and has_function_privilege('anon', p.oid, 'execute')), 'aucune fonction SECURITY DEFINER appelable par un visiteur via l''API');
 select t.ok((select bool_and(c.relrowsecurity) and count(*) = (select count(*) from pg_tables where schemaname = 'public')

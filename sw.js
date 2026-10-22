@@ -22,7 +22,9 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = new URL((event.notification.data && event.notification.data.url) || './', self.registration.scope).href;
+  const target = new URL((event.notification.data && event.notification.data.url) || './', self.registration.scope);
+  if (target.searchParams.get('r')) target.searchParams.set('s', 'notif');   // visite comptée « depuis une notification »
+  const url = target.href;
   event.waitUntil((async () => {
     const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     const open = windows.find((w) => w.url.startsWith(self.registration.scope));

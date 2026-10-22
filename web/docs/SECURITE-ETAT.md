@@ -61,6 +61,27 @@
   signature VAPID), chiffrement vérifié avec l'implémentation de référence `http_ece` ; 93 vérifications navigateur de
   plus (recherche, avis, notifications, alerte push reçue et déchiffrée, partage), en mode jour et en mode nuit.
 
+### Espace restaurateur et statistiques détaillées (migration `20261024090000_analytics.sql`)
+- Mesuré : d'où vient chaque visite (carte, liste, recherche, offres, story, notification, lien partagé), heure des vues,
+  partages, onglet Avis, lien Google, vues / « j'aime » / clics de chaque story, clics sur chaque offre, « j'aime » des
+  plats, désabonnements, clients qui reviennent.
+- **Le restaurateur ne reçoit que des totaux** (`my_merchant_analytics`, sa fiche uniquement, 90 jours au plus) : les tables
+  par personne (`merchant_event_visitors`, `merchant_view_hours`, `story_viewers`, `promo_clicks`) ont une règle
+  « aucun accès direct » ; `story_likes` et `dish_likes` ne laissent lire à chacun que ses propres « j'aime ».
+- Un seul point d'entrée pour le site, `track_visit` : liste fermée d'évènements et de provenances, fiche en ligne
+  obligatoire, story / offre vérifiées comme appartenant à la fiche, visites du restaurateur sur sa fiche ignorées.
+- « J'aime » : story encore en ligne ou plat présent sur la carte, jamais sur sa propre fiche, une fois par personne.
+- Historique effacé après 90 jours ; stories gardées 30 jours après leur fin (visibles par leur seul restaurateur) pour
+  leurs chiffres, puis supprimées avec leur photo. Pages Confidentialité mise à jour.
+- Fiche « masquée temporairement » (`merchants.is_open`, déjà modifiable par son seul propriétaire) : invisible partout.
+- En ligne : tables, règles d'accès, tableau de bord et compteurs **appliqués** (0 nouvelle alerte de sécurité).
+  **Reste un morceau** (`track_visit` et « j'aime ») : l'outil a demandé une confirmation que personne n'a pu donner.
+  Voir « Reste à faire ». En attendant, le site compte vues et clics avec l'ancien compteur et affiche
+  « Les « j'aime » arrivent très bientôt ».
+- Tests : 197 scénarios de sécurité ; 599 vérifications dans un navigateur (dont 70 pour l'espace restaurateur :
+  chiffres exacts après les actions de trois clients, confidentialité, téléphone 320 px, ordinateur, et 5 pour le
+  fonctionnement en attendant le dernier morceau).
+
 ### Connexion avec Google (clients)
 - Prototype : bouton Google (Google Identity Services) affiché dès que `CONFIG.googleClientId` est renseigné.
   Le jeton Google est vérifié par Supabase Auth (`signInWithIdToken`), signature comprise.
@@ -101,6 +122,9 @@
 - Pages `confidentialite.html` et `conditions.html` (contact : flashmiampro@gmail.com).
 
 ### ⏳ Reste à faire
+- **Dernier morceau des statistiques détaillées** (2 minutes) : Supabase › *SQL Editor* › *New query* › coller le
+  contenu de `web/supabase/manual/analytics_4_tracking_likes.sql` › *Run*. (Ou me demander de réessayer : il faudra
+  alors accepter la demande de confirmation de l'outil Supabase.)
 - **Bloquant pour l'inscription par e-mail** (la connexion Google, elle, fonctionne déjà) :
   - *Emails › SMTP Settings* : Gmail (mot de passe d'application de flashmiampro@gmail.com) ou Brevo. Sans cela,
     Supabase n'envoie les e-mails qu'aux membres de l'équipe du projet, et au plus quelques-uns par heure.

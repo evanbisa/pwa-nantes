@@ -19,6 +19,209 @@ export type Database = {
   }
   public: {
     Tables: {
+      dish_likes: {
+        Row: {
+          created_at: string
+          dish: string
+          merchant_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dish: string
+          merchant_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dish?: string
+          merchant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dish_likes_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dish_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_event_visitors: {
+        Row: {
+          day: string
+          event: string
+          merchant_id: string
+          visitor_id: string
+        }
+        Insert: {
+          day: string
+          event: string
+          merchant_id: string
+          visitor_id: string
+        }
+        Update: {
+          day?: string
+          event?: string
+          merchant_id?: string
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_event_visitors_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_event_visitors_visitor_id_fkey"
+            columns: ["visitor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_view_hours: {
+        Row: {
+          day: string
+          hour: number
+          merchant_id: string
+          views: number
+        }
+        Insert: {
+          day: string
+          hour: number
+          merchant_id: string
+          views?: number
+        }
+        Update: {
+          day?: string
+          hour?: number
+          merchant_id?: string
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_view_hours_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promo_clicks: {
+        Row: {
+          clicked_at: string
+          promo_id: string
+          visitor_id: string
+        }
+        Insert: {
+          clicked_at?: string
+          promo_id: string
+          visitor_id: string
+        }
+        Update: {
+          clicked_at?: string
+          promo_id?: string
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_clicks_promo_id_fkey"
+            columns: ["promo_id"]
+            isOneToOne: false
+            referencedRelation: "promotions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promo_clicks_visitor_id_fkey"
+            columns: ["visitor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_likes: {
+        Row: {
+          created_at: string
+          story_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          story_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          story_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_likes_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_viewers: {
+        Row: {
+          clicked: boolean
+          story_id: string
+          viewed_at: string
+          visitor_id: string
+        }
+        Insert: {
+          clicked?: boolean
+          story_id: string
+          viewed_at?: string
+          visitor_id: string
+        }
+        Update: {
+          clicked?: boolean
+          story_id?: string
+          viewed_at?: string
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_viewers_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_viewers_visitor_id_fkey"
+            columns: ["visitor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follows: {
         Row: {
           created_at: string
@@ -566,6 +769,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      dish_like_counts: {
+        Args: { p_merchant_id: string }
+        Returns: { dish: string; likes: number }[]
+      }
+      my_merchant_analytics: {
+        Args: { p_days?: number }
+        Returns: Json
+      }
+      toggle_dish_like: {
+        Args: { p_dish: string; p_merchant_id: string }
+        Returns: boolean
+      }
+      toggle_story_like: {
+        Args: { p_story_id: string }
+        Returns: boolean
+      }
+      track_visit: {
+        Args: { p_event: string; p_merchant_id: string; p_ref?: string; p_source?: string }
+        Returns: undefined
+      }
       claim_pending_pushes: {
         Args: { p_merchant_id?: string }
         Returns: {
