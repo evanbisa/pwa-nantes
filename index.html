@@ -304,6 +304,7 @@
     .eyebrow { margin: 2px 0 0; font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
     .icon-btn { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--hover); color: var(--muted); font-size: 20px; line-height: 1; }
     .icon-btn:hover { color: var(--text); }
+    .icon-btn svg { width: 18px; height: 18px; }
     .status { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 14px; font-weight: 500; }
     .status.is-open { color: var(--green); }
     .status.is-closed { color: var(--danger); }
@@ -870,6 +871,147 @@
     .pro-dash .kv { margin-top: 10px; }
 
     /* =====================================================================
+       8 bis. RECHERCHE, NOTIFICATIONS, AVIS
+       ===================================================================== */
+    /* Barre du haut : profil + recherche */
+    .topbar { display: flex; align-items: center; gap: 8px; }
+    .topbar .brand { min-width: 0; }
+    #search-open { flex: none; width: 52px; height: 52px; }
+
+    /* Cloche et compteur de notifications non lues */
+    .notif-badge {
+      position: absolute; top: 3px; right: 3px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+      font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; color: #fff; background: #d93025;
+      box-shadow: 0 0 0 2px var(--panel-solid); font-variant-numeric: tabular-nums;
+    }
+    #notif-btn.has-unread { color: var(--accent); }
+    #notif-btn.ring svg { animation: ring 1s var(--ease-out); transform-origin: 50% 10%; }
+    @keyframes ring { 0%, 100% { transform: none; } 20% { transform: rotate(14deg); } 40% { transform: rotate(-12deg); } 60% { transform: rotate(8deg); } 80% { transform: rotate(-4deg); } }
+    .sb-brand { display: flex; align-items: center; gap: 4px; }
+    .sb-brand .brand { flex: 1; min-width: 0; }
+    .sb-brand #notif-btn { flex: none; width: 44px; height: 44px; box-shadow: none; border: 0; background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+    .sb-brand #notif-btn:hover { background: var(--hover); }
+
+    /* Recherche plein écran (téléphone) */
+    .search-panel { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; background: var(--panel-solid); padding-top: var(--safe-top); animation: rise .25s var(--ease-out) both; }
+    .sp-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px 6px; }
+    .sp-head .icon-btn { width: 44px; height: 44px; background: transparent; }
+    .sp-head .icon-btn svg { width: 24px; height: 24px; }
+    .sp-input { position: relative; flex: 1; min-width: 0; }
+    .sp-input svg { position: absolute; left: 14px; top: 50%; width: 20px; height: 20px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+    .sp-input input {
+      width: 100%; height: 48px; padding: 0 16px 0 44px; border-radius: 24px; font: inherit; font-size: 16px; color: var(--text);
+      background: var(--input-bg); border: 1px solid var(--line-strong); outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    .sp-input input:focus { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    .budget { display: flex; gap: 6px; padding: 4px 12px 8px; overflow-x: auto; scrollbar-width: none; }
+    .budget::-webkit-scrollbar { display: none; }
+    .budget .chip { height: 32px; padding: 0 12px; font-size: 13px; border: 1px solid var(--line-strong); background: transparent; }
+    /* filtre choisi : fond coloré aussi en mode nuit (le fond transparent ci-dessus ne doit pas l'effacer) */
+    .budget .chip[aria-pressed="true"], .sb-filters .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-line); }
+    .sp-body { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 0 8px calc(var(--safe-bottom) + 20px); -webkit-user-select: none; user-select: none; }
+    .sr-title { margin: 14px 8px 4px; font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+    .sr-list { list-style: none; margin: 0; padding: 0; }
+    .sr-hit { width: 100%; display: flex; gap: 12px; align-items: center; padding: 10px 8px; border-radius: 12px; text-align: left; transition: background-color .15s; }
+    .sr-hit:hover, .sr-hit:focus-visible { background: var(--hover); }
+    .sr-emoji { flex: none; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; font-size: 21px; background: var(--hover); }
+    .sr-body { flex: 1; min-width: 0; display: grid; gap: 1px; }
+    .sr-body b { font-weight: 500; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sr-body small { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sr-body .is-open { color: var(--green); font-weight: 500; }
+    .sr-body .is-closed { color: var(--danger); font-weight: 500; }
+    .sr-price { flex: none; font-weight: 500; font-variant-numeric: tabular-nums; }
+    .sr-more { display: block; margin: 6px auto 0; padding: 8px 14px; font-size: 14px; font-weight: 500; color: var(--accent); }
+    .sr-empty { margin: 28px 16px; text-align: center; color: var(--muted); font-size: 14px; }
+    .sr-empty b { display: block; color: var(--text); font-weight: 500; font-size: 15px; margin-bottom: 4px; }
+    .sr-ideas { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 8px; }
+    .sr-ideas .chip { border: 1px solid var(--line-strong); background: transparent; }
+    mark { color: inherit; background: rgba(251, 188, 4, .32); border-radius: 3px; padding: 0 1px; }
+    :root[data-theme="dark"] mark { background: rgba(253, 214, 99, .28); }
+    /* Ordinateur : plats trouvés sous chaque restaurant de la liste */
+    .sb-budget { padding: 0 16px 6px; }
+    .sb-budget .budget { padding: 0; flex-wrap: wrap; overflow: visible; }
+    .si-dishes { display: grid; gap: 1px; margin-top: 3px; }
+    .si-dishes span { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--text); }
+    .si-dishes span i { font-style: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .si-dishes span em { flex: none; font-style: normal; font-weight: 500; font-variant-numeric: tabular-nums; }
+    .si-rating, .sr-rating { color: var(--text); font-weight: 500; }
+    .menu-list li.is-hit { margin: 0 -8px; padding: 8px; border-radius: 8px; background: var(--accent-soft); border-bottom-color: transparent; }
+
+    /* Notes et avis */
+    .stars { color: #e37400; letter-spacing: 1px; white-space: nowrap; }
+    :root[data-theme="dark"] .stars { color: #fdd663; }
+    .rating-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 14px; color: var(--muted); }
+    .rating-link b { font-weight: 500; color: var(--text); }
+    .rating-link:hover span:last-child { text-decoration: underline; }
+    .rating-link[hidden] { display: none; }
+    .rv-summary { display: grid; grid-template-columns: auto 1fr; gap: 6px 20px; align-items: center; padding: 14px 0 6px; }
+    .rv-summary:empty { display: none; }
+    .rv-avg { text-align: center; }
+    .rv-avg strong { display: block; font-size: 40px; font-weight: 400; line-height: 1.05; font-variant-numeric: tabular-nums; }
+    .rv-avg small { display: block; font-size: 12.5px; color: var(--muted); }
+    .rv-bars { display: grid; gap: 3px; }
+    .rv-bar { display: grid; grid-template-columns: 14px 1fr 26px; gap: 8px; align-items: center; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .rv-bar i { display: block; height: 6px; border-radius: 3px; background: var(--hover); overflow: hidden; }
+    .rv-bar i b { display: block; height: 100%; border-radius: 3px; background: #e37400; }
+    :root[data-theme="dark"] .rv-bar i b { background: #fdd663; }
+    .rv-bar span:last-child { text-align: right; }
+    .rv-form { margin-top: 10px; padding: 14px; border-radius: 12px; border: 1px solid var(--line-strong); }
+    .rv-form h4 { margin: 0 0 6px; font-size: 15px; font-weight: 500; }
+    .rv-form .field { margin-top: 6px; }
+    .rv-form .field-error:empty { min-height: 0; }
+    .stars-pick { display: flex; gap: 2px; }
+    .stars-pick button { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; font-size: 30px; line-height: 1; color: var(--line-strong); transition: transform .12s var(--ease-out), color .15s; }
+    .stars-pick button.is-on { color: #e37400; }
+    :root[data-theme="dark"] .stars-pick button.is-on { color: #fdd663; }
+    .stars-pick button:active { transform: scale(.88); }
+    .rv-actions { display: flex; gap: 10px; }
+    .rv-actions .btn { margin-top: 10px; }
+    .rv-note { margin-top: 10px; }
+    .rv-list { list-style: none; margin: 8px 0 0; padding: 0; }
+    .rv-item { padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .rv-item:last-child { border-bottom: 0; }
+    .rv-item.is-mine { margin: 4px 0; padding: 12px; border: 0; border-radius: 12px; background: var(--accent-soft); }
+    .rv-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 14px; }
+    .rv-head b { font-weight: 500; }
+    .rv-head small { flex: none; font-size: 12.5px; color: var(--muted); }
+    .rv-text { margin: 4px 0 0; font-size: 14.5px; white-space: pre-line; overflow-wrap: anywhere; -webkit-user-select: text; user-select: text; }
+    .rv-reply { margin: 8px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--hover); font-size: 14px; white-space: pre-line; overflow-wrap: anywhere; }
+    .rv-reply b { display: block; margin-bottom: 2px; font-size: 12.5px; font-weight: 500; color: var(--accent); white-space: normal; }
+    .rv-tools { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 6px; font-size: 13px; }
+    .rv-tools button { color: var(--accent); font-weight: 500; padding: 4px 0; }
+    .rv-tools .is-danger { color: var(--danger); }
+    .rv-tools .is-done { color: var(--muted); font-weight: 400; pointer-events: none; }
+    .rv-reply-form { margin-top: 8px; }
+    .rv-reply-form textarea { min-height: 72px; }
+    .rv-reply-form .rv-actions .btn { min-height: 40px; }
+    .rv-empty { margin: 18px 0 8px; text-align: center; font-size: 14px; color: var(--muted); }
+
+    /* Notifications */
+    .notif-list { list-style: none; margin: 10px 0 0; padding: 0; }
+    .notif-item { display: flex; align-items: flex-start; gap: 4px; border-bottom: 1px solid var(--line); }
+    .notif-item:last-child { border-bottom: 0; }
+    .n-open { flex: 1; min-width: 0; display: flex; gap: 12px; padding: 12px 2px; text-align: left; border-radius: 10px; }
+    .n-open:hover { background: var(--hover); }
+    .n-ico { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; font-size: 19px; background: var(--hover); }
+    .notif-item.is-unread .n-ico { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); }
+    .n-body { flex: 1; min-width: 0; display: grid; gap: 1px; }
+    .n-body b { font-weight: 500; font-size: 14.5px; }
+    .notif-item.is-unread .n-body b::after { content: ""; display: inline-block; width: 8px; height: 8px; margin-left: 6px; border-radius: 50%; background: var(--accent); vertical-align: 1px; }
+    .n-body span { font-size: 14px; overflow-wrap: anywhere; }
+    .n-body small { font-size: 12.5px; color: var(--muted); }
+    .n-del { flex: none; display: grid; place-items: center; width: 34px; height: 34px; margin-top: 15px; border-radius: 50%; font-size: 18px; color: var(--muted); }
+    .n-del:hover { background: var(--hover); color: var(--text); }
+    .notif-empty { margin: 22px 6px 6px; text-align: center; font-size: 14px; color: var(--muted); }
+    .notif-empty p { margin: 4px 0 0; }
+    .notif-empty b { color: var(--text); font-weight: 500; }
+    .notif-prefs { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 14px; }
+    .notif-prefs summary { cursor: pointer; color: var(--accent); font-weight: 500; }
+    .notif-prefs .check { align-items: flex-start; margin-top: 12px; color: var(--text); }
+    .notif-prefs .check input { flex: none; margin-top: 1px; }
+    .notif-prefs .hint { margin-top: 8px; }
+
+    /* =====================================================================
        9. TOAST, ÉCRAN D'ERREUR, ATTRIBUTION
        ===================================================================== */
     .toast {
@@ -914,14 +1056,15 @@
       #shop-sheet.is-open { opacity: 1; transform: none; transition: transform .3s var(--ease-out), opacity .25s, visibility 0s, background-color .4s; }
       #shop-sheet .sheet-grab { display: none; }
 
-      #geo-help, #profile-sheet {
+      #geo-help, #profile-sheet, #notif-sheet {
         top: 50%; bottom: auto; left: 50%; right: auto; width: min(460px, calc(100% - 32px)); max-width: none; margin: 0;
         max-height: calc(100dvh - 48px); padding: 24px; border-radius: 16px; border-bottom: 1px solid var(--line);
         opacity: 0; transform: translate(-50%, -46%) scale(.98);
         transition: transform .3s var(--ease-out), opacity .25s, visibility 0s linear .3s, background-color .4s;
       }
-      #geo-help.is-open, #profile-sheet.is-open { opacity: 1; transform: translate(-50%, -50%); transition: transform .3s var(--ease-out), opacity .25s, visibility 0s, background-color .4s; }
-      #geo-help .sheet-grab, #profile-sheet .sheet-grab { display: none; }
+      #geo-help.is-open, #profile-sheet.is-open, #notif-sheet.is-open { opacity: 1; transform: translate(-50%, -50%); transition: transform .3s var(--ease-out), opacity .25s, visibility 0s, background-color .4s; }
+      #geo-help .sheet-grab, #profile-sheet .sheet-grab, #notif-sheet .sheet-grab { display: none; }
+      .search-panel { display: none !important; }
 
       .ob-panel { margin: auto; padding: 32px 32px 28px; }
       #shop-sheet .gallery { margin: 14px -20px 0; }
@@ -955,6 +1098,9 @@
         <small><span class="live-dot" aria-hidden="true"></span>La Roche-sur-Yon</small>
       </span>
     </button>
+    <button id="search-open" class="ctrl glass" type="button" aria-label="Rechercher un plat ou un restaurant" title="Rechercher un plat ou un restaurant">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    </button>
   </header>
 
   <!-- ===================== STORIES DES RESTAURANTS (téléphone : sous le profil ; ordinateur : dans le panneau) ===================== -->
@@ -968,9 +1114,10 @@
     <div class="sb-stories" id="sb-stories-slot" hidden></div>
     <div class="sb-search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-      <input id="search" type="search" placeholder="Rechercher un commerce" autocomplete="off" aria-label="Rechercher un commerce" />
+      <input id="search" type="search" placeholder="Un plat, un restaurant…" autocomplete="off" aria-label="Rechercher un plat ou un restaurant" />
       <kbd aria-hidden="true">/</kbd>
     </div>
+    <div class="sb-budget" id="sb-budget-slot"></div>
     <div class="sb-filters" id="sb-filters-slot"></div>
     <p class="sb-count" id="shop-count"></p>
     <ul class="shop-list" id="shop-list"></ul>
@@ -978,7 +1125,11 @@
   </aside>
 
   <!-- ===================== CONTRÔLES CARTE (en haut à droite) ===================== -->
-  <div class="controls ui">
+  <div class="controls ui" id="controls">
+    <button id="notif-btn" class="ctrl glass" type="button" aria-label="Notifications" title="Notifications">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg>
+      <span class="notif-badge" id="notif-badge" aria-hidden="true" hidden></span>
+    </button>
     <!-- Recentrer sur ma position (redemande l'autorisation si elle a été refusée) -->
     <button id="locate-btn" class="ctrl glass" type="button" data-state="idle" data-follow="false" aria-label="Me localiser" title="Me localiser">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -1020,8 +1171,30 @@
       <span class="chip-sep" aria-hidden="true"></span>
       <button class="chip glass" type="button" id="open-only" aria-pressed="false"><span class="dot-green" aria-hidden="true"></span>Ouverts</button>
       <button class="chip glass" type="button" id="promo-only" aria-pressed="false">🎁 Promos</button>
+      <button class="chip glass" type="button" id="rated-only" aria-pressed="false">⭐ 4 et +</button>
     </div>
   </nav>
+
+  <!-- ===================== RECHERCHE (téléphone : plein écran ; ordinateur : panneau latéral) ===================== -->
+  <div id="search-panel" class="search-panel" role="dialog" aria-modal="true" aria-label="Rechercher un plat ou un restaurant" hidden>
+    <div class="sp-head">
+      <button class="icon-btn" type="button" id="search-close" aria-label="Fermer la recherche">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <div class="sp-input">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="search-m" type="search" placeholder="Un plat, un restaurant…" autocomplete="off" enterkeyhint="search" aria-label="Rechercher un plat ou un restaurant" aria-controls="search-results" />
+      </div>
+    </div>
+    <div class="budget" id="budget" role="group" aria-label="Budget par plat">
+      <button class="chip" type="button" data-max="" aria-pressed="true">Tous les prix</button>
+      <button class="chip" type="button" data-max="5" aria-pressed="false">≤ 5 €</button>
+      <button class="chip" type="button" data-max="10" aria-pressed="false">≤ 10 €</button>
+      <button class="chip" type="button" data-max="15" aria-pressed="false">≤ 15 €</button>
+    </div>
+    <div class="sp-body" id="search-results"></div>
+    <p class="visually-hidden" id="search-live" aria-live="polite"></p>
+  </div>
 
   <!-- ===================== FICHE COMMERCE ===================== -->
   <section id="shop-sheet" class="sheet glass" role="dialog" aria-modal="false" aria-labelledby="shop-name" aria-hidden="true">
@@ -1031,17 +1204,22 @@
       <div class="sheet-title">
         <h2 id="shop-name"></h2>
         <p class="eyebrow"><span id="shop-cat"></span><span class="verified" id="shop-verified" hidden title="SIRET vérifié auprès du répertoire Sirene">✓ Établissement vérifié</span><span id="shop-followers" hidden></span></p>
+        <button class="rating-link" type="button" id="shop-rating" hidden></button>
         <button class="follow-btn" type="button" id="shop-follow" aria-pressed="false" hidden>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg>
           <span id="shop-follow-label">Suivre</span>
         </button>
       </div>
+      <button class="icon-btn" type="button" id="shop-share" aria-label="Partager ce restaurant" title="Partager">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13"/></svg>
+      </button>
       <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
     </div>
     <div class="shop-tabs" id="shop-tabs" role="tablist" aria-label="Contenu de la fiche" hidden>
       <button type="button" role="tab" id="tab-infos" aria-controls="panel-infos" aria-selected="true" data-tab="infos">Infos</button>
       <button type="button" role="tab" id="tab-menu" aria-controls="panel-menu" aria-selected="false" tabindex="-1" data-tab="menu">Menu<small id="tab-menu-n"></small></button>
       <button type="button" role="tab" id="tab-photos" aria-controls="panel-photos" aria-selected="false" tabindex="-1" data-tab="photos">Photos<small id="tab-photos-n"></small></button>
+      <button type="button" role="tab" id="tab-reviews" aria-controls="panel-reviews" aria-selected="false" tabindex="-1" data-tab="reviews" hidden>Avis<small id="tab-reviews-n"></small></button>
     </div>
     <div class="tab-panel" id="panel-infos" role="tabpanel" aria-labelledby="tab-infos">
     <div class="gallery" id="shop-gallery" hidden></div>
@@ -1086,6 +1264,28 @@
     <div class="tab-panel" id="panel-photos" role="tabpanel" aria-labelledby="tab-photos" hidden>
       <div class="photo-grid-view" id="shop-photo-grid"></div>
       <p class="photos-empty" id="shop-photos-empty" hidden>Pas encore de photo.</p>
+    </div>
+    <div class="tab-panel" id="panel-reviews" role="tabpanel" aria-labelledby="tab-reviews" hidden>
+      <div class="rv-summary" id="rv-summary"></div>
+      <form class="rv-form" id="rv-form" novalidate hidden>
+        <h4 id="rv-form-title">Donner mon avis</h4>
+        <div class="stars-pick" id="rv-stars" role="radiogroup" aria-label="Note sur 5"></div>
+        <small class="field-error" id="err-rv-stars" aria-live="polite"></small>
+        <label class="field" id="field-rv-comment">
+          <span>Commentaire (facultatif) <small class="counter" id="rv-count">0 / 600</small></span>
+          <textarea id="rv-comment" rows="3" maxlength="600" placeholder="Qu'avez-vous goûté ? Qu'avez-vous aimé ?"></textarea>
+          <small class="field-error" id="err-rv-comment" aria-live="polite"></small>
+        </label>
+        <p class="hint">Votre prénom et l'initiale de votre nom s'affichent avec votre avis. <a class="link-btn" href="conditions.html#avis" target="_blank" rel="noopener">Règles des avis</a></p>
+        <p class="form-error" id="err-rv" role="alert"></p>
+        <div class="rv-actions">
+          <button class="btn btn-ghost" type="button" id="rv-cancel" hidden>Annuler</button>
+          <button class="btn btn-primary" type="submit" id="rv-submit">Publier mon avis</button>
+        </div>
+      </form>
+      <p class="hint rv-note" id="rv-note" hidden></p>
+      <ul class="rv-list" id="rv-list"></ul>
+      <p class="rv-empty" id="rv-empty" hidden>Pas encore d'avis sur ce restaurant.</p>
     </div>
   </section>
 
@@ -1171,6 +1371,32 @@
     <button class="btn btn-ghost" type="button" data-close>Plus tard</button>
   </section>
 
+  <!-- ===================== NOTIFICATIONS ===================== -->
+  <section id="notif-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="notif-title" aria-hidden="true">
+    <button class="sheet-grab" type="button" data-close aria-label="Fermer"></button>
+    <div class="sheet-head">
+      <div class="sheet-emoji" aria-hidden="true">🔔</div>
+      <div class="sheet-title">
+        <h3 id="notif-title">Notifications</h3>
+        <p class="eyebrow" id="notif-sub"></p>
+      </div>
+      <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
+    </div>
+    <ul class="notif-list" id="notif-list"></ul>
+    <div class="notif-empty" id="notif-empty" hidden>
+      <p><b>Aucune notification pour l'instant.</b></p>
+      <p id="notif-empty-text"></p>
+    </div>
+    <details class="notif-prefs" id="notif-prefs">
+      <summary>Réglages des notifications</summary>
+      <label class="check" id="np-promos-row"><input type="checkbox" id="np-promos" /> Nouvelles promos des restaurants que je suis</label>
+      <label class="check" id="np-stories-row"><input type="checkbox" id="np-stories" /> Nouvelles stories des restaurants que je suis</label>
+      <label class="check"><input type="checkbox" id="np-reviews" /> <span id="np-reviews-label">Réponses des restaurants à mes avis</span></label>
+      <label class="check"><input type="checkbox" id="np-device" /> Alertes sur cet appareil, même quand FlashMiam est fermé</label>
+      <p class="hint" id="np-device-hint"></p>
+    </details>
+  </section>
+
   <!-- ===================== PROFIL ===================== -->
   <section id="profile-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="profile-name" aria-hidden="true">
     <button class="sheet-grab" type="button" data-close aria-label="Fermer"></button>
@@ -1245,6 +1471,7 @@
           <div class="kpi"><span class="kpi-label">Menu consulté</span><strong id="k-menu">0</strong><small>onglet Menu ouvert</small></div>
           <div class="kpi"><span class="kpi-label">Photos regardées</span><strong id="k-photos">0</strong><small>onglet Photos ouvert</small></div>
           <div class="kpi"><span class="kpi-label">Stories vues</span><strong id="k-stories">0</strong><small>affichages</small></div>
+          <div class="kpi"><span class="kpi-label">Note moyenne</span><strong id="k-rating">–</strong><small id="k-rating-d">aucun avis</small></div>
         </div>
         <figure class="chart">
           <figcaption>Vues de la fiche par jour<small id="pd-chart-sub"></small></figcaption>
@@ -1255,8 +1482,9 @@
           <summary>Voir le détail par jour</summary>
           <table id="pd-table"><thead><tr><th scope="col">Jour</th><th scope="col">Vues</th><th scope="col">Personnes</th><th scope="col">Itinéraires</th><th scope="col">Abonnés +</th></tr></thead><tbody></tbody></table>
         </details>
-        <p class="hint">Version de démonstration : les chiffres sont enregistrés sur cet appareil. Une fois l'application reliée à Supabase, ils regrouperont tous les visiteurs, sans jamais révéler qui ils sont.</p>
+        <p class="hint">Chiffres de tous les visiteurs, sans jamais révéler qui ils sont. Vos propres visites ne sont pas comptées.</p>
       </section>
+      <button class="btn btn-ghost" type="button" id="pd-reviews" hidden>Voir les avis et y répondre</button>
       <button class="btn btn-primary" type="button" id="pd-edit">Modifier ma fiche</button>
       <button class="btn btn-ghost" type="button" id="pd-show">Voir sur la carte</button>
     </div>
@@ -1643,6 +1871,7 @@
     supabaseUrl: 'https://fnypgfyxbyaqrnklhjxc.supabase.co',
     supabaseKey: 'sb_publishable_W-2Gra6O-pRBEf0a_XsyKw_8UlhHTzb',
     sireneApi: 'https://recherche-entreprises.api.gouv.fr/search',
+    notifPollMs: 60 * 1000,                     // actualisation des notifications (en plus du temps réel)
     /**
      * Connexion « Continuer avec Google » (clients). Identifiant client OAuth (public) créé gratuitement dans
      * Google Cloud Console › API et services › Identifiants › ID client OAuth › Application Web,
@@ -1835,7 +2064,7 @@
     : null;
 
   /** Données chargées : compte connecté et restaurants inscrits (fiches en ligne + la sienne). */
-  const cloud = { user: null, restaurants: {}, followerCounts: new Map() };
+  const cloud = { user: null, restaurants: {}, followerCounts: new Map(), ratings: new Map(), ready: Promise.resolve() };
   const CAT_TO_DB = { 'Food-truck': 'food_truck', Kebab: 'kebab', Burger: 'burger', Sweets: 'sweets', Pizza: 'pizza', Autre: 'other' };
   const CAT_FROM_DB = Object.fromEntries(Object.entries(CAT_TO_DB).map(([k, v]) => [v, k]));
   const TEST_SIREN = '999999999';
@@ -1857,7 +2086,7 @@
     createdAt: st.created_at, expiresAt: st.expires_at,
   });
   const promoFromRow = (pr) => ({ id: pr.id, kind: pr.kind, title: pr.title, details: pr.details || '', createdAt: pr.created_at, endsAt: pr.ends_at });
-  function restaurantFromRow(m, promos = [], stories = []) {
+  function restaurantFromRow(m, promos = [], stories = [], rating = null) {
     const hours = m.opening_hours || {};
     return {
       id: m.id, ownerId: m.user_id, name: m.name, category: CAT_FROM_DB[m.category] || 'Autre', description: m.description || '',
@@ -1865,16 +2094,18 @@
       hours: hours.services || [], closedOn: hours.closed_on || [], phone: m.phone || '',
       status: m.status, published: m.status === 'published' && m.is_open && m.lat != null, isTest: !!m.is_test, honorAt: m.honor_at,
       publishedAt: m.published_at, updatedAt: m.updated_at, promos: promos.map(promoFromRow), stories: stories.map(storyFromRow),
+      rating: rating && rating.count ? rating : null,
     };
   }
   const groupBy = (rows, key) => rows.reduce((acc, r) => { (acc[r[key]] = acc[r[key]] || []).push(r); return acc; }, {});
 
   /** Restaurants inscrits, avec leurs promotions et stories (la base ne renvoie que ce que l'utilisateur a le droit de voir). */
   async function loadRestaurants() {
-    const [m, pr, st] = await Promise.all([sb.from('merchants').select('*'), sb.from('promotions').select('*'), sb.from('stories').select('*')]);
+    const [m, pr, st, rt] = await Promise.all([sb.from('merchants').select('*'), sb.from('promotions').select('*'), sb.from('stories').select('*'), sb.rpc('merchant_ratings')]);
     if (m.error) throw m.error;
     const promos = groupBy(pr.data || [], 'merchant_id'), stories = groupBy(st.data || [], 'merchant_id');
-    cloud.restaurants = Object.fromEntries(m.data.map((row) => [row.id, restaurantFromRow(row, promos[row.id], stories[row.id])]));
+    cloud.ratings = new Map((rt.data || []).map((r) => [r.merchant_id, { avg: Number(r.average), count: r.total }]));
+    cloud.restaurants = Object.fromEntries(m.data.map((row) => [row.id, restaurantFromRow(row, promos[row.id], stories[row.id], cloud.ratings.get(row.id))]));
     return cloud.restaurants;
   }
 
@@ -1930,6 +2161,7 @@
       name: profile.first_name || (authUser.email || '').split('@')[0], lastName: profile.last_name || '', phone: profile.phone || '',
       createdAt: profile.created_at, emailVerifiedAt: authUser.email_confirmed_at, google: providers.includes('google'),
       follows: Object.fromEntries((follows || []).map((f) => [f.merchant_id, f.created_at])),
+      prefs: { promos: profile.notify_promos !== false, stories: profile.notify_stories !== false, reviews: profile.notify_reviews !== false },
     };
     if (user.role === 'pro') user.pro = await loadPro(user);
     cloud.user = user;
@@ -1977,6 +2209,11 @@
         .on('postgres_changes', { event: '*', schema: 'public', table: 'merchants' }, again)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'stories' }, again)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'promotions' }, again)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, (ev) => {
+          again();
+          const id = (ev.new && ev.new.merchant_id) || (ev.old && ev.old.merchant_id);
+          if (id && id === selectedId) Reviews.refresh(id);
+        })
         .subscribe();
     } catch (e) { /* temps réel indisponible : l'actualisation régulière suffit */ }
     setInterval(() => { if (!document.hidden) refreshCloud(); }, 2 * 60 * 1000);
@@ -2717,9 +2954,11 @@
   function applyLayout() {
     const desktop = isDesktop();
     document.body.classList.toggle('is-desktop', desktop);
-    (desktop ? $('sb-brand-slot') : $('topbar')).appendChild($('profile-btn'));
+    (desktop ? $('sb-brand-slot') : $('topbar')).prepend($('profile-btn'));
     (desktop ? $('sb-filters-slot') : $('filters')).appendChild($('filters-track'));
     (desktop ? $('sb-stories-slot') : $('stories')).appendChild($('stories-track'));
+    if (desktop) $('sb-brand-slot').appendChild($('notif-btn')); else $('controls').prepend($('notif-btn'));
+    if (desktop) $('sb-budget-slot').appendChild($('budget')); else $('search-panel').insertBefore($('budget'), $('search-results'));
     whenMapReady(() => view.setPadding(selectedId ? shopPadding() : basePadding()));
   }
   desktopMQ.addEventListener('change', applyLayout);
@@ -2736,7 +2975,7 @@
      ===================================================================== */
 
   const markers = new Map();          // id → { shop, marker, el, status }
-  const filters = { category: 'all', openOnly: false, promoOnly: false, query: '' };
+  const filters = { category: 'all', openOnly: false, promoOnly: false, ratedOnly: false, query: '', q: [], max: null };
   let selectedId = null;
 
   function createShopMarker(shop) {
@@ -2804,7 +3043,8 @@
     (filters.category === 'all' || m.shop.category === filters.category) &&
     (!filters.openOnly || m.status.open) &&
     (!filters.promoOnly || activePromos(m.shop).length > 0) &&
-    (!filters.query || normalize([m.shop.name, catOf(m.shop).label, m.shop.address, m.shop.description || '', ...(m.shop.menu || []).map((it) => it.name)].join(' ')).includes(filters.query));
+    (!filters.ratedOnly || !!(m.shop.rating && m.shop.rating.avg >= 4)) &&
+    Search.shopMatches(m.shop, filters.q, filters.max);
 
   function applyFilters() {
     markers.forEach((m) => {
@@ -2826,7 +3066,9 @@
     $('shop-count').textContent = all.length + ' adresses · ' + openCount + ' ouvertes';
     $('shop-empty').hidden = items.length > 0;
 
-    const signature = items.map(({ m, d }) => m.shop.id + m.status.label + (d === null ? '' : formatDistance(d)) + activePromos(m.shop).length).join('|') + selectedId;
+    const searching = filters.q.length > 0 || filters.max !== null;
+    const signature = items.map(({ m, d }) => m.shop.id + m.status.label + (d === null ? '' : formatDistance(d)) + activePromos(m.shop).length + JSON.stringify(m.shop.rating)).join('|')
+      + selectedId + '|' + filters.q.join(' ') + '|' + filters.max;
     if (signature === listSignature) return;
     listSignature = signature;
 
@@ -2850,10 +3092,35 @@
       const st = btn.querySelector('.si-status');
       st.textContent = status.label;
       st.className = 'si-status ' + (status.open ? 'is-open' : 'is-closed');
+      if (shop.rating) {
+        const rt = document.createElement('span');
+        rt.className = 'si-rating';
+        rt.textContent = ' · ★ ' + formatRating(shop.rating.avg) + ' (' + shop.rating.count + ')';
+        rt.setAttribute('aria-label', ', noté ' + formatRating(shop.rating.avg) + ' sur 5 (' + shop.rating.count + ' avis)');
+        st.appendChild(rt);
+      }
       const best = activePromos(shop)[0];
       btn.querySelector('.si-promo').textContent = best ? promoLine(best) : (shop.description || '').slice(0, 90);
       if (shop.isPro && !shop.isTest) { const v = document.createElement('span'); v.className = 'verified'; v.textContent = '✓'; v.title = 'Établissement vérifié'; btn.querySelector('strong').appendChild(v); }
-      btn.addEventListener('click', () => openShop(shop.id));
+      // Recherche : plats trouvés dans la carte du restaurant
+      const hits = searching ? Search.dishesOf(shop, filters.q, filters.max) : [];
+      if (hits.length) {
+        const box = document.createElement('span');
+        box.className = 'si-dishes';
+        hits.slice(0, 3).forEach(({ item }) => {
+          const line = document.createElement('span');
+          line.innerHTML = '<i></i><em></em>';
+          Search.highlight(line.querySelector('i'), item.name, filters.q);
+          line.querySelector('em').textContent = formatPrice(item.price);
+          box.appendChild(line);
+        });
+        if (hits.length > 3) { const more = document.createElement('span'); more.textContent = '+ ' + (hits.length - 3) + ' autre' + (hits.length > 4 ? 's' : ''); more.style.color = 'var(--muted)'; box.appendChild(more); }
+        btn.querySelector('.si-body').appendChild(box);
+      }
+      btn.addEventListener('click', () => {
+        if (hits.length) openDish(shop.id, hits.map((h) => h.idx));
+        else openShop(shop.id);
+      });
       btn.addEventListener('mouseenter', () => setHover(shop.id, true));
       btn.addEventListener('mouseleave', () => setHover(shop.id, false));
       li.appendChild(btn);
@@ -2870,6 +3137,9 @@
     } else if (chip.id === 'promo-only') {
       filters.promoOnly = !filters.promoOnly;
       chip.setAttribute('aria-pressed', String(filters.promoOnly));
+    } else if (chip.id === 'rated-only') {
+      filters.ratedOnly = !filters.ratedOnly;
+      chip.setAttribute('aria-pressed', String(filters.ratedOnly));
     } else {
       filters.category = chip.dataset.cat;
       document.querySelectorAll('.chip[data-cat]').forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
@@ -2880,14 +3150,754 @@
   });
 
   $('search').addEventListener('input', (ev) => {
-    filters.query = normalize(ev.target.value.trim());
+    filters.query = ev.target.value;
+    filters.q = Search.parse(ev.target.value);
     applyFilters();
   });
   $('search').addEventListener('keydown', (ev) => {
     if (ev.key === 'Enter') { const first = document.querySelector('.shop-item'); if (first) openShop(first.dataset.id); }
     // Échap : efface la recherche uniquement (ne ferme pas la fiche ouverte)
-    if (ev.key === 'Escape') { ev.target.value = ''; filters.query = ''; applyFilters(); ev.target.blur(); }
+    if (ev.key === 'Escape') { ev.target.value = ''; filters.query = ''; filters.q = []; applyFilters(); ev.target.blur(); }
   });
+
+  /* =====================================================================
+     7 bis. RECHERCHE PAR PLAT, AVIS, NOTIFICATIONS, PARTAGE
+     ===================================================================== */
+
+  const formatRating = (n) => Number(n).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
+
+  /* ---------- Recherche : plats, restaurants, envies (« étudiant »), budget ---------- */
+  const Search = (() => {
+    const STOP = new Set(['de', 'du', 'des', 'la', 'le', 'les', 'l', 'd', 'au', 'aux', 'a', 'et', 'en', 'un', 'une', 'avec', 'pour', 'sur']);
+    const stem = (w) => (w.length > 3 ? w.replace(/[sx]$/, '') : w);   // « frites » = « frite », « gâteaux » = « gâteau »
+    const words = (s) => normalize(String(s || '')).split(/[^a-z0-9]+/).filter((w) => w && !STOP.has(w)).map(stem);
+    const has = (hay, w) => hay.some((x) => x.startsWith(w) || (w.length >= 4 && x.includes(w)));
+    const parse = (q) => [...new Set(words(q))];
+    const shopWords = (shop) => words([shop.name, catOf(shop).label, shop.description, shop.address, ...activePromos(shop).map((p) => p.title)].join(' '));
+
+    /** Plats d'un restaurant qui correspondent à la recherche (tous les mots) et au budget, les plus pertinents d'abord. */
+    function dishesOf(shop, q, max = null) {
+      const out = [];
+      const sw = q.length ? shopWords(shop) : [];
+      (shop.menu || []).forEach((item, idx) => {
+        if (max !== null && !(Number(item.price) <= max)) return;
+        if (!q.length) { out.push({ item, idx, score: 0 }); return; }
+        const nameW = words(item.name), otherW = words([item.section, item.desc].join(' '));
+        let score = 0, inDish = false;
+        for (const w of q) {
+          if (has(nameW, w)) { score += 3; inDish = true; }
+          else if (has(otherW, w)) { score += 1; inDish = true; }
+          else if (has(sw, w)) score += 0.5;           // ex. « burger frites » : « frites » au menu d'un restaurant de burgers
+          else return;
+        }
+        if (inDish) out.push({ item, idx, score });
+      });
+      return out.sort((a, b) => b.score - a.score || a.item.price - b.item.price);
+    }
+    /** Restaurant affiché ? (tous les mots trouvés dans sa fiche ou sa carte ; au moins un plat dans le budget) */
+    function shopMatches(shop, q, max = null) {
+      if (max !== null) return dishesOf(shop, q, max).length > 0;
+      if (!q.length) return true;
+      const hay = shopWords(shop).concat(words((shop.menu || []).map((it) => [it.name, it.section, it.desc].join(' ')).join(' ')));
+      return q.every((w) => has(hay, w));
+    }
+    /** Résultats pour le panneau de recherche (téléphone). */
+    function run(query, max = null) {
+      const q = parse(query);
+      const all = [...markers.values()];
+      const d = (m) => (Geo.position ? distance(Geo.position, m.shop.coords) : Infinity);
+      const dishes = [];
+      if (q.length || max !== null) all.forEach((m) => dishesOf(m.shop, q, max).forEach((hit) => dishes.push({ ...hit, m })));
+      dishes.sort((a, b) => b.score - a.score || (b.m.status.open - a.m.status.open) || (d(a.m) - d(b.m)) || a.item.price - b.item.price);
+      const shops = !q.length ? [] : all.filter((m) => { const sw = shopWords(m.shop); return q.every((w) => has(sw, w)) && (max === null || dishesOf(m.shop, [], max).length); });
+      shops.sort((a, b) => (b.status.open - a.status.open) || (d(a) - d(b)) || a.shop.name.localeCompare(b.shop.name));
+      return { q, dishes, shops };
+    }
+    /** Texte avec les mots recherchés surlignés (sans HTML injecté : nœuds texte et <mark>). */
+    function highlight(el, text, q) {
+      el.textContent = '';
+      text = String(text || '');
+      if (!q.length) { el.textContent = text; return; }
+      let norm = '';
+      const map = [];
+      for (let i = 0; i < text.length; i++) for (const ch of normalize(text[i])) { norm += ch; map.push(i); }
+      const on = new Array(text.length).fill(false);
+      q.forEach((w) => {
+        // mots courts : seulement en début de mot (sans « lookbehind », inconnu des anciens iPhone)
+        for (let at = norm.indexOf(w); at !== -1; at = norm.indexOf(w, at + 1)) {
+          if (w.length < 4 && at > 0 && /[a-z0-9]/.test(norm[at - 1])) continue;
+          for (let k = at; k < at + w.length; k++) on[map[k]] = true;
+        }
+      });
+      for (let i = 0; i < text.length;) {
+        let j = i;
+        while (j < text.length && on[j] === on[i]) j++;
+        const part = text.slice(i, j);
+        if (on[i]) { const mk = document.createElement('mark'); mk.textContent = part; el.appendChild(mk); }
+        else el.appendChild(document.createTextNode(part));
+        i = j;
+      }
+    }
+    return { parse, dishesOf, shopMatches, run, highlight, mobile: { query: '', max: null, limit: 30 } };
+  })();
+
+  /** Ouvre la fiche d'un restaurant sur sa carte, plats trouvés mis en avant. */
+  function openDish(shopId, indexes) {
+    whenMapReady(() => {
+      openShop(shopId);
+      if (!markers.get(shopId)) return;
+      setShopTab('menu');
+      const lis = [...document.querySelectorAll('#shop-menu-list li')];
+      lis.forEach((li) => li.classList.toggle('is-hit', indexes.includes(Number(li.dataset.i))));
+      const first = lis.find((li) => li.classList.contains('is-hit'));
+      if (first) setTimeout(() => first.scrollIntoView({ block: 'center', behavior: 'smooth' }), 350);
+    });
+  }
+
+  /* Panneau de recherche plein écran (téléphone) */
+  const SEARCH_IDEAS = ['Burger', 'Kebab', 'Pizza', 'Gaufre', 'Frites', 'Galette', 'Étudiant', 'Boisson'];
+  function openSearchPanel() {
+    $('search-panel').hidden = false;
+    $('search-m').value = Search.mobile.query;
+    hideToast();
+    renderSearchPanel();
+    setTimeout(() => $('search-m').focus(), 60);
+  }
+  function closeSearchPanel({ restoreFocus = true } = {}) {
+    if ($('search-panel').hidden) return;
+    $('search-panel').hidden = true;
+    $('search-m').blur();
+    if (restoreFocus) $('search-open').focus({ preventScroll: true });
+  }
+  function renderSearchPanel() {
+    const box = $('search-results');
+    const { query, max } = Search.mobile;
+    document.querySelectorAll('#budget .chip').forEach((c) => c.setAttribute('aria-pressed', String((c.dataset.max ? Number(c.dataset.max) : null) === (isDesktop() ? filters.max : max))));
+    box.textContent = '';
+    const res = Search.run(query, max);
+    const title = (text) => { const h = document.createElement('h3'); h.className = 'sr-title'; h.textContent = text; box.appendChild(h); };
+    const status = (m) => { const s = document.createElement('span'); s.className = m.status.open ? 'is-open' : 'is-closed'; s.textContent = m.status.open ? 'Ouvert' : 'Fermé'; return s; };
+    const dist = (m) => (Geo.position ? ' · ' + formatDistance(distance(Geo.position, m.shop.coords)) : '');
+    if (!res.q.length && max === null) {
+      title('Idées');
+      const ideas = document.createElement('div');
+      ideas.className = 'sr-ideas';
+      SEARCH_IDEAS.filter((w) => Search.run(w).dishes.length || Search.run(w).shops.length).forEach((w) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'chip'; b.textContent = w;
+        b.addEventListener('click', () => { $('search-m').value = w; Search.mobile.query = w; Search.mobile.limit = 30; renderSearchPanel(); });
+        ideas.appendChild(b);
+      });
+      box.appendChild(ideas);
+      const p = document.createElement('p');
+      p.className = 'sr-empty';
+      p.textContent = 'Cherchez un plat (« galette saucisse »), un restaurant ou une envie (« étudiant »). Choisissez un budget pour voir les plats à petit prix.';
+      box.appendChild(p);
+      $('search-live').textContent = '';
+      return;
+    }
+    if (!res.dishes.length && !res.shops.length) {
+      const p = document.createElement('div');
+      p.className = 'sr-empty';
+      p.innerHTML = '<b></b><span></span>';
+      p.querySelector('b').textContent = res.q.length ? 'Aucun résultat pour « ' + query.trim() + ' »' : 'Aucun plat dans ce budget';
+      p.querySelector('span').textContent = res.q.length ? 'Essayez un autre mot (« burger », « kebab »…) ou un budget plus large.' : 'Essayez un budget plus large.';
+      box.appendChild(p);
+      $('search-live').textContent = 'Aucun résultat';
+      return;
+    }
+    if (res.dishes.length) {
+      title(plural(res.dishes.length, 'plat', 'plats'));
+      const ul = document.createElement('ul');
+      ul.className = 'sr-list';
+      res.dishes.slice(0, Search.mobile.limit).forEach(({ item, idx, m }) => {
+        const li = document.createElement('li');
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'sr-hit';
+        b.innerHTML = '<span class="sr-emoji" aria-hidden="true"></span><span class="sr-body"><b></b><small></small></span><span class="sr-price"></span>';
+        b.querySelector('.sr-emoji').textContent = catOf(m.shop).emoji;
+        Search.highlight(b.querySelector('b'), item.name, res.q);
+        const small = b.querySelector('small');
+        small.append(m.shop.name + ' · ', status(m), dist(m));
+        b.querySelector('.sr-price').textContent = formatPrice(item.price);
+        b.addEventListener('click', () => { closeSearchPanel({ restoreFocus: false }); openDish(m.shop.id, [idx]); });
+        li.appendChild(b);
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
+      if (res.dishes.length > Search.mobile.limit) {
+        const more = document.createElement('button');
+        more.type = 'button'; more.className = 'sr-more';
+        more.textContent = 'Voir ' + Math.min(30, res.dishes.length - Search.mobile.limit) + ' plats de plus';
+        more.addEventListener('click', () => { Search.mobile.limit += 30; renderSearchPanel(); });
+        box.appendChild(more);
+      }
+    }
+    if (res.shops.length) {
+      title(plural(res.shops.length, 'restaurant', 'restaurants'));
+      const ul = document.createElement('ul');
+      ul.className = 'sr-list';
+      res.shops.slice(0, 20).forEach((m) => {
+        const li = document.createElement('li');
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'sr-hit';
+        b.innerHTML = '<span class="sr-emoji" aria-hidden="true"></span><span class="sr-body"><b></b><small></small></span>';
+        b.querySelector('.sr-emoji').textContent = catOf(m.shop).emoji;
+        Search.highlight(b.querySelector('b'), m.shop.name, res.q);
+        const small = b.querySelector('small');
+        small.append(status(m));
+        if (m.shop.rating) { const r = document.createElement('span'); r.className = 'sr-rating'; r.textContent = ' · ★ ' + formatRating(m.shop.rating.avg); small.append(r); }
+        small.append(' · ' + catOf(m.shop).label + dist(m));
+        b.addEventListener('click', () => { closeSearchPanel({ restoreFocus: false }); whenMapReady(() => openShop(m.shop.id)); });
+        li.appendChild(b);
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
+    }
+    $('search-live').textContent = [res.dishes.length ? plural(res.dishes.length, 'plat', 'plats') : '', res.shops.length ? plural(res.shops.length, 'restaurant', 'restaurants') : ''].filter(Boolean).join(' et ');
+  }
+  $('search-open').addEventListener('click', openSearchPanel);
+  $('search-close').addEventListener('click', () => closeSearchPanel());
+  $('search-m').addEventListener('input', (ev) => { Search.mobile.query = ev.target.value; Search.mobile.limit = 30; renderSearchPanel(); });
+  $('search-m').addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') { ev.preventDefault(); const first = $('search-results').querySelector('.sr-hit'); if (first) first.click(); }
+  });
+  $('search-panel').addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { ev.stopPropagation(); closeSearchPanel(); } });
+  $('budget').addEventListener('click', (ev) => {
+    const chip = ev.target.closest('.chip');
+    if (!chip) return;
+    const max = chip.dataset.max ? Number(chip.dataset.max) : null;
+    document.querySelectorAll('#budget .chip').forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+    if (isDesktop()) { filters.max = max; applyFilters(); }
+    else { Search.mobile.max = max; Search.mobile.limit = 30; renderSearchPanel(); }
+  });
+
+  /* ---------- Avis : note sur 5, commentaire, réponse du restaurateur ---------- */
+  const Reviews = (() => {
+    const cache = new Map();                 // id de la fiche → { list, at }
+    let shopId = null, pick = 0, editing = false, replyFor = null;
+    const starText = (n) => '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
+    const canReview = (shop, me = currentUser()) => !!(shop.isPro && me && me.role === 'client' && !isOwnShop(shop.id, me));
+    const ownShop = (shop) => !!(shop.isPro && isOwnShop(shop.id));
+
+    async function load(id) {
+      const { data, error } = await sb.from('reviews').select('*').eq('merchant_id', id).order('created_at', { ascending: false }).limit(200);
+      if (error) throw error;
+      cache.set(id, { list: data || [], at: Date.now() });
+      return data || [];
+    }
+    async function refresh(id) {
+      try { await load(id); } catch (e) { return; }
+      const m = markers.get(id);
+      if (m && selectedId === id) draw(m.shop);
+    }
+    /** En-tête de la fiche (note) et onglet ; avis rechargés au besoin. */
+    function render(shop) {
+      if (shopId !== shop.id) { shopId = shop.id; pick = 0; editing = false; replyFor = null; }
+      const btn = $('shop-rating');
+      btn.hidden = !shop.isPro;
+      $('tab-reviews-n').textContent = shop.rating ? ' ' + shop.rating.count : '';
+      if (shop.isPro) {
+        btn.textContent = '';
+        if (shop.rating) {
+          const s = document.createElement('span'); s.className = 'stars'; s.setAttribute('aria-hidden', 'true'); s.textContent = starText(Math.round(shop.rating.avg));
+          const b = document.createElement('b'); b.textContent = formatRating(shop.rating.avg);
+          const t = document.createElement('span'); t.textContent = '(' + plural(shop.rating.count, 'avis', 'avis') + ')';
+          btn.append(s, b, t);
+          btn.setAttribute('aria-label', 'Noté ' + formatRating(shop.rating.avg) + ' sur 5, ' + plural(shop.rating.count, 'avis', 'avis') + ' : voir les avis');
+        } else {
+          const t = document.createElement('span'); t.textContent = canReview(shop) ? 'Pas encore d\'avis · donnez le vôtre' : 'Pas encore d\'avis';
+          btn.append(t);
+          btn.setAttribute('aria-label', t.textContent);
+        }
+      }
+      if (!shop.isPro) return;
+      draw(shop);
+      const c = cache.get(shop.id);
+      if (!c || Date.now() - c.at > 60 * 1000) refresh(shop.id);
+    }
+
+    function draw(shop) {
+      const me = currentUser();
+      const c = cache.get(shop.id);
+      const list = c ? c.list : null;
+      const mine = list && me ? list.find((r) => r.user_id === me.id) : null;
+      const own = ownShop(shop);
+      // Résumé : moyenne et répartition des notes
+      const sum = $('rv-summary');
+      sum.textContent = '';
+      if (list && list.length) {
+        const counts = [0, 0, 0, 0, 0, 0];
+        list.forEach((r) => { counts[r.rating]++; });
+        const avg = list.reduce((a, r) => a + r.rating, 0) / list.length;
+        const left = document.createElement('div');
+        left.className = 'rv-avg';
+        left.innerHTML = '<strong></strong><span class="stars" aria-hidden="true"></span><small></small>';
+        left.querySelector('strong').textContent = formatRating(avg);
+        left.querySelector('.stars').textContent = starText(Math.round(avg));
+        left.querySelector('small').textContent = plural(list.length, 'avis', 'avis');
+        const bars = document.createElement('div');
+        bars.className = 'rv-bars';
+        bars.setAttribute('role', 'img');
+        bars.setAttribute('aria-label', [5, 4, 3, 2, 1].map((n) => plural(counts[n], 'avis', 'avis') + ' à ' + n + ' étoile' + (n > 1 ? 's' : '')).join(', '));
+        [5, 4, 3, 2, 1].forEach((n) => {
+          const row = document.createElement('div');
+          row.className = 'rv-bar';
+          row.innerHTML = '<span></span><i><b></b></i><span></span>';
+          row.firstChild.textContent = n;
+          row.querySelector('b').style.width = (counts[n] / list.length * 100).toFixed(1) + '%';
+          row.lastChild.textContent = counts[n];
+          bars.appendChild(row);
+        });
+        sum.append(left, bars);
+      }
+      // Formulaire (client) ; remarque pour les autres
+      const showForm = canReview(shop, me) && !!list && (!mine || editing);
+      $('rv-form').hidden = !showForm;
+      if (showForm) {
+        $('rv-form-title').textContent = editing ? 'Modifier mon avis' : 'Donner mon avis';
+        $('rv-submit').textContent = editing ? 'Enregistrer' : 'Publier mon avis';
+        $('rv-cancel').hidden = !editing;
+        paintStars();
+      }
+      const note = $('rv-note');
+      note.hidden = false;
+      if (own) note.textContent = 'Répondez à vos clients : votre réponse s\'affiche sous leur avis. Un avis abusif ? Signalez-le.';
+      else if (me && me.role === 'pro') note.textContent = 'Les avis sont réservés aux comptes clients.';
+      else note.hidden = true;
+      // Liste : le mien d'abord
+      const ul = $('rv-list');
+      ul.textContent = '';
+      $('rv-empty').hidden = !list || list.length > 0;
+      $('rv-empty').textContent = canReview(shop, me) ? 'Pas encore d\'avis. Soyez le premier à donner le vôtre !' : 'Pas encore d\'avis sur ce restaurant.';
+      if (!list) { const li = document.createElement('li'); li.className = 'rv-empty'; li.textContent = 'Chargement des avis…'; ul.appendChild(li); return; }
+      const ordered = mine ? [mine, ...list.filter((r) => r !== mine)] : list;
+      ordered.forEach((r) => ul.appendChild(item(shop, r, { mine: r === mine && !editing, own })));
+      if (mine && editing) ul.firstChild.remove();
+    }
+
+    function item(shop, r, { mine, own }) {
+      const li = document.createElement('li');
+      li.className = 'rv-item' + (mine ? ' is-mine' : '');
+      li.dataset.id = r.id;
+      li.innerHTML = '<div class="rv-head"><span><span class="stars"></span> <b></b></span><small></small></div>';
+      li.querySelector('.stars').textContent = starText(r.rating);
+      li.querySelector('.stars').setAttribute('aria-label', r.rating + ' sur 5');
+      li.querySelector('b').textContent = mine ? 'Votre avis' : r.author_name;
+      li.querySelector('small').textContent = timeAgo(r.created_at) + (r.updated_at && new Date(r.updated_at) - new Date(r.created_at) > 60000 ? ' · modifié' : '');
+      if (r.comment) { const p = document.createElement('p'); p.className = 'rv-text'; p.textContent = r.comment; li.appendChild(p); }
+      if (r.reply && replyFor !== r.id) {
+        const rp = document.createElement('div');
+        rp.className = 'rv-reply';
+        rp.innerHTML = '<b></b>';
+        rp.querySelector('b').textContent = 'Réponse de ' + shop.name + (r.replied_at ? ' · ' + timeAgo(r.replied_at) : '');
+        rp.append(r.reply);
+        li.appendChild(rp);
+      }
+      const tools = document.createElement('div');
+      tools.className = 'rv-tools';
+      const tool = (label, fn, cls = '') => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; if (cls) b.className = cls; b.addEventListener('click', fn); tools.appendChild(b); return b; };
+      if (mine) {
+        tool('Modifier', () => { editing = true; pick = r.rating; $('rv-comment').value = r.comment || ''; updateCount(); draw(shop); $('rv-form').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
+        tool('Supprimer', () => removeMine(shop, r), 'is-danger');
+      }
+      if (own && replyFor !== r.id) {
+        tool(r.reply ? 'Modifier la réponse' : 'Répondre', () => { replyFor = r.id; draw(shop); const t = document.querySelector('.rv-reply-form textarea'); if (t) t.focus(); });
+        if (r.reply) tool('Retirer la réponse', () => saveReply(shop, r, null), 'is-danger');
+        if (r.reported_at) tool('Signalé', () => {}, 'is-done');
+        else tool('Signaler', () => report(shop, r));
+      }
+      if (tools.childNodes.length) li.appendChild(tools);
+      if (own && replyFor === r.id) li.appendChild(replyForm(shop, r));
+      return li;
+    }
+
+    function replyForm(shop, r) {
+      const f = document.createElement('form');
+      f.className = 'rv-reply-form';
+      f.noValidate = true;
+      f.innerHTML = '<label class="field"><span>Votre réponse <small class="counter">0 / 600</small></span><textarea rows="3" maxlength="600"></textarea><small class="field-error" aria-live="polite"></small></label>' +
+        '<div class="rv-actions"><button class="btn btn-ghost" type="button">Annuler</button><button class="btn btn-primary" type="submit">Publier la réponse</button></div>';
+      const ta = f.querySelector('textarea'), count = f.querySelector('.counter'), err = f.querySelector('.field-error');
+      ta.value = r.reply || '';
+      const upd = () => { count.textContent = ta.value.length + ' / 600'; err.textContent = ''; };
+      upd();
+      ta.addEventListener('input', upd);
+      f.querySelector('.btn-ghost').addEventListener('click', () => { replyFor = null; draw(shop); });
+      f.addEventListener('submit', (ev) => {
+        ev.preventDefault();
+        const text = ta.value.trim();
+        if (text.length < 2) { err.textContent = 'Écrivez votre réponse (2 caractères au moins).'; ta.focus(); return; }
+        saveReply(shop, r, text, f.querySelector('.btn-primary'));
+      });
+      return f;
+    }
+
+    async function saveReply(shop, r, text, btn) {
+      if (text === null && !window.confirm('Retirer votre réponse à cet avis ?')) return;
+      if (btn) btn.disabled = true;
+      const { error } = await sb.from('reviews').update({ reply: text }).eq('id', r.id);
+      if (btn) btn.disabled = false;
+      if (error) { toast(cloudError(error)); return; }
+      if (text) Push.send(shop.id);
+      replyFor = null;
+      toast(text ? 'Réponse publiée : le client est prévenu.' : 'Réponse retirée.');
+      await refresh(shop.id);
+    }
+    async function report(shop, r) {
+      if (!window.confirm('Signaler cet avis à l\'équipe FlashMiam ?\n\nIl reste visible le temps qu\'il soit examiné.')) return;
+      const { error } = await sb.from('reviews').update({ reported_at: new Date().toISOString() }).eq('id', r.id);
+      if (error) { toast(cloudError(error)); return; }
+      toast('Avis signalé : merci, nous allons l\'examiner.');
+      await refresh(shop.id);
+    }
+    async function removeMine(shop, r) {
+      if (!window.confirm('Supprimer votre avis sur ' + shop.name + ' ?')) return;
+      const { error } = await sb.from('reviews').delete().eq('id', r.id);
+      if (error) { toast(cloudError(error)); return; }
+      editing = false; pick = 0;
+      $('rv-comment').value = ''; updateCount();
+      toast('Votre avis a été supprimé.');
+      await refresh(shop.id);
+      refreshCloud();
+    }
+
+    // Étoiles : boutons radio (clic, flèches du clavier)
+    function paintStars() {
+      const box = $('rv-stars');
+      if (!box.childNodes.length) {
+        for (let n = 1; n <= 5; n++) {
+          const b = document.createElement('button');
+          b.type = 'button'; b.dataset.v = n; b.textContent = '★';
+          b.setAttribute('role', 'radio');
+          b.setAttribute('aria-label', n + ' étoile' + (n > 1 ? 's' : '') + ' sur 5');
+          box.appendChild(b);
+        }
+      }
+      [...box.children].forEach((b) => {
+        const v = Number(b.dataset.v);
+        b.classList.toggle('is-on', v <= pick);
+        b.setAttribute('aria-checked', String(v === pick));
+        b.tabIndex = v === (pick || 1) ? 0 : -1;
+      });
+    }
+    $('rv-stars').addEventListener('click', (ev) => {
+      const b = ev.target.closest('button');
+      if (!b) return;
+      pick = Number(b.dataset.v);
+      $('err-rv-stars').textContent = '';
+      paintStars();
+    });
+    $('rv-stars').addEventListener('keydown', (ev) => {
+      const step = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[ev.key];
+      if (!step) return;
+      ev.preventDefault();
+      pick = Math.min(5, Math.max(1, (pick || (step > 0 ? 0 : 6)) + step));
+      paintStars();
+      $('rv-stars').children[pick - 1].focus();
+    });
+    const updateCount = () => { $('rv-count').textContent = $('rv-comment').value.length + ' / 600'; };
+    $('rv-comment').addEventListener('input', () => { updateCount(); setFieldError('rv-comment', ''); });
+    $('rv-cancel').addEventListener('click', () => { editing = false; pick = 0; $('rv-comment').value = ''; updateCount(); $('err-rv').textContent = ''; const m = markers.get(selectedId); if (m) draw(m.shop); });
+    $('rv-form').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const m = markers.get(selectedId);
+      const me = currentUser();
+      if (!m || !canReview(m.shop, me)) return;
+      $('err-rv').textContent = '';
+      const comment = $('rv-comment').value.trim();
+      let ok = true;
+      if (!pick) { $('err-rv-stars').textContent = 'Choisissez une note de 1 à 5 étoiles.'; ok = false; }
+      if (comment && comment.length < 3) { setFieldError('rv-comment', 'Écrivez au moins 3 caractères, ou laissez le commentaire vide.'); ok = false; }
+      if (!ok) return;
+      const list = (cache.get(m.shop.id) || {}).list || [];
+      const mine = list.find((r) => r.user_id === me.id);
+      const row = { rating: pick, comment: comment || null };
+      const btn = $('rv-submit');
+      btn.disabled = true;
+      const { error } = mine
+        ? await Loader.run(sb.from('reviews').update(row).eq('id', mine.id), 'Enregistrement…')
+        : await Loader.run(sb.from('reviews').insert({ merchant_id: m.shop.id, ...row }), 'Publication de votre avis…');
+      btn.disabled = false;
+      if (error) {
+        $('err-rv').textContent = error.code === '23505' ? 'Vous avez déjà donné votre avis sur ce restaurant.' : cloudError(error);
+        refresh(m.shop.id);
+        return;
+      }
+      if (!mine) Push.send(m.shop.id);
+      editing = false; pick = 0;
+      $('rv-comment').value = ''; updateCount();
+      toast(mine ? 'Votre avis a été modifié.' : 'Merci ! Votre avis est publié.');
+      await refresh(m.shop.id);
+      refreshCloud();
+    });
+    $('shop-rating').addEventListener('click', () => setShopTab('reviews', { focus: true }));
+    return { render, refresh, cache };
+  })();
+
+  /* ---------- Partage d'une fiche : lien direct ---------- */
+  const shopLink = (id, tab) => location.origin + location.pathname + '?r=' + encodeURIComponent(id) + (tab ? '&t=' + tab : '');
+  $('shop-share').addEventListener('click', async () => {
+    const m = markers.get(selectedId);
+    if (!m) return;
+    const url = shopLink(m.shop.id);
+    const best = activePromos(m.shop)[0];
+    const text = m.shop.name + ' sur FlashMiam' + (best ? ' : ' + best.title : '');
+    if (navigator.share) {
+      try { await navigator.share({ title: m.shop.name, text, url }); return; }
+      catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    try { await navigator.clipboard.writeText(url); toast('Lien de la fiche copié : collez-le dans un message.'); }
+    catch (e) { toast('Lien de la fiche : ' + url); }
+  });
+
+  /** Lien direct (partage, notification) : ouvre la fiche, l'onglet demandé ou la story. */
+  let pendingLink = null;
+  function openLink(link) {
+    cloud.ready.then(() => whenMapReady(() => {
+      syncShopMarkers();
+      const m = markers.get(link.id);
+      if (!m) { toast('Ce restaurant n\'est plus visible sur la carte.'); return; }
+      if (link.tab === 'story' && liveStories(m.shop).length) { StoryViewer.open(m.shop.id, { only: true }); return; }
+      openShop(m.shop.id);
+      if (link.tab === 'reviews' || link.tab === 'menu') setShopTab(link.tab);
+      if (link.tab === 'reviews') Reviews.refresh(m.shop.id);   // avis ou réponse tout juste publiés
+    }));
+  }
+
+  /* ---------- Notifications : promos et stories des restaurants suivis, avis, réponses ---------- */
+  const Notifs = (() => {
+    const ICONS = { promo: '🎁', story: '📸', review: '⭐', reply: '💬' };
+    const DEVICE_KEY = 'flashmiam:device-alerts';
+    let items = [], loaded = false, inflight = null, started = false, shownUnread = new Set();
+    const known = new Set();
+    const isOpen = () => $('notif-sheet').classList.contains('is-open');
+    const unread = () => items.filter((n) => !n.read_at).length;
+    const tabFor = (n) => (n.kind === 'review' || n.kind === 'reply' ? 'reviews' : n.kind === 'story' ? 'story' : null);
+
+    function paintBadge() {
+      const n = unread();
+      $('notif-badge').hidden = !n;
+      $('notif-badge').textContent = n > 9 ? '9+' : String(n);
+      $('notif-btn').classList.toggle('has-unread', n > 0);
+      $('notif-btn').setAttribute('aria-label', n ? 'Notifications : ' + plural(n, 'non lue', 'non lues') : 'Notifications');
+    }
+    async function load() {
+      if (!currentUser()) return;
+      if (inflight) return inflight;
+      inflight = (async () => {
+        const { data, error } = await sb.from('notifications').select('*').order('created_at', { ascending: false }).limit(50);
+        if (error || !data) return;
+        const fresh = loaded ? data.filter((n) => !known.has(n.id) && !n.read_at) : [];
+        data.forEach((n) => known.add(n.id));
+        items = data;
+        loaded = true;
+        paintBadge();
+        if (isOpen()) render();
+        if (fresh.length) announce(fresh);
+      })().finally(() => { inflight = null; });
+      return inflight;
+    }
+    /** Nouvelle notification pendant l'utilisation : la cloche sonne, un message propose de la voir. */
+    function announce(fresh) {
+      refreshCloud(300);                       // nouvelle promo, story ou avis : données à jour sans attendre
+      fresh.forEach((n) => { if (n.kind === 'review' || n.kind === 'reply') Reviews.cache.delete(n.merchant_id); });
+      const btn = $('notif-btn');
+      btn.classList.remove('ring'); void btn.offsetWidth; btn.classList.add('ring');
+      const n = fresh[0];
+      if (!isOpen() && !document.hidden) toast(ICONS[n.kind] + ' ' + n.title + (n.body ? ' : ' + n.body : '') + (fresh.length > 1 ? ' (+' + (fresh.length - 1) + ')' : ''), { label: 'Voir', run: () => openItem(n) });
+      if (document.hidden) Device.alert(n);
+    }
+    async function markAllRead() {
+      if (!items.some((n) => !n.read_at)) return;
+      const now = new Date().toISOString();
+      const { error } = await sb.from('notifications').update({ read_at: now }).is('read_at', null);
+      if (error) return;
+      items.forEach((n) => { if (!n.read_at) n.read_at = now; });
+      paintBadge();
+    }
+    function open() {
+      shownUnread = new Set(items.filter((n) => !n.read_at).map((n) => n.id));
+      render();
+      renderPrefs();
+      openPanel($('notif-sheet'), { modal: true });
+      markAllRead();
+      load();
+    }
+    function render() {
+      const me = currentUser();
+      $('notif-sub').textContent = shownUnread.size ? plural(shownUnread.size, 'nouvelle', 'nouvelles') : 'Vous êtes à jour';
+      const ul = $('notif-list');
+      ul.textContent = '';
+      $('notif-empty').hidden = items.length > 0;
+      $('notif-empty-text').textContent = me && me.role === 'pro'
+        ? 'Vous serez prévenu ici de chaque nouvel avis sur votre restaurant.'
+        : 'Suivez vos restaurants préférés (bouton « Suivre » de leur fiche) : vous serez prévenu de leurs promos et de leurs stories, et des réponses à vos avis.';
+      items.forEach((n) => {
+        const li = document.createElement('li');
+        li.className = 'notif-item' + (shownUnread.has(n.id) ? ' is-unread' : '');
+        li.dataset.id = n.id;
+        li.innerHTML = '<button type="button" class="n-open"><span class="n-ico" aria-hidden="true"></span><span class="n-body"><b></b><span></span><small></small></span></button>' +
+          '<button type="button" class="n-del" aria-label="Effacer la notification">&times;</button>';
+        li.querySelector('.n-ico').textContent = ICONS[n.kind] || '🔔';
+        li.querySelector('b').textContent = n.title;
+        li.querySelector('.n-body span').textContent = n.body || '';
+        li.querySelector('small').textContent = timeAgo(n.created_at);
+        li.querySelector('.n-open').addEventListener('click', () => openItem(n));
+        li.querySelector('.n-del').addEventListener('click', () => remove(n));
+        ul.appendChild(li);
+      });
+    }
+    async function remove(n) {
+      const { error } = await sb.from('notifications').delete().eq('id', n.id);
+      if (error) { toast(cloudError(error)); return; }
+      items = items.filter((x) => x.id !== n.id);
+      paintBadge();
+      render();
+    }
+    function openItem(n) {
+      closePanel($('notif-sheet'));
+      if (!n.read_at) {
+        n.read_at = new Date().toISOString();
+        sb.from('notifications').update({ read_at: n.read_at }).eq('id', n.id).then(() => {}, () => {});
+        paintBadge();
+      }
+      if (n.merchant_id) openLink({ id: n.merchant_id, tab: tabFor(n) });
+    }
+
+    // Réglages : enregistrés dans le profil (communs à tous les appareils)
+    const PREFS = { promos: ['np-promos', 'notify_promos'], stories: ['np-stories', 'notify_stories'], reviews: ['np-reviews', 'notify_reviews'] };
+    function renderPrefs() {
+      const me = currentUser();
+      if (!me) return;
+      Object.entries(PREFS).forEach(([k, [id]]) => { $(id).checked = me.prefs ? me.prefs[k] : true; });
+      $('np-reviews-label').textContent = me.role === 'pro' ? 'Nouveaux avis sur mon restaurant' : 'Réponses des restaurants à mes avis';
+      Device.renderPref();
+    }
+    Object.entries(PREFS).forEach(([k, [id, col]]) => $(id).addEventListener('change', async (ev) => {
+      const me = currentUser();
+      if (!me) return;
+      const on = ev.target.checked;
+      const { error } = await sb.from('profiles').update({ [col]: on }).eq('id', me.id);
+      if (error) { ev.target.checked = !on; toast(cloudError(error)); return; }
+      me.prefs = { ...(me.prefs || {}), [k]: on };
+      toast(on ? 'Notification activée.' : 'Notification désactivée.');
+    }));
+
+    function start() {
+      if (started || !currentUser()) return;
+      started = true;
+      load();
+      setInterval(() => { if (!document.hidden) load(); }, CONFIG.notifPollMs);
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+      try {
+        sb.channel('notifs-' + currentUser().id)
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: 'user_id=eq.' + currentUser().id }, () => load())
+          .subscribe();
+      } catch (e) { /* temps réel indisponible : actualisation régulière */ }
+      Device.sync();
+    }
+    $('notif-btn').addEventListener('click', open);
+    return { start, load, open, openItem, get items() { return items; }, unread, DEVICE_KEY };
+  })();
+
+  /* ---------- Alertes sur l'appareil (notifications du système), y compris FlashMiam fermé ---------- */
+  const Device = (() => {
+    const supported = 'Notification' in window && 'serviceWorker' in navigator;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    const wanted = () => { try { return localStorage.getItem(Notifs.DEVICE_KEY) === '1'; } catch (e) { return false; } };
+    const setWanted = (on) => { try { localStorage.setItem(Notifs.DEVICE_KEY, on ? '1' : '0'); } catch (e) { /* ignore */ } };
+    let registration = null;
+    async function register() {
+      if (!supported || registration) return registration;
+      try { registration = await navigator.serviceWorker.register('sw.js'); } catch (e) { registration = null; }
+      return registration;
+    }
+    function renderPref() {
+      const box = $('np-device'), hint = $('np-device-hint');
+      box.disabled = !supported;
+      box.checked = supported && wanted() && Notification.permission === 'granted';
+      hint.textContent = !supported
+        ? (isIOS && !standalone ? 'Sur iPhone : ajoutez d\'abord FlashMiam à l\'écran d\'accueil (Partager › Sur l\'écran d\'accueil), puis ouvrez-le depuis l\'icône.' : 'Votre navigateur ne permet pas les alertes.')
+        : Notification.permission === 'denied' ? 'Les alertes sont bloquées pour ce site : autorisez les notifications dans les réglages du navigateur.'
+        : box.checked ? (Push.active() ? 'Activées : vous êtes prévenu même quand FlashMiam est fermé.' : 'Activées : vous êtes prévenu quand FlashMiam est ouvert en arrière-plan.')
+        : 'Recevez une alerte de votre téléphone ou de votre ordinateur à chaque nouvelle notification.';
+    }
+    $('np-device').addEventListener('change', async (ev) => {
+      if (!ev.target.checked) { setWanted(false); await Push.unsubscribe(); renderPref(); toast('Alertes désactivées sur cet appareil.'); return; }
+      let perm = Notification.permission;
+      if (perm === 'default') { try { perm = await Notification.requestPermission(); } catch (e) { perm = 'denied'; } }
+      if (perm !== 'granted') { setWanted(false); renderPref(); toast('Alertes refusées par le navigateur.'); return; }
+      setWanted(true);
+      await register();
+      await Push.subscribe();
+      renderPref();
+      toast('Alertes activées sur cet appareil.');
+    });
+    /** Au démarrage : service de notifications de l'appareil (clic sur une alerte → la fiche s'ouvre). */
+    async function sync() {
+      if (!supported) return;
+      await register();
+      if (wanted() && Notification.permission === 'granted') Push.subscribe();
+    }
+    /** Page ouverte en arrière-plan sans abonnement « push » : alerte locale. */
+    async function alert(n) {
+      if (!supported || !wanted() || Notification.permission !== 'granted' || Push.active()) return;
+      const opts = { body: n.body || '', tag: n.id, icon: 'icon-192.png', badge: 'icon-192.png', data: { url: shopLink(n.merchant_id, n.kind === 'story' ? 'story' : (n.kind === 'review' || n.kind === 'reply') ? 'reviews' : null) } };
+      try { const reg = await register(); if (reg) reg.showNotification(n.title, opts); else new Notification(n.title, opts); } catch (e) { /* ignore */ }
+    }
+    if (supported) {
+      navigator.serviceWorker.addEventListener('message', (ev) => {
+        if (!ev.data || ev.data.type !== 'open') return;
+        const u = new URL(ev.data.url, location.href);
+        if (u.searchParams.get('r')) openLink({ id: u.searchParams.get('r'), tab: u.searchParams.get('t') });
+      });
+    }
+    return { supported, register, renderPref, sync, alert };
+  })();
+
+  /* ---------- Notifications « push » : alertes même quand FlashMiam est fermé (fonction serveur send-push) ---------- */
+  const Push = (() => {
+    let sub = null;
+    const ok = () => Device.supported && 'PushManager' in window;
+    const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const fromB64 = (s) => { const bin = atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)); return Uint8Array.from(bin, (c) => c.charCodeAt(0)); };
+    async function subscribe() {
+      if (!ok() || !currentUser()) return null;
+      try {
+        const reg = await Device.register();
+        if (!reg) return null;
+        await navigator.serviceWorker.ready;
+        sub = await reg.pushManager.getSubscription();
+        if (!sub) {
+          const { data, error } = await sb.functions.invoke('send-push', { body: { action: 'key' } });
+          if (error || !data || !data.publicKey) return null;
+          sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: fromB64(data.publicKey) });
+        }
+        const { error } = await sb.rpc('register_push_subscription', {
+          p_endpoint: sub.endpoint, p_p256dh: b64(sub.getKey('p256dh')), p_auth: b64(sub.getKey('auth')), p_user_agent: navigator.userAgent.slice(0, 200),
+        });
+        if (error) { console.warn('Abonnement push non enregistré', error); }
+        return sub;
+      } catch (e) { console.warn('Alertes push indisponibles', e); sub = null; return null; }
+    }
+    async function unsubscribe() {
+      if (!ok()) return;
+      try {
+        const reg = await Device.register();
+        const s = reg && await reg.pushManager.getSubscription();
+        if (s) { await sb.from('push_subscriptions').delete().eq('endpoint', s.endpoint); await s.unsubscribe(); }
+      } catch (e) { /* ignore */ }
+      sub = null;
+    }
+    /** Après une publication : prévient les appareils des destinataires (la base a déjà créé les notifications). */
+    function send(merchantId) {
+      sb.functions.invoke('send-push', { body: { action: 'send', merchant_id: merchantId } }).then(() => {}, () => {});
+    }
+    return { subscribe, unsubscribe, send, active: () => !!sub };
+  })();
 
   /* =====================================================================
      8. PANNEAUX (fiche commerce, profil, aide) — ouverture, fermeture, glisser
@@ -2983,6 +3993,7 @@
     renderMenu(shop);
     syncShopTabs(shop);
     renderFollow(shop);
+    Reviews.render(shop);
     $('shop-status').textContent = status.label;
     $('shop-status').className = 'status ' + (status.open ? 'is-open' : 'is-closed');
     // Les adresses géocodées contiennent déjà la ville : on ne l'ajoute qu'aux autres
@@ -3050,9 +4061,10 @@
   function syncShopTabs(shop) {
     const hasMenu = !!(shop.menu && shop.menu.length);
     const hasPhotos = !!(shop.photos && shop.photos.length);
-    $('shop-tabs').hidden = !hasMenu && !hasPhotos;
+    $('shop-tabs').hidden = !hasMenu && !hasPhotos && !shop.isPro;
     $('tab-menu').hidden = !hasMenu;
     $('tab-photos').hidden = !hasPhotos;
+    $('tab-reviews').hidden = !shop.isPro;      // avis : restaurants inscrits uniquement
   }
   let tabsSeen = new Set();                    // onglets déjà ouverts pour cette consultation (statistiques)
   function setShopTab(name, { focus = false } = {}) {
@@ -3063,9 +4075,9 @@
       if (on && focus) tab.focus();
       $('panel-' + tab.dataset.tab).hidden = !on;
     });
-    if (selectedId && name !== 'infos' && !tabsSeen.has(name)) {
+    if (selectedId && (name === 'menu' || name === 'photos') && !tabsSeen.has(name)) {
       tabsSeen.add(name);
-      Stats.track(selectedId, name === 'menu' ? 'menu' : 'photos');
+      Stats.track(selectedId, name);
     }
   }
   $('shop-tabs').addEventListener('click', (ev) => {
@@ -3299,6 +4311,8 @@
     $('k-menu').textContent = st.menu.toLocaleString('fr-FR');
     $('k-photos').textContent = st.photos.toLocaleString('fr-FR');
     $('k-stories').textContent = st.stories.toLocaleString('fr-FR');
+    $('k-rating').textContent = r.rating ? formatRating(r.rating.avg) + ' ★' : '–';
+    $('k-rating-d').textContent = r.rating ? r.rating.count + ' avis' : 'aucun avis pour l\'instant';
     $('pd-chart-sub').textContent = period;
     document.querySelectorAll('#pd-stats .seg button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.days) === statsDays)));
     requestAnimationFrame(() => renderViewsChart($('pd-chart'), $('pd-tip'), st.series));
@@ -3385,7 +4399,11 @@
     const min = Math.max(0, Math.round((Date.now() - new Date(iso)) / 60000));
     if (min < 1) return 'à l\'instant';
     if (min < 60) return 'il y a ' + min + ' min';
-    return 'il y a ' + Math.floor(min / 60) + ' h';
+    if (min < 24 * 60) return 'il y a ' + Math.floor(min / 60) + ' h';
+    const days = Math.floor(min / (24 * 60));
+    if (days === 1) return 'hier';
+    if (days < 7) return 'il y a ' + days + ' jours';
+    return 'le ' + new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: days > 300 ? 'numeric' : undefined });
   }
   /** Restaurants qui ont des stories en ligne : non vues d'abord, puis restaurants suivis, puis les plus récentes. */
   function storyGroups() {
@@ -3664,6 +4682,7 @@
         $('err-sc').textContent = /Dix stories/.test(error.message || '') ? 'Vous avez déjà ' + MAX_STORIES + ' stories en ligne : supprimez-en une.' : cloudError(error);
         return;
       }
+      Push.send(r.id);
       await refreshCloud();
       close();
       renderStoryAdmin(currentUser());
@@ -3780,10 +4799,11 @@
     const { error } = await Loader.run(sb.from('promotions').insert(row), 'Publication de la promotion…');
     $('pp-submit').disabled = false;
     if (error) { setFieldError('pp-title', /Six promotions/.test(error.message || '') ? MAX_PROMOS + ' promotions en cours au maximum.' : cloudError(error)); return; }
+    Push.send(r.id);
     await refreshCloud();
     $('pp-title').value = ''; $('pp-details').value = ''; $('pp-end').value = ''; $('pp-title-count').textContent = '0 / 60';
     renderPromoAdmin(currentUser());
-    toast('Promotion publiée : elle apparaît sur votre fiche et avec le filtre « Promos ».');
+    toast('Promotion publiée : elle apparaît sur votre fiche et vos abonnés sont prévenus.');
   });
 
   /** Marges de la carte quand une fiche est ouverte : le commerce reste visible à côté ou au-dessus. */
@@ -4934,12 +5954,13 @@
     $('shop-menu-count').textContent = '';
     if (!items.length) return;
     const groups = new Map();
-    items.forEach((it) => { if (!groups.has(it.section)) groups.set(it.section, []); groups.get(it.section).push(it); });
+    items.forEach((it, i) => { if (!groups.has(it.section)) groups.set(it.section, []); groups.get(it.section).push([it, i]); });
     groups.forEach((group, section) => {
       if (section) { const h = document.createElement('h4'); h.textContent = section; list.appendChild(h); }
       const ul = document.createElement('ul');
-      group.forEach((it) => {
+      group.forEach(([it, i]) => {
         const li = document.createElement('li');
+        li.dataset.i = i;
         li.innerHTML = '<div><b></b><small></small></div><span class="price"></span>';
         li.querySelector('b').textContent = it.name;
         li.querySelector('small').textContent = it.desc || '';
@@ -5376,6 +6397,7 @@
       ? 'Actif depuis le ' + date(pro.payment.paidAt) + (pro.payment.mode === 'demo' ? ' (démonstration)' : '')
       : 'Non souscrit';
     $('pd-show').hidden = !r;
+    $('pd-reviews').hidden = !(r && r.published);
     renderStoryAdmin(account);
     renderPromoAdmin(account);
     renderStats(account);
@@ -5401,6 +6423,11 @@
     const step = proStepFor(currentUser());
     showAuthStep(step || 'pro-listing', { mode: step ? 'create' : 'edit' });
   });
+  $('pd-reviews').addEventListener('click', () => {
+    const r = myRestaurant();
+    closePanel($('profile-sheet'));
+    if (r) whenMapReady(() => { openShop(r.id); setShopTab('reviews'); });
+  });
   $('pd-show').addEventListener('click', () => {
     const r = myRestaurant();
     closePanel($('profile-sheet'));
@@ -5411,7 +6438,7 @@
     requestLocation({ fly: true, fromButton: true });
   });
   $('profile-logout').addEventListener('click', async () => {
-    await Loader.run(sb.auth.signOut().catch(() => {}), 'Déconnexion…');
+    await Loader.run(Push.unsubscribe().then(() => sb.auth.signOut()).catch(() => {}), 'Déconnexion…');
     location.reload();   // retour à l'écran de connexion
   });
   $('profile-delete').addEventListener('click', async () => {
@@ -5430,6 +6457,7 @@
   function startApp({ focus = null } = {}) {
     document.body.classList.add('ui-ready');
     whenMapReady(renderStories);
+    Notifs.start();
     // Carte pas encore prête (connexion lente) : écran de chargement le temps qu'elle arrive
     if (!view) Loader.run(new Promise((resolve) => whenMapReady(resolve)), 'Chargement de la carte…', 'Les commerces de La Roche-sur-Yon arrivent');
     whenMapReady(() => {
@@ -5438,6 +6466,7 @@
         const r = restaurants()[focus];
         if (r) { upsertShopMarker(restaurantToShop(r)); openShop(r.id); return; }
       }
+      if (pendingLink) { const link = pendingLink; pendingLink = null; openLink(link); return; }
       const target = Geo.position && isInBounds(Geo.position) ? Geo.position : CONFIG.center;
       if (Geo.position && isInBounds(Geo.position)) setFollow(true);
       view.flyTo({ center: target, zoom: CONFIG.heroZoom, duration: 2200 });
@@ -5451,19 +6480,24 @@
      restaurateur dont l'inscription n'est pas terminée → reprise à la bonne étape.
      ===================================================================== */
 
-  window.RocheStreetFood = { view: null, Geo, SHOPS, getStatus, setTheme, isValidSiret, restaurants, cloud, sb };
+  window.RocheStreetFood = { view: null, Geo, SHOPS, getStatus, setTheme, isValidSiret, restaurants, cloud, sb, Search, Reviews, Notifs, Push };
 
   setTheme(currentTheme());
   applyLayout();
   setLocateState('idle');
   const params = new URLSearchParams(location.search);
   if (params.has('paiement')) history.replaceState(null, '', location.pathname + location.hash);
+  // Lien direct vers une fiche (?r=…&t=reviews|menu|story) : ouverte après la connexion
+  if (params.get('r')) {
+    pendingLink = { id: params.get('r'), tab: params.get('t') };
+    history.replaceState(null, '', location.pathname + location.hash);
+  }
 
   if (!sb) {
     fatal('Service momentanément indisponible', 'FlashMiam n\'a pas pu joindre son serveur. Vérifiez votre connexion internet, puis rechargez la page.');
   } else {
     // Fiches en ligne : chargées en parallèle de la carte, puis affichées dès que les deux sont prêtes
-    loadRestaurants().then(() => whenMapReady(syncShopMarkers), (e) => { console.warn(e); toast('Les restaurants n\'ont pas pu être chargés. ' + cloudError(e)); });
+    cloud.ready = loadRestaurants().then(() => whenMapReady(syncShopMarkers), (e) => { console.warn(e); toast('Les restaurants n\'ont pas pu être chargés. ' + cloudError(e)); });
     // Lien « mot de passe oublié » ouvert depuis l'e-mail : choisir un nouveau mot de passe
     sb.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') setTimeout(() => showReset(session && session.user && session.user.email, { byLink: true }), 0);
@@ -5510,12 +6544,21 @@
       description: 'Le street-food de La Roche-sur-Yon sur une carte interactive.',
       start_url: base, scope: base.replace(/[^/]*$/, ''), display: 'standalone', orientation: 'any',
       background_color: '#f1f3f4', theme_color: '#f1f3f4', lang: 'fr',
-      icons: [{ src: icon, sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
+      icons: [
+        { src: icon, sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+        // adresses complètes : le manifeste est servi depuis une adresse « blob: »
+        { src: new URL('icon-192.png', base).href, sizes: '192x192', type: 'image/png', purpose: 'any' },
+        { src: new URL('icon-512.png', base).href, sizes: '512x512', type: 'image/png', purpose: 'any' },
+      ],
     };
     const link = document.createElement('link');
     link.rel = 'manifest';
     link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
     document.head.appendChild(link);
+    const touch = document.createElement('link');
+    touch.rel = 'apple-touch-icon';
+    touch.href = 'icon-192.png';
+    document.head.appendChild(touch);
     const favicon = document.createElement('link');
     favicon.rel = 'icon';
     favicon.href = icon;

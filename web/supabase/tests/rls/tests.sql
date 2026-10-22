@@ -230,6 +230,139 @@ select t.ok((select count(*) = 3 from stories), 'restaurateur : voit toutes ses 
 select t.ok(t.affected($$delete from stories where caption = 'Story d''hier'$$) = 1 and t.affected($$delete from promotions where title = 'Formule semaine'$$) = 1, 'restaurateur : supprime une story et une promotion');
 reset role;
 
+-- ===== Notifications (promos et stories des restaurants suivis) =====
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select count(*) filter (where kind = 'promo') = 6 and count(*) filter (where kind = 'story') = 1 from notifications),
+  'abonnée : 6 notifications de promos et 1 seule de story (regroupées sur 6 h) ; rien pour l''offre terminée ni la story expirée');
+select t.ok((select bool_and(title = 'Le Bon Burger' and merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001') from notifications)
+  and exists (select 1 from notifications where body = 'Offre étudiante : Menu étudiant à 8,90 €')
+  and exists (select 1 from notifications where body = 'A publié une story : Nouveau burger au chèvre ce soir !'), 'notification : nom du restaurant et texte de l''offre ou de la story');
+select t.fails($$insert into notifications (user_id, kind, title) values ('33333333-3333-3333-3333-333333333333', 'promo', 'Fausse')$$, 'impossible de créer soi-même une notification');
+select t.ok(t.affected($$update notifications set read_at = now() where read_at is null$$) = 7, 'marque toutes ses notifications comme lues');
+select t.fails($$update notifications set title = 'Modifié'$$, 'texte d''une notification non modifiable');
+select t.fails($$update notifications set user_id = '22222222-2222-2222-2222-222222222222'$$, 'notification : destinataire non modifiable');
+select t.ok(t.affected($$update profiles set notify_promos = false where id = '33333333-3333-3333-3333-333333333333'$$) = 1, 'préférences : désactive les notifications de promos');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select count(*) = 0 from notifications), 'restaurateur : ne voit pas les notifications de ses abonnés');
+insert into promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Frites offertes');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select count(*) = 7 from notifications), 'promos désactivées : aucune nouvelle notification');
+update profiles set notify_promos = true where id = '33333333-3333-3333-3333-333333333333';
+reset role;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated; insert into promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Dessert offert'); reset role;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select count(*) = 1 from notifications where read_at is null and body = 'Bon plan : Dessert offert'), 'promos réactivées : nouvelle notification non lue');
+select t.ok(t.affected($$delete from notifications where body = 'Bon plan : Dessert offert'$$) = 1, 'efface une de ses notifications');
+reset role;
+-- Rafale publier / retirer : 8 promotions de suite
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated;
+do $$ begin for i in 1..8 loop
+  insert into public.promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Rafale ' || i);
+  delete from public.promotions where title = 'Rafale ' || i;
+end loop; end $$;
+reset role;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select count(*) = 10 from notifications where kind = 'promo'), 'anti-rafale : 10 notifications de promos au plus par restaurant et par jour');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select count(*) = 0 from notifications) and t.affected($$update notifications set read_at = null$$) = 0 and t.affected($$delete from notifications$$) = 0,
+  'autre compte : ne voit, ne modifie ni n''efface les notifications d''autrui');
+reset role;
+select set_config('request.jwt.claims', '', false);
+set role anon;
+select t.fails($$select * from notifications$$, 'visiteur : aucun accès aux notifications');
+reset role;
+
+-- ===== Avis =====
+insert into auth.users (id, email, raw_user_meta_data) values ('55555555-5555-5555-5555-555555555555', 'hugo@etu.fr', '{"first_name":"Hugo","last_name":"petit"}');
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok(t.affected($$insert into reviews (merchant_id, rating, comment) values ('aaaaaaaa-0000-0000-0000-000000000001', 5, '  Super burger, frites maison !  ')$$) = 1, 'client : donne son avis (5 étoiles)');
+select t.ok((select author_name = 'Léa' and comment = 'Super burger, frites maison !' and reply is null from reviews where user_id = '33333333-3333-3333-3333-333333333333'), 'avis : nom affiché tiré du profil (jamais l''e-mail), commentaire nettoyé');
+select t.fails($$insert into reviews (merchant_id, rating) values ('aaaaaaaa-0000-0000-0000-000000000001', 3)$$, 'un seul avis par client et par restaurant');
+select t.fails($$insert into reviews (merchant_id, rating) values ('aaaaaaaa-0000-0000-0000-000000000002', 4)$$, 'avis sur une fiche non publiée refusé');
+select t.fails($$insert into reviews (merchant_id, user_id, rating) values ('aaaaaaaa-0000-0000-0000-000000000001', '55555555-5555-5555-5555-555555555555', 1)$$, 'avis au nom d''un autre refusé');
+select t.fails($$update reviews set reply = 'Je me réponds' where user_id = '33333333-3333-3333-3333-333333333333'$$, 'l''auteur ne peut pas écrire la réponse du restaurateur');
+select t.fails($$update reviews set author_name = 'Le patron'$$, 'nom affiché non modifiable');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
+set role authenticated;
+select t.fails($$insert into reviews (merchant_id, rating) values ('aaaaaaaa-0000-0000-0000-000000000001', 6)$$, 'note hors de 1 à 5 refusée');
+select t.fails($$insert into reviews (merchant_id, rating, comment) values ('aaaaaaaa-0000-0000-0000-000000000001', 4, repeat('a', 601))$$, 'commentaire de plus de 600 caractères refusé');
+select t.ok(t.affected($$insert into reviews (merchant_id, rating) values ('aaaaaaaa-0000-0000-0000-000000000001', 3)$$) = 1, 'client : avis sans commentaire');
+select t.ok((select author_name = 'Hugo P.' and comment is null from reviews where user_id = '55555555-5555-5555-5555-555555555555'), 'avis : nom affiché « Hugo P. » (initiale du nom)');
+select t.ok(t.affected($$update reviews set rating = 4 where user_id = '33333333-3333-3333-3333-333333333333'$$) = 0
+  and t.affected($$delete from reviews where user_id = '33333333-3333-3333-3333-333333333333'$$) = 0, 'client : ne modifie ni ne supprime l''avis d''un autre');
+select t.ok(t.affected($$update reviews set rating = 5, comment = 'Encore meilleur la 2e fois' where user_id = '55555555-5555-5555-5555-555555555555'$$) = 1, 'client : modifie son avis');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated;
+select t.fails($$insert into reviews (merchant_id, rating) values ('aaaaaaaa-0000-0000-0000-000000000001', 5)$$, 'restaurateur : ne peut pas noter sa propre fiche');
+select t.ok((select count(*) = 2 from notifications where kind = 'review') and exists (select 1 from notifications where body = '★★★★★ Léa : Super burger, frites maison !'),
+  'restaurateur : notifié de chaque nouvel avis (note et extrait)');
+select t.ok(t.affected($$update reviews set reply = 'Merci Léa, à très vite !' where user_id = '33333333-3333-3333-3333-333333333333'$$) = 1, 'restaurateur : répond à un avis');
+select t.ok((select replied_at is not null from reviews where user_id = '33333333-3333-3333-3333-333333333333'), 'réponse : datée par la base');
+select t.fails($$update reviews set rating = 1 where user_id = '33333333-3333-3333-3333-333333333333'$$, 'restaurateur : ne peut pas modifier la note d''un client');
+select t.ok(t.affected($$delete from reviews where user_id = '55555555-5555-5555-5555-555555555555'$$) = 0, 'restaurateur : ne peut pas supprimer un avis (0 ligne)');
+select t.ok(t.affected($$update reviews set reported_at = '2000-01-01' where user_id = '55555555-5555-5555-5555-555555555555'$$) = 1, 'restaurateur : signale un avis');
+select t.ok((select reported_at > now() - interval '1 minute' from reviews where user_id = '55555555-5555-5555-5555-555555555555'), 'signalement : daté par la base (date fournie ignorée)');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok(exists (select 1 from notifications where kind = 'reply' and title = 'Le Bon Burger a répondu à votre avis' and body = 'Merci Léa, à très vite !'), 'client : notifié de la réponse du restaurateur');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}', false);
+set role authenticated;
+select t.ok(t.affected($$update reviews set reply = 'Concurrence'$$) = 0, 'autre restaurateur : ne peut pas répondre aux avis d''une autre fiche');
+reset role;
+select set_config('request.jwt.claims', '', false);
+set role anon;
+select t.ok((select count(*) = 2 from reviews) and (select average = 5.0 and total = 2 from merchant_ratings() where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'visiteur : lit les avis et la note moyenne (5,0 sur 2 avis)');
+select t.fails($$insert into reviews (merchant_id, rating) values ('aaaaaaaa-0000-0000-0000-000000000001', 1)$$, 'visiteur : ne peut pas donner d''avis');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok(t.affected($$delete from reviews where user_id = '33333333-3333-3333-3333-333333333333'$$) = 1, 'client : supprime son avis');
+select t.ok((select total = 1 from merchant_ratings() where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'note moyenne recalculée après suppression (1 avis)');
+reset role;
+
+-- ===== Alertes push =====
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select register_push_subscription('https://fcm.googleapis.com/fcm/send/appareil-lea', 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM', 'tBHItJI5svbpez7KI4CCXg', 'Test');
+select t.ok((select count(*) = 1 from push_subscriptions), 'client : enregistre son appareil pour les alertes push');
+select t.fails($$insert into push_subscriptions (user_id, endpoint, p256dh, auth) values ('33333333-3333-3333-3333-333333333333', 'https://x.test/a', 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM', 'tBHItJI5svbpez7KI4CCXg')$$, 'ajout direct d''un appareil interdit (passe par la fonction)');
+select t.fails($$select register_push_subscription('javascript:alert(1)', 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM', 'tBHItJI5svbpez7KI4CCXg')$$, 'adresse d''alerte invalide refusée');
+select t.fails($$select register_push_subscription('https://fcm.googleapis.com/fcm/send/x', 'cle<script>', 'tBHItJI5svbpez7KI4CCXg')$$, 'clé d''appareil invalide refusée');
+select t.fails($$select * from push_config$$, 'clés du serveur d''alertes illisibles depuis le site');
+select t.fails($$select * from claim_pending_pushes()$$, 'file d''envoi des alertes réservée au serveur');
+select t.ok(not has_function_privilege('authenticated', 'public.claim_pending_pushes(uuid)', 'execute') and not has_function_privilege('anon', 'public.claim_pending_pushes(uuid)', 'execute')
+  and not has_function_privilege('anon', 'public.register_push_subscription(text, text, text, text)', 'execute'), 'fonctions d''alertes : droits d''exécution limités (serveur ; comptes connectés pour l''enregistrement)');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select count(*) = 0 from push_subscriptions) and t.affected($$delete from push_subscriptions$$) = 0, 'autre compte : ne voit ni ne retire les appareils d''autrui');
+select register_push_subscription('https://fcm.googleapis.com/fcm/send/appareil-lea', 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM', 'tBHItJI5svbpez7KI4CCXg', 'Test');
+reset role;
+select t.ok((select user_id = '22222222-2222-2222-2222-222222222222' from push_subscriptions where endpoint like '%appareil-lea'), 'appareil partagé : les alertes suivent le compte connecté');
+select set_config('request.jwt.claims', '', false);
+set role anon;
+select t.fails($$select register_push_subscription('https://fcm.googleapis.com/fcm/send/anonyme', 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM', 'tBHItJI5svbpez7KI4CCXg')$$, 'visiteur : ne peut pas enregistrer d''appareil');
+reset role;
+set role service_role;
+select t.ok((select count(*) > 0 from claim_pending_pushes()) and (select count(*) = 0 from claim_pending_pushes()), 'serveur : chaque notification récente n''est transmise qu''une fois');
+reset role;
+
 -- ===== Masquage, modération, suppression =====
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
 set role authenticated;
@@ -250,8 +383,9 @@ delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
 select t.ok((select count(*) = 0 from profiles where id = '11111111-1111-1111-1111-111111111111') and (select count(*) = 0 from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001')
   and (select count(*) = 0 from merchant_private where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001')
   and (select count(*) = 0 from follows) and (select count(*) = 0 from merchant_stats) and (select count(*) = 0 from merchant_visitors)
-  and (select count(*) = 0 from stories) and (select count(*) = 0 from promotions) and (select count(*) = 0 from merchant_subscriptions), 'suppression du compte : profil, fiche, SIRET, abonnement, abonnés, statistiques, stories et promotions supprimés');
-select t.ok((select count(*) = 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'merchants'), 'temps réel activé sur merchants');
+  and (select count(*) = 0 from stories) and (select count(*) = 0 from promotions) and (select count(*) = 0 from merchant_subscriptions)
+  and (select count(*) = 0 from reviews) and (select count(*) = 0 from notifications) and (select count(*) = 0 from push_subscriptions where user_id = '11111111-1111-1111-1111-111111111111'), 'suppression du compte : profil, fiche, SIRET, abonnement, abonnés, statistiques, stories, promotions, avis et notifications supprimés');
+select t.ok((select count(*) = 4 from pg_publication_tables where pubname = 'supabase_realtime' and tablename in ('merchants', 'stories', 'reviews', 'notifications')), 'temps réel activé sur merchants, stories, reviews et notifications');
 select t.ok(not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.prosecdef and has_function_privilege('anon', p.oid, 'execute')), 'aucune fonction SECURITY DEFINER appelable par un visiteur via l''API');
 select t.ok((select bool_and(c.relrowsecurity) and count(*) = (select count(*) from pg_tables where schemaname = 'public')
   from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relkind = 'r'), 'RLS activée sur TOUTES les tables publiques');

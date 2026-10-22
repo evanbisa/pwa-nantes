@@ -273,12 +273,69 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          merchant_id: string | null
+          pushed_at: string | null
+          read_at: string | null
+          ref_id: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          merchant_id?: string | null
+          pushed_at?: string | null
+          read_at?: string | null
+          ref_id?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          merchant_id?: string | null
+          pushed_at?: string | null
+          read_at?: string | null
+          ref_id?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
           first_name: string | null
           id: string
           last_name: string | null
+          notify_promos: boolean
+          notify_reviews: boolean
+          notify_stories: boolean
           phone: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
@@ -288,6 +345,9 @@ export type Database = {
           first_name?: string | null
           id: string
           last_name?: string | null
+          notify_promos?: boolean
+          notify_reviews?: boolean
+          notify_stories?: boolean
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
@@ -297,6 +357,9 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          notify_promos?: boolean
+          notify_reviews?: boolean
+          notify_stories?: boolean
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
@@ -337,6 +400,125 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_config: {
+        Row: {
+          created_at: string
+          id: number
+          private_jwk: Json
+          public_key: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          private_jwk: Json
+          public_key: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          private_jwk?: Json
+          public_key?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          last_used_at: string | null
+          p256dh: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          last_used_at?: string | null
+          p256dh: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          last_used_at?: string | null
+          p256dh?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          author_name: string
+          comment: string | null
+          created_at: string
+          id: string
+          merchant_id: string
+          rating: number
+          replied_at: string | null
+          reply: string | null
+          reported_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          author_name?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          merchant_id: string
+          rating: number
+          replied_at?: string | null
+          reply?: string | null
+          reported_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          author_name?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          merchant_id?: string
+          rating?: number
+          replied_at?: string | null
+          reply?: string | null
+          reported_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -384,12 +566,41 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_pending_pushes: {
+        Args: { p_merchant_id?: string }
+        Returns: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          merchant_id: string | null
+          pushed_at: string | null
+          read_at: string | null
+          ref_id: string | null
+          title: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "notifications"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       in_service_area: { Args: { lat: number; lng: number }; Returns: boolean }
       is_valid_hours: { Args: { hours: Json }; Returns: boolean }
       is_valid_menu: { Args: { menu: Json }; Returns: boolean }
       merchant_follower_count: {
         Args: { p_merchant_id: string }
         Returns: number
+      }
+      merchant_ratings: {
+        Args: never
+        Returns: {
+          average: number
+          merchant_id: string
+          total: number
+        }[]
       }
       my_merchant: {
         Args: never
@@ -441,6 +652,15 @@ export type Database = {
           followers: number
           visitors: number
         }[]
+      }
+      register_push_subscription: {
+        Args: {
+          p_auth: string
+          p_endpoint: string
+          p_p256dh: string
+          p_user_agent?: string
+        }
+        Returns: undefined
       }
       track_merchant_event: {
         Args: { p_event: string; p_merchant_id: string }
@@ -607,3 +827,5 @@ export type FollowRecord = Tables<"follows">
 export type MerchantStatsRecord = Tables<"merchant_stats">
 export type PromotionRecord = Tables<"promotions">
 export type StoryRecord = Tables<"stories">
+export type ReviewRecord = Tables<"reviews">
+export type NotificationRecord = Tables<"notifications">

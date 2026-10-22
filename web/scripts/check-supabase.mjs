@@ -52,10 +52,25 @@ for (const [path, label] of [
   ["merchant_private?select=siret&limit=1", "SIRET (merchant_private)"],
   ["profiles?select=*&limit=1", "profils (prénom, nom, téléphone)"],
   ["users?select=email&limit=1", "comptes Supabase Auth (e-mails, mots de passe)"],
+  ["notifications?select=*&limit=1", "notifications des comptes"],
+  ["push_subscriptions?select=*&limit=1", "appareils abonnés aux alertes"],
+  ["push_config?select=*&limit=1", "clés du serveur d'alertes"],
 ]) {
   const r = await get(path);
   report(denied(r), `${label} : inaccessible pour un visiteur (HTTP ${r.status})`);
 }
+
+const reviews = await get("reviews?select=id,author_name,rating&limit=5");
+report(reviews.status === 200 && Array.isArray(reviews.body), `avis publics lisibles (HTTP ${reviews.status})`);
+const ratings = await fetch(`${url}/rest/v1/rpc/merchant_ratings`, { method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: "{}" });
+report(ratings.status === 200, `notes moyennes lisibles (HTTP ${ratings.status})`);
+await ratings.body?.cancel();
+const claim = await fetch(`${url}/rest/v1/rpc/claim_pending_pushes`, { method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: "{}" });
+report(claim.status === 401 || claim.status === 403 || claim.status === 404, `file d'envoi des alertes : réservée au serveur (HTTP ${claim.status})`);
+await claim.body?.cancel();
+const fakeReview = await fetch(`${url}/rest/v1/reviews`, { method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ merchant_id: "00000000-0000-0000-0000-000000000000", rating: 5 }) });
+report(fakeReview.status >= 400, `avis anonyme : refusé (HTTP ${fakeReview.status})`);
+await fakeReview.body?.cancel();
 
 const write = await fetch(`${url}/rest/v1/merchants`, { method: "PATCH", headers: { ...headers, "Content-Type": "application/json", Prefer: "return=representation" }, body: JSON.stringify({ name: "test" }) });
 const written = write.status === 200 ? await write.json() : [];

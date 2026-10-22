@@ -47,6 +47,20 @@
 - Tests : 116 scénarios de sécurité (`npm run db:test`) ; 12 tests des fonctions serveur ; 378 vérifications dans un
   navigateur sur une copie locale de Supabase (plusieurs « appareils » qui voient les mêmes données).
 
+### Avis, notifications, alertes push (migration `20261023090000_reviews_notifications.sql`)
+- Avis : un par client et par restaurant en ligne ; nom affiché fixé par la base (« Léa M. », jamais l'e-mail) ;
+  le restaurateur répond et signale, mais ne peut ni noter sa fiche, ni modifier ou supprimer un avis.
+- Notifications créées uniquement par la base (promo ou story d'un restaurant suivi, nouvel avis, réponse) selon les
+  réglages de chacun ; anti-rafale (10 promos par restaurant et par jour, 1 story toutes les 6 h) ; effacées après 60 jours.
+- Alertes push : la fonction `send-push` ne transmet que des notifications existantes, récentes et pas encore envoyées
+  (réservées une par une par la base), à leurs seuls destinataires — aucun secret partagé. Messages chiffrés de bout en
+  bout (le service d'alertes du navigateur ne peut pas les lire) ; seuls les services d'alertes connus sont appelés
+  (pas d'appel vers une adresse quelconque) ; un appareil désabonné est oublié ; déconnexion = appareil désabonné.
+- Clés VAPID créées par la fonction et gardées dans `push_config` : aucune politique RLS, donc illisible depuis le site.
+- Tests : 167 scénarios de sécurité ; 19 tests des fonctions serveur (dont le déchiffrement complet d'une alerte et la
+  signature VAPID), chiffrement vérifié avec l'implémentation de référence `http_ece` ; 93 vérifications navigateur de
+  plus (recherche, avis, notifications, alerte push reçue et déchiffrée, partage), en mode jour et en mode nuit.
+
 ### Connexion avec Google (clients)
 - Prototype : bouton Google (Google Identity Services) affiché dès que `CONFIG.googleClientId` est renseigné.
   Le jeton Google est vérifié par Supabase Auth (`signInWithIdToken`), signature comprise.
@@ -108,5 +122,6 @@ GitHub `CLOUDFLARE_API_TOKEN` et `CLOUDFLARE_ACCOUNT_ID`.
 
 ## Ensuite (prévu)
 - Paiement réel des abonnements (Stripe), validé par le serveur.
+- Modération des avis signalés (pour l'instant : tableau de bord Supabase, table `reviews`, colonne `reported_at`).
 - Désactiver le SIRET de test avant l'ouverture au public.
 - Application Next.js (`/app/`) : reprendre les écrans du site, désormais reliés à Supabase.

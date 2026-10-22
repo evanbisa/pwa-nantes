@@ -15,6 +15,7 @@ Zone couverte : La Roche-sur-Yon et sa couronne.
 | 3 | Carte : vrais commerces en temps réel, tuiles OpenStreetMap | à faire |
 | 4 | Stories (24 h) et promotions des restaurateurs : tables `stories`, `promotions`, stockage `stories` | ✅ appliqué sur Supabase (99 scénarios de sécurité, 0 alerte) |
 | 5 | Connexion « Continuer avec Google » (clients) | ✅ en ligne (vérifiée par Supabase Auth) |
+| 6 | Avis (1 à 5 étoiles, réponse du restaurateur, signalement), notifications (promos et stories des restaurants suivis, avis, réponses), alertes push, recherche par plat avec budget, partage d'une fiche | ✅ sur le site complet (`../index.html`) ; migration `20261023090000_reviews_notifications.sql`, fonction `send-push` |
 
 ## Connecter le projet à Supabase (≈ 15 min)
 
@@ -105,6 +106,13 @@ Pour le refuser avant l'ouverture au public : secret `ALLOW_TEST_SIRET=false` (*
 `supabase/functions/delete-account/` (déployée) : « Supprimer mon compte » ; efface les fichiers de la fiche
 (photos, stories, justificatifs) puis le compte, et tout ce qui lui est lié en cascade.
 
+`supabase/functions/send-push/` (déployée) : alertes push (standard Web Push : chiffrement RFC 8291, VAPID RFC 8292,
+WebCrypto seulement). Elle ne fait que transmettre les notifications que la base vient de créer, réservées une par une
+(`claim_pending_pushes`), à leurs seuls destinataires : aucun secret partagé n'est nécessaire. Les clés VAPID sont créées
+au premier appel et gardées dans `push_config` (serveur uniquement). Seuls les services d'alertes des navigateurs
+(Google, Mozilla, Apple, Microsoft) sont appelés. Le site l'appelle après chaque promo, story, avis ou réponse.
+Le service worker `../sw.js` affiche les alertes et ouvre la bonne fiche au clic.
+
 ### 8. Vérifications automatiques en ligne
 `.github/workflows/verifications.yml` (à chaque modification de `supabase/`, et chaque lundi) : depuis Internet,
 comme un visiteur, contrôle que SIRET / profils / e-mails restent inaccessibles, que la fonction refuse les appels
@@ -123,6 +131,10 @@ aussi le projet Supabase actif (l'offre gratuite le met en pause après 7 jours 
 | Abonnement du restaurateur | `merchant_subscriptions` | le restaurateur | le restaurateur (mode « démonstration » uniquement) ; le paiement réel passera par le serveur |
 | Photos de la fiche | stockage `photos` (public) | **tout le monde** | le restaurateur, dans le dossier de sa fiche |
 | Justificatifs (Kbis, hygiène…) | stockage `documents` (privé) | le restaurateur seulement | le restaurateur, dans le dossier de sa fiche |
+| Avis (note, commentaire, prénom + initiale) | `reviews` | **tout le monde**, si la fiche est en ligne | le client : le sien (un par restaurant) ; le restaurateur : réponse et signalement sur sa fiche, jamais la note |
+| Notifications | `notifications` | leur destinataire | créées par la base uniquement (déclencheurs) ; le destinataire les marque lues ou les efface |
+| Appareils abonnés aux alertes | `push_subscriptions` | leur propriétaire | enregistrement par `register_push_subscription` ; lus par le serveur pour envoyer les alertes |
+| Clés du serveur d'alertes | `push_config` | personne (serveur uniquement) | la fonction `send-push` |
 | Stories, promotions | `stories`, `promotions` (+ stockage `stories`) | **tout le monde**, tant qu'elles sont en cours, si la fiche est en ligne | le restaurateur, sur sa fiche uniquement (durée de 24 h et fin des promos du jour / de la semaine imposées par la base) |
 | Restaurants suivis | `follows` | l'étudiant concerné (le restaurateur ne voit que le **nombre**) | l'étudiant (s'abonner / se désabonner) |
 | Statistiques (vues, personnes, clics) | `merchant_stats`, `merchant_visitors` | le restaurateur, en **chiffres** uniquement | personne en direct : fonction `track_merchant_event` |
@@ -134,7 +146,7 @@ aussi le projet Supabase actif (l'offre gratuite le met en pause après 7 jours 
   (adresse dans la zone, description, 1 photo, 1 service) : c'est la base qui refuse, pas l'interface.
 - Un restaurateur ne peut ni changer le propriétaire d'une fiche, ni son SIRET, ni se déclarer vérifié,
   ni toucher la fiche d'un autre, ni republier une fiche suspendue.
-- Tests : `npm run db:test` (116 scénarios sur un PostgreSQL local : `PGHOST=… PGPORT=… PGUSER=postgres`).
+- Tests : `npm run db:test` (167 scénarios sur un PostgreSQL local : `PGHOST=… PGPORT=… PGUSER=postgres`).
 
 ## Limites des offres gratuites à connaître
 - **Supabase Free** : 500 Mo de base, 50 000 utilisateurs actifs/mois, 1 Go de fichiers, 200 connexions temps

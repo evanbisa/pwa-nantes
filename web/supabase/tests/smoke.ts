@@ -25,6 +25,22 @@ r = await fetch(FN, { method: "OPTIONS", headers: { Origin: "https://pirate.exam
 await r.body?.cancel();
 check(!r.headers.get("access-control-allow-origin"), "CORS : site inconnu non autorisé");
 
+// 1 bis. Alertes push : clé publique VAPID disponible ; requêtes invalides refusées ; suppression de compte protégée
+const PUSH = `${URL}/functions/v1/send-push`;
+r = await fetch(PUSH, { method: "POST", headers: { "Content-Type": "application/json", apikey: KEY, Origin: "https://pwa-nantes.vercel.app" }, body: JSON.stringify({ action: "key" }) });
+body = await r.json().catch(() => ({}));
+check(r.status === 200 && /^[A-Za-z0-9_-]{87}$/.test(body.publicKey ?? "") && r.headers.get("access-control-allow-origin") === "https://pwa-nantes.vercel.app",
+  `send-push : clé publique des alertes (HTTP ${r.status}, ${String(body.publicKey ?? "").length} caractères)`);
+r = await fetch(PUSH, { method: "POST", headers: { "Content-Type": "application/json", apikey: KEY }, body: JSON.stringify({ action: "send", merchant_id: "'; drop table" }) });
+await r.body?.cancel();
+check(r.status === 400, `send-push : restaurant invalide refusé (HTTP ${r.status})`);
+r = await fetch(PUSH, { method: "POST", headers: { "Content-Type": "application/json", apikey: KEY }, body: JSON.stringify({ action: "send", merchant_id: "00000000-0000-4000-8000-000000000000" }) });
+body = await r.json().catch(() => ({}));
+check(r.status === 200 && body.sent === 0, `send-push : rien à envoyer pour un restaurant inconnu (HTTP ${r.status})`);
+r = await fetch(`${URL}/functions/v1/delete-account`, { method: "POST", headers: { "Content-Type": "application/json", apikey: KEY }, body: "{}" });
+body = await r.json().catch(() => ({}));
+check(r.status === 401 && body.error === "unauthenticated", `delete-account sans session : refusé (HTTP ${r.status})`);
+
 // 2. Le répertoire Sirene répond au format attendu, pour un vrai restaurant de La Roche-sur-Yon
 type Etab = { siret: string; etat_administratif: string; activite_principale?: string; code_postal?: string };
 const search = await fetch("https://recherche-entreprises.api.gouv.fr/search?q=restaurant&code_postal=85000&per_page=25");
