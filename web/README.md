@@ -15,7 +15,7 @@ Zone couverte : La Roche-sur-Yon et sa couronne.
 | 3 | Carte : vrais commerces en temps réel, tuiles OpenStreetMap | à faire |
 | 4 | Stories (24 h) et promotions des restaurateurs : tables `stories`, `promotions`, stockage `stories` | ✅ appliqué sur Supabase (99 scénarios de sécurité, 0 alerte) |
 | 5 | Connexion « Continuer avec Google » (clients) | ✅ en ligne (vérifiée par Supabase Auth) |
-| 6 | Avis (1 à 5 étoiles, réponse du restaurateur, signalement), notifications (promos et stories des restaurants suivis, avis, réponses), alertes push, recherche par plat avec budget, partage d'une fiche | ✅ sur le site complet (`../index.html`) ; migration `20261023090000_reviews_notifications.sql`, fonction `send-push` |
+| 6 | Avis (1 à 5 étoiles, réponse du restaurateur, signalement), notifications (promos et stories des restaurants suivis, avis, réponses), alertes push, recherche par plat avec budget, partage d'une fiche, « ferme bientôt » (contour orange moins d'une heure avant la fermeture), « Offres autour de moi » (de la plus proche à la plus lointaine) | ✅ sur le site complet (`../index.html`) ; migration `20261023090000_reviews_notifications.sql`, fonction `send-push` |
 
 ## Connecter le projet à Supabase (≈ 15 min)
 

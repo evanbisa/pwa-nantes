@@ -240,6 +240,7 @@
     .si-dist { flex: none; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
     .si-status { font-size: 13px; font-weight: 500; }
     .si-status.is-open { color: var(--green); }
+    .si-status.is-soon, .status.is-soon, .sr-body .is-soon { color: var(--amber); }
     .si-status.is-closed { color: var(--danger); }
     .si-top .verified { margin-left: 6px; padding: 0 5px; font-size: 11px; vertical-align: 1px; }
     .si-promo { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -259,6 +260,8 @@
     .pin-badge::after { content: ""; position: absolute; bottom: -8px; left: 50%; width: 12px; height: 12px; background: inherit; border-right: inherit; border-bottom: inherit; transform: translateX(-50%) rotate(45deg); border-radius: 0 0 3px 0; }
     .pin.is-open .pin-badge { border-color: var(--green); }
     .pin.is-open .pin-badge::before { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--green); animation: ripple 2.4s ease-out infinite; }
+    /* Ferme dans moins d'une heure : contour orange */
+    .pin.is-soon .pin-badge, .pin.is-soon .pin-badge::before { border-color: #f29900; }
     .pin.is-closed .pin-badge { filter: grayscale(.9) opacity(.85); }
     .pin:hover .pin-badge, .pin.is-hover .pin-badge { transform: translateY(-3px); }
     .pin.is-selected .pin-badge { transform: translateY(-6px) scale(1.15); border-color: var(--blue); }
@@ -875,8 +878,18 @@
        ===================================================================== */
     /* Barre du haut : profil + recherche */
     .topbar { display: flex; align-items: center; gap: 8px; }
-    .topbar .brand { min-width: 0; }
+    .topbar .brand { min-width: 0; flex: 0 1 auto; }
+    .brand-text small { white-space: nowrap; min-width: 0; }
+    .brand-city { overflow: hidden; text-overflow: ellipsis; }
     #search-open { flex: none; width: 52px; height: 52px; }
+    /* Petits écrans : la barre du haut se resserre (ville, puis nom masqués ; l'avatar reste) */
+    @media (max-width: 400px) {
+      .topbar { gap: 6px; }
+      #search-open, #offers-btn { width: 48px; height: 48px; }
+      .topbar .brand { min-height: 48px; padding: 4px 14px 4px 4px; gap: 8px; }
+    }
+    @media (max-width: 379px) { .topbar .brand-text small { display: none; } }
+    @media (max-width: 339px) { .topbar .brand-text { display: none; } .topbar .brand { padding: 4px; } }
 
     /* Cloche et compteur de notifications non lues */
     .notif-badge {
@@ -1013,6 +1026,37 @@
     .notif-prefs .check input { flex: none; margin-top: 1px; }
     .notif-prefs .hint { margin-top: 8px; }
 
+    /* Offres autour de moi */
+    #offers-btn { flex: none; width: 52px; height: 52px; }
+    @media (max-width: 400px) { #offers-btn { width: 48px; height: 48px; } }
+    .offers-badge {
+      position: absolute; top: 3px; right: 3px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+      font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; color: var(--on-accent); background: var(--accent);
+      box-shadow: 0 0 0 2px var(--panel-solid); font-variant-numeric: tabular-nums;
+    }
+    .sb-brand #offers-btn { width: 44px; height: 44px; box-shadow: none; border: 0; background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+    .sb-brand #offers-btn:hover { background: var(--hover); }
+    .offers-geo { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding: 12px 14px; border-radius: 12px; font-size: 14px; background: var(--accent-soft); }
+    .offers-geo span { flex: 1; min-width: 0; }
+    .offers-geo .pill-btn { flex: none; }
+    .offers-kinds { margin-top: 12px; padding: 0; }
+    .offers-open { margin-top: 8px; }
+    .offers-list { list-style: none; margin: 8px 0 0; padding: 0; }
+    .offers-list li + li { border-top: 1px solid var(--line); }
+    .offer-hit { width: 100%; display: flex; gap: 12px; align-items: flex-start; padding: 12px 4px; text-align: left; border-radius: 12px; }
+    .offer-hit:hover { background: var(--hover); }
+    .offer-ico { flex: none; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; font-size: 21px; background: var(--accent-soft); }
+    .offer-body { flex: 1; min-width: 0; display: grid; gap: 2px; }
+    .offer-body b { font-weight: 500; font-size: 15px; overflow-wrap: anywhere; }
+    .offer-body small { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+    .offer-shop { font-size: 13px; color: var(--text); }
+    .offer-shop .is-open { color: var(--green); font-weight: 500; }
+    .offer-shop .is-closed { color: var(--danger); font-weight: 500; }
+    .offer-shop .is-soon { color: var(--amber); font-weight: 500; }
+    .offer-dist { flex: none; text-align: right; font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; }
+    .offer-dist small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
+    .offers-empty { margin: 22px 6px 6px; text-align: center; font-size: 14px; color: var(--muted); }
+
     /* =====================================================================
        9. TOAST, ÉCRAN D'ERREUR, ATTRIBUTION
        ===================================================================== */
@@ -1058,14 +1102,14 @@
       #shop-sheet.is-open { opacity: 1; transform: none; transition: transform .3s var(--ease-out), opacity .25s, visibility 0s, background-color .4s; }
       #shop-sheet .sheet-grab { display: none; }
 
-      #geo-help, #profile-sheet, #notif-sheet {
+      #geo-help, #profile-sheet, #notif-sheet, #offers-sheet {
         top: 50%; bottom: auto; left: 50%; right: auto; width: min(460px, calc(100% - 32px)); max-width: none; margin: 0;
         max-height: calc(100dvh - 48px); padding: 24px; border-radius: 16px; border-bottom: 1px solid var(--line);
         opacity: 0; transform: translate(-50%, -46%) scale(.98);
         transition: transform .3s var(--ease-out), opacity .25s, visibility 0s linear .3s, background-color .4s;
       }
-      #geo-help.is-open, #profile-sheet.is-open, #notif-sheet.is-open { opacity: 1; transform: translate(-50%, -50%); transition: transform .3s var(--ease-out), opacity .25s, visibility 0s, background-color .4s; }
-      #geo-help .sheet-grab, #profile-sheet .sheet-grab, #notif-sheet .sheet-grab { display: none; }
+      #geo-help.is-open, #profile-sheet.is-open, #notif-sheet.is-open, #offers-sheet.is-open { opacity: 1; transform: translate(-50%, -50%); transition: transform .3s var(--ease-out), opacity .25s, visibility 0s, background-color .4s; }
+      #geo-help .sheet-grab, #profile-sheet .sheet-grab, #notif-sheet .sheet-grab, #offers-sheet .sheet-grab { display: none; }
       .search-panel { display: none !important; }
 
       .ob-panel { margin: auto; padding: 32px 32px 28px; }
@@ -1097,8 +1141,12 @@
       <span class="avatar" id="avatar" aria-hidden="true">?</span>
       <span class="brand-text">
         <strong>FlashMiam</strong>
-        <small><span class="live-dot" aria-hidden="true"></span>La Roche-sur-Yon</small>
+        <small><span class="live-dot" aria-hidden="true"></span><span class="brand-city">La Roche-sur-Yon</span></small>
       </span>
+    </button>
+    <button id="offers-btn" class="ctrl glass" type="button" aria-label="Offres autour de moi" title="Offres autour de moi">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>
+      <span class="offers-badge" id="offers-badge" aria-hidden="true" hidden></span>
     </button>
     <button id="search-open" class="ctrl glass" type="button" aria-label="Rechercher un plat ou un restaurant" title="Rechercher un plat ou un restaurant">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -1375,6 +1423,33 @@
     <p class="inline-note" id="geo-help-note" role="status"></p>
     <button class="btn btn-primary" type="button" id="geo-retry">Réessayer</button>
     <button class="btn btn-ghost" type="button" data-close>Plus tard</button>
+  </section>
+
+  <!-- ===================== OFFRES AUTOUR DE MOI ===================== -->
+  <section id="offers-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="offers-title" aria-hidden="true">
+    <button class="sheet-grab" type="button" data-close aria-label="Fermer"></button>
+    <div class="sheet-head">
+      <div class="sheet-emoji" aria-hidden="true">🎁</div>
+      <div class="sheet-title">
+        <h3 id="offers-title">Offres autour de moi</h3>
+        <p class="eyebrow" id="offers-sub"></p>
+      </div>
+      <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
+    </div>
+    <div class="offers-geo" id="offers-geo" hidden>
+      <span id="offers-geo-text">Activez la localisation pour voir les offres les plus proches de vous en premier.</span>
+      <button class="pill-btn" type="button" id="offers-locate">Me localiser</button>
+    </div>
+    <div class="budget offers-kinds" id="offers-kinds" role="group" aria-label="Type d'offre">
+      <button class="chip" type="button" data-kind="" aria-pressed="true">Toutes</button>
+      <button class="chip" type="button" data-kind="day" aria-pressed="false">⏱️ Du jour</button>
+      <button class="chip" type="button" data-kind="week" aria-pressed="false">📅 De la semaine</button>
+      <button class="chip" type="button" data-kind="student" aria-pressed="false">🎓 Étudiantes</button>
+      <button class="chip" type="button" data-kind="other" aria-pressed="false">🎁 Bons plans</button>
+    </div>
+    <label class="check offers-open"><input type="checkbox" id="offers-open" /> Restaurants ouverts maintenant</label>
+    <ul class="offers-list" id="offers-list"></ul>
+    <p class="offers-empty" id="offers-empty" hidden></p>
   </section>
 
   <!-- ===================== NOTIFICATIONS ===================== -->
@@ -1877,7 +1952,8 @@
     supabaseUrl: 'https://fnypgfyxbyaqrnklhjxc.supabase.co',
     supabaseKey: 'sb_publishable_W-2Gra6O-pRBEf0a_XsyKw_8UlhHTzb',
     sireneApi: 'https://recherche-entreprises.api.gouv.fr/search',
-    notifPollMs: 60 * 1000,                     // actualisation des notifications (en plus du temps réel)
+    notifPollMs: 60 * 1000,
+    closingSoonMin: 60,                         // « ferme bientôt » : moins d'une heure avant la fermeture                     // actualisation des notifications (en plus du temps réel)
     /**
      * Connexion « Continuer avec Google » (clients). Identifiant client OAuth (public) créé gratuitement dans
      * Google Cloud Console › API et services › Identifiants › ID client OAuth › Application Web,
@@ -2441,7 +2517,18 @@
       }
     }
     const current = slots.find(([s, e]) => nowMin >= s && nowMin < e);
-    if (current) return { open: true, label: 'Ouvert · ferme à ' + fmtTime(current[1] % 1440) };
+    if (current) {
+      // créneaux qui s'enchaînent (ex. jusqu'à 23h59 puis dès minuit) : vraie heure de fermeture
+      let end = current[1];
+      for (let i = 0; i < 14; i++) {
+        const next = slots.find(([s, e]) => s >= current[0] && s <= end + 1 && e > end);
+        if (!next) break;
+        end = next[1];
+      }
+      const left = end - nowMin;
+      if (left <= CONFIG.closingSoonMin) return { open: true, soon: true, minutesLeft: left, label: 'Ouvert · ferme dans ' + left + ' min' };
+      return { open: true, label: 'Ouvert · ferme à ' + fmtTime(end % 1440) };
+    }
 
     let next = Infinity;
     for (const [s] of slots) {
@@ -2963,7 +3050,8 @@
     (desktop ? $('sb-brand-slot') : $('topbar')).prepend($('profile-btn'));
     (desktop ? $('sb-filters-slot') : $('filters')).appendChild($('filters-track'));
     (desktop ? $('sb-stories-slot') : $('stories')).appendChild($('stories-track'));
-    if (desktop) $('sb-brand-slot').appendChild($('notif-btn')); else $('controls').prepend($('notif-btn'));
+    if (desktop) $('sb-brand-slot').append($('offers-btn'), $('notif-btn'));
+    else { $('controls').prepend($('notif-btn')); $('topbar').insertBefore($('offers-btn'), $('search-open')); }
     if (desktop) $('sb-budget-slot').appendChild($('budget')); else $('search-panel').insertBefore($('budget'), $('search-results'));
     whenMapReady(() => view.setPadding(selectedId ? shopPadding() : basePadding()));
   }
@@ -3037,12 +3125,14 @@
       m.status = getStatus(m.shop, now);
       m.el.classList.toggle('is-open', m.status.open);
       m.el.classList.toggle('is-closed', !m.status.open);
+      m.el.classList.toggle('is-soon', !!m.status.soon);
       const promos = activePromos(m.shop, now);
       m.el.classList.toggle('has-promo', promos.length > 0);
       m.el.setAttribute('aria-label', m.shop.name + ', ' + catOf(m.shop).label + ', ' + m.status.label + (promos.length ? ', promotion en cours' : ''));
     });
     applyFilters();
     if (selectedId) renderShop(markers.get(selectedId));
+    Offers.refresh();
   }
 
   const matchesFilters = (m) =>
@@ -3097,7 +3187,7 @@
       btn.querySelector('.si-dist').textContent = d === null ? catOf(shop).label : formatDistance(d);
       const st = btn.querySelector('.si-status');
       st.textContent = status.label;
-      st.className = 'si-status ' + (status.open ? 'is-open' : 'is-closed');
+      st.className = 'si-status ' + (status.soon ? 'is-soon' : status.open ? 'is-open' : 'is-closed');
       if (shop.rating) {
         const rt = document.createElement('span');
         rt.className = 'si-rating';
@@ -3174,6 +3264,13 @@
   const fullAddress = (shop) => (normalize(shop.address || '').includes(normalize(CONFIG.city)) ? shop.address : (shop.address ? shop.address + ', ' : '') + CONFIG.city);
   /** Page Google Maps du restaurant (recherche par nom et adresse : ni clé, ni coût). */
   const googleMapsUrl = (shop) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(shop.name + ', ' + fullAddress(shop));
+  /** Étiquette courte de l'état : Ouvert, Ferme bientôt (orange) ou Fermé. */
+  function statusTag(st) {
+    const s = document.createElement('span');
+    s.className = st.soon ? 'is-soon' : st.open ? 'is-open' : 'is-closed';
+    s.textContent = st.soon ? 'Ferme dans ' + st.minutesLeft + ' min' : st.open ? 'Ouvert' : 'Fermé';
+    return s;
+  }
   const formatRating = (n) => Number(n).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
 
@@ -3287,7 +3384,7 @@
     box.textContent = '';
     const res = Search.run(query, max);
     const title = (text) => { const h = document.createElement('h3'); h.className = 'sr-title'; h.textContent = text; box.appendChild(h); };
-    const status = (m) => { const s = document.createElement('span'); s.className = m.status.open ? 'is-open' : 'is-closed'; s.textContent = m.status.open ? 'Ouvert' : 'Fermé'; return s; };
+    const status = (m) => statusTag(m.status);
     const dist = (m) => (Geo.position ? ' · ' + formatDistance(distance(Geo.position, m.shop.coords)) : '');
     if (!res.q.length && max === null) {
       title('Idées');
@@ -3653,6 +3750,85 @@
     return { render, refresh, cache };
   })();
 
+  /* ---------- Offres autour de moi : promotions en cours, de la plus proche à la plus lointaine ---------- */
+  const Offers = (() => {
+    let kind = '', openOnly = false;
+    const isOpen = () => $('offers-sheet').classList.contains('is-open');
+    /** Toutes les offres en cours, avec leur restaurant et la distance (depuis ma position, sinon le centre-ville). */
+    function list() {
+      const from = Geo.position || CONFIG.center;
+      const out = [];
+      markers.forEach((m) => activePromos(m.shop).forEach((p) => out.push({ p, m, d: distance(from, m.shop.coords) })));
+      return out.sort((a, b) => a.d - b.d || PROMO_ORDER.indexOf(a.p.kind) - PROMO_ORDER.indexOf(b.p.kind));
+    }
+    function badge() {
+      const n = list().length;
+      $('offers-badge').hidden = !n;
+      $('offers-badge').textContent = n > 99 ? '99+' : String(n);
+      $('offers-btn').setAttribute('aria-label', 'Offres autour de moi' + (n ? ' : ' + plural(n, 'offre en cours', 'offres en cours') : ''));
+    }
+    function render() {
+      const all = list();
+      const items = all.filter(({ p, m }) => (!kind || p.kind === kind) && (!openOnly || m.status.open));
+      const located = !!Geo.position;
+      $('offers-geo').hidden = located;
+      const geoState = locateBtn.dataset.state;
+      $('offers-geo-text').textContent = geoState === 'searching' ? 'Recherche de votre position…'
+        : geoState === 'denied' ? 'Localisation refusée : autorisez-la pour ce site afin de voir les offres les plus proches en premier.'
+        : geoState === 'unavailable' ? 'Votre position n\'est pas disponible : offres classées depuis le centre-ville.'
+        : 'Activez la localisation pour voir les offres les plus proches de vous en premier.';
+      $('offers-locate').hidden = geoState === 'searching' || geoState === 'unavailable';
+      $('offers-sub').textContent = all.length
+        ? plural(items.length, 'offre', 'offres') + (located ? ' · les plus proches d\'abord' : ' · depuis le centre-ville')
+        : 'Aucune offre en cours';
+      document.querySelectorAll('#offers-kinds .chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.kind === kind)));
+      const ul = $('offers-list');
+      ul.textContent = '';
+      items.forEach(({ p, m, d }) => {
+        const li = document.createElement('li');
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'offer-hit';
+        b.dataset.id = m.shop.id;
+        b.innerHTML = '<span class="offer-ico" aria-hidden="true"></span><span class="offer-body"><b></b><small></small><span class="offer-shop"></span></span><span class="offer-dist"></span>';
+        b.querySelector('.offer-ico').textContent = PROMO_KINDS[p.kind].icon;
+        b.querySelector('b').textContent = p.title;
+        const small = b.querySelector('small');
+        const until = promoUntil(p);
+        small.textContent = [PROMO_KINDS[p.kind].label, p.details, until].filter(Boolean).join(' · ');
+        b.querySelector('.offer-shop').append(catOf(m.shop).emoji + ' ' + m.shop.name + ' · ', statusTag(m.status));
+        const dist = b.querySelector('.offer-dist');
+        if (located) {
+          dist.append(formatDistance(d));
+          const w = document.createElement('small'); w.textContent = formatMinutes(walkMinutes(d)) + ' à pied'; dist.appendChild(w);
+        }
+        b.addEventListener('click', () => { closePanel($('offers-sheet')); whenMapReady(() => openShop(m.shop.id)); });
+        li.appendChild(b);
+        ul.appendChild(li);
+      });
+      const empty = $('offers-empty');
+      empty.hidden = items.length > 0;
+      empty.textContent = !all.length ? 'Aucune offre en cours pour le moment. Revenez plus tard !'
+        : openOnly ? 'Aucune offre de ce type dans un restaurant ouvert en ce moment.' : 'Aucune offre de ce type en ce moment.';
+    }
+    function open() {
+      render();
+      openPanel($('offers-sheet'), { modal: true });
+    }
+    $('offers-btn').addEventListener('click', open);
+    $('offers-kinds').addEventListener('click', (ev) => {
+      const chip = ev.target.closest('.chip');
+      if (!chip) return;
+      kind = chip.dataset.kind;
+      render();
+    });
+    $('offers-open').addEventListener('change', (ev) => { openOnly = ev.target.checked; render(); });
+    $('offers-locate').addEventListener('click', () => requestLocation({ fromButton: true }));
+    /** Après un changement (position, horaires, nouvelles offres) : compteur et liste à jour. */
+    function refresh() { badge(); if (isOpen()) render(); }
+    return { open, refresh, list };
+  })();
+
   /* ---------- Partage d'une fiche : lien direct ---------- */
   const shopLink = (id, tab) => location.origin + location.pathname + '?r=' + encodeURIComponent(id) + (tab ? '&t=' + tab : '');
   $('shop-share').addEventListener('click', async () => {
@@ -4012,7 +4188,7 @@
     renderFollow(shop);
     Reviews.render(shop);
     $('shop-status').textContent = status.label;
-    $('shop-status').className = 'status ' + (status.open ? 'is-open' : 'is-closed');
+    $('shop-status').className = 'status ' + (status.soon ? 'is-soon' : status.open ? 'is-open' : 'is-closed');
     $('shop-address').textContent = fullAddress(shop);
     $('shop-hours').textContent = formatHours(shop);
 
@@ -4885,6 +5061,7 @@
     locateBtn.classList.toggle('hint', state === 'idle' || state === 'denied');
     if (state !== 'active') setFollow(false);
     updateProfileGeo();
+    Offers.refresh();
   }
 
   function setFollow(on) {
@@ -4970,6 +5147,7 @@
     whenMapReady(drawUserLocation);
     setLocateState('active');
     renderList();
+    Offers.refresh();
 
     if (!isInBounds(Geo.position)) {
       if (fly || !Geo.outsideWarned) {
@@ -6496,7 +6674,7 @@
      restaurateur dont l'inscription n'est pas terminée → reprise à la bonne étape.
      ===================================================================== */
 
-  window.RocheStreetFood = { view: null, Geo, SHOPS, getStatus, setTheme, isValidSiret, restaurants, cloud, sb, Search, Reviews, Notifs, Push };
+  window.RocheStreetFood = { view: null, Geo, SHOPS, getStatus, refreshStatuses, setTheme, isValidSiret, restaurants, cloud, sb, Search, Reviews, Notifs, Push, Offers };
 
   setTheme(currentTheme());
   applyLayout();
