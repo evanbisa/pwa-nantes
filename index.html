@@ -986,6 +986,8 @@
     .rv-reply-form textarea { min-height: 72px; }
     .rv-reply-form .rv-actions .btn { min-height: 40px; }
     .rv-empty { margin: 18px 0 8px; text-align: center; font-size: 14px; color: var(--muted); }
+    .rv-google { margin-top: 12px; }
+    .rv-google .rv-ext { font-size: 14px; opacity: .8; }
 
     /* Notifications */
     .notif-list { list-style: none; margin: 10px 0 0; padding: 0; }
@@ -1267,6 +1269,10 @@
     </div>
     <div class="tab-panel" id="panel-reviews" role="tabpanel" aria-labelledby="tab-reviews" hidden>
       <div class="rv-summary" id="rv-summary"></div>
+      <a class="btn btn-ghost rv-google" id="rv-google" target="_blank" rel="noopener" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 1114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        Voir les avis sur Google Maps<span class="rv-ext" aria-hidden="true">↗</span>
+      </a>
       <form class="rv-form" id="rv-form" novalidate hidden>
         <h4 id="rv-form-title">Donner mon avis</h4>
         <div class="stars-pick" id="rv-stars" role="radiogroup" aria-label="Note sur 5"></div>
@@ -3164,6 +3170,10 @@
      7 bis. RECHERCHE PAR PLAT, AVIS, NOTIFICATIONS, PARTAGE
      ===================================================================== */
 
+  // Les adresses géocodées contiennent déjà la ville : on ne l'ajoute qu'aux autres
+  const fullAddress = (shop) => (normalize(shop.address || '').includes(normalize(CONFIG.city)) ? shop.address : (shop.address ? shop.address + ', ' : '') + CONFIG.city);
+  /** Page Google Maps du restaurant (recherche par nom et adresse : ni clé, ni coût). */
+  const googleMapsUrl = (shop) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(shop.name + ', ' + fullAddress(shop));
   const formatRating = (n) => Number(n).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
 
@@ -3395,6 +3405,13 @@
     /** En-tête de la fiche (note) et onglet ; avis rechargés au besoin. */
     function render(shop) {
       if (shopId !== shop.id) { shopId = shop.id; pick = 0; editing = false; replyFor = null; }
+      // Avis Google : lien vers la page du restaurant (pas pour les fiches de test, fictives)
+      const g = $('rv-google');
+      g.hidden = !shop.isPro || !!shop.isTest;
+      if (!g.hidden) {
+        g.href = googleMapsUrl(shop);
+        g.setAttribute('aria-label', 'Voir les avis de ' + shop.name + ' sur Google Maps (nouvel onglet)');
+      }
       const btn = $('shop-rating');
       btn.hidden = !shop.isPro;
       $('tab-reviews-n').textContent = shop.rating ? ' ' + shop.rating.count : '';
@@ -3996,8 +4013,7 @@
     Reviews.render(shop);
     $('shop-status').textContent = status.label;
     $('shop-status').className = 'status ' + (status.open ? 'is-open' : 'is-closed');
-    // Les adresses géocodées contiennent déjà la ville : on ne l'ajoute qu'aux autres
-    $('shop-address').textContent = normalize(shop.address).includes(normalize(CONFIG.city)) ? shop.address : shop.address + ', ' + CONFIG.city;
+    $('shop-address').textContent = fullAddress(shop);
     $('shop-hours').textContent = formatHours(shop);
 
     const dist = $('shop-distance');
