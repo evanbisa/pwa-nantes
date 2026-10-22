@@ -101,3 +101,23 @@ Deno.test("CORS : préflight OK, origine inconnue non autorisée, GET refusé", 
   assertEquals(lookalike.res.headers.get("Access-Control-Allow-Origin"), null);
   assertEquals((await call(req(null, { method: "GET" }), fakeDeps().deps)).status, 405);
 });
+
+Deno.test("SIRET de test : fiche de test créée sans appeler Sirene, SIRET unique, désactivable", async () => {
+  let sirene = 0;
+  const { deps, calls } = fakeDeps({ fetchSirene: () => { sirene++; return Promise.resolve({ ok: true, status: 200, body: sireneBody() }); } });
+  const r = await call(req({ siret: "999 999 999 00009" }), deps);
+  assertEquals(r.status, 200);
+  assertEquals(r.body.test, true);
+  assertEquals(sirene, 0);
+  const row = calls.create[0] as Record<string, unknown>;
+  assertEquals([row.is_test, row.name], [true, "Restaurant de test"]);
+  const saved = (calls.save[0] as { siret: string }).siret;
+  assertEquals(saved.startsWith("999999999") && isValidSiret(saved), true);
+  // Fiche existante de test : même SIRET conservé, pas de nouvelle fiche
+  const again = fakeDeps({ getMyMerchant: () => Promise.resolve({ id: "m-9", status: "published", siret: saved }) });
+  const r2 = await call(req({ siret: "99999999900009" }), again.deps);
+  assertEquals([r2.status, again.calls.create.length, (again.calls.save[0] as { siret: string }).siret], [200, 0, saved]);
+  // Désactivé
+  const off = fakeDeps({ allowTestSiret: false });
+  assertEquals((await call(req({ siret: "99999999900009" }), off.deps)).status, 403);
+});

@@ -23,6 +23,9 @@ insert into auth.users (id, email, encrypted_password, raw_user_meta_data) value
 select t.ok((select role = 'merchant' and phone = '06 12 34 56 78' from profiles where id = '11111111-1111-1111-1111-111111111111'), 'inscription : profil restaurateur créé automatiquement');
 select t.ok((select role = 'student' from profiles where id = '33333333-3333-3333-3333-333333333333'), 'inscription : rôle inconnu (« admin ») → étudiant');
 select t.ok(not exists (select 1 from information_schema.columns where table_schema = 'public' and column_name in ('email', 'password', 'encrypted_password')), 'aucune table publique ne contient d''e-mail ni de mot de passe');
+insert into auth.users (id, email, raw_user_meta_data) values ('44444444-4444-4444-4444-444444444444', 'camille@gmail.com', '{"full_name":"Camille Martin","role":"merchant_no"}');
+select t.ok((select role = 'student' and first_name = 'Camille' from profiles where id = '44444444-4444-4444-4444-444444444444'), 'compte Google : profil étudiant, prénom repris de Google');
+delete from auth.users where id = '44444444-4444-4444-4444-444444444444';
 
 -- Le serveur crée les fiches après vérification du SIRET
 set role service_role;
@@ -68,7 +71,14 @@ update merchant_private set siret_verified_at = now() where merchant_id = 'aaaaa
 reset role;
 
 set role authenticated;
-select t.ok(t.affected($$update merchants set status = 'published' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 1, 'publication acceptée une fois le SIRET vérifié et la fiche complète');
+select t.fails($$update merchants set status = 'published' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$, 'publication refusée sans attestation sur l''honneur');
+update merchants set honor_at = now() where id = 'aaaaaaaa-0000-0000-0000-000000000001';
+select t.fails($$update merchants set status = 'published' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$, 'publication refusée sans abonnement');
+select t.fails($$insert into merchant_subscriptions (merchant_id, mode) values ('aaaaaaaa-0000-0000-0000-000000000001', 'stripe')$$, 'abonnement « payé » impossible à déclarer soi-même');
+select t.fails($$insert into merchant_subscriptions (merchant_id) values ('aaaaaaaa-0000-0000-0000-000000000002')$$, 'abonnement sur la fiche d''un autre refusé');
+select t.ok(t.affected($$insert into merchant_subscriptions (merchant_id) values ('aaaaaaaa-0000-0000-0000-000000000001')$$) = 1, 'abonnement de démonstration souscrit');
+select t.fails($$update merchants set is_test = true where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$, 'restaurateur : ne peut pas modifier le marquage « fiche de test »');
+select t.ok(t.affected($$update merchants set status = 'published' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 1, 'publication acceptée : SIRET vérifié, attestation, abonnement et fiche complète');
 select t.ok((select published_at is not null from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'date de publication renseignée automatiquement');
 select t.fails($$update merchants set photos_urls = '{}' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$, 'fiche publiée : impossible de retirer toutes les photos');
 reset role;
@@ -143,6 +153,26 @@ select t.ok(merchant_follower_count('aaaaaaaa-0000-0000-0000-000000000001') = 0,
 insert into follows (merchant_id) values ('aaaaaaaa-0000-0000-0000-000000000001');
 reset role;
 
+-- ===== Photos des fiches et justificatifs =====
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated;
+select t.ok(t.affected($$insert into storage.objects (bucket_id, name) values ('photos', 'aaaaaaaa-0000-0000-0000-000000000001/burger.jpg')$$) = 1, 'photo déposée dans le dossier de sa fiche');
+select t.fails($$insert into storage.objects (bucket_id, name) values ('photos', 'aaaaaaaa-0000-0000-0000-000000000002/pirate.jpg')$$, 'photo dans le dossier d''une autre fiche refusée');
+select t.ok(t.affected($$insert into storage.objects (bucket_id, name) values ('documents', 'aaaaaaaa-0000-0000-0000-000000000001/kbis.pdf')$$) = 1, 'justificatif déposé (stockage privé)');
+select t.ok((select count(*) = 1 from storage.objects where bucket_id = 'documents'), 'restaurateur : voit ses justificatifs');
+select t.ok(t.affected($$insert into storage.objects (bucket_id, name) values ('photos', 'aaaaaaaa-0000-0000-0000-000000000001/retiree.jpg')$$) = 1
+  and t.affected($$delete from storage.objects where bucket_id = 'photos' and name = 'aaaaaaaa-0000-0000-0000-000000000001/retiree.jpg'$$) = 1, 'restaurateur : supprime une photo retirée de sa fiche');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select count(*) = 0 from storage.objects where bucket_id = 'documents'), 'étudiante : ne voit AUCUN justificatif');
+select t.ok(t.affected($$delete from storage.objects where bucket_id in ('photos', 'documents')$$) = 0, 'étudiante : ne peut supprimer ni photo ni justificatif');
+reset role;
+set role anon;
+select t.ok((select count(*) = 0 from storage.objects where bucket_id = 'documents'), 'visiteur : aucun justificatif lisible');
+reset role;
+select t.ok((select not public from storage.buckets where id = 'documents') and (select public from storage.buckets where id = 'photos'), 'stockage : photos publiques, justificatifs privés');
+
 -- ===== Stories et promotions =====
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
 set role authenticated;
@@ -168,6 +198,8 @@ select t.fails($$insert into stories (merchant_id, background, caption) values (
 select t.fails($$update stories set expires_at = now() + interval '10 days'$$, 'story : prolongation interdite');
 select t.ok(t.affected($$insert into storage.objects (bucket_id, name) values ('stories', 'aaaaaaaa-0000-0000-0000-000000000001/salle.jpg')$$) = 1, 'stockage : dépôt dans le dossier de sa fiche');
 select t.fails($$insert into storage.objects (bucket_id, name) values ('stories', 'aaaaaaaa-0000-0000-0000-000000000002/vol.jpg')$$, 'stockage : dépôt dans le dossier d''un autre refusé');
+select t.ok(t.affected($$insert into storage.objects (bucket_id, name) values ('stories', 'aaaaaaaa-0000-0000-0000-000000000001/expiree.jpg')$$) = 1
+  and t.affected($$delete from storage.objects where bucket_id = 'stories' and name = 'aaaaaaaa-0000-0000-0000-000000000001/expiree.jpg'$$) = 1, 'stockage : le restaurateur supprime l''image d''une story');
 reset role;
 select t.ok((select count(*) = 1 from storage.buckets where id = 'stories' and public and file_size_limit = 5242880), 'stockage « stories » créé (public, 5 Mo, images)');
 -- Une story expirée (insérée par le serveur pour le test)
@@ -218,7 +250,7 @@ delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
 select t.ok((select count(*) = 0 from profiles where id = '11111111-1111-1111-1111-111111111111') and (select count(*) = 0 from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001')
   and (select count(*) = 0 from merchant_private where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001')
   and (select count(*) = 0 from follows) and (select count(*) = 0 from merchant_stats) and (select count(*) = 0 from merchant_visitors)
-  and (select count(*) = 0 from stories) and (select count(*) = 0 from promotions), 'suppression du compte : profil, fiche, SIRET, abonnés, statistiques, stories et promotions supprimés');
+  and (select count(*) = 0 from stories) and (select count(*) = 0 from promotions) and (select count(*) = 0 from merchant_subscriptions), 'suppression du compte : profil, fiche, SIRET, abonnement, abonnés, statistiques, stories et promotions supprimés');
 select t.ok((select count(*) = 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'merchants'), 'temps réel activé sur merchants');
 select t.ok(not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.prosecdef and has_function_privilege('anon', p.oid, 'execute')), 'aucune fonction SECURITY DEFINER appelable par un visiteur via l''API');
 select t.ok((select bool_and(c.relrowsecurity) and count(*) = (select count(*) from pg_tables where schemaname = 'public')

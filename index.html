@@ -1385,12 +1385,7 @@
       <form id="ob-email-code" class="ob-step" novalidate data-step="verify-email" hidden aria-labelledby="ec-title">
         <div class="mail-badge" aria-hidden="true">✉️</div>
         <h2 id="ec-title">Vérifiez votre <em>adresse e-mail</em></h2>
-        <p class="lead" id="ec-lead">Un code à 6 chiffres a été envoyé à <b id="ec-email"></b>. Il est valable 10 minutes.</p>
-        <div class="demo-code" id="ec-demo" hidden role="status">
-          <strong>Mode démonstration</strong>
-          <span>L'envoi d'e-mails n'est pas encore configuré : aucun e-mail n'est envoyé. Votre code est :</span>
-          <b id="ec-demo-code"></b>
-        </div>
+        <p class="lead" id="ec-lead">Un code à 6 chiffres a été envoyé à <b id="ec-email"></b>. Saisissez-le ci-dessous (vous pouvez aussi cliquer sur le lien de l'e-mail).</p>
         <label class="field" id="field-ec-code">
           <span>Code de vérification</span>
           <input id="ec-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="––––––" aria-describedby="ec-lead" />
@@ -1400,6 +1395,30 @@
         <button class="btn btn-primary" type="submit" id="ec-submit">Valider le code</button>
         <p class="ob-switch">Pas reçu ? <button class="link-btn" type="button" id="ec-resend">Renvoyer le code</button></p>
         <p class="hint center">Pensez à regarder dans vos courriers indésirables. <button class="link-btn" type="button" id="ec-change">Modifier l'adresse</button></p>
+      </form>
+
+      <!-- Mot de passe oublié : code reçu par e-mail + nouveau mot de passe -->
+      <form id="ob-reset" class="ob-step" novalidate data-step="reset-password" hidden aria-labelledby="rs-title">
+        <div class="mail-badge" aria-hidden="true">🔑</div>
+        <h2 id="rs-title">Nouveau <em>mot de passe</em></h2>
+        <p class="lead" id="rs-lead">Un code à 6 chiffres a été envoyé à <b id="rs-email"></b>. Saisissez-le, puis choisissez votre nouveau mot de passe.</p>
+        <label class="field" id="field-rs-code">
+          <span>Code reçu par e-mail</span>
+          <input id="rs-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="––––––" />
+          <small class="field-error" id="err-rs-code" aria-live="polite"></small>
+        </label>
+        <label class="field" id="field-rs-password">
+          <span>Nouveau mot de passe</span>
+          <span class="pw-wrap">
+            <input id="rs-password" type="password" autocomplete="new-password" minlength="8" maxlength="128" />
+            <button class="pw-toggle" type="button" data-toggle-pw="rs-password">Afficher</button>
+          </span>
+          <small class="hint">8 caractères minimum, avec une majuscule, une minuscule, un chiffre et un caractère spécial.</small>
+          <small class="field-error" id="err-rs-password" aria-live="polite"></small>
+        </label>
+        <p class="form-error" id="err-reset" role="alert"></p>
+        <button class="btn btn-primary" type="submit">Changer mon mot de passe</button>
+        <p class="ob-switch"><button class="link-btn" type="button" data-goto="login">Retour à la connexion</button></p>
       </form>
 
       <!-- Autorisation de localisation (après la création d'un compte client) -->
@@ -1528,17 +1547,12 @@
           <small class="field-error" id="err-pl-hours" aria-live="polite"></small>
         </div>
 
-        <div class="field-row">
-          <label class="field" id="field-pl-promo">
-            <span>Offre du moment (facultatif)</span>
-            <input id="pl-promo" type="text" maxlength="60" placeholder="Ex. : boisson offerte le midi" />
-          </label>
-          <label class="field" id="field-pl-phone">
-            <span>Téléphone (facultatif)</span>
-            <input id="pl-phone" type="tel" inputmode="tel" maxlength="20" placeholder="02 51 00 00 00" />
-            <small class="field-error" id="err-pl-phone" aria-live="polite"></small>
-          </label>
-        </div>
+        <label class="field" id="field-pl-phone">
+          <span>Téléphone (facultatif)</span>
+          <input id="pl-phone" type="tel" inputmode="tel" maxlength="20" placeholder="02 51 00 00 00" />
+          <small class="field-error" id="err-pl-phone" aria-live="polite"></small>
+        </label>
+        <p class="hint">Vos promotions (du jour, de la semaine, offre étudiante…) et vos stories se publient ensuite depuis votre espace restaurateur.</p>
 
         <p class="form-error" id="err-pro-listing" role="alert"></p>
         <button class="btn btn-primary" type="submit"><span data-mode="create">Publier sur la carte</span><span data-mode="edit">Enregistrer les modifications</span></button>
@@ -1583,6 +1597,8 @@
   <noscript><style>.loader { display: none !important; }</style><div class="fatal"><div><h1>JavaScript requis</h1><p>Activez JavaScript pour afficher la carte.</p></div></div></noscript>
 
 <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+<!-- Supabase (comptes et données partagées) : copie locale du client officiel, servie par le site -->
+<script src="vendor/supabase-js-2.118.0.js"></script>
 <script>
 'use strict';
 
@@ -1620,6 +1636,12 @@
     roadDetour: 1.3,                            // la route est en moyenne 30 % plus longue que la ligne droite
     desktopQuery: '(min-width: 900px)',
     // Vérification des restaurateurs : API publique « Recherche d'entreprises » (répertoire Sirene de l'INSEE)
+    /**
+     * Supabase : comptes, fiches, photos, stories, promotions et statistiques partagés entre tous les appareils.
+     * La clé « publishable » est publique par nature : ce sont les règles de sécurité (RLS) de la base qui protègent les données.
+     */
+    supabaseUrl: 'https://fnypgfyxbyaqrnklhjxc.supabase.co',
+    supabaseKey: 'sb_publishable_W-2Gra6O-pRBEf0a_XsyKw_8UlhHTzb',
     sireneApi: 'https://recherche-entreprises.api.gouv.fr/search',
     /**
      * Connexion « Continuer avec Google » (clients). Identifiant client OAuth (public) créé gratuitement dans
@@ -1628,8 +1650,8 @@
      */
     googleClientId: '87416467106-adp7ojfn62mmkr1pmaa0mpna86drug86.apps.googleusercontent.com',
     /**
-     * SIRET fictif pour essayer l'espace restaurateur sans établissement réel (clé de contrôle valide,
-     * jamais envoyé au répertoire Sirene, réutilisable par plusieurs comptes). Vide = désactivé.
+     * SIRET fictif pour essayer l'espace restaurateur sans établissement réel (accepté par le serveur, qui crée
+     * une fiche marquée « Fiche de test »). Vide = bouton masqué ; côté serveur : ALLOW_TEST_SIRET=false.
      */
     testSiret: '99999999900009',
     // Géocodage des adresses : Géoplateforme de l'IGN (Base Adresse Nationale)
@@ -1641,14 +1663,6 @@
      *   Dans Stripe, réglez la redirection après paiement sur : https://evanbisa.github.io/pwa-nantes/?paiement=ok
      */
     proPlan: { name: 'Abonnement FlashMiam Pro', amount: null, period: 'mois', stripePaymentLink: '' },
-    /**
-     * Envoi des codes de vérification par e-mail via EmailJS (https://www.emailjs.com, gratuit jusqu'à 200 e-mails/mois).
-     * Seuls les restaurateurs reçoivent un code, une seule fois, à l'inscription : les clients n'en reçoivent jamais,
-     * et les connexions se font sans code. Le quota gratuit suffit donc largement.
-     * Les trois identifiants vides = mode démonstration : le code est affiché à l'écran, aucun e-mail n'est envoyé.
-     * Variables disponibles dans le modèle EmailJS : {{to_email}}, {{to_name}}, {{code}}, {{purpose}}, {{validity}}, {{site_name}}, {{site_url}}.
-     */
-    email: { endpoint: 'https://api.emailjs.com/api/v1.0/email/send', publicKey: '', serviceId: '', templateId: '' },
   };
   // Surcharge possible depuis la page (ex. : window.ROCHE_CONFIG = { googleMapsApiKey: '…' })
   Object.assign(CONFIG, window.ROCHE_CONFIG || {});
@@ -1795,10 +1809,178 @@
       return next;
     },
   };
-  const session = {
-    get() { try { return sessionStorage.getItem(CONFIG.sessionKey); } catch (e) { return null; } },
-    set(email) { try { email ? sessionStorage.setItem(CONFIG.sessionKey, email) : sessionStorage.removeItem(CONFIG.sessionKey); } catch (e) { /* ignore */ } },
+  /* =====================================================================
+     4 bis. DONNÉES PARTAGÉES : SUPABASE
+     Comptes (Supabase Auth), fiches, photos, stories, promotions, abonnements et statistiques.
+     ===================================================================== */
+
+  /** Session gardée sur l'appareil (« Rester connecté ») ou seulement le temps de l'onglet. */
+  const REMEMBER_KEY = 'roche-street-food:remember';
+  const authStorage = {
+    remember() { try { return localStorage.getItem(REMEMBER_KEY) === '1'; } catch (e) { return false; } },
+    setRemember(on) { try { if (on) localStorage.setItem(REMEMBER_KEY, '1'); else localStorage.removeItem(REMEMBER_KEY); } catch (e) { /* ignore */ } },
+    getItem(k) { try { return sessionStorage.getItem(k) ?? localStorage.getItem(k); } catch (e) { return null; } },
+    setItem(k, v) {
+      try {
+        if (authStorage.remember()) { localStorage.setItem(k, v); sessionStorage.removeItem(k); }
+        else { sessionStorage.setItem(k, v); localStorage.removeItem(k); }
+      } catch (e) { /* stockage indisponible */ }
+    },
+    removeItem(k) { try { sessionStorage.removeItem(k); localStorage.removeItem(k); } catch (e) { /* ignore */ } },
   };
+  const sb = window.supabase && CONFIG.supabaseUrl
+    ? window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey, {
+      auth: { storage: authStorage, storageKey: 'flashmiam-auth', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'implicit' },
+    })
+    : null;
+
+  /** Données chargées : compte connecté et restaurants inscrits (fiches en ligne + la sienne). */
+  const cloud = { user: null, restaurants: {}, followerCounts: new Map() };
+  const CAT_TO_DB = { 'Food-truck': 'food_truck', Kebab: 'kebab', Burger: 'burger', Sweets: 'sweets', Pizza: 'pizza', Autre: 'other' };
+  const CAT_FROM_DB = Object.fromEntries(Object.entries(CAT_TO_DB).map(([k, v]) => [v, k]));
+  const TEST_SIREN = '999999999';
+  const publicUrl = (bucket, path) => sb.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+  /** Chemin d'un fichier dans son espace de stockage, à partir de son adresse publique. */
+  function storagePath(bucket, url) {
+    const marker = '/object/public/' + bucket + '/';
+    const i = (url || '').indexOf(marker);
+    return i < 0 ? null : decodeURIComponent(url.slice(i + marker.length).split('?')[0]);
+  }
+  async function removeFiles(bucket, urlsOrPaths) {
+    const paths = urlsOrPaths.map((u) => (/^https?:/.test(u) ? storagePath(bucket, u) : u)).filter(Boolean);
+    if (paths.length) await sb.storage.from(bucket).remove(paths).catch(() => {});
+  }
+
+  const storyFromRow = (st) => ({
+    id: st.id, merchantId: st.merchant_id, text: st.caption || '', bg: st.background,
+    imagePath: st.image_path, imageUrl: st.image_path ? publicUrl('stories', st.image_path) : null,
+    createdAt: st.created_at, expiresAt: st.expires_at,
+  });
+  const promoFromRow = (pr) => ({ id: pr.id, kind: pr.kind, title: pr.title, details: pr.details || '', createdAt: pr.created_at, endsAt: pr.ends_at });
+  function restaurantFromRow(m, promos = [], stories = []) {
+    const hours = m.opening_hours || {};
+    return {
+      id: m.id, ownerId: m.user_id, name: m.name, category: CAT_FROM_DB[m.category] || 'Autre', description: m.description || '',
+      photos: m.photos_urls || [], menu: m.menu_json || [], address: m.address || '', coords: m.lat != null ? [m.lng, m.lat] : null,
+      hours: hours.services || [], closedOn: hours.closed_on || [], phone: m.phone || '',
+      status: m.status, published: m.status === 'published' && m.is_open && m.lat != null, isTest: !!m.is_test, honorAt: m.honor_at,
+      publishedAt: m.published_at, updatedAt: m.updated_at, promos: promos.map(promoFromRow), stories: stories.map(storyFromRow),
+    };
+  }
+  const groupBy = (rows, key) => rows.reduce((acc, r) => { (acc[r[key]] = acc[r[key]] || []).push(r); return acc; }, {});
+
+  /** Restaurants inscrits, avec leurs promotions et stories (la base ne renvoie que ce que l'utilisateur a le droit de voir). */
+  async function loadRestaurants() {
+    const [m, pr, st] = await Promise.all([sb.from('merchants').select('*'), sb.from('promotions').select('*'), sb.from('stories').select('*')]);
+    if (m.error) throw m.error;
+    const promos = groupBy(pr.data || [], 'merchant_id'), stories = groupBy(st.data || [], 'merchant_id');
+    cloud.restaurants = Object.fromEntries(m.data.map((row) => [row.id, restaurantFromRow(row, promos[row.id], stories[row.id])]));
+    return cloud.restaurants;
+  }
+
+  /** Justificatifs déposés (stockage privé « documents ») : nom de fichier « type--horodatage--nom d'origine ». */
+  const safeName = (name) => name.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w.-]+/g, '_').slice(-60) || 'fichier';
+  const docPath = (merchantId, key, name) => merchantId + '/' + key + '--' + Date.now().toString(36) + '--' + safeName(name);
+  async function listDocs(merchantId) {
+    const { data } = await sb.storage.from('documents').list(merchantId, { limit: 100 });
+    const docs = {};
+    (data || []).forEach((f) => {
+      const [key, stamp, ...rest] = f.name.split('--');
+      if (!DOC_TYPES.some((t) => t.key === key)) return;
+      const meta = { name: rest.join('--') || f.name, size: (f.metadata && f.metadata.size) || 0, path: merchantId + '/' + f.name, stamp };
+      if (!docs[key] || docs[key].stamp < stamp) docs[key] = meta;
+    });
+    return docs;
+  }
+
+  /** Inscription du restaurateur : fiche, SIRET vérifié, justificatifs, attestation, abonnement → étape à reprendre. */
+  async function loadPro(user) {
+    const { data: m } = await sb.from('merchants').select('*').eq('user_id', user.id).maybeSingle();
+    if (!m) return { status: 'verification', docs: {} };
+    const [{ data: priv }, { data: sub }, docs] = await Promise.all([
+      sb.from('merchant_private').select('siret, siret_verified_at, legal_name, naf_code').eq('merchant_id', m.id).maybeSingle(),
+      sb.from('merchant_subscriptions').select('*').eq('merchant_id', m.id).maybeSingle(),
+      listDocs(m.id),
+    ]);
+    const verified = !!(priv && priv.siret_verified_at);
+    const siret = m.is_test ? CONFIG.testSiret : (priv ? priv.siret : '');
+    const company = verified ? {
+      siret, test: m.is_test, legalName: m.is_test ? 'ÉTABLISSEMENT DE TEST (fictif)' : (priv.legal_name || ''), tradeName: m.name,
+      address: m.address || '', coords: m.lat != null ? [m.lng, m.lat] : null, naf: priv.naf_code || '', nafLabel: NAF_RESTAURATION[priv.naf_code] || '',
+    } : null;
+    const docsOk = DOC_TYPES.every((t) => !t.required || docs[t.key]);
+    const status = m.status !== 'draft' ? 'published' : (!verified || !docsOk || !m.honor_at) ? 'verification' : !sub ? 'payment' : 'listing';
+    return {
+      merchantId: m.id, restaurantId: m.id, siret, company, docs, honorAt: m.honor_at, status, suspended: m.status === 'suspended',
+      verifiedAt: priv && priv.siret_verified_at,
+      payment: sub ? { status: 'paid', mode: sub.mode, paidAt: sub.started_at } : null,
+    };
+  }
+
+  /** Compte connecté : profil, restaurants suivis et, pour un restaurateur, son inscription. */
+  async function loadUser(authUser) {
+    const [{ data: profile, error }, { data: follows }] = await Promise.all([
+      sb.from('profiles').select('*').eq('id', authUser.id).maybeSingle(),
+      sb.from('follows').select('merchant_id, created_at'),
+    ]);
+    if (error || !profile) throw error || new Error('Profil introuvable');
+    const providers = (authUser.app_metadata && (authUser.app_metadata.providers || [authUser.app_metadata.provider])) || [];
+    const user = {
+      id: authUser.id, email: authUser.email, role: profile.role === 'merchant' ? 'pro' : 'client',
+      name: profile.first_name || (authUser.email || '').split('@')[0], lastName: profile.last_name || '', phone: profile.phone || '',
+      createdAt: profile.created_at, emailVerifiedAt: authUser.email_confirmed_at, google: providers.includes('google'),
+      follows: Object.fromEntries((follows || []).map((f) => [f.merchant_id, f.created_at])),
+    };
+    if (user.role === 'pro') user.pro = await loadPro(user);
+    cloud.user = user;
+    return user;
+  }
+
+  /** Message compréhensible pour une erreur du serveur. */
+  function cloudError(e) {
+    if (!navigator.onLine) return 'Vous êtes hors connexion. Vérifiez votre connexion internet puis réessayez.';
+    const code = e && (e.code || e.error_code);
+    if (e && (e.status === 429 || /rate.?limit/i.test(code || '') || /rate limit/i.test(e.message || ''))) return 'Trop de demandes en peu de temps. Patientez quelques minutes puis réessayez.';
+    return 'Le serveur n\'a pas pu traiter la demande' + (e && e.message ? ' (' + e.message + ')' : '') + '. Réessayez dans un instant.';
+  }
+
+  /** Recharge les données partagées (après une modification, un changement en direct, ou régulièrement). */
+  let refreshTimer = null, refreshWaiters = [];
+  function refreshCloud(delay = 0) {
+    clearTimeout(refreshTimer);
+    return new Promise((resolve) => {
+      refreshWaiters.push(resolve);
+      refreshTimer = setTimeout(async () => {
+        const waiters = refreshWaiters; refreshWaiters = [];
+        try {
+          await loadRestaurants();
+          if (cloud.user && cloud.user.role === 'pro') cloud.user.pro = await loadPro(cloud.user);
+          whenMapReady(syncShopMarkers);
+        } catch (e) { console.warn('Actualisation impossible', e); }
+        waiters.forEach((w) => w());
+      }, delay);
+    });
+  }
+  /** La carte suit les données : nouvelles fiches, fiches modifiées ou retirées, stories et promotions. */
+  function syncShopMarkers() {
+    const shops = allShops();
+    const ids = new Set(shops.map((sh) => sh.id));
+    [...markers.keys()].forEach((id) => { if (!ids.has(id)) removeShopMarker(id); });
+    shops.forEach((sh) => { const m = markers.get(sh.id); if (!m || (sh.isPro && JSON.stringify(m.shop) !== JSON.stringify(sh))) upsertShopMarker(sh); });
+    if (!StoryViewer.isOpen()) renderStories();
+  }
+  /** Mises à jour en direct (temps réel Supabase), avec une actualisation régulière en secours. */
+  function subscribeLive() {
+    try {
+      const again = () => refreshCloud(800);
+      sb.channel('carte')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'merchants' }, again)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'stories' }, again)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'promotions' }, again)
+        .subscribe();
+    } catch (e) { /* temps réel indisponible : l'actualisation régulière suffit */ }
+    setInterval(() => { if (!document.hidden) refreshCloud(); }, 2 * 60 * 1000);
+  }
 
   /** Distance à vol d'oiseau en mètres entre deux points [lng, lat]. */
   function distance(a, b) {
@@ -1910,31 +2092,6 @@
   const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
   const formatSize = (b) => (b < 1024 * 1024 ? Math.max(1, Math.round(b / 1024)) + ' Ko' : (b / 1024 / 1024).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' Mo');
 
-  /** Fichiers (photos, justificatifs) stockés dans le navigateur (IndexedDB). */
-  const fileStore = (() => {
-    let dbPromise = null;
-    const open = () => dbPromise || (dbPromise = new Promise((resolve, reject) => {
-      const req = indexedDB.open('roche-street-food', 1);
-      req.onupgradeneeded = () => req.result.createObjectStore('files');
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => { dbPromise = null; reject(req.error); };
-    }));
-    const run = async (mode, op) => {
-      const db = await open();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction('files', mode);
-        const req = op(tx.objectStore('files'));
-        tx.oncomplete = () => resolve(req.result);
-        tx.onerror = tx.onabort = () => reject(tx.error);
-      });
-    };
-    return {
-      put: (id, blob) => run('readwrite', (st) => st.put(blob, id)),
-      get: (id) => run('readonly', (st) => st.get(id)),
-      remove: (ids) => Promise.all([].concat(ids).filter(Boolean).map((id) => run('readwrite', (st) => st.delete(id)))),
-    };
-  })();
-
   /* ---------- Photos : format unique 16:9 ---------- */
 
   const PHOTO_RATIO = 16 / 9;
@@ -1977,7 +2134,7 @@
   /** « 12345678900012 » → « 123 456 789 00012 » (saisie progressive acceptée). */
   const formatSiret = (s) => { const d = onlyDigits(s).slice(0, 14); return [d.slice(0, 3), d.slice(3, 6), d.slice(6, 9), d.slice(9)].filter(Boolean).join(' '); };
 
-  const isTestSiret = (siret) => !!CONFIG.testSiret && siret === CONFIG.testSiret;
+  const isTestSiret = (siret) => !!siret && (siret === CONFIG.testSiret || siret.startsWith('999999999'));
 
   /** Clé de contrôle du SIRET : algorithme de Luhn (exception : établissements de La Poste). */
   function isValidSiret(siret) {
@@ -2000,46 +2157,6 @@
       if (!res.ok) { const err = new Error('HTTP ' + res.status); err.status = res.status; throw err; }
       return await res.json();
     } finally { clearTimeout(timer); }
-  }
-
-  /**
-   * Vérifie un SIRET dans le répertoire Sirene (API Recherche d'entreprises).
-   * Conditions : établissement trouvé, en activité, code NAF de restauration.
-   * @returns {Promise<{ok: boolean, code?: 'notfound'|'closed'|'naf'|'rate'|'network', company?: object}>}
-   */
-  async function lookupSiret(siret) {
-    if (isTestSiret(siret)) {
-      await new Promise((r) => setTimeout(r, 600));
-      return { ok: true, company: {
-        siren: siret.slice(0, 9), siret, test: true,
-        legalName: 'ÉTABLISSEMENT DE TEST (fictif)', tradeName: 'Restaurant de test',
-        address: '1 Place Napoléon 85000 La Roche-sur-Yon', postcode: '85000', city: 'La Roche-sur-Yon',
-        coords: CONFIG.center.slice(), naf: '56.10C', nafLabel: NAF_RESTAURATION['56.10C'] || '',
-      } };
-    }
-    let data;
-    try {
-      data = await fetchJson(CONFIG.sireneApi + '?' + new URLSearchParams({ q: siret, limite_matching_etablissements: '1' }));
-    } catch (err) {
-      return { ok: false, code: err.status === 429 ? 'rate' : 'network' };
-    }
-    const unit = data && data.results && data.results[0];
-    const etab = unit && ((unit.matching_etablissements || []).find((e) => e.siret === siret) || (unit.siege && unit.siege.siret === siret ? unit.siege : null));
-    if (!etab) return { ok: false, code: 'notfound' };
-    const naf = etab.activite_principale || unit.activite_principale || '';
-    const lng = parseFloat(etab.longitude), lat = parseFloat(etab.latitude);
-    const company = {
-      siren: unit.siren, siret,
-      legalName: unit.nom_complet || unit.nom_raison_sociale || '',
-      tradeName: (etab.liste_enseignes || [])[0] || '',
-      address: etab.adresse || etab.geo_adresse || '',
-      postcode: etab.code_postal || '', city: etab.libelle_commune || '',
-      coords: Number.isFinite(lng) && Number.isFinite(lat) ? [lng, lat] : null,
-      naf, nafLabel: NAF_RESTAURATION[naf] || '',
-    };
-    if (etab.etat_administratif !== 'A' || unit.etat_administratif === 'C') return { ok: false, code: 'closed', company };
-    if (!NAF_RESTAURATION[naf]) return { ok: false, code: 'naf', company };
-    return { ok: true, company };
   }
 
   /** Suggestions d'adresses (Base Adresse Nationale), limitées à l'agglomération de La Roche-sur-Yon. */
@@ -2638,9 +2755,9 @@
     markers.set(shop.id, { shop, marker, el, status: getStatus(shop) });
   }
 
-  /** Restaurants publiés par les restaurateurs (enregistrés sur cet appareil). */
-  const restaurants = () => store.read().restaurants || {};
-  const restaurantToShop = (r) => ({ ...r, isPro: true, isTest: isTestSiret(r.siret) });
+  /** Restaurants inscrits (chargés depuis Supabase). */
+  const restaurants = () => cloud.restaurants;
+  const restaurantToShop = (r) => ({ ...r, isPro: true, isTest: !!r.isTest });
   const allShops = () => [...SHOPS, ...Object.values(restaurants()).filter((r) => r.published).map(restaurantToShop)];
 
   /** Ajoute ou remplace le marqueur d'un commerce (après publication ou modification d'une fiche). */
@@ -2899,7 +3016,6 @@
     const key = shop.id + ':' + (shop.updatedAt || '');
     if (key === galleryFor) return;            // déjà affichée
     galleryFor = key;
-    galleryUrls.forEach((u) => URL.revokeObjectURL(u));
     galleryUrls = [];
     const box = $('shop-gallery');
     const grid = $('shop-photo-grid');
@@ -2908,10 +3024,8 @@
     box.hidden = true;
     $('tab-photos-n').textContent = '';
     $('shop-photos-empty').hidden = false;
-    if (!shop.photoIds || !shop.photoIds.length) return;
-    const blobs = await Promise.all(shop.photoIds.map((id) => fileStore.get(id).catch(() => null)));
-    if (galleryFor !== key) return;            // une autre fiche a été ouverte entre-temps
-    blobs.filter(Boolean).forEach((blob) => galleryUrls.push(URL.createObjectURL(blob)));
+    if (!shop.photos || !shop.photos.length) return;
+    galleryUrls = [...shop.photos];
     galleryUrls.forEach((url, i) => {
       const alt = shop.name + ' — photo ' + (i + 1);
       const img = document.createElement('img');
@@ -2935,7 +3049,7 @@
   /* ---------- Onglets de la fiche : Infos · Menu · Photos ---------- */
   function syncShopTabs(shop) {
     const hasMenu = !!(shop.menu && shop.menu.length);
-    const hasPhotos = !!(shop.photoIds && shop.photoIds.length);
+    const hasPhotos = !!(shop.photos && shop.photos.length);
     $('shop-tabs').hidden = !hasMenu && !hasPhotos;
     $('tab-menu').hidden = !hasMenu;
     $('tab-photos').hidden = !hasPhotos;
@@ -3027,10 +3141,16 @@
   })();
 
   /* ---------- Abonnements (« Suivre » un restaurant) ---------- */
-  const followersOf = (shopId) => Object.values(accounts()).filter((a) => a.follows && a.follows[shopId]);
   function isOwnShop(shopId, account = currentUser()) {
     const r = restaurants()[shopId];
-    return !!(r && account && r.ownerEmail === account.email);
+    return !!(r && account && r.ownerId === account.id);
+  }
+  /** Nombre d'abonnés d'une fiche (compté par la base, sans jamais révéler qui). */
+  async function fetchFollowerCount(shopId) {
+    const { data, error } = await sb.rpc('merchant_follower_count', { p_merchant_id: shopId });
+    if (error) return;
+    cloud.followerCounts.set(shopId, data || 0);
+    if (selectedId === shopId) renderFollow(markers.get(shopId).shop);
   }
   function renderFollow(shop) {
     const me = currentUser();
@@ -3041,65 +3161,59 @@
     btn.setAttribute('aria-pressed', String(following));
     $('shop-follow-label').textContent = following ? 'Abonné' : 'Suivre';
     btn.setAttribute('aria-label', following ? 'Ne plus suivre ' + shop.name : 'Suivre ' + shop.name + ' (offres et nouveautés)');
-    const n = shop.isPro ? followersOf(shop.id).length : 0;
+    const n = shop.isPro ? cloud.followerCounts.get(shop.id) || 0 : 0;
     $('shop-followers').hidden = !n;
     $('shop-followers').textContent = n + (n > 1 ? ' abonnés' : ' abonné');
   }
-  $('shop-follow').addEventListener('click', () => {
+  $('shop-follow').addEventListener('click', async () => {
     const me = currentUser();
-    if (!me || !selectedId) return;
-    const follows = { ...(me.follows || {}) };
-    const name = markers.get(selectedId).shop.name;
-    if (follows[selectedId]) { delete follows[selectedId]; toast('Vous ne suivez plus ' + name + '.'); }
-    else { follows[selectedId] = new Date().toISOString(); toast('Vous suivez ' + name + ' : ses offres apparaîtront dans votre profil.'); }
-    updateAccount(me.email, { follows });
-    renderFollow(markers.get(selectedId).shop);
+    const id = selectedId;
+    if (!me || !id) return;
+    const btn = $('shop-follow');
+    const name = markers.get(id).shop.name;
+    const following = !!(me.follows && me.follows[id]);
+    btn.disabled = true;
+    const { error } = following
+      ? await sb.from('follows').delete().eq('merchant_id', id)
+      : await sb.from('follows').insert({ merchant_id: id });
+    btn.disabled = false;
+    if (error) { toast(cloudError(error)); return; }
+    me.follows = { ...(me.follows || {}) };
+    if (following) { delete me.follows[id]; toast('Vous ne suivez plus ' + name + '.'); }
+    else { me.follows[id] = new Date().toISOString(); toast('Vous suivez ' + name + ' : ses offres apparaîtront dans votre profil.'); }
+    cloud.followerCounts.set(id, Math.max(0, (cloud.followerCounts.get(id) || 0) + (following ? -1 : 1)));
+    if (selectedId === id) renderFollow(markers.get(id).shop);
+    fetchFollowerCount(id);
   });
 
   /* ---------- Statistiques de fréquentation (par restaurant inscrit, par jour) ---------- */
   const Stats = (() => {
-    const KEY = 'roche-street-food:stats';
-    const KEEP_DAYS = 90;
-    const EMPTY = () => ({ views: 0, visitors: [], walk: 0, car: 0, phone: 0, menu: 0, photos: 0, stories: 0 });
+    const EVENTS = { views: 'view', walk: 'walk', car: 'car', phone: 'phone', menu: 'menu', photos: 'photos', stories: 'story' };
     const pad = (n) => String(n).padStart(2, '0');
     const dayKey = (d = new Date()) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
-    /** Empreinte courte et non réversible du visiteur (FNV-1a) : on compte des personnes sans stocker leur e-mail. */
-    const visitorId = (email) => { let h = 0x811c9dc5; for (const c of email) { h ^= c.charCodeAt(0); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(36); };
-    const read = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; } };
-    const write = (d) => { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) { /* stockage plein ou bloqué */ } };
+    /** Évènement sur une fiche inscrite (la base ignore les visites du restaurateur sur sa propre fiche). */
     function track(shopId, event) {
-      if (!restaurants()[shopId]) return;      // seulement les restaurants inscrits
-      const me = currentUser();
-      if (isOwnShop(shopId, me)) return;       // le restaurateur ne compte pas ses propres visites
-      const all = read();
-      const days = all[shopId] || (all[shopId] = {});
-      const today = dayKey();
-      const day = days[today] || (days[today] = EMPTY());
-      day[event] = (day[event] || 0) + 1;
-      if (event === 'views' && me) { const v = visitorId(me.email); if (!day.visitors.includes(v)) day.visitors.push(v); }
-      const limit = dayKey(new Date(Date.now() - KEEP_DAYS * 864e5));
-      Object.keys(days).forEach((k) => { if (k < limit) delete days[k]; });
-      write(all);
+      if (!restaurants()[shopId] || !EVENTS[event]) return;
+      sb.rpc('track_merchant_event', { p_merchant_id: shopId, p_event: EVENTS[event] }).then(() => {}, () => {});
     }
-    /** Totaux et série quotidienne sur les `n` derniers jours (aujourd'hui inclus). */
-    function summary(shopId, n) {
-      const days = read()[shopId] || {};
-      const followers = followersOf(shopId);
-      const series = [];
-      const people = new Set();
-      const totals = { views: 0, walk: 0, car: 0, phone: 0, menu: 0, photos: 0, stories: 0 };
-      for (let i = n - 1; i >= 0; i--) {
-        const date = new Date(); date.setHours(12, 0, 0, 0); date.setDate(date.getDate() - i);
-        const key = dayKey(date);
-        const d = days[key] || EMPTY();
-        Object.keys(totals).forEach((k) => { totals[k] += d[k] || 0; });
-        d.visitors.forEach((v) => people.add(v));
-        const newFollowers = followers.filter((a) => dayKey(new Date(a.follows[shopId])) === key).length;
-        series.push({ key, date, views: d.views, visitors: d.visitors.length, routes: d.walk + d.car, newFollowers });
-      }
-      const since = series[0].key;
-      return { ...totals, visitors: people.size, followers: followers.length,
-        newFollowers: followers.filter((a) => dayKey(new Date(a.follows[shopId])) >= since).length, series };
+    /** Totaux et série quotidienne sur les `n` derniers jours (aujourd'hui inclus) du restaurateur connecté. */
+    async function summary(shopId, n) {
+      const since = new Date(); since.setDate(since.getDate() - (n - 1));
+      const [daily, totals, raw] = await Promise.all([
+        sb.rpc('my_merchant_stats', { p_days: n }),
+        sb.rpc('my_merchant_totals', { p_days: n }),
+        sb.from('merchant_stats').select('day, story_views').eq('merchant_id', shopId).gte('day', dayKey(since)),
+      ]);
+      if (daily.error) throw daily.error;
+      const rows = (daily.data || []).slice().sort((a, b) => a.day.localeCompare(b.day));
+      const sum = (k) => rows.reduce((acc, r) => acc + (r[k] || 0), 0);
+      const t = (totals.data && totals.data[0]) || { followers: 0, visitors: 0 };
+      return {
+        views: sum('views'), walk: sum('walk_clicks'), car: sum('car_clicks'), phone: sum('phone_clicks'), menu: sum('menu_views'), photos: sum('photo_views'),
+        stories: (raw.data || []).reduce((acc, r) => acc + (r.story_views || 0), 0),
+        visitors: t.visitors || 0, followers: t.followers || 0, newFollowers: sum('new_followers'),
+        series: rows.map((r) => ({ key: r.day, date: new Date(r.day + 'T12:00:00'), views: r.views, visitors: r.visitors, routes: r.walk_clicks + r.car_clicks, newFollowers: r.new_followers })),
+      };
     }
     return { track, summary };
   })();
@@ -3164,11 +3278,15 @@
   }
 
   let statsDays = 7;
-  function renderStats(account) {
+  let statsToken = 0;
+  async function renderStats(account) {
     const r = myRestaurant(account);
     $('pd-stats').hidden = !(r && r.published);
     if (!r || !r.published) return;
-    const st = Stats.summary(r.id, statsDays);
+    const token = ++statsToken;
+    let st;
+    try { st = await Stats.summary(r.id, statsDays); } catch (e) { return; }
+    if (token !== statsToken) return;          // période changée entre-temps
     const plural = (n, one, many) => n + ' ' + (n > 1 ? many : one);
     const period = statsDays === 7 ? 'sur 7 jours' : 'sur 30 jours';
     $('k-followers').textContent = st.followers.toLocaleString('fr-FR');
@@ -3257,18 +3375,8 @@
     });
   }
 
-  /** Met à jour la fiche d'un restaurant inscrit (promotions, stories) et rafraîchit la carte. */
-  function updateRestaurant(id, patch) {
-    const all = restaurants();
-    all[id] = { ...all[id], ...patch };
-    store.write({ restaurants: all });
-    if (all[id].published) whenMapReady(() => { upsertShopMarker(restaurantToShop(all[id])); renderStories(); });
-    return all[id];
-  }
-
   /* ---------- Stories des restaurants (24 h, visibles par tous, sans abonnement) ---------- */
   const SEEN_KEY = 'roche-street-food:stories-seen';
-  const STORY_VIEWS_KEY = 'roche-street-food:story-views';
   const readJson = (k) => { try { return JSON.parse(localStorage.getItem(k) || '{}'); } catch (e) { return {}; } };
   const writeJson = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* stockage plein ou bloqué */ } };
   const liveStories = (shop, now = Date.now()) => (shop.stories || []).filter((st) => new Date(st.expiresAt) > now)
@@ -3314,13 +3422,11 @@
   }
   $('shop-emoji').addEventListener('click', () => { if (selectedId && $('shop-emoji').classList.contains('has-story')) StoryViewer.open(selectedId, { only: true }); });
 
-  /** Contenu d'une story (photo ou texte sur fond coloré) dans `box`. Renvoie l'URL temporaire à libérer. */
+  /** Contenu d'une story (photo ou texte sur fond coloré) dans `box`. */
   async function fillStory(box, story, { blur = true } = {}) {
     box.textContent = '';
-    if (story.fileId) {
-      const blob = await fileStore.get(story.fileId).catch(() => null);
-      if (!blob) { box.style.background = STORY_BGS.night; return null; }
-      const url = URL.createObjectURL(blob);
+    if (story.imageUrl) {
+      const url = story.imageUrl;
       if (blur) { const bg = document.createElement('img'); bg.className = 'sv-blur'; bg.src = url; bg.alt = ''; box.appendChild(bg); }
       const img = document.createElement('img');
       img.className = blur ? 'sv-img' : '';
@@ -3329,7 +3435,7 @@
       img.alt = story.text ? 'Photo : ' + story.text : 'Photo du restaurant';
       box.appendChild(img);
       box.style.background = '';
-      return url;
+      return null;
     }
     box.style.background = STORY_BGS[story.bg] || STORY_BGS.sunset;
     const t = document.createElement('div');
@@ -3376,7 +3482,7 @@
       $('sv-avatar').textContent = catOf(g.shop).emoji;
       $('sv-name').textContent = g.shop.name;
       $('sv-time').textContent = timeAgo(st.createdAt);
-      $('sv-caption').textContent = st.fileId ? (st.text || '') : '';
+      $('sv-caption').textContent = st.imageUrl ? (st.text || '') : '';
       $('sv-live').textContent = 'Story ' + (si + 1) + ' sur ' + g.stories.length + ' de ' + g.shop.name + (st.text ? ' : ' + st.text : '');
       if (url) { URL.revokeObjectURL(url); url = null; }
       const media = $('sv-media');
@@ -3386,12 +3492,7 @@
       // Vue comptée (une fois par story et par appareil pour « vue », à chaque affichage pour les statistiques)
       const seen = readJson(SEEN_KEY);
       if (!seen[st.id]) { seen[st.id] = Date.now(); Object.keys(seen).forEach((k) => { if (Date.now() - seen[k] > 2 * STORY_TTL) delete seen[k]; }); writeJson(SEEN_KEY, seen); }
-      if (restaurants()[g.shop.id] && !isOwnShop(g.shop.id)) {
-        const views = readJson(STORY_VIEWS_KEY);
-        views[st.id] = (views[st.id] || 0) + 1;
-        writeJson(STORY_VIEWS_KEY, views);
-        Stats.track(g.shop.id, 'stories');
-      }
+      if (!isOwnShop(g.shop.id)) Stats.track(g.shop.id, 'stories');
       elapsed = 0; start = performance.now();
       setPaused(false);
       raf = requestAnimationFrame(tick);
@@ -3545,19 +3646,25 @@
       if (mode === 'text' && text.length < 3) { setFieldError('sc-text', 'Écrivez votre message (3 caractères minimum).'); $('sc-text').focus(); return; }
       const btn = $('sc-publish');
       btn.disabled = true;
-      const now = Date.now();
-      const story = { id: 'story-' + uid(), text, createdAt: new Date(now).toISOString(), expiresAt: new Date(now + STORY_TTL).toISOString() };
-      try {
-        if (mode === 'photo') { story.fileId = 'story-' + uid(); await fileStore.put(story.fileId, blob); }
-        else story.bg = bg;
-      } catch (e) {
-        btn.disabled = false;
-        $('err-sc').textContent = 'Impossible d\'enregistrer la photo sur cet appareil (espace de stockage insuffisant ?).';
+      let imagePath = null;
+      if (mode === 'photo') {
+        imagePath = r.id + '/' + uid() + '.jpg';
+        const up = await Loader.run(sb.storage.from('stories').upload(imagePath, blob, { contentType: 'image/jpeg' }), 'Envoi de la photo…');
+        if (up.error) {
+          btn.disabled = false;
+          $('err-sc').textContent = 'La photo n\'a pas pu être envoyée. ' + cloudError(up.error);
+          return;
+        }
+      }
+      const row = mode === 'photo' ? { merchant_id: r.id, image_path: imagePath, caption: text || null } : { merchant_id: r.id, background: bg, caption: text };
+      const { error } = await Loader.run(sb.from('stories').insert(row), 'Publication de la story…');
+      btn.disabled = false;
+      if (error) {
+        if (imagePath) removeFiles('stories', [imagePath]);
+        $('err-sc').textContent = /Dix stories/.test(error.message || '') ? 'Vous avez déjà ' + MAX_STORIES + ' stories en ligne : supprimez-en une.' : cloudError(error);
         return;
       }
-      btn.disabled = false;
-      const fresh = restaurants()[r.id];
-      updateRestaurant(r.id, { stories: [...liveStories(fresh), story] });
+      await refreshCloud();
       close();
       renderStoryAdmin(currentUser());
       toast('Story publiée : elle est visible par tous pendant 24 h.');
@@ -3566,15 +3673,13 @@
   })();
   $('pd-story-new').addEventListener('click', () => StoryComposer.open());
 
-  let storyAdminUrls = [];
   async function renderStoryAdmin(account) {
     const r = myRestaurant(account);
     $('pd-stories').hidden = !(r && r.published);
     if (!r || !r.published) return;
     const stories = liveStories(r);
-    const views = readJson(STORY_VIEWS_KEY);
-    storyAdminUrls.forEach((u) => URL.revokeObjectURL(u));
-    storyAdminUrls = [];
+    const expired = (r.stories || []).filter((st) => !stories.includes(st));
+    if (expired.length) cleanupStories(expired);
     const list = $('pd-story-list');
     list.textContent = '';
     $('pd-story-new').disabled = stories.length >= MAX_STORIES;
@@ -3582,21 +3687,27 @@
     for (const st of stories.slice().reverse()) {
       const li = document.createElement('li');
       li.innerHTML = '<span class="sa-thumb"></span><small></small><button class="sa-del" type="button">&times;</button>';
-      const u = await fillStory(li.querySelector('.sa-thumb'), st, { blur: false });
-      if (u) storyAdminUrls.push(u);
+      await fillStory(li.querySelector('.sa-thumb'), st, { blur: false });
       const left = Math.max(1, Math.round((new Date(st.expiresAt) - Date.now()) / 3600e3));
-      const n = views[st.id] || 0;
-      li.querySelector('small').textContent = 'encore ' + left + ' h\n' + n + (n > 1 ? ' vues' : ' vue');
+      li.querySelector('small').textContent = 'encore ' + left + ' h\npubliée ' + timeAgo(st.createdAt);
       li.querySelector('.sa-del').setAttribute('aria-label', 'Supprimer la story publiée ' + timeAgo(st.createdAt));
       li.querySelector('.sa-del').addEventListener('click', async () => {
         if (!window.confirm('Supprimer cette story ?')) return;
-        const fresh = restaurants()[r.id];
-        updateRestaurant(r.id, { stories: (fresh.stories || []).filter((x) => x.id !== st.id) });
-        if (st.fileId) await fileStore.remove(st.fileId).catch(() => {});
+        const { error } = await sb.from('stories').delete().eq('id', st.id);
+        if (error) { toast(cloudError(error)); return; }
+        if (st.imagePath) await removeFiles('stories', [st.imagePath]);
+        await refreshCloud();
         renderStoryAdmin(currentUser());
       });
       list.appendChild(li);
     }
+  }
+
+  /** Stories expirées du restaurateur : retirées de la base et leurs photos supprimées du stockage. */
+  async function cleanupStories(expired) {
+    const ids = expired.map((st) => st.id);
+    const { error } = await sb.from('stories').delete().in('id', ids);
+    if (!error) await removeFiles('stories', expired.map((st) => st.imagePath).filter(Boolean));
   }
 
   /* ---------- Espace restaurateur : promotions ---------- */
@@ -3638,9 +3749,10 @@
       const until = promoUntil(p);
       li.querySelector('small').textContent = PROMO_KINDS[p.kind].label + (until ? ' · ' + until : ' · sans date de fin') + (p.details ? ' · ' + p.details : '');
       li.querySelector('button').setAttribute('aria-label', 'Retirer la promotion « ' + p.title + ' »');
-      li.querySelector('button').addEventListener('click', () => {
-        const fresh = restaurants()[r.id];
-        updateRestaurant(r.id, { promos: activePromos({ promos: fresh.promos }).filter((x) => x.id !== p.id) });
+      li.querySelector('button').addEventListener('click', async () => {
+        const { error } = await sb.from('promotions').delete().eq('id', p.id);
+        if (error) { toast(cloudError(error)); return; }
+        await refreshCloud();
         renderPromoAdmin(currentUser());
         toast('Promotion retirée.');
       });
@@ -3650,7 +3762,7 @@
     $('pp-submit').disabled = full;
     $('pp-submit').textContent = full ? MAX_PROMOS + ' promotions au maximum' : 'Publier la promotion';
   }
-  $('pd-promo-form').addEventListener('submit', (ev) => {
+  $('pd-promo-form').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const r = myRestaurant();
     if (!r) return;
@@ -3662,9 +3774,13 @@
       endsAt = endOfDay(new Date($('pp-end').value + 'T12:00:00'));
       if (endsAt < Date.now()) { setFieldError('pp-end', 'Choisissez une date à venir.'); $('pp-end').focus(); return; }
     }
-    const promo = { id: 'promo-' + uid(), kind: promoKind, title, ...(details ? { details } : {}), createdAt: new Date().toISOString(), ...(endsAt ? { endsAt: endsAt.toISOString() } : {}) };
-    const fresh = restaurants()[r.id];
-    updateRestaurant(r.id, { promos: [...activePromos({ promos: fresh.promos }), promo] });
+    // Fin des promos du jour et de la semaine : fixée par la base (heure de Paris)
+    const row = { merchant_id: r.id, kind: promoKind, title, details: details || null, ends_at: endsAt ? endsAt.toISOString() : null };
+    $('pp-submit').disabled = true;
+    const { error } = await Loader.run(sb.from('promotions').insert(row), 'Publication de la promotion…');
+    $('pp-submit').disabled = false;
+    if (error) { setFieldError('pp-title', /Six promotions/.test(error.message || '') ? MAX_PROMOS + ' promotions en cours au maximum.' : cloudError(error)); return; }
+    await refreshCloud();
     $('pp-title').value = ''; $('pp-details').value = ''; $('pp-end').value = ''; $('pp-title-count').textContent = '0 / 60';
     renderPromoAdmin(currentUser());
     toast('Promotion publiée : elle apparaît sur votre fiche et avec le filtre « Promos ».');
@@ -3920,46 +4036,17 @@
 
   /* =====================================================================
      10. COMPTES : création, connexion, déconnexion (clients et restaurateurs)
-     Les comptes sont enregistrés sur cet appareil (aucun serveur) ;
-     le mot de passe n'est jamais stocké en clair (dérivation PBKDF2-SHA-256 salée).
+     Comptes Supabase Auth : le mot de passe n'est jamais stocké par le site (haché par Supabase),
+     l'adresse e-mail est confirmée par un code à 6 chiffres.
      ===================================================================== */
 
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   const PHONE_RE = /^(?:\+33|0033|0)[1-9]\d{8}$/;
-  const PBKDF2_ITERATIONS = 150000;
-  const toB64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
-  const fromB64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
   const compactPhone = (s) => (s || '').replace(/[\s.\-()]/g, '');
   /** « 0612345678 » → « 06 12 34 56 78 » (numéros français). */
   const formatPhone = (s) => { const d = compactPhone(s).replace(/^(\+33|0033)/, '0'); return /^0\d{9}$/.test(d) ? d.replace(/(\d{2})(?=\d)/g, '$1 ') : s.trim(); };
 
-  async function hashPassword(password, saltB64) {
-    const salt = saltB64 ? fromB64(saltB64) : crypto.getRandomValues(new Uint8Array(16));
-    const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
-    const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: PBKDF2_ITERATIONS }, key, 256);
-    return { salt: toB64(salt), hash: toB64(bits) };
-  }
-  /** Comparaison en temps constant de deux empreintes. */
-  function sameHash(a, b) {
-    if (a.length !== b.length) return false;
-    let diff = 0;
-    for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-    return diff === 0;
-  }
-
-  const accounts = () => store.read().accounts || {};
-  const currentUser = () => {
-    const email = session.get() || store.read().rememberedEmail || null;
-    return email ? accounts()[email] || null : null;
-  };
-  /** Met à jour un compte enregistré et renvoie sa nouvelle version. */
-  function updateAccount(email, patch) {
-    const all = accounts();
-    all[email] = { ...all[email], ...patch };
-    store.write({ accounts: all });
-    return all[email];
-  }
-  const updatePro = (email, patch) => updateAccount(email, { pro: { ...(accounts()[email].pro || {}), ...patch } });
+  const currentUser = () => cloud.user;
 
   function setFieldError(field, message) {
     $('field-' + field).classList.toggle('has-error', !!message);
@@ -3969,7 +4056,7 @@
     input.addEventListener('input', () => {
       const field = input.closest('.field').id.replace('field-', '');
       if ($('err-' + field)) setFieldError(field, '');
-      ['err-signup', 'err-login', 'err-pro-verify', 'err-pro-listing', 'err-email-code'].forEach((id) => { $(id).textContent = ''; });
+      ['err-signup', 'err-login', 'err-pro-verify', 'err-pro-listing', 'err-email-code', 'err-reset'].forEach((id) => { $(id).textContent = ''; });
     });
   });
   document.querySelectorAll('[data-toggle-pw]').forEach((btn) => {
@@ -4004,7 +4091,7 @@
   });
 
   const PRO_STEP_INDEX = { 'pro-verify': 2, 'pro-payment': 3, 'pro-listing': 4 };
-  const STEP_TITLES = { signup: 'auth-title', login: 'login-title', 'verify-email': 'ec-title', location: 'ob-loc-title', 'pro-verify': 'pv-title', 'pro-payment': 'pp-title', 'pro-listing': 'pl-title' };
+  const STEP_TITLES = { signup: 'auth-title', login: 'login-title', 'verify-email': 'ec-title', 'reset-password': 'rs-title', location: 'ob-loc-title', 'pro-verify': 'pv-title', 'pro-payment': 'pp-title', 'pro-listing': 'pl-title' };
 
   /** Progression : 2 points (client) ou frise en 4 étapes (restaurateur). */
   function updateProgress(step, mode) {
@@ -4040,7 +4127,7 @@
     if (step === 'pro-verify') enterVerifyStep();
     if (step === 'pro-payment') renderPlan();
     if (step === 'pro-listing') enterListingStep(mode);
-    const focus = { signup: 'su-name', login: $('li-email').value ? 'li-password' : 'li-email', 'verify-email': 'ec-code', location: 'ob-allow', 'pro-verify': 'pv-siret', 'pro-payment': 'pay-btn', 'pro-listing': 'pl-name' }[step];
+    const focus = { signup: 'su-name', login: $('li-email').value ? 'li-password' : 'li-email', 'verify-email': 'ec-code', 'reset-password': 'rs-code', location: 'ob-allow', 'pro-verify': 'pv-siret', 'pro-payment': 'pay-btn', 'pro-listing': 'pl-name' }[step];
     setTimeout(() => $(focus).focus({ preventScroll: true }), 350);
   }
 
@@ -4050,117 +4137,50 @@
     showAuthStep(btn.dataset.goto);
   }));
 
-  /** Ouvre la session (mémorisée si « Rester connecté » est coché). */
-  function startSession(account, remember) {
-    session.set(account.email);
-    store.write({ rememberedEmail: remember ? account.email : null, lastEmail: account.email, lastRole: account.role || 'client' });
-    applyAccount(account);
+  /** Compte ouvert : mémorise l'adresse (préremplie à la prochaine connexion) et met à jour l'interface. */
+  function applySession(user) {
+    cloud.user = user;
+    store.write({ lastEmail: user.email, lastRole: user.role });
+    applyAccount(user);
   }
 
-  /* ---------- Vérification de l'adresse e-mail par code à 6 chiffres ---------- */
+  /* ---------- Vérification de l'adresse e-mail : code à 6 chiffres envoyé par Supabase ---------- */
 
-  const CODE_TTL = 10 * 60 * 1000;          // durée de validité d'un code
-  const CODE_MAX_ATTEMPTS = 5;              // essais autorisés par code
   const RESEND_DELAY = 60 * 1000;           // délai avant de pouvoir redemander un code
-  const MAX_SENDS = 5;                      // codes au plus par adresse…
-  const SEND_WINDOW = 15 * 60 * 1000;       // … sur 15 minutes
-  const MAIL_LOG_KEY = 'roche-street-food:mail-log';
-  const CODE_PURPOSES = { signup: 'la création de votre compte', existing: 'la vérification de votre adresse e-mail' };
-
-  let emailCheck = null;                    // vérification en cours
+  let emailCheck = null;                    // vérification en cours : { email, onSuccess(session), back }
   let resendTimer = null;
 
-  const emailConfigured = () => !!(CONFIG.email && CONFIG.email.publicKey && CONFIG.email.serviceId && CONFIG.email.templateId);
-  async function sha256(text) { return toB64(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))); }
-  const randomCode = () => String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, '0');
-
-  /** Codes envoyés récemment à une adresse (limite anti-abus). */
-  function recentSends(email) {
-    let log = {};
-    try { log = JSON.parse(localStorage.getItem(MAIL_LOG_KEY)) || {}; } catch (e) { /* ignore */ }
-    const now = Date.now();
-    return (log[email] || []).filter((t) => now - t < SEND_WINDOW);
-  }
-  function logSend(email) {
-    let log = {};
-    try { log = JSON.parse(localStorage.getItem(MAIL_LOG_KEY)) || {}; } catch (e) { /* ignore */ }
-    log[email] = [...recentSends(email), Date.now()];
-    try { localStorage.setItem(MAIL_LOG_KEY, JSON.stringify(log)); } catch (e) { /* ignore */ }
-  }
-
-  /** Envoie le code par e-mail (EmailJS). Renvoie 'sent', ou 'demo' si l'envoi n'est pas configuré. */
-  async function deliverCode(email, name, code, purpose) {
-    if (!emailConfigured()) return 'demo';
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 15000);
-    try {
-      const res = await fetch(CONFIG.email.endpoint, {
-        method: 'POST', signal: ctrl.signal, headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          service_id: CONFIG.email.serviceId, template_id: CONFIG.email.templateId, user_id: CONFIG.email.publicKey,
-          template_params: {
-            to_email: email, to_name: name || '', code, purpose: CODE_PURPOSES[purpose], validity: '10 minutes',
-            site_name: 'FlashMiam', site_url: location.origin + location.pathname,
-          },
-        }),
-      });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return 'sent';
-    } finally { clearTimeout(timer); }
-  }
-
   /**
-   * Lance une vérification : un code est envoyé à `email`, puis l'écran de saisie s'affiche.
-   * onSuccess est appelé une fois le bon code saisi ; back = étape à rouvrir via « Modifier l'adresse ».
+   * Écran « Vérifiez votre adresse e-mail ». sent = un code vient d'être envoyé (inscription) ;
+   * sinon on en demande un (connexion d'un compte pas encore confirmé).
    */
-  function startEmailVerification({ email, name, purpose, onSuccess, back }) {
+  function startEmailVerification({ email, onSuccess, back, sent = true }) {
     clearInterval(resendTimer);
-    emailCheck = { email, name, purpose, onSuccess, back, codeHash: null, salt: null, expiresAt: 0, attempts: 0, sends: 0 };
+    emailCheck = { email, onSuccess, back };
     $('ec-email').textContent = email;
     $('ec-code').value = '';
     setFieldError('ec-code', '');
     $('err-email-code').textContent = '';
-    $('ec-demo').hidden = true;
-    $('ec-demo-code').textContent = '';
     showAuthStep('verify-email');
-    sendCode();
+    if (sent) startResendCooldown(RESEND_DELAY); else resendCode({ silent: true });
   }
 
-  async function sendCode() {
+  async function resendCode({ silent = false } = {}) {
     const check = emailCheck;
     if (!check) return;
-    const errBox = $('err-email-code');
-    const resend = $('ec-resend');
-    errBox.textContent = '';
-    const recent = recentSends(check.email);
-    if (recent.length >= MAX_SENDS) {
-      const waitMs = SEND_WINDOW - (Date.now() - recent[0]);
-      errBox.textContent = 'Trop de codes demandés pour cette adresse. Réessayez dans ' + Math.ceil(waitMs / 60000) + ' min.';
-      startResendCooldown(waitMs);
+    const btn = $('ec-resend');
+    btn.disabled = true;
+    btn.textContent = 'Envoi en cours…';
+    $('err-email-code').textContent = '';
+    const { error } = await sb.auth.resend({ type: 'signup', email: check.email, options: { emailRedirectTo: location.origin + location.pathname } });
+    if (check !== emailCheck) return;
+    if (error) {
+      $('err-email-code').textContent = cloudError(error);
+      btn.disabled = false;
+      btn.textContent = 'Renvoyer le code';
       return;
     }
-    const code = randomCode();
-    const salt = toB64(crypto.getRandomValues(new Uint8Array(16)));
-    resend.disabled = true;
-    resend.textContent = 'Envoi en cours…';
-    let mode;
-    try {
-      mode = await deliverCode(check.email, check.name, code, check.purpose);
-    } catch (e) {
-      if (check !== emailCheck) return;
-      errBox.textContent = 'L\'e-mail n\'a pas pu être envoyé. Vérifiez votre connexion internet puis cliquez sur « Renvoyer le code ».';
-      resend.disabled = false;
-      resend.textContent = 'Renvoyer le code';
-      return;
-    }
-    if (check !== emailCheck) return;   // l'utilisateur a quitté l'écran entre-temps
-    // Seule l'empreinte salée du code est conservée, jamais le code lui-même
-    Object.assign(check, { codeHash: await sha256(salt + code), salt, expiresAt: Date.now() + CODE_TTL, attempts: 0 });
-    logSend(check.email);
-    $('ec-demo').hidden = mode !== 'demo';
-    $('ec-demo-code').textContent = mode === 'demo' ? code : '';
-    if (check.sends++ > 0) toast(mode === 'demo' ? 'Nouveau code généré.' : 'Un nouveau code a été envoyé à ' + check.email + '.');
-    $('ec-code').value = '';
+    if (!silent) toast('Un nouveau code a été envoyé à ' + check.email + '.');
     startResendCooldown(RESEND_DELAY);
   }
 
@@ -4178,15 +4198,13 @@
     resendTimer = setInterval(tick, 1000);
   }
 
-  $('ec-resend').addEventListener('click', () => sendCode());
-  $('ec-change').addEventListener('click', () => {
+  $('ec-resend').addEventListener('click', () => resendCode());
+  $('ec-change').addEventListener('click', async () => {
     const back = emailCheck && emailCheck.back;
     clearInterval(resendTimer);
     emailCheck = null;
     if (back) { showAuthStep(back); return; }
-    // Compte déjà ouvert sur cet appareil : on se déconnecte pour changer d'adresse
-    session.set(null);
-    store.write({ rememberedEmail: null });
+    await sb.auth.signOut().catch(() => {});
     location.reload();
   });
   $('ec-code').addEventListener('input', () => {
@@ -4197,35 +4215,27 @@
     if (digits.length === 6) $('ob-email-code').requestSubmit();   // validation automatique au 6e chiffre
   });
 
+  let verifying = false;
   $('ob-email-code').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const check = emailCheck;
-    if (!check) return;
+    if (!check || verifying) return;
     const code = onlyDigits($('ec-code').value);
     if (code.length !== 6) { setFieldError('ec-code', 'Saisissez les 6 chiffres reçus par e-mail.'); return; }
-    if (!check.codeHash) { setFieldError('ec-code', 'Aucun code valide : cliquez sur « Renvoyer le code ».'); return; }
-    if (Date.now() > check.expiresAt) {
-      check.codeHash = null;
-      setFieldError('ec-code', 'Ce code a expiré (validité : 10 minutes). Demandez-en un nouveau.');
-      return;
-    }
-    check.attempts++;
-    if (!sameHash(await sha256(check.salt + code), check.codeHash)) {
-      const left = CODE_MAX_ATTEMPTS - check.attempts;
-      if (left <= 0) {
-        check.codeHash = null;
-        setFieldError('ec-code', 'Trop d\'essais incorrects : ce code est désactivé. Demandez un nouveau code.');
-      } else {
-        setFieldError('ec-code', 'Code incorrect. Il vous reste ' + left + ' essai' + (left > 1 ? 's' : '') + '.');
-      }
+    verifying = true;
+    let { data, error } = await Loader.run(sb.auth.verifyOtp({ email: check.email, token: code, type: 'email' }), 'Vérification du code…');
+    if (error) ({ data, error } = await sb.auth.verifyOtp({ email: check.email, token: code, type: 'signup' }));
+    verifying = false;
+    if (check !== emailCheck) return;
+    if (error || !data.session) {
+      setFieldError('ec-code', error && error.status === 429 ? cloudError(error) : 'Code incorrect ou expiré. Vérifiez le dernier e-mail reçu, ou demandez un nouveau code.');
       $('ec-code').select();
       return;
     }
     clearInterval(resendTimer);
     emailCheck = null;
     $('ec-code').value = '';
-    $('ec-demo').hidden = true;
-    check.onSuccess();
+    check.onSuccess(data.session);
   });
 
   /** Étape à reprendre pour un restaurateur dont l'inscription n'est pas terminée (null = terminée). */
@@ -4281,37 +4291,39 @@
     if (!confirmation) fail('su-password2', 'Confirmez votre mot de passe.');
     else if (confirmation !== password) fail('su-password2', 'Les deux mots de passe ne sont pas identiques.');
     if (firstInvalid) { $(firstInvalid).focus(); return; }
-    if (accounts()[email]) {
+    const accountExists = () => {
       $('err-signup').innerHTML = 'Un compte existe déjà avec cet e-mail. <button class="link-btn" type="button" id="to-login">Se connecter</button>';
       $('to-login').addEventListener('click', () => { $('li-email').value = email; showAuthStep('login'); });
-      return;
-    }
-    if (!window.crypto || !crypto.subtle) { $('err-signup').textContent = 'La création de compte nécessite une connexion sécurisée (HTTPS).'; return; }
-
+    };
     const btn = ev.submitter || $('form-signup').querySelector('[type=submit]');
     btn.disabled = true;
-    const { salt, hash } = await Loader.run(hashPassword(password), 'Création de votre compte…', 'Chiffrement du mot de passe');
-    const account = { role, name, email, salt, hash, createdAt: new Date().toISOString() };
-    if (role === 'pro') Object.assign(account, { lastName, phone: formatPhone(phone), pro: { status: 'verification' } });
-    const remember = $('su-remember').checked;
+    authStorage.setRemember($('su-remember').checked);
+    const meta = role === 'pro'
+      ? { role: 'merchant', first_name: name, last_name: lastName, phone: formatPhone(phone) }
+      : { role: 'student', first_name: name };
+    const { data, error } = await Loader.run(
+      sb.auth.signUp({ email, password, options: { data: meta, emailRedirectTo: location.origin + location.pathname } }),
+      'Création de votre compte…');
     btn.disabled = false;
-    const createAccount = () => {
-      if (accounts()[email]) { showAuthStep('signup'); $('err-signup').textContent = 'Un compte existe déjà avec cet e-mail.'; return; }
-      store.write({ accounts: { ...accounts(), [email]: account } });
-      try { localStorage.removeItem(CONFIG.legacyStorageKey); } catch (e) { /* ignore */ }
-      startSession(account, remember);
-      $('su-password').value = '';
-      $('su-password2').value = '';
-      renderPasswordRules();
-      renderPasswordMatch();
-      showAuthStep(role === 'pro' ? 'pro-verify' : 'location');
+    if (error) {
+      if (error.code === 'user_already_exists' || /already registered/i.test(error.message || '')) { accountExists(); return; }
+      if (error.code === 'weak_password') { setFieldError('su-password', 'Mot de passe trop faible : choisissez-en un plus long ou plus varié.'); $('su-password').focus(); return; }
+      $('err-signup').textContent = cloudError(error);
+      return;
+    }
+    // Adresse déjà inscrite et confirmée : Supabase répond sans erreur (protection de la vie privée) mais sans identité
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) { accountExists(); return; }
+    $('su-password').value = '';
+    $('su-password2').value = '';
+    renderPasswordRules();
+    renderPasswordMatch();
+    const opened = async (session) => {
+      const user = await Loader.run(loadUser(session.user), 'Ouverture de votre compte…');
+      applySession(user);
+      showAuthStep(user.role === 'pro' ? 'pro-verify' : 'location');
     };
-    if (role !== 'pro') { createAccount(); return; }   // clients : pas de code (aucun e-mail envoyé)
-    // Restaurateurs : le compte n'est créé qu'une fois l'adresse e-mail vérifiée par le code reçu
-    startEmailVerification({
-      email, name, purpose: 'signup', back: 'signup',
-      onSuccess: () => { account.emailVerifiedAt = new Date().toISOString(); createAccount(); },
-    });
+    if (data.session) { await opened(data.session); return; }   // confirmation de l'e-mail désactivée
+    startEmailVerification({ email, back: 'signup', onSuccess: opened });
   });
 
   $('form-login').addEventListener('submit', async (ev) => {
@@ -4320,43 +4332,45 @@
     const password = $('li-password').value;
     if (!EMAIL_RE.test(email)) { setFieldError('li-email', 'Adresse e-mail invalide.'); $('li-email').focus(); return; }
     if (!password) { setFieldError('li-password', 'Saisissez votre mot de passe.'); $('li-password').focus(); return; }
-    const account = accounts()[email];
-    if (!account) {
-      $('err-login').innerHTML = 'Aucun compte avec cet e-mail sur cet appareil. <button class="link-btn" type="button" id="to-signup">Créer un compte</button>';
-      $('to-signup').addEventListener('click', () => { $('su-email').value = email; showAuthStep('signup'); });
-      return;
-    }
-    if (!account.hash) {
-      $('err-login').textContent = 'Ce compte a été créé avec Google : utilisez le bouton « Se connecter avec Google ».';
-      return;
-    }
     const btn = ev.submitter || $('form-login').querySelector('[type=submit]');
     btn.disabled = true;
-    const { hash } = await Loader.run(hashPassword(password, account.salt), 'Connexion…');
+    authStorage.setRemember($('li-remember').checked);
+    const { data, error } = await Loader.run(sb.auth.signInWithPassword({ email, password }), 'Connexion…');
     btn.disabled = false;
-    if (!sameHash(hash, account.hash)) {
-      setFieldError('li-password', 'Mot de passe incorrect.');
-      $('li-password').select();
+    if (error) {
+      if (error.code === 'email_not_confirmed' || /not confirmed/i.test(error.message || '')) {
+        startEmailVerification({ email, back: 'login', sent: false, onSuccess: (session) => openAfterLogin(session.user) });
+        return;
+      }
+      if (error.code === 'invalid_credentials' || error.status === 400) {
+        setFieldError('li-password', 'E-mail ou mot de passe incorrect. Si vous vous êtes inscrit avec Google, utilisez le bouton Google.');
+        $('li-password').select();
+        return;
+      }
+      $('err-login').textContent = cloudError(error);
       return;
     }
-    // Le type de compte choisi doit correspondre au compte
-    const role = account.role || 'client';
-    if (role !== authRole) {
-      $('err-login').innerHTML = (role === 'pro' ? 'Ce compte est un compte restaurateur.' : 'Ce compte est un compte client.') +
-        ' <button class="link-btn" type="button" id="switch-role">Passer en mode ' + (role === 'pro' ? 'Restaurateur' : 'Client') + '</button>';
-      $('switch-role').addEventListener('click', () => { setAuthRole(role); $('form-login').requestSubmit(); });
-      return;
-    }
-    const remember = $('li-remember').checked;
-    const openSession = (patch = {}) => {
-      const updated = updateAccount(email, { lastLoginAt: new Date().toISOString(), ...patch });
-      $('li-password').value = '';
-      startSession(updated, remember);
-      routeAfterLogin(updated);
-    };
-    // Pas de code à la connexion : l'adresse des restaurateurs a été vérifiée une fois pour toutes à l'inscription
-    openSession();
+    openAfterLogin(data.user);
   });
+
+  /** Compte ouvert après une connexion : vérifie le type de compte choisi, puis reprend là où il en était. */
+  async function openAfterLogin(authUser) {
+    let user;
+    try { user = await Loader.run(loadUser(authUser), 'Ouverture de votre compte…'); }
+    catch (e) { await sb.auth.signOut().catch(() => {}); $('err-login').textContent = cloudError(e); showAuthStep('login'); return; }
+    if (user.role !== authRole) {
+      await sb.auth.signOut().catch(() => {});
+      cloud.user = null;
+      showAuthStep('login');
+      $('err-login').innerHTML = (user.role === 'pro' ? 'Ce compte est un compte restaurateur.' : 'Ce compte est un compte client.') +
+        ' <button class="link-btn" type="button" id="switch-role">Passer en mode ' + (user.role === 'pro' ? 'Restaurateur' : 'Client') + '</button>';
+      $('switch-role').addEventListener('click', () => { setAuthRole(user.role); $('form-login').requestSubmit(); });
+      return;
+    }
+    $('li-password').value = '';
+    applySession(user);
+    routeAfterLogin(user);
+  }
 
   /* ---------- Connexion avec Google (clients) : Google Identity Services ---------- */
   const GoogleAuth = (() => {
@@ -4370,12 +4384,6 @@
       sc.onerror = () => { loading = null; reject(new Error('gsi')); };
       document.head.appendChild(sc);
     }));
-    /** Contenu du jeton d'identité (JWT) renvoyé par Google. */
-    function decode(credential) {
-      const part = credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      const bytes = Uint8Array.from(atob(part + '='.repeat((4 - (part.length % 4)) % 4)), (c) => c.charCodeAt(0));
-      return JSON.parse(new TextDecoder().decode(bytes));
-    }
     async function mount() {
       if (!enabled()) return;
       document.querySelectorAll('[data-google]').forEach((el) => { el.hidden = false; });
@@ -4398,41 +4406,32 @@
         });
       });
     }
-    return { enabled, mount, decode };
+    return { enabled, mount };
   })();
 
   /**
-   * Réponse de Google : création du compte client ou connexion.
-   * Version sans serveur : le jeton est contrôlé (destinataire, émetteur, expiration, e-mail vérifié) mais sa signature
-   * ne peut être vérifiée que côté serveur — ce que fera Supabase Auth (signInWithIdToken) dans la version en ligne.
+   * Réponse de Google : Supabase vérifie le jeton (signature, destinataire, expiration) puis crée le compte
+   * client ou ouvre la session. Un compte restaurateur ne peut pas se connecter avec Google.
    */
-  function onGoogleCredential(response) {
+  async function onGoogleCredential(response) {
     const errBox = currentStep === 'login' ? $('err-login') : $('err-signup');
     errBox.textContent = '';
-    let p;
-    try { p = GoogleAuth.decode(response.credential); } catch (e) { p = null; }
-    const valid = p && p.aud === CONFIG.googleClientId && ['accounts.google.com', 'https://accounts.google.com'].includes(p.iss)
-      && p.exp * 1000 > Date.now() && p.sub && p.email && p.email_verified !== false;
-    if (!valid) { errBox.textContent = 'La connexion avec Google a échoué. Réessayez.'; return; }
-    const email = p.email.toLowerCase();
-    const now = new Date().toISOString();
-    let account = accounts()[email];
-    if (account && (account.role || 'client') === 'pro') {
+    authStorage.setRemember($(currentStep === 'login' ? 'li-remember' : 'su-remember').checked);
+    const { data, error } = await Loader.run(sb.auth.signInWithIdToken({ provider: 'google', token: response.credential }), 'Connexion avec Google…');
+    if (error || !data.user) { errBox.textContent = 'La connexion avec Google a échoué. Réessayez.'; return; }
+    let user;
+    try { user = await loadUser(data.user); } catch (e) { errBox.textContent = cloudError(e); return; }
+    if (user.role === 'pro') {
+      await sb.auth.signOut().catch(() => {});
+      cloud.user = null;
       errBox.textContent = 'Cette adresse est celle d\'un compte restaurateur : choisissez « Restaurateur » et connectez-vous avec votre mot de passe.';
       return;
     }
-    if (account && account.googleSub && account.googleSub !== p.sub) { errBox.textContent = 'Ce compte est associé à un autre compte Google.'; return; }
-    const fresh = !account;
-    if (fresh) {
-      account = { role: 'client', name: String(p.given_name || p.name || email.split('@')[0]).trim().slice(0, 40), email, provider: 'google', googleSub: p.sub, emailVerifiedAt: now, createdAt: now };
-      store.write({ accounts: { ...accounts(), [email]: account } });
-    } else {
-      account = updateAccount(email, { googleSub: p.sub, emailVerifiedAt: account.emailVerifiedAt || now, lastLoginAt: now });
-    }
     setAuthRole('client');
-    startSession(account, $(currentStep === 'login' ? 'li-remember' : 'su-remember').checked);
-    if (fresh) showAuthStep('location');
-    else routeAfterLogin(account);
+    applySession(user);
+    // Première connexion sur cet appareil : proposer la localisation ; sinon, directement la carte
+    if (!store.read().geoConsent) showAuthStep('location');
+    else routeAfterLogin(user);
   }
 
   /** Après connexion : inscription restaurateur à reprendre, sinon la carte. */
@@ -4443,30 +4442,54 @@
     else finishAuth({ fresh: false });
   }
 
-  /** Supprime un compte et tout ce qui lui appartient (restaurant, photos, justificatifs). */
-  async function deleteAccountData(email) {
-    const account = accounts()[email];
-    const all = accounts(); delete all[email];
-    const restos = restaurants();
-    const owned = Object.values(restos).filter((r) => r.ownerEmail === email);
-    owned.forEach((r) => { delete restos[r.id]; removeShopMarker(r.id); });
-    store.write({ accounts: all, restaurants: restos, rememberedEmail: null });
-    const fileIds = owned.flatMap((r) => (r.photoIds || []).concat((r.stories || []).map((st) => st.fileId))).concat(Object.values((account && account.pro && account.pro.docs) || {}).map((d) => d.fileId));
-    try { await fileStore.remove(fileIds); } catch (e) { /* stockage indisponible */ }
+  /** Supprime définitivement le compte connecté et tout ce qui lui appartient (fonction serveur « delete-account »). */
+  async function deleteMyAccount() {
+    const { error } = await sb.functions.invoke('delete-account', { body: {} });
+    if (error) throw error;
+    await sb.auth.signOut().catch(() => {});
   }
 
+  /* ---------- Mot de passe oublié : code par e-mail, puis nouveau mot de passe ---------- */
+  let resetEmail = null, resetByLink = false;
+  function showReset(email, { byLink = false } = {}) {
+    resetEmail = email; resetByLink = byLink;
+    $('rs-email').textContent = email || '';
+    $('rs-lead').hidden = byLink;
+    $('field-rs-code').hidden = byLink;
+    $('rs-code').value = ''; $('rs-password').value = '';
+    ['rs-code', 'rs-password'].forEach((f) => setFieldError(f, ''));
+    $('err-reset').textContent = '';
+    showAuthStep('reset-password');
+  }
   $('forgot-btn').addEventListener('click', async () => {
     const email = $('li-email').value.trim().toLowerCase();
-    const account = accounts()[email];
-    if (!account) { $('err-login').textContent = 'Saisissez l\'e-mail du compte concerné.'; $('li-email').focus(); return; }
-    if (!account.hash) { $('err-login').textContent = 'Ce compte utilise Google : aucun mot de passe à retrouver, touchez « Se connecter avec Google ».'; return; }
-    // Sans serveur, aucun e-mail de réinitialisation ne peut être envoyé : on propose de recréer le compte
-    if (!window.confirm('Les comptes sont enregistrés uniquement sur cet appareil : le mot de passe ne peut pas être renvoyé.\n\nSupprimer le compte ' + email + ' pour en créer un nouveau ?' + (account.role === 'pro' ? '\n\nLa fiche de votre restaurant sera également supprimée.' : ''))) return;
-    await deleteAccountData(email);
-    $('su-email').value = email;
-    $('su-name').value = account.name;
-    setAuthRole(account.role || 'client');
-    showAuthStep('signup');
+    if (!EMAIL_RE.test(email)) { setFieldError('li-email', 'Saisissez d\'abord l\'adresse e-mail de votre compte.'); $('li-email').focus(); return; }
+    const { error } = await Loader.run(sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname }), 'Envoi du code…');
+    if (error) { $('err-login').textContent = cloudError(error); return; }
+    showReset(email);
+  });
+  $('rs-code').addEventListener('input', () => { const d = onlyDigits($('rs-code').value).slice(0, 6); if (d !== $('rs-code').value) $('rs-code').value = d; });
+  $('ob-reset').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const code = onlyDigits($('rs-code').value);
+    const password = $('rs-password').value;
+    let bad = false;
+    if (!resetByLink && code.length !== 6) { setFieldError('rs-code', 'Saisissez les 6 chiffres reçus par e-mail.'); bad = true; }
+    const missing = missingPasswordRules(password);
+    if (missing.length) { setFieldError('rs-password', 'Mot de passe trop faible : il manque ' + listFr(missing.map((r) => r.label)) + '.'); bad = true; }
+    if (bad) return;
+    if (!resetByLink) {
+      const { error } = await Loader.run(sb.auth.verifyOtp({ email: resetEmail, token: code, type: 'recovery' }), 'Vérification du code…');
+      if (error) { setFieldError('rs-code', 'Code incorrect ou expiré. Demandez un nouveau code depuis l\'écran de connexion.'); return; }
+    }
+    const { data, error } = await Loader.run(sb.auth.updateUser({ password }), 'Enregistrement du mot de passe…');
+    if (error) { $('err-reset').textContent = error.code === 'same_password' ? 'Choisissez un mot de passe différent de l\'ancien.' : cloudError(error); return; }
+    $('rs-password').value = '';
+    toast('Mot de passe modifié.');
+    const user = await Loader.run(loadUser(data.user), 'Ouverture de votre compte…');
+    setAuthRole(user.role);
+    applySession(user);
+    routeAfterLogin(user);
   });
 
   $('ob-allow').addEventListener('click', async () => {
@@ -4503,8 +4526,8 @@
   /** Restaurateur : « Terminer plus tard » → déconnexion, reprise à la prochaine connexion. */
   document.querySelectorAll('[data-pro-later]').forEach((btn) => btn.addEventListener('click', async () => {
     await discardDraftPhotos();
-    session.set(null);
-    store.write({ rememberedEmail: null, lastRole: 'pro' });
+    store.write({ lastRole: 'pro' });
+    await sb.auth.signOut().catch(() => {});
     location.reload();
   }));
   document.querySelectorAll('[data-pro-back]').forEach((btn) => btn.addEventListener('click', () => showAuthStep(btn.dataset.proBack)));
@@ -4533,7 +4556,6 @@
 
   // Brouillon en cours (non encore enregistré dans le compte)
   const proDraft = { company: null, photos: [], addedPhotos: [], removedPhotos: [], address: null, category: null };
-  const photoUrls = new Map();   // id de photo → URL d'aperçu
 
   /* ---------- Étape 2 : vérification SIRET + justificatifs ---------- */
 
@@ -4575,27 +4597,42 @@
     });
   }
 
+  const DOC_MIME = { pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png' };
   async function onDocSelected(type, file, row) {
     if (!file) return;
-    const okType = /^(application\/pdf|image\/jpeg|image\/png)$/.test(file.type) || /\.(pdf|jpe?g|png)$/i.test(file.name);
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    const mime = /^(application\/pdf|image\/jpeg|image\/png)$/.test(file.type) ? file.type : DOC_MIME[ext];
     $('err-pro-verify').textContent = '';
-    if (!okType) { $('err-pro-verify').textContent = '« ' + file.name + ' » : format non accepté (PDF, JPG ou PNG).'; return; }
+    if (!mime) { $('err-pro-verify').textContent = '« ' + file.name + ' » : format non accepté (PDF, JPG ou PNG).'; return; }
     if (file.size > MAX_DOC_SIZE) { $('err-pro-verify').textContent = '« ' + file.name + ' » dépasse 10 Mo.'; return; }
-    const fileId = 'doc-' + uid();
-    try {
-      await fileStore.put(fileId, file);
-    } catch (e) {
-      $('err-pro-verify').textContent = 'Impossible d\'enregistrer ce fichier sur cet appareil (espace de stockage insuffisant ?).';
-      return;
+    const pro = currentUser().pro || {};
+    if (!pro.merchantId) { $('err-pro-verify').textContent = 'Faites d\'abord vérifier votre numéro SIRET (bouton « Vérifier »), puis ajoutez vos justificatifs.'; return; }
+    const path = docPath(pro.merchantId, type.key, file.name);
+    row.classList.add('is-busy');
+    const { error } = await Loader.run(sb.storage.from('documents').upload(path, file, { contentType: mime }), 'Envoi du justificatif…');
+    row.classList.remove('is-busy');
+    if (error) { $('err-pro-verify').textContent = '« ' + file.name + ' » n\'a pas pu être envoyé. ' + cloudError(error); return; }
+    const previous = (pro.docs || {})[type.key];
+    pro.docs = { ...(pro.docs || {}), [type.key]: { name: file.name, size: file.size, path } };
+    if (previous) removeFiles('documents', [previous.path]);
+    renderDocs(pro.docs);
+  }
+
+  /** Vérification du SIRET par le serveur (fonction verify-siret : répertoire Sirene, fiche créée en brouillon). */
+  async function verifySiretOnServer(siret) {
+    const { data, error } = await sb.functions.invoke('verify-siret', { body: { siret } });
+    if (!error) {
+      const c = data.company || {};
+      return { ok: true, merchantId: data.merchant_id, company: {
+        siret: c.siret, test: !!data.test, legalName: c.legalName || '', tradeName: c.tradeName || '', address: c.address || '',
+        coords: c.lat != null ? [c.lng, c.lat] : null, naf: c.naf || '', nafLabel: c.nafLabel || NAF_RESTAURATION[c.naf] || '',
+      } };
     }
-    // Relecture APRÈS l'enregistrement : un autre justificatif a pu être ajouté entre-temps
-    const me = currentUser();
-    const docs = { ...((me.pro && me.pro.docs) || {}) };
-    const previous = docs[type.key];
-    docs[type.key] = { fileId, name: file.name, size: file.size, type: file.type, addedAt: new Date().toISOString() };
-    updatePro(me.email, { docs });
-    if (previous) fileStore.remove(previous.fileId).catch(() => {});
-    renderDocs(docs);
+    let body = null;
+    try { body = await error.context.json(); } catch (e) { /* réseau */ }
+    const codes = { not_found: 'notfound', closed: 'closed', naf: 'naf', sirene_unavailable: 'network', siret_taken: 'taken', siret_locked: 'locked', test_disabled: 'testoff', unauthenticated: 'session', invalid_siret: 'invalid' };
+    const code = (body && codes[body.error]) || 'network';
+    return { ok: false, code: code === 'network' && body && /sollicité/.test(body.message || '') ? 'rate' : code, message: body && body.message };
   }
 
   // Saisie du SIRET : groupes de chiffres « 123 456 789 00012 » ; toute modification annule la vérification
@@ -4622,25 +4659,28 @@
     $('pv-result').hidden = true;
     if (siret.length !== 14) { setFieldError('pv-siret', 'Le numéro SIRET comporte 14 chiffres (9 chiffres du SIREN + 5 chiffres).'); return; }
     if (!isValidSiret(siret)) { setFieldError('pv-siret', 'Ce numéro SIRET n\'est pas valide (clé de contrôle incorrecte). Recopiez-le depuis votre Kbis.'); return; }
-    const taken = !isTestSiret(siret) && Object.values(accounts()).some((a) => a.email !== me.email && a.pro && a.pro.siret === siret && a.pro.verifiedAt);
-    if (taken) { setFieldError('pv-siret', 'Ce SIRET est déjà associé à un autre compte restaurateur.'); return; }
-
     const btn = $('pv-check');
     btn.disabled = true;
     btn.textContent = 'Vérification…';
     showVerifyResult({ pending: true });
-    const result = await lookupSiret(siret);   // attente affichée dans l'encadré (petite orbite)
+    const result = await verifySiretOnServer(siret);   // attente affichée dans l'encadré (petite orbite)
     btn.disabled = false;
     btn.textContent = 'Vérifier';
     // L'utilisateur a pu modifier le numéro pendant la vérification
     if (onlyDigits($('pv-siret').value) !== siret) { $('pv-result').hidden = true; return; }
-    showVerifyResult(result);
+    // Numéro refusé pour une raison qui ne dépend pas du répertoire : message sous le champ
+    if (!result.ok && ['taken', 'locked', 'invalid'].includes(result.code)) {
+      $('pv-result').hidden = true;
+      setFieldError('pv-siret', result.message || 'Ce numéro SIRET ne peut pas être utilisé.');
+      return;
+    }
     if (result.ok) {
       proDraft.company = result.company;
-      updatePro(me.email, { siret, company: result.company, verifiedAt: new Date().toISOString() });
-    } else {
-      updatePro(me.email, { siret, company: null, verifiedAt: null });
+      // Fiche créée (brouillon) : chargée avant d'afficher « vérifié », pour que les justificatifs puissent être déposés aussitôt
+      me.pro = await loadPro(me);
+      if (onlyDigits($('pv-siret').value) !== siret) { $('pv-result').hidden = true; return; }
     }
+    showVerifyResult(result);
   }
 
   /** Encadré du résultat de la vérification Sirene. */
@@ -4660,7 +4700,13 @@
       naf: ['Activité non éligible', 'L\'activité déclarée ne relève pas de la restauration. Activités acceptées : ' + Object.values(NAF_RESTAURATION).join(', ').toLowerCase() + '. Si votre activité a changé, mettez à jour votre déclaration auprès de l\'INSEE.'],
       rate: ['Trop de vérifications', 'Trop de vérifications en peu de temps. Patientez quelques secondes puis réessayez.'],
       network: ['Vérification momentanément indisponible', 'Le répertoire Sirene n\'a pas pu être joint. Vérifiez votre connexion internet puis cliquez à nouveau sur « Vérifier ».'],
+      taken: ['SIRET déjà utilisé', 'Ce SIRET est déjà associé à un autre compte restaurateur. Si c\'est une erreur, contactez-nous : flashmiampro@gmail.com.'],
+      locked: ['SIRET non modifiable', 'Votre fiche est en ligne : le SIRET ne peut plus être changé. Contactez-nous : flashmiampro@gmail.com.'],
+      testoff: ['SIRET de test désactivé', 'Le SIRET de test n\'est plus accepté : utilisez le SIRET de votre établissement.'],
+      session: ['Session expirée', 'Reconnectez-vous, puis relancez la vérification.'],
+      invalid: ['SIRET invalide', 'Ce numéro SIRET n\'est pas valide. Recopiez-le depuis votre Kbis.'],
     };
+    if (!result.ok && !messages[result.code]) messages[result.code] = ['Vérification impossible', result.message || 'Réessayez dans un instant.'];
     h.textContent = result.ok ? '✓ Établissement vérifié' : '✕ ' + messages[result.code][0];
     if (c) {
       const dl = document.createElement('dl');
@@ -4670,15 +4716,16 @@
       row('SIRET', formatSiret(c.siret));
       row('Adresse', c.address);
       row('Activité', c.naf + (c.nafLabel ? ' — ' + c.nafLabel : ''));
-      row('État', result.code === 'closed' ? 'Fermé' : 'En activité');
+      if (!c.test) row('État', result.code === 'closed' ? 'Fermé' : 'En activité');
       card.appendChild(dl);
     }
+    if (!result.ok && result.code === 'naf' && result.message) p(result.message);
     if (result.ok && c && c.test) p('SIRET de test : établissement fictif, aucune vérification réelle n\'a été faite.');
     else if (result.ok) p('Source : répertoire Sirene de l\'INSEE (API Recherche d\'entreprises).');
     else p(messages[result.code][1]);
   }
 
-  $('form-pro-verify').addEventListener('submit', (ev) => {
+  $('form-pro-verify').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const me = currentUser();
     const pro = me.pro || {};
@@ -4695,10 +4742,12 @@
     if (!$('pv-honor').checked) errors.push('Cochez l\'attestation sur l\'honneur.');
     if (errors.length) { $('err-pro-verify').textContent = errors.join(' '); return; }
 
-    const paid = pro.payment && pro.payment.status === 'paid';
-    const status = pro.status === 'published' ? 'published' : paid ? 'listing' : 'payment';
-    updatePro(me.email, { status, honorAt: pro.honorAt || new Date().toISOString() });
-    showAuthStep(paid ? 'pro-listing' : 'pro-payment');
+    if (!pro.honorAt) {
+      const { error } = await Loader.run(sb.from('merchants').update({ honor_at: new Date().toISOString() }).eq('id', pro.merchantId), 'Enregistrement…');
+      if (error) { $('err-pro-verify').textContent = cloudError(error); return; }
+    }
+    me.pro = await Loader.run(loadPro(me), 'Enregistrement…');
+    showAuthStep(me.pro.payment ? 'pro-listing' : 'pro-payment');
   });
 
   /* ---------- Étape 3 : paiement de l'abonnement ---------- */
@@ -4729,12 +4778,15 @@
     location.href = url.toString();
   });
 
-  function markPaid(email, info) {
-    const pro = accounts()[email].pro || {};
-    updatePro(email, {
-      status: pro.status === 'published' ? 'published' : 'listing',
-      payment: { status: 'paid', paidAt: new Date().toISOString(), amount: CONFIG.proPlan.amount, period: CONFIG.proPlan.period, ...info },
-    });
+  /** Abonnement de démonstration (enregistré dans la base) ; le paiement Stripe passera par le serveur. */
+  async function markPaid(email, info) {
+    const me = currentUser();
+    const pro = me.pro || {};
+    if (!pro.payment) {
+      const { error } = await Loader.run(sb.from('merchant_subscriptions').insert({ merchant_id: pro.merchantId }), 'Activation de l\'abonnement…');
+      if (error) { $('err-pro-payment').textContent = cloudError(error); return; }
+    }
+    me.pro = await loadPro(me);
     showAuthStep('pro-listing');
     toast(info.mode === 'demo' ? 'Abonnement activé (démonstration).' : 'Paiement confirmé, merci !');
   }
@@ -4771,7 +4823,7 @@
   }
   $('pl-desc').addEventListener('input', () => { $('pl-desc-count').textContent = $('pl-desc').value.length + ' / 600'; });
 
-  const myRestaurant = (account = currentUser()) => (account && account.pro && account.pro.restaurantId ? restaurants()[account.pro.restaurantId] || null : null);
+  const myRestaurant = (account = currentUser()) => (account && account.pro && account.pro.merchantId ? restaurants()[account.pro.merchantId] || null : null);
 
   /** Préremplit le formulaire : fiche existante, sinon données Sirene. */
   function enterListingStep(mode) {
@@ -4779,24 +4831,24 @@
     const pro = me.pro || {};
     const company = pro.company || {};
     const r = myRestaurant(me);
+    const listed = r && r.status !== 'draft';        // fiche déjà publiée : formulaire prérempli
     proDraft.addedPhotos = []; proDraft.removedPhotos = [];
-    proDraft.photos = r ? [...(r.photoIds || [])] : [];
-    proDraft.address = r ? { label: r.address, coords: r.coords } : null;
-    $('pl-name').value = r ? r.name : (company.tradeName || company.legalName || '').replace(/\s+\(.*\)$/, '');
-    setListingCategory(r ? r.category : null);
+    proDraft.photos = r ? [...(r.photos || [])] : [];
+    proDraft.address = listed ? { label: r.address, coords: r.coords } : null;
+    $('pl-name').value = listed ? r.name : (company.tradeName || company.legalName || '').replace(/\s+\(.*\)$/, '');
+    setListingCategory(listed ? r.category : null);
     $('pl-desc').value = r ? r.description : '';
     $('pl-desc-count').textContent = $('pl-desc').value.length + ' / 600';
-    $('pl-address').value = r ? r.address : '';
-    $('pl-address-status').textContent = r ? '📍 Adresse localisée sur la carte' : '';
-    $('pl-use-sirene').hidden = !company.address || !!r;
-    const [s1, s2] = r ? r.hours : [['11:30', '14:30'], ['18:30', '22:30']];
+    $('pl-address').value = listed ? r.address : '';
+    $('pl-address-status').textContent = listed ? '📍 Adresse localisée sur la carte' : '';
+    $('pl-use-sirene').hidden = !company.address || !!listed;
+    const [s1, s2] = listed && r.hours.length ? r.hours : [['11:30', '14:30'], ['18:30', '22:30']];
     $('pl-h1-on').checked = !!s1; if (s1) { $('pl-h1-from').value = s1[0]; $('pl-h1-to').value = s1[1]; }
     $('pl-h2-on').checked = !!s2; if (s2) { $('pl-h2-from').value = s2[0]; $('pl-h2-to').value = s2[1]; }
     syncHoursInputs();
-    const closed = r ? r.closedOn : [];
+    const closed = listed ? r.closedOn : [];
     $('pl-closed').querySelectorAll('input').forEach((i) => { i.checked = closed.includes(Number(i.value)); });
-    $('pl-promo').value = r ? r.promo || '' : '';
-    $('pl-phone').value = r ? r.phone || '' : (me.phone || '');
+    $('pl-phone').value = listed ? r.phone || '' : (me.phone || '');
     $('pl-menu').textContent = '';
     ((r && r.menu) || []).forEach((it) => addMenuRow(it));
     if (!$('pl-menu').childElementCount) addMenuRow();
@@ -4902,30 +4954,20 @@
       (sections.length ? ' · ' + sections.slice(0, 3).join(', ') + (sections.length > 3 ? '…' : '') : '');
   }
 
-  /* Photos : redimensionnées puis stockées sur l'appareil */
-  let photoRender = 0;
-  async function renderPhotos() {
-    const token = ++photoRender;
+  /* Photos : recadrées en 16:9 puis envoyées dans le stockage « photos » (adresse publique) */
+  function renderPhotos() {
     const ids = [...proDraft.photos];
-    // 1) Préparer les aperçus (lecture asynchrone)…
-    for (const id of ids) {
-      if (photoUrls.has(id)) continue;
-      const blob = await fileStore.get(id).catch(() => null);
-      if (blob) photoUrls.set(id, URL.createObjectURL(blob));
-    }
-    if (token !== photoRender) return;      // un affichage plus récent a été demandé
-    // 2) … puis mettre à jour la grille en une fois
     const grid = $('pl-photos');
     const add = $('pl-photo-add');
     grid.querySelectorAll('.photo-item').forEach((el) => el.remove());
-    ids.filter((id) => photoUrls.has(id)).forEach((id, i) => {
+    ids.forEach((url, i) => {
       const item = document.createElement('div');
       item.className = 'photo-item';
       item.innerHTML = '<img alt="" /><button class="photo-del" type="button">×</button>';
-      item.querySelector('img').src = photoUrls.get(id);
+      item.querySelector('img').src = url;
       item.querySelector('img').alt = 'Photo ' + (i + 1);
       item.querySelector('.photo-del').setAttribute('aria-label', 'Retirer la photo ' + (i + 1));
-      item.querySelector('.photo-del').addEventListener('click', () => removePhoto(id));
+      item.querySelector('.photo-del').addEventListener('click', () => removePhoto(url));
       if (i === 0) { const tag = document.createElement('span'); tag.className = 'photo-main'; tag.textContent = 'Principale'; item.appendChild(tag); }
       grid.insertBefore(item, add);
     });
@@ -4960,10 +5002,12 @@
           : await cropPhoto(bitmap, { index: i + 1, total: batch.length });
         if (!crop) continue;               // photo ignorée
         const blob = await exportCrop(bitmap, crop);
-        const id = 'photo-' + uid();
-        await fileStore.put(id, blob);
-        proDraft.photos.push(id);
-        proDraft.addedPhotos.push(id);
+        const path = currentUser().pro.merchantId + '/' + uid() + '.jpg';
+        const up = await sb.storage.from('photos').upload(path, blob, { contentType: 'image/jpeg' });
+        if (up.error) { setFieldError('pl-photos', '« ' + file.name + ' » n\'a pas pu être envoyée. ' + cloudError(up.error)); continue; }
+        const url = publicUrl('photos', path);
+        proDraft.photos.push(url);
+        proDraft.addedPhotos.push(url);
         renderPhotos();
       } catch (e) {
         setFieldError('pl-photos', '« ' + file.name + ' » : format d\'image non pris en charge (utilisez JPG ou PNG).');
@@ -5129,25 +5173,24 @@
     });
   })();
 
-  function removePhoto(id) {
+  /** Photo retirée : supprimée tout de suite si elle vient d'être ajoutée, sinon à l'enregistrement de la fiche. */
+  function removePhoto(url) {
     setFieldError('pl-photos', '');
-    proDraft.photos = proDraft.photos.filter((p) => p !== id);
-    if (proDraft.addedPhotos.includes(id)) {
-      proDraft.addedPhotos = proDraft.addedPhotos.filter((p) => p !== id);
-      fileStore.remove(id).catch(() => {});
+    proDraft.photos = proDraft.photos.filter((p) => p !== url);
+    if (proDraft.addedPhotos.includes(url)) {
+      proDraft.addedPhotos = proDraft.addedPhotos.filter((p) => p !== url);
+      removeFiles('photos', [url]);
     } else {
-      proDraft.removedPhotos.push(id);
+      proDraft.removedPhotos.push(url);
     }
-    const url = photoUrls.get(id);
-    if (url) { URL.revokeObjectURL(url); photoUrls.delete(id); }
     renderPhotos();
   }
 
-  /** Abandon de la saisie : les photos ajoutées mais non publiées sont supprimées. */
+  /** Abandon de la saisie : les photos ajoutées mais non enregistrées sont supprimées. */
   async function discardDraftPhotos() {
-    const ids = proDraft.addedPhotos;
+    const urls = proDraft.addedPhotos;
     proDraft.addedPhotos = [];
-    await fileStore.remove(ids).catch(() => {});
+    if (urls.length) await removeFiles('photos', urls);
   }
 
   /* Adresse : suggestions de la Base Adresse Nationale (Géoplateforme IGN) */
@@ -5270,22 +5313,24 @@
       return;
     }
 
-    const old = myRestaurant(me);
-    const now = new Date().toISOString();
-    const restaurant = {
-      id: old ? old.id : 'resto-' + (isTestSiret(pro.siret) ? 'test-' + uid() : pro.siret),
-      ownerEmail: me.email, siret: pro.siret,
-      name, category: proDraft.category, description,
-      photoIds: [...proDraft.photos],
-      menu: menu.items,
-      address: proDraft.address.label, coords: proDraft.address.coords,
-      hours, closedOn, promo: $('pl-promo').value.trim(), phone: phone ? formatPhone(phone) : '',
-      published: true, publishedAt: old ? old.publishedAt : now, updatedAt: now,
+    const update = {
+      name, category: CAT_TO_DB[proDraft.category], description, photos_urls: [...proDraft.photos], menu_json: menu.items,
+      address: proDraft.address.label, lng: proDraft.address.coords[0], lat: proDraft.address.coords[1],
+      opening_hours: { services: hours, closed_on: closedOn }, phone: phone ? formatPhone(phone) : null, status: 'published',
     };
-    store.write({ restaurants: { ...restaurants(), [restaurant.id]: restaurant } });
-    await fileStore.remove(proDraft.removedPhotos).catch(() => {});
+    const submitBtn = ev.submitter || $('form-pro-listing').querySelector('[type=submit]');
+    submitBtn.disabled = true;
+    const { error } = await Loader.run(sb.from('merchants').update(update).eq('id', pro.merchantId), mode === 'edit' ? 'Enregistrement de votre fiche…' : 'Publication de votre fiche…');
+    submitBtn.disabled = false;
+    if (error) {
+      // Les messages de la base sont en français (fiche incomplète, SIRET non vérifié, abonnement…)
+      $('err-pro-listing').textContent = /[éèà]/.test(error.message || '') ? error.message : cloudError(error);
+      return;
+    }
+    await removeFiles('photos', proDraft.removedPhotos);
     proDraft.removedPhotos = []; proDraft.addedPhotos = [];
-    updatePro(me.email, { status: 'published', restaurantId: restaurant.id });
+    await Loader.run(refreshCloud(), 'Mise à jour de la carte…');
+    const restaurant = restaurants()[pro.merchantId];
 
     if (mode === 'edit') {
       hideOnboarding();
@@ -5324,9 +5369,9 @@
     const pro = account.pro || {};
     const r = myRestaurant(account);
     const date = (iso) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-    $('pd-name').textContent = r ? r.name : '—';
-    $('pd-status').textContent = r && r.published ? 'En ligne sur la carte' : 'Inscription à terminer';
-    $('pd-siret').textContent = pro.siret ? formatSiret(pro.siret) + (isTestSiret(pro.siret) ? ' (test)' : '') : '—';
+    $('pd-name').textContent = r && r.status !== 'draft' ? r.name : '—';
+    $('pd-status').textContent = pro.suspended ? 'Suspendue par la modération' : r && r.published ? 'En ligne sur la carte' : 'Inscription à terminer';
+    $('pd-siret').textContent = pro.siret ? formatSiret(pro.siret) + (pro.company && pro.company.test ? ' (test)' : '') : '—';
     $('pd-plan').textContent = pro.payment && pro.payment.status === 'paid'
       ? 'Actif depuis le ' + date(pro.payment.paidAt) + (pro.payment.mode === 'demo' ? ' (démonstration)' : '')
       : 'Non souscrit';
@@ -5342,7 +5387,7 @@
     $('profile-avatar').textContent = initial(account.name);
     $('profile-name').textContent = account.role === 'pro' && account.lastName ? account.name + ' ' + account.lastName : account.name;
     $('profile-email').textContent = account.email + (account.emailVerifiedAt ? ' ✓' : '');
-    if (account.googleSub) { const tag = document.createElement('span'); tag.className = 'role-tag'; tag.textContent = 'Google'; $('profile-email').append(' ', tag); }
+    if (account.google) { const tag = document.createElement('span'); tag.className = 'role-tag'; tag.textContent = 'Google'; $('profile-email').append(' ', tag); }
     if (account.role === 'pro') { const tag = document.createElement('span'); tag.className = 'role-tag'; tag.textContent = 'Restaurateur'; $('profile-email').append(' ', tag); }
     $('profile-since').textContent = new Date(account.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
     updateProfileGeo();
@@ -5365,16 +5410,15 @@
     closePanel($('profile-sheet'));
     requestLocation({ fly: true, fromButton: true });
   });
-  $('profile-logout').addEventListener('click', () => {
-    session.set(null);
-    store.write({ rememberedEmail: null });
+  $('profile-logout').addEventListener('click', async () => {
+    await Loader.run(sb.auth.signOut().catch(() => {}), 'Déconnexion…');
     location.reload();   // retour à l'écran de connexion
   });
   $('profile-delete').addEventListener('click', async () => {
     const account = currentUser();
-    if (!account || !window.confirm('Supprimer définitivement votre compte de cet appareil ?' + (account.role === 'pro' ? '\n\nLa fiche de votre restaurant sera retirée de la carte.' : ''))) return;
-    await deleteAccountData(account.email);
-    session.set(null);
+    if (!account || !window.confirm('Supprimer définitivement votre compte ?' + (account.role === 'pro' ? '\n\nLa fiche de votre restaurant, ses photos, stories, promotions et statistiques seront supprimées.' : ''))) return;
+    try { await Loader.run(deleteMyAccount(), 'Suppression de votre compte…'); }
+    catch (e) { toast('La suppression a échoué. ' + cloudError(e)); return; }
     store.write({ lastEmail: null });
     location.reload();
   });
@@ -5382,21 +5426,6 @@
   /* =====================================================================
      11. LANCEMENT DE LA CARTE APRÈS CONNEXION
      ===================================================================== */
-
-  /** Stories expirées : retirées des fiches et leurs photos supprimées de l'appareil. */
-  function pruneStories() {
-    const all = restaurants();
-    const expired = [];
-    let changed = false;
-    Object.values(all).forEach((r) => {
-      const live = liveStories(r);
-      if ((r.stories || []).length !== live.length) {
-        expired.push(...r.stories.filter((st) => !live.includes(st)).map((st) => st.fileId));
-        r.stories = live; changed = true;
-      }
-    });
-    if (changed) { store.write({ restaurants: all }); fileStore.remove(expired).catch(() => {}); }
-  }
 
   function startApp({ focus = null } = {}) {
     document.body.classList.add('ui-ready');
@@ -5422,51 +5451,48 @@
      restaurateur dont l'inscription n'est pas terminée → reprise à la bonne étape.
      ===================================================================== */
 
-  window.RocheStreetFood = { view: null, Geo, SHOPS, getStatus, setTheme, isValidSiret, restaurants };
+  window.RocheStreetFood = { view: null, Geo, SHOPS, getStatus, setTheme, isValidSiret, restaurants, cloud, sb };
 
   setTheme(currentTheme());
   applyLayout();
   setLocateState('idle');
-
-  const user = currentUser();
   const params = new URLSearchParams(location.search);
   if (params.has('paiement')) history.replaceState(null, '', location.pathname + location.hash);
 
-  if (user) {
-    session.set(user.email);
-    applyAccount(user);
-    setAuthRole(user.role || 'client');
-    // Retour de la page de paiement Stripe
-    // (en production, la confirmation doit venir d'un serveur via un webhook Stripe)
-    if (user.role === 'pro' && !user.emailVerifiedAt) {
-      // Restaurateur inscrit avant la vérification par code : on vérifie l'adresse avant d'aller plus loin
-      startEmailVerification({
-        email: user.email, name: user.name, purpose: 'existing', back: null,
-        onSuccess: () => routeAfterLogin(updateAccount(user.email, { emailVerifiedAt: new Date().toISOString() }), { boot: true }),
-      });
-    } else if (params.get('paiement') === 'ok' && !isDemoPayment() && user.pro && user.pro.status === 'payment') {
-      markPaid(user.email, { mode: 'stripe', reference: params.get('session_id') || '' });
-    } else {
-      routeAfterLogin(user, { boot: true });
-    }
-  } else if (Object.keys(accounts()).length > 0) {
-    setAuthRole(store.read().lastRole || 'client');
-    $('li-email').value = store.read().lastEmail || '';
-    showAuthStep('login');
+  if (!sb) {
+    fatal('Service momentanément indisponible', 'FlashMiam n\'a pas pu joindre son serveur. Vérifiez votre connexion internet, puis rechargez la page.');
   } else {
-    // Ancienne version (compte sans mot de passe) : on préremplit la création de compte
-    try {
-      const legacy = JSON.parse(localStorage.getItem(CONFIG.legacyStorageKey) || '{}').account;
-      if (legacy) { $('su-name').value = legacy.name || ''; $('su-email').value = legacy.email || ''; }
-    } catch (e) { /* ignore */ }
-    setAuthRole('client');
-    showAuthStep('signup');
+    // Fiches en ligne : chargées en parallèle de la carte, puis affichées dès que les deux sont prêtes
+    loadRestaurants().then(() => whenMapReady(syncShopMarkers), (e) => { console.warn(e); toast('Les restaurants n\'ont pas pu être chargés. ' + cloudError(e)); });
+    // Lien « mot de passe oublié » ouvert depuis l'e-mail : choisir un nouveau mot de passe
+    sb.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') setTimeout(() => showReset(session && session.user && session.user.email, { byLink: true }), 0);
+    });
+    (async () => {
+      let user = null;
+      try {
+        const { data } = await sb.auth.getSession();
+        if (data.session) user = await loadUser(data.session.user);
+      } catch (e) { await sb.auth.signOut().catch(() => {}); }
+      if (currentStep === 'reset-password') { /* lien de réinitialisation : déjà affiché */ }
+      else if (user) {
+        applySession(user);
+        setAuthRole(user.role);
+        routeAfterLogin(user, { boot: true });
+      } else if (store.read().lastEmail) {
+        setAuthRole(store.read().lastRole || 'client');
+        $('li-email').value = store.read().lastEmail || '';
+        showAuthStep('login');
+      } else {
+        setAuthRole('client');
+        showAuthStep('signup');
+      }
+      Loader.endBoot();
+    })();
+    subscribeLive();
   }
 
-  // Fin du démarrage : avant initMap, pour que l'écran de chargement ne puisse jamais rester bloqué
-  Loader.endBoot();
   initMap();
-  pruneStories();
   setInterval(() => { refreshStatuses(); if (!StoryViewer.isOpen()) renderStories(); }, 60 * 1000);
 
   /* =====================================================================

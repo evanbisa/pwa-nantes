@@ -38,8 +38,9 @@ export function isValidSiret(siret: string): boolean {
 /** Zone de service (identique à public.in_service_area) */
 export const inServiceArea = (lat: number, lng: number) => lat >= 46.6 && lat <= 46.74 && lng >= -1.56 && lng <= -1.3;
 
-export const sireneUrl = (siret: string) =>
-  `https://recherche-entreprises.api.gouv.fr/search?q=${siret}&limite_matching_etablissements=1`;
+/** Adresse de l'API Recherche d'entreprises (base remplaçable pour les tests : variable SIRENE_API_URL). */
+export const sireneUrl = (siret: string, base = "https://recherche-entreprises.api.gouv.fr/search") =>
+  `${base}?q=${siret}&limite_matching_etablissements=1`;
 
 export interface Company {
   siret: string;

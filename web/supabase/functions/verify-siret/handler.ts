@@ -13,10 +13,26 @@ export interface Deps {
   findSiretOwner(siret: string): Promise<{ merchantId: string; userId: string } | null>;
   getMyMerchant(userId: string): Promise<{ id: string; status: string; siret: string | null } | null>;
   fetchSirene(siret: string): Promise<{ ok: boolean; status: number; body: unknown }>;
-  createMerchant(row: { user_id: string; name: string; address: string | null; lat: number | null; lng: number | null }): Promise<string>;
+  createMerchant(row: { user_id: string; name: string; address: string | null; lat: number | null; lng: number | null; is_test?: boolean }): Promise<string>;
   /** Enregistre (ou remplace) la vérification. Doit lever une erreur { code: "23505" } si le SIRET est déjà pris. */
   saveVerification(merchantId: string, company: Company, snapshot: unknown): Promise<void>;
+  /** SIRET de test accepté (phase de test) ? Désactivable : variable ALLOW_TEST_SIRET=false. */
+  allowTestSiret?: boolean;
 }
+
+/** SIRET fictif pour essayer l'espace restaurateur (fiche marquée « de test »). */
+export const TEST_SIRET = "99999999900009";
+const TEST_SIREN = "999999999";
+/** SIRET de test propre à chaque fiche (le SIRET est unique en base) : 999 999 999 + NIC aléatoire, clé de Luhn valide. */
+function uniqueTestSiret(): string {
+  const base = TEST_SIREN + String(crypto.getRandomValues(new Uint32Array(1))[0] % 10000).padStart(4, "0");
+  for (let k = 0; k < 10; k++) if (isValidSiret(base + k)) return base + k;
+  return TEST_SIRET;
+}
+const TEST_COMPANY: Omit<Company, "siret"> = {
+  legalName: "ÉTABLISSEMENT DE TEST (fictif)", tradeName: "Restaurant de test", naf: "56.10C", nafLabel: "Restauration de type rapide",
+  address: "1 Place Napoléon 85000 La Roche-sur-Yon", lat: 46.6705, lng: -1.427,
+};
 
 /** Sites autorisés à appeler la fonction depuis un navigateur */
 const ALLOWED_ORIGINS = [
@@ -64,6 +80,27 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
   const siret = onlyDigits(payload?.siret);
   if (siret.length !== 14) return error(400, "invalid_siret", "Le SIRET comporte 14 chiffres.");
   if (!isValidSiret(siret)) return error(400, "invalid_siret", "Ce numéro de SIRET n'est pas valide (clé de contrôle).");
+
+  // SIRET de test : établissement fictif, sans appel au répertoire Sirene
+  if (siret === TEST_SIRET) {
+    if (deps.allowTestSiret === false) return error(403, "test_disabled", "Le SIRET de test n'est plus accepté.");
+    const mine = await deps.getMyMerchant(userId);
+    if (mine && mine.siret && !mine.siret.startsWith(TEST_SIREN) && mine.status !== "draft") {
+      return error(409, "siret_locked", "Votre fiche est en ligne : le SIRET ne peut plus être changé. Contactez-nous.");
+    }
+    const stored = mine?.siret?.startsWith(TEST_SIREN) ? mine.siret : uniqueTestSiret();
+    const company: Company = { siret: stored, ...TEST_COMPANY };
+    try {
+      const merchantId = mine?.id ?? (await deps.createMerchant({
+        user_id: userId, name: TEST_COMPANY.tradeName!, address: TEST_COMPANY.address, lat: TEST_COMPANY.lat, lng: TEST_COMPANY.lng, is_test: true,
+      }));
+      await deps.saveVerification(merchantId, company, { test: true });
+      return json(200, { verified: true, test: true, merchant_id: merchantId, company: { ...company, siret: TEST_SIRET } });
+    } catch (e) {
+      console.error("verify-siret: enregistrement impossible (test)", e);
+      return error(500, "server", "Enregistrement impossible pour le moment. Réessayez plus tard.");
+    }
+  }
 
   // 3. Pas déjà utilisé par un autre restaurateur ; pas de changement de SIRET sur une fiche en ligne
   const owner = await deps.findSiretOwner(siret);

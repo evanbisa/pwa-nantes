@@ -137,6 +137,35 @@ export type Database = {
           },
         ]
       }
+      merchant_subscriptions: {
+        Row: {
+          merchant_id: string
+          mode: string
+          started_at: string
+          status: string
+        }
+        Insert: {
+          merchant_id: string
+          mode?: string
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          merchant_id?: string
+          mode?: string
+          started_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_subscriptions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_visitors: {
         Row: {
           day: string
@@ -176,8 +205,10 @@ export type Database = {
           category: Database["public"]["Enums"]["merchant_category"]
           created_at: string
           description: string
+          honor_at: string | null
           id: string
           is_open: boolean
+          is_test: boolean
           lat: number | null
           lng: number | null
           menu_json: Json
@@ -195,8 +226,10 @@ export type Database = {
           category?: Database["public"]["Enums"]["merchant_category"]
           created_at?: string
           description?: string
+          honor_at?: string | null
           id?: string
           is_open?: boolean
+          is_test?: boolean
           lat?: number | null
           lng?: number | null
           menu_json?: Json
@@ -214,8 +247,10 @@ export type Database = {
           category?: Database["public"]["Enums"]["merchant_category"]
           created_at?: string
           description?: string
+          honor_at?: string | null
           id?: string
           is_open?: boolean
+          is_test?: boolean
           lat?: number | null
           lng?: number | null
           menu_json?: Json
@@ -363,8 +398,10 @@ export type Database = {
           category: Database["public"]["Enums"]["merchant_category"]
           created_at: string
           description: string
+          honor_at: string | null
           id: string
           is_open: boolean
+          is_test: boolean
           lat: number | null
           lng: number | null
           menu_json: Json

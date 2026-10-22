@@ -11,10 +11,10 @@ Zone couverte : La Roche-sur-Yon et sa couronne.
 | Action | Contenu | État |
 | --- | --- | --- |
 | 1 | Script SQL sécurisé (`profiles`, `merchants`, RLS) + connexion du projet | ✅ appliqué sur le projet Supabase `fnypgfyxbyaqrnklhjxc` (0 alerte de sécurité) |
-| 2 | Supabase Auth : inscription / connexion (remplace le code local et EmailJS) | à faire |
+| 2 | Site relié à Supabase : comptes (code e-mail, Google), fiches, photos, justificatifs, abonnés, statistiques, stories, promotions | ✅ sur le site complet (`../index.html`) ; l'inscription par e-mail attend le SMTP et les modèles d'e-mail (voir 3) |
 | 3 | Carte : vrais commerces en temps réel, tuiles OpenStreetMap | à faire |
 | 4 | Stories (24 h) et promotions des restaurateurs : tables `stories`, `promotions`, stockage `stories` | ✅ appliqué sur Supabase (99 scénarios de sécurité, 0 alerte) |
-| 5 | Connexion « Continuer avec Google » (clients) | ✅ sur le prototype (identifiant Google à fournir) ; Supabase : fournisseur Google à activer |
+| 5 | Connexion « Continuer avec Google » (clients) | ✅ en ligne (vérifiée par Supabase Auth) |
 
 ## Connecter le projet à Supabase (≈ 15 min)
 
@@ -37,6 +37,8 @@ Zone couverte : La Roche-sur-Yon et sa couronne.
   n'envoie les e-mails de confirmation qu'aux membres de l'équipe du projet, avec une limite très basse.
   Option à 0 € : **Gmail** (`smtp.gmail.com`, port 587, un « mot de passe d'application » Google,
   jusqu'à 500 e-mails/jour) ou **Brevo** (offre gratuite, 300 e-mails/jour).
+- *Emails › Templates* (« Confirm signup », « Magic link », « Reset password ») : le site demande un **code à 6 chiffres**.
+  Ajouter `{{ .Token }}` dans chaque modèle, par exemple « Votre code FlashMiam : {{ .Token }} ».
 
 ### 4. Récupérer les clés (*Project Settings › API Keys*)
 | Variable | Où la trouver | Exposée au navigateur ? |
@@ -97,6 +99,11 @@ En attendant, la même application est aussi publiée sur https://evanbisa.githu
 enregistre le SIRET vérifié. La clé secrète est fournie par Supabase à la fonction : elle n'est écrite nulle part.
 Appel depuis le site : `supabase.functions.invoke("verify-siret", { body: { siret } })`.
 Tests : `deno test supabase/functions/` (sans réseau).
+SIRET de test `999 999 999 00009` : établissement fictif accepté sans appel à Sirene (fiche marquée « de test »).
+Pour le refuser avant l'ouverture au public : secret `ALLOW_TEST_SIRET=false` (*Edge Functions › Secrets*).
+
+`supabase/functions/delete-account/` (déployée) : « Supprimer mon compte » ; efface les fichiers de la fiche
+(photos, stories, justificatifs) puis le compte, et tout ce qui lui est lié en cascade.
 
 ### 8. Vérifications automatiques en ligne
 `.github/workflows/verifications.yml` (à chaque modification de `supabase/`, et chaque lundi) : depuis Internet,
@@ -113,17 +120,21 @@ aussi le projet Supabase actif (l'offre gratuite le met en pause après 7 jours 
 | Prénom, nom, téléphone | `profiles` | son propriétaire | son propriétaire (pas le rôle) |
 | Fiche : nom, catégorie, menu, horaires, statut… | `merchants` | **tout le monde**, si publiée et ouverte | son propriétaire |
 | SIRET, raison sociale | `merchant_private` | son propriétaire | le serveur uniquement (clé secrète) |
+| Abonnement du restaurateur | `merchant_subscriptions` | le restaurateur | le restaurateur (mode « démonstration » uniquement) ; le paiement réel passera par le serveur |
+| Photos de la fiche | stockage `photos` (public) | **tout le monde** | le restaurateur, dans le dossier de sa fiche |
+| Justificatifs (Kbis, hygiène…) | stockage `documents` (privé) | le restaurateur seulement | le restaurateur, dans le dossier de sa fiche |
 | Stories, promotions | `stories`, `promotions` (+ stockage `stories`) | **tout le monde**, tant qu'elles sont en cours, si la fiche est en ligne | le restaurateur, sur sa fiche uniquement (durée de 24 h et fin des promos du jour / de la semaine imposées par la base) |
 | Restaurants suivis | `follows` | l'étudiant concerné (le restaurateur ne voit que le **nombre**) | l'étudiant (s'abonner / se désabonner) |
 | Statistiques (vues, personnes, clics) | `merchant_stats`, `merchant_visitors` | le restaurateur, en **chiffres** uniquement | personne en direct : fonction `track_merchant_event` |
 
 - **RLS activée sur toutes les tables**, privilèges accordés explicitement, colonne par colonne pour les modifications.
 - Le SIRET n'est pas dans `merchants` : la RLS filtre des lignes, pas des colonnes.
-- Une fiche ne peut être publiée qu'avec un **SIRET vérifié par le serveur** et une fiche complète
+- Une fiche ne peut être publiée qu'avec un **SIRET vérifié par le serveur**, l'attestation sur l'honneur,
+  un abonnement actif et une fiche complète
   (adresse dans la zone, description, 1 photo, 1 service) : c'est la base qui refuse, pas l'interface.
 - Un restaurateur ne peut ni changer le propriétaire d'une fiche, ni son SIRET, ni se déclarer vérifié,
   ni toucher la fiche d'un autre, ni republier une fiche suspendue.
-- Tests : `npm run db:test` (99 scénarios sur un PostgreSQL local : `PGHOST=… PGPORT=… PGUSER=postgres`).
+- Tests : `npm run db:test` (116 scénarios sur un PostgreSQL local : `PGHOST=… PGPORT=… PGUSER=postgres`).
 
 ## Limites des offres gratuites à connaître
 - **Supabase Free** : 500 Mo de base, 50 000 utilisateurs actifs/mois, 1 Go de fichiers, 200 connexions temps

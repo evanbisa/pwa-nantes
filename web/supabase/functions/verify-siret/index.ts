@@ -43,7 +43,7 @@ const deps: Deps = {
     return { id: data.id, status: data.status, siret };
   },
   async fetchSirene(siret) {
-    const res = await fetch(sireneUrl(siret), { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(8000) });
+    const res = await fetch(sireneUrl(siret, Deno.env.get("SIRENE_API_URL") || undefined), { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(8000) });
     return { ok: res.ok, status: res.status, body: res.ok ? await res.json() : null };
   },
   async createMerchant(row) {
@@ -63,5 +63,7 @@ const deps: Deps = {
     if (error) throw error;
   },
 };
+
+deps.allowTestSiret = Deno.env.get("ALLOW_TEST_SIRET") !== "false";
 
 Deno.serve((req) => handle(req, deps));

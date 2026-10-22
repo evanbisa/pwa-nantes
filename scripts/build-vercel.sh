@@ -10,8 +10,9 @@ cd ..
 rm -rf dist
 mkdir -p dist
 cp index.html confidentialite.html conditions.html dist/
+cp -r vendor dist/   # bibliothèque Supabase (servie par le site lui-même)
 cp -r web/out dist/app
 printf 'User-agent: *\nAllow: /\n' > dist/robots.txt
 # Toute adresse inconnue renvoie vers la carte
-printf '%s\n' '<!DOCTYPE html><html lang="fr"><meta charset="utf-8"><title>Roche Street Food</title>' \
+printf '%s\n' '<!DOCTYPE html><html lang="fr"><meta charset="utf-8"><title>FlashMiam</title>' \
   '<meta http-equiv="refresh" content="0; url=/"><a href="/">Retour à la carte</a></html>' > dist/404.html

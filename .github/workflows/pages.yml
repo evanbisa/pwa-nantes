@@ -6,7 +6,7 @@ name: Publier sur GitHub Pages
 on:
   push:
     branches: [claude/street-food-map-pwa-lr1xu2]
-    paths: ['*.html', 'web/**', .github/workflows/pages.yml]
+    paths: ['*.html', 'vendor/**', 'web/**', .github/workflows/pages.yml]
   workflow_dispatch:
 
 permissions:
@@ -49,13 +49,14 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/site"
           cp index.html confidentialite.html conditions.html "$RUNNER_TEMP/site/"
+          cp -r vendor "$RUNNER_TEMP/site/"   # bibliothèque Supabase (servie par le site lui-même)
           cp -r web/out "$RUNNER_TEMP/site/app"
           touch "$RUNNER_TEMP/site/.nojekyll"
           printf 'User-agent: *\nAllow: /\n' > "$RUNNER_TEMP/site/robots.txt"
           # Vercel suit aussi ce dépôt : pas de déploiement pour la branche gh-pages
           printf '{ "git": { "deploymentEnabled": false } }\n' > "$RUNNER_TEMP/site/vercel.json"
           # Toute adresse inconnue du site renvoie vers l'accueil
-          printf '%s\n' '<!DOCTYPE html><html lang="fr"><meta charset="utf-8"><title>Roche Street Food</title>' \
+          printf '%s\n' '<!DOCTYPE html><html lang="fr"><meta charset="utf-8"><title>FlashMiam</title>' \
             '<meta http-equiv="refresh" content="0; url=/pwa-nantes/"><a href="/pwa-nantes/">Retour à la carte</a></html>' > "$RUNNER_TEMP/site/404.html"
           cd "$RUNNER_TEMP/site"
           git init -q -b gh-pages
