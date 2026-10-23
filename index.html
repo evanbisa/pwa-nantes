@@ -24,24 +24,26 @@
     })();
   </script>
 
-  <link rel="preconnect" href="https://maps.googleapis.com" />
   <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
   <!-- MapLibre GL : moteur de secours (carte « style Google Maps ») utilisé tant qu'aucune clé Google n'est configurée.
        Feuilles de style chargées sans bloquer l'affichage (l'écran de chargement peut apparaître tout de suite) ;
        le script du moteur est chargé en bas de page. -->
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css" media="print" onload="this.media='all'" />
 
-  <!-- Typographie : Roboto (police de Google Maps) -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" media="print" onload="this.media='all'" />
   <noscript>
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" />
   </noscript>
 
   <style>
+    /* Typographie : Roboto (police de Google Maps), servie par le site lui-même : aucun appel à Google (licence OFL, vendor/fonts) */
+    @font-face { font-family: 'Roboto'; font-style: normal; font-weight: 400; font-display: swap; src: url(vendor/fonts/roboto-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+    @font-face { font-family: 'Roboto'; font-style: normal; font-weight: 400; font-display: swap; src: url(vendor/fonts/roboto-latin-400-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+    @font-face { font-family: 'Roboto'; font-style: normal; font-weight: 500; font-display: swap; src: url(vendor/fonts/roboto-latin-ext-500-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+    @font-face { font-family: 'Roboto'; font-style: normal; font-weight: 500; font-display: swap; src: url(vendor/fonts/roboto-latin-500-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+    @font-face { font-family: 'Roboto'; font-style: normal; font-weight: 700; font-display: swap; src: url(vendor/fonts/roboto-latin-ext-700-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+    @font-face { font-family: 'Roboto'; font-style: normal; font-weight: 700; font-display: swap; src: url(vendor/fonts/roboto-latin-700-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+
     /* =====================================================================
        1. DESIGN TOKENS — mode jour (défaut) et mode nuit, palette Google
        ===================================================================== */
@@ -462,6 +464,33 @@
     .legal { margin: 14px 0 0; text-align: center; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
     .legal a { color: var(--accent); text-decoration: none; }
     .legal a:hover { text-decoration: underline; }
+    .legal .link-btn { font-size: inherit; font-weight: 400; }
+    .legal .link-btn:hover { text-decoration: underline; }
+
+    /* Choix des cookies : au-dessus de tout, refuser aussi simple qu'accepter */
+    .consent { position: fixed; inset: 0; z-index: 130; display: flex; align-items: flex-end; justify-content: center; padding: 12px 12px calc(var(--safe-bottom) + 12px); background: var(--backdrop); overflow-y: auto; overscroll-behavior: contain; }
+    .consent[hidden] { display: none; }
+    .cs-panel { width: min(560px, 100%); max-height: calc(100dvh - 24px); overflow-y: auto; padding: 20px 20px 16px; border-radius: 20px; color: var(--text); background: var(--panel-solid); box-shadow: var(--shadow); animation: rise .3s var(--ease-out) both; }
+    .cs-panel h2 { margin: 0; font-size: 19px; font-weight: 500; }
+    .cs-panel > p { margin: 10px 0 0; font-size: 14px; line-height: 1.5; color: var(--muted); }
+    .cs-panel > p b { color: var(--text); font-weight: 500; }
+    .cs-choices { margin-top: 12px; border-top: 1px solid var(--line); }
+    .cs-choices[hidden] { display: none; }
+    .cs-row { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .cs-row > div { flex: 1; min-width: 0; font-size: 14px; }
+    .cs-row b { font-weight: 500; }
+    .cs-row small { display: block; margin-top: 2px; font-size: 12.5px; line-height: 1.4; color: var(--muted); }
+    .cs-row .switch[disabled] { opacity: .6; }
+    .cs-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+    .cs-actions .btn { margin-top: 0; }
+    .cs-btn { color: var(--on-accent); background: var(--accent); }
+    .cs-btn:hover { background: var(--accent-strong); }
+    .cs-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 12px; font-size: 13.5px; }
+    .cs-foot a { color: var(--accent); text-decoration: none; }
+    .cs-foot .cs-save { flex: 1 1 100%; order: -1; margin-top: 0; }
+    .cs-foot .cs-save[hidden] { display: none; }
+    @media (min-width: 900px) { .consent { align-items: center; } }
+    @media (max-width: 340px) { .cs-actions { grid-template-columns: 1fr; } }
     .link-btn { color: var(--accent); font-weight: 500; }
     .link-btn:hover { text-decoration: underline; }
     .fineprint { margin: 12px 0 0; font-size: 12px; text-align: center; color: var(--muted); }
@@ -878,6 +907,7 @@
     .oauth { margin-top: 16px; }
     .g-slot { display: flex; justify-content: center; min-height: 44px; }
     .g-slot .g-fallback { font-size: 13px; color: var(--muted); align-self: center; }
+    .g-slot .g-consent { margin: 0; max-width: 360px; font-size: 13px; line-height: 1.45; text-align: center; color: var(--muted); align-self: center; }
     .or-sep { display: flex; align-items: center; gap: 12px; margin: 14px 0 0; font-size: 13px; color: var(--muted); }
     .or-sep::before, .or-sep::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
@@ -1653,7 +1683,7 @@
     <button class="btn btn-primary" type="button" id="profile-locate">Activer la localisation</button>
     <button class="btn btn-ghost" type="button" id="profile-logout">Se déconnecter</button>
     <button class="btn btn-danger" type="button" id="profile-delete">Supprimer mon compte</button>
-    <p class="legal"><a href="confidentialite.html" target="_blank" rel="noopener">Confidentialité</a> · <a href="conditions.html" target="_blank" rel="noopener">Conditions d'utilisation</a></p>
+    <p class="legal"><a href="confidentialite.html" target="_blank" rel="noopener">Confidentialité</a> · <a href="conditions.html" target="_blank" rel="noopener">Conditions d'utilisation</a> · <button class="link-btn" type="button" id="profile-cookies">Cookies</button></p>
   </section>
 
   <!-- ===================== ESPACE RESTAURATEUR ===================== -->
@@ -1763,7 +1793,7 @@
             <p class="hint">« J'aime » sur les plats de votre carte, depuis toujours.</p>
             <div class="hbars" id="ps-dishes"></div>
           </section>
-          <p class="hint ps-privacy">🔒 Ce sont des totaux : vous ne voyez jamais qui a fait quoi. Vos propres visites ne sont pas comptées. Historique conservé 90 jours.</p>
+          <p class="hint ps-privacy">🔒 Ce sont des totaux : vous ne voyez jamais qui a fait quoi. Seuls les clients qui acceptent les statistiques sont comptés, et vos propres visites ne le sont pas. Historique conservé 90 jours.</p>
         </section>
 
         <!-- Publier -->
@@ -2166,6 +2196,39 @@
   <!-- ===================== TOAST ===================== -->
   <div id="toast" class="toast" role="status" aria-live="polite"><span id="toast-text"></span><button id="toast-action" type="button" hidden></button></div>
 
+  <!-- ===================== COOKIES (choix au premier lancement) ===================== -->
+  <div id="consent" class="consent" role="dialog" aria-modal="true" aria-labelledby="cs-title" aria-describedby="cs-intro" hidden>
+    <div class="cs-panel">
+      <h2 id="cs-title"><span aria-hidden="true">🍪</span> Vos choix de cookies</h2>
+      <p id="cs-intro">FlashMiam garde dans votre navigateur votre session et vos préférences : c'est indispensable au fonctionnement du site.
+        Avec votre accord, nous utilisons aussi des <b>statistiques de fréquentation</b> et les <b>services Google</b>.
+        Vous pouvez changer d'avis à tout moment (Profil › Cookies).</p>
+      <div class="cs-choices" id="cs-choices" hidden>
+        <div class="cs-row">
+          <div><b id="cs-l-need">Indispensables</b><small>Connexion, préférences (thème, localisation, alertes), sécurité. Toujours actifs.</small></div>
+          <button class="switch" type="button" role="switch" aria-checked="true" aria-labelledby="cs-l-need" disabled><i></i></button>
+        </div>
+        <div class="cs-row">
+          <div><b id="cs-l-stats">Statistiques de fréquentation</b><small>Compter vos visites et actions sur les fiches (vues, itinéraires, partages, stories vues…) pour donner aux restaurateurs des totaux. Jamais votre nom.</small></div>
+          <button class="switch" type="button" role="switch" id="cs-stats" aria-checked="false" aria-labelledby="cs-l-stats"><i></i></button>
+        </div>
+        <div class="cs-row">
+          <div><b id="cs-l-google">Services Google</b><small>Bouton « Continuer avec Google » : Google peut alors déposer ses propres cookies.</small></div>
+          <button class="switch" type="button" role="switch" id="cs-google" aria-checked="false" aria-labelledby="cs-l-google"><i></i></button>
+        </div>
+      </div>
+      <div class="cs-actions">
+        <button class="btn cs-btn" type="button" id="cs-refuse">Tout refuser</button>
+        <button class="btn cs-btn" type="button" id="cs-accept">Tout accepter</button>
+      </div>
+      <div class="cs-foot">
+        <button class="link-btn" type="button" id="cs-custom" aria-expanded="false" aria-controls="cs-choices">Personnaliser</button>
+        <button class="btn btn-primary cs-save" type="button" id="cs-save" hidden>Enregistrer mes choix</button>
+        <a href="confidentialite.html#cookies" target="_blank" rel="noopener">En savoir plus</a>
+      </div>
+    </div>
+  </div>
+
   <!-- ===================== ÉCRAN D'ERREUR ===================== -->
   <div id="fatal" class="fatal" hidden>
     <div>
@@ -2392,6 +2455,70 @@
       return next;
     },
   };
+  /* ---------- Cookies : choix de la personne (indispensables toujours ; statistiques et services Google avec son accord) ---------- */
+  const Consent = (() => {
+    const KEY = 'flashmiam:consent', VERSION = 1, MAX_AGE = 182 * 864e5;   // choix redemandé au bout de 6 mois
+    const root = $('consent');
+    const listeners = [];
+    let choice = null, returnFocus = null;
+    try {
+      const c = JSON.parse(localStorage.getItem(KEY));
+      if (c && c.v === VERSION && Date.now() - new Date(c.at) < MAX_AGE) choice = c;
+    } catch (e) { /* stockage indisponible : on redemande */ }
+    const has = (k) => !!(choice && choice[k]);
+    const decided = () => !!choice;
+    const on = (id) => $(id).getAttribute('aria-checked') === 'true';
+    function save(stats, google) {
+      choice = { v: VERSION, stats: !!stats, google: !!google, at: new Date().toISOString() };
+      try { localStorage.setItem(KEY, JSON.stringify(choice)); } catch (e) { /* gardé le temps de la visite */ }
+      close();
+      listeners.forEach((fn) => fn(choice));
+    }
+    function custom(show) {
+      $('cs-choices').hidden = !show;
+      $('cs-save').hidden = !show;
+      $('cs-custom').hidden = show;
+      $('cs-custom').setAttribute('aria-expanded', String(show));
+    }
+    function open({ details = false } = {}) {
+      if (root.hidden) returnFocus = document.activeElement;
+      $('cs-stats').setAttribute('aria-checked', String(has('stats')));
+      $('cs-google').setAttribute('aria-checked', String(has('google')));
+      custom(details);
+      root.hidden = false;
+      setTimeout(() => $(details ? 'cs-stats' : 'cs-refuse').focus({ preventScroll: true }), 50);
+    }
+    function close() {
+      root.hidden = true;
+      if (returnFocus && document.contains(returnFocus) && returnFocus !== document.body) returnFocus.focus({ preventScroll: true });
+    }
+    ['cs-stats', 'cs-google'].forEach((id) => $(id).addEventListener('click', () => $(id).setAttribute('aria-checked', String(!on(id)))));
+    $('cs-accept').addEventListener('click', () => save(true, true));
+    $('cs-refuse').addEventListener('click', () => save(false, false));
+    $('cs-save').addEventListener('click', () => save(on('cs-stats'), on('cs-google')));
+    $('cs-custom').addEventListener('click', () => { custom(true); $('cs-stats').focus(); });
+    // Fenêtre modale : Échap ne ferme que si un choix existe déjà ; Tab reste dans la fenêtre
+    root.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); if (decided()) close(); return; }
+      if (ev.key !== 'Tab') return;
+      const items = [...root.querySelectorAll('button:not([disabled]), a[href]')].filter((el) => el.offsetParent !== null);
+      const first = items[0], last = items[items.length - 1];
+      if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+      else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+    });
+    // Tant que la fenêtre est ouverte, le focus ne la quitte pas (l'écran de compte, derrière, cherche à le prendre)
+    document.addEventListener('focusin', (ev) => {
+      if (!root.hidden && !root.contains(ev.target)) $(!$('cs-choices').hidden ? 'cs-stats' : 'cs-refuse').focus({ preventScroll: true });
+    }, true);
+    if (!choice) open();   // premier lancement (ou choix de plus de 6 mois)
+    return {
+      has, decided, open,
+      /** Accord donné pour une seule catégorie (ex. : bouton « Autoriser » à côté de la connexion Google). */
+      allow: (k) => save(k === 'stats' || has('stats'), k === 'google' || has('google')),
+      onChange: (fn) => listeners.push(fn),
+    };
+  })();
+
   /* =====================================================================
      4 bis. DONNÉES PARTAGÉES : SUPABASE
      Comptes (Supabase Auth), fiches, photos, stories, promotions, abonnements et statistiques.
@@ -3207,6 +3334,7 @@
 
   /** Choix du moteur : Google Maps si une clé est configurée, sinon la carte de secours. */
   function chosenEngine() {
+    if (!Consent.has('google')) return 'maplibre';   // services Google refusés : carte OpenStreetMap
     if (CONFIG.mapEngine === 'google' || CONFIG.mapEngine === 'maplibre') return CONFIG.mapEngine;
     let failed = false;
     try { failed = sessionStorage.getItem(CONFIG.fallbackKey) === '1'; } catch (e) { /* ignore */ }
@@ -4782,7 +4910,7 @@
     const LEGACY = new Set(['view', 'walk', 'car', 'phone', 'menu', 'photos', 'story']);
     let legacy = false;   // base en ligne pas encore à jour : ancien compteur (vues et clics) en attendant
     function track(shopId, event, { ref = null, source = null } = {}) {
-      if (!restaurants()[shopId] || !EVENTS[event]) return;
+      if (!Consent.has('stats') || !restaurants()[shopId] || !EVENTS[event]) return;   // statistiques refusées : rien n'est envoyé
       const ev = EVENTS[event];
       const old = () => { if (LEGACY.has(ev)) sb.rpc('track_merchant_event', { p_merchant_id: shopId, p_event: ev }).then(() => {}, () => {}); };
       if (legacy) { old(); return; }
@@ -5955,6 +6083,14 @@
     async function mount() {
       if (!enabled()) return;
       document.querySelectorAll('[data-google]').forEach((el) => { el.hidden = false; });
+      if (!Consent.has('google')) {
+        ['su-google', 'li-google'].forEach((id) => {
+          const el = $(id);
+          el.innerHTML = '<p class="g-consent">Pour « Continuer avec Google », autorisez les services Google (cookies de Google). <button class="link-btn" type="button">Autoriser</button></p>';
+          el.querySelector('button').addEventListener('click', () => Consent.allow('google'));
+        });
+        return;
+      }
       try { await load(); } catch (e) {
         ['su-google', 'li-google'].forEach((id) => { $(id).innerHTML = '<span class="g-fallback">Connexion Google indisponible pour le moment.</span>'; });
         return;
@@ -5974,6 +6110,8 @@
         });
       });
     }
+    // Accord donné ou retiré pendant que l'écran de connexion est affiché
+    Consent.onChange(() => { if (!$('onboarding').hidden && (currentStep === 'signup' || currentStep === 'login')) mount(); });
     return { enabled, mount };
   })();
 
@@ -7529,6 +7667,7 @@
     else openProfileSheet();
   });
   $('profile-pro').addEventListener('click', () => ProSpace.open());
+  $('profile-cookies').addEventListener('click', () => Consent.open({ details: true }));
   $('profile-locate').addEventListener('click', () => {
     closePanel($('profile-sheet'));
     requestLocation({ fly: true, fromButton: true });
@@ -7576,7 +7715,7 @@
      restaurateur dont l'inscription n'est pas terminée → reprise à la bonne étape.
      ===================================================================== */
 
-  window.RocheStreetFood = { view: null, Geo, SHOPS, getStatus, refreshStatuses, setTheme, isValidSiret, restaurants, cloud, sb, Search, Reviews, Notifs, Push, Offers };
+  window.RocheStreetFood = { view: null, Geo, SHOPS, getStatus, refreshStatuses, setTheme, isValidSiret, restaurants, cloud, sb, Search, Reviews, Notifs, Push, Offers, Consent };
 
   setTheme(currentTheme());
   applyLayout();

@@ -82,6 +82,16 @@
   chiffres exacts après les actions de trois clients, confidentialité, téléphone 320 px, ordinateur, et 5 pour le
   fonctionnement en attendant le dernier morceau).
 
+### Cookies : choix au premier lancement (23 octobre 2026)
+- Fenêtre « Vos choix de cookies » avant tout : « Tout refuser » et « Tout accepter » identiques, « Personnaliser »
+  (statistiques de fréquentation, services Google ; tout est désactivé par défaut). Choix gardé 6 mois puis redemandé,
+  modifiable dans Profil › Cookies.
+- Sans accord : aucune statistique envoyée, script Google (connexion) non chargé, pas de carte Google Maps.
+- Police Roboto servie par le site (`vendor/fonts`, licence OFL) : plus aucun appel à Google au chargement.
+- Page Confidentialité : section « Cookies » réécrite ; statistiques fondées sur le consentement.
+- Tests : 29 vérifications dans un navigateur (avant le choix, refus, accord après coup, choix de plus de 6 mois,
+  clavier, téléphone 320 px, ordinateur).
+
 ### Connexion avec Google (clients)
 - Prototype : bouton Google (Google Identity Services) affiché dès que `CONFIG.googleClientId` est renseigné.
   Le jeton Google est vérifié par Supabase Auth (`signInWithIdToken`), signature comprise.
