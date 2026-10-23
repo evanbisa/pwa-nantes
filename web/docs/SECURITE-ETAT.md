@@ -92,6 +92,31 @@
 - Tests : 29 vérifications dans un navigateur (avant le choix, refus, accord après coup, choix de plus de 6 mois,
   clavier, téléphone 320 px, ordinateur).
 
+### Forte affluence (23 octobre 2026)
+- **Réseau** : délai maximal (15 s pour une lecture, 30 s pour une écriture), nouvelles tentatives des seules lectures
+  (serveur saturé 429/5xx, réseau coupé), espacées au hasard ; les écritures ne sont jamais envoyées deux fois.
+  Les tentatives intégrées à supabase-js sont coupées (`db.retry: false`) pour ne pas se multiplier.
+  Bandeau d'état (connexion difficile, hors connexion, très demandé + « Réessayer »).
+- **Plus de déconnexion sur une panne** : au démarrage, seule une session refusée par le serveur déconnecte ;
+  serveur saturé = nouvelles tentatives puis écran « FlashMiam est très demandé » avec « Réessayer », session gardée.
+- **Données** : plus d'effacement des promos/stories si une partie des lectures échoue ; réponses obsolètes ignorées ;
+  copie locale des fiches publiques (carte affichée tout de suite, même serveur injoignable).
+- **Anti-rafale** : une story ou promo publiée arrive avec le message du temps réel (0 requête) ; un autre changement
+  ne fait relire que ce restaurant, après 0,5 à 3 s au hasard ; actualisation de secours incrémentale (≈ 8 fois moins
+  de données) toutes les 4 à 6 min (2 min sans temps réel) ; onglet caché 3 min = connexion temps réel fermée ;
+  serveur temps réel complet (≈ 200 connexions en offre gratuite) = pause de 10 min, relève régulière à la place ;
+  notifications : en direct, relève de secours toutes les 5 min (1 min sans temps réel).
+- **Base** (`20261025090000_perf.sql`, appliquée) : index sur la fin des stories et promotions, le site ne lit plus que
+  celles en cours (17,7 ms → 3 ms par visiteur avec 30 jours d'historique, et ça ne grossit plus avec le temps).
+- **Fichiers** : MapLibre et les polices servis par le site (plus de dépendance à unpkg ni à Google Fonts), MapLibre
+  chargé en parallèle ; service worker : bibliothèques gardées sur l'appareil, page disponible hors connexion,
+  Supabase et tuiles jamais interceptées (routage statique) ; en-têtes de cache sur Vercel.
+- **Test de charge** (copie locale de 1,9 million de lignes, 300 visiteurs simultanés) : rafale « story publiée »
+  1 200 requêtes / 3,5 s médiane → 0 requête ; fiche modifiée : 3 petites lectures de 3 ms ; 300 visites simultanées
+  toutes comptées. 4G lente : visite suivante en 1,5 s (168 Ko) contre 5,3 s la première fois.
+- Tests : 39 vérifications « forte affluence » (503, lenteur, hors connexion, temps réel simulé, cache, service worker,
+  8 visiteurs en même temps).
+
 ### Connexion avec Google (clients)
 - Prototype : bouton Google (Google Identity Services) affiché dès que `CONFIG.googleClientId` est renseigné.
   Le jeton Google est vérifié par Supabase Auth (`signInWithIdToken`), signature comprise.

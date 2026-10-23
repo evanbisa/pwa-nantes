@@ -29,10 +29,10 @@
   <!-- MapLibre GL : moteur de secours (carte « style Google Maps ») utilisé tant qu'aucune clé Google n'est configurée.
        Feuilles de style chargées sans bloquer l'affichage (l'écran de chargement peut apparaître tout de suite) ;
        le script du moteur est chargé en bas de page. -->
-  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="vendor/maplibre-gl-5.24.0/maplibre-gl.css" media="print" onload="this.media='all'" />
 
   <noscript>
-    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css" />
+    <link rel="stylesheet" href="vendor/maplibre-gl-5.24.0/maplibre-gl.css" />
   </noscript>
 
   <style>
@@ -114,6 +114,14 @@
     *, *::before, *::after { box-sizing: border-box; }
     [hidden] { display: none !important; }
     .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+    /* Squelettes de chargement (serveur lent) : formes grises animées à la place du contenu */
+    .skel { display: block; height: 12px; margin: 6px 0; border-radius: 6px; background: linear-gradient(90deg, var(--hover) 25%, var(--line) 50%, var(--hover) 75%); background-size: 200% 100%; animation: skel 1.3s ease-in-out infinite; }
+    .skel-item { list-style: none; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .skel-text { display: inline-block; min-width: 2.5em; height: 1em; border-radius: 6px; color: transparent !important; background: linear-gradient(90deg, var(--hover) 25%, var(--line) 50%, var(--hover) 75%); background-size: 200% 100%; animation: skel 1.3s ease-in-out infinite; }
+    @keyframes skel { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+    @media (prefers-reduced-motion: reduce) { .skel, .skel-text { animation: none; } }
+    .load-failed { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    img.is-loading { background: linear-gradient(90deg, var(--hover) 25%, var(--line) 50%, var(--hover) 75%) !important; background-size: 200% 100% !important; animation: skel 1.3s ease-in-out infinite; }
     html, body {
       height: 100%; margin: 0; overflow: hidden;
       overscroll-behavior: none; background: var(--bg); color: var(--text);
@@ -975,6 +983,8 @@
     .ps-insights li { display: flex; gap: 12px; padding: 12px 14px; font-size: 14px; border-radius: 12px; border: 1px solid var(--line); }
     .ps-insights li > span:first-child { flex: none; font-size: 18px; }
     .ps-insights b { font-weight: 500; }
+    .ps-insights li.ps-retry { display: block; padding: 0; border: 0; }
+    .ps-insights li.ps-retry .ps-alert, #ps-kpis .ps-alert { margin: 0; grid-column: 1 / -1; }
     /* Barres horizontales (provenance, actions, plats) : une seule teinte, valeur écrite */
     .hbars { display: grid; gap: 10px; margin-top: 12px; }
     .hbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; align-items: baseline; font-size: 13.5px; }
@@ -1243,6 +1253,19 @@
       transform: translateY(-12px); opacity: 0; pointer-events: none; transition: opacity .25s, transform .3s var(--ease-out);
     }
     .toast.is-visible { opacity: 1; transform: none; pointer-events: auto; }
+    /* État de la connexion : discret, en bas de l'écran (téléphone) ou en haut de la carte (ordinateur) */
+    .net { position: fixed; z-index: 125; left: 12px; right: 12px; bottom: calc(var(--safe-bottom) + 76px); width: fit-content; max-width: min(480px, calc(100% - 24px)); margin: 0 auto; display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px; border-radius: 18px; font-size: 13px; font-weight: 500; color: var(--text); background: var(--panel-solid);
+      box-shadow: var(--shadow); animation: rise .25s var(--ease-out) both; }
+    .net[hidden] { display: none; }
+    .net-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--amber); }
+    .net.is-slow .net-dot { border: 2px solid var(--amber); border-right-color: transparent; background: none; width: 12px; height: 12px; animation: spin .8s linear infinite; }
+    .net.is-offline .net-dot { background: var(--gray); }
+    .net.is-down .net-dot { background: var(--danger); }
+    .net.is-back .net-dot { background: var(--green); }
+    #net-text { min-width: 0; line-height: 1.3; }
+    #net-retry { flex: none; margin-left: 2px; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 500; color: var(--accent); background: var(--accent-soft); }
+    @media (prefers-reduced-motion: reduce) { .net.is-slow .net-dot { animation: none; } }
     .toast button { flex: none; color: #8ab4f8; font-weight: 500; }
 
     .fatal { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 24px; text-align: center; background: var(--bg); }
@@ -1266,6 +1289,7 @@
       .controls { top: 16px; right: 16px; }
       /* en bas de la carte : ne recouvre ni la fiche flottante ni les contrôles */
       .toast { top: auto; bottom: 24px; left: calc(var(--sidebar-w) + 32px); right: 16px; transform: translateY(12px); }
+      .net { bottom: auto; top: 16px; left: calc(var(--sidebar-w) + 32px); right: 16px; }
       body.sheet-open .toast { left: calc(var(--sidebar-w) + 424px); }   /* à droite de la fiche flottante */
       .maplibregl-ctrl-bottom-right { bottom: 0; }
 
@@ -2194,6 +2218,7 @@
   </div>
 
   <!-- ===================== TOAST ===================== -->
+  <div id="net" class="net" role="status" aria-live="polite" hidden><span class="net-dot" aria-hidden="true"></span><span id="net-text"></span><button type="button" id="net-retry" hidden>Réessayer</button></div>
   <div id="toast" class="toast" role="status" aria-live="polite"><span id="toast-text"></span><button id="toast-action" type="button" hidden></button></div>
 
   <!-- ===================== COOKIES (choix au premier lancement) ===================== -->
@@ -2234,13 +2259,15 @@
     <div>
       <h1 id="fatal-title">Carte indisponible</h1>
       <p id="fatal-text">Vérifiez votre connexion internet puis réessayez.</p>
-      <button class="btn btn-primary" type="button" onclick="location.reload()">Réessayer</button>
+      <button class="btn btn-primary" type="button" id="fatal-retry" onclick="location.reload()">Réessayer</button>
     </div>
   </div>
 
   <noscript><style>.loader { display: none !important; }</style><div class="fatal"><div><h1>JavaScript requis</h1><p>Activez JavaScript pour afficher la carte.</p></div></div></noscript>
 
-<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+<!-- MapLibre (moteur de carte) : copie servie par le site, sans dépendre d'un service tiers (licence BSD, vendor/).
+     Chargé en parallèle (async) : l'écran de compte et le reste du site n'attendent pas ce gros fichier. -->
+<script src="vendor/maplibre-gl-5.24.0/maplibre-gl.js" id="maplibre-script" async onerror="window.__maplibreFailed = true"></script>
 <!-- Supabase (comptes et données partagées) : copie locale du client officiel, servie par le site -->
 <script src="vendor/supabase-js-2.118.0.js"></script>
 <script>
@@ -2443,6 +2470,13 @@
      ===================================================================== */
 
   const $ = (id) => document.getElementById(id);
+  /** Image en cours de chargement : squelette animé à sa place (réseau ou serveur lent). */
+  function watchLoad(img) {
+    img.classList.add('is-loading');
+    const done = () => img.classList.remove('is-loading');
+    img.addEventListener('load', done, { once: true });
+    img.addEventListener('error', done, { once: true });
+  }
 
   /** Stockage local tolérant aux erreurs (navigation privée, quota…). */
   const store = {
@@ -2524,6 +2558,104 @@
      Comptes (Supabase Auth), fiches, photos, stories, promotions, abonnements et statistiques.
      ===================================================================== */
 
+  /* ---------- Réseau : délai maximal, nouvelles tentatives, état de la connexion ----------
+   * Toutes les requêtes vers Supabase passent par Net.fetch :
+   *  - une lecture (GET, ou fonction de lecture) sans réponse après 15 s est abandonnée et retentée ;
+   *  - serveur saturé (429, 5xx) ou réseau coupé : jusqu'à 3 nouvelles tentatives, espacées de plus en plus
+   *    (avec un hasard pour que tous les visiteurs ne réessaient pas au même instant ; « Retry-After » respecté) ;
+   *  - les écritures ne sont jamais renvoyées deux fois (pas de doublon), mais leur délai est borné
+   *    (30 s ; 60 s pour les fonctions serveur ; aucun pour l'envoi de photos, qui peut être long en 4G faible).
+   * Un petit bandeau dit ce qui se passe (connexion difficile, hors connexion) et propose « Réessayer ». */
+  const Net = (() => {
+    const RETRY_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
+    const READ_RPC = /\/rest\/v1\/rpc\/(merchant_ratings|dish_like_counts|my_merchant_analytics|merchant_follower_count|my_merchant_stats|my_merchant_totals)(\?|$)/;
+    const ATTEMPTS = 4, READ_TIMEOUT = 15000, WRITE_TIMEOUT = 30000, FUNCTION_TIMEOUT = 60000;
+    const listeners = [];
+    let state = 'ok', backTimer = null, troubleAt = 0, onlineAt = 0;
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    function delay(i, res) {
+      const after = res && Number(res.headers.get('retry-after'));
+      if (after > 0) return Math.min(after, 10) * 1000;
+      return Math.min(8000, 600 * 2 ** i) * (0.6 + Math.random() * 0.8);
+    }
+    function paint() {
+      const el = $('net');
+      const text = { slow: 'Connexion difficile, nouvelle tentative…', offline: 'Hors connexion : données de votre dernière visite',
+        down: 'FlashMiam est très demandé, réessayez dans un instant', back: 'Connexion rétablie' }[state];
+      el.hidden = !text;
+      if (!text) return;
+      el.className = 'net is-' + state;
+      $('net-text').textContent = text;
+      $('net-retry').hidden = state !== 'down' && state !== 'offline';
+    }
+    function set(next) {
+      if (next !== 'ok') troubleAt = Date.now();
+      if (next === state) return;
+      const was = state;
+      state = next;
+      clearTimeout(backTimer);
+      if (next === 'ok' && (was === 'down' || was === 'offline')) {
+        state = 'back';
+        backTimer = setTimeout(() => { if (state === 'back') { state = 'ok'; paint(); } }, 2500);
+        listeners.forEach((fn) => fn('back'));
+      }
+      paint();
+    }
+    // Plus de problème depuis quelques secondes : le bandeau « connexion difficile » disparaît
+    const settle = () => { if (state === 'slow' && Date.now() - troubleAt > 1500) set('ok'); };
+    async function fetchWithRetry(input, init = {}) {
+      const url = typeof input === 'string' ? input : input.url;
+      const method = String(init.method || (typeof input === 'string' ? 'GET' : input.method) || 'GET').toUpperCase();
+      const read = method === 'GET' || method === 'HEAD' || (method === 'POST' && READ_RPC.test(url));
+      const upload = url.includes('/storage/v1/object') && method !== 'GET' && method !== 'HEAD';
+      const tries = read ? ATTEMPTS : 1;
+      for (let i = 0; i < tries; i++) {
+        const ctrl = new AbortController();
+        const outer = init.signal;
+        const onAbort = () => ctrl.abort(outer.reason);
+        if (outer) { if (outer.aborted) ctrl.abort(outer.reason); else outer.addEventListener('abort', onAbort, { once: true }); }
+        const limit = read ? READ_TIMEOUT : url.includes('/functions/v1/') ? FUNCTION_TIMEOUT : WRITE_TIMEOUT;
+        const startedAt = Date.now();
+        const timer = upload ? null : setTimeout(() => ctrl.abort(new DOMException('Délai dépassé', 'TimeoutError')), limit);
+        try {
+          const res = await fetch(input, { ...init, signal: ctrl.signal });
+          if (RETRY_STATUS.has(res.status) && i < tries - 1) {
+            if (res.body) res.body.cancel().catch(() => {});  // réponse abandonnée : connexion libérée tout de suite
+            set(navigator.onLine === false ? 'offline' : 'slow');
+            await wait(delay(i, res));
+            continue;
+          }
+          if (RETRY_STATUS.has(res.status)) set(read ? 'down' : 'slow');
+          else if (state === 'down' || state === 'offline') set('ok');   // « connexion difficile » : s'efface tout seul (settle)
+          return res;
+        } catch (e) {
+          if (outer && outer.aborted) throw e;                // abandon voulu par l'appelant
+          const offline = navigator.onLine === false;
+          const leftover = startedAt < onlineAt;               // partie pendant la coupure : pas un signe de lenteur
+          if (i >= tries - 1) { if (!leftover) set(offline ? 'offline' : 'down'); throw e; }
+          if (!leftover) set(offline ? 'offline' : 'slow');
+          await wait(delay(i));
+        } finally {
+          clearTimeout(timer);
+          if (outer) outer.removeEventListener('abort', onAbort);
+        }
+      }
+      throw new Error('unreachable');
+    }
+    window.addEventListener('offline', () => set('offline'));
+    window.addEventListener('online', () => { onlineAt = Date.now(); if (state === 'offline') set('ok'); });
+    setInterval(settle, 1000);
+    $('net-retry').addEventListener('click', () => { set('slow'); listeners.forEach((fn) => fn('retry')); });
+    return {
+      fetch: fetchWithRetry,
+      state: () => state,
+      /** Rappel quand la connexion revient (« back ») ou que la personne demande de réessayer (« retry »). */
+      onRecover: (fn) => listeners.push(fn),
+      /** Problème signalé par le reste du site (ex. : chargement initial impossible). */
+      trouble: (kind = 'down') => set(navigator.onLine === false ? 'offline' : kind),
+    };
+  })();
+
   /** Session gardée sur l'appareil (« Rester connecté ») ou seulement le temps de l'onglet. */
   const REMEMBER_KEY = 'roche-street-food:remember';
   const authStorage = {
@@ -2541,11 +2673,13 @@
   const sb = window.supabase && CONFIG.supabaseUrl
     ? window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey, {
       auth: { storage: authStorage, storageKey: 'flashmiam-auth', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'implicit' },
+      global: { fetch: (input, init) => Net.fetch(input, init) },
+      db: { retry: false },                                   // une seule couche de nouvelles tentatives : Net (sinon elles se multiplient)
     })
     : null;
 
   /** Données chargées : compte connecté et restaurants inscrits (fiches en ligne + la sienne). */
-  const cloud = { user: null, restaurants: {}, followerCounts: new Map(), ratings: new Map(), ready: Promise.resolve() };
+  const cloud = { user: null, restaurants: {}, followerCounts: new Map(), ratings: new Map(), ready: Promise.resolve(), loaded: Promise.resolve(), fromCache: false };
   const CAT_TO_DB = { 'Food-truck': 'food_truck', Kebab: 'kebab', Burger: 'burger', Sweets: 'sweets', Pizza: 'pizza', Autre: 'other' };
   const CAT_FROM_DB = Object.fromEntries(Object.entries(CAT_TO_DB).map(([k, v]) => [v, k]));
   const TEST_SIREN = '999999999';
@@ -2580,15 +2714,147 @@
   }
   const groupBy = (rows, key) => rows.reduce((acc, r) => { (acc[r[key]] = acc[r[key]] || []).push(r); return acc; }, {});
 
+  /**
+   * Stories et promotions encore en cours seulement (une heure de marge pour une horloge d'appareil en avance) :
+   * la base n'a pas à relire tout l'historique gardé pour les statistiques.
+   */
+  const liveSince = () => new Date(Date.now() - 3600e3).toISOString();
+  const promoFilter = (q) => q.or('ends_at.is.null,ends_at.gt."' + liveSince() + '"');
+  const ratingsFrom = (rows) => new Map((rows || []).map((r) => [r.merchant_id, { avg: Number(r.average), count: r.total }]));
+  let loadSeq = 0, appliedSeq = 0;
+
   /** Restaurants inscrits, avec leurs promotions et stories (la base ne renvoie que ce que l'utilisateur a le droit de voir). */
   async function loadRestaurants() {
-    const [m, pr, st, rt] = await Promise.all([sb.from('merchants').select('*'), sb.from('promotions').select('*'), sb.from('stories').select('*'), sb.rpc('merchant_ratings')]);
-    if (m.error) throw m.error;
+    const seq = ++loadSeq;
+    const [m, pr, st, rt] = await Promise.all([
+      sb.from('merchants').select('*'),
+      promoFilter(sb.from('promotions').select('*')),
+      sb.from('stories').select('*').gt('expires_at', liveSince()),
+      sb.rpc('merchant_ratings'),
+    ]);
+    // Une seule partie en échec (serveur saturé) : on garde ce qui est affiché plutôt que d'effacer promos ou stories
+    const error = m.error || pr.error || st.error;
+    if (error) throw error;
+    if (seq < appliedSeq) return cloud.restaurants;          // une lecture plus récente est déjà arrivée
+    appliedSeq = seq;
+    if (!rt.error) cloud.ratings = ratingsFrom(rt.data);
     const promos = groupBy(pr.data || [], 'merchant_id'), stories = groupBy(st.data || [], 'merchant_id');
-    cloud.ratings = new Map((rt.data || []).map((r) => [r.merchant_id, { avg: Number(r.average), count: r.total }]));
     cloud.restaurants = Object.fromEntries(m.data.map((row) => [row.id, restaurantFromRow(row, promos[row.id], stories[row.id], cloud.ratings.get(row.id))]));
+    cloud.fromCache = false;
+    cloud.synced = true;
+    Cache.save();
     return cloud.restaurants;
   }
+
+  /**
+   * Actualisation régulière, incrémentale : listes d'identifiants (quelques Ko), puis seulement ce qui est nouveau.
+   * Les stories et promotions ne sont jamais modifiées après publication (seulement ajoutées ou retirées) ;
+   * une fiche relue seulement si sa date de modification a changé. Environ 8 fois moins de données qu'une lecture complète.
+   */
+  async function syncRestaurants() {
+    if (cloud.fromCache || !Object.keys(cloud.restaurants).length) return loadRestaurants();
+    const seq = ++loadSeq;
+    const knownStories = new Map(), knownPromos = new Map();
+    Object.values(cloud.restaurants).forEach((r) => {
+      r.stories.forEach((x) => knownStories.set(x.id, x));
+      r.promos.forEach((x) => knownPromos.set(x.id, x));
+    });
+    const [mi, pi, si, rt] = await Promise.all([
+      sb.from('merchants').select('id, updated_at'),
+      promoFilter(sb.from('promotions').select('id, merchant_id')),
+      sb.from('stories').select('id, merchant_id').gt('expires_at', liveSince()),
+      sb.rpc('merchant_ratings'),
+    ]);
+    const error = mi.error || pi.error || si.error;
+    if (error) throw error;
+    if (!mi.data.length) return loadRestaurants();             // liste vide inattendue : vérification par une lecture complète
+    const changed = mi.data.filter((x) => { const r = cloud.restaurants[x.id]; return !r || r.updatedAt !== x.updated_at; }).map((x) => x.id);
+    const newPromos = pi.data.filter((x) => !knownPromos.has(x.id)).map((x) => x.id);
+    const newStories = si.data.filter((x) => !knownStories.has(x.id)).map((x) => x.id);
+    if (changed.length + newPromos.length + newStories.length > 120) return loadRestaurants();   // trop de nouveautés : lecture complète
+    const fetchIds = async (table, ids) => {
+      if (!ids.length) return [];
+      const { data, error: e } = await sb.from(table).select('*').in('id', ids);
+      if (e) throw e;
+      return data;
+    };
+    const [mRows, pRows, sRows] = await Promise.all([fetchIds('merchants', changed), fetchIds('promotions', newPromos), fetchIds('stories', newStories)]);
+    if (seq < appliedSeq) return cloud.restaurants;
+    appliedSeq = seq;
+    if (!rt.error) cloud.ratings = ratingsFrom(rt.data);
+    pRows.forEach((x) => knownPromos.set(x.id, promoFromRow(x)));
+    sRows.forEach((x) => knownStories.set(x.id, storyFromRow(x)));
+    const rowById = new Map(mRows.map((m) => [m.id, m]));
+    const promosOf = groupBy(pi.data, 'merchant_id'), storiesOf = groupBy(si.data, 'merchant_id');
+    const next = {};
+    mi.data.forEach(({ id }) => {
+      const base = rowById.has(id) ? restaurantFromRow(rowById.get(id)) : cloud.restaurants[id];
+      if (!base) return;
+      const rating = cloud.ratings.get(id);
+      next[id] = {
+        ...base,
+        promos: (promosOf[id] || []).map((x) => knownPromos.get(x.id)).filter(Boolean),
+        stories: (storiesOf[id] || []).map((x) => knownStories.get(x.id)).filter(Boolean),
+        rating: rating && rating.count ? rating : null,
+      };
+    });
+    cloud.restaurants = next;
+    Cache.save();
+    return cloud.restaurants;
+  }
+
+  /** Notes moyennes seulement (un avis publié, modifié ou retiré). */
+  async function refreshRatings() {
+    const { data, error } = await sb.rpc('merchant_ratings');
+    if (error) throw error;
+    cloud.ratings = ratingsFrom(data);
+    Object.values(cloud.restaurants).forEach((r) => { const x = cloud.ratings.get(r.id); r.rating = x && x.count ? x : null; });
+  }
+
+  /** Un seul restaurant (changement signalé en direct) : trois petites lectures au lieu de tout recharger. */
+  async function refreshMerchant(id) {
+    const seq = ++loadSeq;
+    const [m, pr, st] = await Promise.all([
+      sb.from('merchants').select('*').eq('id', id).maybeSingle(),
+      promoFilter(sb.from('promotions').select('*').eq('merchant_id', id)),
+      sb.from('stories').select('*').eq('merchant_id', id).gt('expires_at', liveSince()),
+    ]);
+    const error = m.error || pr.error || st.error;
+    if (error) throw error;
+    if (seq < appliedSeq) return;
+    appliedSeq = seq;
+    if (m.data) cloud.restaurants[id] = restaurantFromRow(m.data, pr.data, st.data, cloud.ratings.get(id));
+    else delete cloud.restaurants[id];
+    Cache.save();
+  }
+
+  /**
+   * Dernières fiches vues, gardées sur l'appareil (données publiques uniquement) : la carte s'affiche tout de suite,
+   * même si le serveur est lent ou injoignable, puis se met à jour.
+   */
+  const Cache = (() => {
+    const KEY = 'flashmiam:restaurants', MAX_AGE = 3 * 864e5, MAX_SIZE = 1.5e6;
+    let savedAt = 0;
+    function save() {
+      if (Date.now() - savedAt < 20000) return;              // au plus une écriture toutes les 20 s
+      savedAt = Date.now();
+      try {
+        const restaurants = Object.values(cloud.restaurants).filter((r) => r.published);
+        const json = JSON.stringify({ v: 1, at: Date.now(), restaurants });
+        if (json.length < MAX_SIZE) localStorage.setItem(KEY, json); else localStorage.removeItem(KEY);
+      } catch (e) { /* stockage plein ou indisponible : sans importance */ }
+    }
+    function load() {
+      try {
+        const c = JSON.parse(localStorage.getItem(KEY));
+        if (!c || c.v !== 1 || Date.now() - c.at > MAX_AGE || !Array.isArray(c.restaurants)) return false;
+        cloud.restaurants = Object.fromEntries(c.restaurants.map((r) => [r.id, r]));
+        cloud.fromCache = true;
+        return true;
+      } catch (e) { return false; }
+    }
+    return { save, load };
+  })();
 
   /** Justificatifs déposés (stockage privé « documents ») : nom de fichier « type--horodatage--nom d'origine ». */
   const safeName = (name) => name.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w.-]+/g, '_').slice(-60) || 'fichier';
@@ -2631,11 +2897,13 @@
 
   /** Compte connecté : profil, restaurants suivis et, pour un restaurateur, son inscription. */
   async function loadUser(authUser) {
-    const [{ data: profile, error }, { data: follows }] = await Promise.all([
+    const [{ data: profile, error, status }, { data: follows, error: followsError }] = await Promise.all([
       sb.from('profiles').select('*').eq('id', authUser.id).maybeSingle(),
       sb.from('follows').select('merchant_id, created_at'),
     ]);
-    if (error || !profile) throw error || new Error('Profil introuvable');
+    if (error) { error.status = status; throw error; }
+    if (!profile) { const e = new Error('Profil introuvable'); e.status = 404; e.auth = true; throw e; }
+    if (followsError) throw followsError;
     const providers = (authUser.app_metadata && (authUser.app_metadata.providers || [authUser.app_metadata.provider])) || [];
     const user = {
       id: authUser.id, email: authUser.email, role: profile.role === 'merchant' ? 'pro' : 'client',
@@ -2649,11 +2917,36 @@
     return user;
   }
 
+  /** Session refusée par le serveur (jeton expiré ou invalide, compte supprimé) : seul cas où l'on déconnecte. */
+  const sessionRejected = (e) => !!(e && (e.auth || e.status === 401 || e.status === 403
+    || /^PGRST30[123]$/.test(e.code || '') || /jwt/i.test(e.message || '')));
+  /**
+   * Compte au démarrage. Serveur saturé ou réseau coupé : on réessaie (les lectures sont déjà retentées par Net),
+   * puis on propose « Réessayer » sans jamais déconnecter la personne pour une panne passagère.
+   */
+  async function bootUser(authUser) {
+    for (let round = 0; ; round++) {
+      try { return await loadUser(authUser); }
+      catch (e) {
+        if (sessionRejected(e)) throw e;
+        if (round < 2) { await new Promise((r) => setTimeout(r, 1500 * (round + 1) * (0.7 + Math.random() * 0.6))); continue; }
+        Loader.endBoot();
+        await new Promise((resolve) => {
+          fatal('FlashMiam est très demandé', 'Le serveur met trop de temps à répondre. Vous restez connecté : réessayez dans un instant.', { retry: resolve });
+        });
+        round = -1;
+      }
+    }
+  }
+
   /** Message compréhensible pour une erreur du serveur. */
   function cloudError(e) {
     if (!navigator.onLine) return 'Vous êtes hors connexion. Vérifiez votre connexion internet puis réessayez.';
     const code = e && (e.code || e.error_code);
     if (e && (e.status === 429 || /rate.?limit/i.test(code || '') || /rate limit/i.test(e.message || ''))) return 'Trop de demandes en peu de temps. Patientez quelques minutes puis réessayez.';
+    const text = String((e && (e.message || e.name)) || '');
+    if (/TimeoutError|Délai dépassé|AbortError|Failed to fetch|NetworkError|Load failed/i.test(text) || (e && e.status >= 500))
+      return 'FlashMiam est très demandé en ce moment : le serveur n\'a pas répondu à temps. Réessayez dans un instant.';
     return 'Le serveur n\'a pas pu traiter la demande' + (e && e.message ? ' (' + e.message + ')' : '') + '. Réessayez dans un instant.';
   }
 
@@ -2668,38 +2961,138 @@
         try {
           await loadRestaurants();
           if (cloud.user && cloud.user.role === 'pro') cloud.user.pro = await loadPro(cloud.user);
-          whenMapReady(syncShopMarkers);
-          if (ProSpace.isOpen()) ProSpace.render();
+          applyCloud();
         } catch (e) { console.warn('Actualisation impossible', e); }
         waiters.forEach((w) => w());
       }, delay);
     });
   }
+  /** Données mises à jour : carte, liste, stories, espace restaurateur. */
+  function applyCloud() {
+    whenMapReady(syncShopMarkers);
+    if (ProSpace.isOpen()) ProSpace.render();
+  }
   /** La carte suit les données : nouvelles fiches, fiches modifiées ou retirées, stories et promotions. */
+  let markerBatch = false;
   function syncShopMarkers() {
     const shops = allShops();
     const ids = new Set(shops.map((sh) => sh.id));
-    [...markers.keys()].forEach((id) => { if (!ids.has(id)) removeShopMarker(id); });
-    shops.forEach((sh) => { const m = markers.get(sh.id); if (!m || (sh.isPro && JSON.stringify(m.shop) !== JSON.stringify(sh))) upsertShopMarker(sh); });
+    markerBatch = true;                                       // un seul recalcul des états et de la liste à la fin
+    let changed = false;
+    try {
+      [...markers.keys()].forEach((id) => { if (!ids.has(id)) { removeShopMarker(id); changed = true; } });
+      shops.forEach((sh) => { const m = markers.get(sh.id); if (!m || (sh.isPro && JSON.stringify(m.shop) !== JSON.stringify(sh))) { upsertShopMarker(sh); changed = true; } });
+    } finally { markerBatch = false; }
+    if (changed) refreshStatuses(); else renderList();   // (compteur « mise à jour… » retiré)
     if (!StoryViewer.isOpen()) renderStories();
   }
-  /** Mises à jour en direct (temps réel Supabase), avec une actualisation régulière en secours. */
-  function subscribeLive() {
-    try {
-      const again = () => refreshCloud(800);
-      sb.channel('carte')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'merchants' }, again)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'stories' }, again)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'promotions' }, again)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, (ev) => {
-          again();
-          const id = (ev.new && ev.new.merchant_id) || (ev.old && ev.old.merchant_id);
-          if (id && id === selectedId) Reviews.refresh(id);
-        })
-        .subscribe();
-    } catch (e) { /* temps réel indisponible : l'actualisation régulière suffit */ }
-    setInterval(() => { if (!document.hidden) refreshCloud(); }, 2 * 60 * 1000);
-  }
+  /**
+   * Mises à jour en direct, pensées pour beaucoup de visiteurs en même temps :
+   *  - une story ou une promo publiée arrive avec le message du temps réel : aucune requête ;
+   *  - un autre changement : seul le restaurant concerné est relu, après un délai au hasard (0,5 à 3 s) pour que
+   *    tous les visiteurs ne frappent pas le serveur à la même seconde ;
+   *  - actualisation complète de secours, étalée elle aussi : toutes les 4 à 6 min (2 min si le temps réel est coupé) ;
+   *  - onglet caché depuis 3 min : connexion temps réel fermée (le serveur en accepte un nombre limité), rouverte au retour.
+   */
+  const Live = (() => {
+    const HIDE_AFTER = 3 * 60e3;
+    const jitter = (min, max) => min + Math.random() * (max - min);
+    let channel = null, joined = false, pollTimer = null, flushTimer = null, hiddenTimer = null, hiddenAt = 0, refused = 0, retryTimer = null;
+    const pending = new Set();
+    let paintQueued = false;
+    const paintSoon = () => { if (paintQueued) return; paintQueued = true; requestAnimationFrame(() => { paintQueued = false; applyCloud(); }); };
+
+    function connect() {
+      if (channel || !sb || refused >= 3) return;            // (serveur temps réel complet : on attend la fin de la pause)
+      try {
+        channel = sb.channel('carte')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'merchants' }, (ev) => handle('merchants', ev))
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'stories' }, (ev) => handle('stories', ev))
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'promotions' }, (ev) => handle('promotions', ev))
+          .subscribe((status) => {
+            const was = joined;
+            joined = status === 'SUBSCRIBED';
+            if (joined) refused = 0;
+            if (was !== joined) schedule();
+            // Serveur temps réel complet (nombre de connexions limité) : on cesse d'insister pendant ~10 min,
+            // l'actualisation régulière prend le relais
+            if ((status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') && ++refused >= 3) {
+              disconnect();
+              clearTimeout(retryTimer);
+              retryTimer = setTimeout(() => { refused = 0; if (!document.hidden) connect(); }, jitter(8, 12) * 60e3);
+            }
+          });
+      } catch (e) { channel = null; joined = false; }
+      schedule();
+    }
+    function disconnect() {
+      if (channel) { try { sb.removeChannel(channel); } catch (e) { /* ignore */ } }
+      channel = null; joined = false;
+    }
+    function handle(table, ev) {
+      const row = (ev.new && Object.keys(ev.new).length ? ev.new : ev.old) || {};
+      const key = table === 'stories' ? 'stories' : 'promos';
+      const complete = !(ev.errors && ev.errors.length);
+      if (table !== 'merchants' && ev.eventType === 'INSERT' && complete && cloud.restaurants[row.merchant_id]) {
+        const r = cloud.restaurants[row.merchant_id];
+        if (!r[key].some((x) => x.id === row.id)) r[key] = [...r[key], table === 'stories' ? storyFromRow(row) : promoFromRow(row)];
+        paintSoon();
+        return;
+      }
+      if (table !== 'merchants' && ev.eventType === 'DELETE' && row.id) {
+        Object.values(cloud.restaurants).forEach((r) => { if (r[key].some((x) => x.id === row.id)) r[key] = r[key].filter((x) => x.id !== row.id); });
+        paintSoon();
+        return;
+      }
+      touch(table === 'merchants' ? row.id : row.merchant_id);
+    }
+    /** Restaurant à relire bientôt (id inconnu : tout relire) ; « ratings » : un avis a changé sa note. */
+    let ratingsDue = false;
+    function touch(id, { ratings = false } = {}) {
+      pending.add(id || '*');
+      if (ratings) ratingsDue = true;
+      if (!flushTimer) flushTimer = setTimeout(flush, jitter(500, 3000));
+    }
+    async function flush() {
+      flushTimer = null;
+      const ids = [...pending], withRatings = ratingsDue;
+      pending.clear();
+      ratingsDue = false;
+      try {
+        if (ids.includes('*') || ids.length > 3) await syncRestaurants();        // (notes comprises)
+        else {
+          await Promise.all([...ids.map(refreshMerchant), withRatings ? refreshRatings() : null]);
+        }
+        applyCloud();
+      } catch (e) { /* le serveur ne répond pas : la prochaine actualisation régulière s'en chargera */ }
+    }
+    function schedule() {
+      clearTimeout(pollTimer);
+      if (document.hidden) return;
+      const every = joined ? jitter(4, 6) * 60e3 : jitter(1.6, 2.4) * 60e3;
+      pollTimer = setTimeout(async () => {
+        if (!document.hidden) { try { await syncRestaurants(); applyCloud(); } catch (e) { /* nouvel essai au prochain tour */ } }
+        schedule();
+      }, every);
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        hiddenAt = Date.now();
+        clearTimeout(pollTimer);
+        hiddenTimer = setTimeout(() => { disconnect(); Notifs.disconnect(); }, HIDE_AFTER);
+        return;
+      }
+      clearTimeout(hiddenTimer);
+      const away = Date.now() - hiddenAt;
+      connect();
+      Notifs.connect();
+      if (hiddenAt && away > 60e3) touch('*');                 // retour après une absence : données remises à jour
+      schedule();
+    });
+    // Connexion revenue, ou « Réessayer » : tout relire
+    Net.onRecover(() => { touch('*'); Notifs.load(); });
+    return { connect, touch, handle, isJoined: () => joined };
+  })();
 
   /** Distance à vol d'oiseau en mètres entre deux points [lng, lat]. */
   function distance(a, b) {
@@ -2965,10 +3358,12 @@
   }
   function hideToast() { $('toast').classList.remove('is-visible'); }
 
-  function fatal(title, text) {
+  /** Écran d'erreur ; avec « retry », le bouton relance l'opération au lieu de recharger la page. */
+  function fatal(title, text, { retry = null } = {}) {
     $('fatal-title').textContent = title;
     $('fatal-text').textContent = text;
     $('fatal').hidden = false;
+    $('fatal-retry').onclick = retry ? () => { $('fatal').hidden = true; retry(); } : () => location.reload();
   }
 
   /* =====================================================================
@@ -3259,7 +3654,19 @@
 
   /* ---------- b) Carte de secours (MapLibre) ---------- */
 
-  function createMapLibreView(theme) {
+  /** MapLibre est chargé en parallèle du site : on attend qu'il soit là (ou en échec) avant de créer la carte. */
+  function mapLibreLoaded() {
+    if (window.maplibregl || window.__maplibreFailed) return Promise.resolve();
+    return new Promise((resolve) => {
+      const s = $('maplibre-script');
+      s.addEventListener('load', resolve, { once: true });
+      s.addEventListener('error', resolve, { once: true });
+      const t = setInterval(() => { if (window.maplibregl || window.__maplibreFailed) { clearInterval(t); resolve(); } }, 200);
+    });
+  }
+
+  async function createMapLibreView(theme) {
+    await mapLibreLoaded();
     return new Promise((resolve, reject) => {
       if (typeof maplibregl === 'undefined') return reject(new Error('MapLibre indisponible'));
       let map;
@@ -3382,8 +3789,7 @@
     window.RocheStreetFood.view = view;
   }
 
-  window.addEventListener('offline', () => toast('Vous êtes hors connexion.'));
-  window.addEventListener('online', () => toast('Connexion rétablie.'));
+  // (connexion perdue ou retrouvée : bandeau d'état, voir Net)
 
   // Libellés visibles de près, marqueurs compacts de loin
   function updateLabelVisibility() {
@@ -3501,7 +3907,7 @@
     createShopMarker(shop);
     if (selectedId === shop.id) { markers.get(shop.id).el.classList.add('is-selected'); galleryFor = null; }
     listSignature = '';
-    refreshStatuses();
+    if (!markerBatch) refreshStatuses();
   }
   function removeShopMarker(id) {
     const m = markers.get(id);
@@ -3560,7 +3966,7 @@
 
     if (view) requestAnimationFrame(declutterLabels);
     const openCount = all.filter((m) => m.status.open).length;
-    $('shop-count').textContent = all.length + ' adresses · ' + openCount + ' ouvertes';
+    $('shop-count').textContent = all.length + ' adresses · ' + openCount + ' ouvertes' + (cloud.synced ? '' : ' · mise à jour…');
     $('shop-empty').hidden = items.length > 0;
 
     const searching = filters.q.length > 0 || filters.max !== null;
@@ -3895,8 +4301,9 @@
       cache.set(id, { list: data || [], at: Date.now() });
       return data || [];
     }
+    const failed = new Set();                // fiches dont les avis n'ont pas pu être chargés
     async function refresh(id) {
-      try { await load(id); } catch (e) { return; }
+      try { await load(id); failed.delete(id); } catch (e) { failed.add(id); }
       const m = markers.get(id);
       if (m && selectedId === id) draw(m.shop);
     }
@@ -3986,7 +4393,21 @@
       ul.textContent = '';
       $('rv-empty').hidden = !list || list.length > 0;
       $('rv-empty').textContent = canReview(shop, me) ? 'Pas encore d\'avis. Soyez le premier à donner le vôtre !' : 'Pas encore d\'avis sur ce restaurant.';
-      if (!list) { const li = document.createElement('li'); li.className = 'rv-empty'; li.textContent = 'Chargement des avis…'; ul.appendChild(li); return; }
+      if (!list && failed.has(shop.id)) {
+        const li = document.createElement('li');
+        li.className = 'rv-empty load-failed';
+        li.innerHTML = '<span>Les avis n\'ont pas pu être chargés : le serveur est très demandé.</span><button class="pill-btn" type="button">Réessayer</button>';
+        li.querySelector('button').addEventListener('click', () => { failed.delete(shop.id); draw(shop); refresh(shop.id); });
+        ul.appendChild(li);
+        return;
+      }
+      if (!list) {
+        ul.setAttribute('aria-busy', 'true');
+        for (let i = 0; i < 3; i++) { const li = document.createElement('li'); li.className = 'rv-item skel-item'; li.innerHTML = '<i class="skel" style="width:40%"></i><i class="skel"></i><i class="skel" style="width:70%"></i>'; ul.appendChild(li); }
+        const sr = document.createElement('li'); sr.className = 'visually-hidden'; sr.textContent = 'Chargement des avis…'; ul.appendChild(sr);
+        return;
+      }
+      ul.removeAttribute('aria-busy');
       const ordered = mine ? [mine, ...list.filter((r) => r !== mine)] : list;
       ordered.forEach((r) => ul.appendChild(item(shop, r, { mine: r === mine && !editing, own })));
       if (mine && editing) ul.firstChild.remove();
@@ -4243,7 +4664,12 @@
   const StoryLikes = (() => {
     let mine = null, loading = null, cur = null;
     async function load() {
-      if (!loading) loading = sb.from('story_likes').select('story_id').then(({ data }) => { mine = new Set((data || []).map((r) => r.story_id)); });
+      if (!loading) {
+        loading = sb.from('story_likes').select('story_id').then(({ data, error }) => {
+          if (error) { loading = null; if (!mine) mine = new Set(); return; }   // nouvel essai à la prochaine story
+          mine = new Set((data || []).map((r) => r.story_id));
+        });
+      }
       return loading;
     }
     /** Cœur de la story affichée (restaurants inscrits, pas sa propre story). */
@@ -4259,18 +4685,24 @@
       b.textContent = on ? '♥' : '♡';
       b.setAttribute('aria-label', on ? 'Je n\'aime plus cette story' : 'J\'aime cette story');
     }
+    const busy = new Set();
     $('sv-like').addEventListener('click', async (ev) => {
       ev.stopPropagation();
-      if (!cur) return;
+      if (!cur || busy.has(cur.st.id)) return;
       const { shop, st } = cur;
-      const { data, error } = await sb.rpc('toggle_story_like', { p_story_id: st.id });
-      if (error) { toast(missingFn(error) ? LIKES_SOON : cloudError(error)); return; }
+      busy.add(st.id);
       await load();
-      if (data) mine.add(st.id); else mine.delete(st.id);
-      if (cur && cur.st === st) {
-        paint(shop, st);
-        if (data) { const b = $('sv-like'); b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); }
-      }
+      const was = mine.has(st.id);
+      const set = (on) => {
+        if (on) mine.add(st.id); else mine.delete(st.id);
+        if (cur && cur.st === st) paint(shop, st);
+      };
+      set(!was);                                              // tout de suite, sans attendre le serveur
+      if (!was) { const b = $('sv-like'); b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); }
+      const { data, error } = await sb.rpc('toggle_story_like', { p_story_id: st.id });
+      busy.delete(st.id);
+      if (error) { set(was); toast(missingFn(error) ? LIKES_SOON : cloudError(error)); return; }
+      if (data !== !was) set(data);                           // le serveur a le dernier mot
     });
     return { paint };
   })();
@@ -4283,6 +4715,7 @@
         sb.rpc('dish_like_counts', { p_merchant_id: id }),
         me ? sb.from('dish_likes').select('dish').eq('merchant_id', id) : Promise.resolve({ data: [] }),
       ]);
+      if (c.error || m.error) throw c.error || m.error;        // serveur saturé : on garde les compteurs affichés
       cache.set(id, { counts: new Map((c.data || []).map((r) => [r.dish, r.likes])), mine: new Set((m.data || []).map((r) => r.dish)), at: Date.now() });
     }
     /** Cœurs de la carte affichée ; compteurs rechargés au besoin. */
@@ -4322,17 +4755,26 @@
         }
       });
     }
+    const busy = new Set();
     async function toggle(id, dish) {
       if (!currentUser()) return;
-      const { data, error } = await sb.rpc('toggle_dish_like', { p_merchant_id: id, p_dish: dish });
-      if (error) { toast(missingFn(error) ? LIKES_SOON : cloudError(error)); return; }
+      const key = id + '|' + dish;
+      if (busy.has(key)) return;                              // double appui : une seule demande
+      busy.add(key);
       const c = cache.get(id) || { counts: new Map(), mine: new Set(), at: 0 };
-      const was = c.mine.has(dish);
-      if (data && !was) { c.mine.add(dish); c.counts.set(dish, (c.counts.get(dish) || 0) + 1); }
-      if (!data && was) { c.mine.delete(dish); c.counts.set(dish, Math.max(0, (c.counts.get(dish) || 1) - 1)); }
       cache.set(id, c);
-      const m = markers.get(id);
-      if (m && selectedId === id) decorate(m.shop, c);
+      const was = c.mine.has(dish);
+      const set = (on) => {
+        if (on && !c.mine.has(dish)) { c.mine.add(dish); c.counts.set(dish, (c.counts.get(dish) || 0) + 1); }
+        if (!on && c.mine.has(dish)) { c.mine.delete(dish); c.counts.set(dish, Math.max(0, (c.counts.get(dish) || 1) - 1)); }
+        const m = markers.get(id);
+        if (m && selectedId === id) decorate(m.shop, c);
+      };
+      set(!was);                                              // tout de suite, sans attendre le serveur
+      const { data, error } = await sb.rpc('toggle_dish_like', { p_merchant_id: id, p_dish: dish });
+      busy.delete(key);
+      if (error) { set(was); toast(missingFn(error) ? LIKES_SOON : cloudError(error)); return; }
+      if (data !== !was) set(data);                           // le serveur a le dernier mot
       if (data) toast('Vous aimez « ' + dish + ' » : le restaurant le saura (sans votre nom).');
     }
     return { render, cache };
@@ -4361,6 +4803,7 @@
     cloud.ready.then(() => whenMapReady(() => {
       syncShopMarkers();
       const m = markers.get(link.id);
+      if (!m && cloud.fromCache) { cloud.loaded.then(() => { if (!cloud.fromCache) openLink(link); }); return; }   // pas encore dans les données de la dernière visite
       if (!m) { toast('Ce restaurant n\'est plus visible sur la carte.'); return; }
       if (link.tab === 'story' && liveStories(m.shop).length) { StoryViewer.open(m.shop.id, { only: true }); return; }
       openShop(m.shop.id, { source: link.source || 'link' });
@@ -4404,7 +4847,8 @@
     }
     /** Nouvelle notification pendant l'utilisation : la cloche sonne, un message propose de la voir. */
     function announce(fresh) {
-      refreshCloud(300);                       // nouvelle promo, story ou avis : données à jour sans attendre
+      // nouvelle promo, story ou avis : seuls les restaurants concernés sont relus (étalé dans le temps, voir Live)
+      fresh.forEach((n) => Live.touch(n.merchant_id, { ratings: n.kind === 'review' }));
       fresh.forEach((n) => { if (n.kind === 'review' || n.kind === 'reply') Reviews.cache.delete(n.merchant_id); });
       const btn = $('notif-btn');
       btn.classList.remove('ring'); void btn.offsetWidth; btn.classList.add('ring');
@@ -4489,21 +4933,52 @@
       toast(on ? 'Notification activée.' : 'Notification désactivée.');
     }));
 
+    /*
+     * Arrivée des notifications : en direct quand c'est possible, sinon relève régulière (1 min).
+     * En direct, une relève de secours toutes les 5 min suffit. Onglet caché : plus de relève, sauf si les alertes
+     * de l'appareil sont demandées sans « push » (alors toutes les 2 min).
+     */
+    let channel = null, joined = false, pollTimer = null, refused = 0;
+    function connect() {
+      if (!started || channel || !currentUser() || refused >= 3) return;
+      try {
+        channel = sb.channel('notifs-' + currentUser().id)
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: 'user_id=eq.' + currentUser().id }, () => load())
+          .subscribe((status) => {
+            const was = joined;
+            joined = status === 'SUBSCRIBED';
+            if (joined) refused = 0;
+            if (was !== joined) schedule();
+            if ((status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') && ++refused >= 3) {   // serveur temps réel complet : relève régulière
+              disconnect();
+              setTimeout(() => { refused = 0; if (!document.hidden) connect(); }, (8 + Math.random() * 4) * 60e3);
+            }
+          });
+      } catch (e) { channel = null; joined = false; }
+    }
+    function disconnect() {
+      if (channel) { try { sb.removeChannel(channel); } catch (e) { /* ignore */ } }
+      channel = null; joined = false;
+      schedule();
+    }
+    function schedule() {
+      clearTimeout(pollTimer);
+      if (!started) return;
+      if (document.hidden && !Device.background()) return;
+      const every = document.hidden ? 2 * 60e3 : joined ? 5 * 60e3 : CONFIG.notifPollMs;
+      pollTimer = setTimeout(() => { load(); schedule(); }, every * (0.8 + Math.random() * 0.4));
+    }
     function start() {
       if (started || !currentUser()) return;
       started = true;
       load();
-      setInterval(() => { if (!document.hidden) load(); }, CONFIG.notifPollMs);
-      document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
-      try {
-        sb.channel('notifs-' + currentUser().id)
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: 'user_id=eq.' + currentUser().id }, () => load())
-          .subscribe();
-      } catch (e) { /* temps réel indisponible : actualisation régulière */ }
+      connect();
+      schedule();
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); schedule(); });
       Device.sync();
     }
     $('notif-btn').addEventListener('click', open);
-    return { start, load, open, openItem, get items() { return items; }, unread, DEVICE_KEY };
+    return { start, load, open, openItem, connect, disconnect, get items() { return items; }, unread, DEVICE_KEY };
   })();
 
   /* ---------- Alertes sur l'appareil (notifications du système), y compris FlashMiam fermé ---------- */
@@ -4559,7 +5034,9 @@
         if (u.searchParams.get('r')) openLink({ id: u.searchParams.get('r'), tab: u.searchParams.get('t'), source: 'notif' });
       });
     }
-    return { supported, register, renderPref, sync, alert };
+    /** Alertes de l'appareil demandées, sans abonnement « push » : la page doit continuer à relever les notifications en arrière-plan. */
+    const background = () => supported && wanted() && Notification.permission === 'granted' && !Push.active();
+    return { supported, register, renderPref, sync, alert, background };
   })();
 
   /* ---------- Notifications « push » : alertes même quand FlashMiam est fermé (fonction serveur send-push) ---------- */
@@ -4744,13 +5221,17 @@
     galleryUrls.forEach((url, i) => {
       const alt = shop.name + ' — photo ' + (i + 1);
       const img = document.createElement('img');
-      img.src = url; img.alt = alt; img.decoding = 'async';
+      img.alt = alt; img.decoding = 'async';
+      if (i > 0) img.loading = 'lazy';                      // photos suivantes : chargées quand on fait défiler
+      watchLoad(img);
+      img.src = url;
       img.addEventListener('click', () => Lightbox.open(i));
       box.appendChild(img);
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.setAttribute('aria-label', 'Agrandir la photo ' + (i + 1));
-      btn.innerHTML = '<img alt="" decoding="async" />';
+      btn.innerHTML = '<img alt="" decoding="async" loading="lazy" />';
+      watchLoad(btn.firstChild);
       btn.firstChild.src = url;
       btn.addEventListener('click', () => Lightbox.open(i));
       grid.appendChild(btn);
@@ -5364,8 +5845,6 @@
     $('pd-stories').hidden = !(r && r.published);
     if (!r || !r.published) return;
     const stories = liveStories(r);
-    const old = (r.stories || []).filter((st) => Date.now() - new Date(st.expiresAt) > STORY_KEEP_DAYS * 864e5);
-    if (old.length) cleanupStories(old);
     const list = $('pd-story-list');
     const items = document.createDocumentFragment();
     $('pd-story-new').disabled = stories.length >= MAX_STORIES;
@@ -5395,10 +5874,15 @@
   /** Stories expirées depuis plus de 30 jours : retirées de la base et leurs photos supprimées du stockage
    *  (gardées 30 jours après la fin de leur diffusion pour les statistiques de l'espace restaurateur). */
   const STORY_KEEP_DAYS = 30;
-  async function cleanupStories(expired) {
-    const ids = expired.map((st) => st.id);
-    const { error } = await sb.from('stories').delete().in('id', ids);
-    if (!error) await removeFiles('stories', expired.map((st) => st.imagePath).filter(Boolean));
+  let storiesCleaned = false;
+  async function cleanupStories(merchantId) {
+    if (storiesCleaned) return;                               // une fois par visite suffit
+    storiesCleaned = true;
+    const before = new Date(Date.now() - STORY_KEEP_DAYS * 864e5).toISOString();
+    const { data } = await sb.from('stories').select('id, image_path').eq('merchant_id', merchantId).lt('expires_at', before).limit(200);
+    if (!data || !data.length) return;
+    const { error } = await sb.from('stories').delete().in('id', data.map((st) => st.id));
+    if (!error) await removeFiles('stories', data.map((st) => st.image_path).filter(Boolean));
   }
 
   /* ---------- Espace restaurateur : promotions ---------- */
@@ -7073,7 +7557,16 @@
     const root = $('pro-space');
     const TABS = ['home', 'stats', 'publish', 'reviews', 'fiche'];
     let tab = 'home', days = 7, data = null, token = 0, timer = null, lastFocus = null;
-    let rvList = null, rvFilter = 'todo', replyFor = null, rvToken = 0;
+    let rvList = null, rvFilter = 'todo', replyFor = null, rvToken = 0, failed = false;
+    /** Statistiques indisponibles (serveur saturé) : message et bouton « Réessayer ». */
+    function retryBox(text) {
+      const p = document.createElement('div');
+      p.className = 'ps-alert load-failed';
+      p.innerHTML = '<p></p><button class="pill-btn" type="button">Réessayer</button>';
+      p.querySelector('p').textContent = text;
+      p.querySelector('button').addEventListener('click', () => { failed = false; renderHome(); if (tab === 'stats') renderStatsTab(); load(); });
+      return p;
+    }
     const isOpen = () => !root.hidden;
     const nf = (n) => Number(n || 0).toLocaleString('fr-FR');
     const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
@@ -7099,6 +7592,8 @@
       setTab(t, { focus: true });
       render();
       load();
+      const mine = myRestaurant(account);
+      if (mine) cleanupStories(mine.id).catch(() => {});
       clearInterval(timer);
       timer = setInterval(() => { if (!document.hidden && tab !== 'publish') load(); }, 60 * 1000);
     }
@@ -7147,8 +7642,13 @@
       const t = ++token;
       const { data: d, error } = await sb.rpc('my_merchant_analytics', { p_days: days });
       if (t !== token || !isOpen()) return;
-      if (error || !d) { if (!data) $('ps-period-sub').textContent = 'Statistiques indisponibles pour le moment.'; return; }
+      if (error || !d) {
+        failed = !data;
+        if (failed) { renderHome(); if (tab === 'stats') renderStatsTab(); }
+        return;
+      }
       data = d;
+      failed = false;
       renderHome();
       badge();
       if (tab === 'stats') renderStatsTab();
@@ -7172,7 +7672,7 @@
       if (r && r.status !== 'draft') sub.append(' · ' + catOf(r).label);
       renderHome();
       badge();
-      if (tab === 'stats') renderStatsTab();
+      // (statistiques : redessinées seulement quand elles changent, voir load() ; pas à chaque mise à jour de la carte)
       if (tab === 'publish') renderPublish();
       if (tab === 'fiche') renderFiche();
     }
@@ -7236,7 +7736,8 @@
         b.innerHTML = '<span class="kpi-label"><span aria-hidden="true"></span><span></span></span><strong></strong>';
         b.querySelector('.kpi-label span').textContent = c.ico;
         b.querySelector('.kpi-label span:last-child').textContent = c.label;
-        b.querySelector('strong').textContent = T ? nf(c.v) : '…';
+        b.querySelector('strong').textContent = T ? nf(c.v) : failed ? '–' : '…';
+        if (!T && !failed) b.querySelector('strong').classList.add('skel-text');
         if (T && c.prev != null) b.appendChild(trend(c.v, c.prev));
         if (T && c.extra) { const x = document.createElement('span'); x.className = 'trend' + (T.new_followers ? ' is-up' : ''); x.textContent = c.extra; b.appendChild(x); }
         b.setAttribute('aria-label', c.label + ' : ' + (T ? nf(c.v) : 'chargement') + ' — voir les statistiques');
@@ -7281,6 +7782,7 @@
       ul.textContent = '';
       const add = (ico, html) => { const li = document.createElement('li'); li.innerHTML = '<span aria-hidden="true"></span><span></span>'; li.firstChild.textContent = ico; li.lastChild.append(...html); ul.appendChild(li); };
       const b = (t) => { const e = document.createElement('b'); e.textContent = t; return e; };
+      if (!data && failed) { const li = document.createElement('li'); li.className = 'ps-retry'; li.appendChild(retryBox('Les statistiques n\'ont pas pu être chargées : le serveur est très demandé.')); ul.appendChild(li); return; }
       if (!data) { add('⏳', ['Chargement des statistiques…']); return; }
       const T = data.totals;
       if (!T.views && !T.followers && !T.story_views) {
@@ -7338,7 +7840,14 @@
     function renderStatsTab() {
       if (!isOpen() || tab !== 'stats') return;
       document.querySelectorAll('#ps-period button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.days) === days)));
-      if (!data) { $('ps-period-sub').textContent = stateOf().listed ? 'Chargement…' : 'Les statistiques apparaîtront quand votre fiche sera en ligne.'; return; }
+      if (!data) {
+        $('ps-period-sub').textContent = !stateOf().listed ? 'Les statistiques apparaîtront quand votre fiche sera en ligne.' : failed ? '' : 'Chargement…';
+        const k = $('ps-kpis');
+        k.textContent = '';
+        if (failed) { k.appendChild(retryBox('Les statistiques n\'ont pas pu être chargées : le serveur est très demandé.')); return; }
+        if (stateOf().listed) for (let i = 0; i < 8; i++) { const d = document.createElement('div'); d.className = 'kpi'; d.innerHTML = '<i class="skel" style="width:60%"></i><i class="skel" style="height:26px;width:40%"></i>'; k.appendChild(d); }
+        return;
+      }
       const T = data.totals, P = data.previous;
       $('ps-period-sub').textContent = 'Du ' + shortDate(data.period.from) + ' au ' + shortDate(data.period.to) + ' · évolution comparée aux ' + plural(days, 'jour', 'jours') + ' précédents';
       const k = $('ps-kpis');
@@ -7715,7 +8224,7 @@
      restaurateur dont l'inscription n'est pas terminée → reprise à la bonne étape.
      ===================================================================== */
 
-  window.RocheStreetFood = { view: null, Geo, SHOPS, getStatus, refreshStatuses, setTheme, isValidSiret, restaurants, cloud, sb, Search, Reviews, Notifs, Push, Offers, Consent };
+  window.RocheStreetFood = { view: null, Geo, SHOPS, getStatus, refreshStatuses, setTheme, isValidSiret, restaurants, cloud, sb, Search, Reviews, Notifs, Push, Offers, Consent, Net, Live };
 
   setTheme(currentTheme());
   applyLayout();
@@ -7731,8 +8240,23 @@
   if (!sb) {
     fatal('Service momentanément indisponible', 'FlashMiam n\'a pas pu joindre son serveur. Vérifiez votre connexion internet, puis rechargez la page.');
   } else {
-    // Fiches en ligne : chargées en parallèle de la carte, puis affichées dès que les deux sont prêtes
-    cloud.ready = loadRestaurants().then(() => whenMapReady(syncShopMarkers), (e) => { console.warn(e); toast('Les restaurants n\'ont pas pu être chargés. ' + cloudError(e)); });
+    // Fiches en ligne : celles de la dernière visite s'affichent tout de suite (si elles existent), puis sont mises à jour.
+    // Serveur saturé : nouvelles tentatives espacées, sans bloquer le reste du site.
+    const cached = Cache.load();
+    if (cached) whenMapReady(syncShopMarkers);
+    const firstLoad = (async () => {
+      for (let i = 0; ; i++) {
+        try { await loadRestaurants(); applyCloud(); return; }
+        catch (e) {
+          console.warn('Chargement des restaurants', e);
+          Net.trouble('down');
+          if (i === 1 && !cached) toast('Le serveur est très demandé : les restaurants arrivent dans un instant.');
+          await new Promise((r) => setTimeout(r, Math.min(30000, 2000 * 2 ** i) * (0.7 + Math.random() * 0.6)));
+        }
+      }
+    })();
+    cloud.loaded = firstLoad;
+    cloud.ready = cached ? Promise.resolve() : firstLoad;
     // Lien « mot de passe oublié » ouvert depuis l'e-mail : choisir un nouveau mot de passe
     sb.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') setTimeout(() => showReset(session && session.user && session.user.email, { byLink: true }), 0);
@@ -7741,7 +8265,7 @@
       let user = null;
       try {
         const { data } = await sb.auth.getSession();
-        if (data.session) user = await loadUser(data.session.user);
+        if (data.session) user = await bootUser(data.session.user);
       } catch (e) { await sb.auth.signOut().catch(() => {}); }
       if (currentStep === 'reset-password') { /* lien de réinitialisation : déjà affiché */ }
       else if (user) {
@@ -7758,11 +8282,15 @@
       }
       Loader.endBoot();
     })();
-    subscribeLive();
+    Live.connect();
   }
 
   initMap();
   setInterval(() => { refreshStatuses(); if (!StoryViewer.isOpen()) renderStories(); }, 60 * 1000);
+  // Service worker pour tous : fichiers du site gardés sur l'appareil (visites suivantes instantanées), alertes
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => setTimeout(() => navigator.serviceWorker.register('sw.js').catch(() => {}), 1500));
+  }
 
   /* =====================================================================
      13. PWA : manifeste généré à la volée (fichier unique)
