@@ -74,10 +74,10 @@
 - Historique effacé après 90 jours ; stories gardées 30 jours après leur fin (visibles par leur seul restaurateur) pour
   leurs chiffres, puis supprimées avec leur photo. Pages Confidentialité mise à jour.
 - Fiche « masquée temporairement » (`merchants.is_open`, déjà modifiable par son seul propriétaire) : invisible partout.
-- En ligne : tables, règles d'accès, tableau de bord et compteurs **appliqués** (0 nouvelle alerte de sécurité).
-  **Reste un morceau** (`track_visit` et « j'aime ») : l'outil a demandé une confirmation que personne n'a pu donner.
-  Voir « Reste à faire ». En attendant, le site compte vues et clics avec l'ancien compteur et affiche
-  « Les « j'aime » arrivent très bientôt ».
+- **Entièrement en ligne** (23 octobre 2026) : les trois premiers morceaux appliqués par l'outil Supabase, le dernier
+  (`track_visit` et « j'aime », `web/supabase/manual/analytics_4_tracking_likes.sql`) collé dans le SQL Editor.
+  Vérifié : code identique à la version testée, droits conformes, 0 nouvelle alerte de sécurité ; contrôlé aussi
+  chaque semaine par `verifications.yml` (fonctions présentes, réservées comme prévu, données par personne illisibles).
 - Tests : 197 scénarios de sécurité ; 599 vérifications dans un navigateur (dont 70 pour l'espace restaurateur :
   chiffres exacts après les actions de trois clients, confidentialité, téléphone 320 px, ordinateur, et 5 pour le
   fonctionnement en attendant le dernier morceau).
@@ -132,9 +132,6 @@
 - Pages `confidentialite.html` et `conditions.html` (contact : flashmiampro@gmail.com).
 
 ### ⏳ Reste à faire
-- **Dernier morceau des statistiques détaillées** (2 minutes) : Supabase › *SQL Editor* › *New query* › coller le
-  contenu de `web/supabase/manual/analytics_4_tracking_likes.sql` › *Run*. (Ou me demander de réessayer : il faudra
-  alors accepter la demande de confirmation de l'outil Supabase.)
 - **Bloquant pour l'inscription par e-mail** (la connexion Google, elle, fonctionne déjà) :
   - *Emails › SMTP Settings* : Gmail (mot de passe d'application de flashmiampro@gmail.com) ou Brevo. Sans cela,
     Supabase n'envoie les e-mails qu'aux membres de l'équipe du projet, et au plus quelques-uns par heure.
