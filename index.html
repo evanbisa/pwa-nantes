@@ -548,7 +548,7 @@
     @keyframes jn-pop { 0% { opacity: 0; transform: scale(.3) rotate(-20deg); } 60% { opacity: 1; transform: scale(1.15) rotate(6deg); } 100% { transform: none; } }
     .jn-emoji.wave { animation: jn-wave 1s ease-in-out both; }
     @keyframes jn-wave { 0%, 100% { transform: none; } 20% { transform: rotate(18deg); } 40% { transform: rotate(-10deg); } 60% { transform: rotate(14deg); } 80% { transform: rotate(-4deg); } }
-    .join h1 em, .join h2 em { white-space: nowrap; }
+    .join h1 em, .join h2 em, .join .nw { white-space: nowrap; }
     .jn-hint { margin: 8px 0 0; font-size: 14px; line-height: 1.45; color: var(--muted); }
     .jn-field { margin-top: 18px; }
     .jn-field input { height: 56px; font-size: 19px; }
@@ -632,6 +632,25 @@
       .confetti { display: none; }
     }
     @media (max-width: 360px) { .jn-choices button { min-height: 92px; font-size: 14px; } .jn-age output { font-size: 54px; } .jn-screen { min-height: 330px; } }
+    /* Petits écrans (hauteur) : le bouton principal reste visible sans faire défiler */
+    @media (max-height: 740px) {
+      .onboarding[data-role="client"] .ob-top { margin-bottom: 12px; }
+      .onboarding[data-role="client"] .role-switch { margin-bottom: 12px; }
+      .jn-screen { min-height: 0; }
+      .jn-screen .btn { margin-top: 12px; }
+      .jn-hero { zoom: .66; margin: 0; }
+      .join .ob-step h1, .join h1, .join h2 { font-size: 23px; }
+      .join .lead { margin: 6px 0 0; font-size: 14px; }
+      .jn-perks { margin: 10px 0 12px; gap: 6px; }
+      .jn-perks li { padding: 7px 10px; font-size: 13.5px; }
+      .jn-perks li span { font-size: 18px; }
+      .jn-emoji { font-size: 40px; margin: 0 0 8px; }
+      .jn-field { margin-top: 12px; }
+      .jn-choices { margin-top: 14px; }
+      .jn-choices button { min-height: 88px; }
+      .jn-age { margin: 10px 0 4px; }
+    }
+    @media (max-height: 680px) { .jn-screen[data-q="password"] .jn-emoji { display: none; } .jn-screen[data-q="password"] .jn-field { margin-top: 8px; } }
 
     .role-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin: 0 0 18px; border-radius: 999px; background: var(--hover); border: 1px solid var(--line); }
     .role-switch button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; border-radius: 999px; font-weight: 500; font-size: 14px; color: var(--muted); transition: background-color .2s, color .2s, box-shadow .2s; }
@@ -2056,7 +2075,7 @@
 
         <section class="jn-screen" data-q="hello" aria-labelledby="jn-title">
           <div class="jn-hero" aria-hidden="true"><span>🍔</span><span>🌯</span><span>🍕</span><span>🧁</span><span>🚚</span><span>🍟</span></div>
-          <h1 id="jn-title">Le street-food de La Roche-sur-Yon, <em>à deux pas</em></h1>
+          <h1 id="jn-title">Le street-food de <span class="nw">La Roche-sur-Yon</span>, <em>à deux pas</em></h1>
           <p class="lead">Promos du jour, stories des food-trucks, avis des étudiants… Votre compte est prêt en une minute.</p>
           <ul class="jn-perks" aria-label="Avec FlashMiam">
             <li><span aria-hidden="true">🎁</span>Les bons plans autour de vous</li>
