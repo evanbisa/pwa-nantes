@@ -437,6 +437,38 @@ delete from auth.users where id = '55555555-5555-5555-5555-555555555555';
 select t.ok((select count(*) = 1 from merchant_event_visitors where event = 'unfollow') and not exists (select 1 from story_likes where user_id = '55555555-5555-5555-5555-555555555555'),
   'suppression d''un compte abonné : réussie, ses « j''aime » effacés, pas compté comme désabonnement');
 
+-- ===== Sexe et âge (inscription en étapes) et public des restaurants =====
+insert into auth.users (id, email, raw_user_meta_data) values
+  ('66666666-6666-6666-6666-000000000001', 'v1@etu.fr', ('{"first_name":"Inès","gender":"female","birth_year":"' || (extract(year from now())::int - 20) || '"}')::jsonb),
+  ('66666666-6666-6666-6666-000000000002', 'v2@etu.fr', ('{"first_name":"Tom","gender":"male","birth_year":"' || (extract(year from now())::int - 30) || '"}')::jsonb),
+  ('66666666-6666-6666-6666-000000000003', 'v3@etu.fr', ('{"first_name":"Sam","gender":"robot","birth_year":"' || (extract(year from now())::int - 12) || '"}')::jsonb),
+  ('66666666-6666-6666-6666-000000000004', 'v4@etu.fr', '{"first_name":"Lou","gender":"other","birth_year":"1800"}'),
+  ('66666666-6666-6666-6666-000000000005', 'v5@etu.fr', '{"first_name":"Max","birth_year":"abc"}');
+select t.ok((select gender = 'female' and birth_year = extract(year from now())::int - 20 from profiles where id = '66666666-6666-6666-6666-000000000001'), 'inscription : sexe et année de naissance repris');
+select t.ok((select gender is null and birth_year is null from profiles where id = '66666666-6666-6666-6666-000000000003'), 'inscription : sexe inconnu et moins de 15 ans → non renseignés');
+select t.ok((select gender = 'other' and birth_year is null from profiles where id = '66666666-6666-6666-6666-000000000004'), 'inscription : année absurde (1800) ignorée');
+select t.ok((select gender is null and birth_year is null from profiles where id = '66666666-6666-6666-6666-000000000005'), 'inscription : valeurs mal formées ignorées');
+select set_config('request.jwt.claims', '{"sub":"66666666-6666-6666-6666-000000000005","role":"authenticated"}', false);
+set role authenticated;
+select t.ok(t.affected($$update profiles set gender = 'male', birth_year = 2000 where id = '66666666-6666-6666-6666-000000000005'$$) = 1, 'chacun précise son sexe et son âge');
+select t.fails($$update profiles set gender = 'robot' where id = '66666666-6666-6666-6666-000000000005'$$, 'sexe hors liste refusé');
+select t.ok(t.affected($$update profiles set gender = 'female' where id = '66666666-6666-6666-6666-000000000001'$$) = 0, 'impossible de modifier le sexe de quelqu''un d''autre');
+select t.ok((select count(*) = 1 from profiles), 'on ne lit que son propre profil (pas le sexe ni l''âge des autres)');
+reset role;
+-- Public d'un restaurant : rien en dessous de 5 personnes, puis des totaux
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select my_merchant_analytics(7) -> 'audience' = 'null'::jsonb), 'public du restaurant : rien en dessous de 5 personnes');
+reset role;
+insert into merchant_visitors (merchant_id, day, visitor_id)
+  select 'aaaaaaaa-0000-0000-0000-000000000001', (now() at time zone 'Europe/Paris')::date, id from profiles where id::text like '66666666-%' on conflict do nothing;
+set role authenticated;
+select t.ok((select a ->> 'female' = '1' and a ->> 'male' = '2' and a ->> 'other' = '1' and (a ->> 'age_18_24')::int = 1 and (a ->> 'age_25_34')::int >= 1 and (a ->> 'total')::int >= 5
+  from (select my_merchant_analytics(7) -> 'audience' a) x), 'public du restaurant : totaux par sexe et tranche d''âge à partir de 5 personnes');
+select t.ok((select not (my_merchant_analytics(7) -> 'audience' ? 'visitors') and jsonb_typeof(my_merchant_analytics(7) -> 'audience' -> 'total') = 'number'), 'public du restaurant : aucun identifiant, seulement des nombres');
+reset role;
+select set_config('request.jwt.claims', '', false);
+
 -- ===== Masquage, modération, suppression =====
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
 set role authenticated;

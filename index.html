@@ -524,11 +524,119 @@
     /* ---------- Choix du type de compte ---------- */
     .onboarding[data-role="client"] [data-only="pro"], .onboarding[data-role="pro"] [data-only="client"] { display: none !important; }
     .onboarding[data-mode="create"] [data-mode="edit"], .onboarding[data-mode="edit"] [data-mode="create"] { display: none !important; }
+    /* ---------- Inscription client : une question par écran ---------- */
+    .join { position: relative; }
+    .jn-top { display: flex; align-items: center; gap: 10px; min-height: 36px; margin-bottom: 8px; }
+    .jn-top[hidden], .jn-back[hidden] { display: none; }
+    .jn-back { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; color: var(--text); background: var(--hover); transition: background-color .2s, transform .15s; }
+    .jn-back:hover { background: var(--accent-soft); }
+    .jn-back:active { transform: scale(.92); }
+    .jn-back svg { width: 20px; height: 20px; }
+    .jn-bar { flex: 1; height: 6px; border-radius: 3px; background: var(--hover); overflow: hidden; }
+    .jn-bar i { display: block; height: 100%; width: 0; border-radius: 3px; background: linear-gradient(90deg, var(--accent), #ea4335 55%, #fbbc04); transition: width .45s var(--ease-out); }
+    .jn-count { flex: none; min-width: 3.5em; text-align: right; font-size: 12.5px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .jn-screen { min-height: 360px; display: flex; flex-direction: column; }
+    .jn-screen[hidden] { display: none; }
+    .jn-screen.enter-next { animation: jn-next .42s var(--ease-out) both; }
+    .jn-screen.enter-prev { animation: jn-prev .42s var(--ease-out) both; }
+    @keyframes jn-next { from { opacity: 0; transform: translateX(42px); } to { opacity: 1; transform: none; } }
+    @keyframes jn-prev { from { opacity: 0; transform: translateX(-42px); } to { opacity: 1; transform: none; } }
+    .jn-screen .btn { margin-top: auto; }
+    .jn-screen .btn + .jn-skip, .jn-screen .legal { margin-top: 10px; }
+    .jn-emoji { display: block; font-size: 52px; line-height: 1; margin: 6px 0 12px; transform-origin: 30% 80%; }
+    .jn-screen.enter-next .jn-emoji, .jn-screen.enter-prev .jn-emoji { animation: jn-pop .6s .08s var(--ease-out) both; }
+    @keyframes jn-pop { 0% { opacity: 0; transform: scale(.3) rotate(-20deg); } 60% { opacity: 1; transform: scale(1.15) rotate(6deg); } 100% { transform: none; } }
+    .jn-emoji.wave { animation: jn-wave 1s ease-in-out both; }
+    @keyframes jn-wave { 0%, 100% { transform: none; } 20% { transform: rotate(18deg); } 40% { transform: rotate(-10deg); } 60% { transform: rotate(14deg); } 80% { transform: rotate(-4deg); } }
+    .join h1 em, .join h2 em { white-space: nowrap; }
+    .jn-hint { margin: 8px 0 0; font-size: 14px; line-height: 1.45; color: var(--muted); }
+    .jn-field { margin-top: 18px; }
+    .jn-field input { height: 56px; font-size: 19px; }
+    .jn-live { min-height: 22px; margin: 10px 0 14px; font-size: 15px; font-weight: 500; color: var(--accent); }
+    .jn-live.is-warn { color: var(--danger); }
+    .jn-live:not(:empty) { animation: rise .3s var(--ease-out) both; }
+    /* Accueil */
+    .jn-hero { position: relative; height: 92px; margin: 0 0 6px; }
+    .jn-hero span { position: absolute; top: 18px; font-size: 38px; animation: jn-float 3.6s ease-in-out infinite; }
+    .jn-hero span:nth-child(1) { left: 2%; animation-delay: 0s; }
+    .jn-hero span:nth-child(2) { left: 19%; top: 4px; font-size: 32px; animation-delay: -.6s; }
+    .jn-hero span:nth-child(3) { left: 37%; top: 26px; font-size: 44px; animation-delay: -1.2s; }
+    .jn-hero span:nth-child(4) { left: 57%; top: 2px; font-size: 30px; animation-delay: -1.8s; }
+    .jn-hero span:nth-child(5) { left: 73%; top: 22px; animation-delay: -2.4s; }
+    .jn-hero span:nth-child(6) { left: 89%; top: 6px; font-size: 28px; animation-delay: -3s; }
+    @keyframes jn-float { 0%, 100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-12px) rotate(6deg); } }
+    .jn-perks { margin: 16px 0 18px; padding: 0; list-style: none; display: grid; gap: 8px; }
+    .jn-perks li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; font-size: 14.5px; background: var(--hover); animation: jn-next .5s var(--ease-out) both; }
+    .jn-perks li:nth-child(2) { animation-delay: .08s; }
+    .jn-perks li:nth-child(3) { animation-delay: .16s; }
+    .jn-perks li span { font-size: 22px; }
+    .jn-go { min-height: 54px; font-size: 16.5px; }
+    .jn-go:not([disabled]) { box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 35%, transparent); }
+    .join .oauth { margin-top: 4px; }
+    .join .oauth .or-sep { margin: 12px 0; }
+    /* Choix du sexe */
+    .jn-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+    .jn-choices button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 104px; padding: 12px 8px; border-radius: 18px; font-size: 15px; font-weight: 500; line-height: 1.25; text-align: center; color: var(--text); background: var(--panel-solid); border: 1.5px solid var(--line-strong); transition: transform .15s var(--ease-out), border-color .2s, background-color .2s, box-shadow .2s; }
+    .jn-choices button span { font-size: 34px; transition: transform .25s var(--ease-out); }
+    .jn-choices button:hover { border-color: var(--accent-line); box-shadow: var(--shadow); }
+    .jn-choices button:hover span { transform: scale(1.12) rotate(-6deg); }
+    .jn-choices button:active { transform: scale(.96); }
+    .jn-choices button[aria-checked="true"] { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); animation: jn-pick .35s var(--ease-out); }
+    .jn-choices button[aria-checked="true"]::after { content: "✓"; position: absolute; top: 8px; right: 10px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 13px; color: var(--on-accent); background: var(--accent); }
+    @keyframes jn-pick { 0% { transform: scale(1); } 40% { transform: scale(1.06); } 100% { transform: scale(1); } }
+    .jn-error { display: block; min-height: 18px; margin-top: 8px; }
+    /* Âge */
+    .jn-age { display: flex; align-items: center; justify-content: center; gap: 22px; margin: 18px 0 8px; }
+    .jn-step { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; font-size: 26px; font-weight: 500; color: var(--accent); background: var(--accent-soft); transition: transform .12s; }
+    .jn-step:active { transform: scale(.9); }
+    .jn-age output { min-width: 3ch; font-size: 64px; font-weight: 500; line-height: 1; text-align: center; color: var(--text); font-variant-numeric: tabular-nums; }
+    .jn-age output small { display: block; margin-top: 4px; font-size: 14px; font-weight: 400; color: var(--muted); }
+    .jn-age output.bump { animation: jn-bump .25s var(--ease-out); }
+    @keyframes jn-bump { 50% { transform: scale(1.12); } }
+    .jn-range { -webkit-appearance: none; appearance: none; width: 100%; height: 36px; margin: 4px 0 0; border-radius: 18px; background: transparent; cursor: pointer; touch-action: pan-y; }
+    .jn-range:focus { outline: none; }
+    .jn-range:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .jn-range::-webkit-slider-runnable-track { height: 10px; border-radius: 5px; background: linear-gradient(to right, var(--accent) var(--fill, 10%), var(--line-strong) var(--fill, 10%)); }
+    .jn-range::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; margin-top: -10px; border-radius: 50%; background: #fff; border: 3px solid var(--accent); box-shadow: 0 2px 8px rgba(0, 0, 0, .25); transition: transform .15s var(--ease-out); }
+    .jn-range:active::-webkit-slider-thumb { transform: scale(1.15); }
+    .jn-range::-moz-range-track { height: 10px; border-radius: 5px; background: var(--line-strong); }
+    .jn-range::-moz-range-progress { height: 10px; border-radius: 5px; background: var(--accent); }
+    .jn-range::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 3px solid var(--accent); box-shadow: 0 2px 8px rgba(0, 0, 0, .25); }
+    .jn-skip { align-self: center; padding: 8px; font-size: 14px; }
+    /* E-mail */
+    .jn-input-ok { position: relative; display: block; }
+    .jn-input-ok input { padding-right: 46px; }
+    .jn-tick { position: absolute; right: 12px; top: 50%; display: grid; place-items: center; width: 26px; height: 26px; margin-top: -13px; border-radius: 50%; font-style: normal; font-size: 14px; color: #fff; background: var(--green); animation: jn-pop .4s var(--ease-out) both; }
+    .jn-tick[hidden] { display: none; }
+    .jn-suggest { margin: 10px 0 0; font-size: 14px; color: var(--muted); animation: rise .3s var(--ease-out) both; }
+    .jn-suggest[hidden] { display: none; }
+    /* Mot de passe : jauge de solidité */
+    .field > .jn-strength { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 10px 0 0; }
+    .jn-strength i { height: 6px; border-radius: 3px; background: var(--hover); transition: background-color .3s; }
+    .join[data-strength="1"] .jn-strength i:nth-child(-n+1),
+    .join[data-strength="2"] .jn-strength i:nth-child(-n+2) { background: var(--danger); }
+    .join[data-strength="3"] .jn-strength i:nth-child(-n+3) { background: var(--amber); }
+    .join[data-strength="4"] .jn-strength i:nth-child(-n+4),
+    .join[data-strength="5"] .jn-strength i:nth-child(-n+5) { background: var(--green); }
+    .field > .jn-strength-label { display: block; min-height: 18px; margin: 4px 0 0; font-size: 12.5px; font-weight: 500; color: var(--muted); }
+    .join[data-strength="5"] .jn-strength-label { color: var(--green); }
+    .ob-welcome { margin: 0 0 14px; padding: 12px 14px; border-radius: 14px; font-size: 15px; font-weight: 500; line-height: 1.4; color: var(--accent); background: var(--accent-soft); animation: rise .5s var(--ease-out) both; }
+    .ob-welcome::before { content: "🎉 "; }
+    .ob-welcome[hidden] { display: none; }
+    /* Fête : confettis quand le compte est créé */
+    .confetti { position: fixed; inset: 0; z-index: 140; pointer-events: none; overflow: hidden; }
+    .confetti i { position: absolute; top: -12px; width: 9px; height: 14px; border-radius: 2px; animation: confetti 1.6s cubic-bezier(.2, .6, .4, 1) forwards; }
+    @keyframes confetti { to { transform: translate(var(--dx), 105vh) rotate(var(--rot)); opacity: .9; } }
+    @media (prefers-reduced-motion: reduce) {
+      .jn-screen.enter-next, .jn-screen.enter-prev, .jn-screen .jn-emoji, .jn-hero span, .jn-perks li, .jn-choices button, .jn-age output.bump, .jn-emoji.wave { animation: none !important; }
+      .confetti { display: none; }
+    }
+    @media (max-width: 360px) { .jn-choices button { min-height: 92px; font-size: 14px; } .jn-age output { font-size: 54px; } .jn-screen { min-height: 330px; } }
+
     .role-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin: 0 0 18px; border-radius: 999px; background: var(--hover); border: 1px solid var(--line); }
     .role-switch button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; border-radius: 999px; font-weight: 500; font-size: 14px; color: var(--muted); transition: background-color .2s, color .2s, box-shadow .2s; }
     .role-switch button[aria-checked="true"] { background: var(--panel-solid); color: var(--accent); box-shadow: 0 1px 3px rgba(0, 0, 0, .18); }
     .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
-    .onboarding[data-role="client"] #form-signup .field-row { grid-template-columns: 1fr; }
     @media (max-width: 380px) { .field-row { grid-template-columns: 1fr; } }
 
     /* ---------- Étapes du parcours restaurateur ---------- */
@@ -993,6 +1101,9 @@
     .hbar > b small { margin-left: 4px; font-weight: 400; color: var(--muted); }
     .hbar > i { grid-column: 1 / -1; display: block; height: 8px; border-radius: 4px; background: var(--hover); overflow: hidden; }
     .hbar > i > u { display: block; height: 100%; min-width: 0; border-radius: 4px; background: var(--chart); }
+    .ps-aud { display: grid; gap: 4px; }
+    .ps-aud h5 { margin: 14px 0 0; font-size: 13px; font-weight: 500; color: var(--muted); }
+    @media (min-width: 760px) { .ps-aud { grid-template-columns: 1fr 1fr; column-gap: 28px; } .ps-aud > .hbars-empty { grid-column: 1 / -1; } }
     .hbars-empty { margin: 12px 0 0; font-size: 13.5px; color: var(--muted); }
     /* Tableaux (stories, promotions) */
     .ps-table-wrap { margin-top: 10px; overflow-x: auto; }
@@ -1693,6 +1804,7 @@
     <dl class="kv">
       <div><dt>Ville</dt><dd>La Roche-sur-Yon</dd></div>
       <div><dt>Membre depuis</dt><dd id="profile-since"></dd></div>
+      <div id="profile-about-row" hidden><dt>Vous</dt><dd><span id="profile-about"></span> <button class="link-btn" type="button" id="profile-about-edit" aria-label="Modifier votre sexe et votre âge">Modifier</button></dd></div>
       <div><dt>Localisation</dt><dd id="profile-geo"></dd></div>
       <div><dt>Affichage</dt><dd id="profile-theme"></dd></div>
       <div><dt>Carte</dt><dd id="profile-engine"></dd></div>
@@ -1792,6 +1904,11 @@
             <h4 id="ps-sources-title">D'où viennent vos visiteurs</h4>
             <p class="hint">Comment les gens arrivent sur votre fiche (chaque personne comptée une fois par jour).</p>
             <div class="hbars" id="ps-sources"></div>
+          </section>
+          <section class="ps-block ps-card" aria-labelledby="ps-aud-title">
+            <h4 id="ps-aud-title">Votre public</h4>
+            <p class="hint" id="ps-aud-sub">Clients venus sur votre fiche pendant la période, d'après ce qu'ils ont indiqué à l'inscription.</p>
+            <div class="ps-aud" id="ps-audience"></div>
           </section>
           <section class="ps-block ps-card" aria-labelledby="ps-acts-title">
             <h4 id="ps-acts-title">Ce qu'ils font sur votre fiche</h4>
@@ -1927,32 +2044,149 @@
       </div>
 
       <!-- Création de compte (client ou restaurateur) -->
-      <form id="form-signup" class="ob-step" novalidate data-step="signup" hidden>
-        <h1 id="auth-title"><span data-only="client">Créez votre <em>compte</em></span><span data-only="pro">Inscrivez votre <em>restaurant</em></span></h1>
-        <p class="lead" data-only="client">Découvrez les food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon.</p>
-        <p class="lead" data-only="pro">Restaurateur à La Roche-sur-Yon ? Rejoignez la carte en 4 étapes : compte, vérification de votre établissement, abonnement, fiche restaurant.</p>
-        <div class="oauth" data-only="client" data-google hidden>
-          <div class="g-slot" id="su-google"></div>
-          <p class="or-sep">ou avec votre e-mail</p>
+      <!-- Inscription d'un client : une question par écran, avec animations -->
+      <form id="form-join" class="ob-step join" novalidate data-step="signup" data-only="client" hidden>
+        <div class="jn-top">
+          <button class="jn-back" type="button" id="jn-back" aria-label="Question précédente" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="jn-bar" aria-hidden="true"><i id="jn-bar"></i></div>
+          <span class="jn-count" id="jn-count" aria-live="polite"></span>
         </div>
+
+        <section class="jn-screen" data-q="hello" aria-labelledby="jn-title">
+          <div class="jn-hero" aria-hidden="true"><span>🍔</span><span>🌯</span><span>🍕</span><span>🧁</span><span>🚚</span><span>🍟</span></div>
+          <h1 id="jn-title">Le street-food de La Roche-sur-Yon, <em>à deux pas</em></h1>
+          <p class="lead">Promos du jour, stories des food-trucks, avis des étudiants… Votre compte est prêt en une minute.</p>
+          <ul class="jn-perks" aria-label="Avec FlashMiam">
+            <li><span aria-hidden="true">🎁</span>Les bons plans autour de vous</li>
+            <li><span aria-hidden="true">🔔</span>Prévenu des promos de vos restos préférés</li>
+            <li><span aria-hidden="true">⭐</span>Les vrais avis, sans pub</li>
+          </ul>
+          <button class="btn btn-primary jn-go" type="button" id="jn-start">C'est parti <span aria-hidden="true">✨</span></button>
+          <div class="oauth" data-google hidden>
+            <p class="or-sep">ou</p>
+            <div class="g-slot" id="su-google"></div>
+          </div>
+          <p class="form-error" id="err-join" role="alert"></p>
+          <p class="ob-switch">Déjà un compte ? <button class="link-btn" type="button" data-goto="login">Se connecter</button></p>
+        </section>
+
+        <section class="jn-screen" data-q="name" aria-labelledby="jq-name" hidden>
+          <span class="jn-emoji" aria-hidden="true">👋</span>
+          <h2 id="jq-name">Quel est votre <em>prénom</em> ?</h2>
+          <p class="jn-hint">Votre prénom s'affichera sur vos avis.</p>
+          <label class="field jn-field" id="field-jn-name">
+            <span class="visually-hidden">Prénom</span>
+            <input id="jn-name" type="text" autocomplete="given-name" autocapitalize="words" maxlength="40" placeholder="Votre prénom" enterkeyhint="next" />
+            <small class="field-error" id="err-jn-name" aria-live="polite"></small>
+          </label>
+          <p class="jn-live" id="jn-hello" aria-live="polite"></p>
+          <button class="btn btn-primary jn-next" type="button" data-next>Continuer</button>
+        </section>
+
+        <section class="jn-screen" data-q="gender" aria-labelledby="jq-gender" hidden>
+          <span class="jn-emoji" aria-hidden="true">✨</span>
+          <h2 id="jq-gender">Vous êtes…</h2>
+          <p class="jn-hint">Les restaurants voient seulement des totaux («&nbsp;60&nbsp;% de femmes&nbsp;»), jamais votre nom.</p>
+          <div class="jn-choices" id="jn-gender" role="radiogroup" aria-labelledby="jq-gender">
+            <button type="button" role="radio" aria-checked="false" id="jn-g-female" data-gender="female"><span aria-hidden="true">👩</span>Une femme</button>
+            <button type="button" role="radio" aria-checked="false" id="jn-g-male" data-gender="male"><span aria-hidden="true">👨</span>Un homme</button>
+            <button type="button" role="radio" aria-checked="false" id="jn-g-other" data-gender="other"><span aria-hidden="true">🌈</span>Autre</button>
+            <button type="button" role="radio" aria-checked="false" id="jn-g-none" data-gender=""><span aria-hidden="true">🤐</span>Je préfère ne pas le dire</button>
+          </div>
+          <small class="field-error jn-error" id="err-jn-gender" aria-live="polite"></small>
+        </section>
+
+        <section class="jn-screen" data-q="age" aria-labelledby="jq-age" hidden>
+          <span class="jn-emoji" id="jn-age-emoji" aria-hidden="true">🎓</span>
+          <h2 id="jq-age">Quel âge <em>avez-vous</em> ?</h2>
+          <p class="jn-hint">Les restaurants voient seulement des tranches d'âge (18-24&nbsp;ans…), jamais le vôtre.</p>
+          <div class="jn-age">
+            <button type="button" class="jn-step" id="jn-age-minus" aria-label="Un an de moins">−</button>
+            <output id="jn-age-out" for="jn-age" aria-live="polite">20<small>ans</small></output>
+            <button type="button" class="jn-step" id="jn-age-plus" aria-label="Un an de plus">+</button>
+          </div>
+          <input class="jn-range" id="jn-age" type="range" min="13" max="99" step="1" value="20" aria-labelledby="jq-age" aria-valuetext="20 ans" />
+          <p class="jn-live" id="jn-age-note" aria-live="polite"></p>
+          <button class="btn btn-primary jn-next" type="button" data-next id="jn-age-next">Continuer</button>
+          <button class="link-btn jn-skip" type="button" id="jn-skip" hidden>Passer cette question</button>
+        </section>
+
+        <section class="jn-screen" data-q="email" aria-labelledby="jq-email" hidden>
+          <span class="jn-emoji" aria-hidden="true">📬</span>
+          <h2 id="jq-email">Votre adresse <em>e-mail</em> ?</h2>
+          <p class="jn-hint">Nous vous enverrons un code à 6 chiffres pour la confirmer.</p>
+          <label class="field jn-field" id="field-jn-email">
+            <span class="visually-hidden">Adresse e-mail</span>
+            <span class="jn-input-ok">
+              <input id="jn-email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" maxlength="120" placeholder="prenom@exemple.fr" enterkeyhint="next" />
+              <i class="jn-tick" id="jn-email-ok" aria-hidden="true" hidden>✓</i>
+            </span>
+            <small class="field-error" id="err-jn-email" aria-live="polite"></small>
+          </label>
+          <p class="jn-suggest" id="jn-suggest" hidden>Vouliez-vous dire <button class="link-btn" type="button" id="jn-suggest-btn"></button> ?</p>
+          <button class="btn btn-primary jn-next" type="button" data-next>Continuer</button>
+        </section>
+
+        <section class="jn-screen" data-q="password" aria-labelledby="jq-password" hidden>
+          <span class="jn-emoji" id="jn-pw-emoji" aria-hidden="true">🔒</span>
+          <h2 id="jq-password">Choisissez un <em>mot de passe</em></h2>
+          <label class="field jn-field" id="field-jn-password">
+            <span>Mot de passe</span>
+            <span class="pw-wrap">
+              <input id="jn-password" type="password" autocomplete="new-password" minlength="8" maxlength="128" aria-describedby="jn-rules jn-strength-label" enterkeyhint="next" />
+              <button class="pw-toggle" type="button" data-toggle-pw="jn-password">Afficher</button>
+            </span>
+            <span class="jn-strength" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+            <span class="jn-strength-label" id="jn-strength-label"></span>
+            <ul class="pw-rules" id="jn-rules" aria-label="Le mot de passe doit contenir">
+              <li data-rule="length">8 caractères</li>
+              <li data-rule="upper">1 majuscule</li>
+              <li data-rule="lower">1 minuscule</li>
+              <li data-rule="digit">1 chiffre</li>
+              <li data-rule="special">1 caractère spécial</li>
+            </ul>
+            <small class="field-error" id="err-jn-password" aria-live="polite"></small>
+          </label>
+          <label class="field jn-field" id="field-jn-password2">
+            <span>Confirmez-le</span>
+            <span class="pw-wrap">
+              <input id="jn-password2" type="password" autocomplete="new-password" maxlength="128" aria-describedby="jn-match" enterkeyhint="done" />
+              <button class="pw-toggle" type="button" data-toggle-pw="jn-password2">Afficher</button>
+            </span>
+            <p class="pw-match" id="jn-match" aria-live="polite"></p>
+            <small class="field-error" id="err-jn-password2" aria-live="polite"></small>
+          </label>
+          <label class="check"><input type="checkbox" id="jn-remember" /> Rester connecté sur cet appareil</label>
+          <p class="form-error" id="err-join-final" role="alert"></p>
+          <button class="btn btn-primary jn-go" type="submit" id="jn-submit">Créer mon compte <span aria-hidden="true">🎉</span></button>
+          <p class="legal">En créant un compte, vous acceptez les <a href="conditions.html" target="_blank" rel="noopener">conditions d'utilisation</a> et la <a href="confidentialite.html" target="_blank" rel="noopener">politique de confidentialité</a>.</p>
+        </section>
+      </form>
+
+      <!-- Inscription d'un restaurateur (formulaire complet : nom, téléphone professionnel…) -->
+      <form id="form-signup" class="ob-step" novalidate data-step="signup" data-only="pro" hidden>
+        <h1 id="auth-title">Inscrivez votre <em>restaurant</em></h1>
+        <p class="lead">Restaurateur à La Roche-sur-Yon ? Rejoignez la carte en 4 étapes : compte, vérification de votre établissement, abonnement, fiche restaurant.</p>
         <div class="field-row">
           <label class="field" id="field-su-name">
             <span>Prénom</span>
             <input id="su-name" type="text" autocomplete="given-name" autocapitalize="words" maxlength="40" placeholder="Camille" required />
             <small class="field-error" id="err-su-name" aria-live="polite"></small>
           </label>
-          <label class="field" id="field-su-lastname" data-only="pro">
+          <label class="field" id="field-su-lastname">
             <span>Nom</span>
             <input id="su-lastname" type="text" autocomplete="family-name" autocapitalize="words" maxlength="60" placeholder="Martin" />
             <small class="field-error" id="err-su-lastname" aria-live="polite"></small>
           </label>
         </div>
         <label class="field" id="field-su-email">
-          <span><span data-only="client">Adresse e-mail</span><span data-only="pro">E-mail professionnel</span></span>
+          <span>E-mail professionnel</span>
           <input id="su-email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" maxlength="120" placeholder="camille@exemple.fr" required />
           <small class="field-error" id="err-su-email" aria-live="polite"></small>
         </label>
-        <label class="field" id="field-su-phone" data-only="pro">
+        <label class="field" id="field-su-phone">
           <span>Téléphone professionnel</span>
           <input id="su-phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="06 12 34 56 78" />
           <small class="field-error" id="err-su-phone" aria-live="polite"></small>
@@ -1983,7 +2217,7 @@
         </label>
         <label class="check"><input type="checkbox" id="su-remember" /> Rester connecté sur cet appareil</label>
         <p class="form-error" id="err-signup" role="alert"></p>
-        <button class="btn btn-primary" type="submit"><span data-only="client">Créer mon compte</span><span data-only="pro">Continuer : vérification</span></button>
+        <button class="btn btn-primary" type="submit">Continuer : vérification</button>
         <p class="ob-switch">Déjà un compte ? <button class="link-btn" type="button" data-goto="login">Se connecter</button></p>
         <p class="legal">En créant un compte, vous acceptez les <a href="conditions.html" target="_blank" rel="noopener">conditions d'utilisation</a> et la <a href="confidentialite.html" target="_blank" rel="noopener">politique de confidentialité</a>.</p>
       </form>
@@ -2058,6 +2292,7 @@
 
       <!-- Autorisation de localisation (après la création d'un compte client) -->
       <section id="ob-location" class="ob-step" data-step="location" hidden aria-labelledby="ob-loc-title">
+        <p class="ob-welcome" id="ob-welcome" role="status" hidden></p>
         <div class="radar" aria-hidden="true"></div>
         <h2 id="ob-loc-title">Activez votre <em>localisation</em></h2>
         <ul class="perks">
@@ -2911,6 +3146,7 @@
       createdAt: profile.created_at, emailVerifiedAt: authUser.email_confirmed_at, google: providers.includes('google'),
       follows: Object.fromEntries((follows || []).map((f) => [f.merchant_id, f.created_at])),
       prefs: { promos: profile.notify_promos !== false, stories: profile.notify_stories !== false, reviews: profile.notify_reviews !== false },
+      gender: profile.gender || null, birthYear: profile.birth_year || null,
     };
     if (user.role === 'pro') user.pro = await loadPro(user);
     cloud.user = user;
@@ -6236,7 +6472,7 @@
     input.addEventListener('input', () => {
       const field = input.closest('.field').id.replace('field-', '');
       if ($('err-' + field)) setFieldError(field, '');
-      ['err-signup', 'err-login', 'err-pro-verify', 'err-pro-listing', 'err-email-code', 'err-reset'].forEach((id) => { $(id).textContent = ''; });
+      ['err-signup', 'err-join', 'err-join-final', 'err-login', 'err-pro-verify', 'err-pro-listing', 'err-email-code', 'err-reset'].forEach((id) => { $(id).textContent = ''; });
     });
   });
   document.querySelectorAll('[data-toggle-pw]').forEach((btn) => {
@@ -6259,8 +6495,12 @@
       b.setAttribute('aria-checked', String(b.dataset.role === authRole));
       b.tabIndex = b.dataset.role === authRole ? 0 : -1;
     });
-    $('err-signup').textContent = ''; $('err-login').textContent = '';
+    $('err-signup').textContent = ''; $('err-join').textContent = ''; $('err-login').textContent = '';
     if (currentStep === 'signup' || currentStep === 'login') updateProgress(currentStep, 'create');
+    if (currentStep === 'signup') {
+      $('onboarding').setAttribute('aria-labelledby', authRole === 'pro' ? 'auth-title' : Join.titleId());
+      if (authRole === 'client') Join.syncChrome();
+    }
   }
   $('role-switch').addEventListener('click', (ev) => { const b = ev.target.closest('[data-role]'); if (b) setAuthRole(b.dataset.role); });
   $('role-switch').addEventListener('keydown', (ev) => {
@@ -6271,7 +6511,7 @@
   });
 
   const PRO_STEP_INDEX = { 'pro-verify': 2, 'pro-payment': 3, 'pro-listing': 4 };
-  const STEP_TITLES = { signup: 'auth-title', login: 'login-title', 'verify-email': 'ec-title', 'reset-password': 'rs-title', location: 'ob-loc-title', 'pro-verify': 'pv-title', 'pro-payment': 'pp-title', 'pro-listing': 'pl-title' };
+  const STEP_TITLES = { signup: 'auth-title', about: 'jq-gender', login: 'login-title', 'verify-email': 'ec-title', 'reset-password': 'rs-title', location: 'ob-loc-title', 'pro-verify': 'pv-title', 'pro-payment': 'pp-title', 'pro-listing': 'pl-title' };
 
   /** Progression : 2 points (client) ou frise en 4 étapes (restaurateur). */
   function updateProgress(step, mode) {
@@ -6286,7 +6526,8 @@
       li.classList.toggle('is-current', n === proIndex);
       if (n === proIndex) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
     });
-    $('ob-progress').hidden = proIndex > 0 || !(signupLike || step === 'location');
+    // L'inscription d'un client a sa propre barre de progression (une question par écran)
+    $('ob-progress').hidden = proIndex > 0 || !(signupLike || step === 'location') || (step === 'signup' && authRole === 'client');
     $('ob-dot-1').classList.toggle('is-active', signupLike);
     $('ob-dot-2').classList.toggle('is-active', step === 'location');
   }
@@ -6298,22 +6539,31 @@
     ob.hidden = false;
     ob.classList.remove('is-leaving');
     ob.dataset.mode = mode;
-    document.querySelectorAll('#onboarding .ob-step').forEach((el) => { el.hidden = el.dataset.step !== step; });
+    // « about » : questions sexe et âge seules (compte Google tout neuf, modification depuis le profil)
+    document.querySelectorAll('#onboarding .ob-step').forEach((el) => { el.hidden = step === 'about' ? el.id !== 'form-join' : el.dataset.step !== step; });
     $('role-switch').hidden = !(step === 'signup' || step === 'login');
     updateProgress(step, mode);
     ob.setAttribute('aria-labelledby', STEP_TITLES[step]);
     ob.scrollTop = 0;
+    const join = step === 'about' || (step === 'signup' && authRole === 'client');
+    if (join) Join.enter(step);
+    if (step !== 'location') $('ob-welcome').hidden = true;
     if (step === 'signup' || step === 'login') GoogleAuth.mount();
     if (step === 'pro-verify') enterVerifyStep();
     if (step === 'pro-payment') renderPlan();
     if (step === 'pro-listing') enterListingStep(mode);
-    const focus = { signup: 'su-name', login: $('li-email').value ? 'li-password' : 'li-email', 'verify-email': 'ec-code', 'reset-password': 'rs-code', location: 'ob-allow', 'pro-verify': 'pv-siret', 'pro-payment': 'pay-btn', 'pro-listing': 'pl-name' }[step];
+    const focus = join ? Join.focusId() : { signup: 'su-name', login: $('li-email').value ? 'li-password' : 'li-email', 'verify-email': 'ec-code', 'reset-password': 'rs-code', location: 'ob-allow', 'pro-verify': 'pv-siret', 'pro-payment': 'pay-btn', 'pro-listing': 'pl-name' }[step];
     setTimeout(() => $(focus).focus({ preventScroll: true }), 350);
   }
 
   document.querySelectorAll('[data-goto]').forEach((btn) => btn.addEventListener('click', () => {
-    if (btn.dataset.goto === 'login' && $('su-email').value) $('li-email').value = $('su-email').value.trim().toLowerCase();
-    if (btn.dataset.goto === 'signup' && $('li-email').value) $('su-email').value = $('li-email').value.trim().toLowerCase();
+    const typed = authRole === 'pro' ? $('su-email').value.trim().toLowerCase() : Join.email();
+    if (btn.dataset.goto === 'login' && typed) $('li-email').value = typed;
+    if (btn.dataset.goto === 'signup' && $('li-email').value) {
+      const email = $('li-email').value.trim().toLowerCase();
+      $('su-email').value = email;
+      Join.setEmail(email);
+    }
     showAuthStep(btn.dataset.goto);
   }));
 
@@ -6441,19 +6691,18 @@
   $('su-password').addEventListener('input', () => { renderPasswordRules(); renderPasswordMatch(); });
 
   /** Indique en direct si la confirmation correspond (une fois qu'on a commencé à la saisir). */
-  function renderPasswordMatch() {
-    const a = $('su-password').value, b = $('su-password2').value;
-    const box = $('pw-match');
+  function showPasswordMatch(a, b, box) {
     if (!b) { box.textContent = ''; box.className = 'pw-match'; return; }
     const same = a === b;
     box.textContent = same ? '✓ Les mots de passe correspondent' : (a.startsWith(b) ? 'Continuez la saisie…' : '✗ Les mots de passe ne correspondent pas');
     box.className = 'pw-match ' + (same ? 'is-ok' : a.startsWith(b) ? '' : 'is-ko');
   }
+  function renderPasswordMatch() { showPasswordMatch($('su-password').value, $('su-password2').value, $('pw-match')); }
   $('su-password2').addEventListener('input', renderPasswordMatch);
 
+  /** Inscription d'un restaurateur (le client passe par les questions une par une, plus bas). */
   $('form-signup').addEventListener('submit', async (ev) => {
     ev.preventDefault();
-    const role = authRole;
     const name = $('su-name').value.trim().replace(/\s+/g, ' ');
     const lastName = $('su-lastname').value.trim().replace(/\s+/g, ' ');
     const email = $('su-email').value.trim().toLowerCase();
@@ -6462,9 +6711,9 @@
     let firstInvalid = null;
     const fail = (field, msg) => { setFieldError(field, msg); firstInvalid = firstInvalid || field; };
     if (name.length < 2) fail('su-name', 'Indiquez votre prénom (2 caractères minimum).');
-    if (role === 'pro' && lastName.length < 2) fail('su-lastname', 'Indiquez votre nom.');
+    if (lastName.length < 2) fail('su-lastname', 'Indiquez votre nom.');
     if (!EMAIL_RE.test(email)) fail('su-email', 'Adresse e-mail invalide.');
-    if (role === 'pro' && !PHONE_RE.test(compactPhone(phone))) fail('su-phone', 'Numéro de téléphone invalide (ex. : 06 12 34 56 78).');
+    if (!PHONE_RE.test(compactPhone(phone))) fail('su-phone', 'Numéro de téléphone invalide (ex. : 06 12 34 56 78).');
     const missing = missingPasswordRules(password);
     if (missing.length) fail('su-password', 'Mot de passe trop faible : il manque ' + listFr(missing.map((r) => r.label)) + '.');
     const confirmation = $('su-password2').value;
@@ -6478,9 +6727,7 @@
     const btn = ev.submitter || $('form-signup').querySelector('[type=submit]');
     btn.disabled = true;
     authStorage.setRemember($('su-remember').checked);
-    const meta = role === 'pro'
-      ? { role: 'merchant', first_name: name, last_name: lastName, phone: formatPhone(phone) }
-      : { role: 'student', first_name: name };
+    const meta = { role: 'merchant', first_name: name, last_name: lastName, phone: formatPhone(phone) };
     const { data, error } = await Loader.run(
       sb.auth.signUp({ email, password, options: { data: meta, emailRedirectTo: location.origin + location.pathname } }),
       'Création de votre compte…');
@@ -6500,11 +6747,436 @@
     const opened = async (session) => {
       const user = await Loader.run(loadUser(session.user), 'Ouverture de votre compte…');
       applySession(user);
-      showAuthStep(user.role === 'pro' ? 'pro-verify' : 'location');
+      showAuthStep('pro-verify');
     };
     if (data.session) { await opened(data.session); return; }   // confirmation de l'e-mail désactivée
     startEmailVerification({ email, back: 'signup', onSuccess: opened });
   });
+
+  /* ---------- Inscription d'un client : une question par écran (prénom, sexe, âge, e-mail, mot de passe) ---------- */
+  const Join = (() => {
+    const form = $('form-join');
+    const SIGNUP = ['hello', 'name', 'gender', 'age', 'email', 'password'];
+    const ABOUT = ['gender', 'age'];                 // compte Google tout neuf, ou modification depuis le profil
+    const MIN_AGE = 15;
+    const DRAFT_KEY = 'flashmiam:join';              // réponses gardées le temps de l'onglet (jamais le mot de passe)
+    const GENDER_EMOJI = { female: '👩', male: '👨', other: '🌈', '': '🤐' };
+    const EMAIL_DOMAINS = ['gmail.com', 'hotmail.com', 'hotmail.fr', 'outlook.com', 'outlook.fr', 'live.fr', 'live.com', 'msn.com',
+      'yahoo.com', 'yahoo.fr', 'icloud.com', 'me.com', 'orange.fr', 'wanadoo.fr', 'free.fr', 'sfr.fr', 'neuf.fr', 'bbox.fr',
+      'laposte.net', 'gmx.fr', 'proton.me', 'protonmail.com', 'etu.univ-nantes.fr', 'univ-nantes.fr'];
+    let screens = SIGNUP, index = 0, about = null;  // about : { edit, onDone(answers), onCancel }
+    let advanceTimer = null, suggestion = null, suggestedFor = '', suggestTimer = null, waved = false;
+    const answers = { name: '', gender: undefined, age: 20, ageSet: false, email: '' };   // gender undefined = pas encore répondu
+
+    const screen = (q) => form.querySelector('.jn-screen[data-q="' + q + '"]');
+    const current = () => screens[index];
+    const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+    const firstName = () => capitalize(((about && cloud.user ? cloud.user.name : answers.name) || '').split(' ')[0]);
+
+    function save() {
+      if (about) return;
+      try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ name: answers.name, gender: answers.gender, age: answers.age, ageSet: answers.ageSet, email: answers.email })); } catch (e) { /* ignore */ }
+    }
+    function clearDraft() { try { sessionStorage.removeItem(DRAFT_KEY); } catch (e) { /* ignore */ } }
+
+    /** Affiche l'écran n° i, avec un glissement vers la gauche (suivant) ou la droite (précédent). */
+    function show(i, { dir = 'next', focus = true } = {}) {
+      clearTimeout(advanceTimer);
+      index = Math.max(0, Math.min(i, screens.length - 1));
+      const q = current();
+      form.querySelectorAll('.jn-screen').forEach((s) => {
+        const on = s.dataset.q === q;
+        s.hidden = !on;
+        s.classList.remove('enter-next', 'enter-prev');
+        if (on && !reduceMotion) { void s.offsetWidth; s.classList.add(dir === 'prev' ? 'enter-prev' : 'enter-next'); }
+      });
+      const questions = screens.filter((s) => s !== 'hello');
+      const n = questions.indexOf(q) + 1;
+      form.querySelector('.jn-top').hidden = !n;
+      $('jn-bar').style.width = (n / questions.length) * 100 + '%';
+      $('jn-count').innerHTML = n ? '<span aria-hidden="true">' + n + '/' + questions.length + '</span><span class="visually-hidden">Question ' + n + ' sur ' + questions.length + '</span>' : '';
+      const back = $('jn-back');
+      back.hidden = index === 0 && !(about && about.edit);
+      back.setAttribute('aria-label', index === 0 ? 'Annuler' : 'Question précédente');
+      $('jn-skip').hidden = !about;
+      $('jn-skip').textContent = about && about.edit ? 'Ne pas l\'indiquer' : 'Passer cette question';
+      if (q === 'gender') renderGender();
+      if (q === 'age') renderAge();
+      syncChrome();
+      $('onboarding').scrollTop = 0;
+      if (focus) { const el = $(focusId()); if (el) el.focus({ preventScroll: true }); }
+      save();
+    }
+
+    /** Sélecteur client/restaurateur visible seulement sur l'écran d'accueil ; titre du dialogue = question affichée. */
+    function syncChrome() {
+      if (currentStep !== 'signup' && currentStep !== 'about') return;
+      if (currentStep === 'signup') $('role-switch').hidden = authRole === 'client' && current() !== 'hello';
+      if (authRole === 'client') $('onboarding').setAttribute('aria-labelledby', titleId());
+    }
+    const titleId = () => screen(current()).getAttribute('aria-labelledby');
+    function focusId() {
+      const q = current();
+      if (q === 'gender') return ($('jn-gender').querySelector('[aria-checked="true"]') || $('jn-gender').querySelector('button')).id;
+      return { hello: 'jn-start', name: 'jn-name', age: 'jn-age', email: 'jn-email', password: $('jn-password').value ? 'jn-password2' : 'jn-password' }[q];
+    }
+
+    /** Vérifie la réponse de l'écran affiché ; false = rester sur l'écran (l'erreur est affichée). */
+    function validate(q) {
+      if (q === 'name') {
+        answers.name = capitalize($('jn-name').value.trim().replace(/\s+/g, ' '));
+        if (answers.name.length < 2) { setFieldError('jn-name', 'Indiquez votre prénom (2 caractères minimum).'); $('jn-name').focus(); return false; }
+      }
+      if (q === 'gender' && answers.gender === undefined) {
+        $('err-jn-gender').textContent = 'Choisissez une réponse, ou « Je préfère ne pas le dire ».';
+        return false;
+      }
+      if (q === 'age') {
+        if (answers.age < MIN_AGE) { renderAge(); $('jn-age').focus(); return false; }
+        answers.ageSet = true;
+      }
+      if (q === 'email') {
+        answers.email = $('jn-email').value.trim().toLowerCase();
+        if (!EMAIL_RE.test(answers.email)) { setFieldError('jn-email', 'Adresse e-mail invalide (ex. : prenom@gmail.com).'); $('jn-email').focus(); return false; }
+        // Faute de frappe probable (« gmial.com ») : on la signale une fois, sans bloquer
+        if (suggest() && suggestedFor !== answers.email) { suggestedFor = answers.email; $('jn-suggest-btn').focus(); return false; }
+      }
+      if (q === 'password') {
+        const p = $('jn-password').value, c = $('jn-password2').value;
+        const missing = missingPasswordRules(p);
+        if (missing.length) { setFieldError('jn-password', 'Il manque ' + listFr(missing.map((r) => r.label)) + '.'); $('jn-password').focus(); return false; }
+        if (!c) { setFieldError('jn-password2', 'Saisissez à nouveau votre mot de passe.'); $('jn-password2').focus(); return false; }
+        if (c !== p) { setFieldError('jn-password2', 'Les deux mots de passe ne sont pas identiques.'); $('jn-password2').select(); return false; }
+      }
+      return true;
+    }
+
+    function next() {
+      const q = current();
+      if (q !== 'hello' && !validate(q)) return;
+      save();
+      if (index < screens.length - 1) show(index + 1);
+      else if (about) finishAbout();
+      else submit();
+    }
+    function prev() {
+      if (index > 0) show(index - 1, { dir: 'prev' });
+      else if (about && about.edit) { const done = about.onCancel; about = null; done(); }
+    }
+    /** Première question sans réponse (reprise d'un brouillon après un rechargement). */
+    function firstUnanswered() {
+      if (answers.name.length < 2) return screens.indexOf('name');
+      if (answers.gender === undefined) return screens.indexOf('gender');
+      if (!answers.ageSet) return screens.indexOf('age');
+      if (!EMAIL_RE.test(answers.email)) return screens.indexOf('email');
+      return screens.indexOf('password');
+    }
+
+    /* Prénom : on salue la personne dès qu'il est saisi */
+    $('jn-name').addEventListener('input', () => {
+      const v = $('jn-name').value.trim();
+      answers.name = v.replace(/\s+/g, ' ');
+      $('jn-hello').textContent = v.length >= 2 ? 'Bienvenue, ' + capitalize(v.split(/\s+/)[0]) + ' ! 😊' : '';
+      if (v.length >= 2 && !waved && !reduceMotion) {
+        waved = true;
+        const e = screen('name').querySelector('.jn-emoji');
+        e.classList.remove('wave'); void e.offsetWidth; e.classList.add('wave');
+      }
+      if (v.length < 2) waved = false;
+    });
+
+    /* Sexe : une carte par réponse ; un clic (ou Entrée) choisit et passe à la question suivante */
+    function renderGender() {
+      $('jq-gender').textContent = (firstName() ? firstName() + ', vous' : 'Vous') + ' êtes…';
+      const buttons = [...$('jn-gender').querySelectorAll('[data-gender]')];
+      buttons.forEach((b) => b.setAttribute('aria-checked', String(answers.gender !== undefined && b.dataset.gender === answers.gender)));
+      const checked = buttons.find((b) => b.getAttribute('aria-checked') === 'true');
+      buttons.forEach((b) => { b.tabIndex = b === (checked || buttons[0]) ? 0 : -1; });
+      screen('gender').querySelector('.jn-emoji').textContent = answers.gender !== undefined ? GENDER_EMOJI[answers.gender] : '✨';
+    }
+    function pickGender(value, { advance }) {
+      answers.gender = value;
+      $('err-jn-gender').textContent = '';
+      renderGender();
+      save();
+      if (!advance) return;
+      clearTimeout(advanceTimer);
+      advanceTimer = setTimeout(() => { if (current() === 'gender') next(); }, reduceMotion ? 120 : 380);
+    }
+    $('jn-gender').addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-gender]');
+      if (b) pickGender(b.dataset.gender, { advance: true });
+    });
+    $('jn-gender').addEventListener('keydown', (ev) => {
+      const keys = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+      if (!keys[ev.key]) return;
+      ev.preventDefault();
+      const buttons = [...$('jn-gender').querySelectorAll('[data-gender]')];
+      const i = (buttons.indexOf(document.activeElement) + keys[ev.key] + buttons.length) % buttons.length;
+      pickGender(buttons[i].dataset.gender, { advance: false });
+      buttons[i].focus();
+    });
+
+    /* Âge : grand compteur, curseur et boutons − / + */
+    const AGE_EMOJI = [[15, '🧒'], [18, '🎒'], [25, '🎓'], [35, '💼'], [50, '😎'], [Infinity, '🌟']];
+    function renderAge({ bump = false } = {}) {
+      const age = answers.age;
+      const range = $('jn-age');
+      range.value = String(age);
+      range.setAttribute('aria-valuetext', age + ' ans');
+      range.style.setProperty('--fill', ((age - range.min) / (range.max - range.min)) * 100 + '%');
+      const out = $('jn-age-out');
+      out.firstChild.nodeValue = String(age);
+      if (bump && !reduceMotion) { out.classList.remove('bump'); void out.offsetWidth; out.classList.add('bump'); }
+      $('jn-age-emoji').textContent = AGE_EMOJI.find(([max]) => age < max)[1];
+      const young = age < MIN_AGE;
+      $('jn-age-note').textContent = young ? 'FlashMiam est réservé aux ' + MIN_AGE + ' ans et plus.' : '';
+      $('jn-age-note').classList.toggle('is-warn', young);
+      $('jn-age-next').disabled = young;
+      $('jn-age-next').textContent = young ? 'Continuer' : 'J\'ai ' + age + ' ans';
+      $('jn-age-minus').disabled = age <= Number(range.min);
+      $('jn-age-plus').disabled = age >= Number(range.max);
+    }
+    function setAge(age, opts) {
+      const range = $('jn-age');
+      answers.age = Math.max(Number(range.min), Math.min(Number(range.max), Math.round(age)));
+      renderAge(opts);
+      save();
+    }
+    $('jn-age').addEventListener('input', () => setAge(Number($('jn-age').value), { bump: true }));
+    $('jn-age-minus').addEventListener('click', () => setAge(answers.age - 1, { bump: true }));
+    $('jn-age-plus').addEventListener('click', () => setAge(answers.age + 1, { bump: true }));
+    $('jn-skip').addEventListener('click', () => { answers.ageSet = false; if (about) finishAbout(); });
+
+    /* E-mail : coche verte quand l'adresse est valide, suggestion en cas de faute de frappe */
+    function distance(a, b) {
+      const row = Array.from({ length: b.length + 1 }, (_, j) => j);
+      for (let i = 1; i <= a.length; i++) {
+        let diag = row[0];
+        row[0] = i;
+        for (let j = 1; j <= b.length; j++) {
+          const keep = row[j];
+          row[j] = Math.min(row[j] + 1, row[j - 1] + 1, diag + (a[i - 1] === b[j - 1] ? 0 : 1));
+          diag = keep;
+        }
+      }
+      return row[b.length];
+    }
+    /** Propose l'adresse corrigée (« camille@gmial.com » → « camille@gmail.com ») ; null si rien à proposer. */
+    function suggest() {
+      const email = $('jn-email').value.trim().toLowerCase();
+      const at = email.lastIndexOf('@');
+      suggestion = null;
+      if (at > 0 && EMAIL_RE.test(email)) {
+        const domain = email.slice(at + 1);
+        if (!EMAIL_DOMAINS.includes(domain)) {
+          let best = null, bestD = 3;
+          EMAIL_DOMAINS.forEach((d) => { const dd = distance(domain, d); if (dd < bestD) { best = d; bestD = dd; } });
+          if (best && bestD <= (domain.length > 6 ? 2 : 1)) suggestion = email.slice(0, at + 1) + best;
+        }
+      }
+      $('jn-suggest').hidden = !suggestion;
+      if (suggestion) $('jn-suggest-btn').textContent = suggestion;
+      return suggestion;
+    }
+    $('jn-email').addEventListener('input', () => {
+      const email = $('jn-email').value.trim().toLowerCase();
+      answers.email = email;
+      $('jn-email-ok').hidden = !EMAIL_RE.test(email);
+      $('jn-suggest').hidden = true;
+      clearTimeout(suggestTimer);
+      suggestTimer = setTimeout(suggest, 700);
+    });
+    $('jn-email').addEventListener('blur', () => { clearTimeout(suggestTimer); suggest(); });
+    $('jn-suggest-btn').addEventListener('click', () => {
+      if (!suggestion) return;
+      setEmail(suggestion);
+      $('jn-suggest').hidden = true;
+      $('jn-email').focus();
+    });
+    function setEmail(email) {
+      $('jn-email').value = email;
+      answers.email = email;
+      $('jn-email-ok').hidden = !EMAIL_RE.test(email);
+      setFieldError('jn-email', '');
+      save();
+    }
+
+    /* Mot de passe : règles cochées en direct, jauge de solidité, confirmation */
+    const STRENGTH = ['', 'Trop faible', 'Trop faible', 'Moyen', 'Presque !', 'Solide 💪'];
+    function renderPassword() {
+      const p = $('jn-password').value;
+      PASSWORD_RULES.forEach((r) => $('jn-rules').querySelector('[data-rule="' + r.id + '"]').classList.toggle('is-ok', r.test(p)));
+      const score = p ? PASSWORD_RULES.filter((r) => r.test(p)).length : 0;
+      form.dataset.strength = String(score);
+      $('jn-strength-label').textContent = score === 5 && p.length >= 12 ? 'Très solide 💪' : STRENGTH[score];
+      $('jn-pw-emoji').textContent = score === 5 ? '🛡️' : score >= 3 ? '🔑' : '🔒';
+      showPasswordMatch(p, $('jn-password2').value, $('jn-match'));
+    }
+    $('jn-password').addEventListener('input', renderPassword);
+    $('jn-password2').addEventListener('input', renderPassword);
+
+    /* Navigation : boutons « Continuer », retour, touche Entrée */
+    $('jn-start').addEventListener('click', () => show(firstUnanswered()));
+    form.querySelectorAll('[data-next]').forEach((b) => b.addEventListener('click', next));
+    $('jn-back').addEventListener('click', prev);
+    form.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'Enter' || ev.isComposing || !ev.target.matches('input')) return;
+      ev.preventDefault();
+      next();
+    });
+    form.addEventListener('submit', (ev) => { ev.preventDefault(); next(); });
+
+    /** Création du compte : les réponses facultatives (sexe, année de naissance) partent avec l'inscription. */
+    let submitting = false;
+    async function submit() {
+      if (submitting) return;
+      const email = answers.email, password = $('jn-password').value;
+      const meta = { role: 'student', first_name: answers.name };
+      if (answers.gender) meta.gender = answers.gender;
+      if (answers.ageSet) meta.birth_year = String(new Date().getFullYear() - answers.age);
+      const btn = $('jn-submit');
+      submitting = true; btn.disabled = true;
+      authStorage.setRemember($('jn-remember').checked);
+      let res;
+      try {
+        res = await Loader.run(
+          sb.auth.signUp({ email, password, options: { data: meta, emailRedirectTo: location.origin + location.pathname } }),
+          'Création de votre compte…');
+      } catch (e) { res = { data: {}, error: e }; }
+      finally { submitting = false; btn.disabled = false; }
+      const { data, error } = res;
+      const accountExists = () => {
+        show(screens.indexOf('email'), { dir: 'prev' });
+        $('field-jn-email').classList.add('has-error');
+        $('err-jn-email').innerHTML = 'Un compte existe déjà avec cet e-mail. <button class="link-btn" type="button">Se connecter</button>';
+        $('err-jn-email').querySelector('button').addEventListener('click', () => { $('li-email').value = email; showAuthStep('login'); });
+      };
+      if (error) {
+        if (error.code === 'user_already_exists' || /already registered/i.test(error.message || '')) { accountExists(); return; }
+        if (error.code === 'weak_password') { setFieldError('jn-password', 'Mot de passe trop facile à deviner : choisissez-en un plus long ou plus varié.'); $('jn-password').select(); return; }
+        $('err-join-final').textContent = cloudError(error);
+        return;
+      }
+      // Adresse déjà inscrite et confirmée : Supabase répond sans erreur (protection de la vie privée) mais sans identité
+      if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) { accountExists(); return; }
+      $('jn-password').value = '';
+      $('jn-password2').value = '';
+      renderPassword();
+      index = screens.indexOf('email');   // « Modifier l'adresse » depuis l'écran du code revient à l'e-mail
+      const opened = async (session) => {
+        let user;
+        try { user = await Loader.run(loadUser(session.user), 'Ouverture de votre compte…'); }
+        catch (e) { $('li-email').value = email; showAuthStep('login'); $('err-login').textContent = 'Votre compte est créé, mais il n\'a pas pu s\'ouvrir. ' + cloudError(e); return; }
+        clearDraft();
+        applySession(user);
+        welcome(user);
+        showAuthStep('location');
+      };
+      if (data.session) { await opened(data.session); return; }   // confirmation de l'e-mail désactivée
+      startEmailVerification({ email, back: 'signup', onSuccess: opened });
+    }
+
+    /** Sexe et âge enregistrés après coup (compte Google, ou modification depuis le profil). */
+    async function finishAbout() {
+      const done = about;
+      if (!done) return;
+      const fields = {
+        gender: answers.gender ? answers.gender : null,
+        birth_year: answers.ageSet ? new Date().getFullYear() - answers.age : null,
+      };
+      // Rien n'a changé (ou rien n'a été répondu sur un compte tout neuf) : inutile d'écrire
+      const user = currentUser();
+      if (user && fields.gender === user.gender && fields.birth_year === user.birthYear) { about = null; done.onDone(fields); return; }
+      const { error } = await Loader.run(sb.from('profiles').update(fields).eq('id', user.id), 'Enregistrement…');
+      if (error) {
+        const note = $('jn-age-note');
+        show(screens.indexOf('age'), { focus: false });
+        note.textContent = cloudError(error);
+        note.classList.add('is-warn');
+        return;
+      }
+      user.gender = fields.gender;
+      user.birthYear = fields.birth_year;
+      about = null;
+      done.onDone(fields);
+    }
+
+    /** Écran de l'inscription (rôle client) : reprend là où la personne en était. step 'about' : questions seules. */
+    function enter(step) {
+      if (step !== 'about' && screens !== SIGNUP) { about = null; screens = SIGNUP; index = 0; restoreDraft(); }
+      show(index, { focus: false });
+    }
+    /**
+     * Questions « sexe » et « âge » seules, sur un compte existant.
+     * edit : depuis le profil (bouton retour = annuler) ; sinon compte Google tout neuf (questions passables).
+     */
+    function ask({ edit = false, onDone, onCancel = () => {} }) {
+      const user = currentUser();
+      about = { edit, onDone, onCancel };
+      screens = ABOUT;
+      answers.gender = edit ? (user.gender || '') : undefined;
+      if (user.birthYear) { answers.age = new Date().getFullYear() - user.birthYear; answers.ageSet = true; }
+      else { answers.age = 20; answers.ageSet = false; }
+      index = 0;
+      showAuthStep('about');
+    }
+
+    /** Arrivée sur la carte après l'inscription : confettis et mot d'accueil sur l'écran de localisation. */
+    function welcome(user) {
+      const box = $('ob-welcome');
+      box.textContent = 'Bienvenue sur FlashMiam, ' + capitalize((user.name || '').split(' ')[0]) + ' ! Votre compte est prêt.';
+      box.hidden = false;
+      if (reduceMotion) return;
+      const layer = document.createElement('div');
+      layer.className = 'confetti';
+      layer.setAttribute('aria-hidden', 'true');
+      const colors = ['#ea4335', '#fbbc04', '#34a853', '#4285f4', '#ff6d01', '#a142f4'];
+      for (let i = 0; i < 90; i++) {
+        const p = document.createElement('i');
+        p.style.left = Math.random() * 100 + '%';
+        p.style.background = colors[i % colors.length];
+        p.style.setProperty('--dx', Math.round(Math.random() * 200 - 100) + 'px');
+        p.style.setProperty('--rot', Math.round(Math.random() * 900 - 450) + 'deg');
+        p.style.animationDelay = (Math.random() * 0.45).toFixed(2) + 's';
+        p.style.animationDuration = (1.3 + Math.random() * 1.1).toFixed(2) + 's';
+        layer.append(p);
+      }
+      document.body.append(layer);
+      setTimeout(() => layer.remove(), 3200);
+    }
+
+    /** Brouillon de l'onglet (page rechargée en pleine inscription). */
+    function restoreDraft() {
+      Object.assign(answers, { name: '', gender: undefined, age: 20, ageSet: false, email: '' });
+      let d = null;
+      try { d = JSON.parse(sessionStorage.getItem(DRAFT_KEY)); } catch (e) { /* ignore */ }
+      if (d) {
+        answers.name = String(d.name || '').slice(0, 40);
+        answers.gender = ['female', 'male', 'other', ''].includes(d.gender) ? d.gender : undefined;
+        answers.age = Number.isFinite(d.age) ? Math.max(13, Math.min(99, Math.round(d.age))) : 20;
+        answers.ageSet = !!d.ageSet;
+        answers.email = String(d.email || '').slice(0, 120);
+        $('jn-name').value = answers.name;
+        $('jn-email').value = answers.email;
+        $('jn-email-ok').hidden = !EMAIL_RE.test(answers.email);
+      }
+      renderAge();
+    }
+    restoreDraft();
+    renderPassword();
+    // Modification depuis le profil : Échap annule
+    $('onboarding').addEventListener('keydown', (ev) => {
+      if (ev.key !== 'Escape' || !about || !about.edit || currentStep !== 'about') return;
+      ev.preventDefault();
+      ev.stopPropagation();   // sinon le profil rouvert se refermerait aussitôt
+      const done = about.onCancel;
+      about = null;
+      done();
+    });
+
+    return { enter, ask, welcome, syncChrome, focusId, titleId, setEmail, email: () => $('jn-email').value.trim().toLowerCase() };
+  })();
 
   $('form-login').addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -6604,9 +7276,9 @@
    * client ou ouvre la session. Un compte restaurateur ne peut pas se connecter avec Google.
    */
   async function onGoogleCredential(response) {
-    const errBox = currentStep === 'login' ? $('err-login') : $('err-signup');
+    const errBox = currentStep === 'login' ? $('err-login') : $('err-join');
     errBox.textContent = '';
-    authStorage.setRemember($(currentStep === 'login' ? 'li-remember' : 'su-remember').checked);
+    authStorage.setRemember($(currentStep === 'login' ? 'li-remember' : 'jn-remember').checked);
     const { data, error } = await Loader.run(sb.auth.signInWithIdToken({ provider: 'google', token: response.credential }), 'Connexion avec Google…');
     if (error || !data.user) { errBox.textContent = 'La connexion avec Google a échoué. Réessayez.'; return; }
     let user;
@@ -6620,8 +7292,14 @@
     setAuthRole('client');
     applySession(user);
     // Première connexion sur cet appareil : proposer la localisation ; sinon, directement la carte
-    if (!store.read().geoConsent) showAuthStep('location');
-    else routeAfterLogin(user);
+    const then = () => { if (!store.read().geoConsent) showAuthStep('location'); else routeAfterLogin(user); };
+    // Compte Google tout neuf : les deux questions de l'inscription (sexe, âge), passables
+    const fresh = Date.now() - new Date(user.createdAt).getTime() < 10 * 60 * 1000;
+    if (fresh && !user.gender && !user.birthYear) {
+      Join.ask({ onDone: () => { Join.welcome(user); then(); } });
+      return;
+    }
+    then();
   }
 
   /** Après connexion : inscription restaurateur à reprendre, sinon la carte. */
@@ -7819,6 +8497,42 @@
       if (sub) { const s = document.createElement('small'); s.className = 'kpi-sub'; s.id = 'k-' + id + '-d'; s.textContent = sub; d.appendChild(s); }
       return d;
     }
+    /**
+     * Public de la fiche : sexe et tranche d'âge des clients venus sur la période. Le serveur ne renvoie ces
+     * totaux qu'à partir de 5 personnes (audience null en dessous), pour que personne ne soit reconnaissable.
+     */
+    function renderAudience(A) {
+      const box = $('ps-audience');
+      box.textContent = '';
+      if (!A) {
+        $('ps-aud-sub').textContent = 'Le profil de vos clients (sexe, âge) s\'affiche à partir de 5 personnes venues sur votre fiche pendant la période, pour que personne ne soit reconnaissable.';
+        const p = document.createElement('p');
+        p.className = 'hbars-empty';
+        p.textContent = 'Pas encore assez de visiteurs sur la période.';
+        box.appendChild(p);
+        return;
+      }
+      $('ps-aud-sub').textContent = plural(A.total, 'client venu', 'clients venus') + ' sur votre fiche pendant la période, d\'après ce qu\'ils ont indiqué à l\'inscription (facultatif).';
+      const group = (title, rows) => {
+        const h = document.createElement('h5');
+        h.textContent = title;
+        const bars = document.createElement('div');
+        bars.className = 'hbars';
+        const wrap = document.createElement('div');
+        wrap.append(h, bars);
+        box.appendChild(wrap);
+        hbars(bars, rows.filter((x) => x.n || !x.optional), { share: true, empty: 'Personne n\'a répondu.' });
+      };
+      group('Sexe', [
+        { key: 'female', label: '👩 Femmes', n: A.female }, { key: 'male', label: '👨 Hommes', n: A.male },
+        { key: 'other', label: '🌈 Autre', n: A.other }, { key: 'unknown', label: 'Non précisé', n: A.gender_unknown, optional: true },
+      ]);
+      group('Âge', [
+        { key: '15', label: '15-17 ans', n: A.age_15_17 }, { key: '18', label: '18-24 ans', n: A.age_18_24 },
+        { key: '25', label: '25-34 ans', n: A.age_25_34 }, { key: '35', label: '35-49 ans', n: A.age_35_49 },
+        { key: '50', label: '50 ans et plus', n: A.age_50 }, { key: 'unknown', label: 'Non précisé', n: A.age_unknown, optional: true },
+      ]);
+    }
     function hbars(box, rows, { empty = 'Rien pour l\'instant.', share = false } = {}) {
       box.textContent = '';
       const max = Math.max(0, ...rows.map((x) => x.n));
@@ -7887,6 +8601,7 @@
       // Provenance
       hbars($('ps-sources'), SOURCES.map(([key, ico, label]) => ({ key, label: ico + ' ' + label.charAt(0).toUpperCase() + label.slice(1), n: data.sources[key] || 0 })).sort((a, z) => z.n - a.n),
         { share: true, empty: 'Pas encore de visite sur la période.' });
+      renderAudience(data.audience);
       // Actions sur la fiche
       hbars($('ps-acts'), [
         { key: 'menu', label: '📖 Menu consulté', n: T.menu }, { key: 'photos', label: '🖼️ Photos regardées', n: T.photos },
@@ -8164,11 +8879,29 @@
     if (account.google) { const tag = document.createElement('span'); tag.className = 'role-tag'; tag.textContent = 'Google'; $('profile-email').append(' ', tag); }
     if (account.role === 'pro') { const tag = document.createElement('span'); tag.className = 'role-tag'; tag.textContent = 'Restaurateur'; $('profile-email').append(' ', tag); }
     $('profile-since').textContent = new Date(account.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    renderProfileAbout(account);
     updateProfileGeo();
     $('pro-entry').hidden = account.role !== 'pro';
     renderFollows(account);
     openPanel($('profile-sheet'), { modal: true });
   }
+  /** Sexe et âge (facultatifs) : servent seulement aux totaux d'audience des restaurants. */
+  const GENDER_LABEL = { female: 'Femme', male: 'Homme', other: 'Autre' };
+  function renderProfileAbout(account) {
+    $('profile-about-row').hidden = account.role === 'pro';
+    const parts = [];
+    if (account.gender) parts.push(GENDER_LABEL[account.gender]);
+    if (account.birthYear) parts.push((new Date().getFullYear() - account.birthYear) + ' ans');
+    $('profile-about').textContent = parts.join(' · ') || 'Non renseigné';
+  }
+  $('profile-about-edit').addEventListener('click', () => {
+    closePanel($('profile-sheet'));
+    Join.ask({
+      edit: true,
+      onDone: () => { hideOnboarding(); renderProfileAbout(currentUser()); openProfileSheet(); toast('C\'est enregistré.'); },
+      onCancel: () => { hideOnboarding(); openProfileSheet(); },
+    });
+  });
   $('profile-btn').addEventListener('click', () => {
     const account = currentUser();
     if (!account) return;

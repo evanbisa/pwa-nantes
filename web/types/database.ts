@@ -532,8 +532,10 @@ export type Database = {
       }
       profiles: {
         Row: {
+          birth_year: number | null
           created_at: string
           first_name: string | null
+          gender: string | null
           id: string
           last_name: string | null
           notify_promos: boolean
@@ -544,8 +546,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          birth_year?: number | null
           created_at?: string
           first_name?: string | null
+          gender?: string | null
           id: string
           last_name?: string | null
           notify_promos?: boolean
@@ -556,8 +560,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          birth_year?: number | null
           created_at?: string
           first_name?: string | null
+          gender?: string | null
           id?: string
           last_name?: string | null
           notify_promos?: boolean

@@ -117,6 +117,18 @@
 - Tests : 39 vérifications « forte affluence » (503, lenteur, hors connexion, temps réel simulé, cache, service worker,
   8 visiteurs en même temps).
 
+### Inscription en questions, sexe et âge (24 octobre 2026, migration `20261026090000_demographics.sql`)
+- Inscription d'un client en une question par écran (prénom, sexe, âge, e-mail, mot de passe + confirmation),
+  avec progression, retour en arrière, clavier complet, brouillon de l'onglet (jamais le mot de passe) et confettis à l'arrivée.
+  Un nouveau compte Google répond aux deux questions sexe et âge (l'âge peut être passé).
+- `profiles.gender` (`female`, `male`, `other`, ou vide = « Je préfère ne pas le dire ») et `profiles.birth_year`
+  (déduite de l'âge) : facultatifs, contrôlés par la base (liste fermée ; années absurdes ou moins de 15 ans ignorées à
+  l'inscription), modifiables seulement par leur propriétaire (droit de mise à jour limité à ces colonnes), illisibles par les autres.
+- 15 ans minimum (âge du consentement numérique en France), affiché dans les conditions d'utilisation.
+- Restaurateur : « Votre public » = totaux par sexe et tranche d'âge des clients venus sur la période, renvoyés par
+  la base **seulement à partir de 5 personnes** (sinon rien), sans aucun identifiant.
+- Tests : 11 scénarios de sécurité ajoutés (208 au total) et 60 vérifications de bout en bout (inscription, profil, public).
+
 ### Connexion avec Google (clients)
 - Prototype : bouton Google (Google Identity Services) affiché dès que `CONFIG.googleClientId` est renseigné.
   Le jeton Google est vérifié par Supabase Auth (`signInWithIdToken`), signature comprise.

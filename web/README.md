@@ -16,6 +16,7 @@ Zone couverte : La Roche-sur-Yon et sa couronne.
 | 4 | Stories (24 h) et promotions des restaurateurs : tables `stories`, `promotions`, stockage `stories` | ✅ appliqué sur Supabase (99 scénarios de sécurité, 0 alerte) |
 | 5 | Connexion « Continuer avec Google » (clients) | ✅ en ligne (vérifiée par Supabase Auth) |
 | 8 | **Tenue sous forte affluence** : délais et nouvelles tentatives, plus de déconnexion sur une panne, copie locale des fiches, temps réel sans rafale (story publiée = 0 requête, relecture ciblée et étalée), actualisation incrémentale, index « en cours », MapLibre et polices servis par le site, service worker, états de chargement (squelettes, « Réessayer », « j'aime » instantanés) | ✅ sur le site complet ; migration `20261025090000_perf.sql` |
+| 9 | **Inscription en questions** (une par écran : prénom, sexe, âge, e-mail, mot de passe), animée ; sexe et âge facultatifs, modifiables dans le profil ; « Votre public » (sexe, âge) dans les statistiques du restaurateur, à partir de 5 personnes | ✅ sur le site complet ; migration `20261026090000_demographics.sql` |
 | 7 | **Espace restaurateur** (plein écran sur téléphone, grand panneau sur ordinateur ; onglets Accueil, Statistiques, Publier, Avis, Ma fiche) et **statistiques détaillées** : provenance des visites, heures, menu, photos, itinéraires, appels, partages, avis lus, lien Google, vues / « j'aime » / clics de chaque story, clics sur chaque offre, plats aimés, abonnés gagnés et perdus, clients qui reviennent ; comparaison avec la période précédente (7, 30 ou 90 jours) ; masquer temporairement sa fiche | ✅ sur le site complet (`../index.html`) ; migration `20261024090000_analytics.sql` |
 | 6 | Avis (1 à 5 étoiles, réponse du restaurateur, signalement), notifications (promos et stories des restaurants suivis, avis, réponses), alertes push, recherche par plat avec budget, partage d'une fiche, « ferme bientôt » (contour orange moins d'une heure avant la fermeture), « Offres autour de moi » (de la plus proche à la plus lointaine) | ✅ sur le site complet (`../index.html`) ; migration `20261023090000_reviews_notifications.sql`, fonction `send-push` |
 
@@ -128,6 +129,7 @@ aussi le projet Supabase actif (l'offre gratuite le met en pause après 7 jours 
 | Mot de passe | `auth.users` (Supabase Auth, haché en bcrypt) | personne | l'utilisateur, via Supabase Auth |
 | E-mail | `auth.users` (schéma non exposé par l'API) | personne côté navigateur | l'utilisateur, via Supabase Auth |
 | Prénom, nom, téléphone | `profiles` | son propriétaire | son propriétaire (pas le rôle) |
+| Sexe, année de naissance (facultatifs) | `profiles` | son propriétaire ; les restaurateurs n'ont que des totaux, à partir de 5 personnes | son propriétaire |
 | Fiche : nom, catégorie, menu, horaires, statut… | `merchants` | **tout le monde**, si publiée et ouverte | son propriétaire |
 | SIRET, raison sociale | `merchant_private` | son propriétaire | le serveur uniquement (clé secrète) |
 | Abonnement du restaurateur | `merchant_subscriptions` | le restaurateur | le restaurateur (mode « démonstration » uniquement) ; le paiement réel passera par le serveur |
