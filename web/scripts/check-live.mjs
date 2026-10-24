@@ -66,8 +66,10 @@ for (const site of SITES) {
     if (secretJwts(body).length) found.push(`ancienne clé service_role Supabase dans ${url}`);
   }
   report(found.length === 0, `${site.name} : aucune clé secrète dans ${files.length} fichiers publiés${found.length ? " : " + found.join(" ; ") : ""}`);
-  const keys = [...new Set([...page.body.matchAll(/sb_publishable_[A-Za-z0-9_-]+|[0-9]+-[a-z0-9]+\.apps\.googleusercontent\.com/g)].map((m) => m[0].slice(0, 18) + "…"))];
-  report(keys.length > 0 && keys.every((k) => k.startsWith("sb_publishable_") || k.includes(".apps.")), `${site.name} : seules des clés publiques par nature (${keys.join(", ")})`);
+  // Clés repérées dans la page : chacune doit être d'un type public (affichées tronquées dans le rapport)
+  const keys = [...new Set([...page.body.matchAll(/sb_(?:publishable|secret)_[A-Za-z0-9_-]+|[0-9]+-[a-z0-9]+\.apps\.googleusercontent\.com/g)].map((m) => m[0]))];
+  const isPublic = (k) => k.startsWith("sb_publishable_") || k.endsWith(".apps.googleusercontent.com");
+  report(keys.length > 0 && keys.every(isPublic), `${site.name} : seules des clés publiques par nature (${keys.map((k) => k.slice(0, 18) + "…").join(", ")})`);
 
   const csp = (page.body.match(/http-equiv="Content-Security-Policy" content="([^"]*)"/) || [])[1] || "";
   report(/script-src 'self'( 'sha256-[A-Za-z0-9+/=]+')+/.test(csp) && !/unsafe-inline[^;]*;?/.test(csp.match(/script-src[^;]*/)?.[0] || "") && /object-src 'none'/.test(csp),
