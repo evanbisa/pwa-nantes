@@ -135,13 +135,13 @@ aussi le projet Supabase actif (l'offre gratuite le met en pause après 7 jours 
 | Abonnement du restaurateur | `merchant_subscriptions` | le restaurateur | le restaurateur (mode « démonstration » uniquement) ; le paiement réel passera par le serveur |
 | Photos de la fiche | stockage `photos` (public) | **tout le monde** | le restaurateur, dans le dossier de sa fiche |
 | Justificatifs (Kbis, hygiène…) | stockage `documents` (privé) | le restaurateur seulement | le restaurateur, dans le dossier de sa fiche |
-| Avis (note, commentaire, prénom + initiale) | `reviews` | **tout le monde**, si la fiche est en ligne | le client : le sien (un par restaurant) ; le restaurateur : réponse et signalement sur sa fiche, jamais la note |
+| Avis (note, commentaire, prénom + initiale) | `reviews` | **tout le monde**, si la fiche est en ligne ; l'identifiant du compte de l'auteur n'est lisible par personne (chacun retrouve les siens avec `my_reviews`) | le client : le sien (un par restaurant) ; le restaurateur : réponse et signalement sur sa fiche, jamais la note |
 | Notifications | `notifications` | leur destinataire | créées par la base uniquement (déclencheurs) ; le destinataire les marque lues ou les efface |
 | Appareils abonnés aux alertes | `push_subscriptions` | leur propriétaire | enregistrement par `register_push_subscription` ; lus par le serveur pour envoyer les alertes |
 | Clés du serveur d'alertes | `push_config` | personne (serveur uniquement) | la fonction `send-push` |
 | Stories, promotions | `stories`, `promotions` (+ stockage `stories`) | **tout le monde**, tant qu'elles sont en cours, si la fiche est en ligne | le restaurateur, sur sa fiche uniquement (durée de 24 h et fin des promos du jour / de la semaine imposées par la base) |
 | Restaurants suivis | `follows` | l'étudiant concerné (le restaurateur ne voit que le **nombre**) | l'étudiant (s'abonner / se désabonner) |
-| Statistiques (vues, personnes, clics) | `merchant_stats`, `merchant_visitors` | le restaurateur, en **chiffres** uniquement | personne en direct : fonction `track_visit` |
+| Statistiques (vues, personnes, clics) | `merchant_stats`, `merchant_visitors` | le restaurateur, en **chiffres** uniquement | personne en direct : fonction `track_visit` (comptes connectés seulement, 50 actions au plus par personne, fiche et jour : table `visit_budget`, illisible) |
 | Statistiques détaillées (provenance, heures, partages, stories vues, clics sur les offres, désabonnements) | `merchant_event_visitors`, `merchant_view_hours`, `story_viewers`, `promo_clicks` | **personne** en direct : le restaurateur reçoit des **totaux** par `my_merchant_analytics` | fonction `track_visit` (et déclencheur de désabonnement) ; effacées après 90 jours |
 | « J'aime » des stories et des plats | `story_likes`, `dish_likes` | chacun ses propres « j'aime » ; totaux par `dish_like_counts` (public) et `my_merchant_analytics` (restaurateur) | `toggle_story_like`, `toggle_dish_like` (story en ligne / plat de la carte, jamais sur sa propre fiche) |
 
@@ -152,7 +152,14 @@ aussi le projet Supabase actif (l'offre gratuite le met en pause après 7 jours 
   (adresse dans la zone, description, 1 photo, 1 service) : c'est la base qui refuse, pas l'interface.
 - Un restaurateur ne peut ni changer le propriétaire d'une fiche, ni son SIRET, ni se déclarer vérifié,
   ni toucher la fiche d'un autre, ni republier une fiche suspendue.
-- Tests : `npm run db:test` (197 scénarios sur un PostgreSQL local : `PGHOST=… PGPORT=… PGUSER=postgres`).
+- Photos d'une fiche : uniquement des fichiers du stockage FlashMiam, dans le dossier de cette fiche (aucune adresse vers un site tiers).
+- **Ménage chaque nuit** (fonction `purge`, lancée par `pg_cron`) : notifications après 60 jours, données par personne
+  des statistiques après 90 jours, totaux après 180 jours, stories 30 jours après leur fin (avec leur photo).
+- **Politique de sécurité du contenu (CSP)** dans les pages : scripts autorisés par empreinte (`scripts/csp.mjs`,
+  recalculée à chaque publication), connexions limitées à Supabase, aux tuiles et à Google (connexion).
+- Tests : `npm run db:test` (234 scénarios sur un PostgreSQL local : `PGHOST=… PGPORT=… PGUSER=postgres`) ;
+  `deno test supabase/functions/` (fonctions serveur) ; `node scripts/check-supabase.mjs` et
+  `node scripts/check-live.mjs` (projet et sites en ligne, aussi chaque lundi par `verifications.yml`).
 
 ## Limites des offres gratuites à connaître
 - **Supabase Free** : 500 Mo de base, 50 000 utilisateurs actifs/mois, 1 Go de fichiers, 200 connexions temps
@@ -171,7 +178,7 @@ web/
 ├─ lib/supabase/        client.ts (navigateur) · env.ts
 ├─ lib/geo/             centre, limites, fonds de carte, distance
 ├─ types/               database.ts (à régénérer : npx supabase gen types) · merchant.ts
-├─ scripts/             check-supabase.mjs
+├─ scripts/             check-supabase.mjs · check-live.mjs
 ├─ public/_headers      en-têtes de sécurité (Cloudflare Pages)
 └─ supabase/            migrations/ (init, hardening, follows_stats, visitors_tidy, stories_promotions) · functions/verify-siret/ · tests/ (rls, smoke.ts)
 ```

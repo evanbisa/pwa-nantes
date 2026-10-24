@@ -1,4 +1,4 @@
-# Sécurité et mise en ligne : où on en est (22 octobre 2026)
+# Sécurité et mise en ligne : où on en est (24 octobre 2026)
 
 > Mémo à relire quand on reprend « le sujet de la sécurité ».
 > Tout ce qui est marqué ✅ est fait et vérifié ; la section « Ce qu'il te reste à faire » liste
@@ -129,6 +129,49 @@
   la base **seulement à partir de 5 personnes** (sinon rien), sans aucun identifiant.
 - Tests : 11 scénarios de sécurité ajoutés (208 au total) et 60 vérifications de bout en bout (inscription, profil, public).
 
+### Revue de sécurité approfondie (24 octobre 2026)
+Audit complet de la base en ligne (droits table par table et colonne par colonne, fonctions, stockage, temps réel,
+durées de conservation), des fonctions serveur, du site (affichage de données, liens, scripts), du dépôt et des
+publications. Corrigé :
+- **Avis** : l'identifiant du compte de l'auteur n'est plus lisible par personne (il permettait de relier tous les avis
+  d'une même personne) ; chacun retrouve les siens par `my_reviews()`. Les avis ne sont plus diffusés en temps réel
+  (le site ne les écoutait pas, et chaque avis complet partait à quiconque s'abonnait).
+- **Statistiques impossibles à gonfler** : un visiteur sans compte ne fait plus rien compter (avant, un script pouvait
+  ajouter des millions de vues à un restaurant) ; au plus 50 actions comptées par personne, par fiche et par jour ;
+  l'ancien compteur direct `track_merchant_event` est fermé.
+- **Photos des fiches** : seulement des fichiers du stockage FlashMiam, dans le dossier de la fiche. Avant, une adresse
+  vers un site tiers était acceptée : une « photo » pouvait servir à pister l'adresse IP de chaque visiteur.
+- **Durées de conservation réellement appliquées** : la page Confidentialité annonçait 90 jours, mais les visites
+  par personne n'étaient jamais effacées. Désormais, chaque nuit (2 h 17 UTC, `pg_cron` → fonction `purge`) :
+  notifications après 60 jours, données par personne après 90 jours, totaux sans donnée personnelle après 180 jours,
+  stories 30 jours après leur fin avec leur photo (retirée du stockage). Vérifié en ligne (réponse 200, 9 tables traitées).
+- **Politique de sécurité du contenu (CSP)** sur toutes les pages : seuls les scripts du site, autorisés par leur
+  empreinte, peuvent s'exécuter ; connexions limitées à Supabase, aux tuiles de la carte, au géocodage et à Google
+  (connexion). Vérifié : un script injecté, un attribut `onerror` (XSS), un envoi de données vers un autre site, un pixel
+  de pistage et `eval` sont bloqués. Recalculée automatiquement à chaque publication (`scripts/csp.mjs`).
+- **En-têtes** (Vercel, Cloudflare) : intégration dans un autre site interdite (`frame-ancestors 'none'`), fenêtres
+  isolées (`Cross-Origin-Opener-Policy`), caméra, micro, paiement, USB et suivi publicitaire désactivés ;
+  sur GitHub Pages (pas d'en-têtes possibles), la page refuse de s'afficher dans le cadre d'un autre site.
+- **Publication** : actions GitHub épinglées sur une version exacte (empreinte), `wrangler` épinglé, jeton GitHub non
+  conservé après la copie du dépôt ; 0 dépendance vulnérable (`npm audit`) ; aucun secret dans le dépôt ni son historique.
+- **Vérifications automatiques en ligne** (`verifications.yml`, à chaque modification et chaque lundi) : en plus des
+  droits d'un visiteur, `check-live.mjs` contrôle les sites publiés (aucune clé secrète dans les pages et scripts,
+  CSP active, en-têtes de sécurité).
+- Déjà solides (vérifiés) : RLS sur toutes les tables, fonctions privilégiées isolées (`search_path` vide, droits
+  explicites), stockage limité à son dossier (types et tailles imposés), garde-fous des fiches, avis et stories, aucune
+  donnée d'utilisateur insérée comme HTML dans les pages (51 gabarits fixes, textes ajoutés en texte brut).
+
+**Clés API** (inventaire) :
+| Clé | Où | Risque |
+| --- | --- | --- |
+| Supabase *publishable* `sb_publishable_W-2G…` | site, workflows | publique par nature : ne donne que ce que la RLS autorise (234 scénarios + contrôle en ligne) |
+| Supabase *secret* | uniquement dans Supabase (fonctions serveur) | jamais dans le dépôt ni les pages (vérifié, historique compris) |
+| Anciennes clés `anon` / `service_role` (JWT) | Supabase, plus utilisées par le site | à désactiver (voir ci-dessous) |
+| Identifiant client Google `87416467106-…` | site | public par nature ; protégé par les origines autorisées (Google Cloud) et la vérification du jeton par Supabase |
+| Secret du client Google | uniquement dans Supabase | jamais dans le dépôt |
+| Clés VAPID (alertes) | table `push_config` | privée illisible (aucune règle d'accès) ; la clé publique est donnée aux navigateurs, c'est normal |
+| Jetons Cloudflare | secrets GitHub | jamais affichés par les workflows |
+
 ### Connexion avec Google (clients)
 - Prototype : bouton Google (Google Identity Services) affiché dès que `CONFIG.googleClientId` est renseigné.
   Le jeton Google est vérifié par Supabase Auth (`signInWithIdToken`), signature comprise.
@@ -169,6 +212,19 @@
 - Pages `confidentialite.html` et `conditions.html` (contact : flashmiampro@gmail.com).
 
 ### ⏳ Reste à faire
+- **Sécurité (24 octobre 2026), à faire dans Supabase** :
+  - *Project Settings › API Keys* : désactiver les **anciennes clés** (`anon`, `service_role`), plus utilisées par le site.
+    La `service_role` ancienne ne peut pas être changée seule et reste valable jusqu'en 2107 : mieux vaut la couper.
+    Dis-moi quand c'est fait : je vérifie tout de suite que le site et les fonctions marchent (réactivable en un clic).
+  - *Authentication › Providers › Email* : longueur minimale 8 et caractères requis « minuscules, majuscules, chiffres
+    et symboles » (le site l'impose déjà, la base le ferait aussi) ; **Email OTP Expiration** : 900 s (15 min) au lieu de 1 h.
+  - Protection contre les mots de passe divulgués (HaveIBeenPwned) : offre Pro de Supabase uniquement.
+  - Avant l'ouverture au public : *Authentication › Attack Protection* → CAPTCHA (Cloudflare Turnstile, gratuit) contre
+    les inscriptions en masse (il faudra me donner la clé du site Turnstile, publique, pour l'ajouter aux pages).
+- **Vérification des restaurateurs** : le SIRET est contrôlé (existe, en activité, restauration), mais rien ne prouve
+  que la personne est bien le gérant ; quelqu'un pourrait inscrire le restaurant d'un autre. Les justificatifs (Kbis)
+  sont déposés mais pas relus : prévoir une relecture avant la mise en ligne (je peux ajouter l'état « en attente de
+  validation » et un écran de modération).
 - **Bloquant pour l'inscription par e-mail** (la connexion Google, elle, fonctionne déjà) :
   - *Emails › SMTP Settings* : Gmail (mot de passe d'application de flashmiampro@gmail.com) ou Brevo. Sans cela,
     Supabase n'envoie les e-mails qu'aux membres de l'équipe du projet, et au plus quelques-uns par heure.

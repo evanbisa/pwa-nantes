@@ -10,6 +10,8 @@ cd ..
 rm -rf dist
 mkdir -p dist
 cp index.html confidentialite.html conditions.html sw.js icon-192.png icon-512.png dist/
+# Politique de sécurité du contenu (CSP) recalculée sur les pages publiées : toujours à jour
+node scripts/csp.mjs dist/index.html dist/confidentialite.html dist/conditions.html
 cp -r vendor dist/   # bibliothèque Supabase (servie par le site lui-même)
 cp -r web/out dist/app
 printf 'User-agent: *\nAllow: /\n' > dist/robots.txt

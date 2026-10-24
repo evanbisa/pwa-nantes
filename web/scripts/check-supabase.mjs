@@ -62,6 +62,8 @@ for (const [path, label] of [
 
 const reviews = await get("reviews?select=id,author_name,rating&limit=5");
 report(reviews.status === 200 && Array.isArray(reviews.body), `avis publics lisibles (HTTP ${reviews.status})`);
+const reviewAuthors = await get("reviews?select=user_id&limit=1");
+report(reviewAuthors.status === 401 || reviewAuthors.status === 403, `avis : identifiant du compte des auteurs illisible (HTTP ${reviewAuthors.status})`);
 const ratings = await fetch(`${url}/rest/v1/rpc/merchant_ratings`, { method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: "{}" });
 report(ratings.status === 200, `notes moyennes lisibles (HTTP ${ratings.status})`);
 await ratings.body?.cancel();
@@ -81,20 +83,21 @@ const rpc = async (fn, body) => {
 };
 const zero = "00000000-0000-0000-0000-000000000000";
 const visit = await rpc("track_visit", { p_merchant_id: zero, p_event: "view", p_source: "map" });
-report(visit.status === 200 || visit.status === 204, `suivi des visites (track_visit) en ligne, appelable par un visiteur (HTTP ${visit.status})`);
-const badEvent = await rpc("track_visit", { p_merchant_id: zero, p_event: "hack" });
-report(badEvent.status === 400, `suivi des visites : évènement inconnu refusé (HTTP ${badEvent.status})`);
+report(visit.status === 401 || visit.status === 403, `suivi des visites (track_visit) : réservé aux comptes connectés, chiffres impossibles à gonfler sans compte (HTTP ${visit.status})`);
+const legacy = await rpc("track_merchant_event", { p_merchant_id: zero, p_event: "view" });
+report(legacy.status === 401 || legacy.status === 403, `ancien compteur direct (track_merchant_event) : fermé (HTTP ${legacy.status})`);
 const counts = await rpc("dish_like_counts", { p_merchant_id: zero });
 report(counts.status === 200 && Array.isArray(counts.body), `nombre de « j'aime » des plats lisible (HTTP ${counts.status})`);
 for (const [fn, body, label] of [
   ["toggle_dish_like", { p_merchant_id: zero, p_dish: "x" }, "« j'aime » d'un plat"],
   ["toggle_story_like", { p_story_id: zero }, "« j'aime » d'une story"],
   ["my_merchant_analytics", { p_days: 7 }, "tableau de bord du restaurateur"],
+  ["my_reviews", {}, "avis de la personne connectée"],
 ]) {
   const r = await rpc(fn, body);
   report(r.status === 401 || r.status === 403, `${label} : en ligne, réservé aux comptes connectés (HTTP ${r.status}${r.status === 404 ? " : fonction absente" : ""})`);
 }
-for (const table of ["merchant_event_visitors", "merchant_view_hours", "story_viewers", "promo_clicks", "story_likes", "dish_likes"]) {
+for (const table of ["merchant_event_visitors", "merchant_view_hours", "story_viewers", "promo_clicks", "story_likes", "dish_likes", "visit_budget", "maintenance_runs"]) {
   const r = await get(`${table}?select=*&limit=1`);
   report((r.status === 401 || r.status === 403) || (r.status === 200 && Array.isArray(r.body) && r.body.length === 0), `${table} : illisible pour un visiteur (HTTP ${r.status})`);
 }
@@ -102,6 +105,11 @@ for (const table of ["merchant_event_visitors", "merchant_view_hours", "story_vi
 const write = await fetch(`${url}/rest/v1/merchants`, { method: "PATCH", headers: { ...headers, "Content-Type": "application/json", Prefer: "return=representation" }, body: JSON.stringify({ name: "test" }) });
 const written = write.status === 200 ? await write.json() : [];
 report(write.status >= 400 || written.length === 0, `modification anonyme d'une fiche : refusée (HTTP ${write.status})`);
+
+// Ménage quotidien : fonction en ligne (un GET ne déclenche rien)
+const purge = await fetch(`${url}/functions/v1/purge`, { headers });
+report(purge.status === 405, `ménage quotidien (fonction purge) en ligne (HTTP ${purge.status})`);
+await purge.body?.cancel();
 
 console.log(failures ? `\n${failures} problème(s) détecté(s)` : "\nTout est en ordre ✔");
 process.exit(failures ? 1 : 0);

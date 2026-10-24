@@ -5,7 +5,7 @@ name: Vérifier Supabase en ligne
 on:
   push:
     branches: [claude/street-food-map-pwa-lr1xu2]
-    paths: ['web/supabase/**', 'web/scripts/**', .github/workflows/verifications.yml]
+    paths: ['web/supabase/**', 'web/scripts/**', 'index.html', 'vercel.json', 'scripts/**', .github/workflows/verifications.yml]
   schedule:
     - cron: '17 6 * * 1'   # chaque lundi matin : garde aussi le projet Supabase actif (pause après 7 jours d'inactivité)
   workflow_dispatch:
@@ -20,17 +20,23 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: https://fnypgfyxbyaqrnklhjxc.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_W-2Gra6O-pRBEf0a_XsyKw_8UlhHTzb
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
-      - uses: denoland/setup-deno@v2
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         with:
           deno-version: v2.x
 
       - name: Ce qu'un visiteur anonyme peut lire (RLS)
         working-directory: web
         run: node scripts/check-supabase.mjs
+
+      - name: Sites en ligne (aucune clé secrète, politique CSP, en-têtes de sécurité)
+        working-directory: web
+        run: node scripts/check-live.mjs
 
       - name: Tests de la fonction verify-siret (sans réseau)
         working-directory: web

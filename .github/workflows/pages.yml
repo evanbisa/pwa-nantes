@@ -6,7 +6,7 @@ name: Publier sur GitHub Pages
 on:
   push:
     branches: [claude/street-food-map-pwa-lr1xu2]
-    paths: ['*.html', 'sw.js', '*.png', 'vendor/**', 'web/**', .github/workflows/pages.yml]
+    paths: ['*.html', 'sw.js', '*.png', 'vendor/**', 'web/**', 'scripts/**', .github/workflows/pages.yml]
   workflow_dispatch:
 
 permissions:
@@ -21,9 +21,9 @@ jobs:
   publier:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
@@ -49,6 +49,8 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/site"
           cp index.html confidentialite.html conditions.html sw.js icon-192.png icon-512.png "$RUNNER_TEMP/site/"
+          # Politique de sécurité du contenu (CSP) recalculée sur les pages publiées : toujours à jour
+          node scripts/csp.mjs "$RUNNER_TEMP/site/index.html" "$RUNNER_TEMP/site/confidentialite.html" "$RUNNER_TEMP/site/conditions.html"
           cp -r vendor "$RUNNER_TEMP/site/"   # bibliothèque Supabase (servie par le site lui-même)
           cp -r web/out "$RUNNER_TEMP/site/app"
           touch "$RUNNER_TEMP/site/.nojekyll"

@@ -2,6 +2,8 @@
 <html lang="fr" data-theme="light">
 <head>
   <meta charset="UTF-8" />
+  <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-T0hnkmf9riX/8qe2BjNmcRuiKkDaPLbk8PSu/9bxoOo=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Carte interactive des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon." />
@@ -16,20 +18,26 @@
   <!-- Thème appliqué avant le premier affichage (évite un flash de la mauvaise couleur) -->
   <script>
     (function () {
+      // Page affichée dans un cadre d'un autre site (piège au clic) : rien n'est montré
+      if (window.top !== window.self) document.documentElement.style.display = 'none';
       var t = null;
       try { t = localStorage.getItem('roche-street-food:theme'); } catch (e) {}
       if (t !== 'light' && t !== 'dark') t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', t);
       document.getElementById('meta-theme').setAttribute('content', t === 'dark' ? '#242f3e' : '#f1f3f4');
+      // Feuille de style de la carte chargée sans bloquer l'affichage (l'écran de chargement peut apparaître tout de suite)
+      var css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'vendor/maplibre-gl-5.24.0/maplibre-gl.css';
+      document.head.appendChild(css);
     })();
   </script>
 
   <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin />
 
   <!-- MapLibre GL : moteur de secours (carte « style Google Maps ») utilisé tant qu'aucune clé Google n'est configurée.
-       Feuilles de style chargées sans bloquer l'affichage (l'écran de chargement peut apparaître tout de suite) ;
-       le script du moteur est chargé en bas de page. -->
-  <link rel="stylesheet" href="vendor/maplibre-gl-5.24.0/maplibre-gl.css" media="print" onload="this.media='all'" />
+       Feuille de style ajoutée par le script ci-dessus ; le moteur est téléchargé dès maintenant et lancé en bas de page. -->
+  <link rel="preload" href="vendor/maplibre-gl-5.24.0/maplibre-gl.js" as="script" />
 
   <noscript>
     <link rel="stylesheet" href="vendor/maplibre-gl-5.24.0/maplibre-gl.css" />
@@ -168,6 +176,12 @@
     .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
 
     .controls { position: fixed; z-index: 20; right: 12px; top: calc(var(--safe-top) + 12px); display: flex; flex-direction: column; gap: 10px; }
+    /* Téléphone, panneau ouvert : seuls les boutons de la première ligne restent (le panneau, haut de 85 % de l'écran,
+       ne recouvre jamais à moitié les boutons du dessous) */
+    @media (max-width: 899px) {
+      .controls > .ctrl:not(:first-child) { transition: opacity .2s, transform .2s var(--ease-out), background-color .25s, color .25s; }
+      body.sheet-open .controls > .ctrl:not(:first-child) { opacity: 0; transform: translateY(-8px); pointer-events: none; visibility: hidden; transition: opacity .2s, transform .2s, visibility 0s .2s; }
+    }
     .ctrl {
       position: relative; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%;
       color: var(--muted); transition: transform .15s var(--ease-out), background-color .25s, color .25s;
@@ -306,7 +320,7 @@
     }
     .sheet.is-open { transform: translateY(0); visibility: visible; transition: transform .35s var(--ease-out), visibility 0s, background-color .4s; }
     .sheet.is-dragging { transition: none; }
-    .sheet-grab { display: block; width: 100%; padding: 4px 0 12px; cursor: grab; touch-action: none; }
+    .sheet-grab { display: block; width: 100%; padding: 8px 0 16px; cursor: grab; touch-action: none; }   /* zone de 28 px : facile à attraper au doigt */
     .sheet-grab::before { content: ""; display: block; width: 36px; height: 4px; border-radius: 2px; margin: 0 auto; background: var(--line-strong); }
     .sheet-head { display: flex; align-items: flex-start; gap: 14px; }
     .sheet-emoji { flex: none; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 14px; font-size: 28px; background: var(--hover); }
@@ -651,6 +665,7 @@
       .jn-age { margin: 10px 0 4px; }
     }
     @media (max-height: 680px) { .jn-screen[data-q="password"] .jn-emoji { display: none; } .jn-screen[data-q="password"] .jn-field { margin-top: 8px; } }
+    @media (max-height: 600px) { .jn-hero { display: none; } .jn-perks li { padding: 6px 10px; } .join .jn-field input { height: 50px; } }
 
     .role-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin: 0 0 18px; border-radius: 999px; background: var(--hover); border: 1px solid var(--line); }
     .role-switch button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; border-radius: 999px; font-weight: 500; font-size: 14px; color: var(--muted); transition: background-color .2s, color .2s, box-shadow .2s; }
@@ -676,6 +691,7 @@
     /* Champ SIRET + bouton */
     .field > .input-action { display: flex; gap: 8px; margin: 0; font-size: inherit; font-weight: inherit; color: inherit; }
     .input-action input { flex: 1; min-width: 0; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+    @media (max-width: 359px) { .field > .input-action { flex-wrap: wrap; } .input-action input { flex-basis: 100%; } .input-action .btn-inline { flex: 1; } }   /* très petit écran : bouton sous le champ */
     .btn-inline { flex: none; min-height: 50px; padding: 0 18px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--on-accent); background: var(--accent); }
     .btn-inline[disabled] { opacity: .6; pointer-events: none; }
     .verify-card { margin-top: 4px; padding: 14px 16px; border-radius: 12px; font-size: 14px; border: 1px solid var(--line-strong); background: var(--hover); }
@@ -1022,7 +1038,7 @@
     .story-admin li { position: relative; flex: none; width: 84px; }
     .story-admin .sa-thumb { position: relative; display: block; width: 84px; aspect-ratio: 9 / 16; border-radius: 10px; overflow: hidden; background: #111; color: #fff; }
     .story-admin .sa-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .story-admin .sa-thumb .sv-text { padding: 6px; font-size: 10.5px; text-shadow: none; }
+    .story-admin .sa-thumb .sv-text { padding: 32px 6px 6px; font-size: 10.5px; text-shadow: none; }   /* sous le bouton × */
     .story-admin small { display: block; margin-top: 4px; font-size: 11.5px; line-height: 1.3; color: var(--muted); white-space: pre-line; }
     .story-admin .sa-del { position: absolute; top: 4px; right: 4px; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-size: 17px; line-height: 1; color: #fff; background: rgba(0, 0, 0, .55); }
     .story-admin .sa-empty, .promo-admin .pa-empty { width: auto; flex: 1; padding: 12px 0; font-size: 13.5px; color: var(--muted); }
@@ -1272,6 +1288,7 @@
     :root[data-theme="dark"] .stars { color: #fdd663; }
     .rating-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 14px; color: var(--muted); }
     .rating-link b { font-weight: 500; color: var(--text); }
+    .rating-link span:last-child { white-space: nowrap; }   /* « (12 avis) » jamais coupé en deux */
     .rating-link:hover span:last-child { text-decoration: underline; }
     .rating-link[hidden] { display: none; }
     .rv-summary { display: grid; grid-template-columns: auto 1fr; gap: 6px 20px; align-items: center; padding: 14px 0 6px; }
@@ -2513,7 +2530,7 @@
     <div>
       <h1 id="fatal-title">Carte indisponible</h1>
       <p id="fatal-text">Vérifiez votre connexion internet puis réessayez.</p>
-      <button class="btn btn-primary" type="button" id="fatal-retry" onclick="location.reload()">Réessayer</button>
+      <button class="btn btn-primary" type="button" id="fatal-retry">Réessayer</button>
     </div>
   </div>
 
@@ -2521,7 +2538,16 @@
 
 <!-- MapLibre (moteur de carte) : copie servie par le site, sans dépendre d'un service tiers (licence BSD, vendor/).
      Chargé en parallèle (async) : l'écran de compte et le reste du site n'attendent pas ce gros fichier. -->
-<script src="vendor/maplibre-gl-5.24.0/maplibre-gl.js" id="maplibre-script" async onerror="window.__maplibreFailed = true"></script>
+<script>
+  (function () {
+    var s = document.createElement('script');
+    s.src = 'vendor/maplibre-gl-5.24.0/maplibre-gl.js';
+    s.id = 'maplibre-script';
+    s.async = true;
+    s.onerror = function () { window.__maplibreFailed = true; };
+    document.currentScript.parentNode.insertBefore(s, document.currentScript);
+  })();
+</script>
 <!-- Supabase (comptes et données partagées) : copie locale du client officiel, servie par le site -->
 <script src="vendor/supabase-js-2.118.0.js"></script>
 <script>
@@ -4543,15 +4569,31 @@
   });
 
   /* ---------- Avis : note sur 5, commentaire, réponse du restaurateur ---------- */
+  // Colonnes lisibles des avis : l'identifiant du compte de l'auteur n'est jamais transmis (avis non reliables entre eux)
+  const REVIEW_COLS = 'id, merchant_id, rating, comment, author_name, created_at, updated_at, reply, replied_at, reported_at';
   const Reviews = (() => {
     const cache = new Map();                 // id de la fiche → { list, at }
     let shopId = null, pick = 0, editing = false, replyFor = null;
+    let myReviewIds = null;                  // avis de la personne connectée : id de la fiche → id de l'avis (lu une fois)
+    async function myReviews() {
+      const me = currentUser();
+      if (!me || me.role !== 'client') return {};
+      if (myReviewIds) return myReviewIds;
+      const { data, error } = await sb.rpc('my_reviews');
+      if (error) return {};                  // l'avis déjà donné sera signalé par la base au besoin
+      myReviewIds = Object.fromEntries((data || []).map((r) => [r.merchant_id, r.id]));
+      return myReviewIds;
+    }
+    const mineIn = (list, id) => (list && myReviewIds && myReviewIds[id] ? list.find((r) => r.id === myReviewIds[id]) || null : null);
     const starText = (n) => '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
     const canReview = (shop, me = currentUser()) => !!(shop.isPro && me && me.role === 'client' && !isOwnShop(shop.id, me));
     const ownShop = (shop) => !!(shop.isPro && isOwnShop(shop.id));
 
     async function load(id) {
-      const { data, error } = await sb.from('reviews').select('*').eq('merchant_id', id).order('created_at', { ascending: false }).limit(200);
+      const [{ data, error }] = await Promise.all([
+        sb.from('reviews').select(REVIEW_COLS).eq('merchant_id', id).order('created_at', { ascending: false }).limit(200),
+        myReviews(),
+      ]);
       if (error) throw error;
       cache.set(id, { list: data || [], at: Date.now() });
       return data || [];
@@ -4599,7 +4641,7 @@
       const me = currentUser();
       const c = cache.get(shop.id);
       const list = c ? c.list : null;
-      const mine = list && me ? list.find((r) => r.user_id === me.id) : null;
+      const mine = me ? mineIn(list, shop.id) : null;
       const own = ownShop(shop);
       // Résumé : moyenne et répartition des notes
       const sum = $('rv-summary');
@@ -4747,6 +4789,7 @@
       if (!window.confirm('Supprimer votre avis sur ' + shop.name + ' ?')) return;
       const { error } = await sb.from('reviews').delete().eq('id', r.id);
       if (error) { toast(cloudError(error)); return; }
+      if (myReviewIds) delete myReviewIds[shop.id];
       editing = false; pick = 0;
       $('rv-comment').value = ''; updateCount();
       toast('Votre avis a été supprimé.');
@@ -4803,23 +4846,26 @@
       if (comment && comment.length < 3) { setFieldError('rv-comment', 'Écrivez au moins 3 caractères, ou laissez le commentaire vide.'); ok = false; }
       if (!ok) return;
       const list = (cache.get(m.shop.id) || {}).list || [];
-      const mine = list.find((r) => r.user_id === me.id);
+      const own = mineIn(list, m.shop.id);
       const row = { rating: pick, comment: comment || null };
       const btn = $('rv-submit');
       btn.disabled = true;
-      const { error } = mine
-        ? await Loader.run(sb.from('reviews').update(row).eq('id', mine.id), 'Enregistrement…')
-        : await Loader.run(sb.from('reviews').insert({ merchant_id: m.shop.id, ...row }), 'Publication de votre avis…');
+      const { data: saved, error } = own
+        ? await Loader.run(sb.from('reviews').update(row).eq('id', own.id), 'Enregistrement…')
+        : await Loader.run(sb.from('reviews').insert({ merchant_id: m.shop.id, ...row }).select('id').single(), 'Publication de votre avis…');
       btn.disabled = false;
       if (error) {
         $('err-rv').textContent = error.code === '23505' ? 'Vous avez déjà donné votre avis sur ce restaurant.' : cloudError(error);
+        if (error.code === '23505') myReviewIds = null;   // avis donné depuis un autre appareil : relu
         refresh(m.shop.id);
         return;
       }
-      if (!mine) Push.send(m.shop.id);
+      if (!own && saved) (myReviewIds || (myReviewIds = {}))[m.shop.id] = saved.id;
+      const wasMine = !!own;
+      if (!wasMine) Push.send(m.shop.id);
       editing = false; pick = 0;
       $('rv-comment').value = ''; updateCount();
-      toast(mine ? 'Votre avis a été modifié.' : 'Merci ! Votre avis est publié.');
+      toast(wasMine ? 'Votre avis a été modifié.' : 'Merci ! Votre avis est publié.');
       await refresh(m.shop.id);
       refreshCloud();
     });
@@ -5642,16 +5688,12 @@
   const Stats = (() => {
     const EVENTS = { views: 'view', walk: 'walk', car: 'car', phone: 'phone', menu: 'menu', photos: 'photos', stories: 'story',
       share: 'share', reviews: 'reviews', google: 'google', story_cta: 'story_cta', offer: 'offer' };
-    /** Évènement sur une fiche inscrite (la base ignore les visites du restaurateur sur sa propre fiche). */
-    const LEGACY = new Set(['view', 'walk', 'car', 'phone', 'menu', 'photos', 'story']);
-    let legacy = false;   // base en ligne pas encore à jour : ancien compteur (vues et clics) en attendant
+    /** Évènement sur une fiche inscrite (la base ignore les visites du restaurateur sur sa propre fiche,
+     *  ne compte que les personnes connectées, et au plus 50 actions par personne, fiche et jour). */
     function track(shopId, event, { ref = null, source = null } = {}) {
-      if (!Consent.has('stats') || !restaurants()[shopId] || !EVENTS[event]) return;   // statistiques refusées : rien n'est envoyé
-      const ev = EVENTS[event];
-      const old = () => { if (LEGACY.has(ev)) sb.rpc('track_merchant_event', { p_merchant_id: shopId, p_event: ev }).then(() => {}, () => {}); };
-      if (legacy) { old(); return; }
-      sb.rpc('track_visit', { p_merchant_id: shopId, p_event: ev, p_ref: ref && UUID_RE.test(ref) ? ref : null, p_source: source })
-        .then(({ error }) => { if (missingFn(error)) { legacy = true; old(); } }, () => {});
+      if (!Consent.has('stats') || !currentUser() || !restaurants()[shopId] || !EVENTS[event]) return;   // statistiques refusées : rien n'est envoyé
+      sb.rpc('track_visit', { p_merchant_id: shopId, p_event: EVENTS[event], p_ref: ref && UUID_RE.test(ref) ? ref : null, p_source: source })
+        .then(() => {}, () => {});
     }
     return { track };
   })();
@@ -8706,7 +8748,7 @@
       if (!r) return;
       const t = ++rvToken;
       if (!rvList) renderReviews();
-      const { data: rows, error } = await sb.from('reviews').select('*').eq('merchant_id', r.id).order('created_at', { ascending: false }).limit(200);
+      const { data: rows, error } = await sb.from('reviews').select(REVIEW_COLS).eq('merchant_id', r.id).order('created_at', { ascending: false }).limit(200);
       if (t !== rvToken) return;
       if (error) { toast(cloudError(error)); return; }
       rvList = rows || [];

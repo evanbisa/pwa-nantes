@@ -44,7 +44,7 @@ set role authenticated;
 select t.fails($$insert into merchants (user_id, name) values ('11111111-1111-1111-1111-111111111111', 'Doublon')$$, 'restaurateur : création directe de fiche interdite (passe par le serveur)');
 select t.ok((select count(*) = 1 and bool_and(name = 'Le Bon Burger') from my_merchant()), 'restaurateur : retrouve sa fiche en brouillon (my_merchant)');
 select t.ok(t.affected($$update merchants set description = 'Burgers smashés maison, pain brioché du boulanger voisin.', address = '12 Place Napoléon 85000 La Roche-sur-Yon',
-  lat = 46.6706, lng = -1.4268, photos_urls = '{https://x.supabase.co/storage/v1/object/public/photos/a.jpg}',
+  lat = 46.6706, lng = -1.4268, photos_urls = '{https://abcdefghijklmnopqrst.supabase.co/storage/v1/object/public/photos/aaaaaaaa-0000-0000-0000-000000000001/a.jpg}',
   opening_hours = '{"services":[["11:30","14:30"]],"closed_on":[1]}',
   menu_json = '[{"section":"Burgers","name":"Le Classique","price":9.5,"desc":"Cheddar"}]' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 1, 'restaurateur : modifie le contenu de sa fiche');
 select t.ok(t.affected($$update merchants set name = 'Piratage' where id = 'aaaaaaaa-0000-0000-0000-000000000002'$$) = 0, 'restaurateur : la fiche d''un autre est intouchable (0 ligne)');
@@ -114,22 +114,23 @@ select t.fails($$insert into follows (merchant_id) values ('aaaaaaaa-0000-0000-0
 select t.fails($$insert into follows (merchant_id) values ('aaaaaaaa-0000-0000-0000-000000000002')$$, 'abonnement à une fiche non publiée refusé');
 select t.fails($$insert into follows (user_id, merchant_id) values ('22222222-2222-2222-2222-222222222222', 'aaaaaaaa-0000-0000-0000-000000000001')$$, 'impossible d''abonner quelqu''un d''autre');
 select t.ok((select count(*) = 1 from follows), 'étudiante : voit son abonnement');
-select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'view');
-select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'view');
-select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'walk');
-select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'car');
-select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'menu');
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'view');
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'view');
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'walk');
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'car');
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'menu');
+select t.fails($$select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'view')$$, 'étudiante : l''ancien compteur direct n''est plus appelable (seul track_visit compte)');
 select t.ok((select count(*) = 0 from merchant_stats), 'étudiante : ne voit aucune statistique');
 select t.ok((select count(*) = 0 from my_merchant_stats(7)), 'étudiante : my_merchant_stats ne renvoie rien');
 select t.fails($$select * from merchant_visitors$$, 'étudiante : liste des visiteurs inaccessible');
 reset role;
 select set_config('request.jwt.claims', '', false);
 set role anon;
-select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'view');
-select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000002', 'view');   -- brouillon : ignoré
+select t.fails($$select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'view')$$, 'visiteur sans compte : ne peut pas faire compter de visite');
+select t.fails($$select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'view')$$, 'visiteur sans compte : compteur direct inappelable');
 select t.ok((select merchant_follower_count('aaaaaaaa-0000-0000-0000-000000000001') = 1), 'anonyme : nombre d''abonnés visible (1)');
 select t.fails($$select * from follows$$, 'anonyme : liste des abonnés inaccessible');
-select t.fails($$select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'hack')$$, 'évènement inconnu refusé');
+select t.fails($$select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'hack')$$, 'visiteur sans compte : évènement inconnu refusé');
 select t.fails($$update merchant_stats set views = 9999$$, 'anonyme : compteurs non modifiables');
 select t.fails($$select * from my_merchant_stats(7)$$, 'anonyme : tableau de bord inaccessible');
 select t.fails($$select * from private.my_merchant_stats(7)$$, 'anonyme : fonction privée du tableau de bord inappelable');
@@ -137,12 +138,12 @@ select t.fails($$select private.can_follow('aaaaaaaa-0000-0000-0000-000000000001
 reset role;
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
 set role authenticated;
-select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'view');   -- le propriétaire : non compté
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'view');   -- le propriétaire : non compté
 select t.fails($$insert into follows (merchant_id) values ('aaaaaaaa-0000-0000-0000-000000000001')$$, 'restaurateur : ne peut pas suivre sa propre fiche');
 select t.ok((select count(*) = 0 from follows), 'restaurateur : ne voit PAS qui le suit');
 select t.fails($$select * from merchant_visitors$$, 'restaurateur : ne voit PAS qui l''a consulté');
-select t.ok((select views = 3 and visitors = 1 and walk_clicks = 1 and car_clicks = 1 and menu_views = 1 and new_followers = 1
-  from my_merchant_stats(7) order by day desc limit 1), 'restaurateur : 3 vues (sa visite non comptée), 1 personne, 1 à pied, 1 en voiture, 1 menu, 1 nouvel abonné');
+select t.ok((select views = 2 and visitors = 1 and walk_clicks = 1 and car_clicks = 1 and menu_views = 1 and new_followers = 1
+  from my_merchant_stats(7) order by day desc limit 1), 'restaurateur : 2 vues (la sienne et celle sans compte non comptées), 1 personne, 1 à pied, 1 en voiture, 1 menu, 1 nouvel abonné');
 select t.ok((select count(*) = 7 from my_merchant_stats(7)) and (select count(*) = 30 from my_merchant_stats(30)) and (select count(*) = 90 from my_merchant_stats(500)), 'tableau de bord : 7, 30 jours, plafonné à 90');
 select t.ok((select followers = 1 and visitors = 1 from my_merchant_totals(7)), 'totaux : 1 abonné, 1 personne');
 reset role;
@@ -213,19 +214,19 @@ select t.ok((select count(*) = 2 from stories) and (select count(*) = 3 from pro
 select t.ok(not exists (select 1 from stories where caption = 'Story d''hier') and not exists (select 1 from promotions where title = 'Offre terminée'), 'story expirée et promotion terminée : invisibles');
 select t.fails($$insert into stories (merchant_id, background, caption) values ('aaaaaaaa-0000-0000-0000-000000000001', 'ocean', 'Anonyme')$$, 'visiteur : ne peut pas publier de story');
 select t.fails($$delete from promotions$$, 'visiteur : ne peut pas supprimer de promotion');
-select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'story');
+select t.fails($$select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'story')$$, 'visiteur sans compte : vue de story non comptée');
 reset role;
 select t.ok((select count(*) = 4 from promotions), 'aucune promotion supprimée (3 en cours + 1 terminée)');
 select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
 set role authenticated;
-select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'story');
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'story');
 select t.ok(t.affected($$delete from stories$$) = 0, 'étudiante : ne peut pas supprimer les stories d''un restaurant');
 select t.fails($$insert into promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Fausse promo')$$, 'étudiante : ne peut pas publier de promotion');
 reset role;
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
 set role authenticated;
-select track_merchant_event('aaaaaaaa-0000-0000-0000-000000000001', 'story');   -- le propriétaire : non compté
-select t.ok((select story_views = 2 from merchant_stats order by day desc limit 1), 'statistiques : 2 affichages de stories (le restaurateur non compté)');
+select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'story');   -- le propriétaire : non compté
+select t.ok((select story_views = 1 from merchant_stats order by day desc limit 1), 'statistiques : 1 affichage de story (ni le restaurateur ni le visiteur sans compte)');
 select t.ok((select count(*) = 3 from stories), 'restaurateur : voit toutes ses stories, y compris l''expirée');
 select t.ok(t.affected($$delete from stories where caption = 'Story d''hier'$$) = 1 and t.affected($$delete from promotions where title = 'Formule semaine'$$) = 1, 'restaurateur : supprime une story et une promotion');
 reset role;
@@ -288,11 +289,11 @@ insert into auth.users (id, email, raw_user_meta_data) values ('55555555-5555-55
 select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
 set role authenticated;
 select t.ok(t.affected($$insert into reviews (merchant_id, rating, comment) values ('aaaaaaaa-0000-0000-0000-000000000001', 5, '  Super burger, frites maison !  ')$$) = 1, 'client : donne son avis (5 étoiles)');
-select t.ok((select author_name = 'Léa' and comment = 'Super burger, frites maison !' and reply is null from reviews where user_id = '33333333-3333-3333-3333-333333333333'), 'avis : nom affiché tiré du profil (jamais l''e-mail), commentaire nettoyé');
+select t.ok((select author_name = 'Léa' and comment = 'Super burger, frites maison !' and reply is null from reviews where author_name = 'Léa'), 'avis : nom affiché tiré du profil (jamais l''e-mail), commentaire nettoyé');
 select t.fails($$insert into reviews (merchant_id, rating) values ('aaaaaaaa-0000-0000-0000-000000000001', 3)$$, 'un seul avis par client et par restaurant');
 select t.fails($$insert into reviews (merchant_id, rating) values ('aaaaaaaa-0000-0000-0000-000000000002', 4)$$, 'avis sur une fiche non publiée refusé');
 select t.fails($$insert into reviews (merchant_id, user_id, rating) values ('aaaaaaaa-0000-0000-0000-000000000001', '55555555-5555-5555-5555-555555555555', 1)$$, 'avis au nom d''un autre refusé');
-select t.fails($$update reviews set reply = 'Je me réponds' where user_id = '33333333-3333-3333-3333-333333333333'$$, 'l''auteur ne peut pas écrire la réponse du restaurateur');
+select t.fails($$update reviews set reply = 'Je me réponds' where author_name = 'Léa'$$, 'l''auteur ne peut pas écrire la réponse du restaurateur');
 select t.fails($$update reviews set author_name = 'Le patron'$$, 'nom affiché non modifiable');
 reset role;
 select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
@@ -300,22 +301,22 @@ set role authenticated;
 select t.fails($$insert into reviews (merchant_id, rating) values ('aaaaaaaa-0000-0000-0000-000000000001', 6)$$, 'note hors de 1 à 5 refusée');
 select t.fails($$insert into reviews (merchant_id, rating, comment) values ('aaaaaaaa-0000-0000-0000-000000000001', 4, repeat('a', 601))$$, 'commentaire de plus de 600 caractères refusé');
 select t.ok(t.affected($$insert into reviews (merchant_id, rating) values ('aaaaaaaa-0000-0000-0000-000000000001', 3)$$) = 1, 'client : avis sans commentaire');
-select t.ok((select author_name = 'Hugo P.' and comment is null from reviews where user_id = '55555555-5555-5555-5555-555555555555'), 'avis : nom affiché « Hugo P. » (initiale du nom)');
-select t.ok(t.affected($$update reviews set rating = 4 where user_id = '33333333-3333-3333-3333-333333333333'$$) = 0
-  and t.affected($$delete from reviews where user_id = '33333333-3333-3333-3333-333333333333'$$) = 0, 'client : ne modifie ni ne supprime l''avis d''un autre');
-select t.ok(t.affected($$update reviews set rating = 5, comment = 'Encore meilleur la 2e fois' where user_id = '55555555-5555-5555-5555-555555555555'$$) = 1, 'client : modifie son avis');
+select t.ok((select author_name = 'Hugo P.' and comment is null from reviews where author_name = 'Hugo P.'), 'avis : nom affiché « Hugo P. » (initiale du nom)');
+select t.ok(t.affected($$update reviews set rating = 4 where author_name = 'Léa'$$) = 0
+  and t.affected($$delete from reviews where author_name = 'Léa'$$) = 0, 'client : ne modifie ni ne supprime l''avis d''un autre');
+select t.ok(t.affected($$update reviews set rating = 5, comment = 'Encore meilleur la 2e fois' where author_name = 'Hugo P.'$$) = 1, 'client : modifie son avis');
 reset role;
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
 set role authenticated;
 select t.fails($$insert into reviews (merchant_id, rating) values ('aaaaaaaa-0000-0000-0000-000000000001', 5)$$, 'restaurateur : ne peut pas noter sa propre fiche');
 select t.ok((select count(*) = 2 from notifications where kind = 'review') and exists (select 1 from notifications where body = '★★★★★ Léa : Super burger, frites maison !'),
   'restaurateur : notifié de chaque nouvel avis (note et extrait)');
-select t.ok(t.affected($$update reviews set reply = 'Merci Léa, à très vite !' where user_id = '33333333-3333-3333-3333-333333333333'$$) = 1, 'restaurateur : répond à un avis');
-select t.ok((select replied_at is not null from reviews where user_id = '33333333-3333-3333-3333-333333333333'), 'réponse : datée par la base');
-select t.fails($$update reviews set rating = 1 where user_id = '33333333-3333-3333-3333-333333333333'$$, 'restaurateur : ne peut pas modifier la note d''un client');
-select t.ok(t.affected($$delete from reviews where user_id = '55555555-5555-5555-5555-555555555555'$$) = 0, 'restaurateur : ne peut pas supprimer un avis (0 ligne)');
-select t.ok(t.affected($$update reviews set reported_at = '2000-01-01' where user_id = '55555555-5555-5555-5555-555555555555'$$) = 1, 'restaurateur : signale un avis');
-select t.ok((select reported_at > now() - interval '1 minute' from reviews where user_id = '55555555-5555-5555-5555-555555555555'), 'signalement : daté par la base (date fournie ignorée)');
+select t.ok(t.affected($$update reviews set reply = 'Merci Léa, à très vite !' where author_name = 'Léa'$$) = 1, 'restaurateur : répond à un avis');
+select t.ok((select replied_at is not null from reviews where author_name = 'Léa'), 'réponse : datée par la base');
+select t.fails($$update reviews set rating = 1 where author_name = 'Léa'$$, 'restaurateur : ne peut pas modifier la note d''un client');
+select t.ok(t.affected($$delete from reviews where author_name = 'Hugo P.'$$) = 0, 'restaurateur : ne peut pas supprimer un avis (0 ligne)');
+select t.ok(t.affected($$update reviews set reported_at = '2000-01-01' where author_name = 'Hugo P.'$$) = 1, 'restaurateur : signale un avis');
+select t.ok((select reported_at > now() - interval '1 minute' from reviews where author_name = 'Hugo P.'), 'signalement : daté par la base (date fournie ignorée)');
 reset role;
 select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
 set role authenticated;
@@ -324,15 +325,22 @@ reset role;
 select set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}', false);
 set role authenticated;
 select t.ok(t.affected($$update reviews set reply = 'Concurrence'$$) = 0, 'autre restaurateur : ne peut pas répondre aux avis d''une autre fiche');
+select t.fails($$select user_id from reviews$$, 'connecté : l''identifiant des auteurs d''avis est illisible (avis d''une même personne non reliables)');
+select t.fails($$select * from reviews where user_id = '33333333-3333-3333-3333-333333333333'$$, 'connecté : impossible de chercher les avis d''un compte donné');
+select t.ok((select count(*) = 0 from my_reviews()), 'restaurateur sans avis : my_reviews vide');
 reset role;
 select set_config('request.jwt.claims', '', false);
 set role anon;
 select t.ok((select count(*) = 2 from reviews) and (select average = 5.0 and total = 2 from merchant_ratings() where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'visiteur : lit les avis et la note moyenne (5,0 sur 2 avis)');
 select t.fails($$insert into reviews (merchant_id, rating) values ('aaaaaaaa-0000-0000-0000-000000000001', 1)$$, 'visiteur : ne peut pas donner d''avis');
+select t.fails($$select user_id from reviews$$, 'visiteur : l''identifiant du compte des auteurs d''avis est illisible');
+select t.fails($$select * from my_reviews()$$, 'visiteur : my_reviews inappelable');
+select t.ok((select count(*) = 2 and bool_and(author_name is not null) from (select id, rating, author_name, reply from reviews) x), 'visiteur : lit les avis (note, nom affiché, réponse)');
 reset role;
 select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
 set role authenticated;
-select t.ok(t.affected($$delete from reviews where user_id = '33333333-3333-3333-3333-333333333333'$$) = 1, 'client : supprime son avis');
+select t.ok((select count(*) = 1 from my_reviews()) and (select merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001' from my_reviews()), 'client : retrouve son avis (my_reviews), et seulement le sien');
+select t.ok(t.affected($$delete from reviews where id = (select id from my_reviews())$$) = 1, 'client : supprime son avis');
 select t.ok((select total = 1 from merchant_ratings() where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'note moyenne recalculée après suppression (1 avis)');
 reset role;
 
@@ -415,7 +423,7 @@ select t.ok((select exists (select 1 from jsonb_array_elements(j -> 'stories') x
   and (x ->> 'views')::int = 1 and (x ->> 'likes')::int = 2 and (x ->> 'clicks')::int = 1) from a), 'par story : 1 vue, 2 « j''aime », 1 clic vers la fiche');
 select t.ok((select exists (select 1 from jsonb_array_elements(j -> 'promos') x where x ->> 'kind' = 'student' and (x ->> 'clicks')::int = 1) from a), 'par offre : 1 clic');
 select t.ok((select j -> 'dishes' = '[{"dish": "Le Classique", "likes": 2}]'::jsonb from a), 'plats les plus aimés : « Le Classique » (2)');
-select t.ok((select jsonb_array_length(j -> 'hours') = 24 and (select sum(v::int) from jsonb_array_elements_text(j -> 'hours') v) = 4 from a), 'heures de consultation : 24 tranches, 4 vues (restaurateur exclu)');
+select t.ok((select jsonb_array_length(j -> 'hours') = 24 and (select sum(v::int) from jsonb_array_elements_text(j -> 'hours') v) = 6 from a), 'heures de consultation : 24 tranches, 6 vues (restaurateur exclu)');
 select t.ok((select jsonb_array_length(j -> 'daily') = 7 and (j #>> '{period,days}')::int = 7 and j ? 'previous' from a), 'série de 7 jours et période précédente pour comparer');
 drop table a;
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
@@ -424,12 +432,12 @@ select t.ok((my_merchant_analytics(500) #>> '{period,days}')::int = 90, 'périod
 reset role;
 select set_config('request.jwt.claims', '', false);
 set role anon;
-select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'view', null, 'link');
+select t.fails($$select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'view', null, 'link')$$, 'visiteur sans compte : visite non comptée (appel refusé)');
 select t.ok((select likes = 2 from dish_like_counts('aaaaaaaa-0000-0000-0000-000000000001') where dish = 'Le Classique'), 'nombre de « j''aime » des plats visible par tous');
 select t.fails($$select toggle_story_like((select id from stories where caption like 'Nouveau burger%'))$$, 'visiteur : ne peut pas aimer');
 select t.fails($$select my_merchant_analytics(7)$$, 'visiteur : aucun accès aux statistiques');
 reset role;
-select t.ok((select count(*) = 0 from merchant_event_visitors where event = 'from_link'), 'visite anonyme : comptée dans les vues, sans trace par personne');
+select t.ok((select count(*) = 0 from merchant_event_visitors where event = 'from_link'), 'visite sans compte : aucune trace');
 -- Compte supprimé alors qu'il suit un restaurant : suppression possible, pas compté comme désabonnement
 select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
 set role authenticated; insert into follows (merchant_id) values ('aaaaaaaa-0000-0000-0000-000000000001'); reset role;
@@ -469,6 +477,36 @@ select t.ok((select not (my_merchant_analytics(7) -> 'audience' ? 'visitors') an
 reset role;
 select set_config('request.jwt.claims', '', false);
 
+-- ===== Revue de sécurité : photos des fiches, plafond des statistiques, tables internes =====
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated;
+select t.fails($$update merchants set photos_urls = '{https://pistage.example/pixel.png}' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$, 'photo : adresse d''un site tiers refusée (pas de pistage des visiteurs)');
+select t.fails($$update merchants set photos_urls = '{https://abcdefghijklmnopqrst.supabase.co/storage/v1/object/public/photos/aaaaaaaa-0000-0000-0000-000000000002/b.jpg}' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$, 'photo : photo du dossier d''une autre fiche refusée');
+select t.fails($$update merchants set photos_urls = '{javascript:alert(1)}' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$, 'photo : adresse « javascript: » refusée');
+select t.fails($$update merchants set photos_urls = '{https://abcdefghijklmnopqrst.supabase.co/storage/v1/object/public/photos/aaaaaaaa-0000-0000-0000-000000000001/../x.jpg}' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$, 'photo : chemin détourné (« ../ ») refusé');
+select t.ok(t.affected($$update merchants set photos_urls = '{https://abcdefghijklmnopqrst.supabase.co/storage/v1/object/public/photos/aaaaaaaa-0000-0000-0000-000000000001/c-2.webp,http://localhost:54321/storage/v1/object/public/photos/aaaaaaaa-0000-0000-0000-000000000001/d.jpg}' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 1, 'photo : photos du dossier de sa fiche acceptées');
+select t.ok(t.affected($$update merchants set description = description || ' ' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 1, 'fiche : modification sans toucher aux photos acceptée');
+select t.fails($$select * from visit_budget$$, 'restaurateur : plafond des statistiques illisible');
+select t.fails($$select * from maintenance_runs$$, 'restaurateur : suivi du ménage illisible');
+reset role;
+create temporary table t_menu as select coalesce(sum(menu_views), 0) as n from merchant_stats where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001';
+grant select on t_menu to public;
+insert into auth.users (id, email, raw_user_meta_data) values ('77777777-7777-7777-7777-777777777777', 'robot@etu.fr', '{"first_name":"Robot"}');
+select set_config('request.jwt.claims', '{"sub":"77777777-7777-7777-7777-777777777777","role":"authenticated"}', false);
+set role authenticated;
+do $$ begin perform track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'menu') from generate_series(1, 80); end $$;
+select t.fails($$select * from visit_budget$$, 'client : plafond des statistiques illisible');
+select t.fails($$insert into visit_budget (merchant_id, day, visitor_id) values ('aaaaaaaa-0000-0000-0000-000000000001', current_date, '77777777-7777-7777-7777-777777777777')$$, 'client : plafond non modifiable');
+reset role;
+select t.ok((select coalesce(sum(menu_views), 0) from merchant_stats where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001') - (select n from t_menu) = 50, 'statistiques : 80 appels d''une même personne → 50 comptés au plus par jour (chiffres impossibles à gonfler)');
+select set_config('request.jwt.claims', '', false);
+set role anon;
+select t.fails($$select * from visit_budget$$, 'visiteur : plafond des statistiques illisible');
+select t.fails($$select * from maintenance_runs$$, 'visiteur : suivi du ménage illisible');
+reset role;
+delete from auth.users where id = '77777777-7777-7777-7777-777777777777';
+select t.ok((select count(*) = 0 from visit_budget where visitor_id = '77777777-7777-7777-7777-777777777777'), 'compte supprimé : son plafond de statistiques aussi');
+
 -- ===== Masquage, modération, suppression =====
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
 set role authenticated;
@@ -493,7 +531,8 @@ select t.ok((select count(*) = 0 from profiles where id = '11111111-1111-1111-11
   and (select count(*) = 0 from reviews) and (select count(*) = 0 from notifications)
   and (select count(*) = 0 from merchant_event_visitors) and (select count(*) = 0 from merchant_view_hours) and (select count(*) = 0 from story_viewers)
   and (select count(*) = 0 from story_likes) and (select count(*) = 0 from dish_likes) and (select count(*) = 0 from promo_clicks) and (select count(*) = 0 from push_subscriptions where user_id = '11111111-1111-1111-1111-111111111111'), 'suppression du compte : profil, fiche, SIRET, abonnement, abonnés, statistiques, stories, promotions, avis et notifications supprimés');
-select t.ok((select count(*) = 4 from pg_publication_tables where pubname = 'supabase_realtime' and tablename in ('merchants', 'stories', 'reviews', 'notifications')), 'temps réel activé sur merchants, stories, reviews et notifications');
+select t.ok((select count(*) = 3 from pg_publication_tables where pubname = 'supabase_realtime' and tablename in ('merchants', 'stories', 'notifications'))
+  and not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'reviews'), 'temps réel : merchants, stories et notifications ; les avis ne sont plus diffusés en direct');
 select t.ok(not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.prosecdef and has_function_privilege('anon', p.oid, 'execute')), 'aucune fonction SECURITY DEFINER appelable par un visiteur via l''API');
 select t.ok((select bool_and(c.relrowsecurity) and count(*) = (select count(*) from pg_tables where schemaname = 'public')
   from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relkind = 'r'), 'RLS activée sur TOUTES les tables publiques');

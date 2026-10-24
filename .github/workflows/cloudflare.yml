@@ -27,9 +27,11 @@ jobs:
   publier:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
@@ -67,5 +69,5 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           # Crée le projet au premier passage (sans effet s'il existe déjà)
-          npx --yes wrangler@4 pages project create "$CF_PROJECT" --production-branch=main 2>/dev/null || true
-          npx --yes wrangler@4 pages deploy out --project-name="$CF_PROJECT" --branch=main --commit-dirty=true
+          npx --yes wrangler@4.149.0 pages project create "$CF_PROJECT" --production-branch=main 2>/dev/null || true
+          npx --yes wrangler@4.149.0 pages deploy out --project-name="$CF_PROJECT" --branch=main --commit-dirty=true
