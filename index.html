@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-T0hnkmf9riX/8qe2BjNmcRuiKkDaPLbk8PSu/9bxoOo=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-VSuPUZgMrQJ/gvm1k9ipmWeTCwWy7dWqqLZ263vanGo=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Carte interactive des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon." />
@@ -259,14 +259,14 @@
     .shop-item[aria-current="true"] { background: var(--accent-soft); }
     .si-emoji { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; font-size: 22px; background: var(--hover); }
     .si-body { flex: 1; min-width: 0; display: grid; gap: 2px; }
-    .si-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-    .si-top strong { font-weight: 500; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .si-dist { flex: none; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .si-top { display: flex; gap: 8px; align-items: baseline; min-width: 0; }
+    .si-top strong { min-width: 0; font-weight: 500; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .si-dist { flex: none; margin-left: auto; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
     .si-status { font-size: 13px; font-weight: 500; }
     .si-status.is-open { color: var(--green); }
     .si-status.is-soon, .status.is-soon, .sr-body .is-soon { color: var(--amber); }
     .si-status.is-closed { color: var(--danger); }
-    .si-top .verified { margin-left: 6px; padding: 0 5px; font-size: 11px; vertical-align: 1px; }
+    .si-top .verified { flex: none; margin-left: -2px; padding: 0 5px; font-size: 11px; }
     .si-promo { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sb-empty { margin: 24px 20px; text-align: center; color: var(--muted); font-size: 14px; }
 
@@ -1038,7 +1038,8 @@
     .story-admin li { position: relative; flex: none; width: 84px; }
     .story-admin .sa-thumb { position: relative; display: block; width: 84px; aspect-ratio: 9 / 16; border-radius: 10px; overflow: hidden; background: #111; color: #fff; }
     .story-admin .sa-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .story-admin .sa-thumb .sv-text { padding: 32px 6px 6px; font-size: 10.5px; text-shadow: none; }   /* sous le bouton × */
+    .story-admin .sa-thumb .sv-text { inset: auto 0; top: 50%; transform: translateY(-50%); display: -webkit-box; -webkit-box-orient: vertical;
+      -webkit-line-clamp: 6; overflow: hidden; padding: 0 6px; font-size: 10.5px; text-shadow: none; }   /* 6 lignes au plus, « … » ensuite : reste sous le bouton × */
     .story-admin small { display: block; margin-top: 4px; font-size: 11.5px; line-height: 1.3; color: var(--muted); white-space: pre-line; }
     .story-admin .sa-del { position: absolute; top: 4px; right: 4px; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-size: 17px; line-height: 1; color: #fff; background: rgba(0, 0, 0, .55); }
     .story-admin .sa-empty, .promo-admin .pa-empty { width: auto; flex: 1; padding: 12px 0; font-size: 13.5px; color: var(--muted); }
@@ -1403,7 +1404,7 @@
     /* État de la connexion : discret, en bas de l'écran (téléphone) ou en haut de la carte (ordinateur) */
     .net { position: fixed; z-index: 125; left: 12px; right: 12px; bottom: calc(var(--safe-bottom) + 76px); width: fit-content; max-width: min(480px, calc(100% - 24px)); margin: 0 auto; display: flex; align-items: center; gap: 8px;
       padding: 8px 14px; border-radius: 18px; font-size: 13px; font-weight: 500; color: var(--text); background: var(--panel-solid);
-      box-shadow: var(--shadow); animation: rise .25s var(--ease-out) both; }
+      box-shadow: var(--shadow); animation: rise .25s var(--ease-out) both; pointer-events: none; }   /* ne bloque jamais un bouton en dessous */
     .net[hidden] { display: none; }
     .net-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--amber); }
     .net.is-slow .net-dot { border: 2px solid var(--amber); border-right-color: transparent; background: none; width: 12px; height: 12px; animation: spin .8s linear infinite; }
@@ -1411,7 +1412,7 @@
     .net.is-down .net-dot { background: var(--danger); }
     .net.is-back .net-dot { background: var(--green); }
     #net-text { min-width: 0; line-height: 1.3; }
-    #net-retry { flex: none; margin-left: 2px; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 500; color: var(--accent); background: var(--accent-soft); }
+    #net-retry { flex: none; pointer-events: auto; margin-left: 2px; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 500; color: var(--accent); background: var(--accent-soft); }
     @media (prefers-reduced-motion: reduce) { .net.is-slow .net-dot { animation: none; } }
     .toast button { flex: none; color: #8ab4f8; font-weight: 500; }
 
@@ -3220,11 +3221,19 @@
     }
   }
 
+  /**
+   * E-mail de code impossible à envoyer : adresse refusée par le service d'e-mails de Supabase (sans serveur SMTP,
+   * il n'écrit qu'aux membres de l'équipe du projet) ou envoi en échec. Rien n'est créé côté Supabase dans ce cas.
+   */
+  const mailUndeliverable = (e) => !!e && (/email_address_not_authorized/.test(e.code || e.error_code || '')
+    || /email address .*not authorized|error sending .*e?mail/i.test(e.message || ''));
   /** Message compréhensible pour une erreur du serveur. */
   function cloudError(e) {
     if (!navigator.onLine) return 'Vous êtes hors connexion. Vérifiez votre connexion internet puis réessayez.';
     const code = e && (e.code || e.error_code);
     if (e && (e.status === 429 || /rate.?limit/i.test(code || '') || /rate limit/i.test(e.message || ''))) return 'Trop de demandes en peu de temps. Patientez quelques minutes puis réessayez.';
+    if (code === 'email_address_invalid') return 'Cette adresse e-mail n\'est pas acceptée. Utilisez votre adresse habituelle.';
+    if (mailUndeliverable(e)) return 'Le code de confirmation n\'a pas pu être envoyé à cette adresse pour le moment. Réessayez un peu plus tard.';
     const text = String((e && (e.message || e.name)) || '');
     if (/TimeoutError|Délai dépassé|AbortError|Failed to fetch|NetworkError|Load failed/i.test(text) || (e && e.status >= 500))
       return 'FlashMiam est très demandé en ce moment : le serveur n\'a pas répondu à temps. Réessayez dans un instant.';
@@ -4285,7 +4294,7 @@
       }
       const best = activePromos(shop)[0];
       btn.querySelector('.si-promo').textContent = best ? promoLine(best) : (shop.description || '').slice(0, 90);
-      if (shop.isPro && !shop.isTest) { const v = document.createElement('span'); v.className = 'verified'; v.textContent = '✓'; v.title = 'Établissement vérifié'; btn.querySelector('strong').appendChild(v); }
+      if (shop.isPro && !shop.isTest) { const v = document.createElement('span'); v.className = 'verified'; v.textContent = '✓'; v.title = 'Établissement vérifié'; btn.querySelector('strong').after(v); }
       // Recherche : plats trouvés dans la carte du restaurant
       const hits = searching ? Search.dishesOf(shop, filters.q, filters.max) : [];
       if (hits.length) {
@@ -7117,6 +7126,13 @@
         if (error.code === 'user_already_exists' || /already registered/i.test(error.message || '')) { accountExists(); return; }
         if (error.code === 'weak_password') { setFieldError('jn-password', 'Mot de passe trop facile à deviner : choisissez-en un plus long ou plus varié.'); $('jn-password').select(); return; }
         $('err-join-final').textContent = cloudError(error);
+        // Code impossible à envoyer : la connexion avec Google, elle, n'a pas besoin d'e-mail
+        if (mailUndeliverable(error) && GoogleAuth.enabled()) {
+          const g = document.createElement('button');
+          g.type = 'button'; g.className = 'link-btn'; g.textContent = 'créer votre compte avec Google';
+          g.addEventListener('click', () => show(0, { dir: 'prev' }));
+          $('err-join-final').append(' En attendant, vous pouvez ', g, '.');
+        }
         return;
       }
       // Adresse déjà inscrite et confirmée : Supabase répond sans erreur (protection de la vie privée) mais sans identité

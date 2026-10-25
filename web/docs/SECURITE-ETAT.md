@@ -149,6 +149,9 @@ publications. Corrigé :
   empreinte, peuvent s'exécuter ; connexions limitées à Supabase, aux tuiles de la carte, au géocodage et à Google
   (connexion). Vérifié : un script injecté, un attribut `onerror` (XSS), un envoi de données vers un autre site, un pixel
   de pistage et `eval` sont bloqués. Recalculée automatiquement à chaque publication (`scripts/csp.mjs`).
+  Google Maps (moteur de carte facultatif, inutilisé) n'est pas autorisé : sa liste de domaines affaiblirait la
+  politique ; `csp.mjs` refuse de publier une page où une clé Google Maps serait ajoutée sans politique adaptée
+  (sinon la carte MapLibre prend le relais, vérifié).
 - **En-têtes** (Vercel, Cloudflare) : intégration dans un autre site interdite (`frame-ancestors 'none'`), fenêtres
   isolées (`Cross-Origin-Opener-Policy`), caméra, micro, paiement, USB et suivi publicitaire désactivés ;
   sur GitHub Pages (pas d'en-têtes possibles), la page refuse de s'afficher dans le cadre d'un autre site.
@@ -217,7 +220,8 @@ publications. Corrigé :
     La `service_role` ancienne ne peut pas être changée seule et reste valable jusqu'en 2107 : mieux vaut la couper.
     Dis-moi quand c'est fait : je vérifie tout de suite que le site et les fonctions marchent (réactivable en un clic).
   - *Authentication › Providers › Email* : longueur minimale 8 et caractères requis « minuscules, majuscules, chiffres
-    et symboles » (le site l'impose déjà, la base le ferait aussi) ; **Email OTP Expiration** : 900 s (15 min) au lieu de 1 h.
+    et symboles » (le site l'impose déjà, la base le ferait aussi) ; **Email OTP Expiration** : 900 s (15 min) au lieu de 1 h ;
+    vérifier que **Confirm email** est bien activé (c'est le réglage par défaut).
   - Protection contre les mots de passe divulgués (HaveIBeenPwned) : offre Pro de Supabase uniquement.
   - Avant l'ouverture au public : *Authentication › Attack Protection* → CAPTCHA (Cloudflare Turnstile, gratuit) contre
     les inscriptions en masse (il faudra me donner la clé du site Turnstile, publique, pour l'ajouter aux pages).
@@ -226,17 +230,25 @@ publications. Corrigé :
   sont déposés mais pas relus : prévoir une relecture avant la mise en ligne (je peux ajouter l'état « en attente de
   validation » et un écran de modération).
 - **Bloquant pour l'inscription par e-mail** (la connexion Google, elle, fonctionne déjà) :
-  - *Emails › SMTP Settings* : Gmail (mot de passe d'application de flashmiampro@gmail.com) ou Brevo. Sans cela,
-    Supabase n'envoie les e-mails qu'aux membres de l'équipe du projet, et au plus quelques-uns par heure.
+  - Constaté le 25 octobre 2026 : un restaurateur inscrit avec une adresse de l'équipe Supabase reçoit son code, un
+    client avec une adresse ordinaire ne reçoit rien. Le site n'y est pour rien (même inscription pour les deux) : sans
+    serveur SMTP, Supabase **n'écrit qu'aux membres de l'équipe du projet** (erreur `email_address_not_authorized`,
+    aucun compte créé) et au plus 2 e-mails par heure. Le site affiche désormais un message clair au lieu de l'erreur
+    brute et propose aux clients de continuer avec Google.
+  - **À faire** : SMTP avec Gmail (gratuit, environ 500 e-mails par jour) :
+    1. sur le compte Google flashmiampro@gmail.com, activer la validation en deux étapes, puis créer un
+       **mot de passe d'application** (https://myaccount.google.com/apppasswords, nom « Supabase ») ;
+    2. https://supabase.com/dashboard/project/fnypgfyxbyaqrnklhjxc/auth/smtp → *Enable Custom SMTP* : expéditeur
+       `flashmiampro@gmail.com`, nom `FlashMiam`, hôte `smtp.gmail.com`, port `465`, identifiant
+       `flashmiampro@gmail.com`, mot de passe = le mot de passe d'application (à coller seulement là, jamais ailleurs) ;
+    3. https://supabase.com/dashboard/project/fnypgfyxbyaqrnklhjxc/auth/rate-limits : passer l'envoi d'e-mails de
+       30 à 100 par heure (30 par heure est imposé juste après l'activation).
+    Plus tard, avec un nom de domaine (ex. flashmiam.fr) : Brevo ou Resend, pour des e-mails qui arrivent plus sûrement.
   - *Emails › Templates* « Confirm signup », « Magic link » et « Reset password » : le site demande un **code à 6 chiffres** ;
     ajouter `{{ .Token }}` dans le texte des modèles (les modèles par défaut ne contiennent qu'un lien).
 - Supabase › *Authentication › URL Configuration* (n'a pas fonctionné la première fois, à refaire ensemble) :
   *Site URL* `https://pwa-nantes.vercel.app` ; *Redirect URLs* `https://pwa-nantes.vercel.app/**`,
   `https://evanbisa.github.io/pwa-nantes/**`, `http://localhost:3000/**`.
-- Supabase › *Authentication › Sign In / Providers* : vérifier **Confirm email** (activé par défaut) et les règles
-  de mot de passe (8 caractères, minuscules, majuscules, chiffres, symboles).
-- *Emails › SMTP Settings* : Gmail (mot de passe d'application de flashmiampro@gmail.com) ou Brevo, avant l'ouverture
-  au public (sinon les e-mails de confirmation ne partent qu'aux membres de l'équipe Supabase).
 - Avant les premiers abonnements payants : statut (auto-entrepreneur ou société), page « Mentions légales »,
   passage à Vercel Pro ou à Cloudflare Pages (offre Hobby de Vercel = usage non commercial).
 

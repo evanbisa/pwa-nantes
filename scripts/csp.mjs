@@ -8,8 +8,9 @@
  *   node scripts/csp.mjs dist/index.html …   pages à traiter (par défaut : celles du site, à la racine du dépôt)
  *
  * À relancer après chaque modification d'un <script> de la page (la publication le fait aussi d'elle-même).
- * Clé Google Maps ajoutée un jour (CONFIG.googleMapsApiKey) : autoriser aussi Google Maps ci-dessous
- * (voir « Content Security Policy » dans la documentation Google Maps).
+ * Google Maps (moteur de carte facultatif, CONFIG.googleMapsApiKey) n'est pas autorisé : sa liste de domaines
+ * demande 'unsafe-inline' et des jokers qui couvrent des fichiers déposés par n'importe qui. Le script refuse donc
+ * une page qui l'active, plutôt que de publier une carte bloquée (le site retomberait sur MapLibre).
  */
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
@@ -63,6 +64,11 @@ for (const file of targets) {
   const policyFor = PAGES[path.basename(file)];
   if (!policyFor) { console.error(`csp : page inconnue ${file}`); process.exit(2); }
   const html = fs.readFileSync(file, 'utf8');
+  if (policyFor === appPolicy && (/^\s*googleMapsApiKey:\s*'[^']+'/m.test(html) || /^\s*mapEngine:\s*'google'/m.test(html))) {
+    console.error(`csp : ${file} active Google Maps, que la politique de sécurité n'autorise pas.\n` +
+      '  Adapter appPolicy() (guide « Content Security Policy » de Google Maps) avant de publier, ou retirer la clé.');
+    process.exit(2);
+  }
   const next = withPolicy(html, policyFor);
   if (next === html) continue;
   if (check) { console.error(`csp : politique à mettre à jour dans ${file} (node scripts/csp.mjs)`); stale++; }
