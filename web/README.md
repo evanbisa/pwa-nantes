@@ -11,7 +11,7 @@ Zone couverte : La Roche-sur-Yon et sa couronne.
 | Action | Contenu | État |
 | --- | --- | --- |
 | 1 | Script SQL sécurisé (`profiles`, `merchants`, RLS) + connexion du projet | ✅ appliqué sur le projet Supabase `fnypgfyxbyaqrnklhjxc` (0 alerte de sécurité) |
-| 2 | Site relié à Supabase : comptes (code e-mail, Google), fiches, photos, justificatifs, abonnés, statistiques, stories, promotions | ✅ sur le site complet (`../index.html`) ; l'inscription par e-mail attend le SMTP et les modèles d'e-mail (voir 3) |
+| 2 | Site relié à Supabase : comptes (clients sans code, restaurateurs avec code e-mail, Google), fiches, photos, justificatifs, abonnés, statistiques, stories, promotions | ✅ sur le site complet (`../index.html`) ; les codes des restaurateurs et « mot de passe oublié » attendent le SMTP (voir 3) |
 | 3 | Carte : vrais commerces en temps réel, tuiles OpenStreetMap | à faire |
 | 4 | Stories (24 h) et promotions des restaurateurs : tables `stories`, `promotions`, stockage `stories` | ✅ appliqué sur Supabase (99 scénarios de sécurité, 0 alerte) |
 | 5 | Connexion « Continuer avec Google » (clients) | ✅ en ligne (vérifiée par Supabase Auth) |
@@ -37,11 +37,12 @@ Zone couverte : La Roche-sur-Yon et sa couronne.
   « minuscules, majuscules, chiffres et symboles » (même règle que le prototype).
 - *URL Configuration* : *Site URL* = `https://roche-street-food.pages.dev` ;
   *Redirect URLs* : `https://roche-street-food.pages.dev/**`, `https://evanbisa.github.io/pwa-nantes/app/**` et `http://localhost:3000/**`.
-- *Emails › SMTP Settings* : **indispensable pour de vrais utilisateurs**. Sans SMTP personnalisé, Supabase
-  n'envoie les e-mails de confirmation qu'aux membres de l'équipe du projet, avec une limite très basse.
+- *Emails › SMTP Settings* : **indispensable pour les restaurateurs et « mot de passe oublié »** (les clients
+  s'inscrivent sans code). Sans SMTP personnalisé, Supabase n'envoie les e-mails qu'aux membres de l'équipe du
+  projet, avec une limite très basse.
   Option à 0 € : **Gmail** (`smtp.gmail.com`, port 587, un « mot de passe d'application » Google,
   jusqu'à 500 e-mails/jour) ou **Brevo** (offre gratuite, 300 e-mails/jour).
-- *Emails › Templates* (« Confirm signup », « Magic link », « Reset password ») : le site demande un **code à 6 chiffres**.
+- *Emails › Templates* (« Confirm signup » pour les restaurateurs, « Reset password ») : le site demande un **code à 6 chiffres**.
   Ajouter `{{ .Token }}` dans chaque modèle, par exemple « Votre code FlashMiam : {{ .Token }} ».
 
 ### 4. Récupérer les clés (*Project Settings › API Keys*)
@@ -106,6 +107,10 @@ Tests : `deno test supabase/functions/` (sans réseau).
 SIRET de test `999 999 999 00009` : établissement fictif accepté sans appel à Sirene (fiche marquée « de test »).
 Pour le refuser avant l'ouverture au public : secret `ALLOW_TEST_SIRET=false` (*Edge Functions › Secrets*).
 
+`supabase/functions/client-signup/` (déployée) : inscription d'un client **sans code** ; vérifie l'adresse (format, domaine
+qui reçoit des e-mails, via DNS), le mot de passe, le prénom, l'âge, puis crée le compte client déjà confirmé.
+Plafonds : 30 inscriptions par heure et par connexion, 500 au total (table `signup_attempts`, empreinte de l'IP).
+
 `supabase/functions/delete-account/` (déployée) : « Supprimer mon compte » ; efface les fichiers de la fiche
 (photos, stories, justificatifs) puis le compte, et tout ce qui lui est lié en cascade.
 
@@ -157,7 +162,7 @@ aussi le projet Supabase actif (l'offre gratuite le met en pause après 7 jours 
   des statistiques après 90 jours, totaux après 180 jours, stories 30 jours après leur fin (avec leur photo).
 - **Politique de sécurité du contenu (CSP)** dans les pages : scripts autorisés par empreinte (`scripts/csp.mjs`,
   recalculée à chaque publication), connexions limitées à Supabase, aux tuiles et à Google (connexion).
-- Tests : `npm run db:test` (234 scénarios sur un PostgreSQL local : `PGHOST=… PGPORT=… PGUSER=postgres`) ;
+- Tests : `npm run db:test` (243 scénarios sur un PostgreSQL local : `PGHOST=… PGPORT=… PGUSER=postgres`) ;
   `deno test supabase/functions/` (fonctions serveur) ; `node scripts/check-supabase.mjs` et
   `node scripts/check-live.mjs` (projet et sites en ligne, aussi chaque lundi par `verifications.yml`).
 

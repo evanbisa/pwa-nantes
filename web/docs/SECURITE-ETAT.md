@@ -175,6 +175,23 @@ publications. Corrigé :
 | Clés VAPID (alertes) | table `push_config` | privée illisible (aucune règle d'accès) ; la clé publique est donnée aux navigateurs, c'est normal |
 | Jetons Cloudflare | secrets GitHub | jamais affichés par les workflows |
 
+### Inscription des clients sans code (25 octobre 2026, migration `20261028090000_client_signup.sql`, fonction `client-signup`)
+- Seuls les **restaurateurs** reçoivent un code par e-mail. Un client crée son compte sans code ; son adresse est
+  vérifiée autrement, en trois temps :
+  1. faute de frappe d'une messagerie connue repérée en direct (« lea@gmial.com » → « Vouliez-vous dire lea@gmail.com ? ») ;
+  2. le serveur vérifie que le **domaine reçoit des e-mails** (enregistrements DNS : « flashmiam-introuvable.fr » ou un
+     domaine qui refuse tout courrier sont refusés) — seul le domaine est transmis au service DNS (Cloudflare 1.1.1.1) ;
+  3. écran **« C'est bien votre adresse ? »** : l'adresse en grand, domaine mis en avant, « Oui, c'est la bonne » /
+     « Non, je la corrige ».
+- La fonction serveur revérifie tout (adresse, mot de passe : mêmes règles que le site, prénom, sexe, âge ≥ 15 ans),
+  crée le compte **toujours comme client** (impossible de créer un restaurateur ou un administrateur par ce chemin)
+  et déjà confirmé ; le site se connecte ensuite avec le mot de passe choisi. « Confirm email » reste activé dans
+  Supabase : l'inscription directe par l'API publique demande toujours un code.
+- Contre les faux comptes en masse : 30 inscriptions par heure au plus depuis une même connexion (assez pour une salle
+  de cours derrière le wifi du campus), 500 par heure au total ; adresse IP enregistrée sous forme d'empreinte
+  seulement (HMAC), effacée au bout de 2 jours. À ajouter avant l'ouverture au public : CAPTCHA (Turnstile).
+- Tests : 12 scénarios de la fonction, 9 de la base (plafond illisible et impossible à contourner), 18 de bout en bout.
+
 ### Connexion avec Google (clients)
 - Prototype : bouton Google (Google Identity Services) affiché dès que `CONFIG.googleClientId` est renseigné.
   Le jeton Google est vérifié par Supabase Auth (`signInWithIdToken`), signature comprise.
@@ -229,12 +246,10 @@ publications. Corrigé :
   que la personne est bien le gérant ; quelqu'un pourrait inscrire le restaurant d'un autre. Les justificatifs (Kbis)
   sont déposés mais pas relus : prévoir une relecture avant la mise en ligne (je peux ajouter l'état « en attente de
   validation » et un écran de modération).
-- **Bloquant pour l'inscription par e-mail** (la connexion Google, elle, fonctionne déjà) :
-  - Constaté le 25 octobre 2026 : un restaurateur inscrit avec une adresse de l'équipe Supabase reçoit son code, un
-    client avec une adresse ordinaire ne reçoit rien. Le site n'y est pour rien (même inscription pour les deux) : sans
-    serveur SMTP, Supabase **n'écrit qu'aux membres de l'équipe du projet** (erreur `email_address_not_authorized`,
-    aucun compte créé) et au plus 2 e-mails par heure. Le site affiche désormais un message clair au lieu de l'erreur
-    brute et propose aux clients de continuer avec Google.
+- **E-mails des restaurateurs et « mot de passe oublié »** (les clients s'inscrivent sans code depuis le 25 octobre 2026) :
+  - Sans serveur SMTP, Supabase **n'écrit qu'aux membres de l'équipe du projet** (erreur `email_address_not_authorized`,
+    aucun compte créé) et au plus 2 e-mails par heure : un restaurateur ordinaire ne reçoit pas son code, et personne
+    ne peut récupérer un mot de passe oublié. Le site affiche alors un message clair au lieu de l'erreur brute.
   - **À faire** : SMTP avec Gmail (gratuit, environ 500 e-mails par jour) :
     1. sur le compte Google flashmiampro@gmail.com, activer la validation en deux étapes, puis créer un
        **mot de passe d'application** (https://myaccount.google.com/apppasswords, nom « Supabase ») ;

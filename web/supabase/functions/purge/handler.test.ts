@@ -33,6 +33,7 @@ Deno.test("efface chaque table selon sa durée de conservation", async () => {
     "promo_clicks.clicked_at<2026-07-26T03:17:00.000Z",
     "merchant_stats.day<2026-04-27",
     "visit_budget.day<2026-10-22",
+    "signup_attempts.created_at<2026-10-22T03:17:00.000Z",
   ]);
   assertEquals(calls.marked, 1);
   const body = await res.json();

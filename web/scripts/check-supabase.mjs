@@ -97,7 +97,9 @@ for (const [fn, body, label] of [
   const r = await rpc(fn, body);
   report(r.status === 401 || r.status === 403, `${label} : en ligne, réservé aux comptes connectés (HTTP ${r.status}${r.status === 404 ? " : fonction absente" : ""})`);
 }
-for (const table of ["merchant_event_visitors", "merchant_view_hours", "story_viewers", "promo_clicks", "story_likes", "dish_likes", "visit_budget", "maintenance_runs"]) {
+const cap = await rpc("signup_attempt", { p_ip_hash: "verification-en-ligne-0000", p_kind: "check" });
+report(cap.status === 401 || cap.status === 403, `plafond des inscriptions : réservé au serveur, impossible à contourner (HTTP ${cap.status}${cap.status === 404 ? " : fonction absente" : ""})`);
+for (const table of ["merchant_event_visitors", "merchant_view_hours", "story_viewers", "promo_clicks", "story_likes", "dish_likes", "visit_budget", "maintenance_runs", "signup_attempts"]) {
   const r = await get(`${table}?select=*&limit=1`);
   report((r.status === 401 || r.status === 403) || (r.status === 200 && Array.isArray(r.body) && r.body.length === 0), `${table} : illisible pour un visiteur (HTTP ${r.status})`);
 }
@@ -110,6 +112,18 @@ report(write.status >= 400 || written.length === 0, `modification anonyme d'une 
 const purge = await fetch(`${url}/functions/v1/purge`, { headers });
 report(purge.status === 405, `ménage quotidien (fonction purge) en ligne (HTTP ${purge.status})`);
 await purge.body?.cancel();
+
+// Inscription des clients sans code : fonction en ligne ; une adresse mal formée est refusée avant tout (rien n'est créé ni compté)
+const signup = await fetch(`${url}/functions/v1/client-signup`, {
+  method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ action: "check", email: "pas-une-adresse" }),
+});
+const signupBody = await signup.json().catch(() => ({}));
+report(signup.status === 422 && signupBody.error === "email_invalid", `inscription des clients (fonction client-signup) en ligne, adresse invalide refusée (HTTP ${signup.status})`);
+const domainOk = await fetch(`${url}/functions/v1/client-signup`, {
+  method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ action: "check", email: "verification@gmail.com" }),
+});
+const domainOkBody = await domainOk.json().catch(() => ({}));
+report(domainOk.status === 200 && domainOkBody.ok === true, `inscription des clients : adresse valable acceptée, rien n'est créé (HTTP ${domainOk.status})`);
 
 console.log(failures ? `\n${failures} problème(s) détecté(s)` : "\nTout est en ordre ✔");
 process.exit(failures ? 1 : 0);

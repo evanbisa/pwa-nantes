@@ -1,8 +1,8 @@
 /**
  * Ménage quotidien (droit à l'oubli, durées annoncées dans la page Confidentialité) :
  * notifications de plus de 60 jours, données par personne des statistiques de plus de 90 jours,
- * totaux de plus de 180 jours, plafond anti-triche de la veille, stories finies depuis plus de 30 jours
- * (avec leur photo, retirée du stockage).
+ * totaux de plus de 180 jours, plafond anti-triche de la veille, tentatives d'inscription de plus de 2 jours,
+ * stories finies depuis plus de 30 jours (avec leur photo, retirée du stockage).
  *
  * Aucun secret : la fonction n'efface que ce qui a dépassé sa durée de conservation ; un appel en trop ne fait
  * qu'avancer le ménage, et un seul passage par heure est effectué. Déclenchée chaque nuit par la base (pg_cron).
@@ -30,6 +30,7 @@ export const RULES: { table: string; column: string; days: number; date?: boolea
   { table: "promo_clicks", column: "clicked_at", days: 90 },
   { table: "merchant_stats", column: "day", days: 180, date: true },
   { table: "visit_budget", column: "day", days: 2, date: true },
+  { table: "signup_attempts", column: "created_at", days: 2 },
 ];
 export const STORY_KEEP_DAYS = 30;
 const JOB = "purge";

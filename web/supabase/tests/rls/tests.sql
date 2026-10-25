@@ -507,6 +507,28 @@ reset role;
 delete from auth.users where id = '77777777-7777-7777-7777-777777777777';
 select t.ok((select count(*) = 0 from visit_budget where visitor_id = '77777777-7777-7777-7777-777777777777'), 'compte supprimé : son plafond de statistiques aussi');
 
+-- ===== Inscription des clients sans code (fonction client-signup) : plafond des tentatives =====
+select set_config('request.jwt.claims', '', false);
+set role anon;
+select t.fails($$select * from signup_attempts$$, 'visiteur : tentatives d''inscription illisibles');
+select t.fails($$select signup_attempt('empreinte-visiteur-0001', 'signup')$$, 'visiteur : ne peut pas enregistrer ou contourner le plafond des inscriptions');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated;
+select t.fails($$select * from signup_attempts$$, 'restaurateur : tentatives d''inscription illisibles');
+select t.fails($$insert into signup_attempts (ip_hash, kind) values ('empreinte-connecte-001', 'signup')$$, 'compte connecté : tentatives non modifiables');
+select t.fails($$select signup_attempt('empreinte-connecte-001', 'signup')$$, 'compte connecté : plafond des inscriptions réservé au serveur');
+reset role;
+set role service_role;
+create temp table t_signup as select signup_attempt('empreinte-campus-0001', 'signup') as ok from generate_series(1, 32);
+select t.ok((select count(*) filter (where ok) = 30 and count(*) filter (where not ok) = 2 from t_signup), 'serveur : 30 inscriptions par heure depuis une même connexion, puis refus (salle de cours derrière le wifi du campus : assez)');
+select t.ok(signup_attempt('empreinte-autre-00001', 'signup') and signup_attempt('empreinte-campus-0001', 'check'), 'serveur : une autre connexion, ou une simple vérification d''adresse, reste possible');
+select t.fails($$select signup_attempt('empreinte-campus-0001', 'admin')$$, 'serveur : type de tentative inconnu refusé');
+reset role;
+select t.ok(not has_table_privilege('anon', 'signup_attempts', 'select') and not has_function_privilege('anon', 'signup_attempt(text, text)', 'execute')
+  and not has_function_privilege('authenticated', 'signup_attempt(text, text)', 'execute'), 'droits : table et plafond inaccessibles aux visiteurs et aux comptes');
+delete from signup_attempts;
+
 -- ===== Masquage, modération, suppression =====
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
 set role authenticated;
