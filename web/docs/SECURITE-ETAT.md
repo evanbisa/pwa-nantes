@@ -190,7 +190,9 @@ publications. Corrigé :
 - Contre les faux comptes en masse : 30 inscriptions par heure au plus depuis une même connexion (assez pour une salle
   de cours derrière le wifi du campus), 500 par heure au total ; adresse IP enregistrée sous forme d'empreinte
   seulement (HMAC), effacée au bout de 2 jours. À ajouter avant l'ouverture au public : CAPTCHA (Turnstile).
-- Tests : 12 scénarios de la fonction, 9 de la base (plafond illisible et impossible à contourner), 18 de bout en bout.
+- Tests : 13 scénarios de la fonction, 9 de la base (plafond illisible et impossible à contourner), 18 de bout en bout.
+  Vérifié en ligne : vrai DNS (domaine inexistant refusé, « univ-nantes.fr » accepté), trois adresses IP inventées
+  (X-Forwarded-For) comptées comme une seule connexion, deux réseaux différents comptés séparément.
 
 ### Connexion avec Google (clients)
 - Prototype : bouton Google (Google Identity Services) affiché dès que `CONFIG.googleClientId` est renseigné.
