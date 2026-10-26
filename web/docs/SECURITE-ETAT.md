@@ -211,7 +211,7 @@ publications. Corrigé :
   maintenue pendant que Whop réessaie, bandeau d'alerte dans l'espace restaurateur.
 - Suppression du compte : renouvellement Whop arrêté d'abord ; si Whop ne répond pas, rien n'est supprimé.
 - Secrets (`WHOP_API_KEY`, `WHOP_WEBHOOK_SECRET`) : uniquement dans Supabase › Edge Functions › Secrets.
-- Tests : 18 scénarios de la base, 24 des fonctions (dont une signature produite par la bibliothèque officielle), 60 de
+- Tests : 18 scénarios de la base, 24 des fonctions (dont une signature produite par la bibliothèque officielle), 54 de
   bout en bout (faux Whop : page de paiement, notifications signées, résiliation, paiement refusé, fin, suppression).
 
 ### Connexion avec Google (clients)
