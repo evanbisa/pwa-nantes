@@ -42,7 +42,7 @@ const text = async (url) => { const r = await fetch(url, { redirect: "follow" })
 for (const site of SITES) {
   let page = null;
   for (let i = 0; i < 12; i++) {
-    try { page = await text(site.url); } catch (e) { page = { status: 0, headers: new Headers(), body: "" }; }
+    try { page = await text(site.url); } catch { page = { status: 0, headers: new Headers(), body: "" }; }
     if (page.status === 200 && page.body.includes('http-equiv="Content-Security-Policy"')) break;
     await sleep(30000);
   }
@@ -52,7 +52,7 @@ for (const site of SITES) {
   // Pages et scripts du site (le fichier de la carte MapLibre, bibliothèque tierce connue, est exclu)
   const files = [[site.url, page.body]];
   const scripts = [...page.body.matchAll(/<script[^>]*\bsrc="([^"]+)"/g), ...page.body.matchAll(/s\.src = '([^']+\.js)'/g)].map((m) => new URL(m[1], site.url).href);
-  for (const extra of ["sw.js", "confidentialite.html", "conditions.html", "app/"]) scripts.push(new URL(extra, site.url).href);
+  for (const extra of ["sw.js", "confidentialite.html", "conditions.html", "app/", "app/legal/cgu/", "app/legal/confidentialite/"]) scripts.push(new URL(extra, site.url).href);
   for (const url of [...new Set(scripts)].filter((u) => u.startsWith(new URL(site.url).origin) && !u.includes("maplibre"))) {
     try { const f = await text(url); if (f.status === 200) files.push([url, f.body]); } catch { /* fichier absent */ }
   }

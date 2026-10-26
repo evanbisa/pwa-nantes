@@ -72,3 +72,16 @@ body {
   .food-orbit-item:nth-child(3) { animation-delay: 1.2s; }
 }
 @keyframes food-fade { 50% { opacity: 0.35; } }
+
+/* ---------- Pages juridiques (/legal) ---------- */
+/* Sommaire : défilement fluide vers l'article (sauf si l'utilisateur limite les animations) */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.legal-root) { scroll-behavior: smooth; }
+}
+/* La page entière défile (la carte, elle, bloque le rebond) ; fond de la page = celui des documents */
+html:has(.legal-root), html:has(.legal-root) body { height: auto; min-height: 100%; overscroll-behavior: auto; }
+html:has(.legal-root) body { background: #f8fafc; }
+html[data-theme="night"]:has(.legal-root) body { background: #020617; }
+@media print {
+  html:has(.legal-root) body { background: #fff; }
+}

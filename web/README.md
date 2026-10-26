@@ -98,6 +98,12 @@ Tout est prêt dans le dépôt : `vercel.json` (à la racine) et `scripts/build-
 En attendant, la même application est aussi publiée sur https://evanbisa.github.io/pwa-nantes/app/
 (le prototype reste sur https://evanbisa.github.io/pwa-nantes/).
 
+### Pages juridiques (`app/legal/`)
+Mentions légales, CGU, CGV et politique de confidentialité, publiées sous `/app/legal/` (le site complet y renvoie).
+Textes dans `lib/legal/` (un fichier par document) ; **informations à compléter dans `lib/legal/site.ts`** (surlignées
+sur les pages tant qu'elles sont entre crochets). Composants dans `components/legal/` : barre latérale ou onglets,
+sommaire qui suit la lecture, mode jour / nuit partagé avec la carte, impression.
+
 ### 7. Fonction serveur « verify-siret » (Supabase Edge Function, déjà déployée)
 `supabase/functions/verify-siret/` : vérifie le SIRET d'un restaurateur connecté (clé de contrôle, répertoire Sirene,
 établissement en activité, code NAF de restauration, SIRET non déjà pris), puis crée sa fiche en brouillon et

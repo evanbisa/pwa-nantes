@@ -234,6 +234,12 @@ publications. Corrigé :
 - Pages `confidentialite.html` et `conditions.html` (contact : flashmiampro@gmail.com).
 
 ### ⏳ Reste à faire
+- **Pages juridiques** (`/app/legal/` : mentions légales, CGU, CGV, confidentialité ; anciennes adresses
+  `conditions.html` et `confidentialite.html` redirigées) : compléter les informations entre crochets dans
+  `web/lib/legal/site.ts` (éditeur, SIREN/SIRET, adresse, directeur de la publication, TVA, tribunal, médiateur de la
+  consommation, date d'ouverture des abonnements). Tant qu'elles manquent, elles restent surlignées en orange sur les pages.
+  Les CGV décrivent le paiement Stripe et la résiliation en un clic depuis l'espace restaurateur : à mettre en place
+  avant d'ouvrir les abonnements payants. Une relecture par un juriste reste conseillée avant le lancement commercial.
 - **Sécurité (24 octobre 2026), à faire dans Supabase** :
   - *Project Settings › API Keys* : désactiver les **anciennes clés** (`anon`, `service_role`), plus utilisées par le site.
     La `service_role` ancienne ne peut pas être changée seule et reste valable jusqu'en 2107 : mieux vaut la couper.

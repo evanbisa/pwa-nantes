@@ -19,7 +19,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="fr" className="h-full antialiased">
+    // suppressHydrationWarning : le thème des pages juridiques est posé sur <html> avant React (app/legal/layout.tsx)
+    <html lang="fr" className="h-full antialiased" suppressHydrationWarning>
       <body className="h-full">{children}</body>
     </html>
   );
