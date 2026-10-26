@@ -5,6 +5,7 @@ import { LEGAL } from "./site";
 import type { LegalDoc } from "./types";
 
 const mail = `{{${LEGAL.email}|mailto:${LEGAL.email}}}`;
+const { essentiel, premium } = LEGAL.plans;
 
 /** Conditions générales de vente : abonnement des restaurateurs (contrat entre professionnels). */
 export const cgv: LegalDoc = {
@@ -12,7 +13,7 @@ export const cgv: LegalDoc = {
   title: "Conditions générales de vente",
   short: "CGV",
   icon: Receipt,
-  summary: `L'abonnement FlashMiam Pro des restaurateurs : ${LEGAL.priceExclTax} par mois, sans engagement.`,
+  summary: `Les abonnements des restaurateurs : ${essentiel.name} (${essentiel.month} par mois), ${premium.name} (${premium.month} par mois) ou sur devis, au mois ou à l'année, sans engagement.`,
   updated: LEGAL.updated,
   notice: `Ces conditions s'appliquent aux abonnements souscrits à compter du ${LEGAL.cgvEffectiveDate}, date d'ouverture des abonnements payants.`,
   sections: [
@@ -21,7 +22,7 @@ export const cgv: LegalDoc = {
       title: "Champ d'application",
       icon: Info,
       blocks: [
-        `Les présentes conditions générales de vente (« CGV ») régissent l'abonnement **FlashMiam Pro** souscrit par un restaurateur (le « Client ») auprès de ${LEGAL.editorName} (l'« Éditeur », voir les {{mentions légales|/legal/mentions-legales}}).`,
+        `Les présentes conditions générales de vente (« CGV ») régissent les abonnements **FlashMiam Pro** (formules ${essentiel.name}, ${premium.name} et sur devis) souscrits par un restaurateur (le « Client ») auprès de ${LEGAL.editorName} (l'« Éditeur », voir les {{mentions légales|/legal/mentions-legales}}).`,
         "L'abonnement est réservé aux **professionnels** agissant pour les besoins de leur activité de restauration, identifiés par un numéro SIRET vérifié. Les présentes CGV constituent le socle de la négociation commerciale au sens de l'article L. 441-1 du Code de commerce.",
         "Elles sont acceptées en cochant la case prévue lors de la souscription et prévalent sur tout autre document du Client. Les {{conditions générales d'utilisation|/legal/cgu}} s'appliquent également.",
       ],
@@ -31,7 +32,7 @@ export const cgv: LegalDoc = {
       title: "Contenu de l'abonnement",
       icon: ShieldCheck,
       blocks: [
-        "L'abonnement FlashMiam Pro comprend, pendant toute sa durée :",
+        "Toutes les formules comprennent, pendant toute leur durée :",
         {
           list: [
             "la publication de la fiche de l'établissement sur la carte et dans la liste (description, menu et prix, photos, horaires, adresse) ;",
@@ -40,6 +41,7 @@ export const cgv: LegalDoc = {
             "la réponse aux avis des clients et leur signalement.",
           ],
         },
+        `La formule **${premium.name}** ajoute les avantages décrits sur la page de souscription au moment de l'achat. La formule **sur devis** (plusieurs établissements, besoins particuliers) fait l'objet d'un devis accepté par le Client, dont les conditions particulières (contenu, prix, durée) prévalent sur les présentes CGV en cas de contradiction.`,
         "Le service est accessible en ligne, sur ordinateur et sur téléphone. L'Éditeur peut le faire évoluer pour l'améliorer, sans réduire ses fonctions essentielles pendant la période payée.",
       ],
     },
@@ -50,9 +52,11 @@ export const cgv: LegalDoc = {
       blocks: [
         {
           facts: [
-            ["Prix", `**${LEGAL.priceExclTax} par mois**`],
+            [essentiel.name, `**${essentiel.month} par mois**, ou **${essentiel.year} par an**`],
+            [premium.name, `**${premium.month} par mois**, ou **${premium.year} par an**`],
+            ["Sur devis", "Prix fixé par le devis accepté"],
             ["TVA", LEGAL.vatMention],
-            ["Engagement", "Aucun : abonnement mensuel, résiliable à tout moment"],
+            ["Engagement", "Aucun : abonnement au mois ou à l'année, résiliable à tout moment (effet à la fin de la période payée)"],
           ],
         },
         "Le prix applicable est celui affiché au moment de la souscription. L'Éditeur peut le modifier pour les périodes à venir en informant le Client par e-mail au moins **30 jours** à l'avance ; le Client qui refuse le nouveau prix peut résilier avant son application, sans frais.",
@@ -60,11 +64,12 @@ export const cgv: LegalDoc = {
     },
     {
       id: "paiement",
-      title: "Paiement par Stripe",
+      title: "Paiement par Whop",
       icon: CreditCard,
       blocks: [
-        "Le paiement s'effectue par carte bancaire, d'avance, chaque mois à la date anniversaire de la souscription, par l'intermédiaire du prestataire de paiement sécurisé **Stripe** (Stripe Payments Europe, Ltd., Irlande). Les données de carte sont transmises directement à Stripe : l'Éditeur n'y a jamais accès et ne les conserve pas.",
-        "En cas d'échec du prélèvement, le Client en est informé par e-mail et de nouvelles tentatives sont effectuées. À défaut de paiement 15 jours après l'échéance, la fiche peut être masquée jusqu'à régularisation, après information du Client.",
+        `Le paiement s'effectue par carte bancaire, d'avance, pour chaque période (mois ou année) à la date anniversaire de la souscription, sur la page de paiement sécurisée de la plateforme **Whop** (${LEGAL.paymentProvider}). Les données de carte sont saisies et conservées par Whop et ses prestataires de paiement : l'Éditeur n'y a jamais accès. La TVA éventuelle est indiquée sur la page de paiement, avant validation.`,
+        "Le Client gère son moyen de paiement et retrouve ses reçus depuis son espace restaurateur (onglet « Ma fiche », rubrique « Abonnement », « Moyen de paiement et factures »).",
+        "En cas d'échec du paiement, le Client en est averti dans son espace restaurateur et Whop effectue de nouvelles tentatives ; la fiche reste publiée pendant ce délai. Si le paiement n'aboutit pas, l'abonnement prend fin et la fiche est retirée de la carte jusqu'à la souscription d'un nouvel abonnement.",
         "Conformément à l'article L. 441-10 du Code de commerce, toute somme impayée à l'échéance entraîne de plein droit des **pénalités de retard** égales à trois fois le taux d'intérêt légal, ainsi qu'une **indemnité forfaitaire pour frais de recouvrement de 40 €**. Aucun escompte n'est accordé pour paiement anticipé.",
       ],
     },
@@ -73,7 +78,8 @@ export const cgv: LegalDoc = {
       title: "Durée et tacite reconduction",
       icon: Repeat,
       blocks: [
-        "L'abonnement est conclu pour une durée d'**un mois**, à compter de la souscription. Il est ensuite **reconduit tacitement** chaque mois pour une nouvelle durée d'un mois, sauf résiliation.",
+        "L'abonnement est conclu pour une durée d'**un mois** ou d'**un an**, selon la périodicité choisie, à compter de la souscription. Il est ensuite **reconduit tacitement** pour une nouvelle durée identique, sauf résiliation.",
+        "Pour changer de formule ou de périodicité, le Client résilie l'abonnement en cours puis souscrit la nouvelle formule à son échéance, ou contacte l'Éditeur pour un changement immédiat.",
       ],
     },
     {
@@ -81,9 +87,9 @@ export const cgv: LegalDoc = {
       title: "Résiliation en un clic",
       icon: CircleX,
       blocks: [
-        "Le Client peut résilier à tout moment, **en un clic depuis son espace restaurateur** (onglet « Ma fiche », rubrique « Abonnement »). Une confirmation de résiliation lui est adressée par e-mail.",
-        "La résiliation prend effet à la fin de la période mensuelle en cours, déjà payée : la fiche reste publiée jusqu'à cette date, puis est masquée. Aucun nouveau prélèvement n'a lieu. Le mois commencé n'est pas remboursé au prorata.",
-        "Le Client peut se réabonner à tout moment ; s'il supprime son compte, sa fiche et ses contenus sont effacés.",
+        "Le Client peut résilier à tout moment, **en un clic depuis son espace restaurateur** (onglet « Ma fiche », rubrique « Abonnement », « Résilier l'abonnement »). La résiliation est confirmée immédiatement à l'écran, avec sa date d'effet.",
+        "La résiliation prend effet à la fin de la période en cours (mois ou année), déjà payée : la fiche reste publiée jusqu'à cette date, puis est retirée de la carte. Aucun nouveau prélèvement n'a lieu. La période commencée n'est pas remboursée au prorata, y compris pour un abonnement annuel. Jusqu'à cette date, le Client peut revenir sur sa décision (« Reprendre l'abonnement »).",
+        "Le Client peut se réabonner à tout moment. La suppression de son compte arrête le renouvellement de l'abonnement et efface sa fiche et ses contenus.",
         "L'Éditeur peut résilier l'abonnement en cas de manquement grave du Client aux CGU ou aux CGV (contenus illicites, informations trompeuses, impayé persistant), après une mise en demeure restée sans effet pendant 8 jours, sauf urgence ou obligation légale.",
       ],
     },
@@ -102,7 +108,7 @@ export const cgv: LegalDoc = {
       title: "Facturation et déductibilité",
       icon: FileCheck,
       blocks: [
-        "Une **facture** est émise à chaque paiement et adressée par e-mail ; elle reste téléchargeable depuis l'espace restaurateur. Elle mentionne notamment l'identité des parties, le numéro SIRET du Client, la période facturée, le prix hors taxes et le régime de TVA applicable.",
+        `Un **reçu** est adressé par e-mail par Whop à chaque paiement et reste consultable depuis l'espace restaurateur (« Moyen de paiement et factures »). Une **facture** mentionnant notamment l'identité des parties, le numéro SIRET du Client, la période facturée, le prix hors taxes et le régime de TVA applicable est mise à sa disposition ; une copie peut être demandée à ${mail}.`,
         "L'abonnement est une dépense engagée dans l'intérêt de l'exploitation : il constitue en principe une **charge déductible** du résultat professionnel, et la TVA facturée est récupérable par le Client assujetti, selon son régime fiscal. Ces indications sont générales et ne constituent pas un conseil fiscal : le Client est invité à se rapprocher de son expert-comptable.",
         "Les factures sont conservées par l'Éditeur pendant dix ans, conformément à ses obligations comptables.",
       ],

@@ -21,8 +21,13 @@ export const LEGAL = {
   email: "flashmiampro@gmail.com",
   publicationDirector: "[DIRECTEUR_DE_LA_PUBLICATION]",
 
-  // ----- Abonnement restaurateur (CGV) -----
-  priceExclTax: "29 € HT",
+  // ----- Abonnements restaurateurs (CGV) : mêmes prix que la table billing_plans de la base et que le site -----
+  plans: {
+    essentiel: { name: "Essentiel", month: "29 € HT", year: "290 € HT" },
+    premium: { name: "Premium", month: "79 € HT", year: "790 € HT" },
+  },
+  /** Plateforme de paiement des abonnements (raison sociale et pays à vérifier dans les conditions signées avec Whop) */
+  paymentProvider: "Whop, Inc. (États-Unis)",
   /** Ex. « TVA à 20 % en sus, soit 34,80 € TTC par mois » ou « TVA non applicable, article 293 B du CGI » */
   vatMention: "[MENTION_TVA]",
   /** Date d'ouverture des abonnements payants (les CGV s'appliquent à partir de cette date) */

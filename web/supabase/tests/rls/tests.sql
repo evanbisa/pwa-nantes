@@ -529,6 +529,56 @@ select t.ok(not has_table_privilege('anon', 'signup_attempts', 'select') and not
   and not has_function_privilege('authenticated', 'signup_attempt(text, text)', 'execute'), 'droits : table et plafond inaccessibles aux visiteurs et aux comptes');
 delete from signup_attempts;
 
+-- ===== Paiement Whop : formules, interrupteur démonstration / Whop, abonnement tenu par le serveur =====
+set role anon;
+select t.ok((select count(*) = 4 and sum(price_cents) = 2900 + 29000 + 7900 + 79000 from billing_plans), 'formules : 4 tarifs (Essentiel, Premium × mois, année) lisibles par tous');
+select t.fails($$select whop_plan_id from billing_plans$$, 'formules : l''identifiant du tarif Whop n''est pas exposé');
+select t.ok((select not whop_live from billing_settings), 'réglages : interrupteur « paiement Whop » lisible (fermé par défaut)');
+select t.fails($$select whop_account_id from billing_settings$$, 'réglages : identifiant du compte Whop non exposé');
+select t.fails($$update billing_plans set price_cents = 100$$, 'formules : prix non modifiables par un visiteur');
+select t.fails($$select * from whop_events$$, 'notifications Whop : illisibles par un visiteur');
+reset role;
+set role service_role;
+select t.fails($$update billing_settings set whop_live = true$$, 'réglages : paiement Whop impossible à ouvrir sans identifiant de compte « biz_… »');
+select t.fails($$update billing_plans set whop_plan_id = 'prod_123456' where key = 'premium_year'$$, 'formules : identifiant Whop au mauvais format refusé');
+update billing_plans set whop_plan_id = 'plan_PremYear1234' where key = 'premium_year';
+update billing_settings set whop_live = true, whop_account_id = 'biz_Test123456';
+insert into whop_events (id, type) values ('msg_1', 'membership.activated');
+select t.fails($$insert into whop_events (id, type) values ('msg_1', 'membership.activated')$$, 'notification Whop rejouée : refusée (déjà traitée)');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}', false);
+set role authenticated;
+select t.fails($$insert into merchant_subscriptions (merchant_id, plan, period) values ('aaaaaaaa-0000-0000-0000-000000000002', 'premium', 'year')$$, 'paiement Whop ouvert : l''abonnement de démonstration n''est plus possible');
+select t.fails($$insert into merchant_subscriptions (merchant_id, mode, whop_membership_id) values ('aaaaaaaa-0000-0000-0000-000000000002', 'whop', 'mem_Fake12345')$$, 'abonnement Whop impossible à déclarer soi-même');
+reset role;
+set role service_role;
+insert into merchant_subscriptions (merchant_id, mode, plan, period, whop_membership_id, current_period_end, manage_url)
+values ('aaaaaaaa-0000-0000-0000-000000000002', 'whop', 'premium', 'year', 'mem_Nina123456', now() + interval '1 year', 'https://whop.com/billing/manage');
+reset role;
+set role authenticated;
+select t.ok((select plan = 'premium' and period = 'year' and mode = 'whop' and not cancel_at_period_end from merchant_subscriptions), 'restaurateur : voit son abonnement Whop (formule, période), et seulement le sien');
+select t.fails($$update merchant_subscriptions set cancel_at_period_end = true$$, 'restaurateur : ne modifie pas son abonnement lui-même (passe par le serveur)');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role service_role;
+update merchant_subscriptions set status = 'past_due' where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001';
+select t.ok((select status = 'published' from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'paiement refusé (Whop réessaie) : la fiche reste en ligne');
+update merchant_subscriptions set status = 'canceled' where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001';
+select t.ok((select status = 'draft' and published_at is not null from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'abonnement terminé : la fiche repasse en brouillon (retirée de la carte)');
+reset role;
+set role authenticated;
+select t.fails($$update merchants set status = 'published' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$, 'abonnement terminé : republication refusée');
+reset role;
+set role service_role;
+update merchant_subscriptions set status = 'active' where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001';
+update billing_settings set whop_live = false;
+reset role;
+set role authenticated;
+select t.ok(t.affected($$update merchants set status = 'published' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 1, 'nouvel abonnement actif : le restaurateur republie sa fiche');
+reset role;
+select t.ok(not has_table_privilege('authenticated', 'merchant_subscriptions', 'update') and not has_table_privilege('authenticated', 'merchant_subscriptions', 'delete')
+  and not has_table_privilege('authenticated', 'whop_events', 'insert') and not has_table_privilege('authenticated', 'billing_settings', 'update'), 'droits : abonnement, réglages et notifications Whop modifiables par le serveur seulement');
+
 -- ===== Masquage, modération, suppression =====
 select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
 set role authenticated;
@@ -549,7 +599,7 @@ delete from auth.users where id = '11111111-1111-1111-1111-111111111111';
 select t.ok((select count(*) = 0 from profiles where id = '11111111-1111-1111-1111-111111111111') and (select count(*) = 0 from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001')
   and (select count(*) = 0 from merchant_private where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001')
   and (select count(*) = 0 from follows) and (select count(*) = 0 from merchant_stats) and (select count(*) = 0 from merchant_visitors)
-  and (select count(*) = 0 from stories) and (select count(*) = 0 from promotions) and (select count(*) = 0 from merchant_subscriptions)
+  and (select count(*) = 0 from stories) and (select count(*) = 0 from promotions) and (select count(*) = 0 from merchant_subscriptions where merchant_id = 'aaaaaaaa-0000-0000-0000-000000000001')
   and (select count(*) = 0 from reviews) and (select count(*) = 0 from notifications)
   and (select count(*) = 0 from merchant_event_visitors) and (select count(*) = 0 from merchant_view_hours) and (select count(*) = 0 from story_viewers)
   and (select count(*) = 0 from story_likes) and (select count(*) = 0 from dish_likes) and (select count(*) = 0 from promo_clicks) and (select count(*) = 0 from push_subscriptions where user_id = '11111111-1111-1111-1111-111111111111'), 'suppression du compte : profil, fiche, SIRET, abonnement, abonnés, statistiques, stories, promotions, avis et notifications supprimés');

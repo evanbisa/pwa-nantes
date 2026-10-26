@@ -36,7 +36,7 @@
 - Bibliothèque `supabase-js` 2.118.0 servie par le site lui-même (`vendor/`), sans dépendre d'un CDN.
 - Inscription restaurateur : la base exige pour la mise en ligne un SIRET vérifié par le serveur, l'attestation sur
   l'honneur (`merchants.honor_at`) et un abonnement actif (`merchant_subscriptions`, mode « démonstration » seulement
-  côté restaurateur ; le mode Stripe sera réservé au serveur).
+  côté restaurateur ; le paiement réel, par Whop, est réservé au serveur).
 - Stockage `photos` (public, 5 Mo, JPG/PNG/WebP) et `documents` (privé, 10 Mo, PDF/JPG/PNG) : chacun ne dépose, lit
   et supprime que dans le dossier de sa propre fiche ; personne d'autre ne voit les justificatifs.
 - **SIRET de test** `999 999 999 00009` (établissement fictif, sans appel à Sirene) : fiche marquée « de test »
@@ -194,6 +194,26 @@ publications. Corrigé :
   Vérifié en ligne : vrai DNS (domaine inexistant refusé, « univ-nantes.fr » accepté), trois adresses IP inventées
   (X-Forwarded-For) comptées comme une seule connexion, deux réseaux différents comptés séparément.
 
+### Paiement des abonnements par Whop (26 octobre 2026, migration `20261029090000_whop_billing.sql`, fonctions `whop-billing`, `whop-webhook`)
+- Trois formules (Essentiel 29 € HT, Premium 79 € HT, au mois ou à l'année ; Sur devis par e-mail). Paiement par carte
+  sur la page de **Whop** : aucune donnée de carte ne passe par FlashMiam. Mode démonstration tant que
+  `billing_settings.whop_live` est faux (paiement Whop pas encore configuré).
+- Personne ne peut se déclarer abonné : l'abonnement Whop est écrit **par le serveur uniquement**, d'après Whop ; une fois
+  le paiement ouvert, la base refuse aussi l'abonnement de démonstration.
+- Notifications Whop : signature HMAC vérifiée (norme « Standard Webhooks », secret `WHOP_WEBHOOK_SECRET`), horodatage à
+  5 minutes près, notification déjà traitée ignorée, puis **l'abonnement est relu directement chez Whop** (le contenu de
+  la notification n'est jamais cru tel quel ; des notifications dans le désordre ne remettent pas un ancien état).
+  Tarif inconnu, autre compte Whop, restaurateur introuvable : ignorés. La fin d'un ancien abonnement ne coupe pas le nouveau.
+- Paiement : formule et période vérifiées par le serveur, adresse de retour limitée aux pages du site, restaurateur
+  vérifié (SIRET, justificatifs, attestation), pas de second abonnement en cours.
+- Résiliation en un clic : **toujours à l'échéance** (`cancel_at_period_end`), jamais de coupure immédiate ; reprise
+  possible jusque-là. Abonnement terminé → la base retire la fiche de la carte (brouillon). Paiement refusé → fiche
+  maintenue pendant que Whop réessaie, bandeau d'alerte dans l'espace restaurateur.
+- Suppression du compte : renouvellement Whop arrêté d'abord ; si Whop ne répond pas, rien n'est supprimé.
+- Secrets (`WHOP_API_KEY`, `WHOP_WEBHOOK_SECRET`) : uniquement dans Supabase › Edge Functions › Secrets.
+- Tests : 18 scénarios de la base, 24 des fonctions (dont une signature produite par la bibliothèque officielle), 60 de
+  bout en bout (faux Whop : page de paiement, notifications signées, résiliation, paiement refusé, fin, suppression).
+
 ### Connexion avec Google (clients)
 - Prototype : bouton Google (Google Identity Services) affiché dès que `CONFIG.googleClientId` est renseigné.
   Le jeton Google est vérifié par Supabase Auth (`signInWithIdToken`), signature comprise.
@@ -238,8 +258,12 @@ publications. Corrigé :
   `conditions.html` et `confidentialite.html` redirigées) : compléter les informations entre crochets dans
   `web/lib/legal/site.ts` (éditeur, SIREN/SIRET, adresse, directeur de la publication, TVA, tribunal, médiateur de la
   consommation, date d'ouverture des abonnements). Tant qu'elles manquent, elles restent surlignées en orange sur les pages.
-  Les CGV décrivent le paiement Stripe et la résiliation en un clic depuis l'espace restaurateur : à mettre en place
-  avant d'ouvrir les abonnements payants. Une relecture par un juriste reste conseillée avant le lancement commercial.
+  Les CGV décrivent les trois formules, le paiement par Whop et la résiliation en un clic (en place) ; vérifier la
+  raison sociale de Whop (`paymentProvider`) et qui émet les factures (Whop ou vous). Une relecture par un juriste reste
+  conseillée avant le lancement commercial.
+- **Paiement Whop** (voir `web/README.md`, « Paiement des abonnements ») : créer les 4 tarifs, la clé d'API et le webhook
+  sur Whop ; secrets `WHOP_API_KEY` et `WHOP_WEBHOOK_SECRET` dans Supabase ; me transmettre les identifiants `plan_…` et
+  `biz_…` (publics) : je les enregistre et j'ouvre le paiement.
 - **Sécurité (24 octobre 2026), à faire dans Supabase** :
   - *Project Settings › API Keys* : désactiver les **anciennes clés** (`anon`, `service_role`), plus utilisées par le site.
     La `service_role` ancienne ne peut pas être changée seule et reste valable jusqu'en 2107 : mieux vaut la couper.
@@ -280,7 +304,7 @@ Workflow `cloudflare.yml` prêt : créer un compte, un jeton « Cloudflare Pages
 GitHub `CLOUDFLARE_API_TOKEN` et `CLOUDFLARE_ACCOUNT_ID`.
 
 ## Ensuite (prévu)
-- Paiement réel des abonnements (Stripe), validé par le serveur.
+- Détail des avantages de chaque formule (Essentiel, Premium).
 - Modération des avis signalés (pour l'instant : tableau de bord Supabase, table `reviews`, colonne `reported_at`).
 - Désactiver le SIRET de test avant l'ouverture au public.
 - Application Next.js (`/app/`) : reprendre les écrans du site, désormais reliés à Supabase.

@@ -28,6 +28,7 @@
         "npm:eslint-config-next@16.4.2",
         "npm:eslint@9",
         "npm:leaflet@^1.9.4",
+        "npm:lucide-react@1.54.0",
         "npm:next@16.4.2",
         "npm:react-dom@19.3.0",
         "npm:react-leaflet@5",

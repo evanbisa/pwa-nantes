@@ -3,10 +3,14 @@
  * fichiers de sa fiche (photos, stories, justificatifs), puis son compte Supabase Auth.
  * La suppression du compte efface en cascade le profil, la fiche, le SIRET, l'abonnement,
  * les abonnements, statistiques, stories et promotions.
+ * Abonnement payé sur Whop : son renouvellement est d'abord arrêté (aucun prélèvement après la suppression) ;
+ * si Whop ne répond pas, le compte n'est pas supprimé et la personne est invitée à réessayer.
  */
 export interface Deps {
   getUserId(token: string): Promise<string | null>;
   getMerchantId(userId: string): Promise<string | null>;
+  /** Arrête le renouvellement de l'abonnement Whop en cours (rien à faire s'il n'y en a pas) ; lève une erreur si Whop échoue. */
+  stopBilling(merchantId: string): Promise<void>;
   /** Supprime tous les fichiers d'un dossier d'un espace de stockage. */
   removeFolder(bucket: string, folder: string): Promise<void>;
   deleteUser(userId: string): Promise<void>;
@@ -45,7 +49,15 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
 
   try {
     const merchantId = await deps.getMerchantId(userId);
-    if (merchantId) for (const bucket of BUCKETS) await deps.removeFolder(bucket, merchantId);
+    if (merchantId) {
+      try {
+        await deps.stopBilling(merchantId);
+      } catch (e) {
+        console.error("delete-account: résiliation Whop impossible", e instanceof Error ? e.message : e);
+        return json(502, { error: "billing", message: "Votre abonnement n'a pas pu être résilié auprès du service de paiement. Réessayez dans un instant." });
+      }
+      for (const bucket of BUCKETS) await deps.removeFolder(bucket, merchantId);
+    }
     await deps.deleteUser(userId);
     return json(200, { deleted: true });
   } catch (e) {

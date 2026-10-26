@@ -125,5 +125,30 @@ const domainOk = await fetch(`${url}/functions/v1/client-signup`, {
 const domainOkBody = await domainOk.json().catch(() => ({}));
 report(domainOk.status === 200 && domainOkBody.ok === true, `inscription des clients : adresse valable acceptée, rien n'est créé (HTTP ${domainOk.status})`);
 
+// Abonnements (Whop) : prix publics, identifiants Whop et notifications réservés au serveur, fonctions en ligne et protégées
+const plans = await get("billing_plans?select=tier,period,price_cents");
+report(plans.status === 200 && Array.isArray(plans.body) && plans.body.length === 4, `formules d'abonnement lisibles (${Array.isArray(plans.body) ? plans.body.length : "?"} tarifs, HTTP ${plans.status})`);
+for (const [path, label] of [
+  ["billing_plans?select=whop_plan_id&limit=1", "identifiants des tarifs Whop"],
+  ["billing_settings?select=whop_account_id&limit=1", "identifiant du compte Whop"],
+  ["whop_events?select=*&limit=1", "notifications Whop reçues"],
+]) {
+  const r = await get(path);
+  report(denied(r), `${label} : inaccessible pour un visiteur (HTTP ${r.status})`);
+}
+const fakeSub = await fetch(`${url}/rest/v1/merchant_subscriptions`, { method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ merchant_id: zero, mode: "whop", status: "active" }) });
+report(fakeSub.status >= 400, `abonnement déclaré sans payer : refusé (HTTP ${fakeSub.status})`);
+await fakeSub.body?.cancel();
+const billing = await fetch(`${url}/functions/v1/whop-billing`, { method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ action: "cancel" }) });
+report(billing.status === 401, `paiement (fonction whop-billing) en ligne, réservé aux restaurateurs connectés (HTTP ${billing.status})`);
+await billing.body?.cancel();
+const hook = await fetch(`${url}/functions/v1/whop-webhook`, {
+  method: "POST", headers: { "Content-Type": "application/json", "webhook-id": "msg_verification", "webhook-timestamp": String(Math.floor(Date.now() / 1000)), "webhook-signature": "v1,AAAA" },
+  body: JSON.stringify({ type: "membership.activated", data: { id: "mem_Verification" } }),
+});
+// 401 : signature refusée ; 503 : secret Whop pas encore enregistré (rien n'est accepté non plus)
+report(hook.status === 401 || hook.status === 503, `notifications Whop (fonction whop-webhook) : notification non signée par Whop refusée (HTTP ${hook.status}${hook.status === 503 ? ", secret Whop pas encore enregistré" : ""})`);
+await hook.body?.cancel();
+
 console.log(failures ? `\n${failures} problème(s) détecté(s)` : "\nTout est en ordre ✔");
 process.exit(failures ? 1 : 0);

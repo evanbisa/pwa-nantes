@@ -98,6 +98,30 @@ Tout est prêt dans le dépôt : `vercel.json` (à la racine) et `scripts/build-
 En attendant, la même application est aussi publiée sur https://evanbisa.github.io/pwa-nantes/app/
 (le prototype reste sur https://evanbisa.github.io/pwa-nantes/).
 
+### Paiement des abonnements : Whop (whop.com)
+Trois formules pour les restaurateurs : **Essentiel** (29 € HT/mois ou 290 € HT/an), **Premium** (79 € HT/mois ou
+790 € HT/an) et **Sur devis** (contact par e-mail). Prix dans la table `billing_plans` (affichés par le site),
+avantages de chaque formule dans `CONFIG.plans` (`index.html`), textes des CGV dans `lib/legal/site.ts` : les trois à
+garder identiques.
+- `whop-billing` (fonction serveur) : ouvre la page de paiement Whop de la formule choisie, résilie à l'échéance
+  (jamais de coupure immédiate) ou annule une résiliation programmée.
+- `whop-webhook` : reçoit les notifications de Whop (signature vérifiée, rejeu ignoré), relit l'abonnement chez Whop et
+  l'enregistre. Abonnement terminé → fiche retirée de la carte ; paiement refusé → fiche maintenue, restaurateur prévenu.
+- `delete-account` arrête le renouvellement Whop avant de supprimer un compte.
+- Tant que `billing_settings.whop_live` est faux, le site reste en **mode démonstration** (aucun paiement).
+
+Mise en service (une fois) :
+1. Whop › créer l'entreprise, puis un produit « FlashMiam Pro » avec **4 tarifs** récurrents en euros : Essentiel mensuel
+   (29 €), Essentiel annuel (290 €), Premium mensuel (79 €), Premium annuel (790 €). Noter leurs identifiants `plan_…`
+   et celui de l'entreprise `biz_…` (publics, à me transmettre).
+2. Whop › *Developer* › **clé d'API** de l'entreprise (droits : paiements/abonnements en lecture, gestion des membres,
+   création de paiements). Supabase › *Edge Functions › Secrets* : `WHOP_API_KEY` = cette clé (à coller seulement là).
+3. Whop › *Developer › Webhooks* : adresse `https://fnypgfyxbyaqrnklhjxc.supabase.co/functions/v1/whop-webhook`,
+   événements `membership.*` et `payment.*`. Copier le secret affiché (`ws_…`) dans Supabase › *Edge Functions ›
+   Secrets* : `WHOP_WEBHOOK_SECRET`.
+4. Renseigner les identifiants `plan_…` dans `billing_plans.whop_plan_id` et `biz_…` dans
+   `billing_settings.whop_account_id`, puis passer `billing_settings.whop_live` à vrai : le paiement est ouvert.
+
 ### Pages juridiques (`app/legal/`)
 Mentions légales, CGU, CGV et politique de confidentialité, publiées sous `/app/legal/` (le site complet y renvoie).
 Textes dans `lib/legal/` (un fichier par document) ; **informations à compléter dans `lib/legal/site.ts`** (surlignées
@@ -143,7 +167,8 @@ aussi le projet Supabase actif (l'offre gratuite le met en pause après 7 jours 
 | Sexe, année de naissance (facultatifs) | `profiles` | son propriétaire ; les restaurateurs n'ont que des totaux, à partir de 5 personnes | son propriétaire |
 | Fiche : nom, catégorie, menu, horaires, statut… | `merchants` | **tout le monde**, si publiée et ouverte | son propriétaire |
 | SIRET, raison sociale | `merchant_private` | son propriétaire | le serveur uniquement (clé secrète) |
-| Abonnement du restaurateur | `merchant_subscriptions` | le restaurateur | le restaurateur (mode « démonstration » uniquement) ; le paiement réel passera par le serveur |
+| Abonnement du restaurateur (formule, période, échéance) | `merchant_subscriptions` | le restaurateur | le serveur (fonctions `whop-billing` et `whop-webhook`, d'après Whop) ; le restaurateur seulement en mode « démonstration », tant que le paiement Whop est fermé |
+| Formules et prix | `billing_plans`, `billing_settings` | **tout le monde** (prix, paiement ouvert ou non) ; identifiants Whop : le serveur seulement | le serveur / l'équipe (tableau de bord) |
 | Photos de la fiche | stockage `photos` (public) | **tout le monde** | le restaurateur, dans le dossier de sa fiche |
 | Justificatifs (Kbis, hygiène…) | stockage `documents` (privé) | le restaurateur seulement | le restaurateur, dans le dossier de sa fiche |
 | Avis (note, commentaire, prénom + initiale) | `reviews` | **tout le monde**, si la fiche est en ligne ; l'identifiant du compte de l'auteur n'est lisible par personne (chacun retrouve les siens avec `my_reviews`) | le client : le sien (un par restaurant) ; le restaurateur : réponse et signalement sur sa fiche, jamais la note |

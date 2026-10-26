@@ -102,7 +102,7 @@ export const confidentialite: LegalDoc = {
             "**Cloudflare** (service DNS 1.1.1.1) : vérification que le domaine d'une adresse e-mail reçoit des e-mails ; seul le domaine est transmis.",
             "**Service d'alertes de votre navigateur** (Google, Mozilla, Apple ou Microsoft) : acheminement des alertes, chiffrées de bout en bout.",
             "**INSEE** (vérification du SIRET) et **IGN** (recherche d'adresse) : uniquement pour les restaurateurs.",
-            "**Stripe** : paiement de l'abonnement des restaurateurs, dès l'ouverture des abonnements payants ; les données de carte ne transitent que par Stripe.",
+            "**Whop** : paiement de l'abonnement des restaurateurs (page de paiement, moyen de paiement, reçus), dès l'ouverture des abonnements payants. Les données de carte ne transitent que par Whop et ses prestataires de paiement ; FlashMiam ne reçoit que l'état de l'abonnement (formule, échéance, résiliation).",
             "**OpenFreeMap / OpenStreetMap** : fond de carte, chargé sans cookie.",
           ],
         },
@@ -114,7 +114,7 @@ export const confidentialite: LegalDoc = {
       title: "Transferts hors de l'Union européenne",
       icon: Globe,
       blocks: [
-        "Les données des comptes sont conservées dans l'Union européenne. Certains prestataires (Vercel, Google, Cloudflare, Stripe) sont établis aux États-Unis : les transferts éventuels sont encadrés par le cadre de protection des données UE–États-Unis (Data Privacy Framework) auquel ils adhèrent, ou par les clauses contractuelles types de la Commission européenne.",
+        "Les données des comptes sont conservées dans l'Union européenne. Certains prestataires (Vercel, Google, Cloudflare, Whop) sont établis aux États-Unis : les transferts éventuels sont encadrés par le cadre de protection des données UE–États-Unis (Data Privacy Framework) auquel ils adhèrent, ou par les clauses contractuelles types de la Commission européenne.",
       ],
     },
     {
@@ -133,6 +133,7 @@ export const confidentialite: LegalDoc = {
             { title: "Totaux quotidiens des restaurants", detail: "6 mois ; ils ne contiennent aucune donnée personnelle." },
             { title: "Stories", detail: "Publiques 24 heures, puis visibles par leur seul restaurateur ; supprimées avec leur photo 30 jours après leur fin." },
             { title: "Tentatives d'inscription (empreinte IP)", detail: "2 jours." },
+            { title: "Notifications de paiement reçues de Whop", detail: "30 jours (identifiant et type seulement)." },
             { title: "Compte, fiche, avis, « j'aime »", detail: "Jusqu'à leur suppression par vous, ou la suppression du compte." },
             { title: "Alertes sur l'appareil", detail: "Jusqu'à leur désactivation, la déconnexion ou la suppression du compte." },
             { title: "Factures des restaurateurs", detail: "10 ans (obligation comptable)." },
