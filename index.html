@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-MuSk94LvSVvA1O8i+0Sl5Deha57MV/np1FcajLmMQUY=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-lt70UaK7W3Gz7BOKGKWtEFV1cCFL1qRHmcNIqUlLpZA=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Carte interactive des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon." />
@@ -613,6 +613,14 @@
     .jn-perks li:nth-child(3) { animation-delay: .16s; }
     .jn-perks li span { font-size: 22px; }
     .jn-go { min-height: 54px; font-size: 16.5px; }
+    .jn-methods { display: grid; gap: 12px; margin: 22px 0 6px; }
+    .jn-methods .oauth { margin-top: 0; }
+    .jn-methods .or-sep { margin: 0; }
+    .jn-method { min-height: 50px; font-size: 15.5px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .jn-screen .jn-method { margin-top: 0; }
+    .jn-final { display: grid; gap: 10px; margin-top: auto; padding-top: 16px; }
+    .jn-final[hidden] { display: none; }
+    .jn-final .btn { margin-top: 0; }
     .jn-go:not([disabled]) { box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 35%, transparent); }
     .join .oauth { margin-top: 4px; }
     .join .oauth .or-sep { margin: 12px 0; }
@@ -635,15 +643,16 @@
     .jn-age output small { display: block; margin-top: 4px; font-size: 14px; font-weight: 400; color: var(--muted); }
     .jn-age output.bump { animation: jn-bump .25s var(--ease-out); }
     @keyframes jn-bump { 50% { transform: scale(1.12); } }
-    .jn-range { -webkit-appearance: none; appearance: none; width: 100%; height: 36px; margin: 4px 0 0; border-radius: 18px; background: transparent; cursor: pointer; touch-action: pan-y; }
+    /* Curseur d'âge : on glisse depuis n'importe où ; lent = une année à la fois, rapide = plusieurs */
+    .jn-range { position: relative; height: 44px; margin: 4px 14px 0; cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+    .jn-range.is-dragging { cursor: grabbing; }
     .jn-range:focus { outline: none; }
-    .jn-range:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .jn-range::-webkit-slider-runnable-track { height: 10px; border-radius: 5px; background: linear-gradient(to right, var(--accent) var(--fill, 10%), var(--line-strong) var(--fill, 10%)); }
-    .jn-range::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; margin-top: -10px; border-radius: 50%; background: #fff; border: 3px solid var(--accent); box-shadow: 0 2px 8px rgba(0, 0, 0, .25); transition: transform .15s var(--ease-out); }
-    .jn-range:active::-webkit-slider-thumb { transform: scale(1.15); }
-    .jn-range::-moz-range-track { height: 10px; border-radius: 5px; background: var(--line-strong); }
-    .jn-range::-moz-range-progress { height: 10px; border-radius: 5px; background: var(--accent); }
-    .jn-range::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 3px solid var(--accent); box-shadow: 0 2px 8px rgba(0, 0, 0, .25); }
+    .jn-range:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 22px; }
+    .jn-track { position: absolute; left: 0; right: 0; top: 17px; height: 10px; border-radius: 5px; background: var(--line-strong); overflow: hidden; }
+    .jn-fill { display: block; height: 100%; width: var(--fill, 10%); background: var(--accent); }
+    .jn-thumb { position: absolute; top: 7px; left: var(--fill, 10%); width: 30px; height: 30px; margin-left: -15px; border-radius: 50%; background: #fff; border: 3px solid var(--accent); box-shadow: 0 2px 8px rgba(0, 0, 0, .25); transition: transform .15s var(--ease-out); }
+    .jn-range.is-dragging .jn-thumb { transform: scale(1.18); }
+    .jn-range-hint { margin: 2px 0 0; text-align: center; font-size: 12.5px; color: var(--muted); }
     .jn-skip { align-self: center; padding: 8px; font-size: 14px; }
     /* E-mail */
     .jn-input-ok { position: relative; display: block; }
@@ -2154,12 +2163,22 @@
             <li><span aria-hidden="true">⭐</span>Les vrais avis, sans pub</li>
           </ul>
           <button class="btn btn-primary jn-go" type="button" id="jn-start">C'est parti <span aria-hidden="true">✨</span></button>
-          <div class="oauth" data-google hidden>
-            <p class="or-sep">ou</p>
-            <div class="g-slot" id="su-google"></div>
+          <p class="ob-switch">Déjà un compte ? <button class="link-btn" type="button" data-goto="login">Se connecter</button></p>
+        </section>
+
+        <section class="jn-screen" data-q="method" aria-labelledby="jq-method" hidden>
+          <span class="jn-emoji" aria-hidden="true">🚀</span>
+          <h2 id="jq-method">Comment voulez-vous <em>créer votre compte</em> ?</h2>
+          <p class="jn-hint">Avec Google, c'est un seul clic : pas de mot de passe à retenir.</p>
+          <div class="jn-methods">
+            <div class="oauth jn-google" data-google hidden>
+              <div class="g-slot" id="su-google"></div>
+            </div>
+            <p class="or-sep" data-google hidden>ou</p>
+            <button class="btn btn-ghost jn-method" type="button" id="jn-use-email"><span aria-hidden="true">✉️</span> Avec mon adresse e-mail</button>
           </div>
           <p class="form-error" id="err-join" role="alert"></p>
-          <p class="ob-switch">Déjà un compte ? <button class="link-btn" type="button" data-goto="login">Se connecter</button></p>
+          <p class="legal">En continuant, vous acceptez les <a href="app/legal/cgu/" target="_blank" rel="noopener">conditions d'utilisation</a> et la <a href="app/legal/confidentialite/" target="_blank" rel="noopener">politique de confidentialité</a>.</p>
         </section>
 
         <section class="jn-screen" data-q="name" aria-labelledby="jq-name" hidden>
@@ -2197,10 +2216,20 @@
             <output id="jn-age-out" for="jn-age" aria-live="polite">20<small>ans</small></output>
             <button type="button" class="jn-step" id="jn-age-plus" aria-label="Un an de plus">+</button>
           </div>
-          <input class="jn-range" id="jn-age" type="range" min="13" max="99" step="1" value="20" aria-labelledby="jq-age" aria-valuetext="20 ans" />
+          <div class="jn-range" id="jn-age" role="slider" tabindex="0" aria-labelledby="jq-age" aria-valuemin="13" aria-valuemax="99" aria-valuenow="20" aria-valuetext="20 ans">
+            <span class="jn-track" aria-hidden="true"><i class="jn-fill"></i></span>
+            <span class="jn-thumb" aria-hidden="true"></span>
+          </div>
+          <p class="jn-range-hint" aria-hidden="true">Glissez doucement pour ajuster année par année</p>
           <p class="jn-live" id="jn-age-note" aria-live="polite"></p>
           <button class="btn btn-primary jn-next" type="button" data-next id="jn-age-next">Continuer</button>
           <button class="link-btn jn-skip" type="button" id="jn-skip" hidden>Passer cette question</button>
+          <div class="jn-final" id="jn-final" hidden>
+            <label class="check"><input type="checkbox" id="jn-remember" /> Rester connecté sur cet appareil</label>
+            <p class="form-error" id="err-join-final" role="alert"></p>
+            <button class="btn btn-primary jn-go" type="submit" id="jn-submit">Créer mon compte <span aria-hidden="true">🎉</span></button>
+            <p class="legal">En créant un compte, vous acceptez les <a href="app/legal/cgu/" target="_blank" rel="noopener">conditions d'utilisation</a> et la <a href="app/legal/confidentialite/" target="_blank" rel="noopener">politique de confidentialité</a>.</p>
+          </div>
         </section>
 
         <section class="jn-screen" data-q="email" aria-labelledby="jq-email" hidden>
@@ -2257,10 +2286,7 @@
             <p class="pw-match" id="jn-match" aria-live="polite"></p>
             <small class="field-error" id="err-jn-password2" aria-live="polite"></small>
           </label>
-          <label class="check"><input type="checkbox" id="jn-remember" /> Rester connecté sur cet appareil</label>
-          <p class="form-error" id="err-join-final" role="alert"></p>
-          <button class="btn btn-primary jn-go" type="submit" id="jn-submit">Créer mon compte <span aria-hidden="true">🎉</span></button>
-          <p class="legal">En créant un compte, vous acceptez les <a href="app/legal/cgu/" target="_blank" rel="noopener">conditions d'utilisation</a> et la <a href="app/legal/confidentialite/" target="_blank" rel="noopener">politique de confidentialité</a>.</p>
+          <button class="btn btn-primary jn-next" type="button" data-next id="jn-password-next">Continuer</button>
         </section>
       </form>
 
@@ -3546,11 +3572,15 @@
   })();
 
   /**
-   * Clavier des téléphones : le champ en cours de saisie reste toujours visible.
-   * iOS (et Chrome Android par défaut) ne réduisent pas la page quand le clavier s'ouvre : il recouvre simplement
-   * le bas de l'écran, et avec lui les fenêtres ancrées en bas (écran de compte, fiche, story…). On lit la partie
-   * réellement visible (window.visualViewport), on y limite les fenêtres plein écran (classe kb-open sur <html>,
-   * variables --vv-top, --vv-h, --kb) et on y ramène le champ actif.
+   * Clavier des téléphones : le champ en cours de saisie reste toujours visible, quel que soit le téléphone,
+   * le navigateur ou le clavier (taille, barre de suggestions, clavier emoji, clavier flottant, paysage).
+   * Plutôt que de deviner le modèle de téléphone, on mesure directement la place que le clavier laisse :
+   *  - iOS, Chrome Android, Samsung Internet… : la page garde sa taille, le clavier recouvre le bas de l'écran ;
+   *    window.visualViewport donne la partie restée visible ;
+   *  - Firefox Android et certains navigateurs intégrés : la page rétrécit ; on compare à sa hauteur sans clavier.
+   * Les fenêtres plein écran se limitent alors à la partie visible (classe kb-open sur <html>, variables --vv-top,
+   * --vv-h, --kb) et le champ actif y est ramené. Sans visualViewport (très anciens navigateurs) : le champ est
+   * simplement ramené au centre de l'écran.
    */
   const Keyboard = (() => {
     const vv = window.visualViewport;
@@ -3558,12 +3588,28 @@
     const editable = (el) => !!el && (el.tagName === 'TEXTAREA' || el.isContentEditable
       || (el.tagName === 'INPUT' && !/^(checkbox|radio|button|submit|reset|file|range|color|hidden|image)$/i.test(el.type)));
     const touch = window.matchMedia('(pointer: coarse)');   // clavier à l'écran : téléphones et tablettes seulement
+    const landscape = () => window.innerWidth > window.innerHeight;
+    // Hauteur de la page sans clavier, par orientation (la barre d'adresse qui se replie la change un peu)
+    const base = { portrait: 0, landscape: 0 };
+    const orient = () => (landscape() ? 'landscape' : 'portrait');
+    function remember() {
+      if (editable(document.activeElement)) return;
+      base[orient()] = window.innerHeight;
+    }
+    remember();
+    window.addEventListener('resize', () => setTimeout(remember, 0));
+    window.addEventListener('orientationchange', () => { base.portrait = 0; base.landscape = 0; setTimeout(remember, 400); });
+
     let open = false, timer = null;
     function update() {
-      if (!vv || (!touch.matches && !open)) return;
+      if (!touch.matches && !open) return;
+      if (!vv) { reveal(); return; }
+      // Partie de la page recouverte par le clavier (la page garde sa taille)…
       const covered = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
-      // Clavier ouvert : un champ a le focus et une bonne part de l'écran est recouverte (ou la page a rétréci)
-      const now = editable(document.activeElement) && (covered > 80 || vv.height < window.screen.height * 0.6);
+      // …ou hauteur perdue depuis l'ouverture du clavier (la page a rétréci)
+      const ref = Math.max(base[orient()], window.innerHeight);
+      const lost = Math.max(0, Math.round(ref - vv.height));
+      const now = editable(document.activeElement) && (covered > 60 || lost > 120);
       root.style.setProperty('--vv-top', Math.round(vv.offsetTop) + 'px');
       root.style.setProperty('--vv-h', Math.round(vv.height) + 'px');
       root.style.setProperty('--kb', covered + 'px');
@@ -3582,7 +3628,7 @@
       if (el === revealed && Date.now() - revealedAt < 700) return;   // défilement déjà en cours : on ne le relance pas
       const r = el.getBoundingClientRect();
       const top = vv ? vv.offsetTop : 0, bottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
-      if (r.top < top + 12 || r.bottom > bottom - 16) {
+      if (r.top < top + 12 || r.bottom > bottom - 16 || !vv) {
         revealed = el; revealedAt = Date.now();
         el.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
       }
@@ -3591,8 +3637,8 @@
     if (vv) { vv.addEventListener('resize', soon); vv.addEventListener('scroll', soon); }
     document.addEventListener('focusin', (ev) => {
       if (!editable(ev.target)) return;
-      // le clavier met ~250 ms à s'ouvrir : on vérifie pendant et après son animation
-      soon(); setTimeout(update, 320); setTimeout(update, 650);
+      // le clavier met 250 à 500 ms à s'ouvrir selon les téléphones : on vérifie pendant et après son animation
+      soon(); setTimeout(update, 320); setTimeout(update, 650); setTimeout(update, 1000);
     });
     document.addEventListener('focusout', () => setTimeout(update, 80));
     return { update, isOpen: () => open };
@@ -6960,7 +7006,14 @@
   /* ---------- Inscription d'un client : une question par écran (prénom, sexe, âge, e-mail, mot de passe) ---------- */
   const Join = (() => {
     const form = $('form-join');
-    const SIGNUP = ['hello', 'name', 'gender', 'age', 'email', 'check', 'password'];
+    /*
+     * Inscription : après l'accueil, choix « Google » ou « adresse e-mail ». Avec l'e-mail : adresse, relecture,
+     * mot de passe, puis prénom, sexe, âge ; le compte est créé à la dernière question. Avec Google : le compte est
+     * créé par Google, puis les questions sexe et âge (ABOUT). Sans connexion Google configurée : pas d'écran de choix.
+     */
+    const SIGNUP_EMAIL = ['hello', 'method', 'email', 'check', 'password', 'name', 'gender', 'age'];
+    const SIGNUP_NO_GOOGLE = SIGNUP_EMAIL.filter((q) => q !== 'method');
+    let SIGNUP = CONFIG.googleClientId ? SIGNUP_EMAIL : SIGNUP_NO_GOOGLE;
     const ABOUT = ['gender', 'age'];                 // compte Google tout neuf, ou modification depuis le profil
     const MIN_AGE = 15;
     const DRAFT_KEY = 'flashmiam:join';              // réponses gardées le temps de l'onglet (jamais le mot de passe)
@@ -7004,6 +7057,11 @@
       back.setAttribute('aria-label', index === 0 ? 'Annuler' : 'Question précédente');
       $('jn-skip').hidden = !about;
       $('jn-skip').textContent = about && about.edit ? 'Ne pas l\'indiquer' : 'Passer cette question';
+      // Dernière question de l'inscription par e-mail : « Créer mon compte » remplace « Continuer »
+      const last = !about && index === screens.length - 1;
+      $('jn-final').hidden = !last;
+      $('jn-age-next').hidden = last;
+      if (q === 'method' && typeof GoogleAuth !== 'undefined') GoogleAuth.mount();
       if (q === 'gender') renderGender();
       if (q === 'age') renderAge();
       if (q === 'check') renderCheck();
@@ -7023,7 +7081,7 @@
     function focusId() {
       const q = current();
       if (q === 'gender') return ($('jn-gender').querySelector('[aria-checked="true"]') || $('jn-gender').querySelector('button')).id;
-      return { hello: 'jn-start', name: 'jn-name', age: 'jn-age', email: 'jn-email', check: 'jn-check-yes', password: $('jn-password').value ? 'jn-password2' : 'jn-password' }[q];
+      return { hello: 'jn-start', method: 'jn-use-email', name: 'jn-name', age: 'jn-age', email: 'jn-email', check: 'jn-check-yes', password: $('jn-password').value ? 'jn-password2' : 'jn-password' }[q];
     }
 
     /** Vérifie la réponse de l'écran affiché ; false = rester sur l'écran (l'erreur est affichée). */
@@ -7058,7 +7116,7 @@
 
     async function next() {
       const q = current();
-      if (q !== 'hello' && !validate(q)) return;
+      if (q !== 'hello' && q !== 'method' && !validate(q)) return;
       if (q === 'email' && !(await checkDomain())) return;
       save();
       if (index < screens.length - 1) show(index + 1);
@@ -7071,11 +7129,8 @@
     }
     /** Première question sans réponse (reprise d'un brouillon après un rechargement). */
     function firstUnanswered() {
-      if (answers.name.length < 2) return screens.indexOf('name');
-      if (answers.gender === undefined) return screens.indexOf('gender');
-      if (!answers.ageSet) return screens.indexOf('age');
-      if (!EMAIL_RE.test(answers.email)) return screens.indexOf('email');
-      return screens.indexOf('check');   // adresse reprise d'un brouillon : on la fait relire
+      if (!EMAIL_RE.test(answers.email)) return screens.includes('method') ? screens.indexOf('method') : screens.indexOf('email');
+      return screens.indexOf('check');   // adresse reprise d'un brouillon : on la fait relire (le mot de passe n'est jamais gardé)
     }
 
     /* Prénom : on salue la personne dès qu'il est saisi */
@@ -7125,12 +7180,13 @@
 
     /* Âge : grand compteur, curseur et boutons − / + */
     const AGE_EMOJI = [[15, '🧒'], [18, '🎒'], [25, '🎓'], [35, '💼'], [50, '😎'], [Infinity, '🌟']];
+    const AGE_MIN = 13, AGE_MAX = 99;
     function renderAge({ bump = false } = {}) {
       const age = answers.age;
       const range = $('jn-age');
-      range.value = String(age);
+      range.setAttribute('aria-valuenow', String(age));
       range.setAttribute('aria-valuetext', age + ' ans');
-      range.style.setProperty('--fill', ((age - range.min) / (range.max - range.min)) * 100 + '%');
+      range.style.setProperty('--fill', ((age - AGE_MIN) / (AGE_MAX - AGE_MIN)) * 100 + '%');
       const out = $('jn-age-out');
       out.firstChild.nodeValue = String(age);
       if (bump && !reduceMotion) { out.classList.remove('bump'); void out.offsetWidth; out.classList.add('bump'); }
@@ -7140,18 +7196,85 @@
       $('jn-age-note').classList.toggle('is-warn', young);
       $('jn-age-next').disabled = young;
       $('jn-age-next').textContent = young ? 'Continuer' : 'J\'ai ' + age + ' ans';
-      $('jn-age-minus').disabled = age <= Number(range.min);
-      $('jn-age-plus').disabled = age >= Number(range.max);
+      $('jn-submit').disabled = young;
+      $('jn-age-minus').disabled = age <= AGE_MIN;
+      $('jn-age-plus').disabled = age >= AGE_MAX;
     }
     function setAge(age, opts) {
-      const range = $('jn-age');
-      answers.age = Math.max(Number(range.min), Math.min(Number(range.max), Math.round(age)));
+      const next = Math.max(AGE_MIN, Math.min(AGE_MAX, Math.round(age)));
+      if (next === answers.age) return;
+      answers.age = next;
       renderAge(opts);
       save();
     }
-    $('jn-age').addEventListener('input', () => setAge(Number($('jn-age').value), { bump: true }));
-    $('jn-age-minus').addEventListener('click', () => setAge(answers.age - 1, { bump: true }));
-    $('jn-age-plus').addEventListener('click', () => setAge(answers.age + 1, { bump: true }));
+    /*
+     * Curseur : on glisse le doigt n'importe où sur la barre, sans saut au premier contact. La vitesse du geste
+     * règle la précision : lentement, une année tous les 18 px (facile de viser son âge exact) ;
+     * plus vite, une année tous les 9 puis 4 px (pour aller loin d'un seul geste).
+     */
+    (() => {
+      const range = $('jn-age');
+      let drag = null;
+      range.addEventListener('pointerdown', (ev) => {
+        if (ev.button !== 0) return;
+        drag = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, t: ev.timeStamp, x0: ev.clientX, t0: ev.timeStamp, acc: 0, moved: false };
+        range.setPointerCapture(ev.pointerId);
+        range.classList.add('is-dragging');
+        range.focus({ preventScroll: true });
+      });
+      range.addEventListener('pointermove', (ev) => {
+        if (!drag || ev.pointerId !== drag.id) return;
+        const dx = ev.clientX - drag.x, dt = Math.max(1, ev.timeStamp - drag.t);
+        if (!drag.moved && Math.abs(ev.clientX - drag.x0) < 4) return;
+        drag.moved = true;
+        const speed = Math.abs(dx) / dt;                         // pixels par milliseconde
+        const perYear = speed < 0.35 ? 18 : speed < 1 ? 9 : 4;
+        drag.acc += dx / perYear;
+        drag.x = ev.clientX; drag.t = ev.timeStamp;
+        const years = drag.acc > 0 ? Math.floor(drag.acc + 1e-6) : Math.ceil(drag.acc - 1e-6);   // (54 / 18 = 2,9999… sans la marge)
+        if (years) { drag.acc -= years; setAge(answers.age + years, { bump: true }); }
+      });
+      const end = (ev) => {
+        if (!drag || ev.pointerId !== drag.id) return;
+        // Simple toucher sur la barre : une année vers le côté touché (réglage fin, sans saut)
+        if (!drag.moved && ev.type === 'pointerup' && ev.timeStamp - drag.t0 < 400) {
+          const r = range.getBoundingClientRect();
+          const thumbX = r.left + r.width * ((answers.age - AGE_MIN) / (AGE_MAX - AGE_MIN));
+          if (Math.abs(ev.clientX - thumbX) > 16) setAge(answers.age + (ev.clientX > thumbX ? 1 : -1), { bump: true });
+        }
+        drag = null;
+        range.classList.remove('is-dragging');
+      };
+      range.addEventListener('pointerup', end);
+      range.addEventListener('pointercancel', end);
+      range.addEventListener('keydown', (ev) => {
+        const step = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 5, PageDown: -5 }[ev.key];
+        if (step) { ev.preventDefault(); setAge(answers.age + step, { bump: true }); return; }
+        if (ev.key === 'Home') { ev.preventDefault(); setAge(AGE_MIN); }
+        if (ev.key === 'End') { ev.preventDefault(); setAge(AGE_MAX); }
+      });
+      // − et + : un appui = une année ; appui maintenu = défilement, de plus en plus rapide
+      [['jn-age-minus', -1], ['jn-age-plus', 1]].forEach(([id, dir]) => {
+        const btn = $(id);
+        let timer = null, held = false;
+        const stop = () => { clearTimeout(timer); timer = null; };
+        btn.addEventListener('pointerdown', (ev) => {
+          if (ev.button !== 0) return;
+          held = false;
+          const started = Date.now();
+          const tick = () => {
+            held = true;
+            setAge(answers.age + dir, { bump: true });
+            const elapsed = Date.now() - started;
+            timer = setTimeout(tick, elapsed > 1800 ? 60 : elapsed > 900 ? 110 : 180);
+          };
+          timer = setTimeout(tick, 420);
+        });
+        ['pointerup', 'pointerleave', 'pointercancel'].forEach((t) => btn.addEventListener(t, stop));
+        // Clic (souris, clavier, toucher bref) : une année ; ignoré s'il termine un appui maintenu
+        btn.addEventListener('click', () => { if (held) { held = false; return; } setAge(answers.age + dir, { bump: true }); });
+      });
+    })();
     $('jn-skip').addEventListener('click', () => { answers.ageSet = false; if (about) finishAbout(); });
 
     /* E-mail : coche verte quand l'adresse est valide, suggestion en cas de faute de frappe */
@@ -7257,10 +7380,11 @@
 
     /* Navigation : boutons « Continuer », retour, touche Entrée */
     $('jn-start').addEventListener('click', () => show(firstUnanswered()));
+    $('jn-use-email').addEventListener('click', () => show(screens.indexOf('email')));
     form.querySelectorAll('[data-next]').forEach((b) => b.addEventListener('click', next));
     $('jn-back').addEventListener('click', prev);
     form.addEventListener('keydown', (ev) => {
-      if (ev.key !== 'Enter' || ev.isComposing || !ev.target.matches('input')) return;
+      if (ev.key !== 'Enter' || ev.isComposing || !ev.target.matches('input, #jn-age')) return;
       ev.preventDefault();
       next();
     });
@@ -7301,7 +7425,7 @@
           return;
         }
         if (res.code === 'email_domain' || res.code === 'email_invalid') { show(screens.indexOf('email'), { dir: 'prev' }); setFieldError('jn-email', res.message); return; }
-        if (res.code === 'weak_password') { setFieldError('jn-password', res.message); $('jn-password').select(); return; }
+        if (res.code === 'weak_password') { show(screens.indexOf('password'), { dir: 'prev' }); setFieldError('jn-password', res.message); $('jn-password').select(); return; }
         if (res.code === 'signin') {   // compte créé, connexion à refaire
           $('li-email').value = email; showAuthStep('login');
           $('err-login').textContent = 'Votre compte est créé : connectez-vous avec votre mot de passe.';
@@ -7399,7 +7523,7 @@
       if (d) {
         answers.name = String(d.name || '').slice(0, 40);
         answers.gender = ['female', 'male', 'other', ''].includes(d.gender) ? d.gender : undefined;
-        answers.age = Number.isFinite(d.age) ? Math.max(13, Math.min(99, Math.round(d.age))) : 20;
+        answers.age = Number.isFinite(d.age) ? Math.max(AGE_MIN, Math.min(AGE_MAX, Math.round(d.age))) : 20;
         answers.ageSet = !!d.ageSet;
         answers.email = String(d.email || '').slice(0, 120);
         $('jn-name').value = answers.name;
