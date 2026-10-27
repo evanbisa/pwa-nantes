@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-SpmXBZFp6qjXIi292PsRWjZTPuUXMHq2U8qBe5SLwrs=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-Y2X911jleRido2LsEL6NgQF3I49XzA69ZPI8YLC6aKY=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Carte interactive des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon." />
@@ -160,6 +160,11 @@
     body:not(.ui-ready) .topbar, body:not(.ui-ready) .controls, body:not(.ui-ready) .stories { transform: translateY(-12px); }
     body:not(.ui-ready) .filters { transform: translateY(12px); }
     body:not(.ui-ready) .sidebar { transform: translateX(-16px); }
+    /* Arrivée sur la carte : les éléments de l'interface apparaissent l'un après l'autre, une fois le voile levé */
+    body.ui-intro .topbar, body.ui-intro .sidebar { transition-delay: .3s; }
+    body.ui-intro .controls { transition-delay: .38s; }
+    body.ui-intro .stories { transition-delay: .46s; }
+    body.ui-intro .filters { transition-delay: .54s; }
 
     /* =====================================================================
        3. BARRE SUPÉRIEURE (profil) & CONTRÔLES (en haut à droite)
@@ -382,9 +387,26 @@
       background: linear-gradient(to bottom, var(--scrim-soft) 0%, var(--scrim-soft) 25%, var(--scrim) 100%);
       transition: opacity .5s var(--ease-out);
     }
-    .onboarding.is-leaving { opacity: 0; pointer-events: none; }
+    /* Sortie : le panneau glisse et s'efface d'abord, puis le voile se lève sur la carte */
+    .onboarding.is-leaving { opacity: 0; pointer-events: none; transition: opacity .55s var(--ease-out) .15s; }
+    .onboarding.is-leaving .ob-panel { animation: none; opacity: 0; transform: translateY(28px) scale(.98); transition: opacity .3s ease-in, transform .4s var(--ease-out); }
     .ob-panel { width: 100%; max-width: 440px; margin: auto auto 0; padding: 24px 22px 22px; border-radius: 24px; animation: rise .6s var(--ease-out) both; flex: none; }
     .onboarding[data-flow="pro"] .ob-panel { max-width: 560px; }
+    /*
+     * Clavier ouvert (téléphones) : les fenêtres plein écran se limitent à la partie de l'écran restée visible
+     * (variables posées par le module Keyboard d'après window.visualViewport), et le champ en cours de saisie
+     * y est ramené. Les panneaux du bas remontent au-dessus du clavier.
+     */
+    html.kb-open .onboarding, html.kb-open .search-panel, html.kb-open .pro-space, html.kb-open .story-composer {
+      top: var(--vv-top, 0px); bottom: auto; height: var(--vv-h, 100%);
+    }
+    html.kb-open .onboarding { padding-bottom: 12px; }
+    html.kb-open .sheet { bottom: var(--kb, 0px); max-height: calc(var(--vv-h, 100dvh) - 12px); }
+    html.kb-open .sc-panel { max-height: 100%; padding-bottom: 16px; }
+    html.kb-open .jn-screen { min-height: 0; }
+    html.kb-open .jn-screen .btn { margin-top: 14px; }
+    html.kb-open .jn-emoji, html.kb-open .jn-hero { display: none; }
+    @media (max-width: 899px) { html.kb-open .ps-tabs { display: none; } }
     @keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
     .ob-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
     .ob-logo { display: flex; align-items: center; gap: 10px; font-weight: 500; }
@@ -3523,6 +3545,59 @@
     return { run, endBoot, small };
   })();
 
+  /**
+   * Clavier des téléphones : le champ en cours de saisie reste toujours visible.
+   * iOS (et Chrome Android par défaut) ne réduisent pas la page quand le clavier s'ouvre : il recouvre simplement
+   * le bas de l'écran, et avec lui les fenêtres ancrées en bas (écran de compte, fiche, story…). On lit la partie
+   * réellement visible (window.visualViewport), on y limite les fenêtres plein écran (classe kb-open sur <html>,
+   * variables --vv-top, --vv-h, --kb) et on y ramène le champ actif.
+   */
+  const Keyboard = (() => {
+    const vv = window.visualViewport;
+    const root = document.documentElement;
+    const editable = (el) => !!el && (el.tagName === 'TEXTAREA' || el.isContentEditable
+      || (el.tagName === 'INPUT' && !/^(checkbox|radio|button|submit|reset|file|range|color|hidden|image)$/i.test(el.type)));
+    const touch = window.matchMedia('(pointer: coarse)');   // clavier à l'écran : téléphones et tablettes seulement
+    let open = false, timer = null;
+    function update() {
+      if (!vv || (!touch.matches && !open)) return;
+      const covered = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+      // Clavier ouvert : un champ a le focus et une bonne part de l'écran est recouverte (ou la page a rétréci)
+      const now = editable(document.activeElement) && (covered > 80 || vv.height < window.screen.height * 0.6);
+      root.style.setProperty('--vv-top', Math.round(vv.offsetTop) + 'px');
+      root.style.setProperty('--vv-h', Math.round(vv.height) + 'px');
+      root.style.setProperty('--kb', covered + 'px');
+      if (now !== open) {
+        open = now;
+        root.classList.toggle('kb-open', open);
+        if (!open && window.scrollY) window.scrollTo(0, 0);   // iOS : la page décalée pendant la saisie revient en place
+      }
+      if (open) reveal();
+    }
+    let revealed = null, revealedAt = 0;
+    /** Ramène le champ actif dans la partie visible, s'il en sort (ou s'il frôle le bord du clavier). */
+    function reveal() {
+      const el = document.activeElement;
+      if (!editable(el)) return;
+      if (el === revealed && Date.now() - revealedAt < 700) return;   // défilement déjà en cours : on ne le relance pas
+      const r = el.getBoundingClientRect();
+      const top = vv ? vv.offsetTop : 0, bottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
+      if (r.top < top + 12 || r.bottom > bottom - 16) {
+        revealed = el; revealedAt = Date.now();
+        el.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+      }
+    }
+    const soon = () => { clearTimeout(timer); timer = setTimeout(update, 60); };
+    if (vv) { vv.addEventListener('resize', soon); vv.addEventListener('scroll', soon); }
+    document.addEventListener('focusin', (ev) => {
+      if (!editable(ev.target)) return;
+      // le clavier met ~250 ms à s'ouvrir : on vérifie pendant et après son animation
+      soon(); setTimeout(update, 320); setTimeout(update, 650);
+    });
+    document.addEventListener('focusout', () => setTimeout(update, 80));
+    return { update, isOpen: () => open };
+  })();
+
   function isInBounds([lng, lat]) {
     const [[w, s], [e, n]] = CONFIG.bounds;
     return lng >= w && lng <= e && lat >= s && lat <= n;
@@ -4046,6 +4121,11 @@
           map.flyTo({ center, zoom: zoom == null ? map.getZoom() : zoom, padding, duration: ms(duration), curve: 1.3 });
         },
         panTo(center) { map.easeTo({ center, duration: ms(800) }); },
+        /** Arrivée sur la carte après la connexion : un seul mouvement continu, qui ralentit en douceur. */
+        intro({ center, zoom, padding: p, duration = 1900 }) {
+          if (p) padding = p;
+          map.easeTo({ center, zoom, padding, duration: ms(duration), easing: (t) => 1 - Math.pow(1 - t, 4) });
+        },
         jumpTo({ center, zoom }) { map.jumpTo({ center, zoom: zoom == null ? map.getZoom() : zoom }); },
         setPadding(p, { animate = false } = {}) { padding = p; map.easeTo({ padding: p, duration: animate ? ms(500) : 0 }); },
         zoomBy(d) { map.easeTo({ zoom: map.getZoom() + d, duration: ms(300) }); },
@@ -7549,8 +7629,13 @@
 
   /** Ferme l'écran de compte et lance la carte (focus : restaurant à afficher). */
   function finishAuth({ fresh, located = false, focus = null }) {
+    // Clavier refermé d'abord : la carte ne change pas de taille pendant la transition
+    const active = document.activeElement;
+    if (active && active !== document.body && active.blur) active.blur();
+    document.body.classList.add('ui-intro');
+    setTimeout(() => document.body.classList.remove('ui-intro'), 1400);
     hideOnboarding();
-    startApp({ focus });
+    startApp({ focus, intro: true });
     if (fresh && !located && !focus) setTimeout(() => toast('Activez la localisation à tout moment avec le bouton en haut à droite.'), 2200);
     if (!fresh) resumeLocation();
   }
@@ -7558,7 +7643,7 @@
     const ob = $('onboarding');
     ob.classList.add('is-leaving');
     currentStep = null;
-    setTimeout(() => { if (ob.classList.contains('is-leaving')) ob.hidden = true; }, 550);
+    setTimeout(() => { if (ob.classList.contains('is-leaving')) ob.hidden = true; }, 750);
   }
 
   /** Restaurateur : « Terminer plus tard » → déconnexion, reprise à la prochaine connexion. */
@@ -9320,22 +9405,26 @@
      11. LANCEMENT DE LA CARTE APRÈS CONNEXION
      ===================================================================== */
 
-  function startApp({ focus = null } = {}) {
+  function startApp({ focus = null, intro = false } = {}) {
     document.body.classList.add('ui-ready');
     whenMapReady(renderStories);
-    Notifs.start();
+    // Notifications chargées après l'animation d'arrivée (aucun travail réseau pendant le mouvement)
+    setTimeout(() => Notifs.start(), intro && !reduceMotion ? 1200 : 0);
     // Carte pas encore prête (connexion lente) : écran de chargement le temps qu'elle arrive
     if (!view) Loader.run(new Promise((resolve) => whenMapReady(resolve)), 'Chargement de la carte…', 'Les commerces de La Roche-sur-Yon arrivent');
     whenMapReady(() => {
-      view.setPadding(basePadding());
       if (focus) {
+        view.setPadding(basePadding());
         const r = restaurants()[focus];
         if (r) { upsertShopMarker(restaurantToShop(r)); openShop(r.id); return; }
       }
-      if (pendingLink) { const link = pendingLink; pendingLink = null; openLink(link); return; }
+      if (pendingLink) { view.setPadding(basePadding()); const link = pendingLink; pendingLink = null; openLink(link); return; }
       const target = Geo.position && isInBounds(Geo.position) ? Geo.position : CONFIG.center;
       if (Geo.position && isInBounds(Geo.position)) setFollow(true);
-      view.flyTo({ center: target, zoom: CONFIG.heroZoom, duration: 2200 });
+      // Marges de l'interface appliquées pendant le mouvement (pas de saut de cadrage avant le zoom)
+      const go = () => (view.intro ? view.intro({ center: target, zoom: CONFIG.heroZoom, padding: basePadding() })
+        : (view.setPadding(basePadding()), view.flyTo({ center: target, zoom: CONFIG.heroZoom, duration: 2200 })));
+      if (intro && !reduceMotion) setTimeout(go, 220); else go();
     });
   }
 
