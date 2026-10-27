@@ -189,7 +189,7 @@ export const confidentialite: LegalDoc = {
             },
             {
               title: "Services Google (préférence de connexion)",
-              detail: "Le bouton « Continuer avec Google » charge un script de Google, qui peut déposer ses propres cookies. Sans accord, il n'est pas chargé.",
+              detail: "Les boutons « S'inscrire avec Google » et « Se connecter avec Google » chargent un script de Google, qui peut déposer ses propres cookies. Sans accord, il n'est pas chargé : vous donnez cet accord dans le bandeau des cookies, ou en touchant vous-même « S'inscrire avec Google » (ce que le bouton rappelle).",
               basis: "Avec votre accord",
             },
           ],

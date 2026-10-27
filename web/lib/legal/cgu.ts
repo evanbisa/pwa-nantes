@@ -44,7 +44,7 @@ export const cgu: LegalDoc = {
         {
           list: [
             "FlashMiam est réservé aux personnes de **15 ans et plus**.",
-            "Le compte se crée avec un prénom, une adresse e-mail et un mot de passe, ou avec « Continuer avec Google ». Le sexe et l'âge sont facultatifs et modifiables à tout moment.",
+            "Le compte se crée avec un prénom, une adresse e-mail et un mot de passe, ou avec « S'inscrire avec Google ». Le sexe et l'âge sont facultatifs et modifiables à tout moment.",
             "Vous relisez et confirmez votre adresse e-mail à l'inscription : elle sert à vous connecter et à récupérer votre compte. Une adresse inexacte peut vous empêcher d'y accéder.",
           ],
         },

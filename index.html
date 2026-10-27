@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-lt70UaK7W3Gz7BOKGKWtEFV1cCFL1qRHmcNIqUlLpZA=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-ym9ciMgLcAOMmTFRUsU5/zSsMQLSbZa0ZK1FHL/AewA=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Carte interactive des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon." />
@@ -593,6 +593,7 @@
     .jn-mail b { font-weight: 700; color: var(--accent); }
     .jn-screen .btn.jn-fix { margin-top: 10px; }
     .jn-field { margin-top: 18px; }
+    .jn-screen[data-q="email"] #field-jn-password { margin-top: 6px; }   /* juste sous l'adresse (la place du message d'erreur sépare déjà) */
     .jn-field input { height: 56px; font-size: 19px; }
     .jn-live { min-height: 22px; margin: 10px 0 14px; font-size: 15px; font-weight: 500; color: var(--accent); }
     .jn-live.is-warn { color: var(--danger); }
@@ -613,11 +614,19 @@
     .jn-perks li:nth-child(3) { animation-delay: .16s; }
     .jn-perks li span { font-size: 22px; }
     .jn-go { min-height: 54px; font-size: 16.5px; }
-    .jn-methods { display: grid; gap: 12px; margin: 22px 0 6px; }
-    .jn-methods .oauth { margin-top: 0; }
-    .jn-methods .or-sep { margin: 0; }
-    .jn-method { min-height: 50px; font-size: 15.5px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 10px; }
-    .jn-screen .jn-method { margin-top: 0; }
+    /* Bouton « S'inscrire avec Google » : encadré, logo officiel ; le bouton Google (iframe) est posé dessus, invisible */
+    .jn-google { display: grid; gap: 12px; margin-top: 14px; }
+    .jn-google[hidden] { display: none; }
+    .jn-google .or-sep { margin: 0; }
+    .jn-google-box { position: relative; }
+    .jn-google-btn { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 52px; padding: 0 18px; border-radius: 26px; font-size: 15.5px; font-weight: 500; color: var(--text); background: var(--panel-solid); border: 1.5px solid var(--line-strong); box-shadow: 0 1px 3px rgba(0, 0, 0, .08); transition: background-color .2s, border-color .2s; }
+    @media (hover: hover) { .jn-google-box:hover .jn-google-btn { background: var(--hover); border-color: var(--muted); } }   /* pas d'effet resté collé après un toucher */
+    .jn-google-btn svg { width: 22px; height: 22px; flex: none; }
+    .jn-google-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 26px; opacity: .01; }
+    .jn-google-overlay:empty { display: none; }
+    .jn-google-box:focus-within .jn-google-btn { outline: 2px solid var(--accent); outline-offset: 2px; }   /* focus sur le bouton de Google, invisible */
+    .jn-google-note { margin: 0; font-size: 13px; line-height: 1.45; text-align: center; color: var(--muted); }
+    .jn-screen .jn-google-btn { margin-top: 0; }
     .jn-final { display: grid; gap: 10px; margin-top: auto; padding-top: 16px; }
     .jn-final[hidden] { display: none; }
     .jn-final .btn { margin-top: 0; }
@@ -701,7 +710,7 @@
       .jn-choices button { min-height: 88px; }
       .jn-age { margin: 10px 0 4px; }
     }
-    @media (max-height: 680px) { .jn-screen[data-q="password"] .jn-emoji { display: none; } .jn-screen[data-q="password"] .jn-field { margin-top: 8px; } }
+    @media (max-height: 680px) { .jn-screen[data-q="email"] .jn-emoji { display: none; } .jn-screen[data-q="email"] .jn-field { margin-top: 8px; } }
     @media (max-height: 600px) { .jn-hero { display: none; } .jn-perks li { padding: 6px 10px; } .join .jn-field input { height: 50px; } }
 
     .role-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin: 0 0 18px; border-radius: 999px; background: var(--hover); border: 1px solid var(--line); }
@@ -2166,20 +2175,6 @@
           <p class="ob-switch">Déjà un compte ? <button class="link-btn" type="button" data-goto="login">Se connecter</button></p>
         </section>
 
-        <section class="jn-screen" data-q="method" aria-labelledby="jq-method" hidden>
-          <span class="jn-emoji" aria-hidden="true">🚀</span>
-          <h2 id="jq-method">Comment voulez-vous <em>créer votre compte</em> ?</h2>
-          <p class="jn-hint">Avec Google, c'est un seul clic : pas de mot de passe à retenir.</p>
-          <div class="jn-methods">
-            <div class="oauth jn-google" data-google hidden>
-              <div class="g-slot" id="su-google"></div>
-            </div>
-            <p class="or-sep" data-google hidden>ou</p>
-            <button class="btn btn-ghost jn-method" type="button" id="jn-use-email"><span aria-hidden="true">✉️</span> Avec mon adresse e-mail</button>
-          </div>
-          <p class="form-error" id="err-join" role="alert"></p>
-          <p class="legal">En continuant, vous acceptez les <a href="app/legal/cgu/" target="_blank" rel="noopener">conditions d'utilisation</a> et la <a href="app/legal/confidentialite/" target="_blank" rel="noopener">politique de confidentialité</a>.</p>
-        </section>
 
         <section class="jn-screen" data-q="name" aria-labelledby="jq-name" hidden>
           <span class="jn-emoji" aria-hidden="true">👋</span>
@@ -2233,11 +2228,11 @@
         </section>
 
         <section class="jn-screen" data-q="email" aria-labelledby="jq-email" hidden>
-          <span class="jn-emoji" aria-hidden="true">📬</span>
-          <h2 id="jq-email">Votre adresse <em>e-mail</em> ?</h2>
-          <p class="jn-hint">Elle vous servira à vous connecter, et à retrouver votre compte si vous oubliez votre mot de passe.</p>
+          <span class="jn-emoji" aria-hidden="true">🚀</span>
+          <h2 id="jq-email">Créez votre <em>compte</em></h2>
+          <p class="jn-hint">Votre adresse vous servira à vous connecter, et à retrouver votre compte si vous oubliez votre mot de passe.</p>
           <label class="field jn-field" id="field-jn-email">
-            <span class="visually-hidden">Adresse e-mail</span>
+            <span>Adresse e-mail</span>
             <span class="jn-input-ok">
               <input id="jn-email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" maxlength="120" placeholder="prenom@exemple.fr" enterkeyhint="next" />
               <i class="jn-tick" id="jn-email-ok" aria-hidden="true" hidden>✓</i>
@@ -2245,25 +2240,10 @@
             <small class="field-error" id="err-jn-email" aria-live="polite"></small>
           </label>
           <p class="jn-suggest" id="jn-suggest" hidden>Vouliez-vous dire <button class="link-btn" type="button" id="jn-suggest-btn"></button> ?</p>
-          <button class="btn btn-primary jn-next" type="button" data-next id="jn-email-next">Continuer</button>
-        </section>
-
-        <section class="jn-screen" data-q="check" aria-labelledby="jq-check" hidden>
-          <span class="jn-emoji" aria-hidden="true">🔎</span>
-          <h2 id="jq-check">C'est bien <em>votre adresse</em> ?</h2>
-          <p class="jn-mail" id="jn-check-email"></p>
-          <p class="jn-hint">Relisez-la lettre par lettre : sans elle, impossible de retrouver votre compte si vous oubliez votre mot de passe.</p>
-          <button class="btn btn-primary jn-next" type="button" data-next id="jn-check-yes">Oui, c'est la bonne</button>
-          <button class="btn btn-ghost jn-fix" type="button" id="jn-check-fix">Non, je la corrige</button>
-        </section>
-
-        <section class="jn-screen" data-q="password" aria-labelledby="jq-password" hidden>
-          <span class="jn-emoji" id="jn-pw-emoji" aria-hidden="true">🔒</span>
-          <h2 id="jq-password">Choisissez un <em>mot de passe</em></h2>
           <label class="field jn-field" id="field-jn-password">
             <span>Mot de passe</span>
             <span class="pw-wrap">
-              <input id="jn-password" type="password" autocomplete="new-password" minlength="8" maxlength="72" aria-describedby="jn-rules jn-strength-label" enterkeyhint="next" />
+              <input id="jn-password" type="password" autocomplete="new-password" minlength="8" maxlength="72" aria-describedby="jn-rules jn-strength-label" enterkeyhint="go" />
               <button class="pw-toggle" type="button" data-toggle-pw="jn-password">Afficher</button>
             </span>
             <span class="jn-strength" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
@@ -2277,17 +2257,31 @@
             </ul>
             <small class="field-error" id="err-jn-password" aria-live="polite"></small>
           </label>
-          <label class="field jn-field" id="field-jn-password2">
-            <span>Confirmez-le</span>
-            <span class="pw-wrap">
-              <input id="jn-password2" type="password" autocomplete="new-password" maxlength="72" aria-describedby="jn-match" enterkeyhint="done" />
-              <button class="pw-toggle" type="button" data-toggle-pw="jn-password2">Afficher</button>
-            </span>
-            <p class="pw-match" id="jn-match" aria-live="polite"></p>
-            <small class="field-error" id="err-jn-password2" aria-live="polite"></small>
-          </label>
-          <button class="btn btn-primary jn-next" type="button" data-next id="jn-password-next">Continuer</button>
+          <button class="btn btn-primary jn-next" type="button" data-next id="jn-email-next">Continuer</button>
+          <div class="jn-google" data-google hidden>
+            <p class="or-sep">ou</p>
+            <div class="jn-google-box">
+              <button class="jn-google-btn" type="button" id="jn-google-btn">
+                <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                <span>S'inscrire avec Google</span>
+              </button>
+              <div class="g-slot jn-google-overlay" id="su-google"></div>
+            </div>
+            <p class="jn-google-note" id="jn-google-note" hidden></p>
+          </div>
+          <p class="form-error" id="err-join" role="alert"></p>
+          <p class="legal">En continuant, vous acceptez les <a href="app/legal/cgu/" target="_blank" rel="noopener">conditions d'utilisation</a> et la <a href="app/legal/confidentialite/" target="_blank" rel="noopener">politique de confidentialité</a>.</p>
         </section>
+
+        <section class="jn-screen" data-q="check" aria-labelledby="jq-check" hidden>
+          <span class="jn-emoji" aria-hidden="true">🔎</span>
+          <h2 id="jq-check">C'est bien <em>votre adresse</em> ?</h2>
+          <p class="jn-mail" id="jn-check-email"></p>
+          <p class="jn-hint">Relisez-la lettre par lettre : sans elle, impossible de retrouver votre compte si vous oubliez votre mot de passe.</p>
+          <button class="btn btn-primary jn-next" type="button" data-next id="jn-check-yes">Oui, c'est la bonne</button>
+          <button class="btn btn-ghost jn-fix" type="button" id="jn-check-fix">Non, je la corrige</button>
+        </section>
+
       </form>
 
       <!-- Inscription d'un restaurateur (formulaire complet : nom, téléphone professionnel…) -->
@@ -7003,17 +6997,15 @@
     startEmailVerification({ email, back: 'signup', onSuccess: opened });
   });
 
-  /* ---------- Inscription d'un client : une question par écran (prénom, sexe, âge, e-mail, mot de passe) ---------- */
+  /* ---------- Inscription d'un client : e-mail et mot de passe, puis une question par écran (prénom, sexe, âge) ---------- */
   const Join = (() => {
     const form = $('form-join');
     /*
-     * Inscription : après l'accueil, choix « Google » ou « adresse e-mail ». Avec l'e-mail : adresse, relecture,
-     * mot de passe, puis prénom, sexe, âge ; le compte est créé à la dernière question. Avec Google : le compte est
-     * créé par Google, puis les questions sexe et âge (ABOUT). Sans connexion Google configurée : pas d'écran de choix.
+     * Inscription : après l'accueil, un écran « Créez votre compte » avec l'adresse e-mail et le mot de passe, et en
+     * dessous « S'inscrire avec Google ». Avec l'e-mail : relecture de l'adresse, puis prénom, sexe, âge ; le compte
+     * est créé à la dernière question. Avec Google : le compte est créé par Google, puis les questions sexe et âge (ABOUT).
      */
-    const SIGNUP_EMAIL = ['hello', 'method', 'email', 'check', 'password', 'name', 'gender', 'age'];
-    const SIGNUP_NO_GOOGLE = SIGNUP_EMAIL.filter((q) => q !== 'method');
-    let SIGNUP = CONFIG.googleClientId ? SIGNUP_EMAIL : SIGNUP_NO_GOOGLE;
+    const SIGNUP = ['hello', 'email', 'check', 'name', 'gender', 'age'];
     const ABOUT = ['gender', 'age'];                 // compte Google tout neuf, ou modification depuis le profil
     const MIN_AGE = 15;
     const DRAFT_KEY = 'flashmiam:join';              // réponses gardées le temps de l'onglet (jamais le mot de passe)
@@ -7061,7 +7053,7 @@
       const last = !about && index === screens.length - 1;
       $('jn-final').hidden = !last;
       $('jn-age-next').hidden = last;
-      if (q === 'method' && typeof GoogleAuth !== 'undefined') GoogleAuth.mount();
+      if (q === 'email' && typeof GoogleAuth !== 'undefined') GoogleAuth.mount();
       if (q === 'gender') renderGender();
       if (q === 'age') renderAge();
       if (q === 'check') renderCheck();
@@ -7081,7 +7073,7 @@
     function focusId() {
       const q = current();
       if (q === 'gender') return ($('jn-gender').querySelector('[aria-checked="true"]') || $('jn-gender').querySelector('button')).id;
-      return { hello: 'jn-start', method: 'jn-use-email', name: 'jn-name', age: 'jn-age', email: 'jn-email', check: 'jn-check-yes', password: $('jn-password').value ? 'jn-password2' : 'jn-password' }[q];
+      return { hello: 'jn-start', name: 'jn-name', age: 'jn-age', email: answers.email && !$('jn-password').value ? 'jn-password' : 'jn-email', check: 'jn-check-yes' }[q];
     }
 
     /** Vérifie la réponse de l'écran affiché ; false = rester sur l'écran (l'erreur est affichée). */
@@ -7103,20 +7095,19 @@
         if (!EMAIL_RE.test(answers.email)) { setFieldError('jn-email', 'Adresse e-mail invalide (ex. : prenom@gmail.com).'); $('jn-email').focus(); return false; }
         // Faute de frappe probable (« gmial.com ») : on la signale une fois, sans bloquer
         if (suggest() && suggestedFor !== answers.email) { suggestedFor = answers.email; $('jn-suggest-btn').focus(); return false; }
-      }
-      if (q === 'password') {
-        const p = $('jn-password').value, c = $('jn-password2').value;
-        const missing = missingPasswordRules(p);
-        if (missing.length) { setFieldError('jn-password', 'Il manque ' + listFr(missing.map((r) => r.label)) + '.'); $('jn-password').focus(); return false; }
-        if (!c) { setFieldError('jn-password2', 'Saisissez à nouveau votre mot de passe.'); $('jn-password2').focus(); return false; }
-        if (c !== p) { setFieldError('jn-password2', 'Les deux mots de passe ne sont pas identiques.'); $('jn-password2').select(); return false; }
+        const missing = missingPasswordRules($('jn-password').value);
+        if (missing.length) {
+          setFieldError('jn-password', $('jn-password').value ? 'Il manque ' + listFr(missing.map((r) => r.label)) + '.' : 'Choisissez un mot de passe.');
+          $('jn-password').focus();
+          return false;
+        }
       }
       return true;
     }
 
     async function next() {
       const q = current();
-      if (q !== 'hello' && q !== 'method' && !validate(q)) return;
+      if (q !== 'hello' && !validate(q)) return;
       if (q === 'email' && !(await checkDomain())) return;
       save();
       if (index < screens.length - 1) show(index + 1);
@@ -7129,8 +7120,7 @@
     }
     /** Première question sans réponse (reprise d'un brouillon après un rechargement). */
     function firstUnanswered() {
-      if (!EMAIL_RE.test(answers.email)) return screens.includes('method') ? screens.indexOf('method') : screens.indexOf('email');
-      return screens.indexOf('check');   // adresse reprise d'un brouillon : on la fait relire (le mot de passe n'est jamais gardé)
+      return screens.indexOf('email');   // le mot de passe n'est jamais gardé : on repart de l'écran « Créez votre compte »
     }
 
     /* Prénom : on salue la personne dès qu'il est saisi */
@@ -7364,7 +7354,7 @@
     }
     $('jn-check-fix').addEventListener('click', () => { show(screens.indexOf('email'), { dir: 'prev' }); $('jn-email').select(); });
 
-    /* Mot de passe : règles cochées en direct, jauge de solidité, confirmation */
+    /* Mot de passe : règles cochées en direct, jauge de solidité */
     const STRENGTH = ['', 'Trop faible', 'Trop faible', 'Moyen', 'Presque !', 'Solide 💪'];
     function renderPassword() {
       const p = $('jn-password').value;
@@ -7372,20 +7362,18 @@
       const score = p ? PASSWORD_RULES.filter((r) => r.test(p)).length : 0;
       form.dataset.strength = String(score);
       $('jn-strength-label').textContent = score === 5 && p.length >= 12 ? 'Très solide 💪' : STRENGTH[score];
-      $('jn-pw-emoji').textContent = score === 5 ? '🛡️' : score >= 3 ? '🔑' : '🔒';
-      showPasswordMatch(p, $('jn-password2').value, $('jn-match'));
     }
     $('jn-password').addEventListener('input', renderPassword);
-    $('jn-password2').addEventListener('input', renderPassword);
 
     /* Navigation : boutons « Continuer », retour, touche Entrée */
     $('jn-start').addEventListener('click', () => show(firstUnanswered()));
-    $('jn-use-email').addEventListener('click', () => show(screens.indexOf('email')));
     form.querySelectorAll('[data-next]').forEach((b) => b.addEventListener('click', next));
     $('jn-back').addEventListener('click', prev);
     form.addEventListener('keydown', (ev) => {
       if (ev.key !== 'Enter' || ev.isComposing || !ev.target.matches('input, #jn-age')) return;
       ev.preventDefault();
+      // Adresse saisie, mot de passe pas encore : Entrée passe au mot de passe
+      if (ev.target.id === 'jn-email' && !$('jn-password').value) { $('jn-password').focus(); return; }
       next();
     });
     form.addEventListener('submit', (ev) => { ev.preventDefault(); next(); });
@@ -7425,7 +7413,7 @@
           return;
         }
         if (res.code === 'email_domain' || res.code === 'email_invalid') { show(screens.indexOf('email'), { dir: 'prev' }); setFieldError('jn-email', res.message); return; }
-        if (res.code === 'weak_password') { show(screens.indexOf('password'), { dir: 'prev' }); setFieldError('jn-password', res.message); $('jn-password').select(); return; }
+        if (res.code === 'weak_password') { show(screens.indexOf('email'), { dir: 'prev' }); setFieldError('jn-password', res.message); $('jn-password').select(); return; }
         if (res.code === 'signin') {   // compte créé, connexion à refaire
           $('li-email').value = email; showAuthStep('login');
           $('err-login').textContent = 'Votre compte est créé : connectez-vous avec votre mot de passe.';
@@ -7435,7 +7423,6 @@
         return;
       }
       $('jn-password').value = '';
-      $('jn-password2').value = '';
       renderPassword();
       let user;
       try { user = await Loader.run(loadUser(res.session.user), 'Ouverture de votre compte…'); }
@@ -7605,20 +7592,35 @@
       sc.onerror = () => { loading = null; reject(new Error('gsi')); };
       document.head.appendChild(sc);
     }));
+    /*
+     * Inscription : notre bouton « S'inscrire avec Google » (encadré, logo) est toujours visible ; le bouton officiel
+     * de Google est posé dessus, invisible, pour que le toucher ouvre la vraie connexion Google.
+     * Connexion : bouton officiel de Google, tel quel.
+     */
+    const note = (text) => { const n = $('jn-google-note'); n.textContent = text || ''; n.hidden = !text; };
+    const CONSENT_NOTE = 'En touchant ce bouton, vous autorisez les services Google (cookies de Google).';
+    /** Bouton de Google posé sur le nôtre : c'est lui qui reçoit le focus et que lisent les lecteurs d'écran. */
+    function overlay(on) {
+      if (!on) $('su-google').textContent = '';
+      $('jn-google-btn').tabIndex = on ? -1 : 0;
+      $('jn-google-btn').toggleAttribute('aria-hidden', on);
+    }
     async function mount() {
       if (!enabled()) return;
       document.querySelectorAll('[data-google]').forEach((el) => { el.hidden = false; });
       if (!Consent.has('google')) {
-        ['su-google', 'li-google'].forEach((id) => {
-          const el = $(id);
-          el.innerHTML = '<p class="g-consent">Pour « Continuer avec Google », autorisez les services Google (cookies de Google). <button class="link-btn" type="button">Autoriser</button></p>';
-          el.querySelector('button').addEventListener('click', () => Consent.allow('google'));
-        });
+        overlay(false);
+        note(CONSENT_NOTE);
+        const el = $('li-google');
+        el.innerHTML = '<p class="g-consent">Pour « Continuer avec Google », autorisez les services Google (cookies de Google). <button class="link-btn" type="button">Autoriser</button></p>';
+        el.querySelector('button').addEventListener('click', () => Consent.allow('google'));
         return;
       }
+      if ($('jn-google-note').textContent === CONSENT_NOTE) note('');
       try { await load(); } catch (e) {
-        ['su-google', 'li-google'].forEach((id) => { $(id).innerHTML = '<span class="g-fallback">Connexion Google indisponible pour le moment.</span>'; });
-        return;
+        overlay(false);
+        $('li-google').innerHTML = '<span class="g-fallback">Connexion Google indisponible pour le moment.</span>';
+        return 'failed';
       }
       if (!ready) {
         google.accounts.id.initialize({ client_id: CONFIG.googleClientId, callback: onGoogleCredential, ux_mode: 'popup', auto_select: false, cancel_on_tap_outside: true, use_fedcm_for_button: true });
@@ -7627,14 +7629,35 @@
       ['su-google', 'li-google'].forEach((id) => {
         const el = $(id);
         el.textContent = '';
+        const width = id === 'su-google' ? ($('jn-google-btn').offsetWidth || 320) : $('onboarding').querySelector('.ob-panel').clientWidth - 48;
         google.accounts.id.renderButton(el, {
           type: 'standard', size: 'large', shape: 'pill', logo_alignment: 'center', locale: 'fr',
           theme: currentTheme() === 'dark' ? 'filled_black' : 'outline',
           text: id === 'su-google' ? 'signup_with' : 'signin_with',
-          width: Math.min(400, Math.max(240, $('onboarding').querySelector('.ob-panel').clientWidth - 48)),
+          width: Math.min(400, Math.max(240, width)),
         });
       });
+      overlay(true);
+      return 'ready';
     }
+    /*
+     * Toucher notre bouton là où le bouton de Google n'est pas (services Google pas encore autorisés, bouton
+     * pas encore chargé, ou bord du bouton) : on autorise Google si besoin, puis on ouvre la connexion Google.
+     */
+    $('jn-google-btn').addEventListener('click', async () => {
+      $('err-join').textContent = '';
+      if (!Consent.has('google')) Consent.allow('google');   // le choix explicite de « S'inscrire avec Google » vaut accord
+      note('Ouverture de Google…');
+      const state = await mount();
+      if (state === 'failed') { note('Connexion Google indisponible pour le moment. Inscrivez-vous avec votre adresse e-mail, ou réessayez plus tard.'); return; }
+      if (state !== 'ready') { note(''); return; }
+      note('');
+      try {
+        google.accounts.id.prompt((n) => {
+          if (n && ((n.isNotDisplayed && n.isNotDisplayed()) || (n.isSkippedMoment && n.isSkippedMoment()))) note('Touchez encore « S\'inscrire avec Google » pour continuer.');
+        });
+      } catch (e) { note('Touchez encore « S\'inscrire avec Google » pour continuer.'); }
+    });
     // Accord donné ou retiré pendant que l'écran de connexion est affiché
     Consent.onChange(() => { if (!$('onboarding').hidden && (currentStep === 'signup' || currentStep === 'login')) mount(); });
     return { enabled, mount };

@@ -40,7 +40,7 @@ export const LEGAL = {
   consumerMediator: "[MÉDIATEUR_DE_LA_CONSOMMATION]",
 
   /** Date de la dernière mise à jour des documents */
-  updated: "26 octobre 2026",
+  updated: "27 octobre 2026",
 } as const;
 
 /** Une information reste-t-elle à compléter ? (valeur encore entre crochets) */
