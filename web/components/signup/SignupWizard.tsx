@@ -3,15 +3,17 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { ArrowLeft, Check, Eye, EyeOff, Loader2, Minus, Plus } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { setRemember, siteClient } from "@/lib/supabase/site-session";
+import GoogleSignup from "@/components/signup/GoogleSignup";
 import {
   AGE_MAX, AGE_MIN, EMAIL_RE, MIN_AGE, PASSWORD_RULES, capitalize, passwordScore, suggestEmail,
 } from "@/lib/signup/validation";
 
 /**
- * Inscription d'un client, une question par écran : prénom, sexe et âge (facultatifs), e-mail, relecture de l'adresse,
- * mot de passe. Le compte est créé par la fonction serveur client-signup (adresse vérifiée, plafond anti-robots), puis
- * la session est ouverte avec le mot de passe choisi.
+ * Inscription d'un client, une question par écran : prénom, sexe et âge (facultatifs), e-mail (ou Google), relecture de
+ * l'adresse, mot de passe. Le compte est créé par la fonction serveur client-signup (adresse vérifiée, plafond
+ * anti-robots), puis la session est ouverte avec le mot de passe choisi, dans le stockage de la carte : la personne
+ * arrive ensuite sur la carte déjà connectée (?bienvenue=1 : accueil et localisation).
  */
 
 type Step = "name" | "gender" | "age" | "email" | "confirm" | "password" | "done";
@@ -31,6 +33,12 @@ const AGE_EMOJI: [number, string][] = [[15, "🧒"], [18, "🎒"], [25, "🎓"],
 const STRENGTH = ["", "Trop faible", "Trop faible", "Moyen", "Presque !", "Solide 💪"];
 /** Carte (site principal), un niveau au-dessus de l'application : « /app/../ » → « / ». */
 const APP_HOME = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/../`;
+/** Délai de l'écran « Bienvenue » avant l'arrivée sur la carte. */
+const WELCOME_MS = 1600;
+/** La carte est une autre application (index.html) : navigation complète, pas celle de Next.js. */
+const openMap = (query = "") => { window.location.href = new URL(APP_HOME + query, window.location.href).href; };
+/** Compte créé il y a moins de 10 minutes (compte Google tout neuf). */
+const isFresh = (createdAt: string) => Date.now() - new Date(createdAt).getTime() < 10 * 60 * 1000;
 /** Élément qui reçoit le focus à l'arrivée sur chaque écran. */
 const FOCUS: Record<Step, string> = {
   name: "su-name", gender: "su-gender-0", age: "su-age", email: "su-email", confirm: "su-confirm-yes",
@@ -39,7 +47,7 @@ const FOCUS: Record<Step, string> = {
 
 /** Appel à la fonction serveur ; ses refus arrivent sous la forme { error, message }. */
 async function callSignup(body: Record<string, string>): Promise<Reply> {
-  const { error } = await createClient().functions.invoke("client-signup", { body });
+  const { error } = await siteClient().functions.invoke("client-signup", { body });
   if (!error) return { ok: true };
   if (error instanceof FunctionsHttpError) {
     try {
@@ -61,6 +69,7 @@ export default function SignupWizard() {
   const [suggestion, setSuggestion] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRememberChoice] = useState(false);
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<Step, ReactNode>>>({});
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -78,6 +87,12 @@ export default function SignupWizard() {
     document.getElementById(FOCUS[step])?.focus({ preventScroll: true });
   }, [step]);
   useEffect(() => () => { if (advanceTimer.current) clearTimeout(advanceTimer.current); }, []);
+  // Compte ouvert : un instant de fête, puis la carte (déjà connectée)
+  useEffect(() => {
+    if (step !== "done") return;
+    const t = setTimeout(() => openMap("?bienvenue=1"), WELCOME_MS);
+    return () => clearTimeout(t);
+  }, [step]);
 
   const setError = (s: Step, message: ReactNode) => setErrors((e) => ({ ...e, [s]: message }));
   const go = (to: Step, direction: "next" | "prev" = "next") => {
@@ -156,10 +171,41 @@ export default function SignupWizard() {
       if (res.code === "invalid_name") { go("name", "prev"); return setError("name", res.message); }
       return setError("password", res.message);
     }
-    // Compte créé et confirmé : ouverture de la session (en cas d'échec, le compte existe : connexion sur la carte)
-    await createClient().auth.signInWithPassword({ email: cleanEmail, password }).catch(() => null);
+    // Compte créé et confirmé : ouverture de la session, retrouvée ensuite par la carte
+    setRemember(remember);
+    const { error } = await siteClient().auth.signInWithPassword({ email: cleanEmail, password });
     setBusy(false);
+    if (error) return setError("password", <>Votre compte est créé, mais la connexion a échoué. <a className="font-semibold underline" href={APP_HOME}>Se connecter sur la carte</a></>);
     go("done");
+  }
+
+  /**
+   * Inscription avec Google : Supabase vérifie le jeton et crée le compte client (ou ouvre celui qui existe). Compte tout
+   * neuf : le prénom, le sexe et l'âge déjà répondus sont enregistrés. Un compte restaurateur ne passe pas par Google.
+   */
+  async function googleSignIn(credential: string) {
+    setBusy(true);
+    setError("email", null);
+    const sb = siteClient();
+    const fail = (message: ReactNode) => { setBusy(false); setError("email", message); };
+    const { data, error } = await sb.auth.signInWithIdToken({ provider: "google", token: credential });
+    if (error || !data.user) return fail("La connexion avec Google a échoué. Réessayez.");
+    const { data: profile } = await sb.from("profiles").select("role, created_at, gender, birth_year").eq("id", data.user.id).single();
+    if (profile?.role === "merchant") {
+      await sb.auth.signOut().catch(() => null);
+      return fail(<>Cette adresse est celle d&apos;un compte restaurateur : <a className="font-semibold underline" href={APP_HOME}>connectez-vous sur la carte</a> avec votre mot de passe.</>);
+    }
+    const fresh = !!profile && isFresh(profile.created_at);
+    if (fresh) {
+      await sb.from("profiles").update({
+        first_name: name.trim() || undefined,
+        gender: gender || null,
+        birth_year: ageSet ? new Date().getFullYear() - age : null,
+      }).eq("id", data.user.id);
+    }
+    setBusy(false);
+    if (fresh) go("done");
+    else openMap();   // compte déjà existant : directement la carte
   }
 
   /* ---------- Rendu ---------- */
@@ -296,6 +342,7 @@ export default function SignupWizard() {
                 </div>
               )}
               <Primary busy={busy}>{busy ? "Vérification…" : "Continuer"}</Primary>
+              <GoogleSignup onCredential={googleSignIn} />
             </form>
           )}
 
@@ -360,7 +407,11 @@ export default function SignupWizard() {
                   );
                 })}
               </ul>
-              <Primary busy={busy} disabled={score < PASSWORD_RULES.length}>{busy ? "Création du compte…" : "Créer mon compte 🎉"}</Primary>
+              <label className="mt-auto flex items-center gap-3 pt-6 pb-4 text-[15px] text-slate-700 dark:text-slate-300">
+                <input id="su-remember" type="checkbox" checked={remember} onChange={(e) => setRememberChoice(e.target.checked)} className="h-5 w-5 rounded accent-brand dark:accent-brand-night" />
+                Rester connecté sur cet appareil
+              </label>
+              <Primary busy={busy} disabled={score < PASSWORD_RULES.length} className="mt-0">{busy ? "Création du compte…" : "Créer mon compte 🎉"}</Primary>
               <p className="mt-4 text-center text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                 En créant un compte, vous acceptez les{" "}
                 <a className="underline" href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/legal/cgu/`}>conditions d&apos;utilisation</a> et la{" "}
@@ -376,7 +427,9 @@ export default function SignupWizard() {
                 Bienvenue sur FlashMiam, {firstName} !
               </h1>
               <p className="mt-3 text-slate-600 dark:text-slate-400">Votre compte est prêt. Les bons plans food de La Roche-sur-Yon vous attendent.</p>
-              <a href={APP_HOME} className={`${primaryClass} mt-10 grid w-full place-items-center`}>Voir la carte</a>
+              <p className="mt-10 inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400" aria-live="polite">
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Ouverture de la carte…
+              </p>
             </div>
           )}
         </div>
@@ -418,9 +471,9 @@ function Field({ label, errorId, error, children }: { label: string; errorId: st
   );
 }
 
-function Primary({ children, busy = false, disabled = false }: { children: ReactNode; busy?: boolean; disabled?: boolean }) {
+function Primary({ children, busy = false, disabled = false, className = "mt-auto" }: { children: ReactNode; busy?: boolean; disabled?: boolean; className?: string }) {
   return (
-    <button type="submit" disabled={busy || disabled} className={`${primaryClass} mt-auto inline-flex items-center justify-center gap-2`}>
+    <button type="submit" disabled={busy || disabled} className={`${primaryClass} ${className} inline-flex items-center justify-center gap-2`}>
       {busy && <Loader2 className="h-5 w-5 animate-spin" aria-hidden />}
       {children}
     </button>
