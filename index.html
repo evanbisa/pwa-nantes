@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-DIEyfS4wte+nLhmm86STBDD4JWSnUng8wXTrQVYWclc=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-0dQYjDehrISx2uVWdi+/VTNe9TFrezuzVGF+SB7uW/c=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Carte interactive des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon." />
@@ -3981,14 +3981,15 @@
       return {
         id: 'road-' + key + '-glow', type: 'line', source: 'omt', 'source-layer': 'transportation', minzoom: def.minzoom,
         filter: ['all', isLine, notTunnel, roadClass(def.classes)],
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        // Mode sans halo : couche masquée (une couche transparente coûterait quand même son dessin, flou compris)
+        layout: { 'line-cap': 'round', 'line-join': 'round', visibility: on ? 'visible' : 'none' },
         paint: { 'line-color': on ? p['glow' + cap] : 'rgba(0, 0, 0, 0)', 'line-width': width(def.w.map(([z, v]) => [z, v * 3 + 4])),
           'line-blur': width(def.w.map(([z, v]) => [z, v * 1.5 + 3])), 'line-opacity': on ? 0.5 : 0 },
       };
     };
     // Couches présentes dès qu'un des deux modes brille (le passage jour / nuit ne fait que changer les couleurs)
     const glows = Object.values(MAP_STYLE.palettes).some((q) => q.glowPrimary);
-    const glow = glows ? ['secondary', 'primary', 'trunk', 'motorway'].map(glowLine) : [];
+    const glow = glows ? ['primary', 'trunk', 'motorway'].map(glowLine) : [];   // grands axes seulement : le flou coûte cher
 
     return {
       version: 8,
@@ -4255,7 +4256,9 @@
           if (MAP_STYLE.url) return;   // style externe : ses couleurs ne changent pas
           // Recolore la carte sans la recharger (les couleurs se fondent grâce à style.transition)
           buildStyle(t).layers.forEach((layer) => {
-            if (!layer.paint || !map.getLayer(layer.id)) return;
+            if (!map.getLayer(layer.id)) return;
+            if (layer.layout && layer.layout.visibility) map.setLayoutProperty(layer.id, 'visibility', layer.layout.visibility);
+            if (!layer.paint) return;
             Object.entries(layer.paint).forEach(([prop, value]) => map.setPaintProperty(layer.id, prop, value));
           });
         },
