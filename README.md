@@ -91,6 +91,30 @@ Tant que l'envoi n'est pas configuré, le site fonctionne en **mode démonstrati
 bien son adresse, mais une personne techniquement avertie pourrait la contourner. Pour une vérification inviolable, il faudra
 la confier à un serveur (par exemple Supabase Auth ou Firebase Authentication), en même temps que la base de données partagée.
 
+## Style de la carte
+
+La carte (MapLibre, tuiles OpenFreeMap) a quatre styles, tous dessinés par le site lui-même (aucune clé, aucun service
+en plus) :
+
+| Valeur | Style | Jour / nuit |
+|---|---|---|
+| `google` (par défaut) | rendu Google Maps | suit le mode jour ou nuit |
+| `neon` | **Nuit néon** : fond presque noir, grands axes violets et bleus lumineux | toujours sombre |
+| `pastel` | **Minimaliste pastel** : fond crème, routes blanches, parcs vert menthe | toujours clair |
+| `urbain` | **Urbain énergique** : grands axes corail et orange, eau bleu profond, parcs vert vif | toujours clair |
+
+- **Essayer sans rien publier** : ajouter `?carte=neon` (ou `pastel`, `urbain`, `google`) à l'adresse du site,
+  par exemple `https://pwa-nantes.vercel.app/?carte=neon`. Le profil indique le style affiché (« Carte »).
+- **Choisir le style publié** : variable d'environnement `MAP_STYLE`, appliquée à chaque publication par
+  `scripts/config.mjs` :
+  - Vercel › projet › *Settings › Environment Variables* : `MAP_STYLE` = `neon`, puis *Redeploy* ;
+  - GitHub Pages : dépôt › *Settings › Secrets and variables › Actions › Variables* : `MAP_STYLE` = `neon` ;
+  - en local : copier `.env.example` en `.env`, puis `node scripts/config.mjs && node scripts/csp.mjs`
+    (modifie `index.html` : ne pas le pousser si ce n'est pas voulu).
+- **Style externe** : `MAP_STYLE` peut aussi être l'adresse https d'un style MapLibre (`style.json`, par exemple créé
+  avec Maputnik ou MapTiler). Son domaine est ajouté tout seul à la politique de sécurité (`scripts/csp.mjs`) ; si ses
+  tuiles ou ses polices viennent d'un autre domaine, l'ajouter dans `appPolicy()`.
+
 ## Activer la vraie carte Google Maps
 
 Sans clé, le site affiche une carte de secours au style Google Maps (données OpenStreetMap).

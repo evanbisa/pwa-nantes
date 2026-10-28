@@ -19,15 +19,18 @@ import path from 'node:path';
 const SUPABASE = 'https://fnypgfyxbyaqrnklhjxc.supabase.co';
 const GOOGLE_SIGN_IN = 'https://accounts.google.com/gsi/';
 
-/** Politique de la page principale (index.html). */
-function appPolicy(scriptHashes) {
+/**
+ * Politique de la page principale (index.html). mapOrigins : domaine d'un style de carte externe (CONFIG.mapStyle
+ * réglé sur une adresse https), autorisé à être lu en plus des tuiles OpenFreeMap.
+ */
+function appPolicy(scriptHashes, mapOrigins = []) {
   return [
     "default-src 'self'",
     ["script-src 'self'", ...scriptHashes.map((h) => `'sha256-${h}'`), GOOGLE_SIGN_IN + 'client'].join(' '),
     `style-src 'self' 'unsafe-inline' ${GOOGLE_SIGN_IN}style`,
     `img-src 'self' data: blob: ${SUPABASE}`,
     "font-src 'self'",
-    `connect-src 'self' ${SUPABASE} ${SUPABASE.replace('https://', 'wss://')} https://tiles.openfreemap.org https://data.geopf.fr ${GOOGLE_SIGN_IN}`,
+    `connect-src 'self' ${SUPABASE} ${SUPABASE.replace('https://', 'wss://')} https://tiles.openfreemap.org ${mapOrigins.map((o) => o + ' ').join('')}https://data.geopf.fr ${GOOGLE_SIGN_IN}`,
     `frame-src ${GOOGLE_SIGN_IN}`,
     "worker-src 'self' blob:",
     "child-src 'self' blob:",
@@ -69,7 +72,9 @@ for (const file of targets) {
       '  Adapter appPolicy() (guide « Content Security Policy » de Google Maps) avant de publier, ou retirer la clé.');
     process.exit(2);
   }
-  const next = withPolicy(html, policyFor);
+  const style = policyFor === appPolicy && html.match(/^\s*mapStyle:\s*'(https:\/\/[^']+)'/m);
+  const mapOrigins = style ? [new URL(style[1]).origin].filter((o) => o !== 'https://tiles.openfreemap.org') : [];
+  const next = withPolicy(html, (hashes) => policyFor(hashes, mapOrigins));
   if (next === html) continue;
   if (check) { console.error(`csp : politique à mettre à jour dans ${file} (node scripts/csp.mjs)`); stale++; }
   else { fs.writeFileSync(file, next); console.log(`csp : ${file} mis à jour`); }

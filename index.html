@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-ym9ciMgLcAOMmTFRUsU5/zSsMQLSbZa0ZK1FHL/AewA=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-1tZVUa2XlAPsx994VEhsAWAaZCscqowRM53jzbaarYM=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Carte interactive des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon." />
@@ -2653,6 +2653,13 @@
     overviewZoom: 13.5,
     tileJson: 'https://tiles.openfreemap.org/planet',
     glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+    /**
+     * Style de la carte (MapLibre) : 'google' (rendu Google Maps, jour et nuit selon le thème), 'neon' (Nuit néon),
+     * 'pastel' (Minimaliste pastel), 'urbain' (Urbain énergique), ou l'adresse https d'un style MapLibre (style.json).
+     * Réglé à la publication par la variable d'environnement MAP_STYLE (scripts/config.mjs).
+     * Pour essayer sans republier : ajouter ?carte=neon (ou pastel, urbain, google) à l'adresse du site.
+     */
+    mapStyle: 'google',
     storageKey: 'roche-street-food:v2',
     legacyStorageKey: 'roche-street-food:v1',
     sessionKey: 'roche-street-food:session',
@@ -3885,6 +3892,56 @@
     },
   };
 
+  /*
+   * Styles de carte au choix (CONFIG.mapStyle) : chacun donne sa palette pour le mode jour et le mode nuit.
+   * glow* : halo lumineux sous les grands axes (style néon).
+   */
+  const NEON = {
+    background: '#0a0b17', landuseBusy: '#11122a', hospital: '#1a1130', education: '#10132c',
+    landcover: '#0c1120', wood: '#0d1724', park: '#0e1b26', water: '#04050d', waterway: '#1d2f80',
+    building: '#13152b', buildingLine: '#272b5c',
+    motorway: '#ff4fd8', motorwayCase: '#0a0b17', trunk: '#c35cff', trunkCase: '#0a0b17',
+    primary: '#8b6bff', primaryCase: '#0a0b17', secondary: '#4f86ff', secondaryCase: '#0a0b17',
+    tertiary: '#3a5ee0', tertiaryCase: '#0a0b17', minor: '#262f6e', minorCase: '#0a0b17', path: '#2c3270',
+    rail: '#3d4185', label: '#9fb0ff', labelMajor: '#eef0ff', halo: '#0a0b17', place: '#ff7ae0',
+    glowMotorway: '#ff4fd8', glowTrunk: '#c35cff', glowPrimary: '#8b6bff', glowSecondary: '#4f86ff',
+  };
+  const PASTEL = {
+    background: '#f8f4ec', landuseBusy: '#f4ede1', hospital: '#f7e7e4', education: '#edeef5',
+    landcover: '#eef0e1', wood: '#d6ecdd', park: '#cdeadb', water: '#cde3ea', waterway: '#cde3ea',
+    building: '#eee8dd', buildingLine: '#e4ddcf',
+    motorway: '#ecdfc9', motorwayCase: '#ddd0b8', trunk: '#f1e7d4', trunkCase: '#e0d5c0',
+    primary: '#ffffff', primaryCase: '#e2dccf', secondary: '#ffffff', secondaryCase: '#e6e0d4',
+    tertiary: '#ffffff', tertiaryCase: '#e9e4d9', minor: '#fdfbf7', minorCase: '#ece7dd', path: '#d8d0c1',
+    rail: '#d6cfc2', label: '#8b857a', labelMajor: '#625d54', halo: '#f8f4ec', place: '#a39b8c',
+  };
+  const URBAIN = {
+    background: '#fff7ee', landuseBusy: '#ffe4c4', hospital: '#ffd3d8', education: '#d9e3ff',
+    landcover: '#e2f4d2', wood: '#9fdb84', park: '#86d06f', water: '#0a4fa0', waterway: '#0a4fa0',
+    building: '#f6e2cf', buildingLine: '#e8c9ab',
+    motorway: '#ff3b2f', motorwayCase: '#b5221a', trunk: '#ff6338', trunkCase: '#c44522',
+    primary: '#ff7f50', primaryCase: '#d4572c', secondary: '#ffb340', secondaryCase: '#d68d1c',
+    tertiary: '#ffffff', tertiaryCase: '#e2cbb4', minor: '#ffffff', minorCase: '#e8d7c6', path: '#c7a687',
+    rail: '#5b4a6e', label: '#3b322c', labelMajor: '#7d2a10', halo: '#ffffff', place: '#0a4fa0',
+  };
+  const MAP_STYLES = {
+    google: { label: 'Style Google Maps', palettes: PALETTES },
+    neon: { label: 'Nuit néon', palettes: { light: NEON, dark: NEON } },
+    pastel: { label: 'Minimaliste pastel', palettes: { light: PASTEL, dark: PASTEL } },
+    urbain: { label: 'Urbain énergique', palettes: { light: URBAIN, dark: URBAIN } },
+  };
+  /** Style retenu : ?carte=… (essai), sinon CONFIG.mapStyle ; adresse d'un style.json = style externe. */
+  const MAP_STYLE = (() => {
+    const known = (k) => Object.prototype.hasOwnProperty.call(MAP_STYLES, k);
+    let key = CONFIG.mapStyle;
+    try { const q = new URLSearchParams(location.search).get('carte'); if (known(q)) key = q; } catch (e) { /* ignore */ }
+    if (known(key)) return { key, ...MAP_STYLES[key] };
+    if (typeof key === 'string' && /^https:\/\/[^\s'"]+$/.test(key)) return { key: 'url', url: key, label: 'Style personnalisé', palettes: PALETTES };
+    if (key) console.warn('[carte] style inconnu « ' + key + ' » : style Google Maps');
+    return { key: 'google', ...MAP_STYLES.google };
+  })();
+  const palette = (theme) => MAP_STYLE.palettes[theme];
+
   /** Largeur de ligne interpolée exponentiellement selon le zoom. */
   const width = (stops) => ['interpolate', ['exponential', 1.5], ['zoom'], ...stops.flat()];
   const roadClass = (classes) => ['match', ['get', 'class'], classes, true, false];
@@ -3905,7 +3962,7 @@
   const caseStops = (w) => w.map(([z, v]) => [z, v + (z < 13 ? 1 : z < 16 ? 2 : 3)]);
 
   function buildStyle(theme) {
-    const p = PALETTES[theme];
+    const p = palette(theme);
     const roadLine = (key, part) => {
       const def = ROADS[key];
       const isCase = part === 'case';
@@ -3917,10 +3974,22 @@
       };
     };
     const order = ['minor', 'tertiary', 'secondary', 'primary', 'trunk', 'motorway'];
+    // Halo lumineux : une ligne large et floue sous les grands axes
+    const glowLine = (key) => {
+      const def = ROADS[key], cap = key.charAt(0).toUpperCase() + key.slice(1);
+      return {
+        id: 'road-' + key + '-glow', type: 'line', source: 'omt', 'source-layer': 'transportation', minzoom: def.minzoom,
+        filter: ['all', isLine, notTunnel, roadClass(def.classes)],
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': p['glow' + cap], 'line-width': width(def.w.map(([z, v]) => [z, v * 3 + 4])),
+          'line-blur': width(def.w.map(([z, v]) => [z, v * 1.5 + 3])), 'line-opacity': 0.5 },
+      };
+    };
+    const glow = p.glowPrimary ? ['secondary', 'primary', 'trunk', 'motorway'].map(glowLine) : [];
 
     return {
       version: 8,
-      name: 'FlashMiam — style Google Maps (' + theme + ')',
+      name: 'FlashMiam — ' + MAP_STYLE.label + ' (' + theme + ')',
       glyphs: CONFIG.glyphs,
       transition: { duration: 500, delay: 0 },
       sources: {
@@ -3944,12 +4013,13 @@
           paint: { 'fill-color': p.building, 'fill-outline-color': p.buildingLine,
             'fill-opacity': ['interpolate', ['linear'], ['zoom'], 15, 0, 16, 1] } },
 
-        // ---- Routes : toutes les bordures, puis tous les remplissages (intersections propres) ----
+        // ---- Routes : des petites aux grandes, bordure puis remplissage de chaque catégorie (un grand axe passe
+        // par-dessus les rues qu'il croise, sans être coupé ; deux rues de même catégorie se rejoignent proprement) ----
         { id: 'road-path', type: 'line', source: 'omt', 'source-layer': 'transportation', minzoom: 15,
           filter: ['all', isLine, roadClass(['path', 'track'])],
           paint: { 'line-color': p.path, 'line-width': width([[15, 0.8], [17, 1.4], [19, 2.6]]), 'line-dasharray': [2, 1.5] } },
-        ...order.map((k) => roadLine(k, 'case')),
-        ...order.map((k) => roadLine(k, 'fill')),
+        ...glow,
+        ...order.flatMap((k) => [roadLine(k, 'case'), roadLine(k, 'fill')]),
         { id: 'rail', type: 'line', source: 'omt', 'source-layer': 'transportation', minzoom: 12,
           filter: ['all', isLine, roadClass(['rail', 'transit'])],
           paint: { 'line-color': p.rail, 'line-width': width([[12, 0.8], [16, 2], [19, 3]]), 'line-dasharray': [3, 2] } },
@@ -4131,7 +4201,7 @@
       let map;
       try {
         map = new maplibregl.Map({
-          container: 'map', style: buildStyle(theme),
+          container: 'map', style: MAP_STYLE.url || buildStyle(theme),
           center: CONFIG.center, zoom: CONFIG.overviewZoom, minZoom: CONFIG.minZoom, maxZoom: CONFIG.maxZoom,
           maxBounds: CONFIG.bounds, renderWorldCopies: false, attributionControl: false, fadeDuration: 150,
           // Carte à plat : ni inclinaison, ni rotation
@@ -4179,6 +4249,7 @@
           if (src) src.setData(lngLat ? circlePolygon(lngLat, radius) : { type: 'FeatureCollection', features: [] });
         },
         setTheme(t) {
+          if (MAP_STYLE.url) return;   // style externe : ses couleurs ne changent pas
           // Recolore la carte sans la recharger (les couleurs se fondent grâce à style.transition)
           buildStyle(t).layers.forEach((layer) => {
             if (!layer.paint || !map.getLayer(layer.id)) return;
@@ -4194,8 +4265,9 @@
 
       map.on('load', () => {
         map.addSource('user-accuracy', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-        map.addLayer({ id: 'user-accuracy-fill', type: 'fill', source: 'user-accuracy', paint: { 'fill-color': '#1a73e8', 'fill-opacity': 0.12 } }, 'road-label');
-        map.addLayer({ id: 'user-accuracy-line', type: 'line', source: 'user-accuracy', paint: { 'line-color': '#1a73e8', 'line-width': 1, 'line-opacity': 0.35 } }, 'road-label');
+        const below = map.getLayer('road-label') ? 'road-label' : undefined;   // un style externe peut ne pas l'avoir
+        map.addLayer({ id: 'user-accuracy-fill', type: 'fill', source: 'user-accuracy', paint: { 'fill-color': '#1a73e8', 'fill-opacity': 0.12 } }, below);
+        map.addLayer({ id: 'user-accuracy-line', type: 'line', source: 'user-accuracy', paint: { 'line-color': '#1a73e8', 'line-width': 1, 'line-opacity': 0.35 } }, below);
         const attrib = document.querySelector('.maplibregl-ctrl-attrib');
         if (attrib) attrib.classList.remove('maplibregl-compact-show');
         resolve(view);
@@ -4237,7 +4309,7 @@
         return;
       }
     }
-    $('profile-engine').textContent = view.engine === 'google' ? 'Google Maps' : 'Style Google Maps (OpenStreetMap)';
+    $('profile-engine').textContent = view.engine === 'google' ? 'Google Maps' : MAP_STYLE.label + ' (OpenStreetMap)';
     view.on('zoom', updateLabelVisibility);
     view.on('moveend', declutterLabels);
     view.on('dragstart', () => setFollow(false));
@@ -4294,7 +4366,7 @@
 
   function setTheme(theme, { persist = false } = {}) {
     document.documentElement.setAttribute('data-theme', theme);
-    $('meta-theme').setAttribute('content', PALETTES[theme].background);
+    $('meta-theme').setAttribute('content', palette(theme).background);
     $('theme-btn').setAttribute('aria-label', theme === 'dark' ? 'Passer en mode jour' : 'Passer en mode nuit');
     if (persist) { try { localStorage.setItem(CONFIG.themeKey, theme); } catch (e) { /* ignore */ } }
     $('profile-theme').textContent = (theme === 'dark' ? 'Mode nuit' : 'Mode jour') + (readThemeChoice() ? '' : ' (automatique)');
@@ -9582,7 +9654,7 @@
      restaurateur dont l'inscription n'est pas terminée → reprise à la bonne étape.
      ===================================================================== */
 
-  window.RocheStreetFood = { view: null, Geo, SHOPS, getStatus, refreshStatuses, setTheme, isValidSiret, restaurants, cloud, sb, Search, Reviews, Notifs, Push, Offers, Consent, Net, Live };
+  window.RocheStreetFood = { view: null, mapStyle: (theme = currentTheme()) => MAP_STYLE.url || buildStyle(theme), Geo, SHOPS, getStatus, refreshStatuses, setTheme, isValidSiret, restaurants, cloud, sb, Search, Reviews, Notifs, Push, Offers, Consent, Net, Live };
 
   setTheme(currentTheme());
   applyLayout();
