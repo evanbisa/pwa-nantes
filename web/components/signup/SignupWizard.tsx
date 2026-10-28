@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent, type ReactNode } from "react";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { ArrowLeft, Check, Eye, EyeOff, Loader2 } from "lucide-react";
 import { setRemember, siteClient } from "@/lib/supabase/site-session";
@@ -70,7 +70,22 @@ async function callSignup(body: Record<string, string>): Promise<Reply> {
   return { ok: false, code: "network", message: "Connexion impossible. Vérifiez votre réseau, puis réessayez." };
 }
 
+/**
+ * Page prête (JavaScript chargé) : avant, un champ validé par Entrée enverrait le formulaire au navigateur, qui
+ * rechargerait la page et perdrait la réponse. L'export statique affiche donc d'abord une attente, puis les questions.
+ */
+const noSubscribe = () => () => {};
+const useHydrated = () => useSyncExternalStore(noSubscribe, () => true, () => false);
+
 export default function SignupWizard() {
+  return useHydrated() ? <Wizard /> : (
+    <div className="grid min-h-full place-items-center bg-slate-50 dark:bg-slate-950" aria-busy="true">
+      <Loader2 className="h-8 w-8 animate-spin text-brand dark:text-brand-night" aria-label="Chargement" />
+    </div>
+  );
+}
+
+function Wizard() {
   const [step, setStep] = useState<Step>("name");
   const [dir, setDir] = useState<"next" | "prev">("next");
   const [name, setName] = useState("");
