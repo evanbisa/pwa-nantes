@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { FunctionsHttpError } from "@supabase/supabase-js";
-import { ArrowLeft, Check, Eye, EyeOff, Loader2, Minus, Plus } from "lucide-react";
+import { ArrowLeft, Check, Eye, EyeOff, Loader2 } from "lucide-react";
 import { setRemember, siteClient } from "@/lib/supabase/site-session";
+import AgePicker from "@/components/signup/AgePicker";
 import GoogleSignup from "@/components/signup/GoogleSignup";
 import {
-  AGE_MAX, AGE_MIN, EMAIL_RE, MIN_AGE, PASSWORD_RULES, capitalize, passwordScore, suggestEmail,
+  EMAIL_RE, MIN_AGE, PASSWORD_RULES, capitalize, passwordScore, suggestEmail,
 } from "@/lib/signup/validation";
 
 /**
@@ -37,6 +38,16 @@ const APP_HOME = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/../`;
 const WELCOME_MS = 1600;
 /** La carte est une autre application (index.html) : navigation complète, pas celle de Next.js. */
 const openMap = (query = "") => { window.location.href = new URL(APP_HOME + query, window.location.href).href; };
+/** Écran de connexion de la carte, adresse préremplie (la carte la lit dans son propre stockage au démarrage). */
+const openLogin = (email: string, role: "student" | "pro" = "student") => {
+  try {
+    const key = "roche-street-food:v2";
+    const saved = JSON.parse(localStorage.getItem(key) ?? "{}");
+    localStorage.setItem(key, JSON.stringify({ ...saved, lastEmail: email, lastRole: role }));
+  } catch { /* stockage indisponible : la carte affichera l'accueil */ }
+  openMap();
+};
+const linkClass = "font-semibold underline";
 /** Compte créé il y a moins de 10 minutes (compte Google tout neuf). */
 const isFresh = (createdAt: string) => Date.now() - new Date(createdAt).getTime() < 10 * 60 * 1000;
 /** Élément qui reçoit le focus à l'arrivée sur chaque écran. */
@@ -164,7 +175,7 @@ export default function SignupWizard() {
       setBusy(false);
       if (res.code === "exists") {
         go("email", "prev");
-        return setError("email", <>Un compte existe déjà avec cet e-mail. <a className="font-semibold underline" href={APP_HOME}>Se connecter</a></>);
+        return setError("email", <>Un compte existe déjà avec cet e-mail. <button type="button" className={linkClass} onClick={() => openLogin(cleanEmail)}>Se connecter</button></>);
       }
       if (res.code === "email_domain" || res.code === "email_invalid") { go("email", "prev"); return setError("email", res.message); }
       if (res.code === "invalid_age") { go("age", "prev"); return setError("age", res.message); }
@@ -175,7 +186,7 @@ export default function SignupWizard() {
     setRemember(remember);
     const { error } = await siteClient().auth.signInWithPassword({ email: cleanEmail, password });
     setBusy(false);
-    if (error) return setError("password", <>Votre compte est créé, mais la connexion a échoué. <a className="font-semibold underline" href={APP_HOME}>Se connecter sur la carte</a></>);
+    if (error) return setError("password", <>Votre compte est créé, mais la connexion a échoué. <button type="button" className={linkClass} onClick={() => openLogin(cleanEmail)}>Se connecter sur la carte</button></>);
     go("done");
   }
 
@@ -193,7 +204,7 @@ export default function SignupWizard() {
     const { data: profile } = await sb.from("profiles").select("role, created_at, gender, birth_year").eq("id", data.user.id).single();
     if (profile?.role === "merchant") {
       await sb.auth.signOut().catch(() => null);
-      return fail(<>Cette adresse est celle d&apos;un compte restaurateur : <a className="font-semibold underline" href={APP_HOME}>connectez-vous sur la carte</a> avec votre mot de passe.</>);
+      return fail(<>Cette adresse est celle d&apos;un compte restaurateur : <button type="button" className={linkClass} onClick={() => openLogin(data.user.email ?? "", "pro")}>connectez-vous sur la carte</button> avec votre mot de passe.</>);
     }
     const fresh = !!profile && isFresh(profile.created_at);
     if (fresh) {
@@ -286,19 +297,7 @@ export default function SignupWizard() {
             <form onSubmit={submitAge} noValidate className="flex flex-1 flex-col">
               <Title emoji={AGE_EMOJI.find(([max]) => age < max)?.[1] ?? "🎓"} id="q-age">Quel âge <Em>avez-vous</Em> ?</Title>
               <Hint>Facultatif. Les restaurants voient seulement des tranches d&apos;âge (18-24 ans…), jamais le vôtre.</Hint>
-              <div className="mt-8 flex items-center justify-center gap-6">
-                <Stepper label="Un an de moins" disabled={age <= AGE_MIN} onClick={() => setAge((a) => Math.max(AGE_MIN, a - 1))}><Minus className="h-5 w-5" /></Stepper>
-                <output htmlFor="su-age" aria-live="polite" className="min-w-28 text-center text-6xl font-bold tabular-nums tracking-tight">
-                  {age}<span className="ml-1 text-lg font-medium text-slate-500 dark:text-slate-400">ans</span>
-                </output>
-                <Stepper label="Un an de plus" disabled={age >= AGE_MAX} onClick={() => setAge((a) => Math.min(AGE_MAX, a + 1))}><Plus className="h-5 w-5" /></Stepper>
-              </div>
-              <input
-                id="su-age" type="range" min={AGE_MIN} max={AGE_MAX} step={1} value={age}
-                onChange={(e) => { setAge(Number(e.target.value)); setError("age", null); }}
-                aria-labelledby="q-age" aria-valuetext={`${age} ans`}
-                className="mt-8 h-2 w-full cursor-pointer accent-brand dark:accent-brand-night"
-              />
+              <AgePicker value={age} onChange={(v) => { setAge(v); setError("age", null); }} labelledBy="q-age" onEnter={() => { if (age >= MIN_AGE) { setAgeSet(true); go("email"); } }} />
               <p className={`mt-3 min-h-6 text-sm ${age < MIN_AGE || errors.age ? "font-medium text-red-600 dark:text-red-400" : "text-slate-500"}`} aria-live="polite">
                 {age < MIN_AGE ? `FlashMiam est réservé aux ${MIN_AGE} ans et plus.` : errors.age}
               </p>
@@ -332,10 +331,10 @@ export default function SignupWizard() {
                 <div role="alert" className="mt-4 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-[15px] motion-safe:animate-step-next dark:border-amber-500/40 dark:bg-amber-500/10">
                   <p>Vouliez-vous dire <strong className="break-all">{suggestion}</strong> ?</p>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <button type="button" onClick={() => { setEmail(suggestion); checkAndConfirm(suggestion); }} className="rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600">
+                    <button id="su-fix-email" type="button" onClick={() => { setEmail(suggestion); checkAndConfirm(suggestion); }} className="rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600">
                       Oui, corriger
                     </button>
-                    <button type="button" onClick={() => checkAndConfirm(cleanEmail)} className="rounded-full px-4 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-300 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-900">
+                    <button id="su-keep-email" type="button" onClick={() => checkAndConfirm(cleanEmail)} className="rounded-full px-4 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-300 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-900">
                       Non, garder la mienne
                     </button>
                   </div>
@@ -475,17 +474,6 @@ function Primary({ children, busy = false, disabled = false, className = "mt-aut
   return (
     <button type="submit" disabled={busy || disabled} className={`${primaryClass} ${className} inline-flex items-center justify-center gap-2`}>
       {busy && <Loader2 className="h-5 w-5 animate-spin" aria-hidden />}
-      {children}
-    </button>
-  );
-}
-
-function Stepper({ label, disabled, onClick, children }: { label: string; disabled: boolean; onClick: () => void; children: ReactNode }) {
-  return (
-    <button
-      type="button" aria-label={label} disabled={disabled} onClick={onClick}
-      className="grid h-14 w-14 place-items-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:opacity-30 dark:bg-slate-900 dark:text-slate-200 dark:ring-slate-800"
-    >
       {children}
     </button>
   );
