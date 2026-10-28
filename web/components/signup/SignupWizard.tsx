@@ -6,6 +6,7 @@ import { ArrowLeft, Check, Eye, EyeOff, Loader2 } from "lucide-react";
 import { setRemember, siteClient } from "@/lib/supabase/site-session";
 import AgePicker from "@/components/signup/AgePicker";
 import GoogleSignup from "@/components/signup/GoogleSignup";
+import { useKeyboardInset } from "@/components/signup/useKeyboardInset";
 import {
   EMAIL_RE, MIN_AGE, PASSWORD_RULES, capitalize, passwordScore, suggestEmail,
 } from "@/lib/signup/validation";
@@ -86,6 +87,7 @@ export default function SignupWizard() {
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suggestedFor = useRef("");
   const checkedEmail = useRef("");
+  const keyboard = useKeyboardInset();   // clavier ouvert : marge sous la page, emoji masqué pour gagner de la place
 
   const firstName = capitalize(name.trim().split(/\s+/)[0] ?? "");
   const cleanEmail = email.trim().toLowerCase();
@@ -221,7 +223,10 @@ export default function SignupWizard() {
 
   /* ---------- Rendu ---------- */
   return (
-    <div className="flex min-h-full flex-col bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
+    <div
+      data-kb={keyboard ? "" : undefined} style={keyboard ? { paddingBottom: keyboard } : undefined}
+      className="group/page flex min-h-full flex-col bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100"
+    >
       <header className="mx-auto flex w-full max-w-md items-center gap-3 px-5 pt-[max(16px,env(safe-area-inset-top))] pb-2">
         <button
           type="button"
@@ -450,8 +455,8 @@ const inputClass = (invalid: boolean) =>
 function Title({ emoji, id, children }: { emoji: string; id: string; children: ReactNode }) {
   return (
     <>
-      <span aria-hidden className="text-5xl leading-none">{emoji}</span>
-      <h1 id={id} className="mt-5 text-[28px] leading-tight font-bold tracking-tight text-balance">{children}</h1>
+      <span aria-hidden className="text-5xl leading-none group-data-[kb]/page:hidden">{emoji}</span>
+      <h1 id={id} className="mt-5 text-[28px] group-data-[kb]/page:mt-0 leading-tight font-bold tracking-tight text-balance">{children}</h1>
     </>
   );
 }
