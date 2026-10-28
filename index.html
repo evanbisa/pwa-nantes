@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-1tZVUa2XlAPsx994VEhsAWAaZCscqowRM53jzbaarYM=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-DIEyfS4wte+nLhmm86STBDD4JWSnUng8wXTrQVYWclc=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Carte interactive des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon." />
@@ -2654,12 +2654,12 @@
     tileJson: 'https://tiles.openfreemap.org/planet',
     glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
     /**
-     * Style de la carte (MapLibre) : 'google' (rendu Google Maps, jour et nuit selon le thème), 'neon' (Nuit néon),
-     * 'pastel' (Minimaliste pastel), 'urbain' (Urbain énergique), ou l'adresse https d'un style MapLibre (style.json).
-     * Réglé à la publication par la variable d'environnement MAP_STYLE (scripts/config.mjs).
-     * Pour essayer sans republier : ajouter ?carte=neon (ou pastel, urbain, google) à l'adresse du site.
+     * Style de la carte (MapLibre) : 'flashmiam' (Urbain énergique en mode jour, Nuit néon en mode nuit),
+     * 'google' (rendu Google Maps), 'neon', 'pastel' (Minimaliste pastel), 'urbain', ou l'adresse https d'un style
+     * MapLibre (style.json). Réglé à la publication par la variable d'environnement MAP_STYLE (scripts/config.mjs).
+     * Pour essayer sans republier : ajouter ?carte=neon (ou pastel, urbain, google, flashmiam) à l'adresse du site.
      */
-    mapStyle: 'google',
+    mapStyle: 'flashmiam',
     storageKey: 'roche-street-food:v2',
     legacyStorageKey: 'roche-street-food:v1',
     sessionKey: 'roche-street-food:session',
@@ -3925,6 +3925,7 @@
     rail: '#5b4a6e', label: '#3b322c', labelMajor: '#7d2a10', halo: '#ffffff', place: '#0a4fa0',
   };
   const MAP_STYLES = {
+    flashmiam: { label: 'Style FlashMiam', palettes: { light: URBAIN, dark: NEON } },
     google: { label: 'Style Google Maps', palettes: PALETTES },
     neon: { label: 'Nuit néon', palettes: { light: NEON, dark: NEON } },
     pastel: { label: 'Minimaliste pastel', palettes: { light: PASTEL, dark: PASTEL } },
@@ -3937,8 +3938,8 @@
     try { const q = new URLSearchParams(location.search).get('carte'); if (known(q)) key = q; } catch (e) { /* ignore */ }
     if (known(key)) return { key, ...MAP_STYLES[key] };
     if (typeof key === 'string' && /^https:\/\/[^\s'"]+$/.test(key)) return { key: 'url', url: key, label: 'Style personnalisé', palettes: PALETTES };
-    if (key) console.warn('[carte] style inconnu « ' + key + ' » : style Google Maps');
-    return { key: 'google', ...MAP_STYLES.google };
+    if (key) console.warn('[carte] style inconnu « ' + key + ' » : style FlashMiam');
+    return { key: 'flashmiam', ...MAP_STYLES.flashmiam };
   })();
   const palette = (theme) => MAP_STYLE.palettes[theme];
 
@@ -3974,18 +3975,20 @@
       };
     };
     const order = ['minor', 'tertiary', 'secondary', 'primary', 'trunk', 'motorway'];
-    // Halo lumineux : une ligne large et floue sous les grands axes
+    // Halo lumineux : une ligne large et floue sous les grands axes (invisible dans un mode sans halo)
     const glowLine = (key) => {
-      const def = ROADS[key], cap = key.charAt(0).toUpperCase() + key.slice(1);
+      const def = ROADS[key], cap = key.charAt(0).toUpperCase() + key.slice(1), on = !!p.glowPrimary;
       return {
         id: 'road-' + key + '-glow', type: 'line', source: 'omt', 'source-layer': 'transportation', minzoom: def.minzoom,
         filter: ['all', isLine, notTunnel, roadClass(def.classes)],
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': p['glow' + cap], 'line-width': width(def.w.map(([z, v]) => [z, v * 3 + 4])),
-          'line-blur': width(def.w.map(([z, v]) => [z, v * 1.5 + 3])), 'line-opacity': 0.5 },
+        paint: { 'line-color': on ? p['glow' + cap] : 'rgba(0, 0, 0, 0)', 'line-width': width(def.w.map(([z, v]) => [z, v * 3 + 4])),
+          'line-blur': width(def.w.map(([z, v]) => [z, v * 1.5 + 3])), 'line-opacity': on ? 0.5 : 0 },
       };
     };
-    const glow = p.glowPrimary ? ['secondary', 'primary', 'trunk', 'motorway'].map(glowLine) : [];
+    // Couches présentes dès qu'un des deux modes brille (le passage jour / nuit ne fait que changer les couleurs)
+    const glows = Object.values(MAP_STYLE.palettes).some((q) => q.glowPrimary);
+    const glow = glows ? ['secondary', 'primary', 'trunk', 'motorway'].map(glowLine) : [];
 
     return {
       version: 8,

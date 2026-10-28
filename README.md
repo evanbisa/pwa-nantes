@@ -93,17 +93,18 @@ la confier à un serveur (par exemple Supabase Auth ou Firebase Authentication),
 
 ## Style de la carte
 
-La carte (MapLibre, tuiles OpenFreeMap) a quatre styles, tous dessinés par le site lui-même (aucune clé, aucun service
+La carte (MapLibre, tuiles OpenFreeMap) a cinq styles, tous dessinés par le site lui-même (aucune clé, aucun service
 en plus) :
 
 | Valeur | Style | Jour / nuit |
 |---|---|---|
-| `google` (par défaut) | rendu Google Maps | suit le mode jour ou nuit |
+| `flashmiam` (par défaut) | **Urbain énergique** en mode jour, **Nuit néon** en mode nuit | suit le mode jour ou nuit |
+| `google` | rendu Google Maps (l'ancien style) | suit le mode jour ou nuit |
 | `neon` | **Nuit néon** : fond presque noir, grands axes violets et bleus lumineux | toujours sombre |
 | `pastel` | **Minimaliste pastel** : fond crème, routes blanches, parcs vert menthe | toujours clair |
 | `urbain` | **Urbain énergique** : grands axes corail et orange, eau bleu profond, parcs vert vif | toujours clair |
 
-- **Essayer sans rien publier** : ajouter `?carte=neon` (ou `pastel`, `urbain`, `google`) à l'adresse du site,
+- **Essayer sans rien publier** : ajouter `?carte=neon` (ou `pastel`, `urbain`, `google`, `flashmiam`) à l'adresse du site,
   par exemple `https://pwa-nantes.vercel.app/?carte=neon`. Le profil indique le style affiché (« Carte »).
 - **Choisir le style publié** : variable d'environnement `MAP_STYLE`, appliquée à chaque publication par
   `scripts/config.mjs` :
@@ -117,7 +118,7 @@ en plus) :
 
 ## Activer la vraie carte Google Maps
 
-Sans clé, le site affiche une carte de secours au style Google Maps (données OpenStreetMap).
+Sans clé, le site affiche sa propre carte (MapLibre, données OpenStreetMap), au style choisi ci-dessus.
 Pour afficher Google Maps :
 
 1. Ouvrez https://console.cloud.google.com/ et créez un projet (un compte de facturation est demandé ;

@@ -2,7 +2,8 @@
 /**
  * Réglages du site lus à la publication (variables d'environnement), écrits dans CONFIG de la page.
  *
- *   MAP_STYLE   style de la carte : google (par défaut), neon, pastel, urbain, ou l'adresse https d'un style MapLibre
+ *   MAP_STYLE   style de la carte : flashmiam (par défaut : urbain le jour, néon la nuit), google, neon, pastel, urbain,
+ *               ou l'adresse https d'un style MapLibre
  *
  *   node scripts/config.mjs dist/index.html …   pages à régler (par défaut : index.html à la racine du dépôt)
  *
@@ -13,7 +14,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const STYLES = ['google', 'neon', 'pastel', 'urbain'];
+const STYLES = ['flashmiam', 'google', 'neon', 'pastel', 'urbain'];
 const root = path.join(path.dirname(new URL(import.meta.url).pathname), '..');
 
 /** Fichier .env : lignes CLE=valeur, commentaires (#) et guillemets ignorés. */
