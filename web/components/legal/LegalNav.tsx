@@ -36,7 +36,7 @@ export default function LegalNav({ variant }: { variant: "side" | "tabs" }) {
               <Link
                 href={`/legal/${slug}/`}
                 aria-current={active(slug) ? "page" : undefined}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium whitespace-nowrap text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900 aria-[current=page]:border-blue-600 aria-[current=page]:bg-blue-600 aria-[current=page]:text-white dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:text-white dark:aria-[current=page]:border-blue-500 dark:aria-[current=page]:bg-blue-500"
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium whitespace-nowrap text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900 aria-[current=page]:border-blue-600 aria-[current=page]:bg-blue-600 aria-[current=page]:text-white dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:text-white dark:aria-[current=page]:border-blue-600 dark:aria-[current=page]:bg-blue-600"
               >
                 <Icon aria-hidden className="h-4 w-4" />
                 {label}
@@ -50,7 +50,7 @@ export default function LegalNav({ variant }: { variant: "side" | "tabs" }) {
 
   return (
     <nav aria-label="Documents juridiques">
-      <p className="mb-3 px-3 text-xs font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500">Documents</p>
+      <p className="mb-3 px-3 text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">Documents</p>
       <ul className="space-y-1">
         {DOCS.map(({ slug, label, icon: Icon, ...rest }) => (
           <li key={slug}>
@@ -64,7 +64,7 @@ export default function LegalNav({ variant }: { variant: "side" | "tabs" }) {
               </span>
               <span className="leading-tight">
                 {label}
-                {"hint" in rest && <span className="block text-xs font-normal text-slate-400 dark:text-slate-500">{rest.hint}</span>}
+                {"hint" in rest && <span className="block text-xs font-normal text-slate-500 dark:text-slate-400">{rest.hint}</span>}
               </span>
             </Link>
           </li>

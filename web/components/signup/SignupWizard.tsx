@@ -316,7 +316,7 @@ function Wizard() {
                   aria-describedby="err-name" className={inputClass(!!errors.name)}
                 />
               </Field>
-              <p className="mt-3 min-h-6 text-base font-medium text-brand" aria-live="polite">
+              <p className="mt-3 min-h-6 text-base font-medium text-brand-strong" aria-live="polite">
                 {firstName.length >= 2 && <><span className="su-em">Bienvenue, {firstName} !</span> 😊</>}
               </p>
               <Primary>Continuer</Primary>

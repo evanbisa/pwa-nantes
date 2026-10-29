@@ -72,7 +72,7 @@ export default function LegalDocument({ doc }: { doc: LegalDoc }) {
                   <SectionIcon aria-hidden className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="text-xs font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500">Article {n + 1}</p>
+                  <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">Article {n + 1}</p>
                   <h2 id={`${section.id}-titre`} className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
                     <a href={`#${section.id}`} className="hover:text-blue-700 dark:hover:text-blue-300">{section.title}</a>
                   </h2>
@@ -84,7 +84,7 @@ export default function LegalDocument({ doc }: { doc: LegalDoc }) {
         })}
 
         <footer className="space-y-4 pt-4 print:hidden">
-          <h2 className="text-sm font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500">À lire aussi</h2>
+          <h2 className="text-sm font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">À lire aussi</h2>
           <div className="grid gap-3 sm:grid-cols-3">
             {others.map((d) => {
               const DocIcon = d.icon;
@@ -97,7 +97,7 @@ export default function LegalDocument({ doc }: { doc: LegalDoc }) {
                   <DocIcon aria-hidden className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   <span className="mt-3 font-medium text-slate-900 dark:text-white">{d.title}</span>
                   <span className="mt-1 flex-1 text-sm leading-6 text-slate-500 dark:text-slate-400">{d.summary}</span>
-                  <ArrowRight aria-hidden className="mt-3 h-4 w-4 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-blue-600" />
+                  <ArrowRight aria-hidden className="mt-3 h-4 w-4 text-slate-500 transition-transform group-hover:translate-x-1 group-hover:text-blue-600" />
                 </Link>
               );
             })}

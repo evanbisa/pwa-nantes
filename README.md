@@ -116,6 +116,19 @@ en plus) :
   avec Maputnik ou MapTiler). Son domaine est ajouté tout seul à la politique de sécurité (`scripts/csp.mjs`) ; si ses
   tuiles ou ses polices viennent d'un autre domaine, l'ajouter dans `appPolicy()`.
 
+## Référencement et partage des liens
+
+- **Titre, description, aperçu des liens** (Facebook, WhatsApp, Instagram, X, iMessage…) : balises en tête de
+  `index.html` et dans `web/app/layout.tsx`. Image d'aperçu : `og-image.jpg` (1200 × 630, 80 Ko), source
+  `scripts/og-image.html`.
+- **Icône** : `favicon.svg` (carte) et `web/app/favicon.ico`, `web/app/apple-icon.png` (application).
+- **robots.txt, sitemap.xml, page 404** : écrits à la publication par `scripts/seo.mjs` (page 404 : `404.html`).
+- **Adresse principale** : `https://pwa-nantes.vercel.app` par défaut. Le jour du nom de domaine (ex. flashmiam.fr),
+  ajouter dans Vercel › Settings › Environment Variables : `SITE_URL=https://flashmiam.fr` et
+  `NEXT_PUBLIC_SITE_URL=https://flashmiam.fr`, puis republier. La copie GitHub Pages renvoie vers l'adresse principale.
+- Après la mise en ligne : déclarer le sitemap dans Google Search Console (`https://…/sitemap.xml`) et tester
+  l'aperçu d'un lien sur https://www.opengraph.xyz.
+
 ## Activer la vraie carte Google Maps
 
 Sans clé, le site affiche sa propre carte (MapLibre, données OpenStreetMap), au style choisi ci-dessus.

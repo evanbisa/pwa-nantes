@@ -1,10 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { OG_IMAGE } from "@/lib/seo";
 import "./globals.css";
 
+/** Adresse principale du site (aperçu des liens partagés) : NEXT_PUBLIC_SITE_URL, à changer le jour du nom de domaine. */
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://pwa-nantes.vercel.app";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "FlashMiam",
   description: "La carte des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon.",
+  openGraph: { type: "website", siteName: "FlashMiam", locale: "fr_FR", images: [OG_IMAGE] },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {

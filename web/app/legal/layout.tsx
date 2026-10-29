@@ -34,7 +34,7 @@ export default function LegalLayout({ children }: { children: ReactNode }) {
             <div className="mx-auto flex items-center gap-2.5 sm:mx-0 sm:ml-2">
               <span aria-hidden className="grid h-8 w-8 place-items-center rounded-full bg-blue-600 text-sm font-semibold text-white">F</span>
               <span className="text-sm font-semibold text-slate-900 dark:text-white">
-                FlashMiam <span className="hidden font-normal text-slate-400 sm:inline dark:text-slate-500">· Informations légales</span>
+                FlashMiam <span className="hidden font-normal text-slate-500 sm:inline dark:text-slate-400">· Informations légales</span>
               </span>
             </div>
             <div className="ml-auto print:hidden"><HeaderActions /></div>

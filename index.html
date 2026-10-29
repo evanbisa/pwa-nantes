@@ -3,21 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-vb7tL4/XOFDGHGM2hA4E6LtXlKOonDDt+5XiHMIIRnI=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IzbzNmpdxcFCr79rzdpYzaKDOsNWo8MJ91EJeOaAWTk=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-xOGkH5rPsQ7xjQg9qC7LlohGrQ3vy5g/TKsTBsRi8G4=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-  <meta name="description" content="Carte interactive des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon." />
+  <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
   <meta name="color-scheme" content="light dark" />
   <meta name="theme-color" content="#f1f3f4" id="meta-theme" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="FlashMiam" />
-  <title>FlashMiam</title>
+  <title>FlashMiam · Le street food de La Roche-sur-Yon sur une carte</title>
+  <!-- Adresse principale et aperçu des liens partagés (réseaux sociaux, messageries) : l'adresse est remplacée à la
+       publication par SITE_URL (scripts/seo.mjs) -->
+  <link rel="canonical" href="https://pwa-nantes.vercel.app/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="FlashMiam" />
+  <meta property="og:locale" content="fr_FR" />
+  <meta property="og:url" content="https://pwa-nantes.vercel.app/" />
+  <meta property="og:title" content="FlashMiam · Le street food de La Roche-sur-Yon" />
+  <meta property="og:description" content="Food-trucks, kebabs, burgers et douceurs sur une carte, avec les bons plans du moment." />
+  <meta property="og:image" content="https://pwa-nantes.vercel.app/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="FlashMiam : le street food de La Roche-sur-Yon sur une carte" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="icon-192.png" type="image/png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
 
   <!-- Thème appliqué avant le premier affichage (évite un flash de la mauvaise couleur) -->
   <script>
     (function () {
+      // Adresse en http:// : on passe en https (les hébergeurs le font aussi ; ici, au cas où)
+      if (location.protocol === 'http:' && !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) { location.replace('https:' + location.href.slice(5)); return; }
       // Page affichée dans un cadre d'un autre site (piège au clic) : rien n'est montré
       if (window.top !== window.self) document.documentElement.style.display = 'none';
       var t = null;
@@ -1441,7 +1460,7 @@
     .net.is-down .net-dot { background: var(--danger); }
     .net.is-back .net-dot { background: var(--green); }
     #net-text { min-width: 0; line-height: 1.3; }
-    #net-retry { flex: none; pointer-events: auto; margin-left: 2px; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 500; color: var(--accent); background: var(--accent-soft); }
+    #net-retry { flex: none; pointer-events: auto; margin-left: 2px; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); }
     @media (prefers-reduced-motion: reduce) { .net.is-slow .net-dot { animation: none; } }
     .toast button { flex: none; color: #8ab4f8; font-weight: 500; }
 
@@ -9419,15 +9438,7 @@
     const link = document.createElement('link');
     link.rel = 'manifest';
     link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
-    document.head.appendChild(link);
-    const touch = document.createElement('link');
-    touch.rel = 'apple-touch-icon';
-    touch.href = 'icon-192.png';
-    document.head.appendChild(touch);
-    const favicon = document.createElement('link');
-    favicon.rel = 'icon';
-    favicon.href = icon;
-    document.head.appendChild(favicon);
+    document.head.appendChild(link);   // icônes de l'onglet et de l'écran d'accueil : balises <link> en tête de page
   })();
 
 })();
