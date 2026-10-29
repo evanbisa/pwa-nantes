@@ -13,7 +13,8 @@ import {
 
 /**
  * Inscription d'un client, une question par écran : prénom, sexe et âge (facultatifs), e-mail (ou Google), relecture de
- * l'adresse, mot de passe. Le compte est créé par la fonction serveur client-signup (adresse vérifiée, plafond
+ * l'adresse, mot de passe. « S'inscrire avec Google » est aussi proposé dès le premier écran : le compte est créé par
+ * Google, puis seules les deux questions facultatives restent (sexe, âge). Le compte est créé par la fonction serveur client-signup (adresse vérifiée, plafond
  * anti-robots), puis la session est ouverte avec le mot de passe choisi, dans le stockage de la carte : la personne
  * arrive ensuite sur la carte déjà connectée (?bienvenue=1 : accueil et localisation).
  */
@@ -25,6 +26,8 @@ type Reply = { ok: true } | { ok: false; code: string; message: string };
 const FLOW: Step[] = ["name", "gender", "age", "email", "confirm", "password"];
 /** Questions comptées dans la barre de progression (la relecture fait partie de la question de l'e-mail). */
 const QUESTIONS: Step[] = ["name", "gender", "age", "email", "password"];
+/** Compte créé avec Google dès le premier écran : il ne reste que les questions facultatives. */
+const GOOGLE_FLOW: Step[] = ["name", "gender", "age"];
 const GENDERS: { value: Gender; label: string; emoji: string }[] = [
   { value: "female", label: "Une femme", emoji: "👩" },
   { value: "male", label: "Un homme", emoji: "👨" },
@@ -98,6 +101,7 @@ function Wizard() {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRememberChoice] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [viaGoogle, setViaGoogle] = useState(false);   // compte déjà créé avec Google (premier écran)
   const [errors, setErrors] = useState<Partial<Record<Step, ReactNode>>>({});
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suggestedFor = useRef("");
@@ -108,7 +112,9 @@ function Wizard() {
   const cleanEmail = email.trim().toLowerCase();
   const emailValid = EMAIL_RE.test(cleanEmail);
   const score = passwordScore(password);
-  const question = QUESTIONS.indexOf(step === "confirm" ? "email" : step) + 1;
+  const flow = viaGoogle ? GOOGLE_FLOW : FLOW;
+  const questions = viaGoogle ? GOOGLE_FLOW : QUESTIONS;
+  const question = questions.indexOf(step === "confirm" ? "email" : step) + 1;
 
   // Arrivée sur un écran : focus sur sa réponse (sans faire défiler pendant le glissement)
   useEffect(() => {
@@ -129,8 +135,8 @@ function Wizard() {
     setStep(to);
   };
   const back = () => {
-    const i = FLOW.indexOf(step);
-    if (i > 0) go(FLOW[i - 1], "prev");
+    const i = flow.indexOf(step);
+    if (i > 0) go(flow[i - 1], "prev");
   };
 
   /* ---------- Réponses ---------- */
@@ -149,9 +155,14 @@ function Wizard() {
   }
   function submitAge(ev: FormEvent) {
     ev.preventDefault();
-    if (age < MIN_AGE) return;
-    setAgeSet(true);
-    go("email");
+    answerAge(true);
+  }
+  /** Âge donné (ou question passée) : question suivante, ou fin de l'inscription avec Google. */
+  function answerAge(given: boolean) {
+    if (given && age < MIN_AGE) return;
+    setAgeSet(given);
+    if (viaGoogle) finishGoogle(given);
+    else go("email");
   }
   async function submitEmail(ev: FormEvent) {
     ev.preventDefault();
@@ -212,18 +223,27 @@ function Wizard() {
    * neuf : le prénom, le sexe et l'âge déjà répondus sont enregistrés. Un compte restaurateur ne passe pas par Google.
    */
   async function googleSignIn(credential: string) {
+    const at: Step = step === "name" ? "name" : "email";   // écran où le bouton a été touché
     setBusy(true);
-    setError("email", null);
+    setError(at, null);
     const sb = siteClient();
-    const fail = (message: ReactNode) => { setBusy(false); setError("email", message); };
+    const fail = (message: ReactNode) => { setBusy(false); setError(at, message); };
     const { data, error } = await sb.auth.signInWithIdToken({ provider: "google", token: credential });
     if (error || !data.user) return fail("La connexion avec Google a échoué. Réessayez.");
-    const { data: profile } = await sb.from("profiles").select("role, created_at, gender, birth_year").eq("id", data.user.id).single();
+    const { data: profile } = await sb.from("profiles").select("role, created_at, first_name").eq("id", data.user.id).single();
     if (profile?.role === "merchant") {
       await sb.auth.signOut().catch(() => null);
       return fail(<>Cette adresse est celle d&apos;un compte restaurateur : <button type="button" className={linkClass} onClick={() => openLogin(data.user.email ?? "", "pro")}>connectez-vous sur la carte</button> avec votre mot de passe.</>);
     }
     const fresh = !!profile && isFresh(profile.created_at);
+    if (fresh && at === "name") {
+      // Compte créé par Google : prénom tapé, sinon celui de Google ; puis les deux questions facultatives
+      setName(name.trim().length >= 2 ? capitalize(name.trim().replace(/\s+/g, " ")) : profile.first_name ?? "");
+      setError("name", null);
+      setViaGoogle(true);
+      setBusy(false);
+      return go("gender");
+    }
     if (fresh) {
       await sb.from("profiles").update({
         first_name: name.trim() || undefined,
@@ -234,6 +254,21 @@ function Wizard() {
     setBusy(false);
     if (fresh) go("done");
     else openMap();   // compte déjà existant : directement la carte
+  }
+  /** Fin de l'inscription avec Google : prénom, sexe et âge enregistrés sur le compte (réponses facultatives). */
+  async function finishGoogle(withAge: boolean) {
+    setBusy(true);
+    const sb = siteClient();
+    const { data } = await sb.auth.getUser();
+    if (data.user) {
+      await sb.from("profiles").update({
+        first_name: name.trim() || undefined,
+        gender: gender || null,
+        birth_year: withAge ? new Date().getFullYear() - age : null,
+      }).eq("id", data.user.id);
+    }
+    setBusy(false);
+    go("done");
   }
 
   /* ---------- Rendu ---------- */
@@ -248,7 +283,7 @@ function Wizard() {
           type="button"
           onClick={back}
           aria-label="Question précédente"
-          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:bg-white/[0.05] dark:text-zinc-200 dark:ring-white/10 dark:backdrop-blur-xl dark:hover:bg-white/10 dark:focus-visible:ring-brand-night ${FLOW.indexOf(step) > 0 && step !== "done" ? "" : "invisible"}`}
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:bg-white/[0.05] dark:text-zinc-200 dark:ring-white/10 dark:backdrop-blur-xl dark:hover:bg-white/10 dark:focus-visible:ring-brand-night ${flow.indexOf(step) > 0 && step !== "done" ? "" : "invisible"}`}
         >
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </button>
@@ -257,12 +292,12 @@ function Wizard() {
             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10" aria-hidden>
               <div
                 className="su-gradient h-full rounded-full bg-gradient-to-r from-brand to-orange-400 transition-[width] duration-500 ease-out"
-                style={{ width: `${(question / QUESTIONS.length) * 100}%` }}
+                style={{ width: `${(question / questions.length) * 100}%` }}
               />
             </div>
             <p className="w-10 text-right text-sm font-medium tabular-nums text-slate-500 dark:text-zinc-400">
-              <span aria-hidden>{question}/{QUESTIONS.length}</span>
-              <span className="sr-only">Question {question} sur {QUESTIONS.length}</span>
+              <span aria-hidden>{question}/{questions.length}</span>
+              <span className="sr-only">Question {question} sur {questions.length}</span>
             </p>
           </>
         )}
@@ -285,6 +320,7 @@ function Wizard() {
                 {firstName.length >= 2 && <><span className="su-em">Bienvenue, {firstName} !</span> 😊</>}
               </p>
               <Primary>Continuer</Primary>
+              {!viaGoogle && <GoogleSignup onCredential={googleSignIn} />}
             </form>
           )}
 
@@ -318,12 +354,12 @@ function Wizard() {
             <form onSubmit={submitAge} noValidate className="flex flex-1 flex-col">
               <Title emoji={AGE_EMOJI.find(([max]) => age < max)?.[1] ?? "🎓"} id="q-age">Quel âge <Em>avez-vous</Em> ?</Title>
               <Hint>Facultatif. Les restaurants voient seulement des tranches d&apos;âge (18-24 ans…), jamais le vôtre.</Hint>
-              <AgePicker value={age} onChange={(v) => { setAge(v); setError("age", null); }} labelledBy="q-age" onEnter={() => { if (age >= MIN_AGE) { setAgeSet(true); go("email"); } }} />
+              <AgePicker value={age} onChange={(v) => { setAge(v); setError("age", null); }} labelledBy="q-age" onEnter={() => answerAge(true)} />
               <p className={`mt-3 min-h-6 text-sm ${age < MIN_AGE || errors.age ? "font-medium text-red-600 dark:text-red-400" : "text-slate-500"}`} aria-live="polite">
                 {age < MIN_AGE ? `FlashMiam est réservé aux ${MIN_AGE} ans et plus.` : errors.age}
               </p>
-              <Primary disabled={age < MIN_AGE}>{age < MIN_AGE ? "Continuer" : `J'ai ${age} ans`}</Primary>
-              <button type="button" onClick={() => { setAgeSet(false); go("email"); }} className="mt-3 self-center rounded-full px-4 py-2 text-sm font-medium text-slate-500 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-zinc-400">
+              <Primary busy={busy} disabled={age < MIN_AGE}>{age < MIN_AGE ? "Continuer" : `J'ai ${age} ans`}</Primary>
+              <button type="button" disabled={busy} onClick={() => answerAge(false)} className="mt-3 self-center rounded-full px-4 py-2 text-sm font-medium text-slate-500 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-zinc-400">
                 Passer cette question
               </button>
             </form>

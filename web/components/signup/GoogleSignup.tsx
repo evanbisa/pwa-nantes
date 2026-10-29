@@ -18,6 +18,7 @@ declare global {
 }
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const CONSENT_KEY = "flashmiam:consent";
 const CONSENT_MAX_AGE = 182 * 864e5;   // comme la carte : choix redemandé au bout de 6 mois
 
@@ -128,6 +129,12 @@ export default function GoogleSignup({ onCredential }: { onCredential: (credenti
           {note || "En touchant ce bouton, vous autorisez les services Google (cookies de Google)."}
         </p>
       )}
+      {/* Le compte peut être créé ici, sans passer par l'écran du mot de passe : mêmes conditions à accepter */}
+      <p className="text-center text-xs leading-relaxed text-slate-500 dark:text-zinc-400">
+        Avec Google, vous acceptez les{" "}
+        <a className="underline" href={`${BASE}/legal/cgu/`}>conditions d&apos;utilisation</a> et la{" "}
+        <a className="underline" href={`${BASE}/legal/confidentialite/`}>politique de confidentialité</a>.
+      </p>
     </div>
   );
 }
