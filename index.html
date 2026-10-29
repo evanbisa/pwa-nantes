@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IzbzNmpdxcFCr79rzdpYzaKDOsNWo8MJ91EJeOaAWTk=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-xOGkH5rPsQ7xjQg9qC7LlohGrQ3vy5g/TKsTBsRi8G4=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IzbzNmpdxcFCr79rzdpYzaKDOsNWo8MJ91EJeOaAWTk=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-HFoMLO8luqxhCL3zex6d15TfqBKn2M9rTZW9BHpNIZE=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -31,6 +31,7 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="icon" href="icon-192.png" type="image/png" sizes="192x192" />
   <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
 
   <!-- Thème appliqué avant le premier affichage (évite un flash de la mauvaise couleur) -->
   <script>
@@ -383,6 +384,19 @@
     .btn-danger { margin-top: 10px; color: var(--danger); background: transparent; border: 1px solid var(--line-strong); }
 
     .help-steps { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+    /* Ajouter à l'écran d'accueil */
+    .ins-app { flex: none; width: 52px; height: 52px; border-radius: 13px; box-shadow: 0 2px 10px rgba(0, 0, 0, .15); }
+    .ins-perks { margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+    .ins-perks li { display: flex; align-items: center; gap: 12px; font-size: 14.5px; line-height: 1.35; color: var(--text); }
+    .ins-perks li span { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: var(--hover); font-size: 16px; }
+    /* Petit écran avec les étapes : les avantages laissent la place */
+    @media (max-height: 700px) { #install-sheet:has(.ins-steps:not([hidden])) .ins-perks { display: none; } }
+    .ins-steps { margin: 14px 0 4px; padding: 12px 14px; list-style: none; counter-reset: ins; display: grid; gap: 12px; border-radius: 14px; background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); }
+    .ins-steps[hidden] { display: none; }
+    .ins-steps li { position: relative; padding-left: 34px; font-size: 14.5px; line-height: 1.45; color: var(--text); counter-increment: ins; }
+    .ins-steps li::before { content: counter(ins); position: absolute; left: 0; top: -1px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; font-size: 13px; font-weight: 600; color: var(--on-accent); background: var(--accent); }
+    .ins-steps b { font-weight: 600; }
+    .ins-ico { display: inline-block; width: 20px; height: 20px; margin: 0 1px; vertical-align: -4px; color: var(--accent-strong); }
     .help-steps li { padding: 12px 14px; border-radius: 12px; background: var(--hover); font-size: 14px; color: var(--muted); }
     .help-steps li b { display: block; color: var(--text); font-weight: 500; margin-bottom: 2px; }
     .help-steps li.is-current { box-shadow: inset 0 0 0 1px var(--accent-line); background: var(--accent-soft); }
@@ -1498,14 +1512,14 @@
       #shop-sheet.is-open { opacity: 1; transform: none; transition: transform .3s var(--ease-out), opacity .25s, visibility 0s, background-color .4s; }
       #shop-sheet .sheet-grab { display: none; }
 
-      #geo-help, #profile-sheet, #notif-sheet, #offers-sheet {
+      #geo-help, #install-sheet, #profile-sheet, #notif-sheet, #offers-sheet {
         top: 50%; bottom: auto; left: 50%; right: auto; width: min(460px, calc(100% - 32px)); max-width: none; margin: 0;
         max-height: calc(100dvh - 48px); padding: 24px; border-radius: 16px; border-bottom: 1px solid var(--line);
         opacity: 0; transform: translate(-50%, -46%) scale(.98);
         transition: transform .3s var(--ease-out), opacity .25s, visibility 0s linear .3s, background-color .4s;
       }
-      #geo-help.is-open, #profile-sheet.is-open, #notif-sheet.is-open, #offers-sheet.is-open { opacity: 1; transform: translate(-50%, -50%); transition: transform .3s var(--ease-out), opacity .25s, visibility 0s, background-color .4s; }
-      #geo-help .sheet-grab, #profile-sheet .sheet-grab, #notif-sheet .sheet-grab, #offers-sheet .sheet-grab { display: none; }
+      #geo-help.is-open, #install-sheet.is-open, #profile-sheet.is-open, #notif-sheet.is-open, #offers-sheet.is-open { opacity: 1; transform: translate(-50%, -50%); transition: transform .3s var(--ease-out), opacity .25s, visibility 0s, background-color .4s; }
+      #geo-help .sheet-grab, #install-sheet .sheet-grab, #profile-sheet .sheet-grab, #notif-sheet .sheet-grab, #offers-sheet .sheet-grab { display: none; }
       .search-panel { display: none !important; }
 
       .ob-panel { margin: auto; padding: 32px 32px 28px; }
@@ -1822,6 +1836,41 @@
     <button class="btn btn-ghost" type="button" data-close>Plus tard</button>
   </section>
 
+  <!-- ===================== AJOUTER À L'ÉCRAN D'ACCUEIL (PWA) ===================== -->
+  <section id="install-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="install-title" aria-hidden="true">
+    <button class="sheet-grab" type="button" data-close aria-label="Fermer"></button>
+    <div class="sheet-head">
+      <img class="ins-app" src="icon-192.png" alt="" width="52" height="52" />
+      <div class="sheet-title">
+        <h3 id="install-title">FlashMiam sur votre écran d'accueil ?</h3>
+        <p class="eyebrow">Gratuit, en quelques secondes</p>
+      </div>
+      <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
+    </div>
+    <ul class="ins-perks">
+      <li><span aria-hidden="true">⚡</span>La carte en un geste, en plein écran, comme une appli</li>
+      <li><span aria-hidden="true">🔔</span>Les promos de vos restos préférés en alerte</li>
+      <li><span aria-hidden="true">📦</span>Rien à télécharger sur un store, presque aucune place</li>
+    </ul>
+    <ol class="ins-steps" data-install="ios" hidden>
+      <li>Touchez <svg class="ins-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 10H6a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> <b>Partager</b> (en bas de Safari, en haut à droite sur iPad)</li>
+      <li>Choisissez <svg class="ins-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8.5v7M8.5 12h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> <b>Sur l'écran d'accueil</b> (faites défiler si besoin)</li>
+      <li>Touchez <b>Ajouter</b> : l'icône FlashMiam rejoint vos applis</li>
+    </ol>
+    <ol class="ins-steps" data-install="android" hidden>
+      <li>Touchez <svg class="ins-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.5" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="18.5" r="1.8" fill="currentColor"/></svg> le <b>menu</b> du navigateur</li>
+      <li>Choisissez <b>Ajouter à l'écran d'accueil</b> ou <b>Installer l'application</b></li>
+      <li>Confirmez : l'icône FlashMiam rejoint vos applis</li>
+    </ol>
+    <ol class="ins-steps" data-install="inapp" hidden>
+      <li>Vous êtes dans une autre appli (Instagram, Facebook…) : touchez <svg class="ins-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5.5" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="18.5" r="1.8" fill="currentColor"/></svg> ou <b>⋯</b> en haut</li>
+      <li>Choisissez <b>Ouvrir dans le navigateur</b> (Safari ou Chrome)</li>
+      <li>Revenez ici : FlashMiam vous proposera de l'ajouter</li>
+    </ol>
+    <button class="btn btn-primary" type="button" id="install-go">Ajouter à l'écran d'accueil</button>
+    <button class="btn btn-ghost" type="button" data-close>Plus tard</button>
+  </section>
+
   <!-- ===================== OFFRES AUTOUR DE MOI ===================== -->
   <section id="offers-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="offers-title" aria-hidden="true">
     <button class="sheet-grab" type="button" data-close aria-label="Fermer"></button>
@@ -1902,6 +1951,7 @@
       <ul id="follows-list"></ul>
     </div>
     <button class="btn btn-primary" type="button" id="profile-locate">Activer la localisation</button>
+    <button class="btn btn-ghost" type="button" id="profile-install" hidden>📲 Ajouter à l'écran d'accueil</button>
     <button class="btn btn-ghost" type="button" id="profile-logout">Se déconnecter</button>
     <button class="btn btn-danger" type="button" id="profile-delete">Supprimer mon compte</button>
     <p class="legal"><a href="app/legal/confidentialite/" target="_blank" rel="noopener">Confidentialité</a> · <a href="app/legal/cgu/" target="_blank" rel="noopener">Conditions d'utilisation</a> · <a href="app/legal/mentions-legales/" target="_blank" rel="noopener">Mentions légales</a> · <button class="link-btn" type="button" id="profile-cookies">Cookies</button></p>
@@ -2579,6 +2629,7 @@
      * MapLibre (style.json). Réglé à la publication par la variable d'environnement MAP_STYLE (scripts/config.mjs).
      * Pour essayer sans republier : ajouter ?carte=neon (ou pastel, urbain, google, flashmiam) à l'adresse du site.
      */
+    installPromptDelay: 45000,   // ms passées sur la carte avant de proposer l'écran d'accueil (une fois)
     mapStyle: 'flashmiam',
     storageKey: 'roche-street-food:v2',
     legacyStorageKey: 'roche-street-food:v1',
@@ -6673,6 +6724,83 @@
     return 'desktop';
   }
 
+  /*
+   * Écran d'accueil (PWA) : proposer d'ajouter FlashMiam comme une appli. Chrome, Edge, Samsung Internet : vraie
+   * installation (proposition du navigateur, gardée pour le bon moment). iPhone, et Android sans proposition :
+   * les étapes à suivre. Demandé une fois sur la carte (personne connectée, rien d'autre d'ouvert), puis au plus deux
+   * fois encore, à 14 jours d'écart ; toujours possible depuis le profil. Rien sur ordinateur sans proposition.
+   */
+  const Install = (() => {
+    const KEY = 'roche-street-food:install';
+    const AGAIN_AFTER = 14 * 864e5, MAX_ASKS = 3;
+    const IN_APP = /FBAN|FBAV|Instagram|Line\/|Snapchat|musical_ly|TikTok|LinkedInApp/i;
+    let deferred = null, scheduled = false, current = null;
+    const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
+    const write = (v) => { try { localStorage.setItem(KEY, JSON.stringify({ ...read(), ...v })); } catch (e) { /* stockage indisponible */ } };
+    const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    /** Comment installer ici : 'native', 'ios', 'android', 'inapp' (navigateur intégré à une appli), ou null. */
+    function mode() {
+      if (standalone() || read().done) return null;
+      if (deferred) return 'native';
+      const platform = detectPlatform();
+      if (platform === 'desktop') return null;
+      return IN_APP.test(navigator.userAgent) ? 'inapp' : platform;
+    }
+    const due = () => { const st = read(); return !st.done && (st.n || 0) < MAX_ASKS && (!st.at || Date.now() - st.at > AGAIN_AFTER); };
+    function open({ auto = false } = {}) {
+      const m = mode();
+      if (!m) return false;
+      current = m;
+      document.querySelectorAll('#install-sheet [data-install]').forEach((el) => { el.hidden = el.dataset.install !== m; });
+      $('install-go').textContent = m === 'native' ? 'Ajouter à l\'écran d\'accueil' : 'J\'ai compris';
+      if (auto) write({ at: Date.now(), n: (read().n || 0) + 1 });
+      if (activePanel === $('profile-sheet')) closePanel(activePanel, { silent: true });
+      openPanel($('install-sheet'), { modal: true });
+      return true;
+    }
+    async function go() {
+      if (current !== 'native' || !deferred) { closePanel($('install-sheet')); return; }
+      const prompt = deferred;
+      deferred = null;   // une proposition du navigateur ne sert qu'une fois
+      closePanel($('install-sheet'));
+      try {
+        prompt.prompt();
+        const choice = await prompt.userChoice;
+        if (choice && choice.outcome === 'accepted') write({ done: true });
+      } catch (e) { /* proposition expirée : les étapes restent dans le profil */ }
+      syncProfile();
+    }
+    /** Sur la carte, une fois : au bout d'un moment, quand rien d'autre n'est ouvert. */
+    function schedule() {
+      if (scheduled || !due() || !currentUser()) return;
+      scheduled = true;
+      const started = Date.now();
+      const tick = () => {
+        if (!mode() || !due()) return;
+        const calm = !activePanel && $('onboarding').hidden && !StoryViewer.isOpen() && document.visibilityState === 'visible' && $('search-panel').hidden && !document.body.classList.contains('pro-open') && !document.body.classList.contains('ui-intro');
+        if (calm && open({ auto: true })) return;
+        if (Date.now() - started < 10 * 60 * 1000) setTimeout(tick, 5000);
+      };
+      setTimeout(tick, CONFIG.installPromptDelay);
+    }
+    function syncProfile() { $('profile-install').hidden = !mode(); }
+    window.addEventListener('beforeinstallprompt', (ev) => {
+      ev.preventDefault();   // pas de bandeau du navigateur au hasard : FlashMiam le propose au bon moment
+      deferred = ev;
+      syncProfile();
+    });
+    window.addEventListener('appinstalled', () => {
+      deferred = null;
+      write({ done: true });
+      closePanel($('install-sheet'));
+      syncProfile();
+      toast('FlashMiam est sur votre écran d\'accueil 🎉');
+    });
+    $('install-go').addEventListener('click', go);
+    $('profile-install').addEventListener('click', () => open());
+    return { open, schedule, syncProfile, mode };
+  })();
+
   function openGeoHelp() {
     const platform = detectPlatform();
     const list = document.querySelector('.help-steps');
@@ -9255,6 +9383,7 @@
     updateProfileGeo();
     $('pro-entry').hidden = account.role !== 'pro';
     renderFollows(account);
+    Install.syncProfile();
     openPanel($('profile-sheet'), { modal: true });
   }
   /** Sexe et âge (facultatifs) : servent seulement aux totaux d'audience des restaurants. */
@@ -9307,6 +9436,7 @@
 
   function startApp({ focus = null, intro = false } = {}) {
     document.body.classList.add('ui-ready');
+    Install.schedule();
     whenMapReady(renderStories);
     // Notifications chargées après l'animation d'arrivée (aucun travail réseau pendant le mouvement)
     if (intro && !reduceMotion) setTimeout(() => Notifs.start(), 1200); else Notifs.start();
@@ -9335,7 +9465,7 @@
      restaurateur dont l'inscription n'est pas terminée → reprise à la bonne étape.
      ===================================================================== */
 
-  window.RocheStreetFood = { view: null, mapStyle: (theme = currentTheme()) => MAP_STYLE.url || buildStyle(theme), Geo, SHOPS, getStatus, refreshStatuses, setTheme, isValidSiret, restaurants, cloud, sb, Search, Reviews, Notifs, Push, Offers, Consent, Net, Live };
+  window.RocheStreetFood = { view: null, mapStyle: (theme = currentTheme()) => MAP_STYLE.url || buildStyle(theme), Geo, SHOPS, getStatus, refreshStatuses, setTheme, isValidSiret, restaurants, cloud, sb, Search, Reviews, Notifs, Push, Offers, Consent, Net, Live, Install };
 
   setTheme(currentTheme());
   applyLayout();
@@ -9413,33 +9543,6 @@
     window.addEventListener('load', () => setTimeout(() => navigator.serviceWorker.register('sw.js').catch(() => {}), 1500));
   }
 
-  /* =====================================================================
-     13. PWA : manifeste généré à la volée (fichier unique)
-     ===================================================================== */
-  (function injectManifest() {
-    const svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'>" +
-      "<rect width='512' height='512' rx='112' fill='%23ffffff'/>" +
-      "<path d='M256 96c-66 0-120 54-120 120 0 90 120 200 120 200s120-110 120-200c0-66-54-120-120-120z' fill='%23ea4335'/>" +
-      "<circle cx='256' cy='216' r='44' fill='%23ffffff'/></svg>";
-    const icon = 'data:image/svg+xml,' + svg;
-    const base = location.href.split('#')[0].split('?')[0];
-    const manifest = {
-      name: 'FlashMiam', short_name: 'FlashMiam',
-      description: 'Le street-food de La Roche-sur-Yon sur une carte interactive.',
-      start_url: base, scope: base.replace(/[^/]*$/, ''), display: 'standalone', orientation: 'any',
-      background_color: '#f1f3f4', theme_color: '#f1f3f4', lang: 'fr',
-      icons: [
-        { src: icon, sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
-        // adresses complètes : le manifeste est servi depuis une adresse « blob: »
-        { src: new URL('icon-192.png', base).href, sizes: '192x192', type: 'image/png', purpose: 'any' },
-        { src: new URL('icon-512.png', base).href, sizes: '512x512', type: 'image/png', purpose: 'any' },
-      ],
-    };
-    const link = document.createElement('link');
-    link.rel = 'manifest';
-    link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
-    document.head.appendChild(link);   // icônes de l'onglet et de l'écran d'accueil : balises <link> en tête de page
-  })();
 
 })();
 </script>

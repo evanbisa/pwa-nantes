@@ -32,7 +32,7 @@
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=2592000, stale-while-revalidate=86400" }]
     },
     {
-      "source": "/(icon-(192|512).png|favicon.svg|og-image.jpg)",
+      "source": "/(icon-(192|512).png|favicon.svg|og-image.jpg|manifest.webmanifest)",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }]
     },
     {
