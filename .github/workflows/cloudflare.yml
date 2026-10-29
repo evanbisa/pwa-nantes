@@ -1,0 +1,73 @@
+# Publie l'application Next.js (dossier web/, export statique) sur Cloudflare Pages à chaque modification.
+# Adresse : https://roche-street-food.pages.dev
+#
+# Prérequis (une seule fois, voir web/README.md) : deux secrets du dépôt GitHub
+#   CLOUDFLARE_API_TOKEN  : jeton Cloudflare avec la permission « Cloudflare Pages : Edit »
+#   CLOUDFLARE_ACCOUNT_ID : identifiant du compte Cloudflare
+# Tant qu'ils manquent, le workflow construit et vérifie le site mais ne publie pas (sans échouer).
+name: Publier sur Cloudflare Pages
+
+on:
+  push:
+    branches: [claude/street-food-map-pwa-lr1xu2]
+    paths: ['web/**', .github/workflows/cloudflare.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-pages
+  cancel-in-progress: true
+
+env:
+  CF_PROJECT: roche-street-food
+
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Contrôler et construire l'application
+        working-directory: web
+        env:
+          # Valeurs publiques par nature (intégrées au site) : la sécurité repose sur la RLS de Supabase.
+          NEXT_PUBLIC_SUPABASE_URL: https://fnypgfyxbyaqrnklhjxc.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_W-2Gra6O-pRBEf0a_XsyKw_8UlhHTzb
+        run: |
+          npm ci
+          npm run lint
+          npm run build   # inclut la vérification des types
+
+      - name: Vérifier la présence des accès Cloudflare
+        id: acces
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "pret=oui" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Secrets CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID absents : site construit mais non publié."
+            echo "pret=non" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publier sur Cloudflare Pages
+        if: steps.acces.outputs.pret == 'oui'
+        working-directory: web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          # Crée le projet au premier passage (sans effet s'il existe déjà)
+          npx --yes wrangler@4.149.0 pages project create "$CF_PROJECT" --production-branch=main 2>/dev/null || true
+          npx --yes wrangler@4.149.0 pages deploy out --project-name="$CF_PROJECT" --branch=main --commit-dirty=true

@@ -1,0 +1,78 @@
+# Publie automatiquement sur GitHub Pages (branche gh-pages), à chaque modification :
+#   https://evanbisa.github.io/pwa-nantes/      → prototype (index.html)
+#   https://evanbisa.github.io/pwa-nantes/app/  → nouvelle application Next.js (dossier web/, export statique)
+name: Publier sur GitHub Pages
+
+on:
+  push:
+    branches: [claude/street-food-map-pwa-lr1xu2]
+    paths: ['*.html', 'sw.js', '*.png', 'vendor/**', 'web/**', 'scripts/**', .github/workflows/pages.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      # Contrôles puis export statique de l'application (dossier web/out)
+      - name: Construire l'application Next.js
+        working-directory: web
+        env:
+          NEXT_PUBLIC_BASE_PATH: /pwa-nantes/app
+          # Valeurs publiques par nature (intégrées au site) : la sécurité repose sur la RLS de Supabase.
+          # Ne JAMAIS mettre ici la clé secrète.
+          NEXT_PUBLIC_SUPABASE_URL: https://fnypgfyxbyaqrnklhjxc.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_W-2Gra6O-pRBEf0a_XsyKw_8UlhHTzb
+        run: |
+          npm ci
+          npm run lint
+          npm run build   # inclut la vérification des types
+
+      - name: Copier le site sur la branche gh-pages
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Style de la carte : variable du dépôt (Settings › Secrets and variables › Actions › Variables)
+          MAP_STYLE: ${{ vars.MAP_STYLE }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/site"
+          cp index.html confidentialite.html conditions.html sw.js icon-192.png icon-512.png favicon.svg og-image.jpg manifest.webmanifest "$RUNNER_TEMP/site/"
+          node scripts/config.mjs "$RUNNER_TEMP/site/index.html"
+          # Politique de sécurité du contenu (CSP) recalculée sur les pages publiées : toujours à jour
+          node scripts/csp.mjs "$RUNNER_TEMP/site/index.html" "$RUNNER_TEMP/site/confidentialite.html" "$RUNNER_TEMP/site/conditions.html"
+          cp -r vendor "$RUNNER_TEMP/site/"   # bibliothèque Supabase (servie par le site lui-même)
+          cp -r web/out "$RUNNER_TEMP/site/app"
+          touch "$RUNNER_TEMP/site/.nojekyll"
+          # Vercel suit aussi ce dépôt : pas de déploiement pour la branche gh-pages
+          printf '{ "git": { "deploymentEnabled": false } }\n' > "$RUNNER_TEMP/site/vercel.json"
+          # Copie du site principal (Vercel) : balises de partage vers l'adresse principale, page 404 sous /pwa-nantes/
+          node scripts/seo.mjs "$RUNNER_TEMP/site" --base /pwa-nantes/ --mirror
+          cd "$RUNNER_TEMP/site"
+          git init -q -b gh-pages
+          git add -A
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Publication de ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+
+      # Le push effectué avec le jeton du workflow ne déclenche pas toujours la reconstruction du site :
+      # on la demande explicitement à GitHub Pages.
+      - name: Demander la reconstruction du site
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" --silent \
+            || echo "::warning::GitHub Pages n'est pas activé pour ce dépôt (dépôt privé sur un compte gratuit ?) : le site n'est pas publié."

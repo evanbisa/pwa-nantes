@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!-- Source de og-image.jpg (aperçu des liens partagés, 1200 × 630) : ouvrir dans un navigateur à 1200 × 630 et capturer -->
+<html lang="fr">
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    position: relative; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #f4f4f5;
+    background:
+      radial-gradient(520px 360px at 82% 30%, rgb(124 58 237 / .35), transparent 70%),
+      radial-gradient(420px 320px at 8% 95%, rgb(219 39 119 / .22), transparent 70%),
+      radial-gradient(420px 300px at 100% 100%, rgb(59 130 246 / .25), transparent 70%),
+      #111113;
+  }
+  /* Rues de la carte, en néon discret */
+  svg.map { position: absolute; inset: 0; opacity: .55; }
+  .card { position: absolute; left: 80px; top: 92px; width: 640px; }
+  .brand { display: flex; align-items: center; gap: 20px; }
+  .logo { width: 84px; height: 84px; border-radius: 22px; background: #fff; display: grid; place-items: center; box-shadow: 0 12px 40px -10px rgb(167 139 250 / .7); }
+  .logo svg { width: 64px; height: 64px; }
+  .name { font-size: 46px; font-weight: 700; letter-spacing: -.5px; }
+  h1 { margin: 44px 0 0; font-size: 66px; line-height: 1.05; font-weight: 700; letter-spacing: -1.5px; }
+  h1 em { font-style: normal; background: linear-gradient(90deg, #e9a0e4, #a78bfa 55%, #7f95fb); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  p { margin: 26px 0 0; font-size: 28px; line-height: 1.35; color: #a1a1aa; }
+  .chips { display: flex; gap: 12px; margin-top: 34px; }
+  .chip { padding: 10px 18px; border-radius: 999px; font-size: 22px; background: rgb(255 255 255 / .06); border: 1px solid rgb(255 255 255 / .12); }
+  .pin { position: absolute; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; font-size: 32px; background: #1c1a26; border: 2px solid #a78bfa; box-shadow: 0 0 30px rgb(167 139 250 / .55); }
+</style>
+<body>
+  <svg class="map" viewBox="0 0 1200 630" fill="none" stroke-linecap="round">
+    <g stroke="#232859" stroke-width="3">
+      <path d="M760 0v630M860 0v630M960 0v630M1060 0v630M1160 0v630M700 80h500M700 200h500M700 320h500M700 440h500M700 560h500"/>
+    </g>
+    <path d="M700 520 L860 260 L1010 140 L1200 90" stroke="#7d72d9" stroke-width="7"/>
+    <path d="M760 630 L900 420 L1200 380" stroke="#c86bb8" stroke-width="7"/>
+    <path d="M980 0 L1060 630" stroke="#5577c4" stroke-width="5"/>
+  </svg>
+  <div class="pin" style="left: 838px; top: 228px">🍔</div>
+  <div class="pin" style="left: 1030px; top: 330px">🌯</div>
+  <div class="pin" style="left: 930px; top: 470px">🍩</div>
+  <div class="pin" style="left: 1090px; top: 120px">🚚</div>
+  <div class="card">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 512 512"><path d="M256 96c-66 0-120 54-120 120 0 90 120 200 120 200s120-110 120-200c0-66-54-120-120-120z" fill="#ea4335"/><circle cx="256" cy="216" r="44" fill="#fff"/></svg></div>
+      <div class="name">FlashMiam</div>
+    </div>
+    <h1>Le street food de <em>La Roche-sur-Yon</em></h1>
+    <p>Food-trucks, kebabs, burgers et douceurs sur une carte, avec les bons plans du moment.</p>
+    <div class="chips"><span class="chip">🗺️ Carte en direct</span><span class="chip">⚡ Bons plans</span><span class="chip">🎓 Gratuit</span></div>
+  </div>
+</body>
+</html>

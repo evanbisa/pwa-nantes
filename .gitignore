@@ -1,0 +1,4 @@
+dist/
+
+# Réglages locaux (MAP_STYLE…) : jamais publiés
+.env
