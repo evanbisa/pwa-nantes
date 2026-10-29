@@ -32,16 +32,24 @@ export const cgv: LegalDoc = {
       title: "Contenu de l'abonnement",
       icon: ShieldCheck,
       blocks: [
-        "Toutes les formules comprennent, pendant toute leur durée :",
+        `La formule **${essentiel.name}** comprend, pendant toute sa durée :`,
         {
           list: [
-            "la publication de la fiche de l'établissement sur la carte et dans la liste (description, menu et prix, photos, horaires, adresse) ;",
-            "la publication de stories (24 heures) et de promotions, avec notification des clients abonnés à l'établissement ;",
-            "les statistiques de fréquentation de la fiche, en totaux anonymes (vues, provenance, interactions, public) ;",
+            "la publication de la fiche de l'établissement sur la carte et dans la liste (description, menu et prix, photos, horaires, adresse), avec le badge « Établissement vérifié » ;",
+            "la publication de promotions, avec notification des clients abonnés à l'établissement ;",
+            "l'itinéraire et l'appel en un geste pour les clients ;",
             "la réponse aux avis des clients et leur signalement.",
           ],
         },
-        `La formule **${premium.name}** ajoute les avantages décrits sur la page de souscription au moment de l'achat. La formule **sur devis** (plusieurs établissements, besoins particuliers) fait l'objet d'un devis accepté par le Client, dont les conditions particulières (contenu, prix, durée) prévalent sur les présentes CGV en cas de contradiction.`,
+        `La formule **${premium.name}** comprend tout le contenu de la formule ${essentiel.name}, et en plus :`,
+        {
+          list: [
+            "la publication de stories (24 heures), mises en avant en haut de la carte ;",
+            "la mise en avant d'une promotion sous forme de bannière, une fois par semaine ;",
+            "les données analytiques de la fiche, en totaux anonymes (visites, heures de pointe, provenance, interactions, public).",
+          ],
+        },
+        `Le contenu détaillé de chaque formule est celui affiché sur la page de souscription au moment de l'achat. La formule **sur devis** (plusieurs établissements, besoins particuliers) fait l'objet d'un devis accepté par le Client, dont les conditions particulières (contenu, prix, durée) prévalent sur les présentes CGV en cas de contradiction.`,
         "Le service est accessible en ligne, sur ordinateur et sur téléphone. L'Éditeur peut le faire évoluer pour l'améliorer, sans réduire ses fonctions essentielles pendant la période payée.",
       ],
     },
@@ -56,6 +64,7 @@ export const cgv: LegalDoc = {
             [premium.name, `**${premium.month} par mois**, ou **${premium.year} par an**`],
             ["Sur devis", "Prix fixé par le devis accepté"],
             ["TVA", LEGAL.vatMention],
+            ["Premier mois offert", "À la première souscription : aucun prélèvement pendant 30 jours ; résiliation sans frais avant la fin de cette période"],
             ["Engagement", "Aucun : abonnement au mois ou à l'année, résiliable à tout moment (effet à la fin de la période payée)"],
           ],
         },
@@ -78,7 +87,8 @@ export const cgv: LegalDoc = {
       title: "Durée et tacite reconduction",
       icon: Repeat,
       blocks: [
-        "L'abonnement est conclu pour une durée d'**un mois** ou d'**un an**, selon la périodicité choisie, à compter de la souscription. Il est ensuite **reconduit tacitement** pour une nouvelle durée identique, sauf résiliation.",
+        "**Premier mois offert** : pour la première souscription d'un établissement, l'abonnement commence par une période d'essai gratuite de **30 jours**. Aucun montant n'est prélevé pendant cette période. Si le Client résilie avant sa fin, il ne paie rien ; sinon, la première période payante (mois ou année) commence à la fin de l'essai et est prélevée à cette date. L'essai n'est accordé qu'une fois par établissement.",
+        "L'abonnement est conclu pour une durée d'**un mois** ou d'**un an**, selon la périodicité choisie, à compter de la souscription (ou de la fin de l'essai gratuit). Il est ensuite **reconduit tacitement** pour une nouvelle durée identique, sauf résiliation.",
         "Pour changer de formule ou de périodicité, le Client résilie l'abonnement en cours puis souscrit la nouvelle formule à son échéance, ou contacte l'Éditeur pour un changement immédiat.",
       ],
     },
