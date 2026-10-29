@@ -214,6 +214,14 @@ publications. Corrigé :
 - Tests : 18 scénarios de la base, 24 des fonctions (dont une signature produite par la bibliothèque officielle), 54 de
   bout en bout (faux Whop : page de paiement, notifications signées, résiliation, paiement refusé, fin, suppression).
 
+### Case « 15 ans et conditions » obligatoire (29 octobre 2026, migration `20261101090000_terms_acceptance.sql`, fonction `client-signup` version 2)
+- Sur les trois inscriptions (client par e-mail, Google, restaurateur) ; sans elle, `client-signup` refuse le compte
+  (vérifié aussi côté serveur, pas seulement dans la page) et le bouton Google reste verrouillé.
+- Preuve gardée : `profiles.terms_accepted_at` (date posée par la base) et `terms_version`. Compte Google :
+  `accept_terms(version)`, réservée aux personnes connectées, ne modifie que leur propre profil.
+- Adresse tapée à la place du GPS : envoyée seulement à la Géoplateforme de l'IGN, gardée en mémoire le temps de la
+  visite, jamais enregistrée.
+
 ### Connexion avec Google (clients)
 - Prototype : bouton Google (Google Identity Services) affiché dès que `CONFIG.googleClientId` est renseigné.
   Le jeton Google est vérifié par Supabase Auth (`signInWithIdToken`), signature comprise.
