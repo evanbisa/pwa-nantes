@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IzbzNmpdxcFCr79rzdpYzaKDOsNWo8MJ91EJeOaAWTk=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-rVLdbBNNBSRrttYG5nukncJpxCJhQO88r+aRJo5ekjE=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IzbzNmpdxcFCr79rzdpYzaKDOsNWo8MJ91EJeOaAWTk=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-tYTErVmItKJH4TQKJJYfyrVs8S6euP9UcCxCvMuOKxs=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -405,6 +405,37 @@
 
     .profile-card { display: flex; align-items: center; gap: 14px; }
     .profile-card .avatar { width: 56px; height: 56px; font-size: 24px; }
+    /* Profil : en-tête, puis réglages groupés en listes (comme les réglages d'un téléphone) */
+    .pf-head { position: relative; display: flex; align-items: center; gap: 16px; padding: 18px 16px; border-radius: 22px; background: linear-gradient(135deg, var(--accent-soft), transparent 75%), var(--hover); }
+    .pf-head .icon-btn { position: absolute; top: 10px; right: 10px; }
+    .pf-avatar { width: 64px; height: 64px; font-size: 28px; font-weight: 600; background: linear-gradient(135deg, #1a73e8, #8b5cf6); box-shadow: 0 0 0 3px var(--panel-solid), 0 0 0 5px var(--accent-line); }
+    .pf-id { min-width: 0; padding-right: 34px; }
+    .pf-id h3 { margin: 0; font-size: 22px; font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
+    .pf-email { margin: 4px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--muted); overflow-wrap: anywhere; }
+    .pf-email .role-tag { vertical-align: 1px; }
+    .pf-meta { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+    #profile-sheet .pro-entry .btn { margin-top: 14px; }
+    .pf-label { margin: 20px 6px 8px; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+    .pf-group { margin: 0; padding: 0; list-style: none; border-radius: 16px; background: var(--hover); overflow: hidden; }
+    .pf-row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 58px; padding: 10px 14px; font-size: 15px; text-align: left; color: var(--text); text-decoration: none; }
+    .pf-group > :not([hidden]) ~ :not([hidden]) { border-top: 1px solid var(--line); }
+    .pf-group > [hidden] { display: none; }
+    button.pf-row, a.pf-row { transition: background-color .15s; }
+    @media (hover: hover) { button.pf-row:hover, a.pf-row:hover { background: var(--accent-soft); } }
+    .pf-ico { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; font-size: 17px; background: var(--panel-solid); }
+    .pf-k { flex: 1; min-width: 0; }
+    .pf-k small { display: block; margin-top: 1px; font-size: 13px; color: var(--muted); }
+    .pf-link { flex: none; padding: 6px 2px; font-size: 14px; font-weight: 500; color: var(--accent-strong); }
+    .pf-pill { flex: none; padding: 7px 14px; border-radius: 999px; font-size: 13.5px; font-weight: 600; color: var(--on-accent); background: var(--accent); }
+    .pf-pill[hidden] { display: none; }
+    .pf-chev { flex: none; font-size: 22px; line-height: 1; color: var(--muted); }
+    .pf-follows li button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 58px; padding: 10px 14px; text-align: left; color: var(--text); }
+    @media (hover: hover) { .pf-follows li button:hover { background: var(--accent-soft); } }
+    .pf-follows .f-emoji { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; font-size: 18px; background: var(--panel-solid); }
+    .pf-follows strong { display: block; font-size: 15px; font-weight: 500; }
+    .pf-follows small { display: block; margin-top: 1px; font-size: 13px; color: var(--muted); }
+    .pf-delete { display: block; margin: 16px auto 0; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 500; color: var(--danger); }
+    @media (hover: hover) { .pf-delete:hover { background: color-mix(in srgb, var(--danger) 10%, transparent); } }
     .kv { margin: 18px 0 0; display: grid; gap: 0; border-top: 1px solid var(--line); }
     .kv div { display: flex; justify-content: space-between; gap: 12px; padding: 12px 2px; border-bottom: 1px solid var(--line); font-size: 14px; }
     .kv dt { color: var(--muted); }
@@ -1927,34 +1958,43 @@
   <!-- ===================== PROFIL ===================== -->
   <section id="profile-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="profile-name" aria-hidden="true">
     <button class="sheet-grab" type="button" data-close aria-label="Fermer"></button>
-    <div class="profile-card">
-      <span class="avatar" id="profile-avatar" aria-hidden="true"></span>
-      <div class="sheet-title">
+    <div class="pf-head">
+      <span class="avatar pf-avatar" id="profile-avatar" aria-hidden="true"></span>
+      <div class="pf-id">
         <h3 id="profile-name"></h3>
-        <p class="eyebrow" id="profile-email"></p>
+        <p class="pf-email" id="profile-email"></p>
+        <p class="pf-meta">📍 La Roche-sur-Yon · membre depuis le <span id="profile-since"></span></p>
       </div>
       <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
     </div>
-    <dl class="kv">
-      <div><dt>Ville</dt><dd>La Roche-sur-Yon</dd></div>
-      <div><dt>Membre depuis</dt><dd id="profile-since"></dd></div>
-      <div id="profile-about-row" hidden><dt>Vous</dt><dd><span id="profile-about"></span> <button class="link-btn" type="button" id="profile-about-edit" aria-label="Modifier votre sexe et votre âge">Modifier</button></dd></div>
-      <div><dt>Localisation</dt><dd id="profile-geo"></dd></div>
-      <div><dt>Affichage</dt><dd id="profile-theme"></dd></div>
-      <div><dt>Carte</dt><dd id="profile-engine"></dd></div>
-    </dl>
     <div class="pro-entry" id="pro-entry" hidden>
       <button class="btn btn-primary" type="button" id="profile-pro">🍽️ Ouvrir mon espace restaurateur</button>
     </div>
-    <div class="follows" id="follows-box" hidden>
-      <h4>Restaurants suivis</h4>
-      <ul id="follows-list"></ul>
+
+    <p class="pf-label">Mon compte</p>
+    <div class="pf-group">
+      <div class="pf-row" id="profile-about-row" hidden><span class="pf-ico" aria-hidden="true">👤</span><span class="pf-k">Vous<small id="profile-about"></small></span><button class="pf-link" type="button" id="profile-about-edit" aria-label="Modifier votre sexe et votre âge">Modifier</button></div>
+      <div class="pf-row"><span class="pf-ico" aria-hidden="true">📍</span><span class="pf-k">Localisation<small id="profile-geo"></small></span><button class="pf-pill" type="button" id="profile-locate">Activer</button></div>
     </div>
-    <button class="btn btn-primary" type="button" id="profile-locate">Activer la localisation</button>
-    <button class="btn btn-ghost" type="button" id="profile-install" hidden>📲 Ajouter à l'écran d'accueil</button>
-    <a class="btn btn-ghost" id="profile-team" href="app/tableau-de-bord/" hidden>📊 Tableau de bord de l'équipe</a>
-    <button class="btn btn-ghost" type="button" id="profile-logout">Se déconnecter</button>
-    <button class="btn btn-danger" type="button" id="profile-delete">Supprimer mon compte</button>
+
+    <div id="follows-box" hidden>
+      <p class="pf-label">Restaurants suivis</p>
+      <ul class="pf-group pf-follows" id="follows-list"></ul>
+    </div>
+
+    <p class="pf-label">Affichage</p>
+    <div class="pf-group">
+      <button class="pf-row" type="button" id="profile-theme-row"><span class="pf-ico" aria-hidden="true">🌗</span><span class="pf-k">Thème<small id="profile-theme"></small></span><span class="pf-link" aria-hidden="true">Changer</span></button>
+      <div class="pf-row"><span class="pf-ico" aria-hidden="true">🗺️</span><span class="pf-k">Carte<small id="profile-engine"></small></span></div>
+    </div>
+
+    <p class="pf-label">Plus</p>
+    <div class="pf-group">
+      <button class="pf-row" type="button" id="profile-install" hidden><span class="pf-ico" aria-hidden="true">📲</span><span class="pf-k">Ajouter à l'écran d'accueil</span><span class="pf-chev" aria-hidden="true">›</span></button>
+      <a class="pf-row" id="profile-team" href="app/tableau-de-bord/" hidden><span class="pf-ico" aria-hidden="true">📊</span><span class="pf-k">Tableau de bord de l'équipe</span><span class="pf-chev" aria-hidden="true">›</span></a>
+      <button class="pf-row" type="button" id="profile-logout"><span class="pf-ico" aria-hidden="true">👋</span><span class="pf-k">Se déconnecter</span><span class="pf-chev" aria-hidden="true">›</span></button>
+    </div>
+    <button class="pf-delete" type="button" id="profile-delete">Supprimer mon compte</button>
     <p class="legal"><a href="app/legal/confidentialite/" target="_blank" rel="noopener">Confidentialité</a> · <a href="app/legal/cgu/" target="_blank" rel="noopener">Conditions d'utilisation</a> · <a href="app/legal/mentions-legales/" target="_blank" rel="noopener">Mentions légales</a> · <button class="link-btn" type="button" id="profile-cookies">Cookies</button></p>
   </section>
 
@@ -9445,6 +9485,7 @@
   });
   $('profile-pro').addEventListener('click', () => ProSpace.open());
   $('profile-cookies').addEventListener('click', () => Consent.open({ details: true }));
+  $('profile-theme-row').addEventListener('click', () => { $('theme-btn').click(); });
   $('profile-locate').addEventListener('click', () => {
     closePanel($('profile-sheet'));
     requestLocation({ fly: true, fromButton: true });
