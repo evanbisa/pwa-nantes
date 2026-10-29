@@ -14,19 +14,69 @@
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-/* Inscription pas à pas (components/signup) : couleur de la marque, glissement d'une question à l'autre */
+/*
+ * Inscription pas à pas (components/signup). Jour : bleu de la marque. Nuit : noir profond, violet et dégradé
+ * rose → violet → bleu (comme les néons de la carte), surfaces en verre dépoli.
+ * Passage d'une question à l'autre : l'écran glisse, et ses éléments apparaissent l'un après l'autre en sortant du flou.
+ */
 @theme {
   --color-brand: #1a73e8;
   --color-brand-strong: #1557b0;
-  --color-brand-night: #8ab4f8;
-  --animate-step-next: step-next 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-step-prev: step-prev 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --color-brand-night: #a78bfa;
+  --color-night: #111113;
+  --animate-step-next: step-next 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-step-prev: step-prev 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-pop: pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 
-  @keyframes step-next { from { opacity: 0; transform: translateX(48px); } to { opacity: 1; transform: none; } }
-  @keyframes step-prev { from { opacity: 0; transform: translateX(-48px); } to { opacity: 1; transform: none; } }
+  @keyframes step-next { from { transform: translateX(40px); } to { transform: none; } }
+  @keyframes step-prev { from { transform: translateX(-40px); } to { transform: none; } }
   @keyframes pop { from { transform: scale(0.6); } to { transform: none; } }
 }
+
+@keyframes su-rise { from { opacity: 0; filter: blur(10px); transform: translateY(14px); } to { opacity: 1; filter: none; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .su-cascade > * > * { animation: su-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .su-cascade > * > :nth-child(2) { animation-delay: 50ms; }
+  .su-cascade > * > :nth-child(3) { animation-delay: 100ms; }
+  .su-cascade > * > :nth-child(4) { animation-delay: 150ms; }
+  .su-cascade > * > :nth-child(5) { animation-delay: 200ms; }
+  .su-cascade > * > :nth-child(n + 6) { animation-delay: 250ms; }
+}
+
+/* Nuit : halos colorés très doux derrière la page */
+.su-glow { display: none; }
+[data-theme="night"] .su-glow {
+  display: block;
+  background:
+    radial-gradient(38rem 26rem at 50% 18%, rgb(124 58 237 / 0.13), transparent 70%),
+    radial-gradient(26rem 22rem at 8% 72%, rgb(219 39 119 / 0.08), transparent 70%),
+    radial-gradient(28rem 24rem at 96% 92%, rgb(59 130 246 / 0.09), transparent 70%);
+}
+/* Nuit : mots clés en dégradé */
+[data-theme="night"] .su-em {
+  background: linear-gradient(90deg, #e9a0e4, #a78bfa 55%, #7f95fb);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+/* Nuit : bouton principal sombre au contour dégradé, avec une lueur violette */
+[data-theme="night"] .su-cta {
+  border: 1.5px solid transparent;
+  background: linear-gradient(#17171b, #17171b) padding-box, linear-gradient(100deg, #e9a0e4, #a78bfa 50%, #6f8cfb) border-box;
+  color: #fff;
+  box-shadow: 0 10px 36px -14px rgb(167 139 250 / 0.7);
+}
+[data-theme="night"] .su-cta:hover:not(:disabled) {
+  background: linear-gradient(#1f1f25, #1f1f25) padding-box, linear-gradient(100deg, #e9a0e4, #a78bfa 50%, #6f8cfb) border-box;
+}
+[data-theme="night"] .su-cta:disabled { box-shadow: none; }
+/* Nuit : choix coché (sexe), contour dégradé */
+[data-theme="night"] .su-picked {
+  border-color: transparent;
+  background: linear-gradient(#1c1a26, #1c1a26) padding-box, linear-gradient(135deg, #e9a0e4, #a78bfa 50%, #6f8cfb) border-box;
+  box-shadow: 0 8px 30px -12px rgb(167 139 250 / 0.6);
+}
+/* Nuit : barre de progression et curseur d'âge en dégradé */
+[data-theme="night"] .su-gradient { background: linear-gradient(90deg, #e9a0e4, #a78bfa 55%, #7f95fb); }
 
 @media (prefers-color-scheme: dark) {
   :root {

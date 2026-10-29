@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-9ibabGBaGO7AioFORkM/E1bgLRpLBSd2ZeymDx1VVUU=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-3Xdb3fyliOk4IjYRvz1hyax1vK+M+6d8p2fCgIL4gCk=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Carte interactive des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon." />
@@ -3779,17 +3779,18 @@
 
   /*
    * Styles de carte au choix (CONFIG.mapStyle) : chacun donne sa palette pour le mode jour et le mode nuit.
-   * glow* : halo lumineux sous les grands axes (style néon).
+   * glow* : halo lumineux sous les grands axes (style néon), glowOpacity : son intensité.
    */
+  // Néons discrets : couleurs adoucies, halo léger (une lueur, pas un éclairage)
   const NEON = {
     background: '#0a0b17', landuseBusy: '#11122a', hospital: '#1a1130', education: '#10132c',
-    landcover: '#0c1120', wood: '#0d1724', park: '#0e1b26', water: '#04050d', waterway: '#1d2f80',
-    building: '#13152b', buildingLine: '#272b5c',
-    motorway: '#ff4fd8', motorwayCase: '#0a0b17', trunk: '#c35cff', trunkCase: '#0a0b17',
-    primary: '#8b6bff', primaryCase: '#0a0b17', secondary: '#4f86ff', secondaryCase: '#0a0b17',
-    tertiary: '#3a5ee0', tertiaryCase: '#0a0b17', minor: '#262f6e', minorCase: '#0a0b17', path: '#2c3270',
-    rail: '#3d4185', label: '#9fb0ff', labelMajor: '#eef0ff', halo: '#0a0b17', place: '#ff7ae0',
-    glowMotorway: '#ff4fd8', glowTrunk: '#c35cff', glowPrimary: '#8b6bff', glowSecondary: '#4f86ff',
+    landcover: '#0c1120', wood: '#0d1724', park: '#0e1b26', water: '#04050d', waterway: '#1b2766',
+    building: '#13152b', buildingLine: '#232650',
+    motorway: '#c86bb8', motorwayCase: '#0a0b17', trunk: '#9d72d6', trunkCase: '#0a0b17',
+    primary: '#7d72d9', primaryCase: '#0a0b17', secondary: '#5577c4', secondaryCase: '#0a0b17',
+    tertiary: '#3a4f9e', tertiaryCase: '#0a0b17', minor: '#222859', minorCase: '#0a0b17', path: '#282d5e',
+    rail: '#363a72', label: '#98a3dc', labelMajor: '#e6e8fa', halo: '#0a0b17', place: '#d986c6',
+    glowMotorway: '#c86bb8', glowTrunk: '#9d72d6', glowPrimary: '#7d72d9', glowSecondary: '#5577c4', glowOpacity: 0.2,
   };
   const PASTEL = {
     background: '#f8f4ec', landuseBusy: '#f4ede1', hospital: '#f7e7e4', education: '#edeef5',
@@ -3868,8 +3869,8 @@
         filter: ['all', isLine, notTunnel, roadClass(def.classes)],
         // Mode sans halo : couche masquée (une couche transparente coûterait quand même son dessin, flou compris)
         layout: { 'line-cap': 'round', 'line-join': 'round', visibility: on ? 'visible' : 'none' },
-        paint: { 'line-color': on ? p['glow' + cap] : 'rgba(0, 0, 0, 0)', 'line-width': width(def.w.map(([z, v]) => [z, v * 3 + 4])),
-          'line-blur': width(def.w.map(([z, v]) => [z, v * 1.5 + 3])), 'line-opacity': on ? 0.5 : 0 },
+        paint: { 'line-color': on ? p['glow' + cap] : 'rgba(0, 0, 0, 0)', 'line-width': width(def.w.map(([z, v]) => [z, v * 2.2 + 3])),
+          'line-blur': width(def.w.map(([z, v]) => [z, v * 1.2 + 2])), 'line-opacity': on ? (p.glowOpacity ?? 0.5) : 0 },
       };
     };
     // Couches présentes dès qu'un des deux modes brille (le passage jour / nuit ne fait que changer les couleurs)

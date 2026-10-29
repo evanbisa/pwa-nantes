@@ -65,7 +65,7 @@ export default function AgePicker({ value, onChange, labelledBy, onEnter }: {
       <div className="mt-8 flex items-center justify-center gap-6">
         <HoldButton label="Un an de moins" disabled={value <= AGE_MIN} onStep={() => set(current.current - 1)}><Minus className="h-5 w-5" /></HoldButton>
         <output htmlFor="su-age" aria-live="polite" className="min-w-28 text-center text-6xl font-bold tabular-nums tracking-tight">
-          {value}<span className="ml-1 text-lg font-medium text-slate-500 dark:text-slate-400">ans</span>
+          {value}<span className="ml-1 text-lg font-medium text-slate-500 dark:text-zinc-400">ans</span>
         </output>
         <HoldButton label="Un an de plus" disabled={value >= AGE_MAX} onStep={() => set(current.current + 1)}><Plus className="h-5 w-5" /></HoldButton>
       </div>
@@ -73,18 +73,18 @@ export default function AgePicker({ value, onChange, labelledBy, onEnter }: {
         id="su-age" ref={bar} role="slider" tabIndex={0} aria-labelledby={labelledBy}
         aria-valuemin={AGE_MIN} aria-valuemax={AGE_MAX} aria-valuenow={value} aria-valuetext={`${value} ans`}
         onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onKeyDown={key}
-        className="group relative mt-8 h-11 cursor-grab touch-none select-none rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-4 active:cursor-grabbing dark:ring-offset-slate-950"
+        className="group relative mt-8 h-11 cursor-grab touch-none select-none rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-4 active:cursor-grabbing dark:ring-offset-night dark:focus-visible:ring-brand-night"
       >
-        <span aria-hidden className="absolute inset-x-0 top-1/2 h-2 -translate-y-1/2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
-          <span className="block h-full bg-brand dark:bg-brand-night" style={{ width: `${pct}%` }} />
+        <span aria-hidden className="absolute inset-x-0 top-1/2 h-2 -translate-y-1/2 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+          <span className="su-gradient block h-full bg-brand" style={{ width: `${pct}%` }} />
         </span>
         <span
           aria-hidden
-          className="su-thumb absolute top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-brand bg-white shadow-md transition-transform group-active:scale-110 dark:border-brand-night dark:bg-slate-900"
+          className="su-thumb absolute top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-brand bg-white shadow-md transition-transform group-active:scale-110 dark:border-brand-night dark:bg-night dark:shadow-[0_0_18px_rgb(167_139_250/0.45)]"
           style={{ left: `${pct}%` }}
         />
       </div>
-      <p aria-hidden className="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">Glissez doucement pour ajuster année par année</p>
+      <p aria-hidden className="mt-2 text-center text-xs text-slate-500 dark:text-zinc-400">Glissez doucement pour ajuster année par année</p>
     </>
   );
 }
@@ -115,7 +115,7 @@ function HoldButton({ label, disabled, onStep, children }: { label: string; disa
       type="button" aria-label={label} disabled={disabled}
       onPointerDown={start} onPointerUp={stop} onPointerLeave={stop} onPointerCancel={stop}
       onClick={() => { if (held.current) { held.current = false; return; } step.current(); }}
-      className="grid h-14 w-14 place-items-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:opacity-30 dark:bg-slate-900 dark:text-slate-200 dark:ring-slate-800"
+      className="grid h-14 w-14 place-items-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:opacity-30 dark:bg-white/[0.05] dark:text-zinc-200 dark:ring-white/10 dark:backdrop-blur-xl dark:hover:bg-white/10 dark:focus-visible:ring-brand-night"
     >
       {children}
     </button>

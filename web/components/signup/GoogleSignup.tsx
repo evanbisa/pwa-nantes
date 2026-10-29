@@ -107,11 +107,11 @@ export default function GoogleSignup({ onCredential }: { onCredential: (credenti
   if (!CLIENT_ID) return null;
   return (
     <div className="mt-5 grid gap-3">
-      <p className="flex items-center gap-3 text-sm text-slate-500 before:h-px before:flex-1 before:bg-slate-200 after:h-px after:flex-1 after:bg-slate-200 dark:text-slate-400 dark:before:bg-slate-800 dark:after:bg-slate-800">ou</p>
+      <p className="flex items-center gap-3 text-sm text-slate-500 before:h-px before:flex-1 before:bg-slate-200 after:h-px after:flex-1 after:bg-slate-200 dark:text-zinc-400 dark:before:bg-white/10 dark:after:bg-white/10">ou</p>
       <div className="group relative">
         <button
           ref={box} id="su-google-btn" type="button" onClick={click} tabIndex={mounted ? -1 : 0} aria-hidden={mounted || undefined}
-          className="flex h-14 w-full items-center justify-center gap-3 rounded-full border-[1.5px] border-slate-300 bg-white text-[15.5px] font-medium text-slate-900 shadow-sm transition group-focus-within:ring-2 group-focus-within:ring-brand group-focus-within:ring-offset-2 [@media(hover:hover)]:group-hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:ring-offset-slate-950"
+          className="flex h-14 w-full items-center justify-center gap-3 rounded-full border-[1.5px] border-slate-300 bg-white text-[15.5px] font-medium text-slate-900 shadow-sm transition group-focus-within:ring-2 group-focus-within:ring-brand group-focus-within:ring-offset-2 [@media(hover:hover)]:group-hover:bg-slate-50 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-100 dark:backdrop-blur-xl dark:ring-offset-night dark:group-focus-within:ring-brand-night [@media(hover:hover)]:dark:group-hover:bg-white/[0.08]"
         >
           <svg viewBox="0 0 48 48" aria-hidden className="h-[22px] w-[22px]">
             <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
@@ -124,7 +124,7 @@ export default function GoogleSignup({ onCredential }: { onCredential: (credenti
         <div ref={slot} id="su-google" className={`absolute inset-0 flex items-center justify-center overflow-hidden rounded-full opacity-[0.01] ${mounted ? "" : "hidden"}`} />
       </div>
       {(needsConsent || note) && (
-        <p id="su-google-note" aria-live="polite" className="text-center text-[13px] leading-relaxed text-slate-500 dark:text-slate-400">
+        <p id="su-google-note" aria-live="polite" className="text-center text-[13px] leading-relaxed text-slate-500 dark:text-zinc-400">
           {note || "En touchant ce bouton, vous autorisez les services Google (cookies de Google)."}
         </p>
       )}

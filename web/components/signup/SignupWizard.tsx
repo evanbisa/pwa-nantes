@@ -79,7 +79,7 @@ const useHydrated = () => useSyncExternalStore(noSubscribe, () => true, () => fa
 
 export default function SignupWizard() {
   return useHydrated() ? <Wizard /> : (
-    <div className="grid min-h-full place-items-center bg-slate-50 dark:bg-slate-950" aria-busy="true">
+    <div className="grid min-h-full place-items-center bg-slate-50 dark:bg-night" aria-busy="true">
       <Loader2 className="h-8 w-8 animate-spin text-brand dark:text-brand-night" aria-label="Chargement" />
     </div>
   );
@@ -240,26 +240,27 @@ function Wizard() {
   return (
     <div
       data-kb={keyboard ? "" : undefined} style={keyboard ? { paddingBottom: keyboard } : undefined}
-      className="group/page flex min-h-full flex-col bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100"
+      className="group/page relative isolate flex min-h-full flex-col bg-slate-50 text-slate-900 antialiased dark:bg-night dark:text-zinc-50 dark:[color-scheme:dark]"
     >
+      <div aria-hidden className="su-glow pointer-events-none fixed inset-0 -z-10" />
       <header className="mx-auto flex w-full max-w-md items-center gap-3 px-5 pt-[max(16px,env(safe-area-inset-top))] pb-2">
         <button
           type="button"
           onClick={back}
           aria-label="Question précédente"
-          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:bg-slate-900 dark:text-slate-200 dark:ring-slate-800 dark:hover:bg-slate-800 ${FLOW.indexOf(step) > 0 && step !== "done" ? "" : "invisible"}`}
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:bg-white/[0.05] dark:text-zinc-200 dark:ring-white/10 dark:backdrop-blur-xl dark:hover:bg-white/10 dark:focus-visible:ring-brand-night ${FLOW.indexOf(step) > 0 && step !== "done" ? "" : "invisible"}`}
         >
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </button>
         {step !== "done" && (
           <>
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800" aria-hidden>
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10" aria-hidden>
               <div
-                className="h-full rounded-full bg-gradient-to-r from-brand to-orange-400 transition-[width] duration-500 ease-out"
+                className="su-gradient h-full rounded-full bg-gradient-to-r from-brand to-orange-400 transition-[width] duration-500 ease-out"
                 style={{ width: `${(question / QUESTIONS.length) * 100}%` }}
               />
             </div>
-            <p className="w-10 text-right text-sm font-medium tabular-nums text-slate-500 dark:text-slate-400">
+            <p className="w-10 text-right text-sm font-medium tabular-nums text-slate-500 dark:text-zinc-400">
               <span aria-hidden>{question}/{QUESTIONS.length}</span>
               <span className="sr-only">Question {question} sur {QUESTIONS.length}</span>
             </p>
@@ -268,7 +269,7 @@ function Wizard() {
       </header>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col overflow-x-hidden px-5 pt-6 pb-[max(24px,env(safe-area-inset-bottom))]">
-        <div key={step} className={`flex flex-1 flex-col ${dir === "next" ? "motion-safe:animate-step-next" : "motion-safe:animate-step-prev"}`}>
+        <div key={step} className={`su-cascade flex flex-1 flex-col ${dir === "next" ? "motion-safe:animate-step-next" : "motion-safe:animate-step-prev"}`}>
           {step === "name" && (
             <form onSubmit={submitName} noValidate className="flex flex-1 flex-col">
               <Title emoji={name.trim().length >= 2 ? "👋" : "😊"} id="q-name">Comment vous <Em>appelez-vous</Em> ?</Title>
@@ -280,8 +281,8 @@ function Wizard() {
                   aria-describedby="err-name" className={inputClass(!!errors.name)}
                 />
               </Field>
-              <p className="mt-3 min-h-6 text-base font-medium text-brand dark:text-brand-night" aria-live="polite">
-                {firstName.length >= 2 ? `Bienvenue, ${firstName} ! 😊` : ""}
+              <p className="mt-3 min-h-6 text-base font-medium text-brand" aria-live="polite">
+                {firstName.length >= 2 && <><span className="su-em">Bienvenue, {firstName} !</span> 😊</>}
               </p>
               <Primary>Continuer</Primary>
             </form>
@@ -300,9 +301,9 @@ function Wizard() {
                     <button
                       key={g.label} id={`su-gender-${i}`} type="button" role="radio" aria-checked={checked}
                       onClick={() => pickGender(g.value)}
-                      className={`flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border-2 px-3 py-4 text-center text-[15px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 dark:ring-offset-slate-950 ${checked
-                        ? "border-brand bg-brand/10 text-brand dark:border-brand-night dark:bg-brand-night/10 dark:text-brand-night"
-                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"}`}
+                      className={`flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border-2 px-3 py-4 text-center text-[15px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 dark:ring-offset-night dark:focus-visible:ring-brand-night ${checked
+                        ? "su-picked border-brand bg-brand/10 text-brand dark:text-white"
+                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-white/[0.04] dark:backdrop-blur-xl dark:hover:border-white/20 dark:hover:bg-white/[0.07]"}`}
                     >
                       <span aria-hidden className={`text-3xl ${checked ? "motion-safe:animate-pop" : ""}`}>{g.emoji}</span>
                       {g.label}
@@ -322,7 +323,7 @@ function Wizard() {
                 {age < MIN_AGE ? `FlashMiam est réservé aux ${MIN_AGE} ans et plus.` : errors.age}
               </p>
               <Primary disabled={age < MIN_AGE}>{age < MIN_AGE ? "Continuer" : `J'ai ${age} ans`}</Primary>
-              <button type="button" onClick={() => { setAgeSet(false); go("email"); }} className="mt-3 self-center rounded-full px-4 py-2 text-sm font-medium text-slate-500 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-slate-400">
+              <button type="button" onClick={() => { setAgeSet(false); go("email"); }} className="mt-3 self-center rounded-full px-4 py-2 text-sm font-medium text-slate-500 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-zinc-400">
                 Passer cette question
               </button>
             </form>
@@ -354,7 +355,7 @@ function Wizard() {
                     <button id="su-fix-email" type="button" onClick={() => { setEmail(suggestion); checkAndConfirm(suggestion); }} className="rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600">
                       Oui, corriger
                     </button>
-                    <button id="su-keep-email" type="button" onClick={() => checkAndConfirm(cleanEmail)} className="rounded-full px-4 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-300 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-900">
+                    <button id="su-keep-email" type="button" onClick={() => checkAndConfirm(cleanEmail)} className="rounded-full px-4 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-300 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-zinc-200 dark:ring-white/15 dark:hover:bg-white/[0.06]">
                       Non, garder la mienne
                     </button>
                   </div>
@@ -368,15 +369,15 @@ function Wizard() {
           {step === "confirm" && (
             <div className="flex flex-1 flex-col">
               <Title emoji="🔎" id="q-confirm">Confirmez votre <Em>adresse</Em></Title>
-              <p className="mt-6 rounded-2xl bg-white px-5 py-6 text-center text-2xl font-semibold break-all shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <p className="mt-6 rounded-2xl bg-white px-5 py-6 text-center text-2xl font-semibold break-all shadow-sm ring-1 ring-slate-200 dark:bg-white/[0.04] dark:ring-white/10 dark:backdrop-blur-xl">
                 {cleanEmail.slice(0, cleanEmail.lastIndexOf("@"))}
                 <span className="text-slate-400">@</span>
-                <span className="text-brand dark:text-brand-night">{cleanEmail.slice(cleanEmail.lastIndexOf("@") + 1)}</span>
+                <span className="su-em text-brand">{cleanEmail.slice(cleanEmail.lastIndexOf("@") + 1)}</span>
               </p>
               <Hint>Relisez-la lettre par lettre : sans elle, impossible de retrouver votre compte si vous oubliez votre mot de passe.</Hint>
               <div className="mt-auto flex flex-col gap-3 pt-8">
                 <button id="su-confirm-yes" type="button" onClick={() => go("password")} className={primaryClass}>Oui, c&apos;est la bonne</button>
-                <button type="button" onClick={() => go("email", "prev")} className="h-14 rounded-full text-base font-medium text-slate-700 ring-1 ring-slate-300 transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-900">
+                <button type="button" onClick={() => go("email", "prev")} className="h-14 rounded-full text-base font-medium text-slate-700 ring-1 ring-slate-300 transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-zinc-200 dark:ring-white/15 dark:hover:bg-white/[0.06] dark:focus-visible:ring-brand-night">
                   Non, je la corrige
                 </button>
               </div>
@@ -406,18 +407,18 @@ function Wizard() {
               </Field>
               <div className="mt-4 grid grid-cols-5 gap-1.5" aria-hidden>
                 {PASSWORD_RULES.map((r, i) => (
-                  <span key={r.id} className={`h-1.5 rounded-full transition-colors duration-300 ${i < score ? (score <= 2 ? "bg-red-500" : score < 5 ? "bg-amber-500" : "bg-emerald-600") : "bg-slate-200 dark:bg-slate-800"}`} />
+                  <span key={r.id} className={`h-1.5 rounded-full transition-colors duration-300 ${i < score ? (score <= 2 ? "bg-red-500" : score < 5 ? "bg-amber-500" : "bg-emerald-600") : "bg-slate-200 dark:bg-white/10"}`} />
                 ))}
               </div>
-              <p className={`mt-2 min-h-5 text-sm font-medium ${score === 5 ? "text-emerald-700 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400"}`}>
+              <p className={`mt-2 min-h-5 text-sm font-medium ${score === 5 ? "text-emerald-700 dark:text-emerald-400" : "text-slate-500 dark:text-zinc-400"}`}>
                 {password ? STRENGTH[score] : ""}
               </p>
               <ul id="su-rules" aria-label="Le mot de passe doit contenir" className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2.5">
                 {PASSWORD_RULES.map((r) => {
                   const ok = r.test(password);
                   return (
-                    <li key={r.id} className={`flex items-center gap-2 text-[15px] transition-colors duration-300 ${ok ? "text-emerald-700 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400"}`}>
-                      <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full transition-colors duration-300 ${ok ? "bg-emerald-600 text-white" : "border-2 border-slate-300 dark:border-slate-600"}`}>
+                    <li key={r.id} className={`flex items-center gap-2 text-[15px] transition-colors duration-300 ${ok ? "text-emerald-700 dark:text-emerald-400" : "text-slate-500 dark:text-zinc-400"}`}>
+                      <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full transition-colors duration-300 ${ok ? "bg-emerald-600 text-white" : "border-2 border-slate-300 dark:border-zinc-600"}`}>
                         {ok && <Check className="h-3.5 w-3.5 motion-safe:animate-pop" strokeWidth={3} aria-hidden />}
                       </span>
                       {r.label}
@@ -426,12 +427,12 @@ function Wizard() {
                   );
                 })}
               </ul>
-              <label className="mt-auto flex items-center gap-3 pt-6 pb-4 text-[15px] text-slate-700 dark:text-slate-300">
+              <label className="mt-auto flex items-center gap-3 pt-6 pb-4 text-[15px] text-slate-700 dark:text-zinc-300">
                 <input id="su-remember" type="checkbox" checked={remember} onChange={(e) => setRememberChoice(e.target.checked)} className="h-5 w-5 rounded accent-brand dark:accent-brand-night" />
                 Rester connecté sur cet appareil
               </label>
               <Primary busy={busy} disabled={score < PASSWORD_RULES.length} className="mt-0">{busy ? "Création du compte…" : "Créer mon compte 🎉"}</Primary>
-              <p className="mt-4 text-center text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+              <p className="mt-4 text-center text-xs leading-relaxed text-slate-500 dark:text-zinc-400">
                 En créant un compte, vous acceptez les{" "}
                 <a className="underline" href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/legal/cgu/`}>conditions d&apos;utilisation</a> et la{" "}
                 <a className="underline" href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/legal/confidentialite/`}>politique de confidentialité</a>.
@@ -443,10 +444,10 @@ function Wizard() {
             <div className="flex flex-1 flex-col items-center justify-center text-center">
               <span aria-hidden className="text-7xl motion-safe:animate-pop">🎉</span>
               <h1 id="su-done" tabIndex={-1} className="mt-6 text-3xl font-bold tracking-tight text-balance focus:outline-none">
-                Bienvenue sur FlashMiam, {firstName} !
+                Bienvenue sur <Em>FlashMiam</Em>, {firstName} !
               </h1>
-              <p className="mt-3 text-slate-600 dark:text-slate-400">Votre compte est prêt. Les bons plans food de La Roche-sur-Yon vous attendent.</p>
-              <p className="mt-10 inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400" aria-live="polite">
+              <p className="mt-3 text-slate-600 dark:text-zinc-400">Votre compte est prêt. Les bons plans food de La Roche-sur-Yon vous attendent.</p>
+              <p className="mt-10 inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-zinc-400" aria-live="polite">
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Ouverture de la carte…
               </p>
             </div>
@@ -460,12 +461,12 @@ function Wizard() {
 /* ---------- Petits composants de mise en page ---------- */
 
 const primaryClass =
-  "h-14 rounded-full bg-brand text-base font-semibold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-strong active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none dark:ring-offset-slate-950";
+  "su-cta h-14 rounded-full bg-brand text-base font-semibold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-strong active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none dark:ring-offset-night dark:focus-visible:ring-brand-night";
 
 const inputClass = (invalid: boolean) =>
-  `h-14 w-full rounded-2xl border-2 bg-white px-4 text-lg text-slate-900 transition placeholder:text-slate-400 focus:outline-none dark:bg-slate-900 dark:text-slate-100 ${invalid
+  `h-14 w-full rounded-2xl border-2 bg-white px-4 text-lg text-slate-900 transition placeholder:text-slate-400 focus:outline-none dark:bg-white/[0.04] dark:text-zinc-50 dark:backdrop-blur-xl dark:placeholder:text-zinc-500 ${invalid
     ? "border-red-500 focus:border-red-500"
-    : "border-slate-200 focus:border-brand dark:border-slate-800 dark:focus:border-brand-night"}`;
+    : "border-slate-200 focus:border-brand dark:border-white/10 dark:focus:border-brand-night dark:focus:shadow-[0_0_0_4px_rgb(167_139_250/0.18)]"}`;
 
 function Title({ emoji, id, children }: { emoji: string; id: string; children: ReactNode }) {
   return (
@@ -475,13 +476,13 @@ function Title({ emoji, id, children }: { emoji: string; id: string; children: R
     </>
   );
 }
-const Em = ({ children }: { children: ReactNode }) => <span className="text-brand dark:text-brand-night">{children}</span>;
-const Hint = ({ children }: { children: ReactNode }) => <p className="mt-3 text-[15px] leading-relaxed text-slate-600 dark:text-slate-400">{children}</p>;
+const Em = ({ children }: { children: ReactNode }) => <span className="su-em text-brand">{children}</span>;
+const Hint = ({ children }: { children: ReactNode }) => <p className="mt-3 text-[15px] leading-relaxed text-slate-600 dark:text-zinc-400">{children}</p>;
 
 function Field({ label, errorId, error, children }: { label: string; errorId: string; error?: ReactNode; children: ReactNode }) {
   return (
     <div className="mt-6">
-      <label className="block text-sm font-medium text-slate-600 dark:text-slate-400">
+      <label className="block text-sm font-medium text-slate-600 dark:text-zinc-400">
         <span className="mb-2 block">{label}</span>
         {children}
       </label>
