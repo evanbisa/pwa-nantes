@@ -149,3 +149,13 @@ html[data-theme="night"]:has(.legal-root) body { background: #020617; }
 @media print {
   html:has(.legal-root) body { background: #fff; }
 }
+
+/* ---------- Tableau de bord de l'équipe (/tableau-de-bord) ---------- */
+/* Couleurs des graphiques : bleu puis orange (lisibles par les daltoniens, jour et nuit), grille discrète */
+.dash { --viz-1: #2a78d6; --viz-2: #eb6834; --viz-grid: rgb(15 23 42 / 0.08); --dash-surface: #ffffff; }
+[data-theme="night"] .dash { --viz-1: #3987e5; --viz-2: #d95926; --viz-grid: rgb(255 255 255 / 0.09); --dash-surface: #1a1a1d; }
+.btn-dash {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border-radius: 999px;
+  font-weight: 600; color: #fff; background: var(--color-brand); text-decoration: none;
+}
+[data-theme="night"] .btn-dash { color: #111113; background: var(--color-brand-night); }

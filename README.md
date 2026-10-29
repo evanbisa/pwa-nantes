@@ -116,6 +116,17 @@ en plus) :
   avec Maputnik ou MapTiler). Son domaine est ajouté tout seul à la politique de sécurité (`scripts/csp.mjs`) ; si ses
   tuiles ou ses polices viennent d'un autre domaine, l'ajouter dans `appPolicy()`.
 
+## Tableau de bord de l'équipe
+
+- Adresse : `/app/tableau-de-bord/` (aussi depuis le profil : « 📊 Tableau de bord de l'équipe »), réservé aux comptes
+  de l'équipe : visiteurs par jour, appareils, écran d'accueil, nouveaux comptes, restaurants, revenu mensuel,
+  utilisation des fiches, audience. Périodes 7, 30 ou 90 jours.
+- Les visites ne sont comptées qu'avec l'accord « statistiques » des cookies (identifiant d'appareil tiré au hasard,
+  13 mois).
+- Ajouter un membre : Supabase › SQL Editor,
+  `insert into team_admins (user_id) select id from auth.users where email = 'adresse@exemple.fr';`
+  (retirer : `delete from team_admins where user_id = (select id from auth.users where email = '…');`).
+
 ## Référencement et partage des liens
 
 - **Titre, description, aperçu des liens** (Facebook, WhatsApp, Instagram, X, iMessage…) : balises en tête de

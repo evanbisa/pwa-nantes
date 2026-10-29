@@ -75,6 +75,11 @@ export const confidentialite: LegalDoc = {
               basis: "Consentement (choix des cookies)",
             },
             {
+              title: "Fréquentation du site",
+              detail: "Une visite par appareil et par jour, le type d'appareil (iPhone, Android, ordinateur), l'ouverture depuis l'icône de l'écran d'accueil et la réponse à la proposition de l'y ajouter. L'appareil est désigné par un identifiant tiré au hasard, sans lien avec votre compte. Seule l'équipe FlashMiam voit ces totaux.",
+              basis: "Consentement (choix des cookies)",
+            },
+            {
               title: "Restaurateurs : nom, téléphone, SIRET, justificatifs, fiche",
               detail: "Vérifier l'établissement (répertoire Sirene de l'INSEE), publier sa fiche, gérer l'abonnement. Les justificatifs ne sont visibles que par le restaurateur et l'équipe de vérification.",
               basis: "Exécution du contrat ; obligations légales (facturation)",
@@ -132,6 +137,7 @@ export const confidentialite: LegalDoc = {
             { title: "Statistiques liées à une personne", detail: "90 jours au maximum (fiche consultée, provenance, action, story vue, offre ouverte)." },
             { title: "Totaux quotidiens des restaurants", detail: "6 mois ; ils ne contiennent aucune donnée personnelle." },
             { title: "Stories", detail: "Publiques 24 heures, puis visibles par leur seul restaurateur ; supprimées avec leur photo 30 jours après leur fin." },
+            { title: "Fréquentation du site (identifiant d'appareil tiré au hasard)", detail: "13 mois." },
             { title: "Tentatives d'inscription (empreinte IP)", detail: "2 jours." },
             { title: "Notifications de paiement reçues de Whop", detail: "30 jours (identifiant et type seulement)." },
             { title: "Compte, fiche, avis, « j'aime »", detail: "Jusqu'à leur suppression par vous, ou la suppression du compte." },
@@ -184,7 +190,7 @@ export const confidentialite: LegalDoc = {
             },
             {
               title: "Statistiques de fréquentation",
-              detail: "Vos visites et actions sur les fiches sont comptées pour fournir des totaux aux restaurateurs. Sans accord, rien n'est envoyé.",
+              detail: "Vos visites et actions sur les fiches sont comptées pour fournir des totaux aux restaurateurs, et vos visites du site pour les totaux de l'équipe FlashMiam (identifiant d'appareil tiré au hasard, gardé dans votre navigateur). Sans accord, rien n'est envoyé.",
               basis: "Avec votre accord",
             },
             {

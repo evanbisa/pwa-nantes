@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IzbzNmpdxcFCr79rzdpYzaKDOsNWo8MJ91EJeOaAWTk=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-HFoMLO8luqxhCL3zex6d15TfqBKn2M9rTZW9BHpNIZE=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IzbzNmpdxcFCr79rzdpYzaKDOsNWo8MJ91EJeOaAWTk=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-rVLdbBNNBSRrttYG5nukncJpxCJhQO88r+aRJo5ekjE=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1952,6 +1952,7 @@
     </div>
     <button class="btn btn-primary" type="button" id="profile-locate">Activer la localisation</button>
     <button class="btn btn-ghost" type="button" id="profile-install" hidden>📲 Ajouter à l'écran d'accueil</button>
+    <a class="btn btn-ghost" id="profile-team" href="app/tableau-de-bord/" hidden>📊 Tableau de bord de l'équipe</a>
     <button class="btn btn-ghost" type="button" id="profile-logout">Se déconnecter</button>
     <button class="btn btn-danger" type="button" id="profile-delete">Supprimer mon compte</button>
     <p class="legal"><a href="app/legal/confidentialite/" target="_blank" rel="noopener">Confidentialité</a> · <a href="app/legal/cgu/" target="_blank" rel="noopener">Conditions d'utilisation</a> · <a href="app/legal/mentions-legales/" target="_blank" rel="noopener">Mentions légales</a> · <button class="link-btn" type="button" id="profile-cookies">Cookies</button></p>
@@ -6725,6 +6726,35 @@
   }
 
   /*
+   * Fréquentation du site, pour le tableau de bord de l'équipe : avec l'accord « statistiques » seulement, une visite
+   * par appareil et par jour (identifiant tiré au hasard sur l'appareil, sans lien avec le compte), plateforme, et
+   * ouverture depuis l'icône de l'écran d'accueil. Même chose pour la proposition d'écran d'accueil.
+   */
+  const SiteStats = (() => {
+    const KEY = 'roche-street-food:device';
+    const sent = new Set();
+    function device() {
+      try {
+        let id = localStorage.getItem(KEY);
+        if (!/^[0-9a-f-]{36}$/.test(id || '')) { id = crypto.randomUUID(); localStorage.setItem(KEY, id); }
+        return id;
+      } catch (e) { return null; }
+    }
+    function track(event) {
+      if (!sb || !Consent.has('stats')) return;
+      const id = device(), once = event + ':' + new Date().toDateString();
+      if (!id || sent.has(once)) return;
+      sent.add(once);
+      const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+      sb.rpc('track_site_event', { p_event: event, p_visitor: id, p_platform: detectPlatform(), p_standalone: standalone })
+        .then(({ error }) => { if (error) sent.delete(once); }, () => sent.delete(once));
+    }
+    track('visit');
+    Consent.onChange(() => track('visit'));   // accord donné pendant la visite
+    return { track };
+  })();
+
+  /*
    * Écran d'accueil (PWA) : proposer d'ajouter FlashMiam comme une appli. Chrome, Edge, Samsung Internet : vraie
    * installation (proposition du navigateur, gardée pour le bon moment). iPhone, et Android sans proposition :
    * les étapes à suivre. Demandé une fois sur la carte (personne connectée, rien d'autre d'ouvert), puis au plus deux
@@ -6754,6 +6784,7 @@
       document.querySelectorAll('#install-sheet [data-install]').forEach((el) => { el.hidden = el.dataset.install !== m; });
       $('install-go').textContent = m === 'native' ? 'Ajouter à l\'écran d\'accueil' : 'J\'ai compris';
       if (auto) write({ at: Date.now(), n: (read().n || 0) + 1 });
+      SiteStats.track('install_shown');
       if (activePanel === $('profile-sheet')) closePanel(activePanel, { silent: true });
       openPanel($('install-sheet'), { modal: true });
       return true;
@@ -6766,7 +6797,7 @@
       try {
         prompt.prompt();
         const choice = await prompt.userChoice;
-        if (choice && choice.outcome === 'accepted') write({ done: true });
+        if (choice && choice.outcome === 'accepted') { write({ done: true }); SiteStats.track('install_accepted'); }
       } catch (e) { /* proposition expirée : les étapes restent dans le profil */ }
       syncProfile();
     }
@@ -6791,6 +6822,7 @@
     });
     window.addEventListener('appinstalled', () => {
       deferred = null;
+      SiteStats.track('installed');
       write({ done: true });
       closePanel($('install-sheet'));
       syncProfile();
@@ -9384,6 +9416,8 @@
     $('pro-entry').hidden = account.role !== 'pro';
     renderFollows(account);
     Install.syncProfile();
+    // Membre de l'équipe FlashMiam : accès au tableau de bord (vérifié par la base)
+    if (sb && account.role !== 'pro') sb.rpc('is_team_admin').then(({ data }) => { $('profile-team').hidden = data !== true; }, () => {});
     openPanel($('profile-sheet'), { modal: true });
   }
   /** Sexe et âge (facultatifs) : servent seulement aux totaux d'audience des restaurants. */

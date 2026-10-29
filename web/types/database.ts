@@ -783,6 +783,18 @@ export type Database = {
         Args: { p_days?: number }
         Returns: Json
       }
+      is_team_admin: {
+        Args: Record<string, never>
+        Returns: boolean
+      }
+      team_dashboard: {
+        Args: { p_days?: number }
+        Returns: Json
+      }
+      track_site_event: {
+        Args: { p_event: string; p_visitor: string; p_platform: string; p_standalone?: boolean }
+        Returns: undefined
+      }
       toggle_dish_like: {
         Args: { p_dish: string; p_merchant_id: string }
         Returns: boolean

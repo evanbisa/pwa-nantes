@@ -97,9 +97,12 @@ for (const [fn, body, label] of [
   const r = await rpc(fn, body);
   report(r.status === 401 || r.status === 403, `${label} : en ligne, réservé aux comptes connectés (HTTP ${r.status}${r.status === 404 ? " : fonction absente" : ""})`);
 }
+// Tableau de bord de l'équipe : réservé aux membres de l'équipe (un visiteur n'obtient rien)
+const team = await rpc("team_dashboard", { p_days: 30 });
+report(team.status === 401 || team.status === 403, `tableau de bord de l'équipe : en ligne, fermé aux visiteurs (HTTP ${team.status}${team.status === 404 ? " : fonction absente" : ""})`);
 const cap = await rpc("signup_attempt", { p_ip_hash: "verification-en-ligne-0000", p_kind: "check" });
 report(cap.status === 401 || cap.status === 403, `plafond des inscriptions : réservé au serveur, impossible à contourner (HTTP ${cap.status}${cap.status === 404 ? " : fonction absente" : ""})`);
-for (const table of ["merchant_event_visitors", "merchant_view_hours", "story_viewers", "promo_clicks", "story_likes", "dish_likes", "visit_budget", "maintenance_runs", "signup_attempts"]) {
+for (const table of ["merchant_event_visitors", "merchant_view_hours", "story_viewers", "promo_clicks", "story_likes", "dish_likes", "visit_budget", "maintenance_runs", "signup_attempts", "site_events", "team_admins"]) {
   const r = await get(`${table}?select=*&limit=1`);
   report((r.status === 401 || r.status === 403) || (r.status === 200 && Array.isArray(r.body) && r.body.length === 0), `${table} : illisible pour un visiteur (HTTP ${r.status})`);
 }
