@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-3Xdb3fyliOk4IjYRvz1hyax1vK+M+6d8p2fCgIL4gCk=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-VB0G8kAYDCxjbcJB+w92Lj8EHua4tiIHwq+ibEh+KI0=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-vb7tL4/XOFDGHGM2hA4E6LtXlKOonDDt+5XiHMIIRnI=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Carte interactive des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon." />
@@ -607,8 +607,6 @@
     .jn-perks li span { font-size: 22px; }
     .jn-go { min-height: 54px; font-size: 16.5px; }
     .jn-go:not([disabled]) { box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 35%, transparent); }
-    .join .oauth { margin-top: 4px; }
-    .join .oauth .or-sep { margin: 12px 0; }
     /* Choix du sexe */
     .jn-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
     .jn-choices button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 104px; padding: 12px 8px; border-radius: 18px; font-size: 15px; font-weight: 500; line-height: 1.25; text-align: center; color: var(--text); background: var(--panel-solid); border: 1.5px solid var(--line-strong); transition: transform .15s var(--ease-out), border-color .2s, background-color .2s, box-shadow .2s; }
@@ -1075,11 +1073,22 @@
     .kind-pick button { height: 38px; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-radius: 17px; font-size: 13px; font-weight: 500; color: var(--text); border: 1px solid var(--line-strong); }
     .kind-pick button[aria-checked="true"] { color: var(--accent); background: var(--accent-soft); border-color: var(--accent-line); }
 
-    /* Connexion avec Google */
-    .oauth { margin-top: 16px; }
-    .g-slot { display: flex; justify-content: center; min-height: 44px; }
-    .g-slot .g-fallback { font-size: 13px; color: var(--muted); align-self: center; }
-    .g-slot .g-consent { margin: 0; max-width: 360px; font-size: 13px; line-height: 1.45; text-align: center; color: var(--muted); align-self: center; }
+    /*
+     * Connexion avec Google : notre bouton encadré (logo officiel), aux couleurs du site en mode jour comme en mode
+     * nuit ; le bouton de Google est posé dessus, invisible, pour que le toucher ouvre la vraie connexion Google.
+     */
+    .g-login { display: grid; gap: 12px; margin-top: 4px; }
+    .g-login[hidden] { display: none; }
+    .g-login .or-sep { margin: 0; }
+    .g-box { position: relative; }
+    .g-btn { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 52px; padding: 0 18px; border-radius: 26px; font-size: 15.5px; font-weight: 500; color: var(--text); background: var(--panel-solid); border: 1.5px solid var(--line-strong); box-shadow: 0 1px 3px rgba(0, 0, 0, .08); transition: background-color .2s, border-color .2s; }
+    @media (hover: hover) { .g-box:hover .g-btn { background: var(--hover); border-color: var(--muted); } }   /* pas d'effet resté collé après un toucher */
+    .g-btn svg { width: 22px; height: 22px; flex: none; }
+    .g-slot { display: flex; justify-content: center; }
+    .g-overlay { position: absolute; inset: 0; align-items: center; overflow: hidden; border-radius: 26px; opacity: .01; }
+    .g-overlay:empty { display: none; }
+    .g-box:focus-within .g-btn { outline: 2px solid var(--accent); outline-offset: 2px; }   /* focus sur le bouton de Google, invisible */
+    .g-note { margin: 0; font-size: 13px; line-height: 1.45; text-align: center; color: var(--muted); }
     .or-sep { display: flex; align-items: center; gap: 12px; margin: 14px 0 0; font-size: 13px; color: var(--muted); }
     .or-sep::before, .or-sep::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
@@ -2230,10 +2239,6 @@
       <form id="form-login" class="ob-step" novalidate data-step="login" hidden>
         <h1 id="login-title"><span data-only="client">Bon retour <em>parmi nous</em></span><span data-only="pro">Espace <em>restaurateur</em></span></h1>
         <p class="lead"><span data-only="client">Connectez-vous pour retrouver la carte et vos commerces.</span><span data-only="pro">Connectez-vous pour gérer la fiche de votre restaurant.</span></p>
-        <div class="oauth" data-only="client" data-google hidden>
-          <div class="g-slot" id="li-google"></div>
-          <p class="or-sep">ou avec votre e-mail</p>
-        </div>
         <label class="field" id="field-li-email">
           <span>Adresse e-mail</span>
           <input id="li-email" type="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false" maxlength="120" required />
@@ -2251,6 +2256,17 @@
         <button class="link-btn forgot" type="button" id="forgot-btn">Mot de passe oublié ?</button>
         <p class="form-error" id="err-login" role="alert"></p>
         <button class="btn btn-primary" type="submit">Se connecter</button>
+        <div class="g-login" data-only="client" data-google hidden>
+          <p class="or-sep">ou</p>
+          <div class="g-box">
+            <button class="g-btn" type="button" id="li-google-btn">
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+              <span>Se connecter avec Google</span>
+            </button>
+            <div class="g-slot g-overlay" id="li-google"></div>
+          </div>
+          <p class="g-note" id="li-google-note" aria-live="polite" hidden></p>
+        </div>
         <p class="ob-switch">Pas encore de compte ? <button class="link-btn" type="button" data-goto="signup">Créer un compte</button></p>
       </form>
 
@@ -7324,31 +7340,58 @@
       sc.onerror = () => { loading = null; reject(new Error('gsi')); };
       document.head.appendChild(sc);
     }));
-    /** Connexion (écran « Se connecter ») : bouton officiel de Google, chargé seulement avec l'accord de la personne. */
+    /*
+     * Écran « Se connecter » : notre bouton « Se connecter avec Google » est toujours visible ; le bouton officiel de
+     * Google, posé dessus et invisible, reçoit le toucher. Le script de Google n'est chargé qu'avec l'accord de la
+     * personne ; toucher notre bouton vaut accord.
+     */
+    const CONSENT_NOTE = 'En touchant ce bouton, vous autorisez les services Google (cookies de Google).';
+    const AGAIN = 'Touchez encore « Se connecter avec Google » pour continuer.';
+    const note = (text) => { const n = $('li-google-note'); n.textContent = text || ''; n.hidden = !text; };
+    /** Bouton de Google posé sur le nôtre : c'est lui qui reçoit le focus et que lisent les lecteurs d'écran. */
+    function overlay(on) {
+      if (!on) $('li-google').textContent = '';
+      $('li-google-btn').tabIndex = on ? -1 : 0;
+      $('li-google-btn').toggleAttribute('aria-hidden', on);
+    }
     async function mount() {
       if (!enabled()) return;
       document.querySelectorAll('[data-google]').forEach((el) => { el.hidden = false; });
-      const el = $('li-google');
-      if (!Consent.has('google')) {
-        el.innerHTML = '<p class="g-consent">Pour « Continuer avec Google », autorisez les services Google (cookies de Google). <button class="link-btn" type="button">Autoriser</button></p>';
-        el.querySelector('button').addEventListener('click', () => Consent.allow('google'));
-        return;
-      }
-      try { await load(); } catch (e) {
-        el.innerHTML = '<span class="g-fallback">Connexion Google indisponible pour le moment.</span>';
-        return;
-      }
+      if (!Consent.has('google')) { overlay(false); note(CONSENT_NOTE); return; }
+      if ($('li-google-note').textContent === CONSENT_NOTE) note('');
+      try { await load(); } catch (e) { overlay(false); return 'failed'; }
       if (!ready) {
         google.accounts.id.initialize({ client_id: CONFIG.googleClientId, callback: onGoogleCredential, ux_mode: 'popup', auto_select: false, cancel_on_tap_outside: true, use_fedcm_for_button: true });
         ready = true;
       }
+      const el = $('li-google');
       el.textContent = '';
       google.accounts.id.renderButton(el, {
         type: 'standard', size: 'large', shape: 'pill', logo_alignment: 'center', locale: 'fr',
         theme: currentTheme() === 'dark' ? 'filled_black' : 'outline', text: 'signin_with',
-        width: Math.min(400, Math.max(240, $('onboarding').querySelector('.ob-panel').clientWidth - 48)),
+        width: Math.min(400, Math.max(240, $('li-google-btn').offsetWidth || 320)),
       });
+      overlay(true);
+      return 'ready';
     }
+    /*
+     * Toucher notre bouton là où le bouton de Google n'est pas (services Google pas encore autorisés, bouton pas encore
+     * chargé, ou bord du bouton) : on autorise Google si besoin, puis on ouvre la connexion Google.
+     */
+    $('li-google-btn').addEventListener('click', async () => {
+      $('err-login').textContent = '';
+      if (!Consent.has('google')) Consent.allow('google');   // le choix explicite de « Se connecter avec Google » vaut accord
+      note('Ouverture de Google…');
+      const state = await mount();
+      if (state === 'failed') { note('Connexion Google indisponible pour le moment. Connectez-vous avec votre adresse e-mail, ou réessayez plus tard.'); return; }
+      if (state !== 'ready') { note(''); return; }
+      note('');
+      try {
+        google.accounts.id.prompt((n) => {
+          if (n && ((n.isNotDisplayed && n.isNotDisplayed()) || (n.isSkippedMoment && n.isSkippedMoment()))) note(AGAIN);
+        });
+      } catch (e) { note(AGAIN); }
+    });
     // Accord donné ou retiré pendant que l'écran de connexion est affiché
     Consent.onChange(() => { if (!$('onboarding').hidden && currentStep === 'login') mount(); });
     return { enabled, mount };
