@@ -1,6 +1,6 @@
 /**
  * Suppression définitive du compte de l'utilisateur connecté (droit à l'effacement, RGPD) :
- * fichiers de sa fiche (photos, stories, justificatifs), puis son compte Supabase Auth.
+ * sa photo de profil, les fichiers de sa fiche (photos, stories, justificatifs), puis son compte Supabase Auth.
  * La suppression du compte efface en cascade le profil, la fiche, le SIRET, l'abonnement,
  * les abonnements, statistiques, stories et promotions.
  * Abonnement payé sur Whop : son renouvellement est d'abord arrêté (aucun prélèvement après la suppression) ;
@@ -24,6 +24,8 @@ const ALLOWED_ORIGINS = [
   /^http:\/\/localhost:\d+$/,
 ];
 export const BUCKETS = ["photos", "stories", "documents"];
+/** Photos de profil : un dossier par compte (identifiant du compte). */
+export const AVATARS = "avatars";
 
 function corsHeaders(origin: string | null): Record<string, string> {
   const allowed = origin && ALLOWED_ORIGINS.some((re) => re.test(origin));
@@ -58,6 +60,7 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
       }
       for (const bucket of BUCKETS) await deps.removeFolder(bucket, merchantId);
     }
+    await deps.removeFolder(AVATARS, userId);
     await deps.deleteUser(userId);
     return json(200, { deleted: true });
   } catch (e) {

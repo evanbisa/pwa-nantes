@@ -1,6 +1,6 @@
 // Tests de la fonction delete-account, sans réseau : deno test supabase/functions/
 import { assertEquals } from "jsr:@std/assert@1";
-import { BUCKETS, handle, type Deps } from "./handler.ts";
+import { AVATARS, BUCKETS, handle, type Deps } from "./handler.ts";
 
 function fakeDeps(over: Partial<Deps> = {}) {
   const calls = { removed: [] as string[], deleted: [] as string[], billing: [] as string[] };
@@ -17,19 +17,19 @@ function fakeDeps(over: Partial<Deps> = {}) {
 const req = ({ token = "jeton-valide", method = "POST" } = {}) =>
   new Request("https://x.supabase.co/functions/v1/delete-account", { method, headers: { Authorization: `Bearer ${token}`, Origin: "https://pwa-nantes.vercel.app" } });
 
-Deno.test("supprime les fichiers de la fiche puis le compte", async () => {
+Deno.test("supprime les fichiers de la fiche, la photo de profil, puis le compte", async () => {
   const { deps, calls } = fakeDeps();
   const res = await handle(req(), deps);
   assertEquals(res.status, 200);
   assertEquals(calls.billing, ["merchant-1"]);   // renouvellement Whop arrêté avant tout
-  assertEquals(calls.removed, BUCKETS.map((b) => b + "/merchant-1"));
+  assertEquals(calls.removed, [...BUCKETS.map((b) => b + "/merchant-1"), AVATARS + "/user-1"]);
   assertEquals(calls.deleted, ["user-1"]);
   assertEquals(res.headers.get("Access-Control-Allow-Origin"), "https://pwa-nantes.vercel.app");
 });
-Deno.test("compte client (sans fiche) : seul le compte est supprimé", async () => {
+Deno.test("compte client (sans fiche) : sa photo de profil puis le compte", async () => {
   const { deps, calls } = fakeDeps({ getMerchantId: () => Promise.resolve(null) });
   assertEquals((await handle(req(), deps)).status, 200);
-  assertEquals([calls.removed.length, calls.deleted], [0, ["user-1"]]);
+  assertEquals([calls.removed, calls.deleted], [[AVATARS + "/user-1"], ["user-1"]]);
 });
 Deno.test("sans session valide : refus, rien n'est supprimé", async () => {
   const { deps, calls } = fakeDeps();

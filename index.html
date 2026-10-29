@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IzbzNmpdxcFCr79rzdpYzaKDOsNWo8MJ91EJeOaAWTk=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-tYTErVmItKJH4TQKJJYfyrVs8S6euP9UcCxCvMuOKxs=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IzbzNmpdxcFCr79rzdpYzaKDOsNWo8MJ91EJeOaAWTk=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-8ctMUbXDvJFhQUX/alIdYpi2ld3xvY8ecwJx1phGP0w=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -408,6 +408,11 @@
     /* Profil : en-tête, puis réglages groupés en listes (comme les réglages d'un téléphone) */
     .pf-head { position: relative; display: flex; align-items: center; gap: 16px; padding: 18px 16px; border-radius: 22px; background: linear-gradient(135deg, var(--accent-soft), transparent 75%), var(--hover); }
     .pf-head .icon-btn { position: absolute; top: 10px; right: 10px; }
+    .pf-avatar-btn { position: relative; flex: none; padding: 0; border-radius: 50%; }
+    .pf-avatar-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    .pf-cam { position: absolute; right: -4px; bottom: -4px; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; color: #fff; background: var(--accent-strong); box-shadow: 0 0 0 3px var(--panel-solid); }
+    .pf-cam svg { width: 15px; height: 15px; }
+    .avatar.has-photo { color: transparent; background-size: cover; background-position: center; }
     .pf-avatar { width: 64px; height: 64px; font-size: 28px; font-weight: 600; background: linear-gradient(135deg, #1a73e8, #8b5cf6); box-shadow: 0 0 0 3px var(--panel-solid), 0 0 0 5px var(--accent-line); }
     .pf-id { min-width: 0; padding-right: 34px; }
     .pf-id h3 { margin: 0; font-size: 22px; font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
@@ -858,6 +863,9 @@
     .crop-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
     .crop-head h2 { margin: 0; font-size: 18px; font-weight: 500; }
     .crop-head span { flex: none; font-size: 13px; color: var(--muted); }
+    /* Photo de profil : cadre carré, l'extérieur du rond assombri */
+    .cropper.is-round .crop-panel { max-width: 440px; }
+    .cropper.is-round .crop-frame::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 999px rgba(0, 0, 0, .55); pointer-events: none; }
     .crop-frame { position: relative; margin-top: 14px; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: #000; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
     .crop-frame.is-dragging { cursor: grabbing; }
     .crop-frame:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -1959,7 +1967,11 @@
   <section id="profile-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="profile-name" aria-hidden="true">
     <button class="sheet-grab" type="button" data-close aria-label="Fermer"></button>
     <div class="pf-head">
-      <span class="avatar pf-avatar" id="profile-avatar" aria-hidden="true"></span>
+      <button class="pf-avatar-btn" type="button" id="profile-photo-btn" aria-label="Changer la photo de profil">
+        <span class="avatar pf-avatar" id="profile-avatar" aria-hidden="true"></span>
+        <span class="pf-cam" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.3l1.2-1.8A1.5 1.5 0 0 1 10.2 3.5h3.6a1.5 1.5 0 0 1 1.2.7L16.2 6h1.3A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12.5" r="3.3" fill="none" stroke="currentColor" stroke-width="2"/></svg></span>
+      </button>
+      <input type="file" id="avatar-file" accept="image/*" hidden />
       <div class="pf-id">
         <h3 id="profile-name"></h3>
         <p class="pf-email" id="profile-email"></p>
@@ -1973,6 +1985,7 @@
 
     <p class="pf-label">Mon compte</p>
     <div class="pf-group">
+      <div class="pf-row"><span class="pf-ico" aria-hidden="true">📷</span><span class="pf-k">Photo de profil<small id="profile-photo-state"></small></span><button class="pf-link" type="button" id="profile-photo-remove" hidden>Retirer</button><button class="pf-pill" type="button" id="profile-photo-pick">Choisir</button></div>
       <div class="pf-row" id="profile-about-row" hidden><span class="pf-ico" aria-hidden="true">👤</span><span class="pf-k">Vous<small id="profile-about"></small></span><button class="pf-link" type="button" id="profile-about-edit" aria-label="Modifier votre sexe et votre âge">Modifier</button></div>
       <div class="pf-row"><span class="pf-ico" aria-hidden="true">📍</span><span class="pf-k">Localisation<small id="profile-geo"></small></span><button class="pf-pill" type="button" id="profile-locate">Activer</button></div>
     </div>
@@ -3308,6 +3321,7 @@
       follows: Object.fromEntries((follows || []).map((f) => [f.merchant_id, f.created_at])),
       prefs: { promos: profile.notify_promos !== false, stories: profile.notify_stories !== false, reviews: profile.notify_reviews !== false },
       gender: profile.gender || null, birthYear: profile.birth_year || null,
+      avatarPath: profile.avatar_path || null,
     };
     if (user.role === 'pro') user.pro = await loadPro(user);
     cloud.user = user;
@@ -3696,10 +3710,10 @@
     }
   }
 
-  /** Plus grand cadre 16:9 contenu dans l'image, centré. */
-  function fullCrop(w, h) {
-    const cw = w / h > PHOTO_RATIO ? h * PHOTO_RATIO : w;
-    const ch = cw / PHOTO_RATIO;
+  /** Plus grand cadre 16:9 (ou du rapport demandé) contenu dans l'image, centré. */
+  function fullCrop(w, h, ratio = PHOTO_RATIO) {
+    const cw = w / h > ratio ? h * ratio : w;
+    const ch = cw / ratio;
     return { x: (w - cw) / 2, y: (h - ch) / 2, w: cw, h: ch };
   }
 
@@ -8396,11 +8410,11 @@
     renderPhotos();
   }
 
-  /* ---------- Recadreur 16:9 ---------- */
+  /* ---------- Recadreur (photos des fiches en 16:9, photo de profil carrée et ronde) ---------- */
 
   /**
    * Ouvre le recadreur sur `bitmap`. Résout avec la zone choisie { x, y, w, h } (pixels de l'image),
-   * ou null si le restaurateur ignore la photo.
+   * ou null si la photo est ignorée. Options : ratio (16:9 par défaut), round (masque rond), textes.
    */
   const cropPhoto = (() => {
     const root = $('cropper');
@@ -8529,7 +8543,7 @@
     function close(result) {
       const { resolve, returnFocus } = st;
       if (result) {                        // arrondi au pixel, sans sortir de l'image
-        const w = Math.min(st.bitmap.width, Math.round(result.w)), h = Math.min(st.bitmap.height, Math.round(w / PHOTO_RATIO));
+        const w = Math.min(st.bitmap.width, Math.round(result.w)), h = Math.min(st.bitmap.height, Math.round(w / st.ratio));
         result = { x: Math.min(st.bitmap.width - w, Math.max(0, Math.round(result.x))), y: Math.min(st.bitmap.height - h, Math.max(0, Math.round(result.y))), w, h };
       }
       st = null;
@@ -8540,9 +8554,19 @@
       resolve(result);
     }
 
-    return (bitmap, { index = 1, total = 1 } = {}) => new Promise((resolve) => {
-      const base = fullCrop(bitmap.width, bitmap.height);
-      st = { bitmap, base, zoom: 1, cx: bitmap.width / 2, cy: bitmap.height / 2, resolve, returnFocus: document.activeElement };
+    const TEXTS = {
+      title: 'Recadrer la photo',
+      hint: 'Toutes les photos sont au format 16:9. Faites glisser l\'image pour choisir le cadrage, zoomez avec le curseur, la molette ou en pinçant.',
+      ok: 'Valider le cadrage', skip: 'Ignorer cette photo',
+    };
+    return (bitmap, { index = 1, total = 1, ratio = PHOTO_RATIO, round = false, ...texts } = {}) => new Promise((resolve) => {
+      const base = fullCrop(bitmap.width, bitmap.height, ratio);
+      st = { bitmap, base, ratio, zoom: 1, cx: bitmap.width / 2, cy: bitmap.height / 2, resolve, returnFocus: document.activeElement };
+      const t = { ...TEXTS, ...texts };
+      $('crop-title').textContent = t.title; $('crop-hint').textContent = t.hint;
+      $('crop-ok').textContent = t.ok; $('crop-skip').textContent = t.skip;
+      frame.style.aspectRatio = String(ratio);
+      root.classList.toggle('is-round', round);
       $('crop-count').textContent = total > 1 ? 'Photo ' + index + ' sur ' + total : '';
       root.hidden = false;
       draw();
@@ -8723,8 +8747,16 @@
 
   const initial = (name) => (name || '?').trim().charAt(0).toUpperCase() || '?';
 
+  /** Rond du compte : la photo de profil, sinon l'initiale du prénom. */
+  function paintAvatar(el, account) {
+    const url = account.avatarPath && sb ? publicUrl('avatars', account.avatarPath) : '';
+    el.textContent = initial(account.name);
+    el.classList.toggle('has-photo', !!url);
+    el.style.backgroundImage = url ? 'url("' + url + '")' : '';
+  }
+
   function applyAccount(account) {
-    $('avatar').textContent = initial(account.name);
+    paintAvatar($('avatar'), account);
     $('profile-btn').setAttribute('aria-label', 'Profil de ' + account.name);
   }
 
@@ -9445,7 +9477,10 @@
   function openProfileSheet() {
     const account = currentUser();
     if (!account) return;
-    $('profile-avatar').textContent = initial(account.name);
+    paintAvatar($('profile-avatar'), account);
+    $('profile-photo-state').textContent = account.avatarPath ? 'Visible sur votre profil' : 'Aucune photo pour l\'instant';
+    $('profile-photo-remove').hidden = !account.avatarPath;
+    $('profile-photo-pick').textContent = account.avatarPath ? 'Changer' : 'Choisir';
     $('profile-name').textContent = account.role === 'pro' && account.lastName ? account.name + ' ' + account.lastName : account.name;
     $('profile-email').textContent = account.email + (account.emailVerifiedAt ? ' ✓' : '');
     if (account.google) { const tag = document.createElement('span'); tag.className = 'role-tag'; tag.textContent = 'Google'; $('profile-email').append(' ', tag); }
@@ -9486,6 +9521,62 @@
   $('profile-pro').addEventListener('click', () => ProSpace.open());
   $('profile-cookies').addEventListener('click', () => Consent.open({ details: true }));
   $('profile-theme-row').addEventListener('click', () => { $('theme-btn').click(); });
+
+  /*
+   * Photo de profil (clients et restaurateurs) : photothèque ou appareil photo (le téléphone propose les deux),
+   * recadrage rond, envoi d'un JPEG carré de 512 px dans le dossier du compte, ancienne photo effacée.
+   */
+  const AVATAR_SIZE = 512;
+  const pickAvatar = () => { $('avatar-file').value = ''; $('avatar-file').click(); };
+  $('profile-photo-btn').addEventListener('click', pickAvatar);
+  $('profile-photo-pick').addEventListener('click', pickAvatar);
+  $('avatar-file').addEventListener('change', async () => {
+    const file = $('avatar-file').files[0];
+    const account = currentUser();
+    if (!file || !account || !sb) return;
+    if (!/^image\//.test(file.type) && !/\.(heic|heif)$/i.test(file.name)) { toast('Choisissez une photo (JPEG, PNG, HEIC…).'); return; }
+    let bitmap;
+    try { bitmap = await decodeImage(file); } catch (e) { toast('Cette photo ne peut pas être ouverte. Essayez-en une autre.'); return; }
+    const crop = await cropPhoto(bitmap, {
+      ratio: 1, round: true, title: 'Votre photo de profil', ok: 'Utiliser cette photo', skip: 'Annuler',
+      hint: 'Faites glisser la photo pour centrer votre visage dans le rond, zoomez avec le curseur ou en pinçant.',
+    });
+    if (!crop) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = AVATAR_SIZE;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bitmap, crop.x, crop.y, crop.w, crop.h, 0, 0, AVATAR_SIZE, AVATAR_SIZE);
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+    if (!blob) { toast('Cette photo ne peut pas être préparée. Essayez-en une autre.'); return; }
+    const path = account.id + '/' + uid() + '.jpg';
+    const previous = account.avatarPath;
+    try {
+      await Loader.run((async () => {
+        const up = await sb.storage.from('avatars').upload(path, blob, { contentType: 'image/jpeg', cacheControl: '31536000' });
+        if (up.error) throw up.error;
+        const { error } = await sb.from('profiles').update({ avatar_path: path }).eq('id', account.id);
+        if (error) { await sb.storage.from('avatars').remove([path]).catch(() => {}); throw error; }
+      })(), 'Envoi de la photo…');
+    } catch (e) { toast('La photo n\'a pas pu être enregistrée. Vérifiez votre connexion, puis réessayez.'); return; }
+    if (previous) sb.storage.from('avatars').remove([previous]).catch(() => {});
+    account.avatarPath = path;
+    applyAccount(account);
+    openProfileSheet();
+    toast('Photo de profil enregistrée.');
+  });
+  $('profile-photo-remove').addEventListener('click', async () => {
+    const account = currentUser();
+    if (!account || !account.avatarPath || !sb) return;
+    const previous = account.avatarPath;
+    const { error } = await sb.from('profiles').update({ avatar_path: null }).eq('id', account.id);
+    if (error) { toast('La photo n\'a pas pu être retirée. Réessayez.'); return; }
+    sb.storage.from('avatars').remove([previous]).catch(() => {});
+    account.avatarPath = null;
+    applyAccount(account);
+    openProfileSheet();
+    toast('Photo de profil retirée.');
+  });
   $('profile-locate').addEventListener('click', () => {
     closePanel($('profile-sheet'));
     requestLocation({ fly: true, fromButton: true });
