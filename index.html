@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IzbzNmpdxcFCr79rzdpYzaKDOsNWo8MJ91EJeOaAWTk=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-8ctMUbXDvJFhQUX/alIdYpi2ld3xvY8ecwJx1phGP0w=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IzbzNmpdxcFCr79rzdpYzaKDOsNWo8MJ91EJeOaAWTk=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-xGKolAke6V9HaW2wBoKsRGqmVmHyeMVGJw5lwHnVJkc=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -9478,7 +9478,7 @@
     const account = currentUser();
     if (!account) return;
     paintAvatar($('profile-avatar'), account);
-    $('profile-photo-state').textContent = account.avatarPath ? 'Visible sur votre profil' : 'Aucune photo pour l\'instant';
+    $('profile-photo-state').textContent = account.avatarPath ? 'Ajoutée ✓' : 'Aucune photo pour l\'instant';
     $('profile-photo-remove').hidden = !account.avatarPath;
     $('profile-photo-pick').textContent = account.avatarPath ? 'Changer' : 'Choisir';
     $('profile-name').textContent = account.role === 'pro' && account.lastName ? account.name + ' ' + account.lastName : account.name;
@@ -9537,11 +9537,12 @@
     if (!/^image\//.test(file.type) && !/\.(heic|heif)$/i.test(file.name)) { toast('Choisissez une photo (JPEG, PNG, HEIC…).'); return; }
     let bitmap;
     try { bitmap = await decodeImage(file); } catch (e) { toast('Cette photo ne peut pas être ouverte. Essayez-en une autre.'); return; }
+    closePanel($('profile-sheet'));   // le recadrage prend tout l'écran ; la fiche revient ensuite
     const crop = await cropPhoto(bitmap, {
       ratio: 1, round: true, title: 'Votre photo de profil', ok: 'Utiliser cette photo', skip: 'Annuler',
       hint: 'Faites glisser la photo pour centrer votre visage dans le rond, zoomez avec le curseur ou en pinçant.',
     });
-    if (!crop) return;
+    if (!crop) { openProfileSheet(); return; }
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = AVATAR_SIZE;
     const ctx = canvas.getContext('2d');
@@ -9558,7 +9559,7 @@
         const { error } = await sb.from('profiles').update({ avatar_path: path }).eq('id', account.id);
         if (error) { await sb.storage.from('avatars').remove([path]).catch(() => {}); throw error; }
       })(), 'Envoi de la photo…');
-    } catch (e) { toast('La photo n\'a pas pu être enregistrée. Vérifiez votre connexion, puis réessayez.'); return; }
+    } catch (e) { openProfileSheet(); toast('La photo n\'a pas pu être enregistrée. Vérifiez votre connexion, puis réessayez.'); return; }
     if (previous) sb.storage.from('avatars').remove([previous]).catch(() => {});
     account.avatarPath = path;
     applyAccount(account);
