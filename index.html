@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IzbzNmpdxcFCr79rzdpYzaKDOsNWo8MJ91EJeOaAWTk=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-nc+2ltR4szHkDGcKjWxG+GxIoxk99935vK3wNUmhDjo=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IzbzNmpdxcFCr79rzdpYzaKDOsNWo8MJ91EJeOaAWTk=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-1fHY7D75LbW2KhZr/U5adHXYcuC27VifX8e/Jq7QvYw=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -919,6 +919,8 @@
     .crop-actions .btn-ghost { order: -1; }
     @media (max-width: 480px) { .crop-panel { padding: 16px; } .crop-actions { flex-direction: column; } .crop-actions .btn-ghost { order: 0; margin-top: 0; } }
     .addr-wrap { position: relative; }
+    .ob-address-toggle { display: block; margin: 12px auto 0; font-size: 14.5px; }
+    .ob-address { margin-top: 10px; margin-bottom: 14px; text-align: left; }
     .addr-wrap input { width: 100%; height: 50px; padding: 0 16px; border-radius: 8px; font: inherit; font-size: 16px; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); outline: none; }
     .addr-wrap input:focus { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
     .field.has-error .addr-wrap input { border-color: var(--danger); }
@@ -1195,6 +1197,8 @@
     .g-overlay { position: absolute; inset: 0; align-items: center; overflow: hidden; border-radius: 26px; opacity: .01; }
     .g-overlay:empty { display: none; }
     .g-box:focus-within .g-btn { outline: 2px solid var(--accent); outline-offset: 2px; }   /* focus sur le bouton de Google, invisible */
+    .terms-check { align-items: flex-start; line-height: 1.45; }
+    .terms-check input { margin-top: 2px; }
     .g-note { margin: 0; font-size: 13px; line-height: 1.45; text-align: center; color: var(--muted); }
     .or-sep { display: flex; align-items: center; gap: 12px; margin: 14px 0 0; font-size: 13px; color: var(--muted); }
     .or-sep::before, .or-sep::after { content: ""; flex: 1; height: 1px; background: var(--line); }
@@ -2387,10 +2391,11 @@
           <small class="field-error" id="err-su-password2" aria-live="polite"></small>
         </label>
         <label class="check"><input type="checkbox" id="su-remember" /> Rester connecté sur cet appareil</label>
+        <label class="check terms-check" id="field-su-terms"><input type="checkbox" id="su-terms" /> <span>J'accepte les <a href="app/legal/cgu/" target="_blank" rel="noopener">conditions d'utilisation</a>, les <a href="app/legal/cgv/" target="_blank" rel="noopener">conditions de vente</a> des abonnements et la <a href="app/legal/confidentialite/" target="_blank" rel="noopener">politique de confidentialité</a>.</span></label>
+        <small class="field-error" id="err-su-terms" aria-live="polite"></small>
         <p class="form-error" id="err-signup" role="alert"></p>
         <button class="btn btn-primary" type="submit">Continuer : vérification</button>
         <p class="ob-switch">Déjà un compte ? <button class="link-btn" type="button" data-goto="login">Se connecter</button></p>
-        <p class="legal">En créant un compte, vous acceptez les <a href="app/legal/cgu/" target="_blank" rel="noopener">conditions d'utilisation</a> et la <a href="app/legal/confidentialite/" target="_blank" rel="noopener">politique de confidentialité</a>.</p>
       </form>
 
       <!-- Connexion -->
@@ -2424,6 +2429,7 @@
             <div class="g-slot g-overlay" id="li-google"></div>
           </div>
           <p class="g-note" id="li-google-note" aria-live="polite" hidden></p>
+          <p class="g-note">Pas encore de compte ? Avec Google, vous confirmez avoir 15 ans ou plus et accepter les <a href="app/legal/cgu/" target="_blank" rel="noopener">conditions d'utilisation</a>.</p>
         </div>
         <p class="ob-switch">Pas encore de compte ? <button class="link-btn" type="button" data-goto="signup">Créer un compte</button></p>
       </form>
@@ -2479,6 +2485,15 @@
           <li><span aria-hidden="true">🔒</span>Votre position n'est jamais partagée</li>
         </ul>
         <button class="btn btn-primary" type="button" id="ob-allow">Autoriser la localisation</button>
+        <button class="link-btn ob-address-toggle" type="button" id="ob-address-toggle" aria-expanded="false" aria-controls="ob-address">Ou tapez une adresse à la place</button>
+        <div class="field ob-address" id="ob-address" hidden>
+          <span>Votre adresse, ou un lieu de La Roche-sur-Yon</span>
+          <div class="addr-wrap">
+            <input id="ob-address-input" type="text" autocomplete="off" placeholder="Ex. : 12 place Napoléon" role="combobox" aria-autocomplete="list" aria-controls="ob-address-list" aria-expanded="false" />
+            <ul class="addr-list" id="ob-address-list" role="listbox" hidden></ul>
+          </div>
+          <small class="addr-status" id="ob-address-status">Elle sert seulement à calculer les distances sur cet appareil : elle n'est jamais enregistrée.</small>
+        </div>
         <button class="btn btn-ghost" type="button" id="ob-later">Plus tard</button>
       </section>
 
@@ -3735,6 +3750,8 @@
     return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] }, properties: {} };
   }
 
+  /** Version des conditions d'utilisation acceptées (même valeur que l'inscription de l'application). */
+  const TERMS_VERSION = '2026-10-29';
   const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
   const formatSize = (b) => (b < 1024 * 1024 ? Math.max(1, Math.round(b / 1024)) + ' Ko' : (b / 1024 / 1024).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' Mo');
 
@@ -7214,6 +7231,8 @@
     const confirmation = $('su-password2').value;
     if (!confirmation) fail('su-password2', 'Confirmez votre mot de passe.');
     else if (confirmation !== password) fail('su-password2', 'Les deux mots de passe ne sont pas identiques.');
+    $('err-su-terms').textContent = '';
+    if (!$('su-terms').checked) { $('err-su-terms').textContent = 'Cochez la case pour accepter les conditions.'; firstInvalid = firstInvalid || 'su-terms'; }
     if (firstInvalid) { $(firstInvalid).focus(); return; }
     const accountExists = () => {
       $('err-signup').innerHTML = 'Un compte existe déjà avec cet e-mail. <button class="link-btn" type="button" id="to-login">Se connecter</button>';
@@ -7222,7 +7241,7 @@
     const btn = ev.submitter || $('form-signup').querySelector('[type=submit]');
     btn.disabled = true;
     authStorage.setRemember($('su-remember').checked);
-    const meta = { role: 'merchant', first_name: name, last_name: lastName, phone: formatPhone(phone) };
+    const meta = { role: 'merchant', first_name: name, last_name: lastName, phone: formatPhone(phone), terms_version: TERMS_VERSION };
     const { data, error } = await Loader.run(
       sb.auth.signUp({ email, password, options: { data: meta, emailRedirectTo: location.origin + location.pathname } }),
       'Création de votre compte…');
@@ -7696,6 +7715,8 @@
     const then = () => { if (!store.read().geoConsent) showAuthStep('location'); else routeAfterLogin(user); };
     // Compte Google tout neuf : les deux questions de l'inscription (sexe, âge), passables
     const fresh = Date.now() - new Date(user.createdAt).getTime() < 10 * 60 * 1000;
+    // Compte créé à l'instant depuis la connexion : acceptation des conditions affichées sous le bouton Google
+    if (fresh) sb.rpc('accept_terms', { p_version: TERMS_VERSION }).then(() => {}, () => {});
     if (fresh && !user.gender && !user.birthYear) {
       Join.ask({ onDone: () => { Join.welcome(user); then(); } });
       return;
@@ -7776,6 +7797,63 @@
     btn.textContent = 'Autoriser la localisation';
     finishAuth({ fresh: true, located: ok });
   });
+
+  /*
+   * Sans GPS : une adresse tapée (Base Adresse Nationale) remplace la position pour les distances. Gardée en mémoire le
+   * temps de la visite seulement, jamais enregistrée ni envoyée au serveur de FlashMiam.
+   */
+  (function addressInsteadOfGps() {
+    const input = $('ob-address-input'), list = $('ob-address-list'), status = $('ob-address-status');
+    const HINT = status.textContent;
+    let seq = 0, timer = null;
+    $('ob-address-toggle').addEventListener('click', () => {
+      const box = $('ob-address');
+      box.hidden = !box.hidden;
+      $('ob-address-toggle').setAttribute('aria-expanded', String(!box.hidden));
+      if (!box.hidden) input.focus();
+    });
+    function close() { list.hidden = true; list.textContent = ''; input.setAttribute('aria-expanded', 'false'); }
+    function choose(item) {
+      close();
+      input.value = item.label;
+      Geo.position = item.coords;
+      Geo.accuracy = 0;
+      Geo.manual = true;
+      store.write({ geoConsent: 'later' });   // pas d'autorisation GPS : la question pourra être reposée
+      whenMapReady(drawUserLocation);
+      renderList();
+      Offers.refresh();
+      finishAuth({ fresh: true, located: true });
+      setTimeout(() => toast('Distances calculées depuis « ' + item.name + ' ». Adresse non enregistrée.'), 1800);
+    }
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      const q = input.value.trim();
+      if (q.length < 3) { close(); status.textContent = HINT; return; }
+      timer = setTimeout(async () => {
+        const mine = ++seq;
+        let items = [];
+        try { items = await geocode(q); } catch (e) { if (mine === seq) status.textContent = 'Recherche d\'adresse indisponible pour le moment. Réessayez dans un instant.'; return; }
+        if (mine !== seq) return;
+        list.textContent = '';
+        items.forEach((item, i) => {
+          const li = document.createElement('li');
+          li.setAttribute('role', 'option');
+          li.id = 'ob-addr-' + i;
+          li.textContent = item.label;
+          li.addEventListener('click', () => choose(item));
+          list.appendChild(li);
+        });
+        list.hidden = !items.length;
+        input.setAttribute('aria-expanded', String(!!items.length));
+        status.textContent = items.length ? HINT : 'Aucune adresse trouvée à La Roche-sur-Yon.';
+      }, 250);
+    });
+    input.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') { ev.preventDefault(); const first = list.querySelector('li'); if (first) first.click(); }
+      if (ev.key === 'Escape') close();
+    });
+  })();
 
   $('ob-later').addEventListener('click', () => {
     store.write({ geoConsent: 'later' });

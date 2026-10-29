@@ -15,7 +15,7 @@ function fakeDeps(over: Partial<Deps> = {}) {
   };
   return { deps, calls };
 }
-const SIGNUP = { action: "signup", email: "Lea.Martin@Univ-Nantes.fr ", password: "Motdepasse1!", first_name: " Léa ", gender: "female", birth_year: "2005" };
+const SIGNUP = { action: "signup", email: "Lea.Martin@Univ-Nantes.fr ", password: "Motdepasse1!", first_name: " Léa ", gender: "female", birth_year: "2005", accept_terms: "2026-10-29" };
 const req = (body: unknown, { method = "POST", origin = "https://pwa-nantes.vercel.app", ip = "203.0.113.7" } = {}) =>
   new Request("https://x.supabase.co/functions/v1/client-signup", {
     method, headers: { Origin: origin, "x-forwarded-for": ip + ", 10.0.0.1", "Content-Type": "application/json" },
@@ -27,7 +27,7 @@ Deno.test("inscription : compte client créé déjà confirmé, adresse en minus
   const { deps, calls } = fakeDeps();
   const { status, body, res } = await call(SIGNUP, deps);
   assertEquals([status, body], [200, { created: true }]);
-  assertEquals(calls.created, [{ email: "lea.martin@univ-nantes.fr", password: "Motdepasse1!", metadata: { role: "student", first_name: "Léa", gender: "female", birth_year: "2005" } }]);
+  assertEquals(calls.created, [{ email: "lea.martin@univ-nantes.fr", password: "Motdepasse1!", metadata: { role: "student", first_name: "Léa", terms_version: "2026-10-29", gender: "female", birth_year: "2005" } }]);
   assertEquals(calls.dns, ["univ-nantes.fr"]);
   assertEquals(calls.attempts, ["empreinte-203.0.113.7:signup"]);   // première adresse de la liste, jamais en clair
   assertEquals(res.headers.get("Access-Control-Allow-Origin"), "https://pwa-nantes.vercel.app");
@@ -83,8 +83,8 @@ Deno.test("adresse, mot de passe, prénom, âge invalides : refus avant toute te
 Deno.test("15 ans tout juste : accepté ; sexe et âge facultatifs", async () => {
   const { deps, calls } = fakeDeps();
   assertEquals((await call({ ...SIGNUP, birth_year: "2011" }, deps)).status, 200);
-  assertEquals((await call({ action: "signup", email: "hugo@gmail.com", password: "Motdepasse1!", first_name: "Hugo" }, deps)).status, 200);
-  assertEquals(calls.created[1].metadata, { role: "student", first_name: "Hugo" });
+  assertEquals((await call({ action: "signup", email: "hugo@gmail.com", password: "Motdepasse1!", first_name: "Hugo", accept_terms: "2026-10-29" }, deps)).status, 200);
+  assertEquals(calls.created[1].metadata, { role: "student", first_name: "Hugo", terms_version: "2026-10-29" });
 });
 Deno.test("compte déjà existant : 409 ; mot de passe refusé par Supabase : 422", async () => {
   assertEquals((await call(SIGNUP, fakeDeps({ createUser: () => Promise.resolve("exists") }).deps)).status, 409);
@@ -118,4 +118,13 @@ Deno.test("verdict DNS : MX, MX nul, domaine inexistant, adresse seule, réponse
   assertEquals(mailVerdict({ Status: 2 }, null), "unknown");
   assertEquals(mailVerdict(null, null), "unknown");
   assertEquals(mailVerdict({ Status: 0 }, null), "unknown");
+});
+
+Deno.test("CGU non acceptées (case non cochée) : refus, aucun compte créé", async () => {
+  const { deps, calls } = fakeDeps();
+  const { accept_terms: _omit, ...rest } = SIGNUP;
+  const res = await call(rest, deps);
+  assertEquals(res.status, 400);
+  assertEquals(res.body.error, "terms");
+  assertEquals(calls.created.length, 0);
 });

@@ -40,6 +40,11 @@ export const confidentialite: LegalDoc = {
               basis: "Exécution du contrat (CGU)",
             },
             {
+              title: "Acceptation des conditions : date et version",
+              detail: "Garder la preuve que vous avez accepté les conditions d'utilisation et attesté avoir 15 ans ou plus (case cochée à l'inscription) : la date et la version des conditions acceptées.",
+              basis: "Intérêt légitime (preuve de l'acceptation)",
+            },
+            {
               title: "Connexion avec Google : prénom, e-mail, identifiant Google",
               detail: "Créer votre compte et vous connecter sans mot de passe, si vous choisissez ce mode.",
               basis: "Exécution du contrat",
@@ -50,8 +55,8 @@ export const confidentialite: LegalDoc = {
               basis: "Consentement, modifiable ou retirable dans Profil › Vous",
             },
             {
-              title: "Position (si vous l'autorisez)",
-              detail: "Afficher les distances et temps de trajet. Elle reste sur votre appareil : FlashMiam ne l'enregistre jamais.",
+              title: "Position (si vous l'autorisez) ou adresse tapée à la place",
+              detail: "Afficher les distances et temps de trajet. La position reste sur votre appareil : FlashMiam ne l'enregistre jamais. Si vous préférez taper une adresse, elle est seulement envoyée au service de recherche d'adresse de l'IGN pour la placer sur la carte, puis oubliée à la fermeture de la page.",
               basis: "Consentement, retirable à tout moment",
             },
             {
@@ -106,7 +111,7 @@ export const confidentialite: LegalDoc = {
             "**Google** : connexion avec Google, uniquement si vous l'utilisez et l'acceptez.",
             "**Cloudflare** (service DNS 1.1.1.1) : vérification que le domaine d'une adresse e-mail reçoit des e-mails ; seul le domaine est transmis.",
             "**Service d'alertes de votre navigateur** (Google, Mozilla, Apple ou Microsoft) : acheminement des alertes, chiffrées de bout en bout.",
-            "**INSEE** (vérification du SIRET) et **IGN** (recherche d'adresse) : uniquement pour les restaurateurs.",
+            "**INSEE** (vérification du SIRET), pour les restaurateurs, et **IGN** (recherche d'adresse) : seule l'adresse tapée lui est transmise, par un restaurateur pour placer sa fiche ou par un client qui préfère taper une adresse plutôt qu'activer la localisation.",
             "**Whop** : paiement de l'abonnement des restaurateurs (page de paiement, moyen de paiement, reçus), dès l'ouverture des abonnements payants. Les données de carte ne transitent que par Whop et ses prestataires de paiement ; FlashMiam ne reçoit que l'état de l'abonnement (formule, échéance, résiliation).",
             "**OpenFreeMap / OpenStreetMap** : fond de carte, chargé sans cookie.",
           ],
@@ -140,7 +145,7 @@ export const confidentialite: LegalDoc = {
             { title: "Fréquentation du site (identifiant d'appareil tiré au hasard)", detail: "13 mois." },
             { title: "Tentatives d'inscription (empreinte IP)", detail: "2 jours." },
             { title: "Notifications de paiement reçues de Whop", detail: "30 jours (identifiant et type seulement)." },
-            { title: "Compte, fiche, avis, « j'aime »", detail: "Jusqu'à leur suppression par vous, ou la suppression du compte." },
+            { title: "Compte, fiche, avis, « j'aime », preuve d'acceptation des conditions", detail: "Jusqu'à leur suppression par vous, ou la suppression du compte." },
             { title: "Alertes sur l'appareil", detail: "Jusqu'à leur désactivation, la déconnexion ou la suppression du compte." },
             { title: "Factures des restaurateurs", detail: "10 ans (obligation comptable)." },
           ],

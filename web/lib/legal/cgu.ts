@@ -21,7 +21,7 @@ export const cgu: LegalDoc = {
       icon: Info,
       blocks: [
         `Les présentes conditions générales d'utilisation (« CGU ») encadrent l'utilisation du site et de l'application **FlashMiam**, édités par ${LEGAL.editorName} (voir les {{mentions légales|/legal/mentions-legales}}).`,
-        "En créant un compte, vous acceptez les CGU dans leur version en vigueur. Sans compte, la consultation du site vaut également acceptation des présentes règles.",
+        "En créant un compte, vous acceptez les CGU dans leur version en vigueur et attestez avoir 15 ans ou plus, en cochant la case prévue à cet effet ; la date et la version acceptées sont conservées avec votre compte. Sans compte, la consultation du site vaut également acceptation des présentes règles.",
         "Les restaurateurs qui souscrivent l'abonnement payant sont en outre soumis aux {{conditions générales de vente|/legal/cgv}}.",
       ],
     },

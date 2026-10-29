@@ -5,7 +5,8 @@
  * Appels limités par adresse IP (empreinte seulement) et au total, contre les créations de comptes en masse.
  *
  *   POST { action: "check", email }                                          → 200 { ok: true }
- *   POST { action: "signup", email, password, first_name, gender?, birth_year? } → 200 { created: true }
+ *   POST { action: "signup", email, password, first_name, accept_terms, gender?, birth_year? } → 200 { created: true }
+ *   accept_terms : version des CGU acceptée (AAAA-MM-JJ), avec l'attestation « 15 ans ou plus » (case cochée sur le site).
  * Refus : { error, message } (400 données, 409 compte existant, 422 adresse ou mot de passe, 429 trop d'essais).
  */
 export interface Deps {
@@ -97,7 +98,11 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
     if (firstName.length < 2 || firstName.length > 40 || /[\p{Cc}<>]/u.test(firstName)) {
       return refuse(400, "invalid_name", "Prénom invalide (2 à 40 caractères).");
     }
-    const metadata: Record<string, string> = { role: "student", first_name: firstName };
+    const terms = str(body.accept_terms);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(terms)) {
+      return refuse(400, "terms", `Cochez la case : vous devez avoir ${MIN_AGE} ans ou plus et accepter les conditions d'utilisation.`);
+    }
+    const metadata: Record<string, string> = { role: "student", first_name: firstName, terms_version: terms };
     const gender = str(body.gender);
     if (gender && !GENDERS.includes(gender)) return refuse(400, "invalid", "Valeur du sexe inconnue.");
     if (gender) metadata.gender = gender;

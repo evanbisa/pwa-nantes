@@ -8,7 +8,7 @@ import AgePicker from "@/components/signup/AgePicker";
 import GoogleSignup from "@/components/signup/GoogleSignup";
 import { useKeyboardInset } from "@/components/signup/useKeyboardInset";
 import {
-  EMAIL_RE, MIN_AGE, PASSWORD_RULES, capitalize, passwordScore, suggestEmail,
+  EMAIL_RE, MIN_AGE, PASSWORD_RULES, TERMS_VERSION, capitalize, passwordScore, suggestEmail,
 } from "@/lib/signup/validation";
 
 /**
@@ -101,7 +101,8 @@ function Wizard() {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRememberChoice] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [viaGoogle, setViaGoogle] = useState(false);   // compte déjà créé avec Google (premier écran)
+  const [viaGoogle, setViaGoogle] = useState(false);
+  const [terms, setTerms] = useState(false);   // « J'ai 15 ans ou plus et j'accepte les conditions »   // compte déjà créé avec Google (premier écran)
   const [errors, setErrors] = useState<Partial<Record<Step, ReactNode>>>({});
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suggestedFor = useRef("");
@@ -144,9 +145,15 @@ function Wizard() {
     ev.preventDefault();
     const clean = name.trim().replace(/\s+/g, " ");
     if (clean.length < 2) return setError("name", "Indiquez votre prénom (2 caractères minimum).");
+    if (!terms) return termsMissing();
     setName(capitalize(clean));
     setError("name", null);
     go("gender");
+  }
+  /** Case des conditions pas cochée : on le dit et on l'amène sous les yeux. */
+  function termsMissing() {
+    setError("name", `Cochez la case : FlashMiam est réservé aux ${MIN_AGE} ans et plus, qui acceptent ses conditions.`);
+    document.getElementById("su-terms")?.focus();
   }
   function pickGender(value: Gender) {
     setGender(value);
@@ -195,7 +202,7 @@ function Wizard() {
     if (score < PASSWORD_RULES.length || busy) return;
     setBusy(true);
     setError("password", null);
-    const body: Record<string, string> = { action: "signup", email: cleanEmail, password, first_name: name.trim() };
+    const body: Record<string, string> = { action: "signup", email: cleanEmail, password, first_name: name.trim(), accept_terms: TERMS_VERSION };
     if (gender) body.gender = gender;
     if (ageSet) body.birth_year = String(new Date().getFullYear() - age);
     const res = await callSignup(body);
@@ -236,6 +243,8 @@ function Wizard() {
       return fail(<>Cette adresse est celle d&apos;un compte restaurateur : <button type="button" className={linkClass} onClick={() => openLogin(data.user.email ?? "", "pro")}>connectez-vous sur la carte</button> avec votre mot de passe.</>);
     }
     const fresh = !!profile && isFresh(profile.created_at);
+    // Compte créé à l'instant par Google : l'acceptation des conditions (case cochée) est enregistrée sur le compte
+    if (fresh) await sb.rpc("accept_terms", { p_version: TERMS_VERSION });
     if (fresh && at === "name") {
       // Compte créé par Google : prénom tapé, sinon celui de Google ; puis les deux questions facultatives
       setName(name.trim().length >= 2 ? capitalize(name.trim().replace(/\s+/g, " ")) : profile.first_name ?? "");
@@ -319,8 +328,19 @@ function Wizard() {
               <p className="mt-3 min-h-6 text-base font-medium text-brand-strong" aria-live="polite">
                 {firstName.length >= 2 && <><span className="su-em">Bienvenue, {firstName} !</span> 😊</>}
               </p>
-              <Primary>Continuer</Primary>
-              {!viaGoogle && <GoogleSignup onCredential={googleSignIn} />}
+              <label className="mt-auto flex cursor-pointer items-start gap-3 pt-4 text-[14px] leading-relaxed text-slate-700 dark:text-zinc-300">
+                <input
+                  id="su-terms" type="checkbox" checked={terms} onChange={(e) => { setTerms(e.target.checked); setError("name", null); }}
+                  className="mt-0.5 h-5 w-5 flex-none rounded accent-brand dark:accent-brand-night"
+                />
+                <span>
+                  J&apos;ai {MIN_AGE} ans ou plus et j&apos;accepte les{" "}
+                  <a className="font-medium underline" href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/legal/cgu/`} target="_blank" rel="noopener">conditions d&apos;utilisation</a>{" "}
+                  et la <a className="font-medium underline" href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/legal/confidentialite/`} target="_blank" rel="noopener">politique de confidentialité</a>.
+                </span>
+              </label>
+              <Primary className="mt-4">Continuer</Primary>
+              {!viaGoogle && <GoogleSignup onCredential={googleSignIn} locked={!terms} onLocked={termsMissing} />}
             </form>
           )}
 

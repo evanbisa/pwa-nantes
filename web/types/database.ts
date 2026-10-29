@@ -783,6 +783,10 @@ export type Database = {
         Args: { p_days?: number }
         Returns: Json
       }
+      accept_terms: {
+        Args: { p_version: string }
+        Returns: undefined
+      }
       is_team_admin: {
         Args: Record<string, never>
         Returns: boolean
