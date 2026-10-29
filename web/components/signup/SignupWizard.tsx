@@ -331,6 +331,8 @@ function Wizard() {
               <label className="mt-auto flex cursor-pointer items-start gap-3 pt-4 text-[14px] leading-relaxed text-slate-700 dark:text-zinc-300">
                 <input
                   id="su-terms" type="checkbox" checked={terms} onChange={(e) => { setTerms(e.target.checked); setError("name", null); }}
+                  // Entrée sur la case passe à la suite, comme dans les champs (sinon il faut traverser les deux liens)
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); e.currentTarget.form?.requestSubmit(); } }}
                   className="mt-0.5 h-5 w-5 flex-none rounded accent-brand dark:accent-brand-night"
                 />
                 <span>
