@@ -1,8 +1,38 @@
-# Sécurité et mise en ligne : où on en est (24 octobre 2026)
+# Sécurité et mise en ligne : où on en est (30 octobre 2026)
 
 > Mémo à relire quand on reprend « le sujet de la sécurité ».
 > Tout ce qui est marqué ✅ est fait et vérifié ; la section « Ce qu'il te reste à faire » liste
 > les seules actions qui ne peuvent pas être faites à ta place.
+
+## Les 20 points de sécurité (30 octobre 2026)
+
+> **Mise en ligne en cours** : le code, les tests et le site sont publiés. Restent à appliquer sur le projet Supabase,
+> dès ta confirmation (question posée par Supabase) : la migration `20261102090000_security_hardening`, le jeton du
+> ménage nocturne, la migration `20261103090000_backup_role` et les nouvelles versions des fonctions serveur. D'ici là,
+> les points 3 (ménage), 9, 11, 12 (côté stockage) et 13 restent dans leur état précédent en ligne.
+
+| # | Point | État | Comment c'est garanti (et vérifié) |
+|---|---|---|---|
+| 1 | Clés dans un fichier `.env` | ✅ | Aucun secret dans le code : secrets des fonctions dans Supabase › Edge Functions › Secrets, ceux des sauvegardes dans GitHub › Secrets ; modèle local `web/supabase/functions/.env.example`. Contrôle automatique à chaque envoi (`scripts/check-secrets.mjs`, workflow « Contrôle des secrets ») et sur les sites publiés (`check-live.mjs`). |
+| 2 | `.env` dans le `.gitignore` | ✅ | `.gitignore` (racine) : `.env`, `.env.*` sauf `.env.example` ; `web/.gitignore` idem (seul `web/.env.production`, valeurs publiques, est suivi). |
+| 3 | Limite d'essais sur la connexion | ✅ | Serveur : limite par adresse IP de Supabase Auth ; inscription des clients plafonnée par IP (empreinte) et au total. Page : après 4 échecs, attente croissante (30 s, 1 min… 5 min au plus), 1 min si le serveur dit « trop de demandes », maintenue au rechargement. Anti-robots Cloudflare Turnstile prêt (connexion, inscription, mot de passe oublié, renvoi de code, Google) : à activer (voir plus bas). Tests : e2e24 A. |
+| 4 | RLS activée | ✅ | Toutes les tables, avec des règles par rôle ; 311 scénarios (visiteur, client, restaurateur, serveur, rôle de sauvegarde) à chaque modification, aussi sur GitHub (PostgreSQL 17, job « regles-base ») ; contrôle hebdomadaire depuis Internet (`check-supabase.mjs`) ; conseiller de sécurité Supabase. |
+| 5 | Mots de passe hachés | ✅ | Supabase Auth (bcrypt) ; aucune table du site ne contient d'e-mail ni de mot de passe (vérifié par un scénario). Mot de passe du rôle de sauvegarde tiré par la base et gardé haché (SCRAM). |
+| 6 | Droits vérifiés côté serveur | ✅ | Règles RLS et déclencheurs de la base (dates posées par la base, durées, quotas, conditions de publication), fonctions à droits élevés rangées dans `private`, fonctions serveur qui vérifient la session. La page ne fait qu'afficher. |
+| 7 | Clé publique côté client seulement | ✅ | Pages : clé publiable Supabase, identifiant Google, clé de site Turnstile (publiques par nature). Vérifié sur les sites publiés à chaque publication. **Reste à faire** : couper les anciennes clés `anon` / `service_role` (voir plus bas). |
+| 8 | HTTPS partout | ✅ | Hébergeurs en HTTPS, HSTS 1 an (le navigateur refuse ensuite tout accès non chiffré), `upgrade-insecure-requests` (CSP), API Supabase en HTTPS, connexion des sauvegardes à la base chiffrée (TLS exigé). |
+| 9 | Sessions qui expirent | ✅ | Jeton d'accès d'une heure ; sessions fermées après 30 jours sans utilisation et 180 jours au plus (ménage nocturne) ; déconnexion = session supprimée côté serveur. Session refusée : déconnexion propre (e2e24 D). |
+| 10 | Saisies vérifiées avant la base | ✅ | Dans la page (format) **et** côté serveur : contraintes et déclencheurs de la base (menus, horaires, zone, durées, longueurs), fonctions qui valident chaque champ (e-mail, âge, prénom, conditions, SIRET avec clé et répertoire Sirene). Requêtes paramétrées (pas d'injection SQL), textes affichés sans HTML + CSP à empreintes (pas d'injection de script). |
+| 11 | Taille maximale des fichiers | ✅ | Limite par stockage (Supabase Storage) + contrôle dans la page (justificatifs 10 Mo) + nombre de fichiers par compte (photo de profil 5, photos 40, stories 150, justificatifs 20). Tests : e2e24 E, scénarios RLS. |
+| 12 | Types de fichiers vérifiés | ✅ | Justificatifs : contenu réel lu (signature PDF, JPEG, PNG), un fichier renommé est refusé ; photos réencodées en JPEG par la page ; extensions autorisées imposées par les règles du stockage (SVG, HTML, programmes refusés, même par l'API directe). Tests : e2e24 E. |
+| 13 | CORS configuré | ✅ | Fonctions serveur : seuls les sites FlashMiam (Vercel, Cloudflare, GitHub Pages) ; `localhost` uniquement dans la copie de test. Une seule liste (`_shared/cors.ts`), testée. |
+| 14 | Messages d'erreur détaillés coupés | ✅ | À l'écran : messages en français écrits pour l'utilisateur, sinon un message générique ; le détail technique (table, contrainte, adresse interne) ne quitte jamais la console. Fonctions : réponse générique, détail dans leurs journaux. Tests : e2e24 F. |
+| 15 | Console non bavarde | ✅ | Aucun message de diagnostic en usage normal (vérifié sur tous les parcours d'e2e24) ; seulement des avertissements en cas d'échec. Journaux des fonctions : erreurs seules, sans donnée personnelle. |
+| 16 | Un seul message pour e-mail et mot de passe | ✅ | Connexion : « E-mail ou mot de passe incorrect » dans tous les cas ; mot de passe oublié : même réponse qu'un compte existe ou non ; inscription restaurateur avec une adresse prise : même écran du code. Inscription des clients : idem dès que la confirmation par e-mail est activée (point 19). Tests : e2e24 A, B, C, H. |
+| 17 | Webhooks signés | ✅ | `whop-webhook` : signature HMAC-SHA256 (Standard Webhooks), horodatage, rejeu impossible, refus sans secret. Ménage nocturne (`purge`) protégé par un jeton tiré par la base (`private.app_secrets`). Tests unitaires. |
+| 18 | Dépendances à jour | ✅ | 0 faille connue (`npm audit`) ; Next 16.4.3, React 19.3.1, supabase-js 2.118.0 ; MapLibre 6.14.0 (la série 5 avait une faille critique, GHSA-jrc7-96c5-q579) ; TypeScript 6.0.3 (dernière version prise en charge par le lint). Dependabot chaque semaine (7 jours d'attente pour une nouvelle version) et contrôle hebdomadaire des failles, bibliothèques copiées dans `vendor/` comprises ; actions GitHub épinglées. |
+| 19 | Confirmation par e-mail à l'inscription | ✅ restaurateurs, ⏳ clients | Restaurateurs : code par e-mail. Clients : interrupteur prêt et testé (`app_settings.client_email_confirmation` : écran du code, renvoi, rien ne trahit un compte existant), **à activer quand l'envoi d'e-mails sera fiable** (Resend). Comptes jamais confirmés supprimés après 7 jours. |
+| 20 | Sauvegarde automatique | ✅ prête, ⏳ à brancher | Chaque nuit : copie complète par un rôle en lecture seule, chiffrée (AES-256), gardée 30 jours, **restaurée pour vérification** ; ticket d'alerte en cas d'échec ; restauration en un clic (`restauration.yml`). Mode d'emploi : `web/supabase/backup/README.md` (3 étapes à faire une fois). |
 
 ## Ce qui est fait ✅
 
@@ -40,8 +70,9 @@
 - Stockage `photos` (public, 5 Mo, JPG/PNG/WebP) et `documents` (privé, 10 Mo, PDF/JPG/PNG) : chacun ne dépose, lit
   et supprime que dans le dossier de sa propre fiche ; personne d'autre ne voit les justificatifs.
 - **SIRET de test** `999 999 999 00009` (établissement fictif, sans appel à Sirene) : fiche marquée « de test »
-  (`merchants.is_test`, fixé par le serveur seulement). À désactiver avant l'ouverture au public : variable
-  `ALLOW_TEST_SIRET=false` dans Supabase › *Edge Functions › Secrets*.
+  (`merchants.is_test`, fixé par le serveur seulement). **Refusé par défaut** depuis le 30 octobre 2026 : la fonction
+  ne l'accepte que si `ALLOW_TEST_SIRET=true` (copie de test uniquement, jamais en ligne), et le bouton qui le remplit
+  n'existe plus sur le site publié (`testSiret` vide).
 - Fonction `delete-account` (déployée) : « Supprimer mon compte » efface les fichiers de la fiche (photos, stories,
   justificatifs) puis le compte, et tout ce qui lui est lié en cascade.
 - Tests : 116 scénarios de sécurité (`npm run db:test`) ; 12 tests des fonctions serveur ; 378 vérifications dans un
@@ -280,8 +311,21 @@ publications. Corrigé :
     et symboles » (le site l'impose déjà, la base le ferait aussi) ; **Email OTP Expiration** : 900 s (15 min) au lieu de 1 h ;
     vérifier que **Confirm email** est bien activé (c'est le réglage par défaut).
   - Protection contre les mots de passe divulgués (HaveIBeenPwned) : offre Pro de Supabase uniquement.
-  - Avant l'ouverture au public : *Authentication › Attack Protection* → CAPTCHA (Cloudflare Turnstile, gratuit) contre
-    les inscriptions en masse (il faudra me donner la clé du site Turnstile, publique, pour l'ajouter aux pages).
+  - *Authentication › Rate Limits* : vérifier les limites par adresse IP (connexions, inscriptions, vérifications de
+    code) ; *Authentication › Sessions* (ou JWT) : durée du jeton d'accès à 3600 s (1 h, la valeur par défaut).
+- **Anti-robots Cloudflare Turnstile (gratuit), avant l'ouverture au public** — tout est prêt dans le site, l'application
+  et la fonction `client-signup` ; l'ordre compte :
+  1. Cloudflare › *Turnstile* › *Add widget* : nom « FlashMiam », domaines `pwa-nantes.vercel.app`, `evanbisa.github.io`,
+     `roche-street-food.pages.dev`, mode **Managed** ; me donner la **clé de site** (publique) : je l'ajoute au site
+     (`turnstileSiteKey`) et à l'application (`NEXT_PUBLIC_TURNSTILE_SITE_KEY`) et je publie ;
+  2. une fois publié : la **clé secrète** dans Supabase › *Authentication › Attack Protection* (CAPTCHA, fournisseur
+     Turnstile) **et** dans *Edge Functions › Secrets* sous le nom `TURNSTILE_SECRET_KEY` (jamais ailleurs).
+- **Sauvegarde automatique** : 3 étapes, une seule fois (`web/supabase/backup/README.md`) : mot de passe du rôle de
+  sauvegarde (`select private.rotate_backup_password();` dans le SQL Editor), puis secrets GitHub `SUPABASE_DB_URL` et
+  `BACKUP_PASSPHRASE` (phrase de passe gardée dans un gestionnaire de mots de passe). Option payante : offre Pro de
+  Supabase (25 $/mois) pour des sauvegardes gérées par Supabase en plus.
+- **Confirmation par e-mail des clients** : une fois Resend (ou un autre SMTP) réglé dans Supabase, me dire de
+  l'activer (`app_settings.client_email_confirmation`) : l'inscription d'un client demandera alors le code reçu.
 - **Vérification des restaurateurs** : le SIRET est contrôlé (existe, en activité, restauration), mais rien ne prouve
   que la personne est bien le gérant ; quelqu'un pourrait inscrire le restaurant d'un autre. Les justificatifs (Kbis)
   sont déposés mais pas relus : prévoir une relecture avant la mise en ligne (je peux ajouter l'état « en attente de
@@ -314,5 +358,4 @@ GitHub `CLOUDFLARE_API_TOKEN` et `CLOUDFLARE_ACCOUNT_ID`.
 ## Ensuite (prévu)
 - Détail des avantages de chaque formule (Essentiel, Premium).
 - Modération des avis signalés (pour l'instant : tableau de bord Supabase, table `reviews`, colonne `reported_at`).
-- Désactiver le SIRET de test avant l'ouverture au public.
 - Application Next.js (`/app/`) : reprendre les écrans du site, désormais reliés à Supabase.
