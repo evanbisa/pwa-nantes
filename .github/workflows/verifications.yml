@@ -37,6 +37,9 @@ jobs:
 
       - name: Sites en ligne (aucune clé secrète, politique CSP, en-têtes de sécurité)
         working-directory: web
+        env:
+          # Après un envoi : attendre que ce commit soit publié avant de vérifier (sinon : ancienne version)
+          EXPECTED_VERSION: ${{ github.event_name == 'push' && github.sha || '' }}
         run: node scripts/check-live.mjs
 
       - name: Tests de la fonction verify-siret (sans réseau)

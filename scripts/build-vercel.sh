@@ -18,3 +18,5 @@ cp -r vendor dist/   # bibliothèque Supabase (servie par le site lui-même)
 cp -r web/out dist/app
 # Référencement : adresse principale (SITE_URL) dans les balises de partage, robots.txt, sitemap.xml, page 404
 node scripts/seo.mjs dist
+# Version publiée (numéro du commit, fourni par Vercel) : les vérifications en ligne attendent qu'elle soit arrivée
+printf '%s\n' "${VERCEL_GIT_COMMIT_SHA:-${GITHUB_SHA:-}}" > dist/version.txt

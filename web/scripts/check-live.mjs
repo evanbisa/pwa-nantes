@@ -7,12 +7,15 @@
  *  - en-têtes de sécurité (Vercel) : HTTPS forcé, pas d'intégration dans un autre site, etc.
  *
  * Usage : node scripts/check-live.mjs
- * Juste après une publication, le nouveau site peut mettre quelques minutes à arriver : on réessaie jusqu'à 6 minutes.
+ * Juste après un envoi (EXPECTED_VERSION = numéro du commit), chaque site est attendu jusqu'à ce que sa version publiée
+ * (version.txt, écrit à la publication) soit ce commit : sans cela, on vérifierait l'ancienne version. Vercel publie
+ * chaque commit (10 minutes d'attente au plus) ; GitHub Pages seulement ceux qui touchent le site (3 minutes au plus).
  */
 const SITES = [
-  { name: "Vercel", url: "https://pwa-nantes.vercel.app/", headers: true },
-  { name: "GitHub Pages", url: "https://evanbisa.github.io/pwa-nantes/", headers: false },
+  { name: "Vercel", url: "https://pwa-nantes.vercel.app/", headers: true, everyCommit: true, waitMin: 10 },
+  { name: "GitHub Pages", url: "https://evanbisa.github.io/pwa-nantes/", headers: false, everyCommit: false, waitMin: 3 },
 ];
+const EXPECTED = (process.env.EXPECTED_VERSION || "").trim();
 const SECRETS = [
   [/sb_secret_[A-Za-z0-9_-]{10,}/, "clé secrète Supabase (sb_secret_…)"],
   [/GOCSPX-[A-Za-z0-9_-]{10,}/, "secret du client Google"],
@@ -44,6 +47,18 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const text = async (url) => { const r = await fetch(url, { redirect: "follow" }); return { status: r.status, headers: r.headers, body: await r.text() }; };
 
 for (const site of SITES) {
+  if (EXPECTED) {
+    let live = "";
+    for (let i = 0; i < site.waitMin * 2; i++) {
+      try { const v = await text(new URL("version.txt", site.url).href); live = v.status === 200 ? v.body.trim() : ""; } catch { live = ""; }
+      if (live === EXPECTED) break;
+      await sleep(30000);
+    }
+    const shown = live ? live.slice(0, 7) : "inconnue";
+    if (live === EXPECTED) report(true, `${site.name} : version publiée = ${EXPECTED.slice(0, 7)} (ce commit)`);
+    else if (site.everyCommit) report(false, `${site.name} : la publication de ${EXPECTED.slice(0, 7)} n'est pas arrivée en ${site.waitMin} minutes (en ligne : ${shown})`);
+    else console.log(`• ${site.name} : version en ligne ${shown} (ce commit ne republie pas ce site, ou pas encore)`);
+  }
   let page = null;
   for (let i = 0; i < 12; i++) {
     try { page = await text(site.url); } catch { page = { status: 0, headers: new Headers(), body: "" }; }

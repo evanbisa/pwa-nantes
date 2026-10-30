@@ -57,6 +57,8 @@ jobs:
           cp -r vendor "$RUNNER_TEMP/site/"   # bibliothèque Supabase (servie par le site lui-même)
           cp -r web/out "$RUNNER_TEMP/site/app"
           touch "$RUNNER_TEMP/site/.nojekyll"
+          # Version publiée (numéro du commit) : les vérifications en ligne attendent qu'elle soit arrivée
+          printf '%s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/site/version.txt"
           # Vercel suit aussi ce dépôt : pas de déploiement pour la branche gh-pages
           printf '{ "git": { "deploymentEnabled": false } }\n' > "$RUNNER_TEMP/site/vercel.json"
           # Copie du site principal (Vercel) : balises de partage vers l'adresse principale, page 404 sous /pwa-nantes/
