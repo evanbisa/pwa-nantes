@@ -64,6 +64,7 @@ const deps: Deps = {
   },
 };
 
-deps.allowTestSiret = Deno.env.get("ALLOW_TEST_SIRET") !== "false";
+// SIRET fictif refusé en ligne : accepté seulement si ALLOW_TEST_SIRET=true (copie locale de test)
+deps.allowTestSiret = Deno.env.get("ALLOW_TEST_SIRET") === "true";
 
 Deno.serve((req) => handle(req, deps));

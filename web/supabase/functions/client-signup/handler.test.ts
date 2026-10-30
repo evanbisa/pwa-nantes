@@ -4,12 +4,15 @@ import { handle, mailVerdict, type Deps } from "./handler.ts";
 
 const NOW = new Date("2026-10-25T12:00:00Z");
 function fakeDeps(over: Partial<Deps> = {}) {
-  const calls = { created: [] as { email: string; password: string; metadata: Record<string, string> }[], attempts: [] as string[], dns: [] as string[] };
+  const calls = { created: [] as { email: string; password: string; metadata: Record<string, string>; confirmed: boolean }[], attempts: [] as string[], dns: [] as string[], captchas: [] as string[], codes: [] as string[] };
   const deps: Deps = {
     mailDomain: (d) => { calls.dns.push(d); return Promise.resolve(d === "gmial.com" ? "none" : "ok"); },
     attempt: (h, k) => { calls.attempts.push(h + ":" + k); return Promise.resolve(true); },
     hashIp: (ip) => Promise.resolve("empreinte-" + ip.padEnd(8, "-")),
     createUser: (u) => { calls.created.push(u); return Promise.resolve("created"); },
+    settings: () => Promise.resolve({ confirmEmail: false }),
+    sendCode: (email) => { calls.codes.push(email); return Promise.resolve(); },
+    verifyCaptcha: () => null,
     now: () => NOW,
     ...over,
   };
@@ -26,8 +29,8 @@ const call = async (body: unknown, deps: Deps, opts = {}) => { const r = await h
 Deno.test("inscription : compte client créé déjà confirmé, adresse en minuscules, prénom nettoyé", async () => {
   const { deps, calls } = fakeDeps();
   const { status, body, res } = await call(SIGNUP, deps);
-  assertEquals([status, body], [200, { created: true }]);
-  assertEquals(calls.created, [{ email: "lea.martin@univ-nantes.fr", password: "Motdepasse1!", metadata: { role: "student", first_name: "Léa", terms_version: "2026-10-29", gender: "female", birth_year: "2005" } }]);
+  assertEquals([status, body], [200, { created: true, confirm: false }]);
+  assertEquals(calls.created, [{ email: "lea.martin@univ-nantes.fr", password: "Motdepasse1!", metadata: { role: "student", first_name: "Léa", terms_version: "2026-10-29", gender: "female", birth_year: "2005" }, confirmed: true }]);
   assertEquals(calls.dns, ["univ-nantes.fr"]);
   assertEquals(calls.attempts, ["empreinte-203.0.113.7:signup"]);   // première adresse de la liste, jamais en clair
   assertEquals(res.headers.get("Access-Control-Allow-Origin"), "https://pwa-nantes.vercel.app");
@@ -127,4 +130,48 @@ Deno.test("CGU non acceptées (case non cochée) : refus, aucun compte créé", 
   assertEquals(res.status, 400);
   assertEquals(res.body.error, "terms");
   assertEquals(calls.created.length, 0);
+});
+
+Deno.test("confirmation par e-mail activée : compte créé NON confirmé, code envoyé, le site demande le code", async () => {
+  const { deps, calls } = fakeDeps({ settings: () => Promise.resolve({ confirmEmail: true }) });
+  const { status, body } = await call(SIGNUP, deps);
+  assertEquals([status, body, calls.created[0].confirmed], [200, { created: true, confirm: true }, false]);
+  // Un compte créé par le serveur ne déclenche aucun e-mail de lui-même : le code est demandé explicitement
+  assertEquals(calls.codes, ["lea.martin@univ-nantes.fr"]);
+});
+Deno.test("confirmation par e-mail activée : envoi du code impossible → même réponse (le site propose « Renvoyer »)", async () => {
+  const { deps } = fakeDeps({ settings: () => Promise.resolve({ confirmEmail: true }), sendCode: () => Promise.reject(new Error("SMTP indisponible")) });
+  const { status, body } = await call(SIGNUP, deps);
+  assertEquals([status, body], [200, { created: true, confirm: true }]);
+});
+Deno.test("sans confirmation par e-mail : aucun code envoyé (compte déjà confirmé)", async () => {
+  const { deps, calls } = fakeDeps();
+  assertEquals((await call(SIGNUP, deps)).status, 200);
+  assertEquals(calls.codes, []);
+});
+Deno.test("confirmation par e-mail activée : adresse déjà inscrite → exactement la même réponse (aucune fuite)", async () => {
+  const exists = fakeDeps({ settings: () => Promise.resolve({ confirmEmail: true }), createUser: () => Promise.resolve("exists") });
+  const fresh = fakeDeps({ settings: () => Promise.resolve({ confirmEmail: true }) });
+  const a = await call(SIGNUP, exists.deps), b = await call(SIGNUP, fresh.deps);
+  assertEquals([a.status, a.body], [b.status, b.body]);
+  // Le code est demandé dans les deux cas : Supabase n'envoie rien à une adresse déjà confirmée (même délai, même réponse)
+  assertEquals([exists.calls.codes.length, fresh.calls.codes.length], [1, 1]);
+  // Sans confirmation (envoi d'e-mails pas encore réglé) : impossible de répondre pareil, l'adresse prise est signalée
+  assertEquals((await call(SIGNUP, fakeDeps({ createUser: () => Promise.resolve("exists") }).deps)).status, 409);
+});
+Deno.test("anti-robots configuré : jeton absent ou refusé → 400, aucun compte ; bon jeton → compte créé", async () => {
+  const withCaptcha = (over: Partial<Deps> = {}) => fakeDeps({ verifyCaptcha: (t) => Promise.resolve(t === "jeton-ok"), ...over });
+  for (const token of [undefined, "", "faux"]) {
+    const { deps, calls } = withCaptcha();
+    const { status, body } = await call({ ...SIGNUP, captcha_token: token }, deps);
+    assertEquals([status, body.error, calls.created.length], [400, "captcha", 0], String(token));
+  }
+  const ok = withCaptcha();
+  assertEquals((await call({ ...SIGNUP, captcha_token: "jeton-ok" }, ok.deps)).status, 200);
+  // Simple vérification de l'adresse (étape e-mail) : pas d'anti-robots demandé
+  assertEquals((await call({ action: "check", email: "lea@gmail.com" }, withCaptcha().deps)).status, 200);
+});
+Deno.test("anti-robots non configuré (pas de clé secrète) : inscription sans jeton acceptée", async () => {
+  const { deps, calls } = fakeDeps();
+  assertEquals([(await call(SIGNUP, deps)).status, calls.created.length], [200, 1]);
 });

@@ -2,7 +2,7 @@
  * Edge Function « purge » (Supabase) : ménage quotidien des données arrivées au bout de leur durée de conservation.
  * Déclenchée chaque nuit par pg_cron (voir web/supabase/manual/purge_schedule.sql).
  * La clé secrète Supabase est fournie par Supabase (SUPABASE_SECRET_KEYS) : elle n'est écrite nulle part.
- * verify_jwt = false : aucun secret n'est nécessaire (voir handler.ts).
+ * verify_jwt = false : l'appel est authentifié par le jeton de la tâche planifiée, vérifié par la base (voir handler.ts).
  */
 import { createClient } from "npm:@supabase/supabase-js@2.118.0";
 import { type Deps, handle } from "./handler.ts";
@@ -18,6 +18,21 @@ const secretKey = (() => {
 const admin = createClient(url, secretKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
 const deps: Deps = {
+  async checkToken(token) {
+    const { data, error } = await admin.rpc("check_cron_token", { p_token: token });
+    if (error) throw error;
+    return data === true;
+  },
+  async expireSessions(idleDays, maxDays) {
+    const { data, error } = await admin.rpc("expire_sessions", { p_idle_days: idleDays, p_max_days: maxDays });
+    if (error) throw error;
+    return Number(data) || 0;
+  },
+  async purgeUnconfirmed(days) {
+    const { data, error } = await admin.rpc("purge_unconfirmed_users", { p_days: days });
+    if (error) throw error;
+    return Number(data) || 0;
+  },
   async lastRun(job) {
     const { data, error } = await admin.from("maintenance_runs").select("ran_at").eq("job", job).maybeSingle();
     if (error) throw error;

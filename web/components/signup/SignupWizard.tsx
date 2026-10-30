@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent, type
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { ArrowLeft, Check, Eye, EyeOff, Loader2 } from "lucide-react";
 import { setRemember, siteClient } from "@/lib/supabase/site-session";
+import { CAPTCHA_FAILED, captchaRefused, captchaToken } from "@/lib/captcha";
 import AgePicker from "@/components/signup/AgePicker";
 import GoogleSignup from "@/components/signup/GoogleSignup";
 import { useKeyboardInset } from "@/components/signup/useKeyboardInset";
@@ -17,11 +18,15 @@ import {
  * Google, puis seules les deux questions facultatives restent (sexe, âge). Le compte est créé par la fonction serveur client-signup (adresse vérifiée, plafond
  * anti-robots), puis la session est ouverte avec le mot de passe choisi, dans le stockage de la carte : la personne
  * arrive ensuite sur la carte déjà connectée (?bienvenue=1 : accueil et localisation).
+ * Si la confirmation par e-mail est activée (réglage du serveur), un code à 6 chiffres est envoyé à l'adresse : la
+ * session ne s'ouvre qu'avec ce code. La réponse est la même que l'adresse ait déjà un compte ou non (aucune fuite).
  */
 
-type Step = "name" | "gender" | "age" | "email" | "confirm" | "password" | "done";
+type Step = "name" | "gender" | "age" | "email" | "confirm" | "password" | "code" | "done";
 type Gender = "female" | "male" | "other" | "";   // "" : préfère ne pas le dire
-type Reply = { ok: true } | { ok: false; code: string; message: string };
+type Reply = { ok: true; confirm: boolean } | { ok: false; code: string; message: string };
+/** Délai avant de pouvoir redemander un code (comme Supabase : un envoi par minute). */
+const RESEND_DELAY = 60;
 
 const FLOW: Step[] = ["name", "gender", "age", "email", "confirm", "password"];
 /** Questions comptées dans la barre de progression (la relecture fait partie de la question de l'e-mail). */
@@ -57,13 +62,13 @@ const isFresh = (createdAt: string) => Date.now() - new Date(createdAt).getTime(
 /** Élément qui reçoit le focus à l'arrivée sur chaque écran. */
 const FOCUS: Record<Step, string> = {
   name: "su-name", gender: "su-gender-0", age: "su-age", email: "su-email", confirm: "su-confirm-yes",
-  password: "su-password", done: "su-done",
+  password: "su-password", code: "su-code", done: "su-done",
 };
 
 /** Appel à la fonction serveur ; ses refus arrivent sous la forme { error, message }. */
 async function callSignup(body: Record<string, string>): Promise<Reply> {
-  const { error } = await siteClient().functions.invoke("client-signup", { body });
-  if (!error) return { ok: true };
+  const { data, error } = await siteClient().functions.invoke("client-signup", { body });
+  if (!error) return { ok: true, confirm: !!(data && (data as { confirm?: unknown }).confirm) };
   if (error instanceof FunctionsHttpError) {
     try {
       const j = await error.context.json();
@@ -102,7 +107,9 @@ function Wizard() {
   const [remember, setRememberChoice] = useState(false);
   const [busy, setBusy] = useState(false);
   const [viaGoogle, setViaGoogle] = useState(false);
-  const [terms, setTerms] = useState(false);   // « J'ai 15 ans ou plus et j'accepte les conditions »   // compte déjà créé avec Google (premier écran)
+  const [terms, setTerms] = useState(false);   // « J'ai 15 ans ou plus et j'accepte les conditions »
+  const [code, setCode] = useState("");
+  const [resendIn, setResendIn] = useState(0);   // secondes avant de pouvoir redemander un code
   const [errors, setErrors] = useState<Partial<Record<Step, ReactNode>>>({});
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suggestedFor = useRef("");
@@ -115,13 +122,19 @@ function Wizard() {
   const score = passwordScore(password);
   const flow = viaGoogle ? GOOGLE_FLOW : FLOW;
   const questions = viaGoogle ? GOOGLE_FLOW : QUESTIONS;
-  const question = questions.indexOf(step === "confirm" ? "email" : step) + 1;
+  const question = questions.indexOf(step === "confirm" ? "email" : step === "code" ? "password" : step) + 1;
 
   // Arrivée sur un écran : focus sur sa réponse (sans faire défiler pendant le glissement)
   useEffect(() => {
     document.getElementById(FOCUS[step])?.focus({ preventScroll: true });
   }, [step]);
   useEffect(() => () => { if (advanceTimer.current) clearTimeout(advanceTimer.current); }, []);
+  // Compte à rebours avant de pouvoir redemander un code
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setTimeout(() => setResendIn((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendIn]);
   // Compte ouvert : un instant de fête, puis la carte (déjà connectée)
   useEffect(() => {
     if (step !== "done") return;
@@ -205,6 +218,13 @@ function Wizard() {
     const body: Record<string, string> = { action: "signup", email: cleanEmail, password, first_name: name.trim(), accept_terms: TERMS_VERSION };
     if (gender) body.gender = gender;
     if (ageSet) body.birth_year = String(new Date().getFullYear() - age);
+    try {
+      const token = await captchaToken();
+      if (token) body.captcha_token = token;
+    } catch {
+      setBusy(false);
+      return setError("password", CAPTCHA_FAILED);
+    }
     const res = await callSignup(body);
     if (!res.ok) {
       setBusy(false);
@@ -217,12 +237,56 @@ function Wizard() {
       if (res.code === "invalid_name") { go("name", "prev"); return setError("name", res.message); }
       return setError("password", res.message);
     }
+    // Confirmation par e-mail activée : le code part vers l'adresse, la session s'ouvrira avec lui
+    if (res.confirm) {
+      setBusy(false);
+      setCode("");
+      setResendIn(RESEND_DELAY);
+      return go("code");
+    }
     // Compte créé et confirmé : ouverture de la session, retrouvée ensuite par la carte
     setRemember(remember);
-    const { error } = await siteClient().auth.signInWithPassword({ email: cleanEmail, password });
+    let loginToken: string | undefined;
+    try { loginToken = await captchaToken(); } catch { loginToken = undefined; }
+    const { error } = await siteClient().auth.signInWithPassword({ email: cleanEmail, password, options: { captchaToken: loginToken } });
     setBusy(false);
     if (error) return setError("password", <>Votre compte est créé, mais la connexion a échoué. <button type="button" className={linkClass} onClick={() => openLogin(cleanEmail)}>Se connecter sur la carte</button></>);
     go("done");
+  }
+
+  /** Code reçu par e-mail : il confirme l'adresse et ouvre la session (rien ne dit si l'adresse avait déjà un compte). */
+  async function verifyCode(ev?: FormEvent) {
+    ev?.preventDefault();
+    const digits = code.replace(/\D/g, "");
+    if (digits.length !== 6) return setError("code", "Saisissez les 6 chiffres reçus par e-mail.");
+    if (busy) return;
+    setBusy(true);
+    setError("code", null);
+    setRemember(remember);
+    const sb = siteClient();
+    let { data, error } = await sb.auth.verifyOtp({ email: cleanEmail, token: digits, type: "signup" });
+    if (error) ({ data, error } = await sb.auth.verifyOtp({ email: cleanEmail, token: digits, type: "email" }));
+    setBusy(false);
+    if (error || !data.session) {
+      return setError("code", error?.status === 429
+        ? "Trop d'essais en peu de temps. Patientez quelques minutes, puis réessayez."
+        : "Code incorrect ou expiré. Vérifiez le dernier e-mail reçu, ou demandez un nouveau code.");
+    }
+    go("done");
+  }
+  /** Nouvel envoi du code : seules les erreurs utiles sont montrées (jamais « adresse déjà confirmée », qui trahirait un compte). */
+  async function resendCode() {
+    if (resendIn > 0 || busy) return;
+    setError("code", null);
+    let token: string | undefined;
+    try { token = await captchaToken(); } catch { return setError("code", CAPTCHA_FAILED); }
+    const { error } = await siteClient().auth.resend({ type: "signup", email: cleanEmail, options: { captchaToken: token } });
+    if (error && (captchaRefused(error) || error.status === 429 || !error.status || error.status >= 500)) {
+      return setError("code", captchaRefused(error) ? CAPTCHA_FAILED : error.status === 429
+        ? "Trop de demandes en peu de temps. Patientez quelques minutes, puis réessayez."
+        : "Envoi impossible pour le moment. Vérifiez votre connexion, puis réessayez.");
+    }
+    setResendIn(RESEND_DELAY);
   }
 
   /**
@@ -235,8 +299,10 @@ function Wizard() {
     setError(at, null);
     const sb = siteClient();
     const fail = (message: ReactNode) => { setBusy(false); setError(at, message); };
-    const { data, error } = await sb.auth.signInWithIdToken({ provider: "google", token: credential });
-    if (error || !data.user) return fail("La connexion avec Google a échoué. Réessayez.");
+    let token: string | undefined;
+    try { token = await captchaToken(); } catch { return fail(CAPTCHA_FAILED); }
+    const { data, error } = await sb.auth.signInWithIdToken({ provider: "google", token: credential, options: { captchaToken: token } });
+    if (error || !data.user) return fail(captchaRefused(error) ? CAPTCHA_FAILED : "La connexion avec Google a échoué. Réessayez.");
     const { data: profile } = await sb.from("profiles").select("role, created_at, first_name").eq("id", data.user.id).single();
     if (profile?.role === "merchant") {
       await sb.auth.signOut().catch(() => null);
@@ -495,6 +561,44 @@ function Wizard() {
                 <a className="underline" href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/legal/cgu/`}>conditions d&apos;utilisation</a> et la{" "}
                 <a className="underline" href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/legal/confidentialite/`}>politique de confidentialité</a>.
               </p>
+            </form>
+          )}
+
+          {step === "code" && (
+            <form onSubmit={verifyCode} noValidate className="flex flex-1 flex-col">
+              <Title emoji="✉️" id="q-code">Vérifiez votre <Em>adresse e-mail</Em></Title>
+              <Hint>
+                Un code à 6 chiffres vient d&apos;être envoyé à <strong className="break-all text-slate-900 dark:text-zinc-50">{cleanEmail}</strong>.
+                Saisissez-le pour activer votre compte (pensez à regarder dans les courriers indésirables).
+              </Hint>
+              <Field label="Code reçu par e-mail" errorId="err-code" error={errors.code}>
+                <input
+                  id="su-code" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6} enterKeyHint="go"
+                  placeholder="––––––" value={code} aria-describedby="err-code"
+                  onChange={(e) => {
+                    const digits = e.target.value.replace(/\D/g, "").slice(0, 6);
+                    setCode(digits);
+                    setError("code", null);
+                    if (digits.length === 6) setTimeout(() => (document.getElementById("su-code") as HTMLInputElement | null)?.form?.requestSubmit(), 0);
+                  }}
+                  className={`${inputClass(!!errors.code)} text-center text-2xl tracking-[0.5em] tabular-nums`}
+                />
+              </Field>
+              <p className="text-sm leading-relaxed text-slate-500 dark:text-zinc-400">
+                Vous avez déjà un compte avec cette adresse ? Aucun code n&apos;est envoyé dans ce cas :{" "}
+                <button type="button" className={linkClass} onClick={() => openLogin(cleanEmail)}>connectez-vous</button>.
+              </p>
+              <Primary busy={busy} disabled={code.length !== 6}>{busy ? "Vérification…" : "Valider le code"}</Primary>
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
+                <button id="su-resend" type="button" disabled={resendIn > 0 || busy} onClick={resendCode}
+                  className="rounded-full px-3 py-2 font-medium text-brand underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:text-slate-400 disabled:no-underline dark:text-brand-night">
+                  {resendIn > 0 ? `Renvoyer le code (${resendIn} s)` : "Renvoyer le code"}
+                </button>
+                <button type="button" onClick={() => go("email", "prev")}
+                  className="rounded-full px-3 py-2 font-medium text-slate-500 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-zinc-400">
+                  Modifier l&apos;adresse
+                </button>
+              </div>
             </form>
           )}
 

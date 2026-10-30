@@ -7,6 +7,7 @@
  * donc rien envoyer de plus que ce que la base a déjà décidé.
  */
 import { b64u, encryptPayload, generateVapidKeys, type VapidKeys, vapidAuthorization } from "./webpush.ts";
+import { corsHeaders } from "../_shared/cors.ts";
 
 export interface PendingNotification {
   id: string; user_id: string; merchant_id: string | null; kind: string; title: string; body: string | null;
@@ -30,22 +31,6 @@ export const DEFAULT_ENDPOINTS =
   /^https:\/\/(fcm\.googleapis\.com|updates\.push\.services\.mozilla\.com|web\.push\.apple\.com|[a-z0-9.-]+\.push\.apple\.com|[a-z0-9.-]+\.notify\.windows\.com)\//;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-const ALLOWED_ORIGINS = [
-  /^https:\/\/([a-z0-9-]+\.)?roche-street-food\.pages\.dev$/,
-  /^https:\/\/(roche-street-food|pwa-nantes|pwa-nantes-web)\.vercel\.app$/,
-  /^https:\/\/evanbisa\.github\.io$/,
-  /^http:\/\/localhost:\d+$/,
-];
-function corsHeaders(origin: string | null): Record<string, string> {
-  const allowed = origin && ALLOWED_ORIGINS.some((re) => re.test(origin));
-  return {
-    ...(allowed ? { "Access-Control-Allow-Origin": origin! } : {}),
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Max-Age": "86400",
-    Vary: "Origin",
-  };
-}
 
 /** Clés du serveur : créées au premier besoin, puis toujours relues depuis la base (une seule paire). */
 export async function ensureKeys(deps: Deps): Promise<VapidKeys> {
@@ -122,7 +107,7 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
             } else failed++;
           } catch (e) {
             failed++;
-            console.error("send-push: envoi impossible", e);
+            console.error("send-push: envoi impossible", e instanceof Error ? e.message : e);
           }
         })());
       }
@@ -130,7 +115,7 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
     await Promise.all(jobs);
     return json(200, { sent, failed, removed });
   } catch (e) {
-    console.error("send-push: erreur", e);
+    console.error("send-push: erreur", e instanceof Error ? e.message : e);
     return json(500, { error: "server", message: "Envoi impossible pour le moment." });
   }
 }

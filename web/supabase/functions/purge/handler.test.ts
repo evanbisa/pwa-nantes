@@ -1,12 +1,15 @@
 // Tests de la fonction purge, sans réseau : deno test supabase/functions/
 import { assertEquals } from "jsr:@std/assert@1";
-import { type Deps, handle, RULES, STORY_KEEP_DAYS } from "./handler.ts";
+import { type Deps, handle, RULES, SESSION_IDLE_DAYS, SESSION_MAX_DAYS, STORY_KEEP_DAYS, UNCONFIRMED_DAYS } from "./handler.ts";
 
 const NOW = new Date("2026-10-24T03:17:00Z");
 function fakeDeps(over: Partial<Deps> = {}, stories = 0) {
-  const calls = { deletes: [] as string[], removed: [] as string[], storyIds: [] as string[], marked: 0, before: "" };
+  const calls = { deletes: [] as string[], removed: [] as string[], storyIds: [] as string[], marked: 0, before: "", sessions: [] as number[][], unconfirmed: [] as number[] };
   let left = Array.from({ length: stories }, (_, i) => ({ id: "s" + i, image_path: i % 2 ? null : "m1/s" + i + ".jpg" }));
   const deps: Deps = {
+    checkToken: (t) => Promise.resolve(t === TOKEN),
+    expireSessions: (idle, max) => { calls.sessions.push([idle, max]); return Promise.resolve(3); },
+    purgeUnconfirmed: (days) => { calls.unconfirmed.push(days); return Promise.resolve(2); },
     lastRun: () => Promise.resolve(null),
     markRun: () => { calls.marked++; return Promise.resolve(); },
     deleteOlder: (t, c, b) => { calls.deletes.push(`${t}.${c}<${b}`); return Promise.resolve(1); },
@@ -18,7 +21,28 @@ function fakeDeps(over: Partial<Deps> = {}, stories = 0) {
   };
   return { deps, calls };
 }
-const post = () => new Request("https://x.supabase.co/functions/v1/purge", { method: "POST", body: "{}" });
+const TOKEN = "a".repeat(64);
+const post = (token: string | null = TOKEN) =>
+  new Request("https://x.supabase.co/functions/v1/purge", { method: "POST", body: "{}", headers: token === null ? {} : { "x-cron-token": token } });
+
+Deno.test("seule la tâche planifiée peut lancer le ménage : jeton absent, trop court ou faux → 401, rien n'est effacé", async () => {
+  for (const token of [null, "", "court", "b".repeat(64), "a".repeat(500)]) {
+    const { deps, calls } = fakeDeps();
+    const res = await handle(post(token), deps);
+    assertEquals([res.status, calls.deletes.length, calls.marked, calls.sessions.length], [401, 0, 0, 0], String(token).slice(0, 10));
+  }
+});
+Deno.test("sessions de connexion : inutilisées depuis 30 jours ou ouvertes depuis 180 jours, fermées chaque nuit", async () => {
+  const { deps, calls } = fakeDeps();
+  const body = await (await handle(post(), deps)).json();
+  assertEquals([calls.sessions, body.deleted.sessions], [[[SESSION_IDLE_DAYS, SESSION_MAX_DAYS]], 3]);
+  assertEquals([SESSION_IDLE_DAYS, SESSION_MAX_DAYS], [30, 180]);
+});
+Deno.test("comptes jamais confirmés (code jamais saisi) : supprimés après 7 jours", async () => {
+  const { deps, calls } = fakeDeps();
+  const body = await (await handle(post(), deps)).json();
+  assertEquals([calls.unconfirmed, body.deleted.unconfirmed_accounts, UNCONFIRMED_DAYS], [[7], 2, 7]);
+});
 
 Deno.test("efface chaque table selon sa durée de conservation", async () => {
   const { deps, calls } = fakeDeps();
@@ -39,7 +63,7 @@ Deno.test("efface chaque table selon sa durée de conservation", async () => {
   ]);
   assertEquals(calls.marked, 1);
   const body = await res.json();
-  assertEquals(Object.keys(body.deleted).length, RULES.length + 1);
+  assertEquals(Object.keys(body.deleted).length, RULES.length + 3);
 });
 Deno.test("stories finies depuis plus de 30 jours : photos retirées du stockage, puis les stories", async () => {
   const { deps, calls } = fakeDeps({}, 250);

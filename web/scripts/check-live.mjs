@@ -20,12 +20,16 @@ const SECRETS = [
   [/"d"\s*:\s*"[A-Za-z0-9_-]{40,}"/, "clé privée VAPID (JWK)"],
   [/sk_live_[A-Za-z0-9]{10,}|rk_live_[A-Za-z0-9]{10,}/, "clé secrète Stripe"],
   [/ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}/, "jeton GitHub"],
+  [/\bre_[A-Za-z0-9]{8,}_[A-Za-z0-9]{16,}/, "clé d'API Resend"],
+  [/\b(?:apik|whop)_[A-Za-z0-9]{24,}|\bwhsec_[A-Za-z0-9+/=]{20,}/, "clé ou secret Whop"],
+  [/\bxkeysib-[a-f0-9]{32,}/, "clé SMTP Brevo"],
 ];
 const HEADERS = [
   ["strict-transport-security", /max-age=\d{7,}/],
   ["x-frame-options", /^DENY$/i],
   ["x-content-type-options", /^nosniff$/i],
   ["content-security-policy", /frame-ancestors 'none'/],
+  ["content-security-policy", /upgrade-insecure-requests/],
   ["cross-origin-opener-policy", /same-origin/],
   ["referrer-policy", /strict-origin/],
 ];
@@ -74,6 +78,19 @@ for (const site of SITES) {
   const csp = (page.body.match(/http-equiv="Content-Security-Policy" content="([^"]*)"/) || [])[1] || "";
   report(/script-src 'self'( 'sha256-[A-Za-z0-9+/=]+')+/.test(csp) && !/unsafe-inline[^;]*;?/.test(csp.match(/script-src[^;]*/)?.[0] || "") && /object-src 'none'/.test(csp),
     `${site.name} : politique CSP active (scripts autorisés par empreinte, pas de script injecté)`);
+  const appCsp = app ? ((app[1].match(/http-equiv="Content-Security-Policy" content="([^"]*)"/) || [])[1] || "") : "";
+  report(!!app && /script-src 'self'( 'sha256-[A-Za-z0-9+/=]+')+/.test(appCsp) && !/'unsafe-(inline|eval)'/.test(appCsp.match(/script-src[^;]*/)?.[0] || ""),
+    `${site.name} : application (/app/) protégée par une CSP à empreintes`);
+
+  // Carte : le module MapLibre et son worker (.mjs) doivent être servis comme du JavaScript, sinon le navigateur refuse
+  // de les exécuter et la carte ne s'affiche pas.
+  const mod = (page.body.match(/<link rel="modulepreload" href="([^"]*maplibre[^"]*\.mjs)"/) || [])[1];
+  if (!mod) report(false, `${site.name} : module de la carte (MapLibre) introuvable dans la page`);
+  else for (const f of [mod, mod.replace(/maplibre-gl\.mjs$/, "maplibre-gl-worker.mjs")]) {
+    let type = "";
+    try { const r = await fetch(new URL(f, site.url).href, { method: "HEAD" }); type = r.ok ? r.headers.get("content-type") || "" : `HTTP ${r.status}`; } catch { type = "injoignable"; }
+    report(/javascript/.test(type), `${site.name} : ${f.split("/").pop()} servi comme script (${type || "type absent"})`);
+  }
 
   if (site.headers) for (const [name, re] of HEADERS) {
     const v = page.headers.get(name) || "";

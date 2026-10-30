@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-IzbzNmpdxcFCr79rzdpYzaKDOsNWo8MJ91EJeOaAWTk=' 'sha256-ZSIXOuglA/lU2z4EypJNwHCqyUWvpWGXp6dZna8ohCw=' 'sha256-1fHY7D75LbW2KhZr/U5adHXYcuC27VifX8e/Jq7QvYw=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-SbPT9Sx5e8mfj8S8bCtKmq/J0ojDrCwG0c/CKGDP748=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -48,7 +48,7 @@
       // Feuille de style de la carte chargée sans bloquer l'affichage (l'écran de chargement peut apparaître tout de suite)
       var css = document.createElement('link');
       css.rel = 'stylesheet';
-      css.href = 'vendor/maplibre-gl-5.24.0/maplibre-gl.css';
+      css.href = 'vendor/maplibre-gl-6.14.0/maplibre-gl.css';
       document.head.appendChild(css);
     })();
   </script>
@@ -57,10 +57,10 @@
 
   <!-- MapLibre GL : moteur de secours (carte « style Google Maps ») utilisé tant qu'aucune clé Google n'est configurée.
        Feuille de style ajoutée par le script ci-dessus ; le moteur est téléchargé dès maintenant et lancé en bas de page. -->
-  <link rel="preload" href="vendor/maplibre-gl-5.24.0/maplibre-gl.js" as="script" />
+  <link rel="modulepreload" href="vendor/maplibre-gl-6.14.0/maplibre-gl.mjs" />
 
   <noscript>
-    <link rel="stylesheet" href="vendor/maplibre-gl-5.24.0/maplibre-gl.css" />
+    <link rel="stylesheet" href="vendor/maplibre-gl-6.14.0/maplibre-gl.css" />
   </noscript>
 
   <style>
@@ -1197,6 +1197,9 @@
     .g-overlay { position: absolute; inset: 0; align-items: center; overflow: hidden; border-radius: 26px; opacity: .01; }
     .g-overlay:empty { display: none; }
     .g-box:focus-within .g-btn { outline: 2px solid var(--accent); outline-offset: 2px; }   /* focus sur le bouton de Google, invisible */
+    /* Anti-robots (Cloudflare Turnstile) : invisible, sauf si une vérification manuelle est demandée */
+    .captcha-box { position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 2147483000; }
+    .captcha-box.is-open { background: var(--panel-solid); padding: 12px; border-radius: 16px; box-shadow: var(--shadow); }
     .terms-check { align-items: flex-start; line-height: 1.45; }
     .terms-check input { margin-top: 2px; }
     .g-note { margin: 0; font-size: 13px; line-height: 1.45; text-align: center; color: var(--muted); }
@@ -2444,6 +2447,7 @@
           <input id="ec-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="––––––" aria-describedby="ec-lead" />
           <small class="field-error" id="err-ec-code" aria-live="polite"></small>
         </label>
+        <p class="hint" id="ec-exists" hidden>Vous avez déjà un compte avec cette adresse ? Aucun code n'est envoyé dans ce cas : <button class="link-btn" type="button" id="ec-to-login">connectez-vous</button> (ou utilisez « Mot de passe oublié »).</p>
         <p class="form-error" id="err-email-code" role="alert"></p>
         <button class="btn btn-primary" type="submit" id="ec-submit">Valider le code</button>
         <p class="ob-switch">Pas reçu ? <button class="link-btn" type="button" id="ec-resend">Renvoyer le code</button></p>
@@ -2454,7 +2458,7 @@
       <form id="ob-reset" class="ob-step" novalidate data-step="reset-password" hidden aria-labelledby="rs-title">
         <div class="mail-badge" aria-hidden="true">🔑</div>
         <h2 id="rs-title">Nouveau <em>mot de passe</em></h2>
-        <p class="lead" id="rs-lead">Un code à 6 chiffres a été envoyé à <b id="rs-email"></b>. Saisissez-le, puis choisissez votre nouveau mot de passe.</p>
+        <p class="lead" id="rs-lead">Si un compte FlashMiam existe avec l'adresse <b id="rs-email"></b>, un code à 6 chiffres vient d'y être envoyé. Saisissez-le, puis choisissez votre nouveau mot de passe.</p>
         <label class="field" id="field-rs-code">
           <span>Code reçu par e-mail</span>
           <input id="rs-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="––––––" />
@@ -2692,16 +2696,12 @@
   <noscript><style>.loader { display: none !important; }</style><div class="fatal"><div><h1>JavaScript requis</h1><p>Activez JavaScript pour afficher la carte.</p></div></div></noscript>
 
 <!-- MapLibre (moteur de carte) : copie servie par le site, sans dépendre d'un service tiers (licence BSD, vendor/).
-     Chargé en parallèle (async) : l'écran de compte et le reste du site n'attendent pas ce gros fichier. -->
+     Module chargé en parallèle : l'écran de compte et le reste du site n'attendent pas ce gros fichier.
+     Son calcul des tuiles (maplibre-gl-worker.mjs) est trouvé par le module lui-même, dans le même dossier. -->
 <script>
-  (function () {
-    var s = document.createElement('script');
-    s.src = 'vendor/maplibre-gl-5.24.0/maplibre-gl.js';
-    s.id = 'maplibre-script';
-    s.async = true;
-    s.onerror = function () { window.__maplibreFailed = true; };
-    document.currentScript.parentNode.insertBefore(s, document.currentScript);
-  })();
+  window.__maplibreReady = import('./vendor/maplibre-gl-6.14.0/maplibre-gl.mjs')
+    .then(function (m) { window.maplibregl = m; })
+    .catch(function () { window.__maplibreFailed = true; });
 </script>
 <!-- Supabase (comptes et données partagées) : copie locale du client officiel, servie par le site -->
 <script src="vendor/supabase-js-2.118.0.js"></script>
@@ -2766,10 +2766,15 @@
      */
     googleClientId: '87416467106-adp7ojfn62mmkr1pmaa0mpna86drug86.apps.googleusercontent.com',
     /**
-     * SIRET fictif pour essayer l'espace restaurateur sans établissement réel (accepté par le serveur, qui crée
-     * une fiche marquée « Fiche de test »). Vide = bouton masqué ; côté serveur : ALLOW_TEST_SIRET=false.
+     * SIRET fictif pour essayer l'espace restaurateur sans établissement réel (fiche marquée « Fiche de test »).
+     * Vide en ligne : bouton masqué, et le serveur le refuse (accepté seulement avec ALLOW_TEST_SIRET=true, en test).
      */
-    testSiret: '99999999900009',
+    testSiret: '',
+    /**
+     * Anti-robots Cloudflare Turnstile (connexion, inscription, mot de passe oublié, Google) : clé de SITE, publique par
+     * nature. Vide = désactivé. À renseigner AVANT d'activer le CAPTCHA dans Supabase (Authentication › Attack Protection).
+     */
+    turnstileSiteKey: '',
     // Géocodage des adresses : Géoplateforme de l'IGN (Base Adresse Nationale)
     geocoderApi: 'https://data.geopf.fr/geocodage/search',
     /**
@@ -3319,7 +3324,17 @@
 
   /** Justificatifs déposés (stockage privé « documents ») : nom de fichier « type--horodatage--nom d'origine ». */
   const safeName = (name) => name.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w.-]+/g, '_').slice(-60) || 'fichier';
-  const docPath = (merchantId, key, name) => merchantId + '/' + key + '--' + Date.now().toString(36) + '--' + safeName(name);
+  /** Chemin d'un justificatif : l'extension est celle du contenu réel (pdf, jpg, png), jamais celle annoncée par le nom. */
+  const docPath = (merchantId, key, name, ext) =>
+    merchantId + '/' + key + '--' + Date.now().toString(36) + '--' + safeName(name.replace(/\.[A-Za-z0-9]{1,5}$/, '')).slice(0, 50) + '.' + ext;
+  /** Type réel d'un fichier d'après ses premiers octets (signature) : PDF, JPEG ou PNG, sinon null. */
+  async function sniffDoc(file) {
+    const b = new Uint8Array(await file.slice(0, 8).arrayBuffer());
+    if (b[0] === 0x25 && b[1] === 0x50 && b[2] === 0x44 && b[3] === 0x46 && b[4] === 0x2d) return { mime: 'application/pdf', ext: 'pdf' };  // %PDF-
+    if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return { mime: 'image/jpeg', ext: 'jpg' };
+    if ([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every((v, i) => b[i] === v)) return { mime: 'image/png', ext: 'png' };
+    return null;
+  }
   async function listDocs(merchantId) {
     const { data } = await sb.storage.from('documents').list(merchantId, { limit: 100 });
     const docs = {};
@@ -3423,8 +3438,98 @@
     const text = String((e && (e.message || e.name)) || '');
     if (/TimeoutError|Délai dépassé|AbortError|Failed to fetch|NetworkError|Load failed/i.test(text) || (e && e.status >= 500))
       return 'FlashMiam est très demandé en ce moment : le serveur n\'a pas répondu à temps. Réessayez dans un instant.';
-    return 'Le serveur n\'a pas pu traiter la demande' + (e && e.message ? ' (' + e.message + ')' : '') + '. Réessayez dans un instant.';
+    // Message d'une règle de FlashMiam (écrit en français pour l'utilisateur) : affiché tel quel. Tout message technique
+    // (anglais, contrainte, colonne, détail de la base) reste dans la console : jamais montré à l'écran.
+    const msg = e && typeof e.message === 'string' ? e.message.trim() : '';
+    // Règles de la base (« raise exception », code P0001) : toutes écrites en français pour l'utilisateur, avec ou sans
+    // accent (« Dix stories en ligne au maximum. ») ; ailleurs, seul un message manifestement français est repris.
+    const ours = code === 'P0001' && /^[A-ZÉÈÀÂÇ][^<>\n]{2,200}$/.test(msg);
+    const french = /^[A-ZÉÈÀÂÇ][^<>\n]{4,200}[.!]$/.test(msg) && /[éèàùâêîôûç]/i.test(msg);
+    if ((ours || french) && !/violates|constraint|relation|column|syntax|permission|duplicate|null value|function|schema|policy|JSON|token/i.test(msg)) return msg;
+    console.warn('Erreur du serveur', code || '', msg);
+    return 'Le serveur n\'a pas pu traiter la demande. Réessayez dans un instant.';
   }
+
+  /**
+   * Anti-robots (Cloudflare Turnstile), actif seulement si CONFIG.turnstileSiteKey est renseignée. Chaque envoi sensible
+   * (connexion, inscription, mot de passe oublié, nouvel envoi de code, Google) reçoit un jeton à usage unique, vérifié
+   * par Supabase. Le plus souvent invisible ; une case à cocher n'apparaît que si Cloudflare a un doute.
+   * Sans clé : rien n'est chargé et token() renvoie undefined (aucun changement).
+   */
+  const Captcha = (() => {
+    const API = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    let loading = null, widget = null, box = null;
+    const enabled = () => !!CONFIG.turnstileSiteKey;
+    function load() {
+      if (!loading) loading = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = API; s.async = true;
+        s.onload = () => (window.turnstile ? resolve(window.turnstile) : reject(new Error('turnstile')));
+        s.onerror = () => { loading = null; reject(new Error('turnstile')); };
+        document.head.appendChild(s);
+      });
+      return loading;
+    }
+    function slot() {
+      if (!box) { box = document.createElement('div'); box.id = 'captcha-box'; box.className = 'captcha-box'; document.body.appendChild(box); }
+      return box;
+    }
+    /** Jeton à usage unique (undefined si l'anti-robots n'est pas activé). Rejette si la vérification échoue. */
+    async function token() {
+      if (!enabled()) return undefined;
+      const ts = await load();
+      return new Promise((resolve, reject) => {
+        let settled = false;
+        const end = (fn, v) => { if (!settled) { settled = true; clearTimeout(timer); slot().classList.remove('is-open'); fn(v); } };
+        const timer = setTimeout(() => end(reject, new Error('captcha_timeout')), 90000);
+        if (widget !== null) { try { ts.remove(widget); } catch (e) { /* déjà retiré */ } }
+        widget = ts.render(slot(), {
+          sitekey: CONFIG.turnstileSiteKey, execution: 'execute', appearance: 'interaction-only', language: 'fr',
+          callback: (t) => end(resolve, t),
+          'error-callback': () => end(reject, new Error('captcha')),
+          'before-interactive-callback': () => slot().classList.add('is-open'),
+        });
+        ts.execute(widget);
+      });
+    }
+    const failMessage = 'La vérification anti-robots n\'a pas abouti. Vérifiez votre connexion puis réessayez.';
+    return { token, enabled, failMessage };
+  })();
+  /** Erreur de l'anti-robots renvoyée par Supabase (jeton absent, expiré ou refusé). */
+  const captchaRefused = (e) => !!e && (/captcha/i.test(e.code || '') || /captcha/i.test(e.message || ''));
+
+  /**
+   * Connexion : après 3 échecs de suite, une attente croissante avant le prochain essai (30 s, 1 min, 2 min… 5 min au
+   * plus) ; 1 min si le serveur signale trop de demandes. Confort de sécurité dans la page : la vraie limite est celle du
+   * serveur (Supabase Auth limite les tentatives par adresse IP).
+   */
+  const LoginGuard = (() => {
+    const KEY = 'flashmiam:login-guard';
+    const read = () => { try { return JSON.parse(sessionStorage.getItem(KEY)) || { fails: 0, until: 0 }; } catch (e) { return { fails: 0, until: 0 }; } };
+    let state = read(), timer = null;
+    const save = () => { try { sessionStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* stockage indisponible */ } };
+    const left = () => Math.max(0, Math.ceil((state.until - Date.now()) / 1000));
+    function render() {
+      const btn = $('form-login').querySelector('[type=submit]');
+      clearInterval(timer);
+      const tick = () => {
+        const s = left();
+        btn.disabled = s > 0;
+        btn.textContent = s > 0 ? 'Réessayez dans ' + (s >= 60 ? Math.floor(s / 60) + ' min ' + String(s % 60).padStart(2, '0') + ' s' : s + ' s') : 'Se connecter';
+        if (!s) clearInterval(timer);
+      };
+      tick();
+      if (left()) timer = setInterval(tick, 1000);
+    }
+    function failed(serverLimited = false) {
+      state.fails += 1;
+      const wait = serverLimited ? 60 : state.fails > 3 ? Math.min(30 * 2 ** (state.fails - 4), 300) : 0;
+      if (wait) state.until = Date.now() + wait * 1000;
+      save(); render();
+    }
+    function succeeded() { state = { fails: 0, until: 0 }; save(); render(); }
+    return { render, failed, succeeded, locked: () => left() > 0 };
+  })();
 
   /** Recharge les données partagées (après une modification, un changement en direct, ou régulièrement). */
   let refreshTimer = null, refreshWaiters = [];
@@ -4276,12 +4381,7 @@
   /** MapLibre est chargé en parallèle du site : on attend qu'il soit là (ou en échec) avant de créer la carte. */
   function mapLibreLoaded() {
     if (window.maplibregl || window.__maplibreFailed) return Promise.resolve();
-    return new Promise((resolve) => {
-      const s = $('maplibre-script');
-      s.addEventListener('load', resolve, { once: true });
-      s.addEventListener('error', resolve, { once: true });
-      const t = setInterval(() => { if (window.maplibregl || window.__maplibreFailed) { clearInterval(t); resolve(); } }, 200);
-    });
+    return Promise.resolve(window.__maplibreReady).catch(() => {});
   }
 
   async function createMapLibreView(theme) {
@@ -7096,10 +7196,11 @@
    * Écran « Vérifiez votre adresse e-mail ». sent = un code vient d'être envoyé (inscription) ;
    * sinon on en demande un (connexion d'un compte pas encore confirmé).
    */
-  function startEmailVerification({ email, onSuccess, back, sent = true }) {
+  function startEmailVerification({ email, onSuccess, back, sent = true, fromSignup = false }) {
     clearInterval(resendTimer);
     emailCheck = { email, onSuccess, back };
     $('ec-email').textContent = email;
+    $('ec-exists').hidden = !fromSignup;
     $('ec-code').value = '';
     setFieldError('ec-code', '');
     $('err-email-code').textContent = '';
@@ -7114,15 +7215,19 @@
     btn.disabled = true;
     btn.textContent = 'Envoi en cours…';
     $('err-email-code').textContent = '';
-    const { error } = await sb.auth.resend({ type: 'signup', email: check.email, options: { emailRedirectTo: location.origin + location.pathname } });
+    const captchaToken = await Captcha.token().catch(() => null);
+    const { error } = captchaToken === null ? { error: { code: 'captcha_failed' } }
+      : await sb.auth.resend({ type: 'signup', email: check.email, options: { emailRedirectTo: location.origin + location.pathname, captchaToken } });
     if (check !== emailCheck) return;
-    if (error) {
-      $('err-email-code').textContent = cloudError(error);
+    // Seules les erreurs utiles sont montrées (réseau, trop de demandes, envoi impossible, anti-robots) : une réponse
+    // du type « adresse déjà confirmée » trahirait l'existence d'un compte, elle est traitée comme un envoi normal.
+    if (error && (captchaRefused(error) || error.status === 429 || mailUndeliverable(error) || !navigator.onLine || !error.status || error.status >= 500)) {
+      $('err-email-code').textContent = captchaRefused(error) ? Captcha.failMessage : cloudError(error);
       btn.disabled = false;
       btn.textContent = 'Renvoyer le code';
       return;
     }
-    if (!silent) toast('Un nouveau code a été envoyé à ' + check.email + '.');
+    if (!silent) toast('Si cette adresse attend sa confirmation, un nouveau code y a été envoyé.');
     startResendCooldown(RESEND_DELAY);
   }
 
@@ -7141,6 +7246,13 @@
   }
 
   $('ec-resend').addEventListener('click', () => resendCode());
+  $('ec-to-login').addEventListener('click', () => {
+    const email = emailCheck && emailCheck.email;
+    clearInterval(resendTimer);
+    emailCheck = null;
+    if (email) $('li-email').value = email;
+    showAuthStep('login');
+  });
   $('ec-change').addEventListener('click', async () => {
     const back = emailCheck && emailCheck.back;
     clearInterval(resendTimer);
@@ -7241,19 +7353,24 @@
     const btn = ev.submitter || $('form-signup').querySelector('[type=submit]');
     btn.disabled = true;
     authStorage.setRemember($('su-remember').checked);
+    $('err-signup').textContent = '';
+    const captchaToken = await Captcha.token().catch(() => null);
+    if (captchaToken === null) { btn.disabled = false; $('err-signup').textContent = Captcha.failMessage; return; }
     const meta = { role: 'merchant', first_name: name, last_name: lastName, phone: formatPhone(phone), terms_version: TERMS_VERSION };
     const { data, error } = await Loader.run(
-      sb.auth.signUp({ email, password, options: { data: meta, emailRedirectTo: location.origin + location.pathname } }),
+      sb.auth.signUp({ email, password, options: { data: meta, emailRedirectTo: location.origin + location.pathname, captchaToken } }),
       'Création de votre compte…');
     btn.disabled = false;
     if (error) {
+      if (captchaRefused(error)) { $('err-signup').textContent = Captcha.failMessage; return; }
+      // Seulement si la confirmation par e-mail était désactivée côté Supabase (sinon Supabase ne le dit jamais)
       if (error.code === 'user_already_exists' || /already registered/i.test(error.message || '')) { accountExists(); return; }
       if (error.code === 'weak_password') { setFieldError('su-password', 'Mot de passe trop faible : choisissez-en un plus long ou plus varié.'); $('su-password').focus(); return; }
       $('err-signup').textContent = cloudError(error);
       return;
     }
-    // Adresse déjà inscrite et confirmée : Supabase répond sans erreur (protection de la vie privée) mais sans identité
-    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) { accountExists(); return; }
+    // Adresse déjà inscrite et confirmée : Supabase répond sans erreur et n'envoie rien (protection de la vie privée).
+    // La page fait de même : même écran « code envoyé », avec l'indication pour se connecter (aucune fuite).
     $('su-password').value = '';
     $('su-password2').value = '';
     renderPasswordRules();
@@ -7264,7 +7381,7 @@
       showAuthStep('pro-verify');
     };
     if (data.session) { await opened(data.session); return; }   // confirmation de l'e-mail désactivée
-    startEmailVerification({ email, back: 'signup', onSuccess: opened });
+    startEmailVerification({ email, back: 'signup', onSuccess: opened, fromSignup: true });
   });
   /* ---------- Inscription d'un client : accueil (la suite dans l'application), questions sexe et âge seules ---------- */
   /* ---------- Inscription d'un client : e-mail et mot de passe, puis une question par écran (prénom, sexe, âge) ---------- */
@@ -7582,26 +7699,37 @@
     const password = $('li-password').value;
     if (!EMAIL_RE.test(email)) { setFieldError('li-email', 'Adresse e-mail invalide.'); $('li-email').focus(); return; }
     if (!password) { setFieldError('li-password', 'Saisissez votre mot de passe.'); $('li-password').focus(); return; }
+    if (LoginGuard.locked()) { $('err-login').textContent = 'Trop d\'essais : par sécurité, patientez avant de réessayer.'; return; }
     const btn = ev.submitter || $('form-login').querySelector('[type=submit]');
     btn.disabled = true;
     authStorage.setRemember($('li-remember').checked);
-    const { data, error } = await Loader.run(sb.auth.signInWithPassword({ email, password }), 'Connexion…');
+    $('err-login').textContent = '';
+    const captchaToken = await Captcha.token().catch(() => null);
+    if (captchaToken === null) { btn.disabled = false; $('err-login').textContent = Captcha.failMessage; return; }
+    const { data, error } = await Loader.run(sb.auth.signInWithPassword({ email, password, options: { captchaToken } }), 'Connexion…');
     btn.disabled = false;
     if (error) {
       if (error.code === 'email_not_confirmed' || /not confirmed/i.test(error.message || '')) {
         startEmailVerification({ email, back: 'login', sent: false, onSuccess: (session) => openAfterLogin(session.user) });
         return;
       }
+      if (captchaRefused(error)) { $('err-login').textContent = Captcha.failMessage; return; }
+      if (error.status === 429) { LoginGuard.failed(true); $('err-login').textContent = cloudError(error); return; }
       if (error.code === 'invalid_credentials' || error.status === 400) {
+        // Un seul message, que l'adresse existe ou non : impossible de deviner qui a un compte
         setFieldError('li-password', 'E-mail ou mot de passe incorrect. Si vous vous êtes inscrit avec Google, utilisez le bouton Google.');
+        LoginGuard.failed();
+        if (LoginGuard.locked()) $('err-login').textContent = 'Trop d\'essais : par sécurité, patientez avant de réessayer.';
         $('li-password').select();
         return;
       }
       $('err-login').textContent = cloudError(error);
       return;
     }
+    LoginGuard.succeeded();
     openAfterLogin(data.user);
   });
+  LoginGuard.render();
 
   /** Compte ouvert après une connexion : vérifie le type de compte choisi, puis reprend là où il en était. */
   async function openAfterLogin(authUser) {
@@ -7699,8 +7827,10 @@
     const errBox = $('err-login');
     errBox.textContent = '';
     authStorage.setRemember($('li-remember').checked);
-    const { data, error } = await Loader.run(sb.auth.signInWithIdToken({ provider: 'google', token: response.credential }), 'Connexion avec Google…');
-    if (error || !data.user) { errBox.textContent = 'La connexion avec Google a échoué. Réessayez.'; return; }
+    const captchaToken = await Captcha.token().catch(() => null);
+    if (captchaToken === null) { errBox.textContent = Captcha.failMessage; return; }
+    const { data, error } = await Loader.run(sb.auth.signInWithIdToken({ provider: 'google', token: response.credential, options: { captchaToken } }), 'Connexion avec Google…');
+    if (error || !data.user) { errBox.textContent = captchaRefused(error) ? Captcha.failMessage : 'La connexion avec Google a échoué. Réessayez.'; return; }
     let user;
     try { user = await loadUser(data.user); } catch (e) { errBox.textContent = cloudError(e); return; }
     if (user.role === 'pro') {
@@ -7759,8 +7889,10 @@
   $('forgot-btn').addEventListener('click', async () => {
     const email = $('li-email').value.trim().toLowerCase();
     if (!EMAIL_RE.test(email)) { setFieldError('li-email', 'Saisissez d\'abord l\'adresse e-mail de votre compte.'); $('li-email').focus(); return; }
-    const { error } = await Loader.run(sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname }), 'Envoi du code…');
-    if (error) { $('err-login').textContent = cloudError(error); return; }
+    const captchaToken = await Captcha.token().catch(() => null);
+    if (captchaToken === null) { $('err-login').textContent = Captcha.failMessage; return; }
+    const { error } = await Loader.run(sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname, captchaToken }), 'Envoi du code…');
+    if (error) { $('err-login').textContent = captchaRefused(error) ? Captcha.failMessage : cloudError(error); return; }
     showReset(email);
   });
   $('rs-code').addEventListener('input', () => { const d = onlyDigits($('rs-code').value).slice(0, 6); if (d !== $('rs-code').value) $('rs-code').value = d; });
@@ -7954,19 +8086,18 @@
     });
   }
 
-  const DOC_MIME = { pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png' };
   async function onDocSelected(type, file, row) {
     if (!file) return;
-    const ext = (file.name.split('.').pop() || '').toLowerCase();
-    const mime = /^(application\/pdf|image\/jpeg|image\/png)$/.test(file.type) ? file.type : DOC_MIME[ext];
     $('err-pro-verify').textContent = '';
-    if (!mime) { $('err-pro-verify').textContent = '« ' + file.name + ' » : format non accepté (PDF, JPG ou PNG).'; return; }
     if (file.size > MAX_DOC_SIZE) { $('err-pro-verify').textContent = '« ' + file.name + ' » dépasse 10 Mo.'; return; }
+    // Contenu réellement vérifié (et non le nom ou le type annoncés) : un fichier renommé en .pdf est refusé
+    const real = await sniffDoc(file).catch(() => null);
+    if (!real) { $('err-pro-verify').textContent = '« ' + file.name + ' » : format non accepté (PDF, JPG ou PNG).'; return; }
     const pro = currentUser().pro || {};
     if (!pro.merchantId) { $('err-pro-verify').textContent = 'Faites d\'abord vérifier votre numéro SIRET (bouton « Vérifier »), puis ajoutez vos justificatifs.'; return; }
-    const path = docPath(pro.merchantId, type.key, file.name);
+    const path = docPath(pro.merchantId, type.key, file.name, real.ext);
     row.classList.add('is-busy');
-    const { error } = await Loader.run(sb.storage.from('documents').upload(path, file, { contentType: mime }), 'Envoi du justificatif…');
+    const { error } = await Loader.run(sb.storage.from('documents').upload(path, file, { contentType: real.mime }), 'Envoi du justificatif…');
     row.classList.remove('is-busy');
     if (error) { $('err-pro-verify').textContent = '« ' + file.name + ' » n\'a pas pu être envoyé. ' + cloudError(error); return; }
     const previous = (pro.docs || {})[type.key];
@@ -9730,7 +9861,7 @@
     if (!account || !window.confirm('Supprimer définitivement votre compte ?' + (account.role === 'pro' ? '\n\nLa fiche de votre restaurant, ses photos, stories, promotions et statistiques seront supprimées.' : '')
       + (paid ? '\n\nVotre abonnement sera résilié : aucun nouveau prélèvement.' : ''))) return;
     try { await Loader.run(deleteMyAccount(), 'Suppression de votre compte…'); }
-    catch (e) { toast('La suppression a échoué. ' + (/[éèà]/.test(e.message || '') ? e.message : cloudError(e))); return; }
+    catch (e) { toast('La suppression a échoué. ' + cloudError(e)); return; }
     store.write({ lastEmail: null });
     location.reload();
   });

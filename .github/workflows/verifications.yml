@@ -1,5 +1,6 @@
 # Vérifications contre le vrai projet Supabase (depuis Internet, comme un visiteur) :
-# sécurité des données en accès anonyme, fonction verify-siret, répertoire Sirene.
+# sécurité des données en accès anonyme, fonction verify-siret, répertoire Sirene ;
+# et règles de sécurité de la base (scénarios RLS) sur une base jetable reconstruite par les migrations.
 name: Vérifier Supabase en ligne
 
 on:
@@ -45,3 +46,34 @@ jobs:
       - name: Fonction en ligne et répertoire Sirene réel
         working-directory: web
         run: deno run --allow-net --allow-env supabase/tests/smoke.ts
+
+  # Règles de sécurité de la base (RLS, droits, fonctions, rôle de sauvegarde) : toutes les migrations appliquées sur une
+  # base jetable PostgreSQL 17 (même version que Supabase), puis plus de 300 scénarios (visiteur, client, restaurateur…)
+  regles-base:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Client PostgreSQL 17
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-common > /dev/null
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y > /dev/null
+          sudo apt-get install -y -qq postgresql-client-17 > /dev/null
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+      - name: Scénarios de sécurité de la base
+        run: sh web/supabase/tests/rls/run.sh

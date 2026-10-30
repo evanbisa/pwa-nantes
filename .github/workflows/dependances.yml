@@ -1,0 +1,33 @@
+# Failles connues dans les dépendances, chaque semaine et à chaque changement de dépendance :
+#  - bibliothèques copiées dans le site (vendor/ : MapLibre, supabase-js), que ni npm ni Dependabot ne surveillent ;
+#  - application Next.js (web/package-lock.json).
+# Échoue (et GitHub prévient par e-mail) dès qu'une faille de gravité moyenne ou plus est connue.
+# Les mises à jour elles-mêmes sont proposées par Dependabot (.github/dependabot.yml).
+name: Dépendances (failles connues)
+
+on:
+  push:
+    branches: [claude/street-food-map-pwa-lr1xu2]
+    paths: ['vendor/**', 'web/package.json', 'web/package-lock.json', 'scripts/check-vendor.mjs', .github/workflows/dependances.yml]
+  schedule:
+    - cron: '41 5 * * 3'   # chaque mercredi matin
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Bibliothèques servies par le site (vendor/)
+        run: node scripts/check-vendor.mjs
+      - name: Application (web/)
+        working-directory: web
+        run: npm audit --audit-level=moderate

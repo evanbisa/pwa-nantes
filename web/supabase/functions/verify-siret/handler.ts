@@ -4,6 +4,7 @@
  * Les dépendances (base, Sirene) sont injectées pour pouvoir tester sans réseau.
  */
 import { type Company, checkSireneResponse, isValidSiret, merchantName, onlyDigits } from "./siret.ts";
+import { corsHeaders } from "../_shared/cors.ts";
 
 export interface Deps {
   /** Identifiant de l'utilisateur dont le jeton de session est valide, sinon null. */
@@ -16,7 +17,7 @@ export interface Deps {
   createMerchant(row: { user_id: string; name: string; address: string | null; lat: number | null; lng: number | null; is_test?: boolean }): Promise<string>;
   /** Enregistre (ou remplace) la vérification. Doit lever une erreur { code: "23505" } si le SIRET est déjà pris. */
   saveVerification(merchantId: string, company: Company, snapshot: unknown): Promise<void>;
-  /** SIRET de test accepté (phase de test) ? Désactivable : variable ALLOW_TEST_SIRET=false. */
+  /** SIRET de test accepté ? Refusé par défaut (en ligne) ; accepté seulement si ALLOW_TEST_SIRET=true (tests locaux). */
   allowTestSiret?: boolean;
 }
 
@@ -34,24 +35,7 @@ const TEST_COMPANY: Omit<Company, "siret"> = {
   address: "1 Place Napoléon 85000 La Roche-sur-Yon", lat: 46.6705, lng: -1.427,
 };
 
-/** Sites autorisés à appeler la fonction depuis un navigateur */
-const ALLOWED_ORIGINS = [
-  /^https:\/\/([a-z0-9-]+\.)?roche-street-food\.pages\.dev$/,   // Cloudflare Pages (et ses aperçus)
-  /^https:\/\/(roche-street-food|pwa-nantes|pwa-nantes-web)\.vercel\.app$/,  // Vercel : adresses de production uniquement
-  /^https:\/\/evanbisa\.github\.io$/,
-  /^http:\/\/localhost:\d+$/,
-];
 
-function corsHeaders(origin: string | null): Record<string, string> {
-  const allowed = origin && ALLOWED_ORIGINS.some((re) => re.test(origin));
-  return {
-    ...(allowed ? { "Access-Control-Allow-Origin": origin! } : {}),
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Max-Age": "86400",
-    Vary: "Origin",
-  };
-}
 
 export async function handle(req: Request, deps: Deps): Promise<Response> {
   const cors = corsHeaders(req.headers.get("Origin"));
@@ -83,7 +67,7 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
 
   // SIRET de test : établissement fictif, sans appel au répertoire Sirene
   if (siret === TEST_SIRET) {
-    if (deps.allowTestSiret === false) return error(403, "test_disabled", "Le SIRET de test n'est plus accepté.");
+    if (deps.allowTestSiret !== true) return error(403, "test_disabled", "Le SIRET de test n'est pas accepté : utilisez le SIRET de votre établissement.");
     const mine = await deps.getMyMerchant(userId);
     if (mine && mine.siret && !mine.siret.startsWith(TEST_SIREN) && mine.status !== "draft") {
       return error(409, "siret_locked", "Votre fiche est en ligne : le SIRET ne peut plus être changé. Contactez-nous.");
@@ -97,7 +81,7 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
       await deps.saveVerification(merchantId, company, { test: true });
       return json(200, { verified: true, test: true, merchant_id: merchantId, company: { ...company, siret: TEST_SIRET } });
     } catch (e) {
-      console.error("verify-siret: enregistrement impossible (test)", e);
+      console.error("verify-siret: enregistrement impossible (test)", e instanceof Error ? e.message : e);
       return error(500, "server", "Enregistrement impossible pour le moment. Réessayez plus tard.");
     }
   }
@@ -143,7 +127,7 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
     if ((e as { code?: string })?.code === "23505") {
       return error(409, "siret_taken", "Ce SIRET est déjà associé à un autre compte restaurateur.");
     }
-    console.error("verify-siret: enregistrement impossible", e);
+    console.error("verify-siret: enregistrement impossible", e instanceof Error ? e.message : e);
     return error(500, "server", "Enregistrement impossible pour le moment. Réessayez plus tard.");
   }
 }

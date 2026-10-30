@@ -90,6 +90,11 @@ export const confidentialite: LegalDoc = {
               basis: "Exécution du contrat ; obligations légales (facturation)",
             },
             {
+              title: "Connexions : adresse IP et navigateur de chaque session",
+              detail: "Garder votre compte connecté sur vos appareils et repérer un usage anormal. Enregistrés par notre prestataire d'authentification le temps de la session ; vous êtes déconnecté après 30 jours sans utilisation, et au plus tard après 180 jours.",
+              basis: "Intérêt légitime (sécurité des comptes)",
+            },
+            {
               title: "Inscription : empreinte de l'adresse IP",
               detail: "Limiter les créations de comptes en masse depuis une même connexion. L'adresse IP elle-même n'est jamais enregistrée, seulement une empreinte irréversible.",
               basis: "Intérêt légitime (sécurité du service)",
@@ -107,7 +112,8 @@ export const confidentialite: LegalDoc = {
         {
           list: [
             "**Supabase** : comptes, données et fichiers, hébergés à Stockholm (Union européenne) ; envoi des codes par e-mail.",
-            "**Vercel** (et GitHub pour la copie de secours) : hébergement des pages du site.",
+            "**Vercel** : hébergement des pages du site.",
+            "**GitHub** (Microsoft) : copie de secours du site, vérifications automatiques et **sauvegardes de la base**, chiffrées avant d'être déposées (AES-256) et conservées 30 jours.",
             "**Google** : connexion avec Google, uniquement si vous l'utilisez et l'acceptez.",
             "**Cloudflare** (service DNS 1.1.1.1) : vérification que le domaine d'une adresse e-mail reçoit des e-mails ; seul le domaine est transmis.",
             "**Service d'alertes de votre navigateur** (Google, Mozilla, Apple ou Microsoft) : acheminement des alertes, chiffrées de bout en bout.",
@@ -124,7 +130,7 @@ export const confidentialite: LegalDoc = {
       title: "Transferts hors de l'Union européenne",
       icon: Globe,
       blocks: [
-        "Les données des comptes sont conservées dans l'Union européenne. Certains prestataires (Vercel, Google, Cloudflare, Whop) sont établis aux États-Unis : les transferts éventuels sont encadrés par le cadre de protection des données UE–États-Unis (Data Privacy Framework) auquel ils adhèrent, ou par les clauses contractuelles types de la Commission européenne.",
+        "Les données des comptes sont conservées dans l'Union européenne. Certains prestataires (Vercel, GitHub, Google, Cloudflare, Whop) sont établis aux États-Unis : les transferts éventuels sont encadrés par le cadre de protection des données UE–États-Unis (Data Privacy Framework) auquel ils adhèrent, ou par les clauses contractuelles types de la Commission européenne.",
       ],
     },
     {
@@ -144,10 +150,13 @@ export const confidentialite: LegalDoc = {
             { title: "Stories", detail: "Publiques 24 heures, puis visibles par leur seul restaurateur ; supprimées avec leur photo 30 jours après leur fin." },
             { title: "Fréquentation du site (identifiant d'appareil tiré au hasard)", detail: "13 mois." },
             { title: "Tentatives d'inscription (empreinte IP)", detail: "2 jours." },
+            { title: "Sessions de connexion (adresse IP, navigateur)", detail: "30 jours sans utilisation, 180 jours au plus : la session est alors fermée." },
+            { title: "Compte dont l'adresse n'a jamais été confirmée (code jamais saisi)", detail: "Supprimé 7 jours après l'inscription." },
             { title: "Notifications de paiement reçues de Whop", detail: "30 jours (identifiant et type seulement)." },
             { title: "Compte, fiche, avis, « j'aime », preuve d'acceptation des conditions", detail: "Jusqu'à leur suppression par vous, ou la suppression du compte." },
             { title: "Alertes sur l'appareil", detail: "Jusqu'à leur désactivation, la déconnexion ou la suppression du compte." },
             { title: "Factures des restaurateurs", detail: "10 ans (obligation comptable)." },
+            { title: "Sauvegardes chiffrées de la base", detail: "30 jours, puis effacées automatiquement : une donnée supprimée disparaît aussi des sauvegardes au plus tard 30 jours après. Une restauration ne fait jamais revenir les données d'un compte supprimé entre-temps." },
           ],
         },
       ],
@@ -157,7 +166,7 @@ export const confidentialite: LegalDoc = {
       title: "Sécurité",
       icon: Lock,
       blocks: [
-        "Connexions chiffrées (HTTPS), mots de passe conservés sous forme d'empreinte, règles d'accès en base de données (chacun n'accède qu'à ses propres données), protection contre l'injection de scripts, vérifications automatiques régulières et suppression complète des fichiers à la suppression d'un compte.",
+        "Connexions chiffrées (HTTPS), mots de passe conservés sous forme d'empreinte, règles d'accès en base de données (chacun n'accède qu'à ses propres données), protection contre l'injection de scripts, vérifications automatiques régulières, sauvegarde chiffrée chaque nuit (vérifiée par une restauration d'essai) et suppression complète des fichiers à la suppression d'un compte.",
       ],
     },
     {

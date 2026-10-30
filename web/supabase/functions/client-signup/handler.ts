@@ -5,10 +5,19 @@
  * Appels limités par adresse IP (empreinte seulement) et au total, contre les créations de comptes en masse.
  *
  *   POST { action: "check", email }                                          → 200 { ok: true }
- *   POST { action: "signup", email, password, first_name, accept_terms, gender?, birth_year? } → 200 { created: true }
+ *   POST { action: "signup", email, password, first_name, accept_terms, gender?, birth_year?, captcha_token? }
+ *        → 200 { created: true, confirm }
  *   accept_terms : version des CGU acceptée (AAAA-MM-JJ), avec l'attestation « 15 ans ou plus » (case cochée sur le site).
- * Refus : { error, message } (400 données, 409 compte existant, 422 adresse ou mot de passe, 429 trop d'essais).
+ *   captcha_token : jeton Cloudflare Turnstile, exigé dès que le serveur a sa clé secrète (TURNSTILE_SECRET_KEY).
+ *
+ * Confirmation par e-mail (réglage app_settings.client_email_confirmation, à activer une fois l'envoi d'e-mails réglé) :
+ * le compte est créé NON confirmé, le code part par e-mail (un compte créé par le serveur ne déclenche aucun envoi de
+ * lui-même) et confirm = true : le site demande alors ce code. Dans ce mode, une adresse déjà inscrite reçoit exactement
+ * la même réponse, sans rien créer (et aucun code si elle est déjà confirmée) : impossible de savoir qui a un compte.
+ * Sans confirmation : compte créé déjà confirmé ; adresse déjà inscrite → 409.
+ * Refus : { error, message } (400 données ou anti-robots, 409 compte existant, 422 adresse ou mot de passe, 429 trop d'essais).
  */
+import { corsHeaders } from "../_shared/cors.ts";
 export interface Deps {
   /** Le domaine peut-il recevoir des e-mails ? "unknown" : impossible de le savoir (l'inscription continue). */
   mailDomain(domain: string): Promise<"ok" | "none" | "unknown">;
@@ -16,17 +25,16 @@ export interface Deps {
   attempt(ipHash: string, kind: "check" | "signup"): Promise<boolean>;
   /** Empreinte de l'adresse IP (l'adresse elle-même n'est jamais enregistrée). */
   hashIp(ip: string): Promise<string>;
-  createUser(u: { email: string; password: string; metadata: Record<string, string> }): Promise<"created" | "exists" | "weak">;
+  createUser(u: { email: string; password: string; metadata: Record<string, string>; confirmed: boolean }): Promise<"created" | "exists" | "weak">;
+  /** Réglages du serveur : confirmation par e-mail des clients exigée ? */
+  settings(): Promise<{ confirmEmail: boolean }>;
+  /** Envoie le code de confirmation à une adresse qui attend sa confirmation (rien si elle est déjà confirmée). */
+  sendCode(email: string): Promise<void>;
+  /** Vérifie un jeton anti-robots ; null = anti-robots non configuré (pas de clé secrète). */
+  verifyCaptcha(token: string, ip: string): Promise<boolean> | null;
   now(): Date;
 }
 
-/** Sites autorisés à appeler la fonction depuis un navigateur (même liste que les autres fonctions) */
-const ALLOWED_ORIGINS = [
-  /^https:\/\/([a-z0-9-]+\.)?roche-street-food\.pages\.dev$/,
-  /^https:\/\/(roche-street-food|pwa-nantes|pwa-nantes-web)\.vercel\.app$/,
-  /^https:\/\/evanbisa\.github\.io$/,
-  /^http:\/\/localhost:\d+$/,
-];
 /** Messageries connues : inutile d'interroger le DNS. */
 const KNOWN_DOMAINS = new Set([
   "gmail.com", "googlemail.com", "hotmail.com", "hotmail.fr", "outlook.com", "outlook.fr", "live.fr", "live.com", "msn.com",
@@ -45,16 +53,6 @@ export const PASSWORD_RULES: ((p: string) => boolean)[] = [
 export const MIN_AGE = 15;
 const GENDERS = ["female", "male", "other"];
 
-function corsHeaders(origin: string | null): Record<string, string> {
-  const allowed = origin && ALLOWED_ORIGINS.some((re) => re.test(origin));
-  return {
-    ...(allowed ? { "Access-Control-Allow-Origin": origin! } : {}),
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Max-Age": "86400",
-    Vary: "Origin",
-  };
-}
 /**
  * Adresse IP du visiteur. Celle posée par la passerelle (Cloudflare : cf-connecting-ip, réécrite à chaque requête)
  * passe en premier : le début de X-Forwarded-For peut être inventé par le client pour contourner le plafond.
@@ -89,6 +87,7 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
   const domain = email.slice(email.indexOf("@") + 1);
 
   let fields: { password: string; metadata: Record<string, string> } | null = null;
+  const captcha = str(body.captcha_token).slice(0, 2048);
   if (action === "signup") {
     const password = str(body.password);
     if (!PASSWORD_RULES.every((rule) => rule(password))) {
@@ -118,17 +117,32 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
   }
 
   try {
-    if (!(await deps.attempt(await deps.hashIp(clientIp(req)), action))) {
+    const ip = clientIp(req);
+    if (!(await deps.attempt(await deps.hashIp(ip), action))) {
       return refuse(429, "rate_limited", "Trop de tentatives depuis cette connexion. Réessayez dans une heure.");
+    }
+    // Anti-robots (seulement pour créer un compte) : exigé dès que le serveur a sa clé secrète
+    if (fields) {
+      const check = deps.verifyCaptcha(captcha, ip);
+      if (check !== null && !(captcha && (await check))) {
+        return refuse(400, "captcha", "La vérification anti-robots n'a pas abouti. Réessayez.");
+      }
     }
     if (!KNOWN_DOMAINS.has(domain) && (await deps.mailDomain(domain)) === "none") {
       return refuse(422, "email_domain", `Le domaine « ${domain} » ne reçoit pas d'e-mails : vérifiez l'adresse.`);
     }
     if (!fields) return json(200, { ok: true });
-    const result = await deps.createUser({ email, ...fields });
+    const { confirmEmail } = await deps.settings();
+    const result = await deps.createUser({ email, ...fields, confirmed: !confirmEmail });
+    if (confirmEmail && result !== "weak") {
+      // Code envoyé (compte créé, ou déjà inscrit mais jamais confirmé) ; adresse déjà confirmée : rien ne part. Dans
+      // tous les cas la même réponse, même si l'envoi échoue (le site propose « Renvoyer le code ») : aucune fuite.
+      await deps.sendCode(email).catch((e) => console.error("client-signup : envoi du code impossible", e instanceof Error ? e.message : e));
+      return json(200, { created: true, confirm: true });
+    }
     if (result === "exists") return refuse(409, "exists", "Un compte existe déjà avec cet e-mail.");
     if (result === "weak") return refuse(422, "weak_password", "Mot de passe trop facile à deviner : choisissez-en un plus long ou plus varié.");
-    return json(200, { created: true });
+    return json(200, { created: true, confirm: confirmEmail });
   } catch (e) {
     console.error("client-signup : échec", e instanceof Error ? e.message : e);
     return refuse(500, "server", "Inscription impossible pour le moment. Réessayez dans un instant.");
