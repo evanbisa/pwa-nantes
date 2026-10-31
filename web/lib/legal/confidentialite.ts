@@ -60,6 +60,11 @@ export const confidentialite: LegalDoc = {
               basis: "Consentement, retirable à tout moment",
             },
             {
+              title: "FlashMiam ajoutée à l'écran d'accueil : oui ou non, et la date",
+              detail: "Ne plus vous proposer d'ajouter FlashMiam à l'écran d'accueil une fois que c'est fait. Noté sur votre compte quand vous ouvrez FlashMiam depuis son icône (ou si vous indiquez « C'est déjà fait »).",
+              basis: "Exécution du contrat (CGU)",
+            },
+            {
               title: "Restaurants suivis, notifications et alertes",
               detail: "Vous prévenir des promotions et stories des restaurants suivis, des réponses à vos avis ; alertes sur l'appareil si vous les activez (adresse technique fournie par votre navigateur).",
               basis: "Exécution du contrat ; consentement pour les alertes",

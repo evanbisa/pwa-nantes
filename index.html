@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-WHtpURp8vdWkmW93pBA6cZ58E22ls5mhZhqidvd7hls=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-09sUgaFwTjyMSbulqKywosxk4hu2YI1crbPqiPLzHOU=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -392,7 +392,12 @@
     /* Petit écran avec les étapes : les avantages laissent la place */
     @media (max-height: 700px) { #install-sheet:has(.ins-steps:not([hidden])) .ins-perks { display: none; } }
     .ins-steps { margin: 14px 0 4px; padding: 12px 14px; list-style: none; counter-reset: ins; display: grid; gap: 12px; border-radius: 14px; background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); }
-    .ins-steps[hidden] { display: none; }
+    .ins-steps[hidden], .ins-desk[hidden], .ins-done[hidden], #install-later[hidden] { display: none; }
+    .ins-desk { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 14px; align-items: center; margin-top: 14px; }
+    .ins-desk .ins-steps { margin: 0; }
+    .ins-qr { width: 132px; height: 132px; padding: 6px; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 1px var(--line); }
+    .ins-qr svg { display: block; width: 100%; height: 100%; }
+    .ins-done { display: block; margin: 10px auto 0; font-size: 13.5px; color: var(--muted); }
     .ins-steps li { position: relative; padding-left: 34px; font-size: 14.5px; line-height: 1.45; color: var(--text); counter-increment: ins; }
     .ins-steps li::before { content: counter(ins); position: absolute; left: 0; top: -1px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; font-size: 13px; font-weight: 600; color: var(--on-accent); background: var(--accent); }
     .ins-steps b { font-weight: 600; }
@@ -2163,8 +2168,16 @@
       <li>Choisissez <b>Ouvrir dans le navigateur</b> (Safari ou Chrome)</li>
       <li>Revenez ici : FlashMiam vous proposera de l'ajouter</li>
     </ol>
+    <div class="ins-desk" data-install="desktop" hidden>
+      <div class="ins-qr" id="install-qr" aria-label="QR code de FlashMiam" role="img"></div>
+      <ol class="ins-steps">
+        <li>Visez ce QR code avec l'<b>appareil photo</b> de votre téléphone et ouvrez le lien</li>
+        <li>Connectez-vous : FlashMiam vous montre comment l'ajouter à l'écran d'accueil</li>
+      </ol>
+    </div>
     <button class="btn btn-primary" type="button" id="install-go">Ajouter à l'écran d'accueil</button>
-    <button class="btn btn-ghost" type="button" data-close>Plus tard</button>
+    <button class="btn btn-ghost" type="button" id="install-later" data-close>Plus tard</button>
+    <button class="link-btn ins-done" type="button" id="install-done">C'est déjà fait</button>
   </section>
 
   <!-- ===================== OFFRES AUTOUR DE MOI ===================== -->
@@ -2260,8 +2273,8 @@
 
     <p class="pf-label">Plus</p>
     <div class="pf-group">
+      <button class="pf-row" type="button" id="profile-install"><span class="pf-ico" aria-hidden="true">📲</span><span class="pf-k">Mettre FlashMiam sur l'écran d'accueil<small id="profile-install-state">Tutoriel en 3 étapes</small></span><span class="pf-chev" aria-hidden="true">›</span></button>
       <button class="pf-row" type="button" id="profile-tour"><span class="pf-ico" aria-hidden="true">🧭</span><span class="pf-k">Revoir le guide de l'application</span><span class="pf-chev" aria-hidden="true">›</span></button>
-      <button class="pf-row" type="button" id="profile-install" hidden><span class="pf-ico" aria-hidden="true">📲</span><span class="pf-k">Ajouter à l'écran d'accueil</span><span class="pf-chev" aria-hidden="true">›</span></button>
       <a class="pf-row" id="profile-team" href="app/tableau-de-bord/" hidden><span class="pf-ico" aria-hidden="true">📊</span><span class="pf-k">Tableau de bord de l'équipe</span><span class="pf-chev" aria-hidden="true">›</span></a>
       <button class="pf-row" type="button" id="profile-logout"><span class="pf-ico" aria-hidden="true">👋</span><span class="pf-k">Se déconnecter</span><span class="pf-chev" aria-hidden="true">›</span></button>
     </div>
@@ -3031,7 +3044,7 @@
      * MapLibre (style.json). Réglé à la publication par la variable d'environnement MAP_STYLE (scripts/config.mjs).
      * Pour essayer sans republier : ajouter ?carte=neon (ou pastel, urbain, google, flashmiam) à l'adresse du site.
      */
-    installPromptDelay: 45000,   // ms passées sur la carte avant de proposer l'écran d'accueil (une fois)
+    installPromptDelay: 2500,    // ms sur la carte avant de proposer l'écran d'accueil (chaque visite, tant que ce n'est pas fait)
     tourDelay: 1200,             // ms après l'arrivée sur la carte avant le guide de démarrage (-1 : jamais)
     mapStyle: 'flashmiam',
     storageKey: 'roche-street-food:v2',
@@ -3688,6 +3701,8 @@
       prefs: { promos: profile.notify_promos !== false, stories: profile.notify_stories !== false, reviews: profile.notify_reviews !== false },
       gender: profile.gender || null, birthYear: profile.birth_year || null,
       avatarPath: profile.avatar_path || null,
+      // FlashMiam déjà ouverte depuis l'icône de l'écran d'accueil (noté sur le compte : sur iPhone, Safari ne le sait pas)
+      appInstalledAt: (authUser.user_metadata && authUser.user_metadata.app_installed_at) || null,
     };
     if (user.role === 'pro') user.pro = await loadPro(user);
     cloud.user = user;
@@ -7290,33 +7305,71 @@
   /*
    * Écran d'accueil (PWA) : proposer d'ajouter FlashMiam comme une appli. Chrome, Edge, Samsung Internet : vraie
    * installation (proposition du navigateur, gardée pour le bon moment). iPhone, et Android sans proposition :
-   * les étapes à suivre. Demandé une fois sur la carte (personne connectée, rien d'autre d'ouvert), puis au plus deux
-   * fois encore, à 14 jours d'écart ; toujours possible depuis le profil. Rien sur ordinateur sans proposition.
+   * les étapes à suivre ; ordinateur : le QR code du site, à ouvrir sur le téléphone.
+   * Proposé au début de CHAQUE visite sur téléphone (une fois par visite, quand rien d'autre n'est ouvert : après le
+   * guide de démarrage la première fois), tant que ce n'est pas fait. « Fait » est su par :
+   *  - l'installation confirmée par le navigateur (Android, Chrome, Edge) ;
+   *  - l'ouverture de FlashMiam depuis l'icône (mode plein écran), notée aussi sur le COMPTE : sur iPhone, l'icône a
+   *    ses propres données, séparées de Safari ; c'est le compte qui prévient Safari que c'est fait ;
+   *  - « C'est déjà fait », si la personne le dit elle-même.
+   * Toujours disponible depuis le profil : « Mettre FlashMiam sur l'écran d'accueil » (le tutoriel).
    */
   const Install = (() => {
     const KEY = 'roche-street-food:install';
-    const AGAIN_AFTER = 14 * 864e5, MAX_ASKS = 3;
+    const SESSION_KEY = 'flashmiam:install-asked';
     const IN_APP = /FBAN|FBAV|Instagram|Line\/|Snapchat|musical_ly|TikTok|LinkedInApp/i;
     let deferred = null, scheduled = false, current = null;
     const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
     const write = (v) => { try { localStorage.setItem(KEY, JSON.stringify({ ...read(), ...v })); } catch (e) { /* stockage indisponible */ } };
     const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-    /** Comment installer ici : 'native', 'ios', 'android', 'inapp' (navigateur intégré à une appli), ou null. */
-    function mode() {
-      if (standalone() || read().done) return null;
+    /** Déjà sur l'écran d'accueil (cet appareil, ou ce compte depuis son icône) ? */
+    const isDone = () => !!(read().done || (currentUser() && currentUser().appInstalledAt));
+    const askedThisVisit = () => { try { return sessionStorage.getItem(SESSION_KEY) === '1'; } catch (e) { return false; } };
+    /**
+     * Comment installer ici : 'native', 'ios', 'android', 'inapp' (navigateur intégré à une appli), 'desktop'
+     * (tutoriel ouvert depuis le profil sur ordinateur), ou null (rien à proposer : appli ouverte depuis l'icône).
+     * Sans « tutorial », null aussi quand c'est déjà fait ou sur ordinateur sans proposition du navigateur.
+     */
+    function mode({ tutorial = false } = {}) {
+      if (standalone()) return null;
+      if (!tutorial && isDone()) return null;
       if (deferred) return 'native';
       const platform = detectPlatform();
-      if (platform === 'desktop') return null;
+      if (platform === 'desktop') return tutorial ? 'desktop' : null;
       return IN_APP.test(navigator.userAgent) ? 'inapp' : platform;
     }
-    const due = () => { const st = read(); return !st.done && (st.n || 0) < MAX_ASKS && (!st.at || Date.now() - st.at > AGAIN_AFTER); };
+    const due = () => !isDone() && !askedThisVisit() && detectPlatform() !== 'desktop';
+    /** Noté « fait » sur l'appareil et sur le compte (sur iPhone, Safari l'apprendra par le compte). */
+    function markDone() {
+      write({ done: true, doneAt: new Date().toISOString() });
+      const me = currentUser();
+      if (me && !me.appInstalledAt && sb) {
+        me.appInstalledAt = new Date().toISOString();
+        Promise.resolve(sb.auth.updateUser({ data: { app_installed_at: me.appInstalledAt } })).catch(() => { /* réessayé à la prochaine ouverture */ });
+      }
+      syncProfile();
+    }
+    /** À chaque ouverture : depuis l'icône, c'est fait (noté sur le compte s'il ne l'était pas encore). */
+    function syncAccount() {
+      const me = currentUser();
+      if (!me) return;
+      if (standalone()) { if (!me.appInstalledAt || !read().done) markDone(); }
+      else if (read().done && !me.appInstalledAt) markDone();   // installée avant de se connecter
+    }
+    let qrDrawn = false;
     function open({ auto = false } = {}) {
-      const m = mode();
+      const m = mode({ tutorial: !auto });
       if (!m) return false;
       current = m;
       document.querySelectorAll('#install-sheet [data-install]').forEach((el) => { el.hidden = el.dataset.install !== m; });
+      $('install-title').textContent = m === 'desktop' ? 'FlashMiam sur votre téléphone' : 'FlashMiam sur votre écran d\'accueil ?';
       $('install-go').textContent = m === 'native' ? 'Ajouter à l\'écran d\'accueil' : 'J\'ai compris';
-      if (auto) write({ at: Date.now(), n: (read().n || 0) + 1 });
+      $('install-later').hidden = !auto;
+      $('install-done').hidden = m === 'desktop' || isDone();
+      if (m === 'desktop' && !qrDrawn) {
+        loadQrMaker().then(() => { $('install-qr').innerHTML = qrSvg(location.origin + location.pathname); qrDrawn = true; }, () => { $('install-qr').hidden = true; });
+      }
+      if (auto) { try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (e) { /* navigation privée */ } }
       SiteStats.track('install_shown');
       if (activePanel === $('profile-sheet')) closePanel(activePanel, { silent: true });
       openPanel($('install-sheet'), { modal: true });
@@ -7330,24 +7383,31 @@
       try {
         prompt.prompt();
         const choice = await prompt.userChoice;
-        if (choice && choice.outcome === 'accepted') { write({ done: true }); SiteStats.track('install_accepted'); }
+        if (choice && choice.outcome === 'accepted') { markDone(); SiteStats.track('install_accepted'); }
       } catch (e) { /* proposition expirée : les étapes restent dans le profil */ }
       syncProfile();
     }
-    /** Sur la carte, une fois : au bout d'un moment, quand rien d'autre n'est ouvert. */
+    /** Au début de la visite, une fois, sur la carte, dès que rien d'autre n'est ouvert (le guide d'abord). */
     function schedule() {
+      syncAccount();
       if (scheduled || !due() || !currentUser()) return;
       scheduled = true;
       const started = Date.now();
       const tick = () => {
         if (!mode() || !due()) return;
-        const calm = !activePanel && $('onboarding').hidden && !StoryViewer.isOpen() && document.visibilityState === 'visible' && $('search-panel').hidden && !document.body.classList.contains('pro-open') && !document.body.classList.contains('ui-intro') && !Tour.isOpen();
+        const calm = !activePanel && $('onboarding').hidden && !StoryViewer.isOpen() && document.visibilityState === 'visible' && $('search-panel').hidden
+          && !document.body.classList.contains('pro-open') && !document.body.classList.contains('ui-intro') && !Tour.isOpen()
+          && !VisitPass.isOpen() && !Scanner.isOpen();
         if (calm && open({ auto: true })) return;
-        if (Date.now() - started < 10 * 60 * 1000) setTimeout(tick, 5000);
+        if (Date.now() - started < 10 * 60 * 1000) setTimeout(tick, 2000);
       };
       setTimeout(tick, CONFIG.installPromptDelay);
     }
-    function syncProfile() { $('profile-install').hidden = !mode(); }
+    /** Profil : le tutoriel, toujours là (sauf dans l'appli ouverte depuis l'icône). */
+    function syncProfile() {
+      $('profile-install').hidden = standalone();
+      $('profile-install-state').textContent = isDone() ? 'Déjà fait ✓ · revoir les étapes' : detectPlatform() === 'desktop' ? 'Pour votre téléphone' : 'Tutoriel en 3 étapes';
+    }
     window.addEventListener('beforeinstallprompt', (ev) => {
       ev.preventDefault();   // pas de bandeau du navigateur au hasard : FlashMiam le propose au bon moment
       deferred = ev;
@@ -7356,14 +7416,18 @@
     window.addEventListener('appinstalled', () => {
       deferred = null;
       SiteStats.track('installed');
-      write({ done: true });
+      markDone();
       closePanel($('install-sheet'));
-      syncProfile();
       toast('FlashMiam est sur votre écran d\'accueil 🎉');
     });
     $('install-go').addEventListener('click', go);
+    $('install-done').addEventListener('click', () => {
+      markDone();
+      closePanel($('install-sheet'));
+      toast('Noté : on ne vous le proposera plus. Le tutoriel reste dans votre profil.');
+    });
     $('profile-install').addEventListener('click', () => open());
-    return { open, schedule, syncProfile, mode };
+    return { open, schedule, syncProfile, syncAccount, mode, isDone };
   })();
 
   function openGeoHelp() {
