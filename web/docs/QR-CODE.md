@@ -4,7 +4,9 @@ Le client prouve qu'il est venu (et profite d'une offre) en montrant un QR code 
 
 ## Côté client
 
-- Fiche d'un restaurant › **Valider ma visite** (bouton bleu sous les offres), ou **Utiliser** sur une offre en cours.
+- Fiche d'un restaurant : grand bouton bleu **en haut de la fiche**, visible sans faire défiler : **Profiter de l'offre**
+  (avec l'offre rappelée) quand le restaurant en a une, sinon **Valider ma visite** ; lien « Juste valider ma visite,
+  sans l'offre » ; bouton **En profiter** sur chaque offre de la fiche et de « Offres autour de moi » (🎁).
 - QR code plein écran, propre à ce restaurant (et à cette offre) : **usage unique**, il **change chaque minute**
   (anneau qui se vide, « Nouveau QR code dans 42 s »). Sous le QR code, le même code en clair (`K7P4-QX9M-2T`) à dicter
   si la caméra du restaurateur ne le lit pas.
@@ -12,8 +14,14 @@ Le client prouve qu'il est venu (et profite d'une offre) en montrant un QR code 
 
 ## Côté restaurateur
 
-- Bouton **Scanner** en bas à droite de la carte, et grande carte **Scanner un client** en tête de son espace
-  (avec le nombre de visites validées aujourd'hui).
+- Bouton **Scanner** toujours en bas à droite, à portée de pouce : sur la carte et sur chaque onglet de son espace ;
+  grande carte **Scanner un client** en tête de l'accueil (avec les visites validées aujourd'hui) ; appui long sur
+  l'icône de l'application installée › **Scanner un client**.
+- **Validation automatique** : aucun bouton à toucher après le scan (vérifié par le test e2e25 : un seul geste,
+  1,3 à 1,6 s entre l'appui sur « Scanner » et « Visite validée », démarrage de la caméra compris).
+- Lecture rapide : lecteur intégré du navigateur (Android) ou jsQR dans un « worker » (iPhone…) qui décode chaque
+  image dès qu'elle arrive sans bloquer l'écran ; centre de l'image puis image entière ; mise au point continue ;
+  lecteur préparé avant même l'ouverture du scanner.
 - Caméra arrière plein écran : il suffit de viser, la lecture est automatique (vibration et petit son). Résultat :
   « Visite validée » ou « Offre validée » avec **l'offre à appliquer**, le numéro de la visite du client chez lui, et
   un avertissement si ce client a déjà eu cette offre aujourd'hui. Le scanner repasse tout seul au client suivant.

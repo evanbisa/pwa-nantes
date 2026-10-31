@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-abn3ROqaZZ9jkCYXOmOQ9JUbg1pfGfFno0qqow4romM=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-WHtpURp8vdWkmW93pBA6cZ58E22ls5mhZhqidvd7hls=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1532,6 +1532,7 @@
     .offer-shop .is-soon { color: var(--amber); font-weight: 500; }
     .offer-dist { flex: none; text-align: right; font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; }
     .offer-dist small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
+    .offer-use { display: block; height: 32px; margin: -6px 0 12px 58px; padding: 0 14px; border-radius: 16px; font-size: 13px; font-weight: 600; color: var(--on-accent); background: var(--accent); }
     .offers-empty { margin: 22px 6px 6px; text-align: center; font-size: 14px; color: var(--muted); }
 
     /* =====================================================================
@@ -1612,10 +1613,13 @@
        Client : bouton « Valider ma visite » sur la fiche, QR code plein écran qui change chaque minute.
        Restaurateur : bouton « Scanner » sur la carte et dans son espace, scanner plein écran.
        ===================================================================== */
-    .visit-cta { display: flex; align-items: center; gap: 14px; width: 100%; margin-top: 14px; padding: 12px 14px; border-radius: 14px; text-align: left; color: var(--on-accent);
+    .visit-box { margin: 4px 0 14px; }
+    .visit-box[hidden] { display: none; }
+    .visit-plain { display: block; margin: 8px auto 0; font-size: 13px; }
+    .visit-plain[hidden] { display: none; }
+    .visit-cta { display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px 14px; border-radius: 14px; text-align: left; color: var(--on-accent);
       background: linear-gradient(135deg, var(--accent), var(--accent-strong)); box-shadow: 0 6px 18px -8px var(--accent); transition: transform .15s var(--ease-out), box-shadow .2s; }
     .visit-cta:active { transform: scale(.98); }
-    .visit-cta[hidden] { display: none; }
     .visit-cta-ico { flex: none; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: rgba(255, 255, 255, .18); }
     .visit-cta-ico svg, .ps-scan-ico svg, .scan-fab svg { width: 24px; height: 24px; }
     .visit-cta-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
@@ -1685,7 +1689,11 @@
       transition: opacity .3s var(--ease-out), transform .35s var(--ease-out); }
     .scan-fab[hidden] { display: none; }
     .scan-fab:active { transform: scale(.96); }
-    body:not(.ui-ready) .scan-fab, body.sheet-open .scan-fab, body.pro-open .scan-fab { opacity: 0; transform: translateY(16px); pointer-events: none; }
+    body:not(.ui-ready) .scan-fab:not(.ps-scan-fab), body.sheet-open .scan-fab:not(.ps-scan-fab), body.pro-open .scan-fab:not(.ps-scan-fab) { opacity: 0; transform: translateY(16px); pointer-events: none; }
+    .ps-panel { position: relative; }
+    .ps-scan-fab { position: absolute; z-index: 3; right: 14px; bottom: calc(var(--safe-bottom) + 72px); }
+    #pro-space .ps-body { padding-bottom: 92px; }
+    .ps-scan[hidden] { display: none; }
 
     /* Carte « Scanner un client » en tête de l'espace restaurateur */
     .ps-scan { display: flex; align-items: center; gap: 14px; width: 100%; margin: 6px 0 16px; padding: 16px; border-radius: 18px; text-align: left; color: var(--on-accent);
@@ -1773,7 +1781,35 @@
       .vp-body { padding: 56px 28px 28px; }
       .vp-close { top: 14px; }
       .scan-fab { right: 16px; bottom: 24px; }
+      .ps-scan-fab { right: 28px; bottom: 24px; }
     }
+    /* =====================================================================
+       GUIDE DE DÉMARRAGE (moins d'une minute, une fois par type de compte ; « Revoir le guide » dans le profil)
+       ===================================================================== */
+    .tour { position: fixed; inset: 0; z-index: 130; }
+    .tour[hidden] { display: none; }
+    .tour-spot { position: absolute; left: 50%; top: 45%; width: 0; height: 0; border-radius: 18px; box-shadow: 0 0 0 200vmax rgba(10, 12, 16, .62); pointer-events: none;
+      transition: left .45s var(--ease-out), top .45s var(--ease-out), width .45s var(--ease-out), height .45s var(--ease-out), border-radius .45s; }
+    .tour-spot::after { content: ''; position: absolute; inset: -5px; border-radius: inherit; border: 2px solid rgba(255, 255, 255, .9); animation: tour-pulse 1.8s ease-out infinite; }
+    .tour-spot.is-none::after { display: none; }
+    .tour-spot.is-glued { transition: none; }
+    @keyframes tour-pulse { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.18); } }
+    .tour-card { position: absolute; left: 16px; right: 16px; top: 50%; max-width: 380px; margin: 0 auto; padding: 18px 18px 14px; border-radius: 22px; color: var(--text); background: var(--panel-solid);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, .35); transition: top .45s var(--ease-out), opacity .22s, transform .22s; animation: rise .35s var(--ease-out) both; }
+    .tour-card.is-swap { opacity: 0; transform: translateY(8px); }
+    .tour-step { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); }
+    .tour-card h2 { margin: 4px 0 6px; font-size: 19px; font-weight: 600; }
+    .tour-text { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--muted); }
+    .tour-demo { margin: 0 0 14px; pointer-events: none; }
+    .tour-demo[hidden] { display: none; }
+    .tour-demo .visit-cta { animation: tour-tap 1.6s ease-in-out .4s infinite; }
+    @keyframes tour-tap { 0%, 70%, 100% { transform: none; } 80% { transform: scale(.96); } }
+    .tour-foot { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+    .tour-foot .link-btn { font-size: 14px; color: var(--muted); }
+    .tour-dots { flex: 1; display: flex; justify-content: center; gap: 6px; }
+    .tour-dots i { width: 6px; height: 6px; border-radius: 3px; background: var(--line-strong); transition: width .3s, background-color .3s; }
+    .tour-dots i.is-on { width: 18px; background: var(--accent); }
+    .tour-foot .pill-btn { height: 40px; padding: 0 18px; border-radius: 20px; font-size: 14.5px; }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
     }
@@ -1933,16 +1969,19 @@
       <button type="button" role="tab" id="tab-reviews" aria-controls="panel-reviews" aria-selected="false" tabindex="-1" data-tab="reviews" hidden>Avis<small id="tab-reviews-n"></small></button>
     </div>
     <div class="tab-panel" id="panel-infos" role="tabpanel" aria-labelledby="tab-infos">
+    <!-- Comptes clients : « Profiter de l'offre » (ou « Valider ma visite ») → QR code à montrer en caisse -->
+    <div class="visit-box" id="shop-visit-box" hidden>
+      <button class="visit-cta" type="button" id="shop-visit">
+        <span class="visit-cta-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17.5 20.5h3v-3"/></svg></span>
+        <span class="visit-cta-txt"><strong id="shop-visit-title">Valider ma visite</strong><small id="shop-visit-sub">Un QR code à montrer en caisse</small></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <button class="link-btn visit-plain" type="button" id="shop-visit-plain" hidden>Juste valider ma visite, sans l'offre</button>
+    </div>
     <div class="gallery" id="shop-gallery" hidden></div>
     <span class="status" id="shop-status"></span>
     <p class="shop-desc" id="shop-desc" hidden></p>
     <div class="promos" id="shop-promos" hidden></div>
-    <!-- QR code de visite (comptes clients) : à montrer au restaurateur, qui le scanne -->
-    <button class="visit-cta" type="button" id="shop-visit" hidden>
-      <span class="visit-cta-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17.5 20.5h3v-3"/></svg></span>
-      <span class="visit-cta-txt"><strong>Valider ma visite</strong><small>Un QR code à montrer en caisse</small></span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
-    </button>
     <ul class="meta">
       <li>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 1114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
@@ -2221,6 +2260,7 @@
 
     <p class="pf-label">Plus</p>
     <div class="pf-group">
+      <button class="pf-row" type="button" id="profile-tour"><span class="pf-ico" aria-hidden="true">🧭</span><span class="pf-k">Revoir le guide de l'application</span><span class="pf-chev" aria-hidden="true">›</span></button>
       <button class="pf-row" type="button" id="profile-install" hidden><span class="pf-ico" aria-hidden="true">📲</span><span class="pf-k">Ajouter à l'écran d'accueil</span><span class="pf-chev" aria-hidden="true">›</span></button>
       <a class="pf-row" id="profile-team" href="app/tableau-de-bord/" hidden><span class="pf-ico" aria-hidden="true">📊</span><span class="pf-k">Tableau de bord de l'équipe</span><span class="pf-chev" aria-hidden="true">›</span></a>
       <button class="pf-row" type="button" id="profile-logout"><span class="pf-ico" aria-hidden="true">👋</span><span class="pf-k">Se déconnecter</span><span class="pf-chev" aria-hidden="true">›</span></button>
@@ -2230,6 +2270,24 @@
   </section>
 
   <!-- ===================== ESPACE RESTAURATEUR ===================== -->
+  <!-- ===================== GUIDE DE DÉMARRAGE ===================== -->
+  <div id="tour" class="tour" role="dialog" aria-modal="true" aria-labelledby="tour-title" aria-describedby="tour-text" hidden>
+    <div class="tour-spot is-none" id="tour-spot" aria-hidden="true"></div>
+    <div class="tour-card" id="tour-card">
+      <div class="tour-demo" id="tour-demo" aria-hidden="true" hidden>
+        <div class="visit-cta"><span class="visit-cta-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17.5 20.5h3v-3"/></svg></span><span class="visit-cta-txt"><strong>Profiter de l'offre</strong><small>🎓 -20 % étudiant</small></span></div>
+      </div>
+      <p class="tour-step" id="tour-step"></p>
+      <h2 id="tour-title"></h2>
+      <p class="tour-text" id="tour-text"></p>
+      <div class="tour-foot">
+        <button class="link-btn" type="button" id="tour-skip">Passer</button>
+        <span class="tour-dots" id="tour-dots" aria-hidden="true"></span>
+        <button class="pill-btn" type="button" id="tour-next">Suivant</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===================== QR CODE DE VISITE (client) ===================== -->
   <div id="visit-pass" class="vp" role="dialog" aria-modal="true" aria-labelledby="vp-title" hidden>
     <div class="vp-panel">
@@ -2300,6 +2358,7 @@
         <button type="button" role="tab" id="pst-reviews" data-tab="reviews" aria-controls="psp-reviews" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true">⭐<b class="ps-badge" id="ps-reviews-badge" hidden></b></span><span>Avis</span></button>
         <button type="button" role="tab" id="pst-fiche" data-tab="fiche" aria-controls="psp-fiche" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true">🛠️</span><span>Ma fiche</span></button>
       </nav>
+      <button class="scan-fab ps-scan-fab" type="button" id="ps-scan-fab" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8V5a2 2 0 012-2h3M16 3h3a2 2 0 012 2v3M21 16v3a2 2 0 01-2 2h-3M8 21H5a2 2 0 01-2-2v-3M7 12h10"/></svg><span>Scanner</span></button>
       <div class="ps-body" id="ps-body">
         <!-- Accueil -->
         <section class="ps-pane" id="psp-home" role="tabpanel" aria-labelledby="pst-home">
@@ -2973,6 +3032,7 @@
      * Pour essayer sans republier : ajouter ?carte=neon (ou pastel, urbain, google, flashmiam) à l'adresse du site.
      */
     installPromptDelay: 45000,   // ms passées sur la carte avant de proposer l'écran d'accueil (une fois)
+    tourDelay: 1200,             // ms après l'arrivée sur la carte avant le guide de démarrage (-1 : jamais)
     mapStyle: 'flashmiam',
     storageKey: 'roche-street-food:v2',
     legacyStorageKey: 'roche-street-food:v1',
@@ -5614,6 +5674,20 @@
           whenMapReady(() => openShop(m.shop.id, { source: 'offers' }));
         });
         li.appendChild(b);
+        // Comptes clients : « En profiter » ouvre directement le QR code de l'offre (la fiche s'ouvre derrière)
+        if (UUID_RE.test(p.id) && VisitPass.canUse(m.shop) && VisitFeature.check()) {
+          const use = document.createElement('button');
+          use.type = 'button';
+          use.className = 'offer-use';
+          use.textContent = 'En profiter';
+          use.setAttribute('aria-label', 'Profiter de l\'offre « ' + p.title + ' » chez ' + m.shop.name + ' : afficher mon QR code');
+          use.addEventListener('click', () => {
+            closePanel($('offers-sheet'));
+            Stats.track(m.shop.id, 'offer', { ref: p.id });
+            whenMapReady(() => { openShop(m.shop.id, { source: 'offers' }); VisitPass.open(m.shop.id, p); });
+          });
+          li.appendChild(use);
+        }
         ul.appendChild(li);
       });
       const empty = $('offers-empty');
@@ -6506,11 +6580,11 @@
       const more = card.querySelector('.promo-more');
       if (p.details) more.textContent = p.details; else more.remove();
       // Comptes clients : « Utiliser » affiche le QR code de visite avec cette offre (validé par le restaurateur)
-      if (UUID_RE.test(p.id) && VisitPass.canUse(shop)) {
+      if (UUID_RE.test(p.id) && VisitPass.canUse(shop) && VisitFeature.check()) {
         const use = document.createElement('button');
         use.type = 'button';
         use.className = 'promo-use';
-        use.textContent = 'Utiliser';
+        use.textContent = 'En profiter';
         use.setAttribute('aria-label', 'Utiliser l\'offre « ' + p.title + ' » : afficher mon QR code');
         use.addEventListener('click', () => VisitPass.open(shop.id, p));
         card.appendChild(use);
@@ -7267,7 +7341,7 @@
       const started = Date.now();
       const tick = () => {
         if (!mode() || !due()) return;
-        const calm = !activePanel && $('onboarding').hidden && !StoryViewer.isOpen() && document.visibilityState === 'visible' && $('search-panel').hidden && !document.body.classList.contains('pro-open') && !document.body.classList.contains('ui-intro');
+        const calm = !activePanel && $('onboarding').hidden && !StoryViewer.isOpen() && document.visibilityState === 'visible' && $('search-panel').hidden && !document.body.classList.contains('pro-open') && !document.body.classList.contains('ui-intro') && !Tour.isOpen();
         if (calm && open({ auto: true })) return;
         if (Date.now() - started < 10 * 60 * 1000) setTimeout(tick, 5000);
       };
@@ -10027,6 +10101,24 @@
     return vendorLoads[src];
   }
   const loadQrMaker = () => loadVendor('vendor/qrcode-generator-2.0.4/qrcode.js', 'qrcode');
+  /**
+   * La base connaît-elle le QR code de visite ? Vérifié une fois par session (un code vide répond « inconnu ») : si le
+   * site est publié avant la mise à jour de la base, les boutons restent masqués au lieu d'échouer. Réseau en panne :
+   * supposé disponible (les erreurs s'affichent alors normalement).
+   */
+  const VisitFeature = (() => {
+    let state = null, probe = null;
+    function check(onReady) {
+      if (state !== null) return state;
+      if (!probe && sb) {
+        probe = Promise.resolve(sb.rpc('visit_pass_status', { p_token: '' }))
+          .then(({ error }) => { state = !missingFn(error); }, () => { state = true; });
+      }
+      if (probe && onReady) probe.then(() => onReady());
+      return false;
+    }
+    return { check };
+  })();
   /** QR code en SVG (modules noirs sur fond blanc, marge de 3 modules), une ligne de tracé par suite de modules noirs. */
   function qrSvg(text) {
     const qr = window.qrcode(0, 'M');
@@ -10081,12 +10173,23 @@
     const isOpen = () => !root.hidden;
     const canUse = (shop, me = currentUser()) => !!(shop && shop.isPro && UUID_RE.test(shop.id) && me && me.role === 'client' && !isOwnShop(shop.id, me));
 
-    /** Bouton « Valider ma visite » de la fiche (comptes clients). */
+    let entryPromo = null;
+    /** Offres de la fiche utilisables avec le QR code (enregistrées dans la base), la plus intéressante d'abord. */
+    const usablePromos = (shop) => activePromos(shop).filter((p) => UUID_RE.test(p.id));
+    /** Bouton principal de la fiche (comptes clients) : « Profiter de l'offre » s'il y en a une, sinon « Valider ma visite ». */
     function renderEntry(shop) {
-      const ok = canUse(shop);
-      $('shop-visit').hidden = !ok;
-      $('shop-visit').setAttribute('aria-label', 'Valider ma visite chez ' + (shop ? shop.name : '') + ' : afficher mon QR code');
-      if (ok && !prefetched) { prefetched = true; (window.requestIdleCallback || setTimeout)(() => loadQrMaker().catch(() => { prefetched = false; })); }
+      const ok = canUse(shop) && VisitFeature.check(() => { const m = selectedId && markers.get(selectedId); if (m) { renderShopPromos(m.shop); renderEntry(m.shop); } });
+      $('shop-visit-box').hidden = !ok;
+      if (!ok) return;
+      const offers = usablePromos(shop);
+      entryPromo = offers[0] || null;
+      $('shop-visit-title').textContent = entryPromo ? 'Profiter de l\'offre' : 'Valider ma visite';
+      $('shop-visit-sub').textContent = entryPromo
+        ? PROMO_KINDS[entryPromo.kind].icon + ' ' + entryPromo.title + (offers.length > 1 ? ' · et ' + plural(offers.length - 1, 'autre offre', 'autres offres') + ' plus bas' : '')
+        : 'Un QR code à montrer en caisse';
+      $('shop-visit').setAttribute('aria-label', (entryPromo ? 'Profiter de l\'offre « ' + entryPromo.title + ' »' : 'Valider ma visite') + ' chez ' + shop.name + ' : afficher mon QR code');
+      $('shop-visit-plain').hidden = !entryPromo;
+      if (!prefetched) { prefetched = true; (window.requestIdleCallback || setTimeout)(() => loadQrMaker().catch(() => { prefetched = false; })); }
     }
     function setState(s) { stage.dataset.state = s; }
     function stopTimers() { clearInterval(tick); clearTimeout(poll); tick = poll = null; if (ring) { ring.cancel(); ring = null; } }
@@ -10227,7 +10330,8 @@
       keepAwake(false);
     }
 
-    $('shop-visit').addEventListener('click', () => selectedId && open(selectedId));
+    $('shop-visit').addEventListener('click', () => selectedId && open(selectedId, entryPromo));
+    $('shop-visit-plain').addEventListener('click', () => selectedId && open(selectedId));
     $('vp-close').addEventListener('click', close);
     $('vp-finish').addEventListener('click', close);
     $('vp-retry').addEventListener('click', () => { failures = 0; setState('loading'); issue(); });
@@ -10245,17 +10349,23 @@
   const Scanner = (() => {
     const root = $('scanner'), video = $('scan-video');
     const HELP = 'Visez le QR code du client';
-    let stream = null, track = null, detector = null, loopTimer = null, camSeq = 0, busy = false, manual = false;
+    let stream = null, track = null, detector = null, detectorPrep = null, worker = null, loopTimer = null, camSeq = 0, busy = false, manual = false;
     const seen = new Map();            // codes déjà traités → dernière fois vus devant la caméra
     let wrongAt = 0, summary = null, lastFocus = null, nextTimer = null, bar = null, canvas = null, ctx = null;
     const isOpen = () => !root.hidden;
     const nf = (n) => Number(n || 0).toLocaleString('fr-FR');
     const listed = () => { const r = myRestaurant(); return !!(r && r.published); };
 
-    /** Bouton « Scanner » de la carte : restaurateurs dont la fiche est en ligne. */
+    /** Boutons « Scanner » (carte, espace restaurateur) : restaurateurs dont la fiche est en ligne. */
     function renderEntry() {
       const me = currentUser();
-      $('scan-fab').hidden = !(me && me.role === 'pro' && listed());
+      const pro = !!(me && me.role === 'pro');
+      const ok = pro && VisitFeature.check(renderEntry);
+      $('scan-fab').hidden = !(ok && listed());
+      $('ps-scan').hidden = !ok;
+      $('ps-scan-fab').hidden = !ok;
+      // Lecteur préparé à l'avance (sans ouvrir la caméra) : le scanner s'ouvre et lit tout de suite
+      if (ok && listed() && !detectorPrep) (window.requestIdleCallback || setTimeout)(() => { if (!detectorPrep) detectorPrep = prepareDetector().catch(() => { detectorPrep = null; }); });
     }
     function help(text, warn = false) { $('scan-help').textContent = text; $('scan-help').classList.toggle('is-warn', warn); }
 
@@ -10296,8 +10406,10 @@
         cameraOff('Pas de caméra disponible ici : tapez le code affiché sous le QR code du client.');
         return;
       }
+      // Lecteur préparé pendant que la caméra démarre (en parallèle)
+      if (!detectorPrep) detectorPrep = prepareDetector().catch((e) => { detectorPrep = null; throw e; });
       try {
-        const s = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } } });
+        const s = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } } });
         if (my !== camSeq || !isOpen()) { s.getTracks().forEach((t) => t.stop()); return; }
         stream = s;
         track = s.getVideoTracks()[0] || null;
@@ -10307,7 +10419,9 @@
         try { caps = track && track.getCapabilities ? track.getCapabilities() : {}; } catch (e) { caps = {}; }
         $('scan-torch').hidden = !caps.torch;
         $('scan-torch').setAttribute('aria-pressed', 'false');
-        await prepareDetector();
+        // Mise au point continue (Android) : un QR code tenu à 15 cm reste net
+        if (caps.focusMode && caps.focusMode.includes('continuous')) track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
+        await detectorPrep;
         if (my !== camSeq || !isOpen()) return;
         loop();
       } catch (e) {
@@ -10334,7 +10448,12 @@
       help('');
       setManual(true);
     }
-    /** Lecteur intégré au navigateur (Android, Chrome) ; sinon lecteur jsQR chargé à la demande (iPhone, Firefox…). */
+    /**
+     * Lecteur de QR code : celui du navigateur s'il existe (Android, Chrome), sinon jsQR dans un « worker » (iPhone,
+     * Firefox…) pour ne jamais bloquer l'affichage ; jsQR sur le fil principal en dernier recours.
+     * Chaque image est lue en deux passes alternées : le centre (là où le restaurateur vise, petit donc rapide), puis
+     * l'image entière plus détaillée (QR code tenu de travers ou loin).
+     */
     async function prepareDetector() {
       if (detector) return;
       if ('BarcodeDetector' in window) {
@@ -10347,30 +10466,59 @@
           }
         } catch (e) { /* lecteur intégré inutilisable : jsQR */ }
       }
-      await loadVendor('vendor/jsqr-1.4.0/jsQR.js', 'jsQR');
       canvas = document.createElement('canvas');
       ctx = canvas.getContext('2d', { willReadFrequently: true });
+      let decode = null;
+      try {
+        worker = new Worker('qr-worker.js');
+        await new Promise((resolve, reject) => {          // le worker répond-il ? (fichier bloqué, ancien navigateur…)
+          const t = setTimeout(() => reject(new Error('jsQR')), 8000);
+          worker.onmessage = () => { clearTimeout(t); resolve(); };
+          worker.onerror = (e) => { clearTimeout(t); e.preventDefault(); reject(new Error('jsQR')); };
+          worker.postMessage({ id: 0, buf: new ArrayBuffer(4), w: 1, h: 1 });
+        });
+        let seq = 0;
+        const waiting = new Map();
+        worker.onmessage = (ev) => { const cb = waiting.get(ev.data.id); if (cb) { waiting.delete(ev.data.id); cb(ev.data.text); } };
+        decode = (img) => new Promise((resolve) => {
+          const id = ++seq;
+          waiting.set(id, resolve);
+          worker.postMessage({ id, buf: img.data.buffer, w: img.width, h: img.height }, [img.data.buffer]);
+        });
+      } catch (e) {
+        if (worker) { worker.terminate(); worker = null; }
+        await loadVendor('vendor/jsqr-1.4.0/jsQR.js', 'jsQR');
+        decode = async (img) => { const r = window.jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' }); return r ? r.data : null; };
+      }
+      let pass = 0;
       detector = async (v) => {
         const w = v.videoWidth, h = v.videoHeight;
         if (!w || !h) return null;
-        const side = Math.min(w, h), size = Math.min(side, 640);   // carré central, réduit : lecture rapide
+        const full = Math.min(w, h);
+        const side = pass++ % 2 === 0 ? Math.round(full * 0.75) : full;   // centre, puis image entière
+        const size = Math.min(side, side === full ? 720 : 480);
         canvas.width = canvas.height = size;
         ctx.drawImage(v, (w - side) / 2, (h - side) / 2, side, side, 0, 0, size, size);
-        const r = window.jsQR(ctx.getImageData(0, 0, size, size).data, size, size, { inversionAttempts: 'dontInvert' });
-        return r ? r.data : null;
+        return decode(ctx.getImageData(0, 0, size, size));
       };
     }
+    /** Lecture image après image : dès qu'une image est lue, on passe à la suivante (jamais deux à la fois). */
     function loop() {
       clearTimeout(loopTimer);
       const my = camSeq;
+      const next = () => {
+        if (my !== camSeq || !isOpen()) return;
+        if (video.requestVideoFrameCallback) video.requestVideoFrameCallback(() => step());
+        else loopTimer = setTimeout(step, 40);
+      };
       const step = async () => {
         if (my !== camSeq || !isOpen()) return;
         if (!busy && !document.hidden && video.readyState >= 2) {
           try { const text = await detector(video); if (text && my === camSeq) onRead(text); } catch (e) { /* image illisible */ }
-        }
-        if (my === camSeq) loopTimer = setTimeout(step, 120);
+        } else if (busy || document.hidden) { loopTimer = setTimeout(next, 120); return; }
+        next();
       };
-      step();
+      next();
     }
     function onRead(text) {
       const code = visitCodeFrom(text);
@@ -10490,6 +10638,7 @@
     $('scan-close').addEventListener('click', close);
     $('scan-fab').addEventListener('click', () => open());
     $('ps-scan').addEventListener('click', () => open());
+    $('ps-scan-fab').addEventListener('click', () => open());
     document.addEventListener('visibilitychange', () => {
       if (!isOpen() || root.classList.contains('is-off')) return;
       if (document.hidden) stopCamera(); else startCamera();   // caméra coupée quand l'application passe en arrière-plan
@@ -10526,11 +10675,163 @@
     if (user.role === 'pro') { if (!proStepFor(user)) Scanner.open({ code }); }
     else toast('Ce QR code se montre au restaurateur : c\'est lui qui le scanne depuis son espace FlashMiam.');
   }
+  /* ---------- Guide de démarrage ----------
+     Quelques bulles, moins d'une minute : un projecteur glisse d'un bouton à l'autre. Montré une fois par type de compte
+     (client, restaurateur) sur cet appareil, à un moment calme ; « Passer » à tout moment ; « Revoir le guide » dans le
+     profil. Rien n'est envoyé au serveur. */
+  const Tour = (() => {
+    const KEY = 'flashmiam:tour';
+    const root = $('tour'), spot = $('tour-spot'), card = $('tour-card');
+    let steps = [], i = 0, role = 'client', lastFocus = null, waitTimer = null, follow = null, glueTimer = null;
+    const isOpen = () => !root.hidden;
+    const seen = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; } };
+    const markSeen = () => { try { localStorage.setItem(KEY, JSON.stringify({ ...seen(), [role]: new Date().toISOString() })); } catch (e) { /* stockage bloqué */ } };
+    const visible = (el) => { if (!el || el.hidden) return null; const r = el.getBoundingClientRect(); return r.width > 4 && r.height > 4 && r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth ? r : null; };
+    /** Restaurant le plus proche du centre de l'écran (pastille sur la carte). */
+    function centralPin() {
+      let best = null, bestD = Infinity;
+      document.querySelectorAll('.pin .pin-badge').forEach((el) => {
+        const r = visible(el);
+        if (!r || r.top < 90 || r.bottom > innerHeight - 90) return;
+        const d = Math.hypot(r.left + r.width / 2 - innerWidth / 2, r.top + r.height / 2 - innerHeight / 2);
+        if (d < bestD) { bestD = d; best = el; }
+      });
+      return best;
+    }
+    const desktop = () => matchMedia(CONFIG.desktopQuery).matches;
+    function stepsFor(r) {
+      if (r === 'pro') {
+        return [
+          { el: () => $('scan-fab'), title: 'Scannez vos clients', text: 'Un client vous montre son QR code : touchez « Scanner » et visez. La visite, ou l\'offre, est validée toute seule.' },
+          { el: () => $('profile-btn'), title: 'Votre espace restaurateur', text: 'Touchez votre avatar : statistiques, stories, promos, avis et fiche. Le bouton « Scanner » y est aussi.' },
+          { el: () => $('notif-btn'), title: 'Restez informé', text: 'Nouveaux avis et nouveaux abonnés arrivent ici.' },
+        ].filter((st) => visible(st.el()));
+      }
+      return [
+        { el: centralPin, title: 'Bienvenue sur FlashMiam 👋', text: 'Chaque pastille est un restaurant : touchez-en une pour voir le menu, les photos, les horaires et les avis.', round: true },
+        { el: () => $('offers-btn'), title: 'Les bons plans autour de vous', text: 'Promos du jour, offres étudiantes… les plus proches d\'abord.' },
+        { el: null, demo: true, title: 'Profitez-en en caisse', text: 'Dans la fiche, « Profiter de l\'offre » affiche un QR code : montrez-le au restaurateur, il le scanne et c\'est validé.' },
+        { el: () => (desktop() ? $('search') : $('search-open')), title: 'Une envie précise ?', text: 'Cherchez un plat (« tacos », « crêpe »…) ou un restaurant.' },
+        { el: () => $('profile-btn'), title: 'Votre profil', text: 'Restaurants suivis, notifications et réglages. Vous y retrouverez ce guide.' },
+      ];
+    }
+    function place() {
+      const st = steps[i];
+      const el = st && st.el ? st.el() : null;
+      const r = visible(el);
+      const pad = st && st.round ? 10 : 6;
+      spot.classList.toggle('is-none', !r);
+      if (r) {
+        const w = r.width + pad * 2, h = r.height + pad * 2;
+        Object.assign(spot.style, { left: r.left - pad + 'px', top: r.top - pad + 'px', width: w + 'px', height: h + 'px', borderRadius: st.round ? '50%' : Math.min(h / 2, 26) + 'px' });
+      } else Object.assign(spot.style, { left: innerWidth / 2 + 'px', top: innerHeight * 0.42 + 'px', width: '0px', height: '0px' });
+      // Bulle au-dessus ou au-dessous du bouton montré, sans jamais le cacher
+      const ch = card.offsetHeight, margin = 18;
+      let top;
+      if (!r) top = (innerHeight - ch) / 2;
+      else if (r.top + r.height / 2 > innerHeight / 2) top = r.top - pad - margin - ch;
+      else top = r.bottom + pad + margin;
+      card.style.top = Math.max(12, Math.min(innerHeight - ch - 12, top)) + 'px';
+    }
+    /** Étape montrant la carte : le projecteur suit le restaurant tant que la carte bouge (arrivée, glissement). */
+    function trackMap(on) {
+      cancelAnimationFrame(follow);
+      clearTimeout(glueTimer);
+      spot.classList.remove('is-glued');
+      follow = null;
+      if (!on) return;
+      // Le projecteur glisse jusqu'au restaurant, puis s'y colle à chaque image tant que la carte bouge
+      glueTimer = setTimeout(() => {
+        spot.classList.add('is-glued');
+        const tick = () => { if (!isOpen() || !steps[i] || !steps[i].round) return; place(); follow = requestAnimationFrame(tick); };
+        follow = requestAnimationFrame(tick);
+      }, 480);
+    }
+    function show(n, { animate = true } = {}) {
+      i = n;
+      const st = steps[i];
+      trackMap(!!st.round);
+      const fill = () => {
+        $('tour-step').textContent = (i + 1) + ' / ' + steps.length;
+        $('tour-title').textContent = st.title;
+        $('tour-text').textContent = st.text;
+        $('tour-demo').hidden = !st.demo;
+        $('tour-next').textContent = i === steps.length - 1 ? 'C\'est parti !' : 'Suivant';
+        $('tour-dots').innerHTML = steps.map((_, k) => '<i' + (k === i ? ' class="is-on"' : '') + '></i>').join('');
+        place();
+        card.classList.remove('is-swap');
+        $('tour-next').focus({ preventScroll: true });
+      };
+      if (animate) { card.classList.add('is-swap'); setTimeout(fill, 180); } else fill();
+    }
+    function start({ force = false } = {}) {
+      const me = currentUser();
+      if (!me || isOpen()) return false;
+      role = me.role === 'pro' ? 'pro' : 'client';
+      if (!force && seen()[role]) return false;
+      steps = stepsFor(role);
+      if (!steps.length) return false;
+      if (activePanel) closePanel(activePanel);
+      lastFocus = document.activeElement;
+      root.hidden = false;
+      document.body.classList.add('tour-open');
+      show(0, { animate: false });
+      return true;
+    }
+    function end() {
+      if (!isOpen()) return;
+      markSeen();
+      trackMap(false);
+      root.hidden = true;
+      document.body.classList.remove('tour-open');
+      if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+    }
+    const next = () => (i < steps.length - 1 ? show(i + 1) : end());
+    const prev = () => { if (i > 0) show(i - 1); };
+    /** Premier passage sur la carte : guide montré dès que rien d'autre n'est ouvert (2 minutes au plus). */
+    function maybeStart(delay = CONFIG.tourDelay) {
+      if (delay < 0) return;
+      const me = currentUser();
+      if (!me || seen()[me.role === 'pro' ? 'pro' : 'client']) return;
+      const t0 = Date.now();
+      clearTimeout(waitTimer);
+      const tick = () => {
+        const calm = !activePanel && $('onboarding').hidden && !StoryViewer.isOpen() && document.visibilityState === 'visible' && $('search-panel').hidden
+          && !document.body.classList.contains('pro-open') && !document.body.classList.contains('ui-intro') && !VisitPass.isOpen() && !Scanner.isOpen() && $('fatal').hidden;
+        if (calm) { start(); return; }
+        if (Date.now() - t0 < 2 * 60 * 1000) waitTimer = setTimeout(tick, 1500);
+      };
+      waitTimer = setTimeout(tick, delay);
+    }
+    $('tour-next').addEventListener('click', next);
+    $('tour-skip').addEventListener('click', end);
+    root.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); end(); }
+      else if (ev.key === 'ArrowRight') { ev.preventDefault(); next(); }
+      else if (ev.key === 'ArrowLeft') { ev.preventDefault(); prev(); }
+      else if (ev.key === 'Tab') {        // le focus reste dans la bulle
+        const f = [$('tour-skip'), $('tour-next')];
+        if (ev.shiftKey && document.activeElement === f[0]) { ev.preventDefault(); f[1].focus(); }
+        else if (!ev.shiftKey && document.activeElement === f[1]) { ev.preventDefault(); f[0].focus(); }
+      }
+    });
+    addEventListener('resize', () => { if (isOpen()) place(); });
+    $('profile-tour').addEventListener('click', () => { closePanel($('profile-sheet')); setTimeout(() => start({ force: true }), 350); });
+    return { start, maybeStart, isOpen, end };
+  })();
+
+  /** Raccourci de l'icône : scanner (restaurateur) ou offres autour de moi (client). */
+  function openShortcut(what, user = currentUser()) {
+    if (!user) return;
+    if (what === 'scanner' && user.role === 'pro' && !proStepFor(user)) Scanner.open();
+    else if (what === 'offres' || what === 'scanner') whenMapReady(() => Offers.open());
+  }
   window.addEventListener('hashchange', () => {
     const code = visitCodeFrom(location.hash);
-    if (!code) return;
+    const shortcut = { '#scanner': 'scanner', '#offres': 'offres' }[location.hash];
+    if (!code && !shortcut) return;
     history.replaceState(null, '', location.pathname + location.search);
-    openVisitLink(code);
+    if (code) openVisitLink(code); else openShortcut(shortcut);
   });
 
   /** Profil (compte) : pour un restaurateur, l'avatar ouvre d'abord son espace restaurateur. */
@@ -10676,6 +10977,8 @@
         if (r) { upsertShopMarker(restaurantToShop(r)); openShop(r.id); return; }
       }
       if (pendingLink) { view.setPadding(basePadding()); const link = pendingLink; pendingLink = null; openLink(link); return; }
+      // Guide de démarrage : après l'arrivée sur la carte (et son animation), une seule fois
+      Tour.maybeStart(CONFIG.tourDelay < 0 ? -1 : CONFIG.tourDelay + (intro && !reduceMotion ? 2400 : 0));
       const target = Geo.position && isInBounds(Geo.position) ? Geo.position : CONFIG.center;
       if (Geo.position && isInBounds(Geo.position)) setFollow(true);
       // Marges de l'interface appliquées pendant le mouvement (pas de saut de cadrage avant le zoom)
@@ -10711,7 +11014,9 @@
   }
   // QR code de visite lu par l'appareil photo (#visite=…) : ouvert dans le scanner du restaurateur une fois connecté
   const pendingVisit = visitCodeFrom(location.hash);
-  if (pendingVisit) history.replaceState(null, '', location.pathname + location.search);
+  // Raccourcis de l'icône de l'application (appui long) : « Scanner un client », « Offres autour de moi »
+  const pendingShortcut = { '#scanner': 'scanner', '#offres': 'offres' }[location.hash] || null;
+  if (pendingVisit || pendingShortcut) history.replaceState(null, '', location.pathname + location.search);
 
   if (!sb) {
     fatal('Service momentanément indisponible', 'FlashMiam n\'a pas pu joindre son serveur. Vérifiez votre connexion internet, puis rechargez la page.');
@@ -10754,6 +11059,7 @@
         } else routeAfterLogin(user, { boot: true });
         if (paymentReturn && user.role === 'pro') awaitPayment(user);
         if (pendingVisit) setTimeout(() => openVisitLink(pendingVisit, user), 600);
+        else if (pendingShortcut) setTimeout(() => openShortcut(pendingShortcut, user), 600);
       } else if (store.read().lastEmail) {
         setAuthRole(store.read().lastRole || 'client');
         $('li-email').value = store.read().lastEmail || '';
