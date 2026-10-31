@@ -1,7 +1,10 @@
 # Failles connues dans les dépendances, chaque semaine et à chaque changement de dépendance :
 #  - bibliothèques copiées dans le site (vendor/ : MapLibre, supabase-js), que ni npm ni Dependabot ne surveillent ;
 #  - application Next.js (web/package-lock.json).
-# Échoue (et GitHub prévient par e-mail) dès qu'une faille de gravité moyenne ou plus est connue.
+# Échoue (et GitHub prévient par e-mail) dès qu'une faille de gravité moyenne ou plus est connue dans ce qui est servi
+# aux visiteurs (vendor/, dépendances de production de l'application). Outils de développement (ESLint, TypeScript…),
+# jamais servis aux visiteurs : échec à partir de la gravité haute ; une faille moyenne y est signalée en avertissement
+# (la correction arrive par Dependabot, en général sous une à deux semaines).
 # Les mises à jour elles-mêmes sont proposées par Dependabot (.github/dependabot.yml).
 name: Dépendances (failles connues)
 
@@ -28,6 +31,14 @@ jobs:
           node-version: 22
       - name: Bibliothèques servies par le site (vendor/)
         run: node scripts/check-vendor.mjs
-      - name: Application (web/)
+      - name: Application (web/) : ce qui est servi aux visiteurs
         working-directory: web
-        run: npm audit --audit-level=moderate
+        run: npm audit --omit=dev --audit-level=moderate
+      - name: Application (web/) : outils de développement
+        working-directory: web
+        run: |
+          npm audit --audit-level=high
+          if ! npm audit --audit-level=moderate > "$RUNNER_TEMP/audit.txt"; then
+            echo "::warning::Faille de gravité moyenne dans un outil de développement (jamais servi aux visiteurs) : voir le détail ci-dessous ; correction attendue par Dependabot."
+            grep -E '^[a-z@].*  ' "$RUNNER_TEMP/audit.txt" | head -20 || true
+          fi
