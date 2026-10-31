@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Failles connues des bibliothèques copiées dans le site (dossier vendor/ : MapLibre, supabase-js).
+ * Failles connues des bibliothèques copiées dans le site (dossier vendor/ : MapLibre, supabase-js, QR codes).
  * Ces fichiers ne passent pas par npm, donc ni « npm audit » ni Dependabot ne les surveillent : ce script retrouve leur
  * version (nom du fichier ou du dossier), interroge la base des failles de npm pour exactement ces versions et indique
  * aussi la dernière version publiée.
@@ -21,6 +21,8 @@ const VENDOR = process.argv[2] ?? new URL("../vendor/", import.meta.url).pathnam
 const PACKAGES = [
   [/^maplibre-gl-(\d+\.\d+\.\d+)$/, "maplibre-gl"],
   [/^supabase-js-(\d+\.\d+\.\d+)\.js$/, "@supabase/supabase-js"],
+  [/^qrcode-generator-(\d+\.\d+\.\d+)$/, "qrcode-generator"],
+  [/^jsqr-(\d+\.\d+\.\d+)$/, "jsqr"],
 ];
 const LEVELS = ["info", "low", "moderate", "high", "critical"];
 const npm = (args, cwd) => execFileSync("npm", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });

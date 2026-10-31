@@ -75,6 +75,11 @@ export const confidentialite: LegalDoc = {
               basis: "Consentement (retirable en un clic)",
             },
             {
+              title: "QR code de visite : restaurant, offre choisie, date et heure",
+              detail: "Prouver votre passage au restaurant et vous faire profiter d'une offre : vous affichez un QR code à usage unique (il change chaque minute), le restaurateur le scanne. Il ne voit ni votre nom ni votre compte, seulement l'offre à appliquer et le numéro de votre visite chez lui ; ses statistiques ne montrent que des totaux. Côté restaurateur, l'image de la caméra est lue sur son téléphone et n'est jamais envoyée ni enregistrée.",
+              basis: "Exécution du contrat (vous choisissez d'afficher le QR code)",
+            },
+            {
               title: "Statistiques de fréquentation des fiches",
               detail: "Vues, provenance (carte, recherche, story…), menu et photos consultés, itinéraires, appels, partages, clics sur une offre ou une story. Elles fournissent aux restaurateurs des totaux ; votre compte sert seulement à ne vous compter qu'une fois.",
               basis: "Consentement (choix des cookies)",
@@ -149,6 +154,8 @@ export const confidentialite: LegalDoc = {
             { title: "Totaux quotidiens des restaurants", detail: "6 mois ; ils ne contiennent aucune donnée personnelle." },
             { title: "Stories", detail: "Publiques 24 heures, puis visibles par leur seul restaurateur ; supprimées avec leur photo 30 jours après leur fin." },
             { title: "Fréquentation du site (identifiant d'appareil tiré au hasard)", detail: "13 mois." },
+            { title: "QR codes de visite", detail: "Valables 75 secondes, effacés au bout d'un jour." },
+            { title: "Visites validées au restaurant (QR code)", detail: "13 mois." },
             { title: "Tentatives d'inscription (empreinte IP)", detail: "2 jours." },
             { title: "Sessions de connexion (adresse IP, navigateur)", detail: "30 jours sans utilisation, 180 jours au plus : la session est alors fermée." },
             { title: "Compte dont l'adresse n'a jamais été confirmée (code jamais saisi)", detail: "Supprimé 7 jours après l'inscription." },

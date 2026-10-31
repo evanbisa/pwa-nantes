@@ -727,6 +727,127 @@ reset role;
 select t.ok((select terms_version = '2026-10-29' and terms_accepted_at is not null from profiles where id = '66666666-6666-6666-6666-666666666666'), 'acceptation des conditions : toujours enregistrée via le relais public');
 select set_config('request.jwt.claims', '', false);
 
+-- ===== QR code de visite (usage unique, validé par le restaurateur) =====
+set session_replication_role = replica;   -- mise en place directe : fiche de Sam en ligne, offre de Nina
+update merchants set status = 'published', is_open = true where id = 'aaaaaaaa-0000-0000-0000-000000000005';
+insert into promotions (id, merchant_id, kind, title, created_at, ends_at) values
+  ('bbbbbbbb-0000-0000-0000-00000000000a', 'aaaaaaaa-0000-0000-0000-000000000002', 'other', 'Offre de Nina', now(), now() + interval '1 day'),
+  ('bbbbbbbb-0000-0000-0000-00000000000b', 'aaaaaaaa-0000-0000-0000-000000000005', 'other', 'Offre finie', now() - interval '2 hours', now() - interval '1 hour');
+set session_replication_role = origin;
+select set_config('test.promo', (select id::text from promotions where title = 'Offre du mois'), false);
+select t.ok((select count(distinct x) = 2000 and bool_and(x ~ '^[0-9A-HJKMNP-TV-Z]{10}$') from (select private.new_visit_token() x from generate_series(1, 2000)) g),
+  'QR : jetons de 10 caractères tirés au hasard, tous différents (2 000 tirages)');
+select t.ok(private.normalize_visit_token(' k7p4-qx9m-2t ') = 'K7P4QX9M2T' and private.normalize_visit_token('OIL') = '011', 'QR : code tapé à la main normalisé (minuscules, tirets, O/I/L)');
+
+select set_config('request.jwt.claims', '', false);
+set role anon;
+select t.fails($$select * from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005')$$, 'QR : visiteur sans compte, aucun QR code');
+select t.fails($$select public.redeem_visit_pass('K7P4QX9M2T')$$, 'QR : visiteur sans compte, aucun scan');
+select t.fails($$select public.merchant_visit_summary()$$, 'QR : visiteur sans compte, aucun total');
+reset role;
+
+-- Léa (cliente)
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select set_config('test.tok1', (select token from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005')), false);
+select t.ok(current_setting('test.tok1') ~ '^[0-9A-HJKMNP-TV-Z]{10}$', 'QR : la cliente obtient un QR code pour un restaurant en ligne');
+select t.ok((select expires_at between now() + interval '70 seconds' and now() + interval '80 seconds' and promo_title is null
+  from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005')), 'QR : valable 75 secondes');
+select t.fails($$select * from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000002')$$, 'QR : refusé pour un restaurant pas en ligne (brouillon)');
+select t.fails($$select * from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005', 'bbbbbbbb-0000-0000-0000-00000000000a')$$, 'QR : refusé avec l''offre d''un autre restaurant');
+select t.fails($$select * from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005', 'bbbbbbbb-0000-0000-0000-00000000000b')$$, 'QR : refusé avec une offre terminée');
+select t.fails($$select * from public.visit_passes$$, 'QR : la cliente ne peut pas lire la table des QR codes');
+select t.fails($$insert into public.visits (merchant_id, user_id) values ('aaaaaaaa-0000-0000-0000-000000000005', '33333333-3333-3333-3333-333333333333')$$, 'QR : la cliente ne peut pas s''inventer une visite');
+select t.fails($$select public.redeem_visit_pass(current_setting('test.tok1'))$$, 'QR : la cliente ne peut pas valider elle-même son QR code');
+reset role;
+select t.ok((select expires_at <= now() + interval '10 seconds' from visit_passes where token = current_setting('test.tok1')), 'QR : l''ancien QR expire 10 secondes après le nouveau');
+select t.ok((select count(*) = 1 from visit_passes where user_id = '33333333-3333-3333-3333-333333333333' and expires_at > now() + interval '30 seconds'), 'QR : un seul QR pleinement valable à la fois par client et restaurant');
+select set_config('test.tok1', (select token from visit_passes where user_id = '33333333-3333-3333-3333-333333333333' order by created_at desc, expires_at desc limit 1), false);
+
+-- Sam (restaurateur, sans compte client) ne peut pas tirer de QR ; Nina ne peut pas valider celui de Sam
+select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
+set role authenticated;
+select t.fails($$select * from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005')$$, 'QR : réservé aux comptes clients (refusé au restaurateur)');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((public.redeem_visit_pass(current_setting('test.tok1')) ->> 'status') = 'other_restaurant', 'QR : refusé par un autre restaurateur (« QR d''un autre restaurant »)');
+reset role;
+select t.ok((select used_at is null from visit_passes where token = current_setting('test.tok1')), 'QR : toujours utilisable après la tentative d''un autre restaurateur');
+
+-- Sam valide
+select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
+set role authenticated;
+select set_config('test.r', public.redeem_visit_pass(lower(substr(current_setting('test.tok1'), 1, 4) || '-' || substr(current_setting('test.tok1'), 5)))::text, false);
+select t.ok((current_setting('test.r')::jsonb ->> 'status') = 'ok' and (current_setting('test.r')::jsonb ->> 'visit_number') = '1'
+  and not (current_setting('test.r')::jsonb ? 'user_id') and current_setting('test.r') !~* 'Léa|3333',
+  'QR : le restaurateur valide (code tapé en minuscules avec tiret) : 1re visite, aucun nom ni identifiant');
+select t.ok((public.redeem_visit_pass(current_setting('test.tok1')) ->> 'status') = 'used', 'QR : usage unique (deuxième scan refusé)');
+select t.ok((public.redeem_visit_pass('ZZZZZZZZZZ') ->> 'status') = 'unknown' and (public.redeem_visit_pass('<script>') ->> 'status') = 'unknown'
+  and (public.redeem_visit_pass(null) ->> 'status') = 'unknown', 'QR : code inconnu ou invalide refusé proprement');
+select t.ok((select count(*) = 0 from public.visits), 'QR : le restaurateur ne voit aucune visite une par une');
+select t.fails($$select * from public.visit_passes$$, 'QR : le restaurateur ne peut pas lire la table des QR codes');
+reset role;
+
+-- Léa voit que son QR a été validé, puis utilise l'offre
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((public.visit_pass_status(current_setting('test.tok1')) ->> 'status') = 'ok' and (public.visit_pass_status(current_setting('test.tok1')) ->> 'visit_number') = '1',
+  'QR : la cliente voit « Validé ! » (1re visite)');
+select set_config('test.tok2', (select token from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005', current_setting('test.promo')::uuid)), false);
+select t.ok((public.visit_pass_status(current_setting('test.tok2')) ->> 'status') = 'pending', 'QR : en attente du scan');
+select t.ok((select count(*) = 1 from public.visits), 'QR : la cliente voit sa visite');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
+set role authenticated;
+select set_config('test.r', public.redeem_visit_pass(current_setting('test.tok2'))::text, false);
+select t.ok((current_setting('test.r')::jsonb ->> 'status') = 'ok' and (current_setting('test.r')::jsonb ->> 'promo_title') = 'Offre du mois'
+  and (current_setting('test.r')::jsonb ->> 'visit_number') = '2' and (current_setting('test.r')::jsonb ->> 'promo_used_today') = 'false',
+  'QR avec offre : le restaurateur voit l''offre à appliquer (2e visite)');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select set_config('test.tok3', (select token from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005', current_setting('test.promo')::uuid)), false);
+reset role;
+select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((public.redeem_visit_pass(current_setting('test.tok3')) ->> 'status') = 'duplicate', 'QR : même client et même offre validés il y a moins de 20 min : pas compté deux fois');
+reset role;
+update visits set visited_at = visited_at - interval '21 minutes';   -- 21 minutes plus tard…
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select set_config('test.tok4', (select token from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005', current_setting('test.promo')::uuid)), false);
+select set_config('test.tok5', (select token from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005')), false);
+reset role;
+update visit_passes set created_at = now() - interval '2 minutes', expires_at = now() - interval '1 minute' where token = current_setting('test.tok5');
+select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((public.redeem_visit_pass(current_setting('test.tok4')) ->> 'promo_used_today') = 'true', 'QR : le restaurateur est prévenu si l''offre a déjà servi aujourd''hui à ce client');
+select t.ok((public.redeem_visit_pass(current_setting('test.tok5')) ->> 'status') = 'expired', 'QR : QR expiré refusé');
+select t.ok((select (s ->> 'today')::int = 3 and (s ->> 'today_offers')::int = 2 and (s ->> 'clients_30d')::int = 1 and (s ->> 'returning_30d')::int = 1
+  from public.merchant_visit_summary() s), 'QR : le restaurateur voit ses totaux (3 visites aujourd''hui, 2 offres, 1 client fidèle)');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok(public.merchant_visit_summary() is null, 'QR : une cliente n''a aucun total de restaurant');
+select t.ok((select count(*) = 3 from public.visits), 'QR : la cliente voit ses 3 visites');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"66666666-6666-6666-6666-666666666666","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select count(*) = 0 from public.visits), 'QR : une autre cliente ne voit pas les visites de Léa');
+select t.ok((public.visit_pass_status(current_setting('test.tok2')) ->> 'status') = 'unknown', 'QR : une autre cliente ne peut pas suivre le QR de Léa');
+reset role;
+insert into visit_passes (token, user_id, merchant_id, expires_at)
+  select private.new_visit_token(), '66666666-6666-6666-6666-666666666666', 'aaaaaaaa-0000-0000-0000-000000000005', now() + interval '1 minute' from generate_series(1, 120);
+set role authenticated;
+select t.fails($$select * from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005')$$, 'QR : plafond de 120 QR codes par heure et par client');
+reset role;
+select set_config('request.jwt.claims', '', false);
+select t.ok(not has_table_privilege('anon', 'public.visit_passes', 'select') and not has_table_privilege('authenticated', 'public.visit_passes', 'select')
+  and not has_table_privilege('authenticated', 'public.visits', 'insert') and not has_table_privilege('authenticated', 'public.visits', 'update')
+  and not has_table_privilege('authenticated', 'public.visits', 'delete') and not has_table_privilege('anon', 'public.visits', 'select'),
+  'QR : droits minimaux sur les tables (aucune écriture directe)');
+
 -- ===== Sauvegarde automatique : rôle en lecture seule =====
 select t.ok((select rolcanlogin and rolbypassrls and not rolsuper and not rolcreaterole and not rolcreatedb and not rolreplication and rolconnlimit = 3
   from pg_roles where rolname = 'flashmiam_sauvegarde'), 'sauvegarde : rôle de lecture sans aucun pouvoir d''administration, 3 connexions au plus');

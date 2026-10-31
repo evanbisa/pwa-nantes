@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-SbPT9Sx5e8mfj8S8bCtKmq/J0ojDrCwG0c/CKGDP748=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-abn3ROqaZZ9jkCYXOmOQ9JUbg1pfGfFno0qqow4romM=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1607,6 +1607,173 @@
       #shop-sheet .gallery { margin: 14px -20px 0; }
       .ob-step h1, .ob-step h2 { font-size: 30px; }
     }
+    /* =====================================================================
+       QR CODE DE VISITE
+       Client : bouton « Valider ma visite » sur la fiche, QR code plein écran qui change chaque minute.
+       Restaurateur : bouton « Scanner » sur la carte et dans son espace, scanner plein écran.
+       ===================================================================== */
+    .visit-cta { display: flex; align-items: center; gap: 14px; width: 100%; margin-top: 14px; padding: 12px 14px; border-radius: 14px; text-align: left; color: var(--on-accent);
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong)); box-shadow: 0 6px 18px -8px var(--accent); transition: transform .15s var(--ease-out), box-shadow .2s; }
+    .visit-cta:active { transform: scale(.98); }
+    .visit-cta[hidden] { display: none; }
+    .visit-cta-ico { flex: none; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: rgba(255, 255, 255, .18); }
+    .visit-cta-ico svg, .ps-scan-ico svg, .scan-fab svg { width: 24px; height: 24px; }
+    .visit-cta-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .visit-cta-txt strong { font-size: 15.5px; font-weight: 600; }
+    .visit-cta-txt small { font-size: 12.5px; opacity: .85; }
+    .visit-cta > svg { flex: none; width: 20px; height: 20px; opacity: .8; }
+    .promo { position: relative; }
+    .promo > div { flex: 1; min-width: 0; }
+    .promo-use { flex: none; align-self: center; height: 32px; padding: 0 12px; border-radius: 16px; font-size: 13px; font-weight: 600; color: var(--on-accent); background: var(--accent); }
+    .promo.is-student .promo-use { background: var(--green); }
+    .promo.is-day .promo-use, .promo.is-week .promo-use { background: var(--danger); }
+    :root[data-theme="dark"] .promo.is-student .promo-use, :root[data-theme="dark"] .promo.is-day .promo-use, :root[data-theme="dark"] .promo.is-week .promo-use { color: #202124; }
+
+    /* QR code du client (plein écran) */
+    .vp { position: fixed; inset: 0; z-index: 110; display: flex; justify-content: center; background: var(--backdrop); }
+    .vp[hidden] { display: none; }
+    .vp-panel { position: relative; display: flex; flex-direction: column; width: 100%; height: 100%; overflow-y: auto; overscroll-behavior: contain; color: var(--text); background: var(--panel-solid); animation: rise .28s var(--ease-out) both; }
+    .vp-close { position: absolute; z-index: 2; top: calc(var(--safe-top) + 12px); right: 14px; }
+    .vp-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: calc(var(--safe-top) + 56px) 24px calc(var(--safe-bottom) + 28px); text-align: center; }
+    .vp-shop { display: inline-flex; align-items: center; gap: 8px; margin: 0; padding: 6px 14px 6px 8px; border-radius: 999px; font-size: 14px; font-weight: 500; background: var(--hover); max-width: 100%; }
+    .vp-shop span:first-child { font-size: 20px; }
+    .vp-shop span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .vp-body h2 { margin: 6px 0 0; font-size: 22px; font-weight: 600; letter-spacing: -.01em; }
+    .vp-offer { margin: 0; padding: 8px 14px; border-radius: 12px; font-size: 14.5px; font-weight: 600; color: var(--green); background: rgba(24, 128, 56, .1); }
+    .vp-offer[hidden] { display: none; }
+    .vp-stage { position: relative; width: min(300px, 76vw); aspect-ratio: 1; margin: 14px 0 4px; }
+    .vp-ring { position: absolute; inset: -12px; width: calc(100% + 24px); height: calc(100% + 24px); overflow: visible; }
+    .vp-ring rect { fill: none; stroke-width: 1.6; }
+    .vp-ring .ring-bg { stroke: var(--line); }
+    .vp-ring .ring-fg { stroke: var(--accent); stroke-linecap: round; transition: stroke .3s; }
+    .vp-stage.is-late .ring-fg { stroke: var(--amber); }
+    .vp-card { position: absolute; inset: 0; border-radius: 22px; background: #fff; box-shadow: 0 10px 30px -12px rgba(0, 0, 0, .35); overflow: hidden;
+      transition: transform .45s var(--ease-out), opacity .35s, filter .35s; }
+    .vp-qr { position: absolute; inset: 0; display: grid; place-items: center; animation: vp-in .35s var(--ease-out) both; }
+    .vp-qr svg { width: 100%; height: 100%; display: block; }
+    .vp-qr.is-leaving { animation: vp-out .3s ease forwards; }
+    @keyframes vp-in { from { opacity: 0; transform: scale(.94); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+    @keyframes vp-out { to { opacity: 0; transform: scale(1.04); filter: blur(4px); } }
+    .vp-skel { position: absolute; inset: 14%; border-radius: 12px; background: linear-gradient(90deg, #eceff1 25%, #f6f7f8 50%, #eceff1 75%) 0 0 / 200% 100%; animation: skel 1.2s linear infinite; }
+    .vp-err { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; color: #202124; font-size: 14.5px; }
+    .vp-stage[data-state="error"] .vp-err { display: flex; }
+    .vp-stage[data-state="error"] .vp-qr, .vp-stage:not([data-state="loading"]) .vp-skel { display: none; }
+    .vp-done { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+    .vp-done svg { width: 62%; height: 62%; opacity: 0; transform: scale(.4); }
+    .vp-done circle { fill: #1e8e3e; }
+    .vp-done path { fill: none; stroke: #fff; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 60; stroke-dashoffset: 60; }
+    .vp-stage[data-state="done"] .vp-card { transform: scale(.86); opacity: .12; filter: blur(6px); }
+    .vp-stage[data-state="done"] .vp-ring { opacity: 0; transition: opacity .3s; }
+    .vp-stage[data-state="done"] .vp-done svg { animation: vp-pop .55s cubic-bezier(.2, 1.4, .4, 1) .1s forwards; }
+    .vp-stage[data-state="done"] .vp-done path { animation: vp-check .45s ease-out .45s forwards; }
+    .vp-stage[data-state="done"]::after { content: ''; position: absolute; inset: 12%; border-radius: 50%; border: 3px solid #1e8e3e; animation: ripple 1s ease-out .2s both; }
+    @keyframes vp-pop { to { opacity: 1; transform: none; } }
+    @keyframes vp-check { to { stroke-dashoffset: 0; } }
+    .vp-code { margin: 6px 0 0; font: 600 24px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .08em; }
+    .vp-code small { display: block; margin-bottom: 4px; font: 400 12.5px/1.3 Roboto, system-ui, -apple-system, 'Segoe UI', sans-serif; letter-spacing: 0; color: var(--muted); }
+    .vp-timer { margin: 0; min-height: 20px; font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .vp-status { margin: 4px 0 0; font-size: 15px; font-weight: 500; }
+    .vp-status:empty { display: none; }
+    .vp-status.is-ok { color: var(--green); font-size: 18px; font-weight: 600; }
+    .vp-hint { margin: 0; font-size: 12.5px; color: var(--muted); }
+    .vp-finish { min-width: 200px; margin-top: 8px; }
+    .vp-finish[hidden], .vp-hint[hidden], .vp-code[hidden] { display: none; }
+
+    /* Bouton « Scanner » du restaurateur sur la carte */
+    .scan-fab { position: fixed; z-index: 21; right: 12px; bottom: calc(var(--safe-bottom) + 66px); display: inline-flex; align-items: center; gap: 8px; height: 52px; padding: 0 20px 0 16px;
+      border-radius: 26px; font-size: 15.5px; font-weight: 600; color: var(--on-accent); background: var(--accent); box-shadow: 0 8px 22px -6px rgba(0, 0, 0, .45);
+      transition: opacity .3s var(--ease-out), transform .35s var(--ease-out); }
+    .scan-fab[hidden] { display: none; }
+    .scan-fab:active { transform: scale(.96); }
+    body:not(.ui-ready) .scan-fab, body.sheet-open .scan-fab, body.pro-open .scan-fab { opacity: 0; transform: translateY(16px); pointer-events: none; }
+
+    /* Carte « Scanner un client » en tête de l'espace restaurateur */
+    .ps-scan { display: flex; align-items: center; gap: 14px; width: 100%; margin: 6px 0 16px; padding: 16px; border-radius: 18px; text-align: left; color: var(--on-accent);
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong)); box-shadow: 0 10px 24px -12px var(--accent); transition: transform .15s var(--ease-out); }
+    .ps-scan:active { transform: scale(.985); }
+    .ps-scan-ico { flex: none; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; background: rgba(255, 255, 255, .2); }
+    .ps-scan-ico svg { width: 28px; height: 28px; }
+    .ps-scan-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .ps-scan-txt strong { font-size: 17px; font-weight: 600; }
+    .ps-scan-txt small { font-size: 13px; opacity: .88; }
+    .ps-scan-today { flex: none; display: flex; flex-direction: column; align-items: center; min-width: 64px; padding: 6px 8px; border-radius: 12px; background: rgba(255, 255, 255, .16); }
+    .ps-scan-today b { font-size: 22px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+    .ps-scan-today small { font-size: 11px; opacity: .9; }
+
+    /* Scanner plein écran */
+    .scan { position: fixed; inset: 0; z-index: 120; overflow: hidden; color: #fff; background: #000; animation: loader-in .2s ease both; opacity: 0; }
+    .scan[hidden] { display: none; }
+    .scan video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .scan-frame { position: absolute; left: 50%; top: 46%; width: min(68vw, 300px, 46vh); aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 26px;
+      box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .55); transition: box-shadow .3s; }
+    .scan-frame i { position: absolute; width: 44px; height: 44px; border: 4px solid #fff; transition: border-color .25s; }
+    .scan-frame i:nth-child(1) { top: -2px; left: -2px; border-right: 0; border-bottom: 0; border-top-left-radius: 26px; }
+    .scan-frame i:nth-child(2) { top: -2px; right: -2px; border-left: 0; border-bottom: 0; border-top-right-radius: 26px; }
+    .scan-frame i:nth-child(3) { bottom: -2px; left: -2px; border-right: 0; border-top: 0; border-bottom-left-radius: 26px; }
+    .scan-frame i:nth-child(4) { bottom: -2px; right: -2px; border-left: 0; border-top: 0; border-bottom-right-radius: 26px; }
+    .scan-line { position: absolute; left: 10%; right: 10%; top: 12%; height: 2px; border-radius: 1px; background: linear-gradient(90deg, transparent, #8ab4f8, transparent);
+      box-shadow: 0 0 12px 2px rgba(138, 180, 248, .7); animation: scan-sweep 2.2s ease-in-out infinite alternate; }
+    @keyframes scan-sweep { to { top: 88%; } }
+    .scan.is-busy .scan-line, .scan.is-off .scan-line { display: none; }
+    .scan.is-busy .scan-frame i { border-color: #81c995; }
+    .scan-head { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 12px; padding: calc(var(--safe-top) + 12px) 14px 12px;
+      background: linear-gradient(rgba(0, 0, 0, .55), transparent); }
+    .scan-head > div { flex: 1; min-width: 0; }
+    .scan-head h2 { margin: 0; font-size: 18px; font-weight: 600; }
+    .scan-head p { margin: 2px 0 0; font-size: 13px; color: rgba(255, 255, 255, .8); font-variant-numeric: tabular-nums; }
+    .scan-btn { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: #fff; background: rgba(255, 255, 255, .16); backdrop-filter: blur(8px); font-size: 24px; line-height: 1; }
+    .scan-btn[hidden] { display: none; }
+    .scan-btn[aria-pressed="true"] { color: #202124; background: #fdd663; }
+    .scan-btn svg { width: 22px; height: 22px; }
+    .scan-help { position: absolute; left: 16px; right: 16px; top: calc(46% + min(34vw, 150px, 23vh) + 18px); margin: 0; text-align: center; font-size: 15px; font-weight: 500; text-shadow: 0 1px 4px rgba(0, 0, 0, .6); }
+    .scan-help.is-warn { color: #fdd663; }
+    .scan-off { position: absolute; left: 50%; top: 46%; width: min(320px, calc(100% - 48px)); transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; font-size: 15px; }
+    .scan-off[hidden] { display: none; }
+    .scan-off span { font-size: 40px; }
+    .scan-off p { margin: 0; line-height: 1.45; color: rgba(255, 255, 255, .9); }
+    .scan.is-off .scan-frame { opacity: 0; }
+    .scan-foot { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 16px calc(var(--safe-bottom) + 20px);
+      background: linear-gradient(transparent, rgba(0, 0, 0, .6)); }
+    .scan-manual { display: flex; gap: 8px; width: min(420px, 100%); }
+    .scan-manual[hidden] { display: none; }
+    .scan-manual input { flex: 1; min-width: 0; height: 50px; padding: 0 16px; border: 1px solid rgba(255, 255, 255, .3); border-radius: 25px; color: #fff; background: rgba(255, 255, 255, .14);
+      font: 600 19px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .08em; text-transform: uppercase; backdrop-filter: blur(8px); }
+    .scan-manual input::placeholder { color: rgba(255, 255, 255, .45); }
+    .scan-manual input:focus { outline: 2px solid #8ab4f8; outline-offset: 1px; }
+    .scan-manual button { flex: none; height: 50px; padding: 0 20px; border-radius: 25px; font-size: 15px; font-weight: 600; color: #202124; background: #fff; }
+    .scan-manual button[disabled] { opacity: .5; }
+    .scan-type { height: 44px; padding: 0 18px; border-radius: 22px; font-size: 14.5px; font-weight: 500; color: #fff; background: rgba(255, 255, 255, .16); backdrop-filter: blur(8px); }
+    .scan-type[hidden] { display: none; }
+
+    /* Résultat du scan */
+    .scan-result { position: absolute; left: 12px; right: 12px; bottom: calc(var(--safe-bottom) + 12px); max-width: 460px; margin: 0 auto; padding: 22px 20px 16px; border-radius: 24px;
+      text-align: center; color: var(--text); background: var(--panel-solid); box-shadow: 0 -6px 40px rgba(0, 0, 0, .45);
+      transform: translateY(calc(100% + 40px)); transition: transform .42s cubic-bezier(.2, 1.15, .35, 1); }
+    .scan-result.is-shown { transform: none; }
+    .scan-result[hidden] { display: none; }
+    .sr-ico { display: grid; place-items: center; width: 64px; height: 64px; margin: -54px auto 8px; border-radius: 50%; font-size: 32px; color: #fff; border: 5px solid var(--panel-solid); background: #1e8e3e; }
+    .sr-ico svg { width: 30px; height: 30px; }
+    .sr-ico path { fill: none; stroke: currentColor; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 30; stroke-dashoffset: 30; }
+    .scan-result.is-shown .sr-ico { animation: jn-pop .5s cubic-bezier(.2, 1.4, .4, 1) both; }
+    .scan-result.is-shown .sr-ico path { animation: vp-check .35s ease-out .25s forwards; }
+    .scan-result[data-kind="warn"] .sr-ico { background: #e37400; }
+    .scan-result[data-kind="bad"] .sr-ico { background: #d93025; }
+    .scan-result h3 { margin: 0; font-size: 21px; font-weight: 600; }
+    .scan-result p { margin: 6px 0 0; font-size: 15px; color: var(--muted); }
+    .sr-offer { padding: 12px 14px; border-radius: 14px; font-size: 17px !important; font-weight: 600; color: var(--green) !important; background: rgba(24, 128, 56, .1); }
+    .sr-warn { padding: 10px 12px; border-radius: 12px; font-size: 14px !important; font-weight: 500; color: var(--amber) !important; background: rgba(227, 116, 0, .1); }
+    .sr-offer[hidden], .sr-warn[hidden] { display: none; }
+    .sr-next { position: relative; overflow: hidden; width: 100%; margin-top: 16px; }
+    .sr-next i { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: rgba(255, 255, 255, .55); transform-origin: left; transform: scaleX(0); }
+    .sr-next span { position: relative; }
+
+    @media (min-width: 900px) {
+      .vp { align-items: center; padding: 24px; }
+      .vp-panel { width: min(460px, 100%); height: auto; max-height: calc(100dvh - 48px); border-radius: 22px; box-shadow: var(--shadow); }
+      .vp-body { padding: 56px 28px 28px; }
+      .vp-close { top: 14px; }
+      .scan-fab { right: 16px; bottom: 24px; }
+    }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
     }
@@ -1664,6 +1831,9 @@
     <ul class="shop-list" id="shop-list"></ul>
     <p class="sb-empty" id="shop-empty" hidden>Aucun commerce ne correspond à votre recherche.</p>
   </aside>
+
+  <!-- ===================== RESTAURATEUR : SCANNER LE QR CODE D'UN CLIENT ===================== -->
+  <button class="scan-fab ui" type="button" id="scan-fab" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8V5a2 2 0 012-2h3M16 3h3a2 2 0 012 2v3M21 16v3a2 2 0 01-2 2h-3M8 21H5a2 2 0 01-2-2v-3M7 12h10"/></svg><span>Scanner</span></button>
 
   <!-- ===================== CONTRÔLES CARTE (en haut à droite) ===================== -->
   <div class="controls ui" id="controls">
@@ -1767,6 +1937,12 @@
     <span class="status" id="shop-status"></span>
     <p class="shop-desc" id="shop-desc" hidden></p>
     <div class="promos" id="shop-promos" hidden></div>
+    <!-- QR code de visite (comptes clients) : à montrer au restaurateur, qui le scanne -->
+    <button class="visit-cta" type="button" id="shop-visit" hidden>
+      <span class="visit-cta-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17.5 20.5h3v-3"/></svg></span>
+      <span class="visit-cta-txt"><strong>Valider ma visite</strong><small>Un QR code à montrer en caisse</small></span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+    </button>
     <ul class="meta">
       <li>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 1114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
@@ -2054,6 +2230,59 @@
   </section>
 
   <!-- ===================== ESPACE RESTAURATEUR ===================== -->
+  <!-- ===================== QR CODE DE VISITE (client) ===================== -->
+  <div id="visit-pass" class="vp" role="dialog" aria-modal="true" aria-labelledby="vp-title" hidden>
+    <div class="vp-panel">
+      <button class="icon-btn vp-close" type="button" id="vp-close" aria-label="Fermer le QR code">&times;</button>
+      <div class="vp-body">
+        <p class="vp-shop"><span id="vp-emoji" aria-hidden="true"></span><span id="vp-shop"></span></p>
+        <h2 id="vp-title">Montrez ce QR code au restaurateur</h2>
+        <p class="vp-offer" id="vp-offer" hidden></p>
+        <div class="vp-stage" id="vp-stage" data-state="loading">
+          <svg class="vp-ring" viewBox="0 0 120 120" preserveAspectRatio="none" aria-hidden="true"><rect class="ring-bg" x="2" y="2" width="116" height="116" rx="24" pathLength="100"/><rect class="ring-fg" id="vp-ring" x="2" y="2" width="116" height="116" rx="24" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"/></svg>
+          <div class="vp-card" id="vp-card">
+            <div class="vp-skel" aria-hidden="true"></div>
+            <div class="vp-err"><span id="vp-err-text"></span><button class="pill-btn" type="button" id="vp-retry">Réessayer</button></div>
+          </div>
+          <div class="vp-done" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48"/><path d="M29 52l14 14 28-30"/></svg></div>
+        </div>
+        <p class="vp-code" id="vp-code" hidden></p>
+        <p class="vp-status" id="vp-status" role="status" aria-live="polite"></p>
+        <p class="vp-timer" id="vp-timer"></p>
+        <p class="vp-hint" id="vp-hint">Usage unique · le QR code change chaque minute</p>
+        <button class="btn btn-primary vp-finish" type="button" id="vp-finish" hidden>Terminé</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SCANNER (restaurateur) ===================== -->
+  <div id="scanner" class="scan" role="dialog" aria-modal="true" aria-labelledby="scan-title" hidden>
+    <video id="scan-video" playsinline muted autoplay aria-hidden="true"></video>
+    <div class="scan-frame" id="scan-frame" aria-hidden="true"><i></i><i></i><i></i><i></i><span class="scan-line"></span></div>
+    <header class="scan-head">
+      <button class="scan-btn" type="button" id="scan-close" aria-label="Fermer le scanner">&times;</button>
+      <div><h2 id="scan-title">Scanner un client</h2><p id="scan-count"></p></div>
+      <button class="scan-btn" type="button" id="scan-torch" aria-pressed="false" aria-label="Lampe de la caméra" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></button>
+    </header>
+    <p class="scan-help" id="scan-help" role="status" aria-live="polite">Visez le QR code du client</p>
+    <div class="scan-off" id="scan-off" hidden><span aria-hidden="true">📷</span><p id="scan-off-text"></p></div>
+    <div class="scan-foot">
+      <form class="scan-manual" id="scan-manual" hidden autocomplete="off">
+        <input id="scan-code" type="text" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="16" placeholder="K7P4-QX9M-2T" aria-label="Code affiché sous le QR code du client" />
+        <button type="submit" id="scan-code-go" disabled>Valider</button>
+      </form>
+      <button class="scan-type" type="button" id="scan-type">⌨️ Saisir le code à la main</button>
+    </div>
+    <div class="scan-result" id="scan-result" data-kind="ok" role="alert" hidden>
+      <div class="sr-ico" id="sr-ico" aria-hidden="true"></div>
+      <h3 id="sr-title"></h3>
+      <p id="sr-text"></p>
+      <p class="sr-offer" id="sr-offer" hidden></p>
+      <p class="sr-warn" id="sr-warn" hidden></p>
+      <button class="btn btn-primary sr-next" type="button" id="sr-next"><i id="sr-bar"></i><span>Client suivant</span></button>
+    </div>
+  </div>
+
   <div id="pro-space" class="pro-space" role="dialog" aria-modal="true" aria-labelledby="ps-title" hidden>
     <div class="ps-panel">
       <header class="ps-head">
@@ -2077,6 +2306,11 @@
           <p class="ps-hello" id="ps-hello"></p>
           <div class="ps-alert" id="ps-alert" role="status" hidden><p></p><button class="pill-btn" type="button"></button></div>
           <div id="ps-home-live">
+            <button class="ps-scan" type="button" id="ps-scan">
+              <span class="ps-scan-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8V5a2 2 0 012-2h3M16 3h3a2 2 0 012 2v3M21 16v3a2 2 0 01-2 2h-3M8 21H5a2 2 0 01-2-2v-3M7 12h10"/></svg></span>
+              <span class="ps-scan-txt"><strong>Scanner un client</strong><small id="ps-scan-sub">Visite ou offre : scannez le QR code de son téléphone</small></span>
+              <span class="ps-scan-today"><b id="ps-scan-n">–</b><small>aujourd'hui</small></span>
+            </button>
             <div class="ps-cards" id="ps-cards"></div>
             <section class="ps-block" aria-labelledby="ps-todo-title">
               <h3 id="ps-todo-title">À faire</h3>
@@ -3552,6 +3786,7 @@
   function applyCloud() {
     whenMapReady(syncShopMarkers);
     if (ProSpace.isOpen()) ProSpace.render();
+    Scanner.renderEntry();
   }
   /** La carte suit les données : nouvelles fiches, fiches modifiées ou retirées, stories et promotions. */
   let markerBatch = false;
@@ -5916,6 +6151,7 @@
     $('shop-desc').hidden = !shop.description;
     $('shop-desc').textContent = shop.description || '';
     renderShopPromos(shop);
+    VisitPass.renderEntry(shop);
     $('shop-phone-row').hidden = !shop.phone;
     if (shop.phone) { $('shop-phone').textContent = shop.phone; $('shop-phone').href = 'tel:' + compactPhone(shop.phone); }
     renderGallery(shop);
@@ -6269,6 +6505,16 @@
       card.querySelector('strong').textContent = p.title;
       const more = card.querySelector('.promo-more');
       if (p.details) more.textContent = p.details; else more.remove();
+      // Comptes clients : « Utiliser » affiche le QR code de visite avec cette offre (validé par le restaurateur)
+      if (UUID_RE.test(p.id) && VisitPass.canUse(shop)) {
+        const use = document.createElement('button');
+        use.type = 'button';
+        use.className = 'promo-use';
+        use.textContent = 'Utiliser';
+        use.setAttribute('aria-label', 'Utiliser l\'offre « ' + p.title + ' » : afficher mon QR code');
+        use.addEventListener('click', () => VisitPass.open(shop.id, p));
+        card.appendChild(use);
+      }
       box.appendChild(card);
     });
   }
@@ -9027,6 +9273,7 @@
   function applyAccount(account) {
     paintAvatar($('avatar'), account);
     $('profile-btn').setAttribute('aria-label', 'Profil de ' + account.name);
+    Scanner.renderEntry();
   }
 
   function updateProfileGeo() {
@@ -9079,6 +9326,7 @@
       setTab(t, { focus: true });
       render();
       load();
+      Scanner.loadSummary();
       const mine = myRestaurant(account);
       if (mine) cleanupStories(mine.id).catch(() => {});
       clearInterval(timer);
@@ -9742,6 +9990,549 @@
     return { open, close, isOpen, render, refresh: load, storyStats, promoStats, tab: () => tab };
   })();
 
+  /* ---------- QR code de visite ----------
+     Client : QR code à usage unique pour UN restaurant (et, s'il le veut, une de ses offres), qui change chaque minute,
+     à montrer en caisse. Il passe à « Visite validée ! » dès que le restaurateur l'a scanné.
+     Restaurateur : scanner plein écran (caméra, ou code tapé à la main), résultat immédiat, client suivant automatiquement.
+     La base vérifie tout (compte client, restaurant en ligne, offre en cours, bon restaurant, usage unique, délai) ; le
+     restaurateur ne reçoit ni nom ni identifiant, seulement l'offre à appliquer et le numéro de la visite. */
+  const VISIT_CODE_RE = /^[0-9A-HJKMNP-TV-Z]{10}$/;
+  /** Code normalisé comme le fait la base : majuscules, sans séparateurs, O→0, I et L→1. */
+  const normVisitCode = (t) => String(t || '').toUpperCase().replace(/[^0-9A-Z]/g, '').replace(/O/g, '0').replace(/[IL]/g, '1');
+  const prettyVisitCode = (t) => t.slice(0, 4) + '-' + t.slice(4, 8) + '-' + t.slice(8);
+  /** Lien du QR code : lu par l'appareil photo d'un téléphone, il ouvre directement le scanner du restaurateur. */
+  const visitLink = (t) => location.origin + location.pathname + '#visite=' + t;
+  /** Code de visite contenu dans un texte lu (lien FlashMiam ou code seul) ; null si ce n'est pas un QR code FlashMiam. */
+  function visitCodeFrom(text) {
+    const s = String(text || '').trim();
+    const m = s.match(/[#?&]visite=([0-9A-Za-z-]{10,14})(?:&|$)/) || (s.length <= 16 ? s.match(/^([0-9A-Za-z-]{10,14})$/) : null);
+    if (!m) return null;
+    const code = normVisitCode(m[1]);
+    return VISIT_CODE_RE.test(code) ? code : null;
+  }
+  /** Bibliothèque de vendor/ chargée à la demande (une seule fois), gardée ensuite par le service worker. */
+  const vendorLoads = {};
+  function loadVendor(src, name) {
+    if (window[name]) return Promise.resolve(window[name]);
+    if (!vendorLoads[src]) {
+      vendorLoads[src] = new Promise((resolve, reject) => {
+        const el = document.createElement('script');
+        el.src = src;
+        el.async = true;
+        el.onload = () => (window[name] ? resolve(window[name]) : reject(new Error(name)));
+        el.onerror = () => { delete vendorLoads[src]; el.remove(); reject(new Error(name)); };
+        document.head.appendChild(el);
+      });
+    }
+    return vendorLoads[src];
+  }
+  const loadQrMaker = () => loadVendor('vendor/qrcode-generator-2.0.4/qrcode.js', 'qrcode');
+  /** QR code en SVG (modules noirs sur fond blanc, marge de 3 modules), une ligne de tracé par suite de modules noirs. */
+  function qrSvg(text) {
+    const qr = window.qrcode(0, 'M');
+    qr.addData(text);
+    qr.make();
+    const n = qr.getModuleCount(), q = 3, size = n + q * 2;
+    let d = '';
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        if (!qr.isDark(r, c)) continue;
+        let len = 1;
+        while (c + len < n && qr.isDark(r, c + len)) len++;
+        d += 'M' + (c + q) + ' ' + (r + q) + 'h' + len + 'v1h-' + len + 'z';
+        c += len - 1;
+      }
+    }
+    return '<svg viewBox="0 0 ' + size + ' ' + size + '" shape-rendering="crispEdges" role="img" aria-label="QR code de visite">'
+      + '<rect width="' + size + '" height="' + size + '" fill="#fff"/><path fill="#111" d="' + d + '"/></svg>';
+  }
+  const nth = (n) => (n === 1 ? '1re' : n + 'e');
+  /** Petit retour sonore (le restaurateur a les mains prises) : deux notes si c'est bon, une note grave sinon. */
+  const Beep = (() => {
+    let ac = null;
+    return {
+      prepare() { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) { ac = null; } },
+      play(ok) {
+        if (!ac) return;
+        try {
+          const t = ac.currentTime;
+          (ok ? [[880, 0], [1320, 0.11]] : [[220, 0]]).forEach(([f, at]) => {
+            const o = ac.createOscillator(), g = ac.createGain();
+            o.type = ok ? 'sine' : 'square';
+            o.frequency.value = f;
+            g.gain.setValueAtTime(0.0001, t + at);
+            g.gain.exponentialRampToValueAtTime(ok ? 0.25 : 0.08, t + at + 0.015);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + at + (ok ? 0.22 : 0.3));
+            o.connect(g).connect(ac.destination);
+            o.start(t + at);
+            o.stop(t + at + 0.35);
+          });
+        } catch (e) { /* son indisponible */ }
+      },
+    };
+  })();
+  const buzz = (pattern) => { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) { /* vibreur absent */ } };
+
+  const VisitPass = (() => {
+    const root = $('visit-pass'), stage = $('vp-stage'), card = $('vp-card');
+    const ROTATE_MS = 60 * 1000;           // nouveau QR code chaque minute (chacun vaut 75 s côté base)
+    let shopId = null, promo = null, token = null, prevToken = null, prevUntil = 0, issuedAt = 0, seq = 0;
+    let tick = null, poll = null, ring = null, lock = null, lastFocus = null, done = false, failures = 0, prefetched = false, renewing = false;
+    const isOpen = () => !root.hidden;
+    const canUse = (shop, me = currentUser()) => !!(shop && shop.isPro && UUID_RE.test(shop.id) && me && me.role === 'client' && !isOwnShop(shop.id, me));
+
+    /** Bouton « Valider ma visite » de la fiche (comptes clients). */
+    function renderEntry(shop) {
+      const ok = canUse(shop);
+      $('shop-visit').hidden = !ok;
+      $('shop-visit').setAttribute('aria-label', 'Valider ma visite chez ' + (shop ? shop.name : '') + ' : afficher mon QR code');
+      if (ok && !prefetched) { prefetched = true; (window.requestIdleCallback || setTimeout)(() => loadQrMaker().catch(() => { prefetched = false; })); }
+    }
+    function setState(s) { stage.dataset.state = s; }
+    function stopTimers() { clearInterval(tick); clearTimeout(poll); tick = poll = null; if (ring) { ring.cancel(); ring = null; } }
+    async function keepAwake(on) {
+      try {
+        if (on && !lock && 'wakeLock' in navigator && !document.hidden) {
+          lock = await navigator.wakeLock.request('screen');
+          lock.addEventListener('release', () => { lock = null; });
+        } else if (!on && lock) { const l = lock; lock = null; await l.release(); }
+      } catch (e) { lock = null; }      // refusé (économie d'énergie) : sans importance
+    }
+
+    function open(id, promoObj = null) {
+      const m = markers.get(id);
+      if (!m || !canUse(m.shop)) return;
+      if (!isOpen()) lastFocus = document.activeElement;
+      shopId = id;
+      promo = promoObj && UUID_RE.test(promoObj.id) && PROMO_KINDS[promoObj.kind] ? promoObj : null;
+      token = prevToken = null; done = false; failures = 0; renewing = false;
+      stopTimers();
+      card.querySelectorAll('.vp-qr').forEach((el) => el.remove());
+      $('vp-emoji').textContent = catOf(m.shop).emoji;
+      $('vp-shop').textContent = m.shop.name;
+      $('vp-offer').hidden = !promo;
+      $('vp-offer').textContent = promo ? PROMO_KINDS[promo.kind].icon + ' ' + promo.title : '';
+      $('vp-title').textContent = promo ? 'Montrez ce QR code pour profiter de l\'offre' : 'Montrez ce QR code au restaurateur';
+      $('vp-code').hidden = true;
+      $('vp-timer').textContent = '';
+      $('vp-status').textContent = '';
+      $('vp-status').className = 'vp-status';
+      $('vp-hint').hidden = false;
+      $('vp-finish').hidden = true;
+      stage.classList.remove('is-late');
+      setState('loading');
+      root.hidden = false;
+      document.body.classList.add('vp-open');
+      $('vp-close').focus({ preventScroll: true });
+      keepAwake(true);
+      tick = setInterval(onTick, 500);
+      issue();
+    }
+    function close() {
+      if (!isOpen()) return;
+      seq++;
+      stopTimers();
+      keepAwake(false);
+      root.hidden = true;
+      document.body.classList.remove('vp-open');
+      token = prevToken = null;
+      if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+    }
+
+    async function issue() {
+      const s = ++seq;
+      clearTimeout(poll);
+      renewing = true;
+      let row = null, error = null;
+      try {
+        await loadQrMaker();
+        const res = await sb.rpc('issue_visit_pass', { p_merchant_id: shopId, p_promo_id: promo ? promo.id : null });
+        error = res.error;
+        row = Array.isArray(res.data) ? res.data[0] : res.data;
+      } catch (e) { error = e; }
+      if (s !== seq || !isOpen() || done) return;
+      if (error || !row || !VISIT_CODE_RE.test(row.token)) {
+        failures++;
+        // Le QR affiché vaut encore quelques secondes : on réessaie discrètement avant d'afficher l'erreur
+        if (token && failures < 3 && Date.now() - issuedAt < 70 * 1000) { poll = setTimeout(issue, 3000); return; }
+        token = null;
+        renewing = false;
+        $('vp-err-text').textContent = error && error.message && !/Failed to fetch|NetworkError|Load failed|qrcode/i.test(error.message)
+          ? cloudError(error) : 'Pas de connexion : le QR code ne peut pas être créé pour le moment.';
+        $('vp-code').hidden = true;
+        $('vp-timer').textContent = '';
+        if (ring) { ring.cancel(); ring = null; }
+        setState('error');
+        return;
+      }
+      failures = 0;
+      renewing = false;
+      if (token) { prevToken = token; prevUntil = Date.now() + 12 * 1000; }   // l'ancien vaut encore 10 s côté base
+      token = row.token;
+      issuedAt = Date.now();
+      draw(token);
+      $('vp-code').hidden = false;
+      $('vp-code').innerHTML = '<small>ou donnez ce code</small>';
+      $('vp-code').append(prettyVisitCode(token));
+      stage.classList.remove('is-late');
+      if (ring) ring.cancel();
+      ring = $('vp-ring').animate([{ strokeDashoffset: 0 }, { strokeDashoffset: 100 }], { duration: ROTATE_MS, easing: 'linear', fill: 'forwards' });
+      setState('ready');
+      onTick();
+      poll = setTimeout(check, 1500);
+    }
+    function draw(t) {
+      const old = card.querySelectorAll('.vp-qr');
+      old.forEach((el) => { el.classList.add('is-leaving'); setTimeout(() => el.remove(), 320); });
+      const box = document.createElement('div');
+      box.className = 'vp-qr';
+      box.innerHTML = qrSvg(visitLink(t));    // uniquement des nombres et le lien du site : rien venant d'un tiers
+      card.appendChild(box);
+    }
+    function onTick() {
+      if (!isOpen() || done || !token || document.hidden) return;
+      const left = Math.max(0, Math.ceil((issuedAt + ROTATE_MS - Date.now()) / 1000));
+      $('vp-timer').textContent = 'Nouveau QR code dans ' + left + ' s';
+      stage.classList.toggle('is-late', left <= 10);
+      if (left <= 0 && !renewing) issue();
+    }
+    /** Le restaurateur a-t-il scanné ? (QR affiché, et l'ancien pendant ses dernières secondes) */
+    async function check() {
+      if (!isOpen() || done || !token) return;
+      if (document.hidden) { poll = setTimeout(check, 2000); return; }
+      const list = [token].concat(prevToken && Date.now() < prevUntil ? [prevToken] : []);
+      const s = seq;
+      const res = await Promise.all(list.map((t) => Promise.resolve(sb.rpc('visit_pass_status', { p_token: t })).catch((e) => ({ error: e }))));
+      if (!isOpen() || done) return;
+      const hit = res.find((r) => !r.error && r.data && r.data.status === 'ok');
+      if (hit) { success(hit.data); return; }
+      if (s === seq) poll = setTimeout(check, 2000);
+    }
+    function success(d) {
+      done = true;
+      seq++;
+      stopTimers();
+      setState('done');
+      buzz([30, 60, 90]);
+      const name = $('vp-shop').textContent;
+      const n = Number(d.visit_number) || 1;
+      $('vp-title').textContent = promo ? 'Offre validée !' : 'Visite validée !';
+      $('vp-status').className = 'vp-status is-ok';
+      $('vp-status').textContent = n > 1 ? nth(n) + ' visite chez ' + name + ' 🎉' : 'Première visite chez ' + name + ' 🎉';
+      $('vp-code').hidden = true;
+      $('vp-timer').textContent = promo ? 'Le restaurateur applique l\'offre sur votre commande.' : 'Merci et bon appétit !';
+      $('vp-hint').hidden = true;
+      $('vp-finish').hidden = false;
+      setTimeout(() => { if (isOpen()) $('vp-finish').focus({ preventScroll: true }); }, 400);
+      keepAwake(false);
+    }
+
+    $('shop-visit').addEventListener('click', () => selectedId && open(selectedId));
+    $('vp-close').addEventListener('click', close);
+    $('vp-finish').addEventListener('click', close);
+    $('vp-retry').addEventListener('click', () => { failures = 0; setState('loading'); issue(); });
+    root.addEventListener('click', (ev) => { if (ev.target === root) close(); });
+    document.addEventListener('visibilitychange', () => {
+      if (!isOpen() || done) return;
+      if (document.hidden) { clearTimeout(poll); return; }
+      keepAwake(true);
+      // Retour dans l'application : QR périmé renouvelé tout de suite, sinon on regarde s'il a été scanné entre-temps
+      if (token && !renewing && Date.now() - issuedAt >= ROTATE_MS) issue(); else if (token) check();
+    });
+    return { open, close, isOpen, canUse, renderEntry };
+  })();
+
+  const Scanner = (() => {
+    const root = $('scanner'), video = $('scan-video');
+    const HELP = 'Visez le QR code du client';
+    let stream = null, track = null, detector = null, loopTimer = null, camSeq = 0, busy = false, manual = false;
+    const seen = new Map();            // codes déjà traités → dernière fois vus devant la caméra
+    let wrongAt = 0, summary = null, lastFocus = null, nextTimer = null, bar = null, canvas = null, ctx = null;
+    const isOpen = () => !root.hidden;
+    const nf = (n) => Number(n || 0).toLocaleString('fr-FR');
+    const listed = () => { const r = myRestaurant(); return !!(r && r.published); };
+
+    /** Bouton « Scanner » de la carte : restaurateurs dont la fiche est en ligne. */
+    function renderEntry() {
+      const me = currentUser();
+      $('scan-fab').hidden = !(me && me.role === 'pro' && listed());
+    }
+    function help(text, warn = false) { $('scan-help').textContent = text; $('scan-help').classList.toggle('is-warn', warn); }
+
+    async function open({ code = null } = {}) {
+      const me = currentUser();
+      if (!me || me.role !== 'pro') return;
+      if (!isOpen()) lastFocus = document.activeElement;
+      if (activePanel) closePanel(activePanel);
+      root.hidden = false;
+      document.body.classList.add('scan-open');
+      busy = false; seen.clear();
+      hideResult();
+      setManual(false);
+      help(HELP);
+      Beep.prepare();
+      $('scan-close').focus({ preventScroll: true });
+      renderCount();
+      loadSummary();
+      startCamera();
+      if (code) handle(code, 'link');
+    }
+    function close() {
+      if (!isOpen()) return;
+      stopCamera();
+      clearTimeout(nextTimer);
+      if (bar) { bar.cancel(); bar = null; }
+      root.hidden = true;
+      document.body.classList.remove('scan-open');
+      if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+    }
+
+    /* Caméra arrière ; à défaut (refus, ordinateur sans caméra), saisie du code à la main */
+    async function startCamera() {
+      const my = ++camSeq;
+      root.classList.remove('is-off');
+      $('scan-off').hidden = true;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        cameraOff('Pas de caméra disponible ici : tapez le code affiché sous le QR code du client.');
+        return;
+      }
+      try {
+        const s = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } } });
+        if (my !== camSeq || !isOpen()) { s.getTracks().forEach((t) => t.stop()); return; }
+        stream = s;
+        track = s.getVideoTracks()[0] || null;
+        video.srcObject = s;
+        await video.play().catch(() => {});
+        let caps = {};
+        try { caps = track && track.getCapabilities ? track.getCapabilities() : {}; } catch (e) { caps = {}; }
+        $('scan-torch').hidden = !caps.torch;
+        $('scan-torch').setAttribute('aria-pressed', 'false');
+        await prepareDetector();
+        if (my !== camSeq || !isOpen()) return;
+        loop();
+      } catch (e) {
+        if (my !== camSeq || !isOpen()) return;
+        stopCamera();
+        const denied = e && (e.name === 'NotAllowedError' || e.name === 'SecurityError');
+        cameraOff(denied
+          ? 'Accès à la caméra refusé. Autorisez-le dans les réglages du navigateur (icône à gauche de l\'adresse), ou tapez le code du client ci-dessous.'
+          : e && /jsQR/.test(e.message) ? 'Le lecteur de QR code n\'a pas pu se charger (connexion ?) : tapez le code du client ci-dessous.'
+            : 'Caméra introuvable ou déjà utilisée par une autre application : tapez le code du client ci-dessous.');
+      }
+    }
+    function stopCamera() {
+      camSeq++;
+      clearTimeout(loopTimer);
+      if (stream) stream.getTracks().forEach((t) => t.stop());
+      stream = track = null;
+      video.srcObject = null;
+    }
+    function cameraOff(text) {
+      root.classList.add('is-off');
+      $('scan-off').hidden = false;
+      $('scan-off-text').textContent = text;
+      help('');
+      setManual(true);
+    }
+    /** Lecteur intégré au navigateur (Android, Chrome) ; sinon lecteur jsQR chargé à la demande (iPhone, Firefox…). */
+    async function prepareDetector() {
+      if (detector) return;
+      if ('BarcodeDetector' in window) {
+        try {
+          const formats = await window.BarcodeDetector.getSupportedFormats();
+          if (formats.includes('qr_code')) {
+            const native = new window.BarcodeDetector({ formats: ['qr_code'] });
+            detector = async (src) => { const r = await native.detect(src); return r.length ? r[0].rawValue : null; };
+            return;
+          }
+        } catch (e) { /* lecteur intégré inutilisable : jsQR */ }
+      }
+      await loadVendor('vendor/jsqr-1.4.0/jsQR.js', 'jsQR');
+      canvas = document.createElement('canvas');
+      ctx = canvas.getContext('2d', { willReadFrequently: true });
+      detector = async (v) => {
+        const w = v.videoWidth, h = v.videoHeight;
+        if (!w || !h) return null;
+        const side = Math.min(w, h), size = Math.min(side, 640);   // carré central, réduit : lecture rapide
+        canvas.width = canvas.height = size;
+        ctx.drawImage(v, (w - side) / 2, (h - side) / 2, side, side, 0, 0, size, size);
+        const r = window.jsQR(ctx.getImageData(0, 0, size, size).data, size, size, { inversionAttempts: 'dontInvert' });
+        return r ? r.data : null;
+      };
+    }
+    function loop() {
+      clearTimeout(loopTimer);
+      const my = camSeq;
+      const step = async () => {
+        if (my !== camSeq || !isOpen()) return;
+        if (!busy && !document.hidden && video.readyState >= 2) {
+          try { const text = await detector(video); if (text && my === camSeq) onRead(text); } catch (e) { /* image illisible */ }
+        }
+        if (my === camSeq) loopTimer = setTimeout(step, 120);
+      };
+      step();
+    }
+    function onRead(text) {
+      const code = visitCodeFrom(text);
+      if (!code) {
+        if (Date.now() - wrongAt > 2500) { wrongAt = Date.now(); help('Ce n\'est pas un QR code FlashMiam', true); setTimeout(() => { if (!busy && Date.now() - wrongAt >= 2400) help(HELP); }, 2500); }
+        return;
+      }
+      // QR code déjà traité, toujours devant la caméra (le client n'a pas encore retiré son téléphone) : ignoré
+      if (seen.has(code) && Date.now() - seen.get(code) < 8000) { seen.set(code, Date.now()); return; }
+      handle(code, 'camera');
+    }
+
+    async function handle(code, how) {
+      if (busy) return;
+      busy = true;
+      seen.set(code, Date.now());
+      if (seen.size > 50) seen.delete(seen.keys().next().value);
+      root.classList.add('is-busy');
+      help('Vérification…');
+      buzz(15);
+      let data = null, error = null;
+      try { ({ data, error } = await sb.rpc('redeem_visit_pass', { p_token: code })); } catch (e) { error = e; }
+      if (!isOpen()) { busy = false; return; }
+      if (error) {
+        show('bad', 'Vérification impossible', /Failed to fetch|NetworkError|Load failed/i.test(error.message || '') ? 'Pas de connexion internet : réessayez dans un instant.' : cloudError(error), { wait: 4000 });
+        seen.delete(code);             // on pourra rescanner le même QR code
+        return;
+      }
+      const d = data || {};
+      const offer = d.promo_title ? '🎁 À appliquer : ' + d.promo_title : '';
+      switch (d.status) {
+        case 'ok': {
+          const n = Number(d.visit_number) || 1;
+          if (summary) { summary.today = (summary.today || 0) + 1; if (d.promo_title) summary.today_offers = (summary.today_offers || 0) + 1; renderCount(); }
+          show('ok', d.promo_title ? 'Offre validée' : 'Visite validée', n > 1 ? nth(n) + ' visite de ce client chez vous' : 'Première visite de ce client chez vous 🎉', {
+            offer, warn: d.promo_used_today ? '⚠️ Ce client a déjà profité de cette offre aujourd\'hui.' : '', wait: d.promo_title || d.promo_used_today ? 7000 : 2600 });
+          setTimeout(loadSummary, 800);
+          break;
+        }
+        case 'duplicate': {
+          const min = Number(d.minutes_ago) || 0;
+          show('warn', 'Déjà validé', 'Ce client a été validé ' + (min < 1 ? 'à l\'instant' : 'il y a ' + min + ' min') + ' : sa visite n\'est pas comptée deux fois.', { offer: d.promo_title ? '🎁 Offre : ' + d.promo_title : '', wait: 4500 });
+          break;
+        }
+        case 'used': show('bad', 'QR code déjà utilisé', 'Chaque QR code ne sert qu\'une fois : le client doit afficher son nouveau QR code.', { wait: 4000 }); break;
+        case 'expired': show('warn', 'QR code expiré', 'Demandez au client de rouvrir « Valider ma visite » : un nouveau QR code s\'affiche aussitôt.', { wait: 4500 }); break;
+        case 'other_restaurant': show('bad', 'Pas pour votre restaurant', 'Ce QR code a été créé pour un autre restaurant.', { wait: 4000 }); break;
+        default: show('bad', 'QR code inconnu', how === 'manual' ? 'Vérifiez le code tapé (10 caractères, sous le QR code du client).' : 'Ce QR code n\'est pas valable.', { wait: 4000 });
+      }
+    }
+    const ICONS = {
+      ok: '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+      warn: '<svg viewBox="0 0 24 24"><path d="M12 6v7.5M12 18v.01"/></svg>',
+      bad: '<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg>',
+    };
+    function show(kind, title, text, { offer = '', warn = '', wait = 3000 } = {}) {
+      const box = $('scan-result');
+      box.dataset.kind = kind;
+      $('sr-ico').innerHTML = ICONS[kind];
+      $('sr-title').textContent = title;
+      $('sr-text').textContent = text;
+      $('sr-offer').hidden = !offer; $('sr-offer').textContent = offer;
+      $('sr-warn').hidden = !warn; $('sr-warn').textContent = warn;
+      box.hidden = false;
+      box.classList.remove('is-shown');
+      void box.offsetWidth;            // relance l'animation d'arrivée
+      box.classList.add('is-shown');
+      help('');
+      buzz(kind === 'ok' ? [40, 60, 40] : [180]);
+      Beep.play(kind === 'ok');
+      clearTimeout(nextTimer);
+      if (bar) bar.cancel();
+      bar = $('sr-bar').animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: wait, easing: 'linear', fill: 'forwards' });
+      nextTimer = setTimeout(next, wait);
+    }
+    function hideResult() {
+      const box = $('scan-result');
+      box.classList.remove('is-shown');
+      box.hidden = true;
+    }
+    /** Client suivant : résultat retiré, scanner (ou saisie) de nouveau prêt. */
+    function next() {
+      clearTimeout(nextTimer);
+      if (bar) { bar.cancel(); bar = null; }
+      const box = $('scan-result');
+      box.classList.remove('is-shown');
+      setTimeout(() => { if (!box.classList.contains('is-shown')) box.hidden = true; }, 420);
+      busy = false;
+      root.classList.remove('is-busy');
+      help(root.classList.contains('is-off') ? '' : HELP);
+      if (manual) { $('scan-code').value = ''; $('scan-code-go').disabled = true; $('scan-code').focus({ preventScroll: true }); }
+    }
+
+    function setManual(on) {
+      manual = on;
+      $('scan-manual').hidden = !on;
+      $('scan-type').hidden = on || root.classList.contains('is-off');
+      if (on) { $('scan-code').value = ''; $('scan-code-go').disabled = true; setTimeout(() => isOpen() && $('scan-code').focus({ preventScroll: true }), 80); }
+    }
+    $('scan-type').addEventListener('click', () => setManual(true));
+    $('scan-code').addEventListener('input', () => {
+      const raw = normVisitCode($('scan-code').value).slice(0, 10);
+      const shown = raw.length > 8 ? prettyVisitCode(raw) : raw.length > 4 ? raw.slice(0, 4) + '-' + raw.slice(4) : raw;
+      if ($('scan-code').value !== shown) $('scan-code').value = shown;
+      $('scan-code-go').disabled = !VISIT_CODE_RE.test(raw);
+    });
+    $('scan-manual').addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const code = normVisitCode($('scan-code').value);
+      if (VISIT_CODE_RE.test(code)) handle(code, 'manual');
+    });
+    $('scan-torch').addEventListener('click', async () => {
+      const on = $('scan-torch').getAttribute('aria-pressed') !== 'true';
+      try { await track.applyConstraints({ advanced: [{ torch: on }] }); $('scan-torch').setAttribute('aria-pressed', String(on)); } catch (e) { $('scan-torch').hidden = true; }
+    });
+    $('sr-next').addEventListener('click', next);
+    $('scan-close').addEventListener('click', close);
+    $('scan-fab').addEventListener('click', () => open());
+    $('ps-scan').addEventListener('click', () => open());
+    document.addEventListener('visibilitychange', () => {
+      if (!isOpen() || root.classList.contains('is-off')) return;
+      if (document.hidden) stopCamera(); else startCamera();   // caméra coupée quand l'application passe en arrière-plan
+    });
+
+    /** Totaux du restaurateur (visites validées) : jamais de liste de personnes. */
+    async function loadSummary() {
+      try {
+        const { data, error } = await sb.rpc('merchant_visit_summary');
+        if (!error && data) { summary = data; renderCount(); }
+      } catch (e) { /* hors ligne : le compteur attendra */ }
+    }
+    function renderCount() {
+      const s = summary;
+      $('scan-count').textContent = s ? plural(Number(s.today) || 0, 'visite validée', 'visites validées') + ' aujourd\'hui' : '';
+      $('ps-scan-n').textContent = s ? nf(s.today) : '–';
+      $('ps-scan-sub').textContent = s && s.last_7d
+        ? nf(s.last_7d) + ' sur 7 jours' + (s.returning_30d ? ' · ' + plural(Number(s.returning_30d), 'client fidèle', 'clients fidèles') : '')
+        : 'Visite ou offre : scannez le QR code de son téléphone';
+    }
+
+    return { open, close, isOpen, next, renderEntry, loadSummary, hasResult: () => !$('scan-result').hidden && $('scan-result').classList.contains('is-shown') };
+  })();
+
+  // Échap : ferme le QR code ou le scanner (avant les autres fenêtres, restées dessous)
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key !== 'Escape') return;
+    if (Scanner.isOpen()) { ev.stopPropagation(); ev.preventDefault(); if (Scanner.hasResult()) Scanner.next(); else Scanner.close(); }
+    else if (VisitPass.isOpen()) { ev.stopPropagation(); ev.preventDefault(); VisitPass.close(); }
+  }, true);
+  /** QR code de visite lu par l'appareil photo du téléphone (lien « #visite=… ») : scanner du restaurateur. */
+  function openVisitLink(code, user = currentUser()) {
+    if (!code || !user) return;
+    if (user.role === 'pro') { if (!proStepFor(user)) Scanner.open({ code }); }
+    else toast('Ce QR code se montre au restaurateur : c\'est lui qui le scanne depuis son espace FlashMiam.');
+  }
+  window.addEventListener('hashchange', () => {
+    const code = visitCodeFrom(location.hash);
+    if (!code) return;
+    history.replaceState(null, '', location.pathname + location.search);
+    openVisitLink(code);
+  });
+
   /** Profil (compte) : pour un restaurateur, l'avatar ouvre d'abord son espace restaurateur. */
   function openProfileSheet() {
     const account = currentUser();
@@ -9918,6 +10709,9 @@
     pendingLink = { id: params.get('r'), tab: params.get('t'), source: params.get('s') === 'notif' ? 'notif' : 'link' };
     history.replaceState(null, '', location.pathname + location.hash);
   }
+  // QR code de visite lu par l'appareil photo (#visite=…) : ouvert dans le scanner du restaurateur une fois connecté
+  const pendingVisit = visitCodeFrom(location.hash);
+  if (pendingVisit) history.replaceState(null, '', location.pathname + location.search);
 
   if (!sb) {
     fatal('Service momentanément indisponible', 'FlashMiam n\'a pas pu joindre son serveur. Vérifiez votre connexion internet, puis rechargez la page.');
@@ -9959,6 +10753,7 @@
           else routeAfterLogin(user, { boot: true });
         } else routeAfterLogin(user, { boot: true });
         if (paymentReturn && user.role === 'pro') awaitPayment(user);
+        if (pendingVisit) setTimeout(() => openVisitLink(pendingVisit, user), 600);
       } else if (store.read().lastEmail) {
         setAuthRole(store.read().lastRole || 'client');
         $('li-email').value = store.read().lastEmail || '';
