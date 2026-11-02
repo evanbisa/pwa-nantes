@@ -41,7 +41,7 @@ export const confidentialite: LegalDoc = {
             },
             {
               title: "Acceptation des conditions : date et version",
-              detail: "Garder la preuve que vous avez accepté les conditions d'utilisation et attesté avoir 15 ans ou plus (case cochée à l'inscription) : la date et la version des conditions acceptées.",
+              detail: "Garder la preuve que vous avez accepté les conditions d'utilisation (case cochée à l'inscription) : la date et la version des conditions acceptées.",
               basis: "Intérêt légitime (preuve de l'acceptation)",
             },
             {

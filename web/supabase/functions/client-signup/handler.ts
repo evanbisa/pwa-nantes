@@ -7,7 +7,7 @@
  *   POST { action: "check", email }                                          → 200 { ok: true }
  *   POST { action: "signup", email, password, first_name, accept_terms, gender?, birth_year?, captcha_token? }
  *        → 200 { created: true, confirm }
- *   accept_terms : version des CGU acceptée (AAAA-MM-JJ), avec l'attestation « 15 ans ou plus » (case cochée sur le site).
+ *   accept_terms : version des CGU acceptée (AAAA-MM-JJ), case « J'accepte les conditions d'utilisation » cochée sur le site.
  *   captcha_token : jeton Cloudflare Turnstile, exigé dès que le serveur a sa clé secrète (TURNSTILE_SECRET_KEY).
  *
  * Confirmation par e-mail (réglage app_settings.client_email_confirmation, à activer une fois l'envoi d'e-mails réglé) :
@@ -99,7 +99,7 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
     }
     const terms = str(body.accept_terms);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(terms)) {
-      return refuse(400, "terms", `Cochez la case : vous devez avoir ${MIN_AGE} ans ou plus et accepter les conditions d'utilisation.`);
+      return refuse(400, "terms", "Pour créer votre compte, cochez la case « J'accepte les conditions d'utilisation ».");
     }
     const metadata: Record<string, string> = { role: "student", first_name: firstName, terms_version: terms };
     const gender = str(body.gender);
@@ -109,7 +109,7 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
     if (birthYear) {
       const year = deps.now().getUTCFullYear();
       if (!/^\d{4}$/.test(birthYear) || +birthYear > year - MIN_AGE || +birthYear < year - 100) {
-        return refuse(400, "invalid_age", `FlashMiam est réservé aux personnes de ${MIN_AGE} ans et plus.`);
+        return refuse(400, "invalid_age", `Désolé, FlashMiam est réservé aux personnes de ${MIN_AGE} ans et plus : vous ne pouvez pas encore créer de compte.`);
       }
       metadata.birth_year = birthYear;
     }

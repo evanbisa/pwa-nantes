@@ -13,14 +13,18 @@ import {
 } from "@/lib/signup/validation";
 
 /**
- * Inscription d'un client, une question par écran : prénom, sexe et âge (facultatifs), e-mail (ou Google), relecture de
+ * Inscription d'un client, une question par écran : prénom, sexe (facultatif) et âge (15 ans au moins), e-mail (ou Google), relecture de
  * l'adresse, mot de passe. « S'inscrire avec Google » est aussi proposé dès le premier écran : le compte est créé par
- * Google, puis seules les deux questions facultatives restent (sexe, âge). Le compte est créé par la fonction serveur client-signup (adresse vérifiée, plafond
+ * Google, puis seules les questions du sexe et de l'âge restent. Le compte est créé par la fonction serveur client-signup (adresse vérifiée, plafond
  * anti-robots), puis la session est ouverte avec le mot de passe choisi, dans le stockage de la carte : la personne
  * arrive ensuite sur la carte déjà connectée (?bienvenue=1 : accueil et localisation).
  * Si la confirmation par e-mail est activée (réglage du serveur), un code à 6 chiffres est envoyé à l'adresse : la
  * session ne s'ouvre qu'avec ce code. La réponse est la même que l'adresse ait déjà un compte ou non (aucune fuite).
  */
+
+/** Messages d'erreur de l'inscription : âge en dessous du minimum, case des conditions pas cochée. */
+const TOO_YOUNG = `Désolé, FlashMiam est réservé aux personnes de ${MIN_AGE} ans et plus : vous ne pouvez pas encore créer de compte.`;
+const TERMS_MISSING = "Pour créer votre compte, cochez la case « J'accepte les conditions d'utilisation ».";
 
 type Step = "name" | "gender" | "age" | "email" | "confirm" | "password" | "code" | "done";
 type Gender = "female" | "male" | "other" | "";   // "" : préfère ne pas le dire
@@ -31,7 +35,7 @@ const RESEND_DELAY = 60;
 const FLOW: Step[] = ["name", "gender", "age", "email", "confirm", "password"];
 /** Questions comptées dans la barre de progression (la relecture fait partie de la question de l'e-mail). */
 const QUESTIONS: Step[] = ["name", "gender", "age", "email", "password"];
-/** Compte créé avec Google dès le premier écran : il ne reste que les questions facultatives. */
+/** Compte créé avec Google dès le premier écran : il ne reste que le sexe et l'âge. */
 const GOOGLE_FLOW: Step[] = ["name", "gender", "age"];
 const GENDERS: { value: Gender; label: string; emoji: string }[] = [
   { value: "female", label: "Une femme", emoji: "👩" },
@@ -107,7 +111,7 @@ function Wizard() {
   const [remember, setRememberChoice] = useState(false);
   const [busy, setBusy] = useState(false);
   const [viaGoogle, setViaGoogle] = useState(false);
-  const [terms, setTerms] = useState(false);   // « J'ai 15 ans ou plus et j'accepte les conditions »
+  const [terms, setTerms] = useState(false);   // « J'accepte les conditions d'utilisation »
   const [code, setCode] = useState("");
   const [resendIn, setResendIn] = useState(0);   // secondes avant de pouvoir redemander un code
   const [errors, setErrors] = useState<Partial<Record<Step, ReactNode>>>({});
@@ -165,7 +169,7 @@ function Wizard() {
   }
   /** Case des conditions pas cochée : on le dit et on l'amène sous les yeux. */
   function termsMissing() {
-    setError("name", `Cochez la case : FlashMiam est réservé aux ${MIN_AGE} ans et plus, qui acceptent ses conditions.`);
+    setError("name", TERMS_MISSING);
     document.getElementById("su-terms")?.focus();
   }
   function pickGender(value: Gender) {
@@ -175,13 +179,14 @@ function Wizard() {
   }
   function submitAge(ev: FormEvent) {
     ev.preventDefault();
-    answerAge(true);
+    answerAge();
   }
-  /** Âge donné (ou question passée) : question suivante, ou fin de l'inscription avec Google. */
-  function answerAge(given: boolean) {
-    if (given && age < MIN_AGE) return;
-    setAgeSet(given);
-    if (viaGoogle) finishGoogle(given);
+  /** Âge donné (obligatoire, 15 ans au moins) : question suivante, ou fin de l'inscription avec Google. */
+  function answerAge() {
+    if (age < MIN_AGE) return setError("age", TOO_YOUNG);
+    setError("age", null);
+    setAgeSet(true);
+    if (viaGoogle) finishGoogle(true);
     else go("email");
   }
   async function submitEmail(ev: FormEvent) {
@@ -233,7 +238,8 @@ function Wizard() {
         return setError("email", <>Un compte existe déjà avec cet e-mail. <button type="button" className={linkClass} onClick={() => openLogin(cleanEmail)}>Se connecter</button></>);
       }
       if (res.code === "email_domain" || res.code === "email_invalid") { go("email", "prev"); return setError("email", res.message); }
-      if (res.code === "invalid_age") { go("age", "prev"); return setError("age", res.message); }
+      if (res.code === "invalid_age") { go("age", "prev"); return setError("age", TOO_YOUNG); }
+      if (res.code === "terms") { setTerms(false); go("name", "prev"); return setError("name", TERMS_MISSING); }
       if (res.code === "invalid_name") { go("name", "prev"); return setError("name", res.message); }
       return setError("password", res.message);
     }
@@ -312,7 +318,7 @@ function Wizard() {
     // Compte créé à l'instant par Google : l'acceptation des conditions (case cochée) est enregistrée sur le compte
     if (fresh) await sb.rpc("accept_terms", { p_version: TERMS_VERSION });
     if (fresh && at === "name") {
-      // Compte créé par Google : prénom tapé, sinon celui de Google ; puis les deux questions facultatives
+      // Compte créé par Google : prénom tapé, sinon celui de Google ; puis le sexe et l'âge
       setName(name.trim().length >= 2 ? capitalize(name.trim().replace(/\s+/g, " ")) : profile.first_name ?? "");
       setError("name", null);
       setViaGoogle(true);
@@ -330,7 +336,7 @@ function Wizard() {
     if (fresh) go("done");
     else openMap();   // compte déjà existant : directement la carte
   }
-  /** Fin de l'inscription avec Google : prénom, sexe et âge enregistrés sur le compte (réponses facultatives). */
+  /** Fin de l'inscription avec Google : prénom, sexe et âge enregistrés sur le compte (sexe facultatif). */
   async function finishGoogle(withAge: boolean) {
     setBusy(true);
     const sb = siteClient();
@@ -394,7 +400,7 @@ function Wizard() {
               <p className="mt-3 min-h-6 text-base font-medium text-brand-strong" aria-live="polite">
                 {firstName.length >= 2 && <><span className="su-em">Bienvenue, {firstName} !</span> 😊</>}
               </p>
-              <label className="mt-auto flex cursor-pointer items-start gap-3 pt-4 text-[14px] leading-relaxed text-slate-700 dark:text-zinc-300">
+              <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-[15px] leading-relaxed text-slate-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300">
                 <input
                   id="su-terms" type="checkbox" checked={terms} onChange={(e) => { setTerms(e.target.checked); setError("name", null); }}
                   // Entrée sur la case passe à la suite, comme dans les champs (sinon il faut traverser les deux liens)
@@ -402,12 +408,12 @@ function Wizard() {
                   className="mt-0.5 h-5 w-5 flex-none rounded accent-brand dark:accent-brand-night"
                 />
                 <span>
-                  J&apos;ai {MIN_AGE} ans ou plus et j&apos;accepte les{" "}
+                  J&apos;accepte les{" "}
                   <a className="font-medium underline" href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/legal/cgu/`} target="_blank" rel="noopener">conditions d&apos;utilisation</a>{" "}
                   et la <a className="font-medium underline" href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/legal/confidentialite/`} target="_blank" rel="noopener">politique de confidentialité</a>.
                 </span>
               </label>
-              <Primary className="mt-4">Continuer</Primary>
+              <Primary className="mt-auto">Continuer</Primary>
               {!viaGoogle && <GoogleSignup onCredential={googleSignIn} locked={!terms} onLocked={termsMissing} />}
             </form>
           )}
@@ -441,15 +447,12 @@ function Wizard() {
           {step === "age" && (
             <form onSubmit={submitAge} noValidate className="flex flex-1 flex-col">
               <Title emoji={AGE_EMOJI.find(([max]) => age < max)?.[1] ?? "🎓"} id="q-age">Quel âge <Em>avez-vous</Em> ?</Title>
-              <Hint>Facultatif. Les restaurants voient seulement des tranches d&apos;âge (18-24 ans…), jamais le vôtre.</Hint>
-              <AgePicker value={age} onChange={(v) => { setAge(v); setError("age", null); }} labelledBy="q-age" onEnter={() => answerAge(true)} />
-              <p className={`mt-3 min-h-6 text-sm ${age < MIN_AGE || errors.age ? "font-medium text-red-600 dark:text-red-400" : "text-slate-500"}`} aria-live="polite">
-                {age < MIN_AGE ? `FlashMiam est réservé aux ${MIN_AGE} ans et plus.` : errors.age}
+              <Hint>FlashMiam est réservé aux {MIN_AGE} ans et plus. Les restaurants voient seulement des tranches d&apos;âge (18-24 ans…), jamais le vôtre.</Hint>
+              <AgePicker value={age} onChange={(v) => { setAge(v); setError("age", null); }} labelledBy="q-age" onEnter={answerAge} />
+              <p role={errors.age ? "alert" : undefined} className={`mt-3 min-h-6 text-sm ${errors.age ? "font-medium text-red-600 dark:text-red-400" : "text-slate-500"}`} aria-live="polite">
+                {errors.age}
               </p>
-              <Primary busy={busy} disabled={age < MIN_AGE}>{age < MIN_AGE ? "Continuer" : `J'ai ${age} ans`}</Primary>
-              <button type="button" disabled={busy} onClick={() => answerAge(false)} className="mt-3 self-center rounded-full px-4 py-2 text-sm font-medium text-slate-500 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-zinc-400">
-                Passer cette question
-              </button>
+              <Primary busy={busy}>{age < MIN_AGE ? "Continuer" : `J'ai ${age} ans`}</Primary>
             </form>
           )}
 
