@@ -91,7 +91,8 @@ const useHydrated = () => useSyncExternalStore(noSubscribe, () => true, () => fa
 
 export default function SignupWizard() {
   return useHydrated() ? <Wizard /> : (
-    <div className="grid min-h-full place-items-center bg-slate-50 dark:bg-night" aria-busy="true">
+    <div className="grid min-h-full place-items-center" aria-busy="true">
+      <MapBackdrop />
       <Loader2 className="h-8 w-8 animate-spin text-brand dark:text-brand-night" aria-label="Chargement" />
     </div>
   );
@@ -356,10 +357,13 @@ function Wizard() {
   return (
     <div
       data-kb={keyboard ? "" : undefined} style={keyboard ? { paddingBottom: keyboard } : undefined}
-      className="group/page relative isolate flex min-h-full flex-col bg-slate-50 text-slate-900 antialiased dark:bg-night dark:text-zinc-50 dark:[color-scheme:dark]"
+      className="group/page relative isolate flex min-h-full flex-col px-3 pt-[max(12px,env(safe-area-inset-top))] pb-[max(12px,env(safe-area-inset-bottom))] text-slate-900 antialiased dark:text-zinc-50 dark:[color-scheme:dark]"
     >
-      <div aria-hidden className="su-glow pointer-events-none fixed inset-0 -z-10" />
-      <header className="mx-auto flex w-full max-w-md items-center gap-3 px-5 pt-[max(16px,env(safe-area-inset-top))] pb-2">
+      <MapBackdrop />
+      {/* Carte de l'inscription posée sur la carte de la ville, comme l'écran d'accueil */}
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col relative isolate overflow-hidden rounded-[28px] bg-white/80 shadow-2xl ring-1 ring-black/5 backdrop-blur-[6px] dark:bg-night/75 dark:ring-white/10">
+      <div aria-hidden className="su-glow pointer-events-none absolute inset-0 -z-10" />
+      <header className="flex w-full items-center gap-3 px-5 pt-4 pb-2">
         <button
           type="button"
           onClick={back}
@@ -384,7 +388,7 @@ function Wizard() {
         )}
       </header>
 
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col overflow-x-hidden px-5 pt-6 pb-[max(24px,env(safe-area-inset-bottom))]">
+      <main className="flex w-full flex-1 flex-col overflow-x-hidden px-5 pt-6 pb-6">
         <div key={step} className={`su-cascade flex flex-1 flex-col ${dir === "next" ? "motion-safe:animate-step-next" : "motion-safe:animate-step-prev"}`}>
           {step === "name" && (
             <form onSubmit={submitName} noValidate className="flex flex-1 flex-col">
@@ -619,6 +623,22 @@ function Wizard() {
           )}
         </div>
       </main>
+      </div>
+    </div>
+  );
+}
+
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+/**
+ * Fond : la carte de La Roche-sur-Yon (centre-ville, même style que la carte du site, jour ou nuit), légèrement floutée
+ * pour que les questions restent lisibles. Image fixe : pas de carte à charger pendant l'inscription.
+ */
+function MapBackdrop() {
+  return (
+    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-[#fdf4e7] dark:bg-night">
+      <div className="absolute inset-0 scale-105 bg-cover bg-center blur-[1px] dark:hidden" style={{ backgroundImage: `url(${BASE}/inscription/carte-jour.webp)` }} />
+      <div className="absolute inset-0 hidden scale-105 bg-cover bg-center blur-[1px] dark:block" style={{ backgroundImage: `url(${BASE}/inscription/carte-nuit.webp)` }} />
+      <div className="absolute inset-0 bg-slate-900/10 dark:bg-black/30" />
     </div>
   );
 }
