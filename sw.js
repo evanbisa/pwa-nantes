@@ -8,7 +8,7 @@
  *  - « push » : alerte envoyée par la fonction serveur send-push (même FlashMiam fermé) ;
  *  - clic sur une alerte : ouvre FlashMiam sur la bonne fiche (ou l'onglet déjà ouvert).
  */
-const CACHE = 'flashmiam-v4';   // à changer si les fichiers de vendor/ ou les icônes changent sans changer de nom
+const CACHE = 'flashmiam-v5';   // à changer si les fichiers de vendor/ ou les icônes changent sans changer de nom
 const STATIC = /\/(vendor\/.+|icon-(192|512)\.png)$/;
 const PAGE_TIMEOUT = 6000;
 

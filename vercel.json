@@ -75,7 +75,7 @@
       ]
     },
     {
-      "source": "/:file(icon-192\\.png|icon-512\\.png|icon-maskable-192\\.png|icon-maskable-512\\.png|apple-touch-icon\\.png|favicon\\.ico|favicon-96\\.png|og-image\\.jpg|manifest\\.webmanifest)",
+      "source": "/:file(icon-192\\.png|icon-512\\.png|icon-1024\\.png|icon-maskable-192\\.png|icon-maskable-512\\.png|icon-maskable-1024\\.png|apple-touch-icon\\.png|favicon\\.ico|favicon-96\\.png|og-image\\.jpg|manifest\\.webmanifest)",
       "headers": [
         {
           "key": "Cache-Control",
