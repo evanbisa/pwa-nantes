@@ -609,6 +609,282 @@ select t.ok(not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p
 select t.ok((select bool_and(c.relrowsecurity) and count(*) = (select count(*) from pg_tables where schemaname = 'public')
   from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relkind = 'r'), 'RLS activée sur TOUTES les tables publiques');
 
+
+-- ===== Renforcement du 29 octobre 2026 : sessions, ménage, saisies, fichiers, réglages, fonctions privilégiées =====
+reset role;
+select set_config('request.jwt.claims', '', false);
+insert into auth.users (id, email, encrypted_password, raw_user_meta_data) values
+  ('55555555-5555-5555-5555-555555555555', 'sam@resto.fr', '$2a$10$hash', '{"role":"merchant","first_name":"Sam"}'),
+  ('66666666-6666-6666-6666-666666666666', 'ines@etu.fr', '$2a$10$hash', '{"role":"student","first_name":"Inès"}');
+-- Sessions : récente, inutilisée depuis 31 jours, ouverte il y a 181 jours (même utilisée hier)
+insert into auth.sessions (id, user_id, created_at, updated_at, refreshed_at) values
+  ('5e550000-0000-0000-0000-000000000001', '66666666-6666-6666-6666-666666666666', now() - interval '2 days', now() - interval '1 hour', (now() at time zone 'UTC') - interval '1 hour'),
+  ('5e550000-0000-0000-0000-000000000002', '66666666-6666-6666-6666-666666666666', now() - interval '40 days', now() - interval '31 days', (now() at time zone 'UTC') - interval '31 days'),
+  ('5e550000-0000-0000-0000-000000000003', '66666666-6666-6666-6666-666666666666', now() - interval '181 days', now() - interval '1 day', (now() at time zone 'UTC') - interval '1 day');
+select set_config('request.jwt.claims', '{"sub":"66666666-6666-6666-6666-666666666666","role":"authenticated"}', false);
+set role authenticated;
+select t.fails($$select public.expire_sessions()$$, 'sessions : un utilisateur ne peut pas lancer l''expiration des sessions');
+reset role;
+set role service_role;
+select t.ok(public.expire_sessions() = 2, 'sessions : inutilisée depuis 30 jours ou ouverte depuis plus de 180 jours → déconnectée (2 sur 3)');
+reset role;
+select t.ok((select array_agg(id::text) = array['5e550000-0000-0000-0000-000000000001'] from auth.sessions where user_id = '66666666-6666-6666-6666-666666666666'), 'sessions : la session récente est conservée');
+select t.fails($$select public.expire_sessions(0, 10)$$, 'sessions : durées invalides refusées');
+
+-- Comptes jamais confirmés : supprimés après 7 jours (les confirmés et les récents restent)
+alter table auth.users add column if not exists email_confirmed_at timestamptz, add column if not exists created_at timestamptz not null default now();
+insert into auth.users (id, email, raw_user_meta_data, created_at, email_confirmed_at) values
+  ('88888888-8888-8888-8888-888888888881', 'vieux-jamais-confirme@etu.fr', '{"first_name":"Vieux"}', now() - interval '8 days', null),
+  ('88888888-8888-8888-8888-888888888882', 'recent-pas-confirme@etu.fr', '{"first_name":"Récent"}', now() - interval '2 days', null),
+  ('88888888-8888-8888-8888-888888888883', 'ancien-confirme@etu.fr', '{"first_name":"Ancien"}', now() - interval '300 days', now() - interval '300 days');
+set role authenticated;
+select t.fails($$select public.purge_unconfirmed_users()$$, 'comptes non confirmés : suppression interdite à un utilisateur');
+reset role;
+set role service_role;
+select t.ok(public.purge_unconfirmed_users() = 1, 'comptes non confirmés depuis plus de 7 jours : supprimés (1)');
+reset role;
+select t.ok((select array_agg(email order by email) = array['ancien-confirme@etu.fr', 'recent-pas-confirme@etu.fr'] from auth.users where id::text like '88888888%')
+  and not exists (select 1 from profiles where id = '88888888-8888-8888-8888-888888888881'), 'comptes non confirmés : le récent et le confirmé restent ; le profil du supprimé part avec lui');
+
+-- Jeton du ménage nocturne
+set role anon;
+select t.fails($$select public.check_cron_token('x')$$, 'ménage : un visiteur ne peut pas tester le jeton');
+select t.fails($$select value from private.app_secrets$$, 'ménage : jeton illisible pour un visiteur');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"66666666-6666-6666-6666-666666666666","role":"authenticated"}', false);
+set role authenticated;
+select t.fails($$select value from private.app_secrets$$, 'ménage : jeton illisible pour une personne connectée');
+reset role;
+select set_config('test.token', (select value from private.app_secrets where name = 'purge_token'), false);
+set role service_role;
+select t.ok(public.check_cron_token(current_setting('test.token')) and not public.check_cron_token(repeat('0', 64)) and not public.check_cron_token(null) and not public.check_cron_token(''),
+  'ménage : seul le bon jeton (64 caractères tirés au hasard) est accepté');
+reset role;
+
+-- Saisies vérifiées par la base
+insert into merchants (id, user_id, name, category) values ('aaaaaaaa-0000-0000-0000-000000000005', '55555555-5555-5555-5555-555555555555', 'Chez Sam', 'burger');
+select t.fails($$insert into promotions (merchant_id, kind, title, ends_at) values ('aaaaaaaa-0000-0000-0000-000000000005', 'other', 'Offre sans fin', now() + interval '2 years')$$, 'promotion : date de fin à plus d''un an refusée');
+select t.ok(t.affected($$insert into promotions (merchant_id, kind, title, ends_at) values ('aaaaaaaa-0000-0000-0000-000000000005', 'other', 'Offre du mois', now() + interval '30 days')$$) = 1, 'promotion : date de fin dans l''année acceptée');
+select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
+set role authenticated;
+update merchants set honor_at = '2001-01-01' where id = 'aaaaaaaa-0000-0000-0000-000000000005';
+reset role;
+select t.ok((select honor_at > now() - interval '1 minute' from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000005'), 'attestation sur l''honneur : datée par la base, pas par le navigateur');
+select set_config('test.honor', (select honor_at::text from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000005'), false);
+set role authenticated;
+update merchants set honor_at = '2099-01-01' where id = 'aaaaaaaa-0000-0000-0000-000000000005';
+reset role;
+select t.ok((select honor_at::text = current_setting('test.honor') from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000005'), 'attestation sur l''honneur : sa date ne peut plus être changée');
+insert into notifications (id, user_id, kind, title) values ('bbbbbbbb-0000-0000-0000-00000000000a', '66666666-6666-6666-6666-666666666666', 'promo', 'Nouvelle offre');
+select set_config('request.jwt.claims', '{"sub":"66666666-6666-6666-6666-666666666666","role":"authenticated"}', false);
+set role authenticated;
+update notifications set read_at = '1999-01-01' where id = 'bbbbbbbb-0000-0000-0000-00000000000a';
+reset role;
+select t.ok((select read_at > now() - interval '1 minute' from notifications where id = 'bbbbbbbb-0000-0000-0000-00000000000a'), 'notification : date de lecture posée par la base');
+
+-- Fichiers : extension et nombre maximal par compte
+select set_config('request.jwt.claims', '{"sub":"66666666-6666-6666-6666-666666666666","role":"authenticated"}', false);
+set role authenticated;
+select t.fails($$insert into storage.objects (bucket_id, name) values ('avatars', '66666666-6666-6666-6666-666666666666/portrait.svg')$$, 'photo de profil : fichier SVG refusé (extension)');
+select t.fails($$insert into storage.objects (bucket_id, name) values ('avatars', '66666666-6666-6666-6666-666666666666/portrait')$$, 'photo de profil : fichier sans extension refusé');
+select t.ok((select sum(t.affected(format($q$insert into storage.objects (bucket_id, name) values ('avatars', '66666666-6666-6666-6666-666666666666/p%s.jpg')$q$, i))) = 5 from generate_series(1, 5) i), 'photo de profil : 5 fichiers acceptés');
+select t.fails($$insert into storage.objects (bucket_id, name) values ('avatars', '66666666-6666-6666-6666-666666666666/p6.jpg')$$, 'photo de profil : 6e fichier refusé (5 au plus par compte)');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
+set role authenticated;
+select t.fails($$insert into storage.objects (bucket_id, name) values ('documents', 'aaaaaaaa-0000-0000-0000-000000000005/kbis--1--kbis.exe')$$, 'justificatif : fichier .exe refusé');
+select t.fails($$insert into storage.objects (bucket_id, name) values ('photos', 'aaaaaaaa-0000-0000-0000-000000000005/page.html')$$, 'photo de fiche : fichier HTML refusé');
+select t.ok(t.affected($$insert into storage.objects (bucket_id, name) values ('documents', 'aaaaaaaa-0000-0000-0000-000000000005/kbis--1--kbis.PDF')$$) = 1, 'justificatif : PDF accepté (majuscules comprises)');
+reset role;
+
+-- Réglages de l'application : lisibles par le serveur seul
+set role anon;
+select t.fails($$select * from app_settings$$, 'réglages : illisibles pour un visiteur');
+reset role;
+set role authenticated;
+select t.fails($$update app_settings set client_email_confirmation = true$$, 'réglages : non modifiables par une personne connectée');
+reset role;
+set role service_role;
+select t.ok((select client_email_confirmation = false from app_settings), 'réglages : confirmation par e-mail des clients désactivée tant que l''envoi d''e-mails n''est pas réglé');
+reset role;
+
+-- Fonctions à droits élevés rangées dans « private » : l'API n'expose que des relais sans privilège
+select t.ok(not exists (select 1 from pg_proc p where p.pronamespace = 'public'::regnamespace and p.prosecdef
+  and (has_function_privilege('anon', p.oid, 'execute') or has_function_privilege('authenticated', p.oid, 'execute'))),
+  'aucune fonction SECURITY DEFINER exposée par l''API, ni aux visiteurs ni aux personnes connectées');
+select set_config('request.jwt.claims', '', false);
+set role anon;
+select public.track_site_event('visit', '77777777-7777-7777-7777-777777777777', 'ios', false);
+select t.fails($$select public.team_dashboard(30)$$, 'tableau de bord de l''équipe : fermé aux visiteurs');
+reset role;
+select t.ok((select count(*) = 1 from site_events where visitor_id = '77777777-7777-7777-7777-777777777777'), 'visites du site : toujours comptées via le relais public');
+select set_config('request.jwt.claims', '{"sub":"66666666-6666-6666-6666-666666666666","role":"authenticated"}', false);
+set role authenticated;
+select public.accept_terms('2026-10-29');
+select t.ok(not public.is_team_admin(), 'membre de l''équipe : contrôle toujours disponible (faux pour une cliente)');
+select t.fails($$select public.team_dashboard(30)$$, 'tableau de bord de l''équipe : refusé à une cliente');
+reset role;
+select t.ok((select terms_version = '2026-10-29' and terms_accepted_at is not null from profiles where id = '66666666-6666-6666-6666-666666666666'), 'acceptation des conditions : toujours enregistrée via le relais public');
+select set_config('request.jwt.claims', '', false);
+
+-- ===== QR code de visite (usage unique, validé par le restaurateur) =====
+set session_replication_role = replica;   -- mise en place directe : fiche de Sam en ligne, offre de Nina
+update merchants set status = 'published', is_open = true where id = 'aaaaaaaa-0000-0000-0000-000000000005';
+insert into promotions (id, merchant_id, kind, title, created_at, ends_at) values
+  ('bbbbbbbb-0000-0000-0000-00000000000a', 'aaaaaaaa-0000-0000-0000-000000000002', 'other', 'Offre de Nina', now(), now() + interval '1 day'),
+  ('bbbbbbbb-0000-0000-0000-00000000000b', 'aaaaaaaa-0000-0000-0000-000000000005', 'other', 'Offre finie', now() - interval '2 hours', now() - interval '1 hour');
+set session_replication_role = origin;
+select set_config('test.promo', (select id::text from promotions where title = 'Offre du mois'), false);
+select t.ok((select count(distinct x) = 2000 and bool_and(x ~ '^[0-9A-HJKMNP-TV-Z]{10}$') from (select private.new_visit_token() x from generate_series(1, 2000)) g),
+  'QR : jetons de 10 caractères tirés au hasard, tous différents (2 000 tirages)');
+select t.ok(private.normalize_visit_token(' k7p4-qx9m-2t ') = 'K7P4QX9M2T' and private.normalize_visit_token('OIL') = '011', 'QR : code tapé à la main normalisé (minuscules, tirets, O/I/L)');
+
+select set_config('request.jwt.claims', '', false);
+set role anon;
+select t.fails($$select * from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005')$$, 'QR : visiteur sans compte, aucun QR code');
+select t.fails($$select public.redeem_visit_pass('K7P4QX9M2T')$$, 'QR : visiteur sans compte, aucun scan');
+select t.fails($$select public.merchant_visit_summary()$$, 'QR : visiteur sans compte, aucun total');
+reset role;
+
+-- Léa (cliente)
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select set_config('test.tok1', (select token from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005')), false);
+select t.ok(current_setting('test.tok1') ~ '^[0-9A-HJKMNP-TV-Z]{10}$', 'QR : la cliente obtient un QR code pour un restaurant en ligne');
+select t.ok((select expires_at between now() + interval '70 seconds' and now() + interval '80 seconds' and promo_title is null
+  from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005')), 'QR : valable 75 secondes');
+select t.fails($$select * from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000002')$$, 'QR : refusé pour un restaurant pas en ligne (brouillon)');
+select t.fails($$select * from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005', 'bbbbbbbb-0000-0000-0000-00000000000a')$$, 'QR : refusé avec l''offre d''un autre restaurant');
+select t.fails($$select * from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005', 'bbbbbbbb-0000-0000-0000-00000000000b')$$, 'QR : refusé avec une offre terminée');
+select t.fails($$select * from public.visit_passes$$, 'QR : la cliente ne peut pas lire la table des QR codes');
+select t.fails($$insert into public.visits (merchant_id, user_id) values ('aaaaaaaa-0000-0000-0000-000000000005', '33333333-3333-3333-3333-333333333333')$$, 'QR : la cliente ne peut pas s''inventer une visite');
+select t.fails($$select public.redeem_visit_pass(current_setting('test.tok1'))$$, 'QR : la cliente ne peut pas valider elle-même son QR code');
+reset role;
+select t.ok((select expires_at <= now() + interval '10 seconds' from visit_passes where token = current_setting('test.tok1')), 'QR : l''ancien QR expire 10 secondes après le nouveau');
+select t.ok((select count(*) = 1 from visit_passes where user_id = '33333333-3333-3333-3333-333333333333' and expires_at > now() + interval '30 seconds'), 'QR : un seul QR pleinement valable à la fois par client et restaurant');
+select set_config('test.tok1', (select token from visit_passes where user_id = '33333333-3333-3333-3333-333333333333' order by created_at desc, expires_at desc limit 1), false);
+
+-- Sam (restaurateur, sans compte client) ne peut pas tirer de QR ; Nina ne peut pas valider celui de Sam
+select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
+set role authenticated;
+select t.fails($$select * from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005')$$, 'QR : réservé aux comptes clients (refusé au restaurateur)');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((public.redeem_visit_pass(current_setting('test.tok1')) ->> 'status') = 'other_restaurant', 'QR : refusé par un autre restaurateur (« QR d''un autre restaurant »)');
+reset role;
+select t.ok((select used_at is null from visit_passes where token = current_setting('test.tok1')), 'QR : toujours utilisable après la tentative d''un autre restaurateur');
+
+-- Sam valide
+select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
+set role authenticated;
+select set_config('test.r', public.redeem_visit_pass(lower(substr(current_setting('test.tok1'), 1, 4) || '-' || substr(current_setting('test.tok1'), 5)))::text, false);
+select t.ok((current_setting('test.r')::jsonb ->> 'status') = 'ok' and (current_setting('test.r')::jsonb ->> 'visit_number') = '1'
+  and not (current_setting('test.r')::jsonb ? 'user_id') and current_setting('test.r') !~* 'Léa|3333',
+  'QR : le restaurateur valide (code tapé en minuscules avec tiret) : 1re visite, aucun nom ni identifiant');
+select t.ok((public.redeem_visit_pass(current_setting('test.tok1')) ->> 'status') = 'used', 'QR : usage unique (deuxième scan refusé)');
+select t.ok((public.redeem_visit_pass('ZZZZZZZZZZ') ->> 'status') = 'unknown' and (public.redeem_visit_pass('<script>') ->> 'status') = 'unknown'
+  and (public.redeem_visit_pass(null) ->> 'status') = 'unknown', 'QR : code inconnu ou invalide refusé proprement');
+select t.ok((select count(*) = 0 from public.visits), 'QR : le restaurateur ne voit aucune visite une par une');
+select t.fails($$select * from public.visit_passes$$, 'QR : le restaurateur ne peut pas lire la table des QR codes');
+reset role;
+
+-- Léa voit que son QR a été validé, puis utilise l'offre
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((public.visit_pass_status(current_setting('test.tok1')) ->> 'status') = 'ok' and (public.visit_pass_status(current_setting('test.tok1')) ->> 'visit_number') = '1',
+  'QR : la cliente voit « Validé ! » (1re visite)');
+select set_config('test.tok2', (select token from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005', current_setting('test.promo')::uuid)), false);
+select t.ok((public.visit_pass_status(current_setting('test.tok2')) ->> 'status') = 'pending', 'QR : en attente du scan');
+select t.ok((select count(*) = 1 from public.visits), 'QR : la cliente voit sa visite');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
+set role authenticated;
+select set_config('test.r', public.redeem_visit_pass(current_setting('test.tok2'))::text, false);
+select t.ok((current_setting('test.r')::jsonb ->> 'status') = 'ok' and (current_setting('test.r')::jsonb ->> 'promo_title') = 'Offre du mois'
+  and (current_setting('test.r')::jsonb ->> 'visit_number') = '2' and (current_setting('test.r')::jsonb ->> 'promo_used_today') = 'false',
+  'QR avec offre : le restaurateur voit l''offre à appliquer (2e visite)');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select set_config('test.tok3', (select token from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005', current_setting('test.promo')::uuid)), false);
+reset role;
+select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((public.redeem_visit_pass(current_setting('test.tok3')) ->> 'status') = 'duplicate', 'QR : même client et même offre validés il y a moins de 20 min : pas compté deux fois');
+reset role;
+update visits set visited_at = visited_at - interval '21 minutes';   -- 21 minutes plus tard…
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select set_config('test.tok4', (select token from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005', current_setting('test.promo')::uuid)), false);
+select set_config('test.tok5', (select token from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005')), false);
+reset role;
+update visit_passes set created_at = now() - interval '2 minutes', expires_at = now() - interval '1 minute' where token = current_setting('test.tok5');
+select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((public.redeem_visit_pass(current_setting('test.tok4')) ->> 'promo_used_today') = 'true', 'QR : le restaurateur est prévenu si l''offre a déjà servi aujourd''hui à ce client');
+select t.ok((public.redeem_visit_pass(current_setting('test.tok5')) ->> 'status') = 'expired', 'QR : QR expiré refusé');
+select t.ok((select (s ->> 'today')::int = 3 and (s ->> 'today_offers')::int = 2 and (s ->> 'clients_30d')::int = 1 and (s ->> 'returning_30d')::int = 1
+  from public.merchant_visit_summary() s), 'QR : le restaurateur voit ses totaux (3 visites aujourd''hui, 2 offres, 1 client fidèle)');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok(public.merchant_visit_summary() is null, 'QR : une cliente n''a aucun total de restaurant');
+select t.ok((select count(*) = 3 from public.visits), 'QR : la cliente voit ses 3 visites');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"66666666-6666-6666-6666-666666666666","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select count(*) = 0 from public.visits), 'QR : une autre cliente ne voit pas les visites de Léa');
+select t.ok((public.visit_pass_status(current_setting('test.tok2')) ->> 'status') = 'unknown', 'QR : une autre cliente ne peut pas suivre le QR de Léa');
+reset role;
+insert into visit_passes (token, user_id, merchant_id, expires_at)
+  select private.new_visit_token(), '66666666-6666-6666-6666-666666666666', 'aaaaaaaa-0000-0000-0000-000000000005', now() + interval '1 minute' from generate_series(1, 120);
+set role authenticated;
+select t.fails($$select * from public.issue_visit_pass('aaaaaaaa-0000-0000-0000-000000000005')$$, 'QR : plafond de 120 QR codes par heure et par client');
+reset role;
+select set_config('request.jwt.claims', '', false);
+select t.ok(not has_table_privilege('anon', 'public.visit_passes', 'select') and not has_table_privilege('authenticated', 'public.visit_passes', 'select')
+  and not has_table_privilege('authenticated', 'public.visits', 'insert') and not has_table_privilege('authenticated', 'public.visits', 'update')
+  and not has_table_privilege('authenticated', 'public.visits', 'delete') and not has_table_privilege('anon', 'public.visits', 'select'),
+  'QR : droits minimaux sur les tables (aucune écriture directe)');
+
+-- ===== Sauvegarde automatique : rôle en lecture seule =====
+select t.ok((select rolcanlogin and rolbypassrls and not rolsuper and not rolcreaterole and not rolcreatedb and not rolreplication and rolconnlimit = 3
+  from pg_roles where rolname = 'flashmiam_sauvegarde'), 'sauvegarde : rôle de lecture sans aucun pouvoir d''administration, 3 connexions au plus');
+select t.ok(pg_has_role('flashmiam_sauvegarde', 'pg_read_all_data', 'USAGE'), 'sauvegarde : lecture de toutes les données');
+select t.ok(not pg_has_role('flashmiam_sauvegarde', 'anon', 'MEMBER') and not pg_has_role('flashmiam_sauvegarde', 'authenticated', 'MEMBER')
+  and not pg_has_role('flashmiam_sauvegarde', 'service_role', 'MEMBER'), 'sauvegarde : aucun des droits de l''API');
+select t.ok(not exists (select 1 from pg_auth_members m join pg_roles r on r.oid = m.member
+  where m.roleid = 'flashmiam_sauvegarde'::regrole and r.rolname not in ('postgres', 'supabase_admin')), 'sauvegarde : aucun autre rôle (ni l''API) ne peut l''emprunter');
+select t.ok(exists (select 1 from pg_db_role_setting s where s.setrole = 'flashmiam_sauvegarde'::regrole
+  and 'default_transaction_read_only=on' = any(s.setconfig)), 'sauvegarde : transactions en lecture seule par défaut');
+select t.ok(not exists (select 1 from pg_proc p where p.prosecdef and has_function_privilege('flashmiam_sauvegarde', p.oid, 'execute')
+  and p.pronamespace not in ('pg_catalog'::regnamespace, 'information_schema'::regnamespace)), 'sauvegarde : aucune fonction à droits élevés appelable (pas d''écriture détournée)');
+select set_config('test.nb', (select count(*) from merchants)::text || '/' || (select count(*) from profiles)::text || '/' || (select count(*) from auth.users)::text, false);
+set role flashmiam_sauvegarde;
+select t.ok((select count(*) from public.merchants)::text || '/' || (select count(*) from public.profiles)::text || '/' || (select count(*) from auth.users)::text
+  = current_setting('test.nb'), 'sauvegarde : voit TOUTES les lignes (fiches, profils, comptes), règles RLS contournées pour une copie complète');
+select t.ok((select count(*) = 1 from private.app_secrets where name = 'purge_token') and (select count(*) >= 0 from storage.objects), 'sauvegarde : lit aussi les réglages privés et la liste des fichiers');
+select t.fails($$insert into public.team_admins (user_id) values ('11111111-1111-1111-1111-111111111111')$$, 'sauvegarde : ajout refusé (membre de l''équipe)');
+select t.fails($$update public.merchants set name = 'Piraté'$$, 'sauvegarde : modification refusée (fiches)');
+select t.fails($$delete from public.profiles$$, 'sauvegarde : suppression refusée (profils)');
+select t.fails($$truncate public.site_events$$, 'sauvegarde : vidage d''une table refusé');
+select t.fails($$update auth.users set email = 'pirate@exemple.fr'$$, 'sauvegarde : comptes non modifiables');
+select t.fails($$create table public.porte_derobee (i int)$$, 'sauvegarde : création de table refusée');
+select t.fails($$select private.rotate_backup_password()$$, 'sauvegarde : ne peut pas changer son propre mot de passe');
+reset role;
+set role service_role;
+select t.fails($$select private.rotate_backup_password()$$, 'mot de passe de la sauvegarde : impossible à changer par le serveur (clé service_role)');
+reset role;
+set role authenticated;
+select t.fails($$select private.rotate_backup_password()$$, 'mot de passe de la sauvegarde : impossible à changer par une personne connectée');
+reset role;
+select set_config('test.mdp1', private.rotate_backup_password(), false);
+select t.ok(current_setting('test.mdp1') ~ '^[0-9a-f]{64}$' and private.rotate_backup_password() <> current_setting('test.mdp1')
+  and (select rolpassword like 'SCRAM-SHA-256$%' from pg_authid where rolname = 'flashmiam_sauvegarde'),
+  'mot de passe de la sauvegarde : 64 caractères tirés au hasard, différent à chaque fois, conservé haché (SCRAM)');
+select set_config('test.mdp1', '', false);
+
 \set QUIET off
 select (case when ok then '  ✔ ' else '  ✘ ' end) || label as resultat from t.results order by n;
 select count(*) filter (where not ok) as echecs, count(*) as total from t.results;

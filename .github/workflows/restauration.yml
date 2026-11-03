@@ -1,0 +1,121 @@
+# Restaurer une sauvegarde dans la base EN LIGNE : lancement manuel uniquement (voir web/supabase/backup/README.md).
+# Remplace les données du site par celles de la sauvegarde choisie, en une seule transaction (en cas d'erreur, rien
+# n'est modifié). Juste avant, l'état actuel est lui-même sauvegardé (« avant-restauration », gardé 30 jours) : on peut
+# toujours revenir en arrière.
+# Garde-fous : lancement manuel par un administrateur du dépôt ; mot RESTAURER à taper ; secret SUPABASE_RESTORE_DB_URL
+# (accès en écriture : à ajouter seulement le temps d'une restauration, puis à supprimer).
+name: Restaurer une sauvegarde
+
+on:
+  workflow_dispatch:
+    inputs:
+      quelle:
+        description: "Quelle copie : sauvegarde de la nuit, ou état d'avant une restauration (pour l'annuler)"
+        type: choice
+        options: [sauvegarde-base, avant-restauration]
+        default: sauvegarde-base
+      execution:
+        description: "Numéro de l'exécution qui a produit la copie (vide = la plus récente)"
+        required: false
+        default: ''
+      confirmation:
+        description: 'Taper RESTAURER pour confirmer : les données du site seront remplacées par celles de la sauvegarde'
+        required: true
+      avec_comptes:
+        description: 'Restaurer aussi les comptes (projet Supabase NEUF uniquement)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: read   # retrouver et télécharger la sauvegarde d'une autre exécution
+
+concurrency:
+  group: sauvegarde   # jamais en même temps qu'une sauvegarde
+  cancel-in-progress: false
+
+jobs:
+  restaurer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      QUELLE: ${{ inputs.quelle }}
+      EXECUTION: ${{ inputs.execution }}
+      CONFIRMATION: ${{ inputs.confirmation }}
+      AVEC_COMPTES: ${{ inputs.avec_comptes }}
+      PGSSLMODE: require
+    steps:
+      - name: Confirmation et accès
+        env:
+          SUPABASE_RESTORE_DB_URL: ${{ secrets.SUPABASE_RESTORE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          [ "$CONFIRMATION" = "RESTAURER" ] || { echo "::error::Confirmation absente : taper RESTAURER."; exit 1; }
+          [ -n "$SUPABASE_RESTORE_DB_URL" ] || { echo "::error::Secret SUPABASE_RESTORE_DB_URL absent (README.md)."; exit 1; }
+          [ -n "$BACKUP_PASSPHRASE" ] || { echo "::error::Secret BACKUP_PASSPHRASE absent."; exit 1; }
+          if [ -n "$EXECUTION" ] && ! [[ $EXECUTION =~ ^[0-9]{1,20}$ ]]; then echo "::error::Numéro d'exécution invalide."; exit 1; fi
+          [[ $QUELLE =~ ^(sauvegarde-base|avant-restauration)$ ]] || { echo "::error::Copie inconnue."; exit 1; }
+
+      - name: Sauvegarde à restaurer
+        id: choix
+        run: |
+          if [ -z "$EXECUTION" ]; then
+            EXECUTION=$(gh api "repos/$GH_REPO/actions/artifacts?name=$QUELLE&per_page=20" \
+              --jq '[.artifacts[] | select(.expired | not)][0].workflow_run.id // empty')
+          fi
+          [ -n "$EXECUTION" ] || { echo "::error::Aucune sauvegarde disponible (elles sont gardées 30 jours)."; exit 1; }
+          echo "execution=$EXECUTION" >> "$GITHUB_OUTPUT"
+          echo "Copie « $QUELLE » de l'exécution $EXECUTION"
+
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Client PostgreSQL 17
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-common > /dev/null
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y > /dev/null
+          sudo apt-get install -y -qq postgresql-client-17 > /dev/null
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+
+      - name: Télécharger la sauvegarde
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ${{ inputs.quelle }}
+          run-id: ${{ steps.choix.outputs.execution }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/a-restaurer
+
+      - name: Vérifier la sauvegarde (déchiffrement, empreintes, contenu)
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: bash web/supabase/backup/restaurer.sh "$(ls "$RUNNER_TEMP"/a-restaurer/*.tar.gpg)"
+
+      - name: Sauvegarder l'état actuel avant d'y toucher
+        id: avant
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_RESTORE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: bash web/supabase/backup/sauvegarder.sh "$RUNNER_TEMP/avant"
+
+      - name: Garder l'état actuel 30 jours
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: avant-restauration
+          path: ${{ steps.avant.outputs.fichier }}
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error
+
+      - name: Restaurer
+        env:
+          SUPABASE_RESTORE_DB_URL: ${{ secrets.SUPABASE_RESTORE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          options=(--confirmer)
+          if [ "$AVEC_COMPTES" = "true" ]; then options+=(--avec-comptes); fi
+          bash web/supabase/backup/restaurer.sh "$(ls "$RUNNER_TEMP"/a-restaurer/*.tar.gpg)" --vers "$SUPABASE_RESTORE_DB_URL" "${options[@]}"
+          echo "::notice::Restauration terminée. Pensez à supprimer le secret SUPABASE_RESTORE_DB_URL (Settings › Secrets and variables › Actions)."

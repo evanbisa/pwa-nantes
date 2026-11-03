@@ -3,12 +3,22 @@
  * notifications de plus de 60 jours, données par personne des statistiques de plus de 90 jours,
  * totaux de plus de 180 jours, plafond anti-triche de la veille, tentatives d'inscription de plus de 2 jours,
  * notifications de paiement Whop de plus de 30 jours, visites du site de plus de 13 mois,
+ * QR codes de visite de plus d'un jour, visites validées au restaurant (QR code) de plus de 13 mois,
  * stories finies depuis plus de 30 jours (avec leur photo, retirée du stockage).
  *
- * Aucun secret : la fonction n'efface que ce qui a dépassé sa durée de conservation ; un appel en trop ne fait
- * qu'avancer le ménage, et un seul passage par heure est effectué. Déclenchée chaque nuit par la base (pg_cron).
+ * Sessions de connexion : déconnectées après 30 jours sans utilisation, 180 jours au plus.
+ * Comptes jamais confirmés (code reçu par e-mail jamais saisi) : supprimés après 7 jours.
+ *
+ * Seule la base peut la déclencher : la tâche planifiée (pg_cron) envoie le jeton « x-cron-token », tiré au hasard
+ * dans la base (private.app_secrets) et vérifié par elle. Un seul passage par heure est effectué.
  */
 export interface Deps {
+  /** Le jeton présenté est-il celui de la tâche planifiée ? (vérifié par la base) */
+  checkToken(token: string): Promise<boolean>;
+  /** Déconnecte les sessions inutilisées / trop anciennes ; renvoie le nombre de sessions fermées. */
+  expireSessions(idleDays: number, maxDays: number): Promise<number>;
+  /** Supprime les comptes jamais confirmés depuis « days » jours ; renvoie leur nombre. */
+  purgeUnconfirmed(days: number): Promise<number>;
   /** Date du dernier passage (null : jamais). */
   lastRun(job: string): Promise<Date | null>;
   markRun(job: string, at: Date): Promise<void>;
@@ -34,8 +44,14 @@ export const RULES: { table: string; column: string; days: number; date?: boolea
   { table: "signup_attempts", column: "created_at", days: 2 },
   { table: "whop_events", column: "received_at", days: 30 },
   { table: "site_events", column: "day", days: 395, date: true },   // visites du site : 13 mois
+  { table: "visit_passes", column: "expires_at", days: 1 },          // QR codes de visite : un jour
+  { table: "visits", column: "visited_at", days: 395 },              // visites validées au restaurant : 13 mois
 ];
 export const STORY_KEEP_DAYS = 30;
+/** Sessions : déconnectées après 30 jours sans utilisation, 180 jours au plus (la page Confidentialité l'annonce). */
+export const SESSION_IDLE_DAYS = 30, SESSION_MAX_DAYS = 180;
+/** Comptes dont l'adresse n'a jamais été confirmée (code jamais saisi) : supprimés après 7 jours. */
+export const UNCONFIRMED_DAYS = 7;
 const JOB = "purge";
 const MIN_INTERVAL = 60 * 60 * 1000;
 const BATCH = 100, MAX_BATCHES = 20;
@@ -49,6 +65,10 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
 
   const now = deps.now();
   try {
+    const token = req.headers.get("x-cron-token") ?? "";
+    if (token.length < 32 || token.length > 200 || !(await deps.checkToken(token))) {
+      return json(401, { error: "unauthorized", message: "Appel non autorisé." });
+    }
     const last = await deps.lastRun(JOB);
     if (last && now.getTime() - last.getTime() < MIN_INTERVAL) return json(200, { skipped: true });
     await deps.markRun(JOB, now);
@@ -71,9 +91,11 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
       if (batch.length < BATCH) break;
     }
     deleted.stories = stories;
+    deleted.sessions = await deps.expireSessions(SESSION_IDLE_DAYS, SESSION_MAX_DAYS);
+    deleted.unconfirmed_accounts = await deps.purgeUnconfirmed(UNCONFIRMED_DAYS);
     return json(200, { deleted, files });
   } catch (e) {
-    console.error("purge: ménage impossible", e);
+    console.error("purge: ménage impossible", e instanceof Error ? e.message : e);
     return json(500, { error: "server", message: "Ménage impossible pour le moment." });
   }
 }

@@ -11,10 +11,57 @@
   "orientation": "any",
   "background_color": "#f1f3f4",
   "theme_color": "#f1f3f4",
-  "categories": ["food", "lifestyle", "navigation"],
+  "categories": [
+    "food",
+    "lifestyle",
+    "navigation"
+  ],
   "icons": [
-    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Scanner un client",
+      "short_name": "Scanner",
+      "description": "Restaurateurs : scanner le QR code d'un client",
+      "url": "./#scanner",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Offres autour de moi",
+      "short_name": "Offres",
+      "description": "Les bons plans les plus proches",
+      "url": "./#offres",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }

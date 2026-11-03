@@ -18,7 +18,6 @@ declare global {
 }
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
-const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const CONSENT_KEY = "flashmiam:consent";
 const CONSENT_MAX_AGE = 182 * 864e5;   // comme la carte : choix redemandé au bout de 6 mois
 
@@ -53,7 +52,11 @@ function loadGsi(): Promise<Gsi> {
 const noSubscribe = () => () => {};
 const useGoogleConsent = () => useSyncExternalStore(noSubscribe, () => readConsent()?.google ?? false, () => true);
 
-export default function GoogleSignup({ onCredential }: { onCredential: (credential: string) => void }) {
+/**
+ * locked : case des conditions pas encore cochée. Le vrai bouton de Google est alors retiré (un toucher ne peut pas
+ * créer de compte) et notre bouton appelle onLocked, qui rappelle de cocher la case.
+ */
+export default function GoogleSignup({ onCredential, locked = false, onLocked }: { onCredential: (credential: string) => void; locked?: boolean; onLocked?: () => void }) {
   const box = useRef<HTMLButtonElement>(null);
   const slot = useRef<HTMLDivElement>(null);
   const callback = useRef(onCredential);
@@ -92,6 +95,7 @@ export default function GoogleSignup({ onCredential }: { onCredential: (credenti
 
   /* Toucher notre bouton (accord pas encore donné, bouton de Google pas encore chargé, ou bord du bouton) */
   async function click() {
+    if (locked) { onLocked?.(); return; }
     if (needsConsent) { allowGoogle(); setGranted(true); }
     setNote("Ouverture de Google…");
     const gsi = await loadGsi().catch(() => null);
@@ -111,7 +115,7 @@ export default function GoogleSignup({ onCredential }: { onCredential: (credenti
       <p className="flex items-center gap-3 text-sm text-slate-500 before:h-px before:flex-1 before:bg-slate-200 after:h-px after:flex-1 after:bg-slate-200 dark:text-zinc-400 dark:before:bg-white/10 dark:after:bg-white/10">ou</p>
       <div className="group relative">
         <button
-          ref={box} id="su-google-btn" type="button" onClick={click} tabIndex={mounted ? -1 : 0} aria-hidden={mounted || undefined}
+          ref={box} id="su-google-btn" type="button" onClick={click} tabIndex={mounted && !locked ? -1 : 0} aria-hidden={(mounted && !locked) || undefined}
           className="flex h-14 w-full items-center justify-center gap-3 rounded-full border-[1.5px] border-slate-300 bg-white text-[15.5px] font-medium text-slate-900 shadow-sm transition group-focus-within:ring-2 group-focus-within:ring-brand group-focus-within:ring-offset-2 [@media(hover:hover)]:group-hover:bg-slate-50 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-100 dark:backdrop-blur-xl dark:ring-offset-night dark:group-focus-within:ring-brand-night [@media(hover:hover)]:dark:group-hover:bg-white/[0.08]"
         >
           <svg viewBox="0 0 48 48" aria-hidden className="h-[22px] w-[22px]">
@@ -122,19 +126,13 @@ export default function GoogleSignup({ onCredential }: { onCredential: (credenti
           </svg>
           S&apos;inscrire avec Google
         </button>
-        <div ref={slot} id="su-google" className={`absolute inset-0 flex items-center justify-center overflow-hidden rounded-full opacity-[0.01] ${mounted ? "" : "hidden"}`} />
+        <div ref={slot} id="su-google" className={`absolute inset-0 flex items-center justify-center overflow-hidden rounded-full opacity-[0.01] ${mounted && !locked ? "" : "hidden"}`} />
       </div>
       {(needsConsent || note) && (
         <p id="su-google-note" aria-live="polite" className="text-center text-[13px] leading-relaxed text-slate-500 dark:text-zinc-400">
           {note || "En touchant ce bouton, vous autorisez les services Google (cookies de Google)."}
         </p>
       )}
-      {/* Le compte peut être créé ici, sans passer par l'écran du mot de passe : mêmes conditions à accepter */}
-      <p className="text-center text-xs leading-relaxed text-slate-500 dark:text-zinc-400">
-        Avec Google, vous acceptez les{" "}
-        <a className="underline" href={`${BASE}/legal/cgu/`}>conditions d&apos;utilisation</a> et la{" "}
-        <a className="underline" href={`${BASE}/legal/confidentialite/`}>politique de confidentialité</a>.
-      </p>
     </div>
   );
 }

@@ -40,6 +40,11 @@ export const confidentialite: LegalDoc = {
               basis: "Exécution du contrat (CGU)",
             },
             {
+              title: "Acceptation des conditions : date et version",
+              detail: "Garder la preuve que vous avez accepté les conditions d'utilisation (case cochée à l'inscription) : la date et la version des conditions acceptées.",
+              basis: "Intérêt légitime (preuve de l'acceptation)",
+            },
+            {
               title: "Connexion avec Google : prénom, e-mail, identifiant Google",
               detail: "Créer votre compte et vous connecter sans mot de passe, si vous choisissez ce mode.",
               basis: "Exécution du contrat",
@@ -50,9 +55,14 @@ export const confidentialite: LegalDoc = {
               basis: "Consentement, modifiable ou retirable dans Profil › Vous",
             },
             {
-              title: "Position (si vous l'autorisez)",
-              detail: "Afficher les distances et temps de trajet. Elle reste sur votre appareil : FlashMiam ne l'enregistre jamais.",
+              title: "Position (si vous l'autorisez) ou adresse tapée à la place",
+              detail: "Afficher les distances et temps de trajet. La position reste sur votre appareil : FlashMiam ne l'enregistre jamais. Si vous préférez taper une adresse, elle est seulement envoyée au service de recherche d'adresse de l'IGN pour la placer sur la carte, puis oubliée à la fermeture de la page.",
               basis: "Consentement, retirable à tout moment",
+            },
+            {
+              title: "FlashMiam ajoutée à l'écran d'accueil : oui ou non, et la date",
+              detail: "Ne plus vous proposer d'ajouter FlashMiam à l'écran d'accueil une fois que c'est fait. Noté sur votre compte quand vous ouvrez FlashMiam depuis son icône (ou si vous indiquez « C'est déjà fait »).",
+              basis: "Exécution du contrat (CGU)",
             },
             {
               title: "Restaurants suivis, notifications et alertes",
@@ -70,6 +80,11 @@ export const confidentialite: LegalDoc = {
               basis: "Consentement (retirable en un clic)",
             },
             {
+              title: "QR code de visite : restaurant, offre choisie, date et heure",
+              detail: "Prouver votre passage au restaurant et vous faire profiter d'une offre : vous affichez un QR code à usage unique (il change chaque minute), le restaurateur le scanne. Il ne voit ni votre nom ni votre compte, seulement l'offre à appliquer et le numéro de votre visite chez lui ; ses statistiques ne montrent que des totaux. Côté restaurateur, l'image de la caméra est lue sur son téléphone et n'est jamais envoyée ni enregistrée.",
+              basis: "Exécution du contrat (vous choisissez d'afficher le QR code)",
+            },
+            {
               title: "Statistiques de fréquentation des fiches",
               detail: "Vues, provenance (carte, recherche, story…), menu et photos consultés, itinéraires, appels, partages, clics sur une offre ou une story. Elles fournissent aux restaurateurs des totaux ; votre compte sert seulement à ne vous compter qu'une fois.",
               basis: "Consentement (choix des cookies)",
@@ -83,6 +98,11 @@ export const confidentialite: LegalDoc = {
               title: "Restaurateurs : nom, téléphone, SIRET, justificatifs, fiche",
               detail: "Vérifier l'établissement (répertoire Sirene de l'INSEE), publier sa fiche, gérer l'abonnement. Les justificatifs ne sont visibles que par le restaurateur et l'équipe de vérification.",
               basis: "Exécution du contrat ; obligations légales (facturation)",
+            },
+            {
+              title: "Connexions : adresse IP et navigateur de chaque session",
+              detail: "Garder votre compte connecté sur vos appareils et repérer un usage anormal. Enregistrés par notre prestataire d'authentification le temps de la session ; vous êtes déconnecté après 30 jours sans utilisation, et au plus tard après 180 jours.",
+              basis: "Intérêt légitime (sécurité des comptes)",
             },
             {
               title: "Inscription : empreinte de l'adresse IP",
@@ -102,11 +122,12 @@ export const confidentialite: LegalDoc = {
         {
           list: [
             "**Supabase** : comptes, données et fichiers, hébergés à Stockholm (Union européenne) ; envoi des codes par e-mail.",
-            "**Vercel** (et GitHub pour la copie de secours) : hébergement des pages du site.",
+            "**Vercel** : hébergement des pages du site.",
+            "**GitHub** (Microsoft) : copie de secours du site, vérifications automatiques et **sauvegardes de la base**, chiffrées avant d'être déposées (AES-256) et conservées 30 jours.",
             "**Google** : connexion avec Google, uniquement si vous l'utilisez et l'acceptez.",
             "**Cloudflare** (service DNS 1.1.1.1) : vérification que le domaine d'une adresse e-mail reçoit des e-mails ; seul le domaine est transmis.",
             "**Service d'alertes de votre navigateur** (Google, Mozilla, Apple ou Microsoft) : acheminement des alertes, chiffrées de bout en bout.",
-            "**INSEE** (vérification du SIRET) et **IGN** (recherche d'adresse) : uniquement pour les restaurateurs.",
+            "**INSEE** (vérification du SIRET), pour les restaurateurs, et **IGN** (recherche d'adresse) : seule l'adresse tapée lui est transmise, par un restaurateur pour placer sa fiche ou par un client qui préfère taper une adresse plutôt qu'activer la localisation.",
             "**Whop** : paiement de l'abonnement des restaurateurs (page de paiement, moyen de paiement, reçus), dès l'ouverture des abonnements payants. Les données de carte ne transitent que par Whop et ses prestataires de paiement ; FlashMiam ne reçoit que l'état de l'abonnement (formule, échéance, résiliation).",
             "**OpenFreeMap / OpenStreetMap** : fond de carte, chargé sans cookie.",
           ],
@@ -119,7 +140,7 @@ export const confidentialite: LegalDoc = {
       title: "Transferts hors de l'Union européenne",
       icon: Globe,
       blocks: [
-        "Les données des comptes sont conservées dans l'Union européenne. Certains prestataires (Vercel, Google, Cloudflare, Whop) sont établis aux États-Unis : les transferts éventuels sont encadrés par le cadre de protection des données UE–États-Unis (Data Privacy Framework) auquel ils adhèrent, ou par les clauses contractuelles types de la Commission européenne.",
+        "Les données des comptes sont conservées dans l'Union européenne. Certains prestataires (Vercel, GitHub, Google, Cloudflare, Whop) sont établis aux États-Unis : les transferts éventuels sont encadrés par le cadre de protection des données UE–États-Unis (Data Privacy Framework) auquel ils adhèrent, ou par les clauses contractuelles types de la Commission européenne.",
       ],
     },
     {
@@ -138,11 +159,16 @@ export const confidentialite: LegalDoc = {
             { title: "Totaux quotidiens des restaurants", detail: "6 mois ; ils ne contiennent aucune donnée personnelle." },
             { title: "Stories", detail: "Publiques 24 heures, puis visibles par leur seul restaurateur ; supprimées avec leur photo 30 jours après leur fin." },
             { title: "Fréquentation du site (identifiant d'appareil tiré au hasard)", detail: "13 mois." },
+            { title: "QR codes de visite", detail: "Valables 75 secondes, effacés au bout d'un jour." },
+            { title: "Visites validées au restaurant (QR code)", detail: "13 mois." },
             { title: "Tentatives d'inscription (empreinte IP)", detail: "2 jours." },
+            { title: "Sessions de connexion (adresse IP, navigateur)", detail: "30 jours sans utilisation, 180 jours au plus : la session est alors fermée." },
+            { title: "Compte dont l'adresse n'a jamais été confirmée (code jamais saisi)", detail: "Supprimé 7 jours après l'inscription." },
             { title: "Notifications de paiement reçues de Whop", detail: "30 jours (identifiant et type seulement)." },
-            { title: "Compte, fiche, avis, « j'aime »", detail: "Jusqu'à leur suppression par vous, ou la suppression du compte." },
+            { title: "Compte, fiche, avis, « j'aime », preuve d'acceptation des conditions", detail: "Jusqu'à leur suppression par vous, ou la suppression du compte." },
             { title: "Alertes sur l'appareil", detail: "Jusqu'à leur désactivation, la déconnexion ou la suppression du compte." },
             { title: "Factures des restaurateurs", detail: "10 ans (obligation comptable)." },
+            { title: "Sauvegardes chiffrées de la base", detail: "30 jours, puis effacées automatiquement : une donnée supprimée disparaît aussi des sauvegardes au plus tard 30 jours après. Une restauration ne fait jamais revenir les données d'un compte supprimé entre-temps." },
           ],
         },
       ],
@@ -152,7 +178,7 @@ export const confidentialite: LegalDoc = {
       title: "Sécurité",
       icon: Lock,
       blocks: [
-        "Connexions chiffrées (HTTPS), mots de passe conservés sous forme d'empreinte, règles d'accès en base de données (chacun n'accède qu'à ses propres données), protection contre l'injection de scripts, vérifications automatiques régulières et suppression complète des fichiers à la suppression d'un compte.",
+        "Connexions chiffrées (HTTPS), mots de passe conservés sous forme d'empreinte, règles d'accès en base de données (chacun n'accède qu'à ses propres données), protection contre l'injection de scripts, vérifications automatiques régulières, sauvegarde chiffrée chaque nuit (vérifiée par une restauration d'essai) et suppression complète des fichiers à la suppression d'un compte.",
       ],
     },
     {

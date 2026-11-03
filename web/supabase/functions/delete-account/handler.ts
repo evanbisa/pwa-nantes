@@ -6,6 +6,7 @@
  * Abonnement payé sur Whop : son renouvellement est d'abord arrêté (aucun prélèvement après la suppression) ;
  * si Whop ne répond pas, le compte n'est pas supprimé et la personne est invitée à réessayer.
  */
+import { corsHeaders } from "../_shared/cors.ts";
 export interface Deps {
   getUserId(token: string): Promise<string | null>;
   getMerchantId(userId: string): Promise<string | null>;
@@ -16,27 +17,10 @@ export interface Deps {
   deleteUser(userId: string): Promise<void>;
 }
 
-/** Sites autorisés à appeler la fonction depuis un navigateur (même liste que verify-siret) */
-const ALLOWED_ORIGINS = [
-  /^https:\/\/([a-z0-9-]+\.)?roche-street-food\.pages\.dev$/,
-  /^https:\/\/(roche-street-food|pwa-nantes|pwa-nantes-web)\.vercel\.app$/,
-  /^https:\/\/evanbisa\.github\.io$/,
-  /^http:\/\/localhost:\d+$/,
-];
 export const BUCKETS = ["photos", "stories", "documents"];
 /** Photos de profil : un dossier par compte (identifiant du compte). */
 export const AVATARS = "avatars";
 
-function corsHeaders(origin: string | null): Record<string, string> {
-  const allowed = origin && ALLOWED_ORIGINS.some((re) => re.test(origin));
-  return {
-    ...(allowed ? { "Access-Control-Allow-Origin": origin! } : {}),
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Max-Age": "86400",
-    Vary: "Origin",
-  };
-}
 
 export async function handle(req: Request, deps: Deps): Promise<Response> {
   const cors = corsHeaders(req.headers.get("Origin"));
@@ -64,7 +48,7 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
     await deps.deleteUser(userId);
     return json(200, { deleted: true });
   } catch (e) {
-    console.error("delete-account: suppression impossible", e);
+    console.error("delete-account: suppression impossible", e instanceof Error ? e.message : e);
     return json(500, { error: "server", message: "Suppression impossible pour le moment. Réessayez plus tard." });
   }
 }

@@ -1,0 +1,45 @@
+# Dependabot : propose chaque semaine les mises à jour des dépendances (une demande de fusion groupée par catégorie),
+# à relire et fusionner après le passage des vérifications. Les bibliothèques copiées dans vendor/ (MapLibre,
+# supabase-js) ne sont pas couvertes : leurs failles sont surveillées par .github/workflows/dependances.yml.
+# Attente de 7 jours après la publication d'une version avant de la proposer (une version piégée est en général
+# repérée et retirée entre-temps) ; les correctifs de sécurité, eux, sont proposés sans attendre.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /web
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:23"
+      timezone: Europe/Paris
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    ignore:
+      # typescript-eslint (lint de l'application) ne prend pas encore en charge TypeScript 7 : rester en 6.x d'ici là
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+    groups:
+      production:
+        dependency-type: production
+        update-types: [minor, patch]
+      developpement:
+        dependency-type: development
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "Dépendances"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:23"
+      timezone: Europe/Paris
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "Actions"

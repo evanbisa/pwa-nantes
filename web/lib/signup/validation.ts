@@ -61,3 +61,6 @@ export function suggestEmail(raw: string): string | null {
 }
 
 export const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/** Version des conditions d'utilisation acceptées à l'inscription (date de la version, enregistrée sur le compte). */
+export const TERMS_VERSION = "2026-10-29";

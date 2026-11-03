@@ -9,6 +9,7 @@
  * 409 déjà abonné ou paiement pas encore ouvert, 502 Whop indisponible, 503 configuration incomplète).
  */
 import { subscriptionPatch, WhopError, type SubscriptionPatch, type WhopMembership } from "../_shared/whop.ts";
+import { corsHeaders, isAllowedOrigin } from "../_shared/cors.ts";
 
 export interface Merchant { id: string; verified: boolean; honor: boolean }
 export interface Subscription {
@@ -29,33 +30,16 @@ export interface Deps {
   whop<T>(method: "GET" | "POST" | "PATCH", path: string, body?: unknown): Promise<T>;
 }
 
-/** Sites autorisés à appeler la fonction depuis un navigateur (même liste que les autres fonctions) */
-const ALLOWED_ORIGINS = [
-  /^https:\/\/([a-z0-9-]+\.)?roche-street-food\.pages\.dev$/,
-  /^https:\/\/(roche-street-food|pwa-nantes|pwa-nantes-web)\.vercel\.app$/,
-  /^https:\/\/evanbisa\.github\.io$/,
-  /^http:\/\/localhost:\d+$/,
-];
 const TIERS = ["essentiel", "premium"];
 const PERIODS = ["month", "year"];
 
-function corsHeaders(origin: string | null): Record<string, string> {
-  const allowed = origin && ALLOWED_ORIGINS.some((re) => re.test(origin));
-  return {
-    ...(allowed ? { "Access-Control-Allow-Origin": origin! } : {}),
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Max-Age": "86400",
-    Vary: "Origin",
-  };
-}
 
 /** Adresse de retour après paiement : une page du site uniquement (jamais un autre site). */
 function returnUrl(raw: unknown): string | null {
   if (typeof raw !== "string" || raw.length > 300) return null;
   try {
     const u = new URL(raw);
-    return ALLOWED_ORIGINS.some((re) => re.test(u.origin)) && !u.username && !u.password ? u.href : null;
+    return isAllowedOrigin(u.origin) && !u.username && !u.password ? u.href : null;
   } catch {
     return null;
   }

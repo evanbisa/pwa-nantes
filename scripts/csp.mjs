@@ -18,6 +18,8 @@ import path from 'node:path';
 
 const SUPABASE = 'https://fnypgfyxbyaqrnklhjxc.supabase.co';
 const GOOGLE_SIGN_IN = 'https://accounts.google.com/gsi/';
+/** Anti-robots Cloudflare Turnstile (chargé seulement si CONFIG.turnstileSiteKey est renseignée). */
+const TURNSTILE = 'https://challenges.cloudflare.com';
 
 /**
  * Politique de la page principale (index.html). mapOrigins : domaine d'un style de carte externe (CONFIG.mapStyle
@@ -26,12 +28,12 @@ const GOOGLE_SIGN_IN = 'https://accounts.google.com/gsi/';
 function appPolicy(scriptHashes, mapOrigins = []) {
   return [
     "default-src 'self'",
-    ["script-src 'self'", ...scriptHashes.map((h) => `'sha256-${h}'`), GOOGLE_SIGN_IN + 'client'].join(' '),
+    ["script-src 'self'", ...scriptHashes.map((h) => `'sha256-${h}'`), GOOGLE_SIGN_IN + 'client', TURNSTILE].join(' '),
     `style-src 'self' 'unsafe-inline' ${GOOGLE_SIGN_IN}style`,
     `img-src 'self' data: blob: ${SUPABASE}`,
     "font-src 'self'",
-    `connect-src 'self' ${SUPABASE} ${SUPABASE.replace('https://', 'wss://')} https://tiles.openfreemap.org ${mapOrigins.map((o) => o + ' ').join('')}https://data.geopf.fr ${GOOGLE_SIGN_IN}`,
-    `frame-src ${GOOGLE_SIGN_IN}`,
+    `connect-src 'self' ${SUPABASE} ${SUPABASE.replace('https://', 'wss://')} https://tiles.openfreemap.org ${mapOrigins.map((o) => o + ' ').join('')}https://data.geopf.fr ${GOOGLE_SIGN_IN} ${TURNSTILE}`,
+    `frame-src ${GOOGLE_SIGN_IN} ${TURNSTILE}`,
     "worker-src 'self' blob:",
     "child-src 'self' blob:",
     "manifest-src 'self' blob:",

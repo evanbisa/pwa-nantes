@@ -1,0 +1,194 @@
+# Sauvegarde automatique de la base, chaque nuit (voir web/supabase/backup/README.md) :
+#  1. copie complète de la base par le rôle en lecture seule « flashmiam_sauvegarde », chiffrée (AES-256), gardée
+#     30 jours dans les artefacts de GitHub (le dépôt est public : sans la phrase de passe, le fichier est illisible) ;
+#  2. vérification : la sauvegarde est téléchargée, déchiffrée et restaurée dans une base jetable reconstruite par les
+#     migrations du dépôt ; chaque table doit retrouver exactement son nombre de lignes ;
+#  3. en cas d'échec (ou si les accès manquent), un ticket « sauvegarde » est ouvert dans le dépôt, donc un e-mail.
+# Prérequis (une seule fois) : secrets SUPABASE_DB_URL et BACKUP_PASSPHRASE du dépôt (README.md).
+name: Sauvegarde de la base
+
+on:
+  schedule:
+    - cron: '47 2 * * *'   # chaque nuit (après le ménage nocturne de 2 h 17)
+  push:
+    branches: [claude/street-food-map-pwa-lr1xu2]
+    paths: ['web/supabase/backup/**', 'web/supabase/migrations/**', 'web/supabase/tests/rls/**', .github/workflows/sauvegarde.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sauvegarde
+  cancel-in-progress: false
+
+jobs:
+  # Test des scripts sur une base jetable PostgreSQL 17 (même version que Supabase), sans aucune donnée réelle :
+  # sauvegarde par le rôle en lecture seule, chiffrement, vérification, restaurations (voir backup/test.sh)
+  tester:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Client PostgreSQL 17
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-common > /dev/null
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y > /dev/null
+          sudo apt-get install -y -qq postgresql-client-17 > /dev/null
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+      - name: Sauvegarde et restauration de bout en bout
+        run: bash web/supabase/backup/test.sh
+
+  sauvegarder:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    outputs:
+      fichier: ${{ steps.sauvegarde.outputs.fichier }}
+      acces: ${{ steps.acces.outputs.pret }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Accès à la base configurés ?
+        id: acces
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          if [ -n "$SUPABASE_DB_URL" ] && [ -n "$BACKUP_PASSPHRASE" ]; then
+            echo "pret=oui" >> "$GITHUB_OUTPUT"
+          else
+            echo "pret=non" >> "$GITHUB_OUTPUT"
+            echo "::warning::Sauvegarde NON faite : secrets SUPABASE_DB_URL et BACKUP_PASSPHRASE absents (web/supabase/backup/README.md)."
+          fi
+
+      - name: Client PostgreSQL 17 (même version que Supabase)
+        if: steps.acces.outputs.pret == 'oui'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-common > /dev/null
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y > /dev/null
+          sudo apt-get install -y -qq postgresql-client-17 > /dev/null
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+
+      - name: Sauvegarder et chiffrer
+        id: sauvegarde
+        if: steps.acces.outputs.pret == 'oui'
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: bash web/supabase/backup/sauvegarder.sh "$RUNNER_TEMP/sauvegarde"
+
+      - name: Garder la sauvegarde 30 jours
+        if: steps.acces.outputs.pret == 'oui'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sauvegarde-base
+          path: ${{ steps.sauvegarde.outputs.fichier }}
+          retention-days: 30
+          compression-level: 0   # déjà compressée et chiffrée
+          if-no-files-found: error
+
+  verifier:
+    needs: sauvegarder
+    if: needs.sauvegarder.outputs.acces == 'oui'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17   # base jetable, détruite avec la machine à la fin de la vérification
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Client PostgreSQL 17
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-common > /dev/null
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y > /dev/null
+          sudo apt-get install -y -qq postgresql-client-17 > /dev/null
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+
+      - name: Télécharger la sauvegarde gardée
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: sauvegarde-base
+          path: ${{ runner.temp }}/sauvegarde
+
+      - name: Base jetable reconstruite par les migrations du dépôt
+        run: |
+          psql -X -q -d postgres -c "create database restauration"
+          psql -X -q -d restauration -v ON_ERROR_STOP=1 -f web/supabase/tests/rls/stub.sql > /dev/null
+          for m in $(ls web/supabase/migrations/*.sql | sort); do
+            psql -X -q -d restauration -v ON_ERROR_STOP=1 -f "$m" > /dev/null || { echo "::error::Migration en échec : $m"; exit 1; }
+          done
+
+      - name: Déchiffrer, contrôler et restaurer (chaque table doit retrouver son nombre de lignes)
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          fichier=$(ls "$RUNNER_TEMP"/sauvegarde/*.tar.gpg)
+          bash web/supabase/backup/restaurer.sh "$fichier"
+          bash web/supabase/backup/restaurer.sh "$fichier" --vers "postgresql://postgres:postgres@localhost:5432/restauration" --confirmer --base-de-test
+
+  alerte:
+    needs: [sauvegarder, verifier]
+    if: always() && github.event_name != 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      issues: write
+      actions: write   # réactiver ce workflow (GitHub suspend les tâches planifiées après 60 jours sans commit)
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      EXECUTION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      ACCES: ${{ needs.sauvegarder.outputs.acces }}
+      RESULTAT: ${{ needs.sauvegarder.result }}/${{ needs.verifier.result }}
+    steps:
+      - name: Garder la sauvegarde planifiée active
+        run: gh api -X PUT "repos/$GH_REPO/actions/workflows/sauvegarde.yml/enable" > /dev/null
+
+      - name: Ticket d'alerte (ouvert en cas de problème, fermé quand tout refonctionne)
+        run: |
+          gh label create sauvegarde --color B60205 --description "Alerte de la sauvegarde automatique" --force > /dev/null
+          ticket=$(gh issue list --label sauvegarde --state open --json number --jq '.[0].number // empty')
+          quand=$(TZ=Europe/Paris date '+%d/%m/%Y à %H:%M')
+          if [ "$ACCES" != "oui" ]; then
+            [ -n "$ticket" ] || gh issue create --label sauvegarde --title "Sauvegarde de la base non configurée" \
+              --body "La sauvegarde automatique ne peut pas se faire : les secrets SUPABASE_DB_URL et BACKUP_PASSPHRASE du dépôt ne sont pas renseignés. Marche à suivre : web/supabase/backup/README.md. Détail : $EXECUTION"
+          elif [ "$RESULTAT" = "success/success" ]; then
+            if [ -n "$ticket" ]; then gh issue close "$ticket" --comment "Réglé : sauvegarde du $quand faite et vérifiée ($EXECUTION)."; fi
+          elif [ -n "$ticket" ]; then
+            gh issue comment "$ticket" --body "Nouvel échec le $quand ($RESULTAT) : $EXECUTION"
+          else
+            gh issue create --label sauvegarde --title "Sauvegarde de la base en échec" \
+              --body "La sauvegarde automatique du $quand a échoué ($RESULTAT : sauvegarde/vérification). Détail : $EXECUTION — marche à suivre : web/supabase/backup/README.md."
+          fi

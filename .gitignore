@@ -1,4 +1,6 @@
 dist/
 
-# Réglages locaux (MAP_STYLE…) : jamais publiés
+# Réglages et secrets locaux : jamais publiés (seuls les modèles .env.example le sont)
 .env
+.env.*
+!.env.example
