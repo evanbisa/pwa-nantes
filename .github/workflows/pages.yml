@@ -50,7 +50,7 @@ jobs:
           MAP_STYLE: ${{ vars.MAP_STYLE }}
         run: |
           mkdir -p "$RUNNER_TEMP/site"
-          cp index.html confidentialite.html conditions.html sw.js icon-192.png icon-512.png icon-maskable-192.png icon-maskable-512.png apple-touch-icon.png favicon.ico favicon-96.png og-image.jpg manifest.webmanifest qr-worker.js "$RUNNER_TEMP/site/"
+          cp index.html confidentialite.html conditions.html sw.js icon-192.png icon-512.png icon-1024.png icon-maskable-192.png icon-maskable-512.png icon-maskable-1024.png apple-touch-icon.png favicon.ico favicon-96.png og-image.jpg manifest.webmanifest qr-worker.js "$RUNNER_TEMP/site/"
           node scripts/config.mjs "$RUNNER_TEMP/site/index.html"
           # Politique de sécurité du contenu (CSP) recalculée sur les pages publiées : toujours à jour
           node scripts/csp.mjs "$RUNNER_TEMP/site/index.html" "$RUNNER_TEMP/site/confidentialite.html" "$RUNNER_TEMP/site/conditions.html"
