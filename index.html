@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-09sUgaFwTjyMSbulqKywosxk4hu2YI1crbPqiPLzHOU=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-9mTU6OoliJWXXaeNcxZy6qGaqkuSyauwErqcVNu2hes=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -2121,16 +2121,22 @@
     <div class="sheet-head">
       <div class="sheet-emoji" aria-hidden="true">📍</div>
       <div class="sheet-title">
-        <h3 id="geo-help-title">Localisation bloquée</h3>
+        <h3 id="geo-help-title"><span data-geo-mode="site">Localisation bloquée</span><span data-geo-mode="device" hidden>Localisation coupée sur l'appareil</span></h3>
         <p class="eyebrow">Autorisation nécessaire</p>
       </div>
       <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
     </div>
-    <p class="lead">Votre navigateur a mémorisé un refus et ne peut plus afficher la demande. Réactivez la position pour ce site, puis touchez « Réessayer ».</p>
-    <ul class="help-steps">
+    <p class="lead" data-geo-mode="site">Votre navigateur a mémorisé un refus et ne peut plus afficher la demande. Réactivez la position pour ce site, puis touchez « Réessayer ».</p>
+    <p class="lead" data-geo-mode="device" hidden>FlashMiam est bien autorisé, mais votre téléphone ou votre ordinateur ne donne pas la position au navigateur. Activez-la dans les réglages de l'appareil, puis touchez « Réessayer ».</p>
+    <ul class="help-steps" data-geo-mode="site">
       <li data-platform="ios"><b>iPhone / iPad (Safari)</b>Touchez « aA » dans la barre d'adresse › Réglages du site web › Position › Autoriser. Vérifiez aussi Réglages › Confidentialité › Service de localisation › Safari.</li>
       <li data-platform="android"><b>Android (Chrome)</b>Touchez l'icône à gauche de l'adresse › Autorisations › Position › Autoriser.</li>
       <li data-platform="desktop"><b>Ordinateur</b>Cliquez sur l'icône à gauche de l'adresse et autorisez « Position ».</li>
+    </ul>
+    <ul class="help-steps" data-geo-mode="device" hidden>
+      <li data-platform="ios"><b>iPhone / iPad</b>Réglages › Confidentialité et sécurité › Service de localisation : activez-le, puis touchez « Sites web Safari » (ou votre navigateur) › « Lorsque l'app est active ». Activez aussi « Position exacte ».</li>
+      <li data-platform="android"><b>Android</b>Faites glisser le haut de l'écran vers le bas et activez « Localisation ». Puis Paramètres › Applications › Chrome (ou votre navigateur) › Autorisations › Position › Autoriser.</li>
+      <li data-platform="desktop"><b>Ordinateur</b>Mac : Réglages Système › Confidentialité et sécurité › Service de localisation : activez-le pour votre navigateur, puis relancez-le. Windows : Paramètres › Confidentialité et sécurité › Localisation : activez les services de localisation et « Autoriser les applications de bureau ».</li>
     </ul>
     <p class="inline-note" id="geo-help-note" role="status"></p>
     <button class="btn btn-primary" type="button" id="geo-retry">Réessayer</button>
@@ -7135,6 +7141,7 @@
    * @returns {Promise<'granted'|'blocked'|'denied'|'error'|'unavailable'>}
    *   'blocked' = refus mémorisé par le navigateur (aucune fenêtre n'a pu s'afficher)
    */
+  const readPosition = (options) => new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, options));
   let pendingRequest = null;
   function requestLocation({ fly = false, fromButton = false } = {}) {
     if (pendingRequest) return pendingRequest;
@@ -7150,19 +7157,18 @@
     }
     setLocateState('searching');
     const startedAt = performance.now();
-    pendingRequest = new Promise((resolve) => {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          store.write({ geoConsent: 'accepted' });
-          Geo.permission = 'granted';
-          onPosition(pos, { fly });
-          startWatch();
-          resolve('granted');
-        },
-        (err) => resolve(onLocationError(err, { fromButton, elapsed: performance.now() - startedAt })),
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-      );
-    }).finally(() => { pendingRequest = null; });
+    pendingRequest = readPosition({ enableHighAccuracy: true, timeout: 15000, maximumAge: 0 })
+      // GPS lent ou sans signal (intérieur, ordinateur) : nouvel essai par le Wi-Fi / réseau, moins précis mais rapide
+      .catch((err) => (err.code === err.PERMISSION_DENIED ? Promise.reject(err)
+        : readPosition({ enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 })))
+      .then((pos) => {
+        store.write({ geoConsent: 'accepted' });
+        Geo.permission = 'granted';
+        onPosition(pos, { fly });
+        startWatch();
+        return 'granted';
+      }, (err) => onLocationError(err, { fromButton, elapsed: performance.now() - startedAt }))
+      .finally(() => { pendingRequest = null; });
     return pendingRequest;
   }
 
@@ -7197,7 +7203,7 @@
     if (!isInBounds(Geo.position)) {
       if (fly || !Geo.outsideWarned) {
         Geo.outsideWarned = true;
-        toast('Vous êtes à ' + formatDistance(distance(Geo.position, CONFIG.center)) + ' de La Roche-sur-Yon. La carte reste centrée sur la ville.');
+        toast(outsideMessage());
       }
       if (fly) whenMapReady(flyToCity);
       return;
@@ -7209,17 +7215,19 @@
 
   function onLocationError(err, { fromButton, elapsed }) {
     if (err.code === err.PERMISSION_DENIED) {
-      Geo.permission = 'denied';
+      // Site autorisé mais position refusée : c'est l'appareil qui bloque (localisation coupée, navigateur non autorisé)
+      const device = Geo.permission === 'granted';
+      if (!device) Geo.permission = 'denied';
       setLocateState('denied');
-      const blocked = elapsed < 600;   // réponse quasi immédiate = aucune fenêtre affichée (refus mémorisé)
-      if (fromButton && blocked) openGeoHelp();
-      else if (fromButton) toast('Localisation refusée.', { label: 'Aide', run: openGeoHelp });
+      const blocked = device || elapsed < 600;   // réponse quasi immédiate = aucune fenêtre affichée (refus mémorisé)
+      if (fromButton && blocked) openGeoHelp(device ? 'device' : 'site');
+      else if (fromButton) toast('Localisation refusée.', { label: 'Aide', run: () => openGeoHelp('site') });
       return blocked ? 'blocked' : 'denied';
     }
     setLocateState(Geo.position ? 'active' : 'idle');
-    toast(err.code === err.TIMEOUT
-      ? 'Position introuvable pour le moment. Réessayez dans un instant.'
-      : 'Impossible de déterminer votre position. Vérifiez que le GPS est activé.');
+    if (err.code === err.TIMEOUT) toast('Position introuvable pour le moment. Réessayez dans un instant.');
+    else toast('Impossible de déterminer votre position. Vérifiez que la localisation de l\'appareil est activée.',
+      { label: 'Aide', run: () => openGeoHelp('device') });
     return 'error';
   }
 
@@ -7250,6 +7258,12 @@
     view.flyTo({ center: Geo.position, zoom: Math.max(view.getZoom(), 16.5), duration: 1500 });
   }
 
+  /** Position bien trouvée, mais hors de la carte (limitée à l'agglomération) : on le dit clairement. */
+  function outsideMessage() {
+    return 'Position trouvée : vous êtes à ' + formatDistance(distance(Geo.position, CONFIG.center))
+      + ' de La Roche-sur-Yon. FlashMiam ne couvre que La Roche-sur-Yon pour l\'instant : la carte reste centrée sur la ville.';
+  }
+
   function flyToCity() {
     view.flyTo({ center: CONFIG.center, zoom: CONFIG.heroZoom, duration: 1600 });
   }
@@ -7258,7 +7272,7 @@
     if (locateBtn.dataset.state === 'searching') return;
     if (Geo.position && Geo.watchId !== null) {
       if (isInBounds(Geo.position)) whenMapReady(flyToUser);
-      else toast('Vous êtes en dehors de La Roche-sur-Yon.');
+      else toast(outsideMessage());
       return;
     }
     requestLocation({ fly: true, fromButton: true });
@@ -7430,13 +7444,17 @@
     return { open, schedule, syncProfile, syncAccount, mode, isDone };
   })();
 
-  function openGeoHelp() {
+  /** mode : 'site' = refus mémorisé par le navigateur ; 'device' = localisation coupée dans les réglages de l'appareil. */
+  function openGeoHelp(mode = 'site') {
     const platform = detectPlatform();
-    const list = document.querySelector('.help-steps');
+    const help = $('geo-help');
+    help.dataset.mode = mode;
+    help.querySelectorAll('[data-geo-mode]').forEach((el) => { el.hidden = el.dataset.geoMode !== mode; });
+    const list = help.querySelector('.help-steps[data-geo-mode="' + mode + '"]');
     list.querySelectorAll('li').forEach((li) => li.classList.toggle('is-current', li.dataset.platform === platform));
     list.prepend(list.querySelector('[data-platform="' + platform + '"]'));
     $('geo-help-note').textContent = '';
-    openPanel($('geo-help'), { modal: true });
+    openPanel(help, { modal: true });
   }
 
   $('geo-retry').addEventListener('click', async () => {
@@ -7446,7 +7464,8 @@
     const result = await requestLocation({ fly: true });
     btn.disabled = false;
     if (result === 'granted') closePanel($('geo-help'));
-    else if (result === 'blocked') $('geo-help-note').textContent = 'La position est toujours bloquée. Modifiez le réglage indiqué ci-dessus.';
+    else if (result === 'blocked' && $('geo-help').dataset.mode === 'device' && Geo.permission !== 'granted') openGeoHelp('site');
+    else if (result === 'blocked' || result === 'error') $('geo-help-note').textContent = 'La position est toujours bloquée. Modifiez le réglage indiqué ci-dessus.';
     else if (result === 'denied') $('geo-help-note').textContent = 'Vous avez refusé l\'accès à votre position.';
   });
 
