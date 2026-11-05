@@ -7428,7 +7428,9 @@
       toast('Noté : on ne vous le proposera plus. Le tutoriel reste dans votre profil.');
     });
     $('profile-install').addEventListener('click', () => open());
-    return { open, schedule, syncProfile, syncAccount, mode, isDone };
+    /** Pas de proposition automatique pendant cette visite (case décochée à l'inscription, ou fenêtre déjà vue). */
+    const skipThisVisit = () => { try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (e) { /* navigation privée */ } };
+    return { open, schedule, syncProfile, syncAccount, mode, isDone, skipThisVisit };
   })();
 
   function openGeoHelp() {
@@ -11071,6 +11073,10 @@
   if (params.has('paiement')) history.replaceState(null, '', location.pathname + location.hash);
   // Retour de l'inscription (application, app/inscription/) : compte tout neuf, déjà connecté → accueil et localisation
   const welcomeBack = params.get('bienvenue') === '1';
+  // Case « Ajouter FlashMiam à mon écran d'accueil » de l'inscription : raccourci=1 → la fiche d'installation (guide
+  // iPhone, ou bouton d'installation) s'ouvre comme d'habitude dès que la carte est calme ; raccourci=0 → case décochée,
+  // ou fenêtre du navigateur déjà vue pendant l'inscription : pas reproposé pendant cette visite.
+  if (welcomeBack && params.get('raccourci') === '0') Install.skipThisVisit();
   if (params.has('bienvenue')) history.replaceState(null, '', location.pathname + location.hash);
   // Lien direct vers une fiche (?r=…&t=reviews|menu|story) : ouverte après la connexion
   if (params.get('r')) {
