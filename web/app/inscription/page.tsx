@@ -6,6 +6,8 @@ import { OG_IMAGE } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "Créer un compte · FlashMiam",
   description: "Inscription gratuite à FlashMiam, la carte des bons plans food des étudiants de La Roche-sur-Yon.",
+  // Manifeste de la carte (adresse absolue, hors /app) : Android peut proposer d'installer FlashMiam dès l'inscription
+  manifest: "/manifest.webmanifest",
   // (openGraph d'une page remplace celui de la mise en page : image et nom du site répétés)
   openGraph: {
     type: "website", siteName: "FlashMiam", locale: "fr_FR", images: [OG_IMAGE],
