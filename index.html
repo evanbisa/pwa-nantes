@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-foITd8yuKnvxLXkdgZEPIBDEfmlXFUpTMcihAYMJoYs=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-dcJWQxkzAOPygfoR5udeKpsrzvQLWX8FCIwRAwBisSk=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -393,7 +393,7 @@
     /* Petit écran avec les étapes : les avantages laissent la place */
     @media (max-height: 700px) { #install-sheet:has(.ins-steps:not([hidden])) .ins-perks { display: none; } }
     .ins-steps { margin: 14px 0 4px; padding: 12px 14px; list-style: none; counter-reset: ins; display: grid; gap: 12px; border-radius: 14px; background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); }
-    .ins-steps[hidden], .ins-desk[hidden], .ins-done[hidden], #install-later[hidden] { display: none; }
+    .ins-steps[hidden], .ins-desk[hidden], .ins-done[hidden] { display: none; }
     .ins-desk { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 14px; align-items: center; margin-top: 14px; }
     .ins-desk .ins-steps { margin: 0; }
     .ins-qr { width: 132px; height: 132px; padding: 6px; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 1px var(--line); }
@@ -1572,6 +1572,18 @@
     #net-retry { flex: none; pointer-events: auto; margin-left: 2px; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); }
     @media (prefers-reduced-motion: reduce) { .net.is-slow .net-dot { animation: none; } }
     .toast button { flex: none; color: #8ab4f8; font-weight: 500; }
+    /* Rappel « écran d'accueil » : sous la barre du haut, sous les messages (toast) s'il y en a un */
+    .install-nudge { position: fixed; z-index: 119; left: 12px; right: 12px; top: calc(var(--safe-top) + 76px); max-width: 480px; margin: 0 auto;
+      display: flex; align-items: center; gap: 12px; padding: 10px 8px 10px 12px; border-radius: 16px; color: var(--text); background: var(--panel-solid);
+      box-shadow: var(--shadow); animation: rise .3s var(--ease-out) both; }
+    .install-nudge[hidden] { display: none; }
+    .install-nudge img { flex: none; border-radius: 10px; }
+    .install-nudge p { flex: 1; min-width: 0; margin: 0; font-size: 13px; line-height: 1.3; }
+    .install-nudge b { display: block; font-size: 14px; font-weight: 500; }
+    .install-nudge span { color: var(--muted); }
+    .nudge-go { flex: none; padding: 8px 12px; border-radius: 18px; font-size: 13px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); }
+    .nudge-close { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; font-size: 22px; line-height: 1; color: var(--muted); }
+    .nudge-go:focus-visible, .nudge-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     .fatal { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 24px; text-align: center; background: var(--bg); }
     .fatal > div { max-width: 340px; }
@@ -2190,7 +2202,6 @@
       </ol>
     </div>
     <button class="btn btn-primary" type="button" id="install-go">Ajouter à l'écran d'accueil</button>
-    <button class="btn btn-ghost" type="button" id="install-later" data-close>Plus tard</button>
     <button class="link-btn ins-done" type="button" id="install-done">C'est déjà fait</button>
   </section>
 
@@ -2970,6 +2981,13 @@
   <!-- ===================== TOAST ===================== -->
   <div id="net" class="net" role="status" aria-live="polite" hidden><span class="net-dot" aria-hidden="true"></span><span id="net-text"></span><button type="button" id="net-retry" hidden>Réessayer</button></div>
   <div id="toast" class="toast" role="status" aria-live="polite"><span id="toast-text"></span><button id="toast-action" type="button" hidden></button></div>
+  <!-- Rappel « écran d'accueil » : petite notification à chaque connexion tant que ce n'est pas fait -->
+  <div id="install-nudge" class="install-nudge" role="status" aria-live="polite" hidden>
+    <img src="icon-192.png" alt="" width="40" height="40" />
+    <p><b>Mettez FlashMiam sur votre écran d'accueil</b><span>La carte en un geste, comme une vraie appli.</span></p>
+    <button class="nudge-go" type="button" id="install-nudge-go">Voir le tuto</button>
+    <button class="nudge-close" type="button" id="install-nudge-close" aria-label="Plus tard">&times;</button>
+  </div>
 
   <!-- ===================== COOKIES (choix au premier lancement) ===================== -->
   <div id="consent" class="consent" role="dialog" aria-modal="true" aria-labelledby="cs-title" aria-describedby="cs-intro" hidden>
@@ -7406,19 +7424,18 @@
       else if (read().done && !me.appInstalledAt) markDone();   // installée avant de se connecter
     }
     let qrDrawn = false;
-    function open({ auto = false } = {}) {
-      const m = mode({ tutorial: !auto });
+    /** Tutoriel (profil, ou « Voir le tuto » du rappel). */
+    function open() {
+      const m = mode({ tutorial: true });
       if (!m) return false;
       current = m;
       document.querySelectorAll('#install-sheet [data-install]').forEach((el) => { el.hidden = el.dataset.install !== m; });
       $('install-title').textContent = m === 'desktop' ? 'FlashMiam sur votre téléphone' : 'FlashMiam sur votre écran d\'accueil ?';
       $('install-go').textContent = m === 'native' ? 'Ajouter à l\'écran d\'accueil' : 'J\'ai compris';
-      $('install-later').hidden = !auto;
       $('install-done').hidden = m === 'desktop' || isDone();
       if (m === 'desktop' && !qrDrawn) {
         loadQrMaker().then(() => { $('install-qr').innerHTML = qrSvg(location.origin + location.pathname); qrDrawn = true; }, () => { $('install-qr').hidden = true; });
       }
-      if (auto) { try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (e) { /* navigation privée */ } }
       SiteStats.track('install_shown');
       if (activePanel === $('profile-sheet')) closePanel(activePanel, { silent: true });
       openPanel($('install-sheet'), { modal: true });
@@ -7436,7 +7453,28 @@
       } catch (e) { /* proposition expirée : les étapes restent dans le profil */ }
       syncProfile();
     }
-    /** Au début de la visite, une fois, sur la carte, dès que rien d'autre n'est ouvert (le guide d'abord). */
+    /**
+     * Petite notification (pas la fiche entière) : « Voir le tuto » ouvre le tutoriel adapté à l'appareil. Une fois par
+     * visite et à chaque connexion, tant que ce n'est pas fait ; se range seule au bout de 15 s.
+     */
+    let nudgeTimer = 0;
+    function nudge() {
+      if (!mode()) return false;
+      try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (e) { /* navigation privée */ }
+      $('install-nudge').hidden = false;
+      clearTimeout(nudgeTimer);
+      nudgeTimer = setTimeout(hideNudge, 15000);
+      return true;
+    }
+    function hideNudge() { clearTimeout(nudgeTimer); $('install-nudge').hidden = true; }
+    $('install-nudge-go').addEventListener('click', () => { hideNudge(); open(); });
+    $('install-nudge-close').addEventListener('click', hideNudge);
+    /** Connexion (mot de passe, Google, nouveau mot de passe) : le rappel est proposé de nouveau. */
+    function newLogin() {
+      try { sessionStorage.removeItem(SESSION_KEY); } catch (e) { /* navigation privée */ }
+      scheduled = false;
+    }
+    /** Au début de la visite et à chaque connexion, sur la carte, dès que rien d'autre n'est ouvert (le guide d'abord). */
     function schedule() {
       syncAccount();
       if (scheduled || !due() || !currentUser()) return;
@@ -7447,7 +7485,7 @@
         const calm = !activePanel && $('onboarding').hidden && !StoryViewer.isOpen() && document.visibilityState === 'visible' && $('search-panel').hidden
           && !document.body.classList.contains('pro-open') && !document.body.classList.contains('ui-intro') && !Tour.isOpen()
           && !VisitPass.isOpen() && !Scanner.isOpen();
-        if (calm && open({ auto: true })) return;
+        if (calm && nudge()) return;
         if (Date.now() - started < 10 * 60 * 1000) setTimeout(tick, 2000);
       };
       setTimeout(tick, CONFIG.installPromptDelay);
@@ -7464,6 +7502,7 @@
     });
     window.addEventListener('appinstalled', () => {
       deferred = null;
+      hideNudge();
       SiteStats.track('installed');
       markDone();
       closePanel($('install-sheet'));
@@ -7475,10 +7514,10 @@
       closePanel($('install-sheet'));
       toast('Noté : on ne vous le proposera plus. Le tutoriel reste dans votre profil.');
     });
-    $('profile-install').addEventListener('click', () => open());
+    $('profile-install').addEventListener('click', open);
     /** Pas de proposition automatique pendant cette visite (case décochée à l'inscription, ou fenêtre déjà vue). */
     const skipThisVisit = () => { try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (e) { /* navigation privée */ } };
-    return { open, schedule, syncProfile, syncAccount, mode, isDone, skipThisVisit };
+    return { open, schedule, syncProfile, syncAccount, mode, isDone, skipThisVisit, newLogin };
   })();
 
   /** mode : 'site' = refus mémorisé par le navigateur ; 'device' = localisation coupée dans les réglages de l'appareil. */
@@ -8187,6 +8226,7 @@
     }
     $('li-password').value = '';
     applySession(user);
+    Install.newLogin();
     routeAfterLogin(user);
   }
 
@@ -8281,6 +8321,7 @@
     }
     setAuthRole('client');
     applySession(user);
+    Install.newLogin();
     // Première connexion sur cet appareil : proposer la localisation ; sinon, directement la carte
     const then = () => { if (!store.read().geoConsent) showAuthStep('location'); else routeAfterLogin(user); };
     // Compte Google tout neuf : les deux questions de l'inscription (sexe, âge), passables
@@ -8356,6 +8397,7 @@
     const user = await Loader.run(loadUser(data.user), 'Ouverture de votre compte…');
     setAuthRole(user.role);
     applySession(user);
+    Install.newLogin();
     routeAfterLogin(user);
   });
 
@@ -11131,6 +11173,9 @@
   // ou fenêtre du navigateur déjà vue pendant l'inscription : pas reproposé pendant cette visite.
   if (welcomeBack && params.get('raccourci') === '0') Install.skipThisVisit();
   if (params.has('bienvenue')) history.replaceState(null, '', location.pathname + location.hash);
+  // « J'ai déjà un compte » depuis l'inscription (app/inscription/) : écran de connexion directement
+  const wantLogin = params.get('connexion') === '1';
+  if (params.has('connexion')) history.replaceState(null, '', location.pathname + location.hash);
   // Lien direct vers une fiche (?r=…&t=reviews|menu|story) : ouverte après la connexion
   if (params.get('r')) {
     pendingLink = { id: params.get('r'), tab: params.get('t'), source: params.get('s') === 'notif' ? 'notif' : 'link' };
@@ -11184,7 +11229,7 @@
         if (paymentReturn && user.role === 'pro') awaitPayment(user);
         if (pendingVisit) setTimeout(() => openVisitLink(pendingVisit, user), 600);
         else if (pendingShortcut) setTimeout(() => openShortcut(pendingShortcut, user), 600);
-      } else if (store.read().lastEmail) {
+      } else if (store.read().lastEmail || wantLogin) {
         setAuthRole(store.read().lastRole || 'client');
         $('li-email').value = store.read().lastEmail || '';
         showAuthStep('login');
