@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-09sUgaFwTjyMSbulqKywosxk4hu2YI1crbPqiPLzHOU=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-dcJWQxkzAOPygfoR5udeKpsrzvQLWX8FCIwRAwBisSk=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -393,7 +393,7 @@
     /* Petit écran avec les étapes : les avantages laissent la place */
     @media (max-height: 700px) { #install-sheet:has(.ins-steps:not([hidden])) .ins-perks { display: none; } }
     .ins-steps { margin: 14px 0 4px; padding: 12px 14px; list-style: none; counter-reset: ins; display: grid; gap: 12px; border-radius: 14px; background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); }
-    .ins-steps[hidden], .ins-desk[hidden], .ins-done[hidden], #install-later[hidden] { display: none; }
+    .ins-steps[hidden], .ins-desk[hidden], .ins-done[hidden] { display: none; }
     .ins-desk { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 14px; align-items: center; margin-top: 14px; }
     .ins-desk .ins-steps { margin: 0; }
     .ins-qr { width: 132px; height: 132px; padding: 6px; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 1px var(--line); }
@@ -1122,6 +1122,13 @@
     .sv-head div { flex: 1; min-width: 0; }
     .sv-head strong { display: block; font-size: 14.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sv-head small { display: block; font-size: 12px; opacity: .8; }
+    /* État de l'établissement : pastille colorée, texte blanc (lisible sur toutes les photos) */
+    .sv-head .sv-status { display: flex; align-items: center; gap: 6px; margin-top: 2px; opacity: 1; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sv-status::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: #9aa0a6; box-shadow: 0 0 0 2px rgba(0, 0, 0, .25); }
+    .sv-status.is-open::before { background: #34d399; }
+    .sv-status.is-soon::before { background: #fbbf24; }
+    .sv-status.is-closed::before { background: #f87171; }
+    .sv-status:empty { display: none; }
     .sv-close, .sv-pause { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; font-size: 26px; line-height: 1; color: #fff; }
     .sv-pause { font-size: 16px; }
     .sv-like { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; font-size: 26px; line-height: 1; color: #fff; transition: transform .15s var(--ease-out); }
@@ -1214,7 +1221,7 @@
 
     .pro-entry { margin-top: 6px; }
 
-    /* ---------- Espace restaurateur (plein écran sur téléphone, grand panneau sur ordinateur) ---------- */
+    /* ---------- Espace restaurateur (plein écran, sur téléphone comme sur ordinateur) ---------- */
     .pro-space { position: fixed; inset: 0; z-index: 90; display: flex; justify-content: center; background: var(--backdrop); }
     .pro-space[hidden] { display: none; }
     .ps-panel { display: flex; flex-direction: column; width: 100%; height: 100%; color: var(--text); background: var(--panel-solid); animation: rise .25s var(--ease-out) both; }
@@ -1335,10 +1342,10 @@
     .story-admin .sa-stats { color: var(--text); }
     @media (max-width: 380px) { .ps-tabs .ps-lbl { font-size: 0; } .ps-tabs .ps-lbl::after { content: attr(data-short); font-size: 11.5px; } }
     @media (max-width: 360px) { .ps-quick { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ps-tabs .ps-ico { width: 44px; } }
+    /* Ordinateur : tableau de bord sur tout l'écran, menu à gauche, contenu sur plusieurs colonnes */
     @media (min-width: 900px) {
-      .pro-space { align-items: center; padding: 24px; }
-      .ps-panel { display: grid; grid-template-columns: 220px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); width: min(1080px, 100%); height: min(860px, 100%); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); }
-      .ps-head { grid-column: 1 / -1; padding: 16px 20px; }
+      .ps-panel { display: grid; grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); overflow: hidden; }
+      .ps-head { grid-column: 1 / -1; padding: 14px 24px; }
       .ps-tabs { order: 0; grid-column: 1; grid-row: 2; }
       .ps-body { order: 0; grid-column: 2; grid-row: 2; }
       .ps-tabs { flex-direction: column; gap: 4px; padding: 12px; border-top: 0; border-right: 1px solid var(--line); }
@@ -1347,13 +1354,33 @@
       .ps-tabs button[aria-selected="true"] .ps-ico { background: none; }
       .ps-tabs .ps-ico { width: 40px; }
       .ps-badge { right: -6px; }
-      .ps-body { padding: 24px 28px 32px; }
+      .ps-body { padding: 28px 40px 40px; }
       .ps-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       .ps-quick { grid-template-columns: repeat(6, minmax(0, 1fr)); }
       .ps-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       #psp-stats .ps-card, #psp-fiche .ps-card { max-width: none; }
       .ps-insights { grid-template-columns: 1fr 1fr; }
     }
+    /*
+     * Grand écran : deux colonnes dans chaque onglet (texte lisible jusqu'à 1600 px, centré au-delà).
+     * Accueil : scanner et chiffres en haut, « À faire » à côté des actions rapides, l'essentiel en dessous.
+     * Statistiques : chiffres et courbe des visites en pleine largeur, le détail en cartes côte à côte.
+     */
+    @media (min-width: 1200px) {
+      .ps-pane { max-width: 1600px; margin: 0 auto; }
+      .ps-pane:not([hidden]) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; align-items: start; }
+      .ps-pane > * { grid-column: 1 / -1; }
+      #ps-home-live { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); column-gap: 28px; align-items: start; }
+      #ps-home-live > .ps-scan, #ps-home-live > .ps-cards, #ps-home-live > .ps-block:last-child { grid-column: 1 / -1; }
+      #ps-home-live .ps-quick { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .ps-insights { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      #psp-stats > .chart:first-of-type ~ .chart, #psp-stats > .ps-card, #psp-publish > .pd-block, #psp-fiche > .ps-card { grid-column: auto; }
+      #psp-stats > .chart:first-of-type ~ .chart, #psp-stats > .ps-card, #psp-publish > .pd-block, #psp-fiche > .ps-card { margin-top: 22px; }
+      #psp-publish > .pd-block { margin-top: 16px; }
+      .ps-rv-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+      #psp-fiche > .btn { grid-column: auto; }
+    }
+    @media (min-width: 1600px) { .ps-kpis { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
 
     /* =====================================================================
        8 bis. RECHERCHE, NOTIFICATIONS, AVIS
@@ -1565,6 +1592,18 @@
     #net-retry { flex: none; pointer-events: auto; margin-left: 2px; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); }
     @media (prefers-reduced-motion: reduce) { .net.is-slow .net-dot { animation: none; } }
     .toast button { flex: none; color: #8ab4f8; font-weight: 500; }
+    /* Rappel « écran d'accueil » : sous la barre du haut, sous les messages (toast) s'il y en a un */
+    .install-nudge { position: fixed; z-index: 119; left: 12px; right: 12px; top: calc(var(--safe-top) + 76px); max-width: 480px; margin: 0 auto;
+      display: flex; align-items: center; gap: 12px; padding: 10px 8px 10px 12px; border-radius: 16px; color: var(--text); background: var(--panel-solid);
+      box-shadow: var(--shadow); animation: rise .3s var(--ease-out) both; }
+    .install-nudge[hidden] { display: none; }
+    .install-nudge img { flex: none; border-radius: 10px; }
+    .install-nudge p { flex: 1; min-width: 0; margin: 0; font-size: 13px; line-height: 1.3; }
+    .install-nudge b { display: block; font-size: 14px; font-weight: 500; }
+    .install-nudge span { color: var(--muted); }
+    .nudge-go { flex: none; padding: 8px 12px; border-radius: 18px; font-size: 13px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); }
+    .nudge-close { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; font-size: 22px; line-height: 1; color: var(--muted); }
+    .nudge-go:focus-visible, .nudge-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     .fatal { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 24px; text-align: center; background: var(--bg); }
     .fatal > div { max-width: 340px; }
@@ -2072,7 +2111,7 @@
         <div class="sv-bars" id="sv-bars" aria-hidden="true"></div>
         <div class="sv-head">
           <span class="sv-avatar" id="sv-avatar" aria-hidden="true"></span>
-          <div><strong id="sv-name"></strong><small id="sv-time"></small></div>
+          <div><strong id="sv-name"></strong><small id="sv-time"></small><small class="sv-status" id="sv-status"></small></div>
           <button class="sv-like" type="button" id="sv-like" aria-pressed="false" aria-label="J'aime cette story" hidden>♡</button>
           <button class="sv-pause" type="button" id="sv-pause" aria-label="Mettre en pause">❚❚</button>
           <button class="sv-close" type="button" id="sv-close" aria-label="Fermer les stories">&times;</button>
@@ -2122,16 +2161,22 @@
     <div class="sheet-head">
       <div class="sheet-emoji" aria-hidden="true">📍</div>
       <div class="sheet-title">
-        <h3 id="geo-help-title">Localisation bloquée</h3>
+        <h3 id="geo-help-title"><span data-geo-mode="site">Localisation bloquée</span><span data-geo-mode="device" hidden>Localisation coupée sur l'appareil</span></h3>
         <p class="eyebrow">Autorisation nécessaire</p>
       </div>
       <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
     </div>
-    <p class="lead">Votre navigateur a mémorisé un refus et ne peut plus afficher la demande. Réactivez la position pour ce site, puis touchez « Réessayer ».</p>
-    <ul class="help-steps">
+    <p class="lead" data-geo-mode="site">Votre navigateur a mémorisé un refus et ne peut plus afficher la demande. Réactivez la position pour ce site, puis touchez « Réessayer ».</p>
+    <p class="lead" data-geo-mode="device" hidden>FlashMiam est bien autorisé, mais votre téléphone ou votre ordinateur ne donne pas la position au navigateur. Activez-la dans les réglages de l'appareil, puis touchez « Réessayer ».</p>
+    <ul class="help-steps" data-geo-mode="site">
       <li data-platform="ios"><b>iPhone / iPad (Safari)</b>Touchez « aA » dans la barre d'adresse › Réglages du site web › Position › Autoriser. Vérifiez aussi Réglages › Confidentialité › Service de localisation › Safari.</li>
       <li data-platform="android"><b>Android (Chrome)</b>Touchez l'icône à gauche de l'adresse › Autorisations › Position › Autoriser.</li>
       <li data-platform="desktop"><b>Ordinateur</b>Cliquez sur l'icône à gauche de l'adresse et autorisez « Position ».</li>
+    </ul>
+    <ul class="help-steps" data-geo-mode="device" hidden>
+      <li data-platform="ios"><b>iPhone / iPad</b>Réglages › Confidentialité et sécurité › Service de localisation : activez-le, puis touchez « Sites web Safari » (ou votre navigateur) › « Lorsque l'app est active ». Activez aussi « Position exacte ».</li>
+      <li data-platform="android"><b>Android</b>Faites glisser le haut de l'écran vers le bas et activez « Localisation ». Puis Paramètres › Applications › Chrome (ou votre navigateur) › Autorisations › Position › Autoriser.</li>
+      <li data-platform="desktop"><b>Ordinateur</b>Mac : Réglages Système › Confidentialité et sécurité › Service de localisation : activez-le pour votre navigateur, puis relancez-le. Windows : Paramètres › Confidentialité et sécurité › Localisation : activez les services de localisation et « Autoriser les applications de bureau ».</li>
     </ul>
     <p class="inline-note" id="geo-help-note" role="status"></p>
     <button class="btn btn-primary" type="button" id="geo-retry">Réessayer</button>
@@ -2177,7 +2222,6 @@
       </ol>
     </div>
     <button class="btn btn-primary" type="button" id="install-go">Ajouter à l'écran d'accueil</button>
-    <button class="btn btn-ghost" type="button" id="install-later" data-close>Plus tard</button>
     <button class="link-btn ins-done" type="button" id="install-done">C'est déjà fait</button>
   </section>
 
@@ -2957,6 +3001,13 @@
   <!-- ===================== TOAST ===================== -->
   <div id="net" class="net" role="status" aria-live="polite" hidden><span class="net-dot" aria-hidden="true"></span><span id="net-text"></span><button type="button" id="net-retry" hidden>Réessayer</button></div>
   <div id="toast" class="toast" role="status" aria-live="polite"><span id="toast-text"></span><button id="toast-action" type="button" hidden></button></div>
+  <!-- Rappel « écran d'accueil » : petite notification à chaque connexion tant que ce n'est pas fait -->
+  <div id="install-nudge" class="install-nudge" role="status" aria-live="polite" hidden>
+    <img src="icon-192.png" alt="" width="40" height="40" />
+    <p><b>Mettez FlashMiam sur votre écran d'accueil</b><span>La carte en un geste, comme une vraie appli.</span></p>
+    <button class="nudge-go" type="button" id="install-nudge-go">Voir le tuto</button>
+    <button class="nudge-close" type="button" id="install-nudge-close" aria-label="Plus tard">&times;</button>
+  </div>
 
   <!-- ===================== COOKIES (choix au premier lancement) ===================== -->
   <div id="consent" class="consent" role="dialog" aria-modal="true" aria-labelledby="cs-title" aria-describedby="cs-intro" hidden>
@@ -6687,7 +6738,7 @@
   const StoryViewer = (() => {
     const root = $('story-viewer');
     let groups = [], gi = 0, si = 0, start = 0, elapsed = 0, raf = 0, paused = false, url = null, token = 0;
-    let returnFocus = null, press = null;
+    let returnFocus = null, press = null, clock = 0;
     const current = () => groups[gi] && groups[gi].stories[si];
     function open(shopId, { only = false } = {}) {
       groups = storyGroups();
@@ -6698,11 +6749,14 @@
       si = Math.max(0, groups[gi].stories.findIndex((st) => !seen[st.id]));
       returnFocus = document.activeElement;
       root.hidden = false;
+      clearInterval(clock);
+      clock = setInterval(paintTime, 30000);   // « ferme dans 12 min » reste juste, même en pause
       show();
       $('sv-close').focus();
     }
     function close() {
       cancelAnimationFrame(raf);
+      clearInterval(clock);
       token++;
       root.hidden = true;
       if (url) { URL.revokeObjectURL(url); url = null; }
@@ -6719,9 +6773,11 @@
       g.stories.forEach((_, i) => { const b = document.createElement('span'); b.innerHTML = '<i></i>'; if (i < si) b.firstChild.style.width = '100%'; bars.appendChild(b); });
       $('sv-avatar').textContent = catOf(g.shop).emoji;
       $('sv-name').textContent = g.shop.name;
-      $('sv-time').textContent = timeAgo(st.createdAt);
+      paintTime();
       $('sv-caption').textContent = st.imageUrl ? (st.text || '') : '';
-      $('sv-live').textContent = 'Story ' + (si + 1) + ' sur ' + g.stories.length + ' de ' + g.shop.name + (st.text ? ' : ' + st.text : '');
+      const away = distanceLabel(g.shop);
+      $('sv-live').textContent = 'Story ' + (si + 1) + ' sur ' + g.stories.length + ' de ' + g.shop.name + ', ' + getStatus(g.shop).label
+        + (away ? ', à ' + away : '') + (st.text ? ' : ' + st.text : '');
       if (url) { URL.revokeObjectURL(url); url = null; }
       const media = $('sv-media');
       const u = await fillStory(media, st);
@@ -6735,6 +6791,27 @@
       elapsed = 0; start = performance.now();
       setPaused(false);
       raf = requestAnimationFrame(tick);
+    }
+    /**
+     * « 450 m · 6 min à pied » (en voiture au-delà de 30 min de marche, distance seule hors de la ville : le temps est
+     * estimé à la vitesse urbaine) ; vide sans position connue.
+     */
+    function distanceLabel(shop) {
+      if (!Geo.position) return '';
+      const d = distance(Geo.position, shop.coords), walk = walkMinutes(d);
+      if (d > 15000) return formatDistance(d);
+      return formatDistance(d) + ' · ' + (walk <= 30 ? formatMinutes(walk) + ' à pied' : formatMinutes(driveMinutes(d)) + ' en voiture');
+    }
+    /** Heure de publication, distance et état de l'établissement (ouvert, ferme bientôt, fermé), recalculés à chaque appel. */
+    function paintTime() {
+      const g = groups[gi], st = current();
+      if (!g || !st) return;
+      const away = distanceLabel(g.shop);
+      $('sv-time').textContent = timeAgo(st.createdAt) + (away ? ' · 📍 ' + away : '');
+      const status = getStatus(g.shop);
+      const el = $('sv-status');
+      el.className = 'sv-status ' + (status.soon ? 'is-soon' : status.open ? 'is-open' : 'is-closed');
+      el.textContent = status.label;
     }
     function tick(t) {
       const bar = $('sv-bars').children[si];
@@ -6800,7 +6877,7 @@
       }
     }, true);
     document.addEventListener('visibilitychange', () => { if (!root.hidden && document.hidden) setPaused(true); });
-    return { open, close, isOpen: () => !root.hidden };
+    return { open, close, isOpen: () => !root.hidden, refreshDistance: () => { if (!root.hidden) paintTime(); } };
   })();
 
   /* ---------- Espace restaurateur : publier une story ---------- */
@@ -7136,6 +7213,7 @@
    * @returns {Promise<'granted'|'blocked'|'denied'|'error'|'unavailable'>}
    *   'blocked' = refus mémorisé par le navigateur (aucune fenêtre n'a pu s'afficher)
    */
+  const readPosition = (options) => new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, options));
   let pendingRequest = null;
   function requestLocation({ fly = false, fromButton = false } = {}) {
     if (pendingRequest) return pendingRequest;
@@ -7151,19 +7229,18 @@
     }
     setLocateState('searching');
     const startedAt = performance.now();
-    pendingRequest = new Promise((resolve) => {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          store.write({ geoConsent: 'accepted' });
-          Geo.permission = 'granted';
-          onPosition(pos, { fly });
-          startWatch();
-          resolve('granted');
-        },
-        (err) => resolve(onLocationError(err, { fromButton, elapsed: performance.now() - startedAt })),
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-      );
-    }).finally(() => { pendingRequest = null; });
+    pendingRequest = readPosition({ enableHighAccuracy: true, timeout: 15000, maximumAge: 0 })
+      // GPS lent ou sans signal (intérieur, ordinateur) : nouvel essai par le Wi-Fi / réseau, moins précis mais rapide
+      .catch((err) => (err.code === err.PERMISSION_DENIED ? Promise.reject(err)
+        : readPosition({ enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 })))
+      .then((pos) => {
+        store.write({ geoConsent: 'accepted' });
+        Geo.permission = 'granted';
+        onPosition(pos, { fly });
+        startWatch();
+        return 'granted';
+      }, (err) => onLocationError(err, { fromButton, elapsed: performance.now() - startedAt }))
+      .finally(() => { pendingRequest = null; });
     return pendingRequest;
   }
 
@@ -7194,11 +7271,12 @@
     setLocateState('active');
     renderList();
     Offers.refresh();
+    StoryViewer.refreshDistance();
 
     if (!isInBounds(Geo.position)) {
       if (fly || !Geo.outsideWarned) {
         Geo.outsideWarned = true;
-        toast('Vous êtes à ' + formatDistance(distance(Geo.position, CONFIG.center)) + ' de La Roche-sur-Yon. La carte reste centrée sur la ville.');
+        toast(outsideMessage());
       }
       if (fly) whenMapReady(flyToCity);
       return;
@@ -7210,17 +7288,19 @@
 
   function onLocationError(err, { fromButton, elapsed }) {
     if (err.code === err.PERMISSION_DENIED) {
-      Geo.permission = 'denied';
+      // Site autorisé mais position refusée : c'est l'appareil qui bloque (localisation coupée, navigateur non autorisé)
+      const device = Geo.permission === 'granted';
+      if (!device) Geo.permission = 'denied';
       setLocateState('denied');
-      const blocked = elapsed < 600;   // réponse quasi immédiate = aucune fenêtre affichée (refus mémorisé)
-      if (fromButton && blocked) openGeoHelp();
-      else if (fromButton) toast('Localisation refusée.', { label: 'Aide', run: openGeoHelp });
+      const blocked = device || elapsed < 600;   // réponse quasi immédiate = aucune fenêtre affichée (refus mémorisé)
+      if (fromButton && blocked) openGeoHelp(device ? 'device' : 'site');
+      else if (fromButton) toast('Localisation refusée.', { label: 'Aide', run: () => openGeoHelp('site') });
       return blocked ? 'blocked' : 'denied';
     }
     setLocateState(Geo.position ? 'active' : 'idle');
-    toast(err.code === err.TIMEOUT
-      ? 'Position introuvable pour le moment. Réessayez dans un instant.'
-      : 'Impossible de déterminer votre position. Vérifiez que le GPS est activé.');
+    if (err.code === err.TIMEOUT) toast('Position introuvable pour le moment. Réessayez dans un instant.');
+    else toast('Impossible de déterminer votre position. Vérifiez que la localisation de l\'appareil est activée.',
+      { label: 'Aide', run: () => openGeoHelp('device') });
     return 'error';
   }
 
@@ -7251,6 +7331,12 @@
     view.flyTo({ center: Geo.position, zoom: Math.max(view.getZoom(), 16.5), duration: 1500 });
   }
 
+  /** Position bien trouvée, mais hors de la carte (limitée à l'agglomération) : on le dit clairement. */
+  function outsideMessage() {
+    return 'Position trouvée : vous êtes à ' + formatDistance(distance(Geo.position, CONFIG.center))
+      + ' de La Roche-sur-Yon. FlashMiam ne couvre que La Roche-sur-Yon pour l\'instant : la carte reste centrée sur la ville.';
+  }
+
   function flyToCity() {
     view.flyTo({ center: CONFIG.center, zoom: CONFIG.heroZoom, duration: 1600 });
   }
@@ -7259,7 +7345,7 @@
     if (locateBtn.dataset.state === 'searching') return;
     if (Geo.position && Geo.watchId !== null) {
       if (isInBounds(Geo.position)) whenMapReady(flyToUser);
-      else toast('Vous êtes en dehors de La Roche-sur-Yon.');
+      else toast(outsideMessage());
       return;
     }
     requestLocation({ fly: true, fromButton: true });
@@ -7358,19 +7444,18 @@
       else if (read().done && !me.appInstalledAt) markDone();   // installée avant de se connecter
     }
     let qrDrawn = false;
-    function open({ auto = false } = {}) {
-      const m = mode({ tutorial: !auto });
+    /** Tutoriel (profil, ou « Voir le tuto » du rappel). */
+    function open() {
+      const m = mode({ tutorial: true });
       if (!m) return false;
       current = m;
       document.querySelectorAll('#install-sheet [data-install]').forEach((el) => { el.hidden = el.dataset.install !== m; });
       $('install-title').textContent = m === 'desktop' ? 'FlashMiam sur votre téléphone' : 'FlashMiam sur votre écran d\'accueil ?';
       $('install-go').textContent = m === 'native' ? 'Ajouter à l\'écran d\'accueil' : 'J\'ai compris';
-      $('install-later').hidden = !auto;
       $('install-done').hidden = m === 'desktop' || isDone();
       if (m === 'desktop' && !qrDrawn) {
         loadQrMaker().then(() => { $('install-qr').innerHTML = qrSvg(location.origin + location.pathname); qrDrawn = true; }, () => { $('install-qr').hidden = true; });
       }
-      if (auto) { try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (e) { /* navigation privée */ } }
       SiteStats.track('install_shown');
       if (activePanel === $('profile-sheet')) closePanel(activePanel, { silent: true });
       openPanel($('install-sheet'), { modal: true });
@@ -7388,7 +7473,28 @@
       } catch (e) { /* proposition expirée : les étapes restent dans le profil */ }
       syncProfile();
     }
-    /** Au début de la visite, une fois, sur la carte, dès que rien d'autre n'est ouvert (le guide d'abord). */
+    /**
+     * Petite notification (pas la fiche entière) : « Voir le tuto » ouvre le tutoriel adapté à l'appareil. Une fois par
+     * visite et à chaque connexion, tant que ce n'est pas fait ; se range seule au bout de 15 s.
+     */
+    let nudgeTimer = 0;
+    function nudge() {
+      if (!mode()) return false;
+      try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (e) { /* navigation privée */ }
+      $('install-nudge').hidden = false;
+      clearTimeout(nudgeTimer);
+      nudgeTimer = setTimeout(hideNudge, 15000);
+      return true;
+    }
+    function hideNudge() { clearTimeout(nudgeTimer); $('install-nudge').hidden = true; }
+    $('install-nudge-go').addEventListener('click', () => { hideNudge(); open(); });
+    $('install-nudge-close').addEventListener('click', hideNudge);
+    /** Connexion (mot de passe, Google, nouveau mot de passe) : le rappel est proposé de nouveau. */
+    function newLogin() {
+      try { sessionStorage.removeItem(SESSION_KEY); } catch (e) { /* navigation privée */ }
+      scheduled = false;
+    }
+    /** Au début de la visite et à chaque connexion, sur la carte, dès que rien d'autre n'est ouvert (le guide d'abord). */
     function schedule() {
       syncAccount();
       if (scheduled || !due() || !currentUser()) return;
@@ -7399,7 +7505,7 @@
         const calm = !activePanel && $('onboarding').hidden && !StoryViewer.isOpen() && document.visibilityState === 'visible' && $('search-panel').hidden
           && !document.body.classList.contains('pro-open') && !document.body.classList.contains('ui-intro') && !Tour.isOpen()
           && !VisitPass.isOpen() && !Scanner.isOpen();
-        if (calm && open({ auto: true })) return;
+        if (calm && nudge()) return;
         if (Date.now() - started < 10 * 60 * 1000) setTimeout(tick, 2000);
       };
       setTimeout(tick, CONFIG.installPromptDelay);
@@ -7416,6 +7522,7 @@
     });
     window.addEventListener('appinstalled', () => {
       deferred = null;
+      hideNudge();
       SiteStats.track('installed');
       markDone();
       closePanel($('install-sheet'));
@@ -7427,19 +7534,23 @@
       closePanel($('install-sheet'));
       toast('Noté : on ne vous le proposera plus. Le tutoriel reste dans votre profil.');
     });
-    $('profile-install').addEventListener('click', () => open());
+    $('profile-install').addEventListener('click', open);
     /** Pas de proposition automatique pendant cette visite (case décochée à l'inscription, ou fenêtre déjà vue). */
     const skipThisVisit = () => { try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (e) { /* navigation privée */ } };
-    return { open, schedule, syncProfile, syncAccount, mode, isDone, skipThisVisit };
+    return { open, schedule, syncProfile, syncAccount, mode, isDone, skipThisVisit, newLogin };
   })();
 
-  function openGeoHelp() {
+  /** mode : 'site' = refus mémorisé par le navigateur ; 'device' = localisation coupée dans les réglages de l'appareil. */
+  function openGeoHelp(mode = 'site') {
     const platform = detectPlatform();
-    const list = document.querySelector('.help-steps');
+    const help = $('geo-help');
+    help.dataset.mode = mode;
+    help.querySelectorAll('[data-geo-mode]').forEach((el) => { el.hidden = el.dataset.geoMode !== mode; });
+    const list = help.querySelector('.help-steps[data-geo-mode="' + mode + '"]');
     list.querySelectorAll('li').forEach((li) => li.classList.toggle('is-current', li.dataset.platform === platform));
     list.prepend(list.querySelector('[data-platform="' + platform + '"]'));
     $('geo-help-note').textContent = '';
-    openPanel($('geo-help'), { modal: true });
+    openPanel(help, { modal: true });
   }
 
   $('geo-retry').addEventListener('click', async () => {
@@ -7449,7 +7560,8 @@
     const result = await requestLocation({ fly: true });
     btn.disabled = false;
     if (result === 'granted') closePanel($('geo-help'));
-    else if (result === 'blocked') $('geo-help-note').textContent = 'La position est toujours bloquée. Modifiez le réglage indiqué ci-dessus.';
+    else if (result === 'blocked' && $('geo-help').dataset.mode === 'device' && Geo.permission !== 'granted') openGeoHelp('site');
+    else if (result === 'blocked' || result === 'error') $('geo-help-note').textContent = 'La position est toujours bloquée. Modifiez le réglage indiqué ci-dessus.';
     else if (result === 'denied') $('geo-help-note').textContent = 'Vous avez refusé l\'accès à votre position.';
   });
 
@@ -8134,6 +8246,7 @@
     }
     $('li-password').value = '';
     applySession(user);
+    Install.newLogin();
     routeAfterLogin(user);
   }
 
@@ -8228,6 +8341,7 @@
     }
     setAuthRole('client');
     applySession(user);
+    Install.newLogin();
     // Première connexion sur cet appareil : proposer la localisation ; sinon, directement la carte
     const then = () => { if (!store.read().geoConsent) showAuthStep('location'); else routeAfterLogin(user); };
     // Compte Google tout neuf : les deux questions de l'inscription (sexe, âge), passables
@@ -8303,6 +8417,7 @@
     const user = await Loader.run(loadUser(data.user), 'Ouverture de votre compte…');
     setAuthRole(user.role);
     applySession(user);
+    Install.newLogin();
     routeAfterLogin(user);
   });
 
@@ -11078,6 +11193,9 @@
   // ou fenêtre du navigateur déjà vue pendant l'inscription : pas reproposé pendant cette visite.
   if (welcomeBack && params.get('raccourci') === '0') Install.skipThisVisit();
   if (params.has('bienvenue')) history.replaceState(null, '', location.pathname + location.hash);
+  // « J'ai déjà un compte » depuis l'inscription (app/inscription/) : écran de connexion directement
+  const wantLogin = params.get('connexion') === '1';
+  if (params.has('connexion')) history.replaceState(null, '', location.pathname + location.hash);
   // Lien direct vers une fiche (?r=…&t=reviews|menu|story) : ouverte après la connexion
   if (params.get('r')) {
     pendingLink = { id: params.get('r'), tab: params.get('t'), source: params.get('s') === 'notif' ? 'notif' : 'link' };
@@ -11131,7 +11249,7 @@
         if (paymentReturn && user.role === 'pro') awaitPayment(user);
         if (pendingVisit) setTimeout(() => openVisitLink(pendingVisit, user), 600);
         else if (pendingShortcut) setTimeout(() => openShortcut(pendingShortcut, user), 600);
-      } else if (store.read().lastEmail) {
+      } else if (store.read().lastEmail || wantLogin) {
         setAuthRole(store.read().lastRole || 'client');
         $('li-email').value = store.read().lastEmail || '';
         showAuthStep('login');

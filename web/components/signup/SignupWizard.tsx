@@ -52,14 +52,17 @@ const APP_HOME = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/../`;
 const WELCOME_MS = 1600;
 /** La carte est une autre application (index.html) : navigation complète, pas celle de Next.js. */
 const openMap = (query = "") => { window.location.href = new URL(APP_HOME + query, window.location.href).href; };
-/** Écran de connexion de la carte, adresse préremplie (la carte la lit dans son propre stockage au démarrage). */
+/**
+ * Écran de connexion de la carte (?connexion=1), adresse préremplie si elle est connue (la carte la lit dans son propre
+ * stockage au démarrage).
+ */
 const openLogin = (email: string, role: "student" | "pro" = "student") => {
   try {
     const key = "roche-street-food:v2";
     const saved = JSON.parse(localStorage.getItem(key) ?? "{}");
-    localStorage.setItem(key, JSON.stringify({ ...saved, lastEmail: email, lastRole: role }));
-  } catch { /* stockage indisponible : la carte affichera l'accueil */ }
-  openMap();
+    if (email) localStorage.setItem(key, JSON.stringify({ ...saved, lastEmail: email, lastRole: role }));
+  } catch { /* stockage indisponible : l'écran de connexion s'ouvre quand même, sans adresse */ }
+  openMap("?connexion=1");
 };
 const linkClass = "font-semibold underline";
 /** Compte créé il y a moins de 10 minutes (compte Google tout neuf). */
@@ -170,10 +173,15 @@ function Wizard() {
   const askInstall = () => {
     if (homeOffer && addToHome && !installChoice.current) installChoice.current = promptInstall();
   };
+  /** Retour : question précédente, ou accueil de la carte depuis la première (mauvais bouton touché). */
   const back = () => {
     const i = flow.indexOf(step);
     if (i > 0) go(flow[i - 1], "prev");
+    else if (i === 0 && !viaGoogle) openMap();
   };
+  const atStart = flow.indexOf(step) === 0;
+  /** Compte pas encore créé : « J'ai déjà un compte » reste proposé (pas après Google, ni pendant le code e-mail). */
+  const canSwitchToLogin = !viaGoogle && step !== "code" && step !== "done";
 
   /* ---------- Réponses ---------- */
   function submitName(ev: FormEvent) {
@@ -385,8 +393,8 @@ function Wizard() {
         <button
           type="button"
           onClick={back}
-          aria-label="Question précédente"
-          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:bg-white/[0.05] dark:text-zinc-200 dark:ring-white/10 dark:backdrop-blur-xl dark:hover:bg-white/10 dark:focus-visible:ring-brand-night ${flow.indexOf(step) > 0 && step !== "done" ? "" : "invisible"}`}
+          aria-label={atStart ? "Retour à l'accueil" : "Question précédente"}
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:bg-white/[0.05] dark:text-zinc-200 dark:ring-white/10 dark:backdrop-blur-xl dark:hover:bg-white/10 dark:focus-visible:ring-brand-night ${(flow.indexOf(step) > 0 || (atStart && !viaGoogle)) && step !== "done" ? "" : "invisible"}`}
         >
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </button>
@@ -405,8 +413,17 @@ function Wizard() {
           </>
         )}
       </header>
+      {canSwitchToLogin && (
+        <p className="px-5 text-right text-sm text-slate-600 dark:text-zinc-400">
+          J&apos;ai déjà un compte ·{" "}
+          <button type="button" onClick={() => openLogin(emailValid ? cleanEmail : "")}
+            className="rounded font-semibold text-brand-strong underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-brand-night">
+            Se connecter
+          </button>
+        </p>
+      )}
 
-      <main className="flex w-full flex-1 flex-col overflow-x-hidden px-5 pt-6 pb-6">
+      <main className={`flex w-full flex-1 flex-col overflow-x-hidden px-5 ${canSwitchToLogin ? "pt-3" : "pt-6"} pb-6`}>
         <div key={step} className={`su-cascade flex flex-1 flex-col ${dir === "next" ? "motion-safe:animate-step-next" : "motion-safe:animate-step-prev"}`}>
           {step === "name" && (
             <form onSubmit={submitName} noValidate className="flex flex-1 flex-col">
