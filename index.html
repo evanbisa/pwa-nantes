@@ -1221,7 +1221,7 @@
 
     .pro-entry { margin-top: 6px; }
 
-    /* ---------- Espace restaurateur (plein écran sur téléphone, grand panneau sur ordinateur) ---------- */
+    /* ---------- Espace restaurateur (plein écran, sur téléphone comme sur ordinateur) ---------- */
     .pro-space { position: fixed; inset: 0; z-index: 90; display: flex; justify-content: center; background: var(--backdrop); }
     .pro-space[hidden] { display: none; }
     .ps-panel { display: flex; flex-direction: column; width: 100%; height: 100%; color: var(--text); background: var(--panel-solid); animation: rise .25s var(--ease-out) both; }
@@ -1342,10 +1342,10 @@
     .story-admin .sa-stats { color: var(--text); }
     @media (max-width: 380px) { .ps-tabs .ps-lbl { font-size: 0; } .ps-tabs .ps-lbl::after { content: attr(data-short); font-size: 11.5px; } }
     @media (max-width: 360px) { .ps-quick { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ps-tabs .ps-ico { width: 44px; } }
+    /* Ordinateur : tableau de bord sur tout l'écran, menu à gauche, contenu sur plusieurs colonnes */
     @media (min-width: 900px) {
-      .pro-space { align-items: center; padding: 24px; }
-      .ps-panel { display: grid; grid-template-columns: 220px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); width: min(1080px, 100%); height: min(860px, 100%); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); }
-      .ps-head { grid-column: 1 / -1; padding: 16px 20px; }
+      .ps-panel { display: grid; grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); overflow: hidden; }
+      .ps-head { grid-column: 1 / -1; padding: 14px 24px; }
       .ps-tabs { order: 0; grid-column: 1; grid-row: 2; }
       .ps-body { order: 0; grid-column: 2; grid-row: 2; }
       .ps-tabs { flex-direction: column; gap: 4px; padding: 12px; border-top: 0; border-right: 1px solid var(--line); }
@@ -1354,13 +1354,33 @@
       .ps-tabs button[aria-selected="true"] .ps-ico { background: none; }
       .ps-tabs .ps-ico { width: 40px; }
       .ps-badge { right: -6px; }
-      .ps-body { padding: 24px 28px 32px; }
+      .ps-body { padding: 28px 40px 40px; }
       .ps-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       .ps-quick { grid-template-columns: repeat(6, minmax(0, 1fr)); }
       .ps-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       #psp-stats .ps-card, #psp-fiche .ps-card { max-width: none; }
       .ps-insights { grid-template-columns: 1fr 1fr; }
     }
+    /*
+     * Grand écran : deux colonnes dans chaque onglet (texte lisible jusqu'à 1600 px, centré au-delà).
+     * Accueil : scanner et chiffres en haut, « À faire » à côté des actions rapides, l'essentiel en dessous.
+     * Statistiques : chiffres et courbe des visites en pleine largeur, le détail en cartes côte à côte.
+     */
+    @media (min-width: 1200px) {
+      .ps-pane { max-width: 1600px; margin: 0 auto; }
+      .ps-pane:not([hidden]) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; align-items: start; }
+      .ps-pane > * { grid-column: 1 / -1; }
+      #ps-home-live { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); column-gap: 28px; align-items: start; }
+      #ps-home-live > .ps-scan, #ps-home-live > .ps-cards, #ps-home-live > .ps-block:last-child { grid-column: 1 / -1; }
+      #ps-home-live .ps-quick { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .ps-insights { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      #psp-stats > .chart:first-of-type ~ .chart, #psp-stats > .ps-card, #psp-publish > .pd-block, #psp-fiche > .ps-card { grid-column: auto; }
+      #psp-stats > .chart:first-of-type ~ .chart, #psp-stats > .ps-card, #psp-publish > .pd-block, #psp-fiche > .ps-card { margin-top: 22px; }
+      #psp-publish > .pd-block { margin-top: 16px; }
+      .ps-rv-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+      #psp-fiche > .btn { grid-column: auto; }
+    }
+    @media (min-width: 1600px) { .ps-kpis { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
 
     /* =====================================================================
        8 bis. RECHERCHE, NOTIFICATIONS, AVIS
