@@ -132,7 +132,10 @@ en plus) :
 - **Titre, description, aperçu des liens** (Facebook, WhatsApp, Instagram, X, iMessage…) : balises en tête de
   `index.html` et dans `web/app/layout.tsx`. Image d'aperçu : `og-image.jpg` (1200 × 630, 80 Ko), source
   `scripts/og-image.html`.
-- **Icône** : `favicon.svg` (carte) et `web/app/favicon.ico`, `web/app/apple-icon.png` (application).
+- **Logo et icônes** : logo source `scripts/logo-flashmiam.png` (800 × 800). Icônes tirées de ce logo : `favicon.ico`,
+  `favicon-96.png`, `apple-touch-icon.png` (raccourci iPhone), `icon-192.png`, `icon-512.png`, `icon-1024.png` et `icon-maskable-*.png` (logo à 70 % au centre)
+  (raccourci Android, déclarées dans `manifest.webmanifest`), plus `web/app/favicon.ico` et `web/app/apple-icon.png`
+  (application). Après un changement d'icône, augmenter le numéro `?v=` (manifest, `index.html`, `404.html`) et changer `CACHE` dans `sw.js` : les icônes restent 7 jours dans le cache des téléphones, seule une nouvelle adresse force leur rechargement.
 - **robots.txt, sitemap.xml, page 404** : écrits à la publication par `scripts/seo.mjs` (page 404 : `404.html`).
 - **Adresse principale** : `https://pwa-nantes.vercel.app` par défaut. Le jour du nom de domaine (ex. flashmiam.fr),
   ajouter dans Vercel › Settings › Environment Variables : `SITE_URL=https://flashmiam.fr` et

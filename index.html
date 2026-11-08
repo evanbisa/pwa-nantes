@@ -28,10 +28,11 @@
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="FlashMiam : le street food de La Roche-sur-Yon sur une carte" />
   <meta name="twitter:card" content="summary_large_image" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="icon" href="icon-192.png" type="image/png" sizes="192x192" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
-  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="favicon.ico?v=2" sizes="16x16 32x32 48x48" />
+  <link rel="icon" href="favicon-96.png?v=2" type="image/png" sizes="96x96" />
+  <link rel="icon" href="icon-192.png?v=2" type="image/png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2" sizes="180x180" />
+  <link rel="manifest" href="manifest.webmanifest?v=2" />
 
   <!-- Thème appliqué avant le premier affichage (évite un flash de la mauvaise couleur) -->
   <script>
@@ -2154,7 +2155,7 @@
   <section id="install-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="install-title" aria-hidden="true">
     <button class="sheet-grab" type="button" data-close aria-label="Fermer"></button>
     <div class="sheet-head">
-      <img class="ins-app" src="icon-192.png" alt="" width="52" height="52" />
+      <img class="ins-app" src="icon-192.png?v=2" alt="" width="52" height="52" />
       <div class="sheet-title">
         <h3 id="install-title">FlashMiam sur votre écran d'accueil ?</h3>
         <p class="eyebrow">Gratuit, en quelques secondes</p>
@@ -7475,7 +7476,9 @@
       toast('Noté : on ne vous le proposera plus. Le tutoriel reste dans votre profil.');
     });
     $('profile-install').addEventListener('click', () => open());
-    return { open, schedule, syncProfile, syncAccount, mode, isDone };
+    /** Pas de proposition automatique pendant cette visite (case décochée à l'inscription, ou fenêtre déjà vue). */
+    const skipThisVisit = () => { try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (e) { /* navigation privée */ } };
+    return { open, schedule, syncProfile, syncAccount, mode, isDone, skipThisVisit };
   })();
 
   /** mode : 'site' = refus mémorisé par le navigateur ; 'device' = localisation coupée dans les réglages de l'appareil. */
@@ -11123,6 +11126,10 @@
   if (params.has('paiement')) history.replaceState(null, '', location.pathname + location.hash);
   // Retour de l'inscription (application, app/inscription/) : compte tout neuf, déjà connecté → accueil et localisation
   const welcomeBack = params.get('bienvenue') === '1';
+  // Case « Ajouter FlashMiam à mon écran d'accueil » de l'inscription : raccourci=1 → la fiche d'installation (guide
+  // iPhone, ou bouton d'installation) s'ouvre comme d'habitude dès que la carte est calme ; raccourci=0 → case décochée,
+  // ou fenêtre du navigateur déjà vue pendant l'inscription : pas reproposé pendant cette visite.
+  if (welcomeBack && params.get('raccourci') === '0') Install.skipThisVisit();
   if (params.has('bienvenue')) history.replaceState(null, '', location.pathname + location.hash);
   // Lien direct vers une fiche (?r=…&t=reviews|menu|story) : ouverte après la connexion
   if (params.get('r')) {

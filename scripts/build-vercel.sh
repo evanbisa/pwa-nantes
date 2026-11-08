@@ -9,7 +9,7 @@ NEXT_PUBLIC_BASE_PATH=/app npm run build   # inclut la vérification des types
 cd ..
 rm -rf dist
 mkdir -p dist
-cp index.html confidentialite.html conditions.html sw.js icon-192.png icon-512.png favicon.svg og-image.jpg manifest.webmanifest qr-worker.js dist/
+cp index.html confidentialite.html conditions.html sw.js icon-192.png icon-512.png icon-1024.png icon-maskable-192.png icon-maskable-512.png icon-maskable-1024.png apple-touch-icon.png favicon.ico favicon-96.png og-image.jpg manifest.webmanifest qr-worker.js dist/
 # Réglages de publication (variable MAP_STYLE : style de la carte), puis politique de sécurité du contenu (CSP)
 # recalculée sur les pages publiées : toujours à jour
 node scripts/config.mjs dist/index.html

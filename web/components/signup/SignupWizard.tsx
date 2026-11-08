@@ -8,6 +8,7 @@ import { CAPTCHA_FAILED, captchaRefused, captchaToken } from "@/lib/captcha";
 import AgePicker from "@/components/signup/AgePicker";
 import GoogleSignup from "@/components/signup/GoogleSignup";
 import { useKeyboardInset } from "@/components/signup/useKeyboardInset";
+import { canAddToHome, promptInstall, type InstallResult } from "@/lib/install";
 import {
   EMAIL_RE, MIN_AGE, PASSWORD_RULES, TERMS_VERSION, capitalize, passwordScore, suggestEmail,
 } from "@/lib/signup/validation";
@@ -116,6 +117,10 @@ function Wizard() {
   const [code, setCode] = useState("");
   const [resendIn, setResendIn] = useState(0);   // secondes avant de pouvoir redemander un code
   const [errors, setErrors] = useState<Partial<Record<Step, ReactNode>>>({});
+  // Raccourci sur l'écran d'accueil : case cochée par défaut, proposée sur téléphone seulement (pas déjà installé)
+  const [homeOffer] = useState(canAddToHome);
+  const [addToHome, setAddToHome] = useState(true);
+  const installChoice = useRef<Promise<InstallResult> | null>(null);
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suggestedFor = useRef("");
   const checkedEmail = useRef("");
@@ -140,18 +145,30 @@ function Wizard() {
     const t = setTimeout(() => setResendIn((s) => s - 1), 1000);
     return () => clearTimeout(t);
   }, [resendIn]);
-  // Compte ouvert : un instant de fête, puis la carte (déjà connectée)
+  // Compte ouvert : un instant de fête, puis la carte (déjà connectée), après la réponse à la fenêtre d'installation.
+  // raccourci=1 : la case est cochée mais rien n'a pu s'ouvrir ici (iPhone…) → la carte montre comment faire.
+  // raccourci=0 : case décochée, ou fenêtre déjà vue → la carte ne le repropose pas pendant cette visite.
   useEffect(() => {
     if (step !== "done") return;
-    const t = setTimeout(() => openMap("?bienvenue=1"), WELCOME_MS);
-    return () => clearTimeout(t);
-  }, [step]);
+    let cancelled = false;
+    const pause = new Promise((resolve) => setTimeout(resolve, WELCOME_MS));
+    Promise.all([installChoice.current ?? Promise.resolve<InstallResult>("unavailable"), pause]).then(([result]) => {
+      if (cancelled) return;
+      const shortcut = !homeOffer ? "" : !addToHome || result !== "unavailable" ? "&raccourci=0" : "&raccourci=1";
+      openMap(`?bienvenue=1${shortcut}`);
+    });
+    return () => { cancelled = true; };
+  }, [step, homeOffer, addToHome]);
 
   const setError = (s: Step, message: ReactNode) => setErrors((e) => ({ ...e, [s]: message }));
   const go = (to: Step, direction: "next" | "prev" = "next") => {
     if (advanceTimer.current) clearTimeout(advanceTimer.current);
     setDir(direction);
     setStep(to);
+  };
+  /** Case cochée : fenêtre « Installer l'application » du navigateur, ouverte tout de suite (pendant le clic). */
+  const askInstall = () => {
+    if (homeOffer && addToHome && !installChoice.current) installChoice.current = promptInstall();
   };
   const back = () => {
     const i = flow.indexOf(step);
@@ -187,7 +204,7 @@ function Wizard() {
     if (age < MIN_AGE) return setError("age", TOO_YOUNG);
     setError("age", null);
     setAgeSet(true);
-    if (viaGoogle) finishGoogle(true);
+    if (viaGoogle) { askInstall(); finishGoogle(true); }
     else go("email");
   }
   async function submitEmail(ev: FormEvent) {
@@ -219,6 +236,7 @@ function Wizard() {
   async function createAccount(ev: FormEvent) {
     ev.preventDefault();
     if (score < PASSWORD_RULES.length || busy) return;
+    askInstall();
     setBusy(true);
     setError("password", null);
     const body: Record<string, string> = { action: "signup", email: cleanEmail, password, first_name: name.trim(), accept_terms: TERMS_VERSION };
@@ -456,7 +474,8 @@ function Wizard() {
               <p role={errors.age ? "alert" : undefined} className={`mt-3 min-h-6 text-sm ${errors.age ? "font-medium text-red-600 dark:text-red-400" : "text-slate-500"}`} aria-live="polite">
                 {errors.age}
               </p>
-              <Primary busy={busy}>{age < MIN_AGE ? "Continuer" : `J'ai ${age} ans`}</Primary>
+              {viaGoogle && homeOffer && <div className="mt-auto pt-4 pb-4"><HomeShortcut checked={addToHome} onChange={setAddToHome} /></div>}
+              <Primary busy={busy} className={viaGoogle && homeOffer ? "mt-0" : "mt-auto"}>{age < MIN_AGE ? "Continuer" : `J'ai ${age} ans`}</Primary>
             </form>
           )}
 
@@ -558,10 +577,13 @@ function Wizard() {
                   );
                 })}
               </ul>
-              <label className="mt-auto flex items-center gap-3 pt-6 pb-4 text-[15px] text-slate-700 dark:text-zinc-300">
-                <input id="su-remember" type="checkbox" checked={remember} onChange={(e) => setRememberChoice(e.target.checked)} className="h-5 w-5 rounded accent-brand dark:accent-brand-night" />
-                Rester connecté sur cet appareil
-              </label>
+              <div className="mt-auto flex flex-col gap-3 pt-6 pb-4">
+                {homeOffer && <HomeShortcut checked={addToHome} onChange={setAddToHome} />}
+                <label className="flex items-center gap-3 text-[15px] text-slate-700 dark:text-zinc-300">
+                  <input id="su-remember" type="checkbox" checked={remember} onChange={(e) => setRememberChoice(e.target.checked)} className="h-5 w-5 rounded accent-brand dark:accent-brand-night" />
+                  Rester connecté sur cet appareil
+                </label>
+              </div>
               <Primary busy={busy} disabled={score < PASSWORD_RULES.length} className="mt-0">{busy ? "Création du compte…" : "Créer mon compte 🎉"}</Primary>
               <p className="mt-4 text-center text-xs leading-relaxed text-slate-500 dark:text-zinc-400">
                 En créant un compte, vous acceptez les{" "}
@@ -652,6 +674,19 @@ const inputClass = (invalid: boolean) =>
   `h-14 w-full rounded-2xl border-2 bg-white px-4 text-lg text-slate-900 transition placeholder:text-slate-400 focus:outline-none dark:bg-white/[0.04] dark:text-zinc-50 dark:backdrop-blur-xl dark:placeholder:text-zinc-500 ${invalid
     ? "border-red-500 focus:border-red-500"
     : "border-slate-200 focus:border-brand dark:border-white/10 dark:focus:border-brand-night dark:focus:shadow-[0_0_0_4px_rgb(167_139_250/0.18)]"}`;
+
+/** « Ajouter FlashMiam à mon écran d'accueil », cochée par défaut : on peut la décocher. */
+function HomeShortcut({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-[15px] leading-snug text-slate-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300">
+      <input id="su-home" type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-0.5 h-5 w-5 flex-none rounded accent-brand dark:accent-brand-night" />
+      <span>
+        <span className="font-medium text-slate-900 dark:text-zinc-50">Ajouter FlashMiam à mon écran d&apos;accueil</span>
+        <span className="mt-0.5 block text-sm text-slate-500 dark:text-zinc-400">L&apos;appli en un geste, comme les autres. Votre téléphone vous demandera de confirmer.</span>
+      </span>
+    </label>
+  );
+}
 
 function Title({ emoji, id, children }: { emoji: string; id: string; children: ReactNode }) {
   return (
