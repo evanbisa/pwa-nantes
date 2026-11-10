@@ -492,6 +492,21 @@
     .ob-step { animation: rise .4s var(--ease-out) both; }
     .ob-step h1, .ob-step h2 { margin: 0; font-weight: 400; font-size: 26px; line-height: 1.2; }
     .ob-step h1 em, .ob-step h2 em { font-style: normal; color: var(--accent); font-weight: 500; }
+    /*
+     * Même style que l'inscription (app/inscription/, web/components/signup) : police du téléphone, titres gras et
+     * serrés, carte arrondie, encadrés blancs, champs et boutons de 56 px, lien « Se connecter » souligné.
+     */
+    .onboarding { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    .ob-panel { border-radius: 28px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, .25); }
+    .ob-step h1, .ob-step h2 { font-weight: 700; font-size: 28px; line-height: 1.25; letter-spacing: -.025em; text-wrap: balance; }
+    .ob-step h1 em, .ob-step h2 em { font-weight: 700; }
+    .onboarding .lead { font-size: 15px; line-height: 1.6; }
+    .onboarding .jn-perks li { background: var(--panel-solid); border: 1px solid var(--line); border-radius: 16px; }
+    .onboarding .btn { min-height: 56px; border-radius: 28px; font-size: 16px; font-weight: 600; }
+    .onboarding .field > span { font-size: 14px; }
+    .onboarding .field input { height: 56px; border-radius: 16px; border-width: 2px; }
+    .onboarding .field input:focus { box-shadow: none; }
+    .ob-switch .link-btn { font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
     .field { display: block; margin-top: 14px; }
     .field > span { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
     .field input {
