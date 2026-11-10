@@ -44,7 +44,7 @@ jobs:
 
       - name: Tests de la fonction verify-siret (sans réseau)
         working-directory: web
-        run: deno test supabase/functions/
+        run: deno test --allow-env=CORS_ALLOW_LOCALHOST supabase/functions/
 
       - name: Fonction en ligne et répertoire Sirene réel
         working-directory: web
