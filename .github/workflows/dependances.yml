@@ -31,10 +31,10 @@ jobs:
           node-version: 22
       - name: Bibliothèques servies par le site (vendor/)
         run: node scripts/check-vendor.mjs
-      - name: Application (web/) : ce qui est servi aux visiteurs
+      - name: "Application (web/) : ce qui est servi aux visiteurs"
         working-directory: web
         run: npm audit --omit=dev --audit-level=moderate
-      - name: Application (web/) : outils de développement
+      - name: "Application (web/) : outils de développement"
         working-directory: web
         run: |
           npm audit --audit-level=high
