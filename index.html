@@ -507,6 +507,39 @@
     .onboarding .field input { height: 56px; border-radius: 16px; border-width: 2px; }
     .onboarding .field input:focus { box-shadow: none; }
     .ob-switch .link-btn { font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+    /*
+     * Nuit : la palette de l'inscription (web/app/globals.css) plutôt que le bleu de la carte : violet, mots clés en
+     * dégradé rose → violet → bleu, halos doux dans la carte, bouton sombre au contour dégradé, surfaces en verre.
+     */
+    :root[data-theme="dark"] .onboarding {
+      --accent: #a78bfa; --accent-strong: #c4b5fd; --accent-soft: rgb(167 139 250 / .14); --accent-line: rgb(167 139 250 / .45); --on-accent: #fff;
+    }
+    :root[data-theme="dark"] .ob-panel {
+      border-color: rgb(255 255 255 / .1);
+      background:
+        radial-gradient(38rem 26rem at 50% 18%, rgb(124 58 237 / .13), transparent 70%),
+        radial-gradient(26rem 22rem at 8% 72%, rgb(219 39 119 / .08), transparent 70%),
+        radial-gradient(28rem 24rem at 96% 92%, rgb(59 130 246 / .09), transparent 70%),
+        rgb(17 17 19 / .75);
+    }
+    :root[data-theme="dark"] .ob-step h1 em, :root[data-theme="dark"] .ob-step h2 em {
+      background: linear-gradient(90deg, #e9a0e4, #a78bfa 55%, #7f95fb);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      -webkit-box-decoration-break: clone; box-decoration-break: clone;
+    }
+    :root[data-theme="dark"] .onboarding .btn-primary {
+      border: 1.5px solid transparent; color: #fff;
+      background: linear-gradient(#17171b, #17171b) padding-box, linear-gradient(100deg, #e9a0e4, #a78bfa 50%, #6f8cfb) border-box;
+      box-shadow: 0 10px 36px -14px rgb(167 139 250 / .7);
+    }
+    :root[data-theme="dark"] .onboarding .btn-primary:hover {
+      background: linear-gradient(#1f1f25, #1f1f25) padding-box, linear-gradient(100deg, #e9a0e4, #a78bfa 50%, #6f8cfb) border-box;
+    }
+    :root[data-theme="dark"] .onboarding .jn-perks li, :root[data-theme="dark"] .onboarding .field input {
+      background: rgb(255 255 255 / .04); border-color: rgb(255 255 255 / .1);
+    }
+    :root[data-theme="dark"] .onboarding .field input:focus { border-color: var(--accent); }
+    :root[data-theme="dark"] .ob-logo .avatar { color: #fff; background: linear-gradient(135deg, #e9a0e4, #a78bfa 55%, #7f95fb); }
     .field { display: block; margin-top: 14px; }
     .field > span { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
     .field input {
@@ -2663,7 +2696,7 @@
 
         <section class="jn-screen" data-q="hello" aria-labelledby="jn-title">
           <div class="jn-hero" aria-hidden="true"><span>🍔</span><span>🌯</span><span>🍕</span><span>🧁</span><span>🚚</span><span>🍟</span></div>
-          <h1 id="jn-title">Le street-food de <span class="nw">La Roche-sur-Yon</span>, <em>à deux pas</em></h1>
+          <h1 id="jn-title">Les restaurants de <span class="nw">La Roche-sur-Yon</span>, <em>à deux pas</em></h1>
           <p class="lead">Promos du jour, stories des food-trucks, avis des étudiants… Votre compte est prêt en une minute.</p>
           <ul class="jn-perks" aria-label="Avec FlashMiam">
             <li><span aria-hidden="true">🎁</span>Les bons plans autour de vous</li>
