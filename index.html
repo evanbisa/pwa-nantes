@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-UUtFdgeuO2iVvrGyZSWiL3FwmJWv98w+QHolSJglnD8=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-d9O9TXUy66Xi6TF3PVTrsSam0jnYOV02NzSTwMFHIpM=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -943,6 +943,15 @@
     .menu-row .m-desc { grid-column: 1 / 4; }
     .field .menu-row input.is-invalid { border-color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
     .menu-add { margin-top: 8px; min-height: 42px; }
+    .menu-scan { margin: 8px 0 12px; padding: 12px; border-radius: 12px; border: 1px dashed var(--line); background: var(--panel-solid); }
+    .menu-scan-btn { width: 100%; min-height: 46px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+    .menu-scan-btn[aria-disabled="true"] { opacity: .6; pointer-events: none; }
+    .menu-scan .hint { text-align: center; }
+    .menu-scan-status { margin: 10px 0 0; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .menu-scan-status[data-kind="error"] { color: var(--danger); }
+    .menu-scan-status[data-kind="ok"] { color: var(--green); }
+    .menu-scan-status .spin { width: 16px; height: 16px; flex: none; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: spin .8s linear infinite; }
+    .menu-row .m-price.is-missing { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber); }
     .menu-add[hidden] { display: none; }
 
     /* Recadrage des photos (format unique 16:9) */
@@ -2983,6 +2992,14 @@
         <div class="field" id="field-pl-menu">
           <span>La carte (facultatif) <small class="counter" id="pl-menu-count"></small></span>
           <p class="hint menu-hint">Vos plats et leurs prix, classés par rubrique (Entrées, Plats, Desserts, Boissons…).</p>
+          <div class="menu-scan" id="pl-menu-scan">
+            <label class="btn btn-primary menu-scan-btn" id="pl-menu-scan-btn">
+              <input type="file" id="pl-menu-scan-input" accept="image/*" multiple hidden />
+              <span aria-hidden="true">📷</span>Remplir avec une photo de ma carte
+            </label>
+            <p class="hint">1 à 5 photos (une par page, bien à plat et nette). Plats, rubriques et prix sont remplis automatiquement : il ne vous reste qu'à vérifier.</p>
+            <p class="menu-scan-status" id="pl-menu-scan-status" aria-live="polite" hidden></p>
+          </div>
           <div class="menu-edit" id="pl-menu"></div>
           <button class="btn btn-ghost menu-add" type="button" id="pl-menu-add">＋ Ajouter un plat</button>
           <datalist id="menu-sections">
@@ -9058,6 +9075,7 @@
     const closed = listed ? r.closedOn : [];
     $('pl-closed').querySelectorAll('input').forEach((i) => { i.checked = closed.includes(Number(i.value)); });
     $('pl-phone').value = listed ? r.phone || '' : (me.phone || '');
+    setMenuScanStatus('', '');
     $('pl-menu').textContent = '';
     ((r && r.menu) || []).forEach((it) => addMenuRow(it));
     if (!$('pl-menu').childElementCount) addMenuRow();
@@ -9113,6 +9131,91 @@
   }
 
   $('pl-menu-add').addEventListener('click', () => addMenuRow({}, { focus: true }));
+
+  /* ---------- Carte lue sur photo (fonction serveur « menu-scan ») ---------- */
+
+  const MENU_SCAN_MAX = 5;           // photos par lecture
+  const MENU_SCAN_EDGE = 2000;       // plus grand côté envoyé, en pixels (lisible, et moins de 1 Mo en JPEG)
+
+  /** Photo de la carte → JPEG réduit, en base64 (sans l'en-tête « data: »). */
+  async function menuPhotoToBase64(file) {
+    const bmp = await decodeImage(file);
+    const k = Math.min(1, MENU_SCAN_EDGE / Math.max(bmp.width, bmp.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bmp.width * k); canvas.height = Math.round(bmp.height * k);
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+    if (bmp.close) bmp.close();
+    const blob = await new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('format'))), 'image/jpeg', 0.85));
+    const url = await new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(r.result); r.onerror = reject; r.readAsDataURL(blob); });
+    return String(url).slice(String(url).indexOf(',') + 1);
+  }
+
+  function setMenuScanStatus(kind, text) {
+    const el = $('pl-menu-scan-status');
+    el.hidden = !text;
+    el.dataset.kind = kind;
+    el.textContent = '';
+    if (kind === 'busy') { const sp = document.createElement('span'); sp.className = 'spin'; sp.setAttribute('aria-hidden', 'true'); el.appendChild(sp); }
+    el.appendChild(document.createTextNode(text || ''));
+    $('pl-menu-scan-btn').setAttribute('aria-disabled', kind === 'busy' ? 'true' : 'false');
+  }
+
+  /** Met les plats lus dans l'éditeur : remplace la carte (ou l'ajoute à la suite si le restaurateur le préfère). */
+  function fillMenuFromScan(items) {
+    const filled = [...$('pl-menu').children].filter((row) => row.querySelector('.m-name').value.trim());
+    let replace = true;
+    if (filled.length) replace = window.confirm('Remplacer les ' + filled.length + ' plat' + (filled.length > 1 ? 's' : '') + ' déjà saisi' + (filled.length > 1 ? 's' : '') + ' par ceux lus sur la photo ?\n\nOK : remplacer · Annuler : ajouter à la suite');
+    const list = $('pl-menu');
+    if (replace) list.textContent = '';
+    else [...list.children].forEach((row) => { if (!row.querySelector('.m-name').value.trim() && !row.querySelector('.m-price').value.trim()) row.remove(); });
+    const room = MAX_MENU_ITEMS - list.childElementCount;
+    const added = items.slice(0, Math.max(0, room));
+    added.forEach((it) => addMenuRow({ section: it.section || '', name: it.name, price: typeof it.price === 'number' ? it.price : null, desc: it.desc || '' }));
+    // Prix non lus : case signalée, à remplir avant d'enregistrer
+    [...list.children].slice(-added.length).forEach((row) => {
+      const p = row.querySelector('.m-price');
+      if (!p.value) { p.classList.add('is-missing'); p.placeholder = 'Prix ?'; p.addEventListener('input', () => p.classList.remove('is-missing'), { once: true }); }
+    });
+    if (!list.childElementCount) addMenuRow();
+    syncMenuEditor();
+    setFieldError('pl-menu', '');
+    return { added: added.length, dropped: items.length - added.length };
+  }
+
+  async function scanMenuPhotos(files) {
+    files = [...files].filter((f) => /^image\//.test(f.type) || /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name));
+    if (!files.length) return;
+    if (files.length > MENU_SCAN_MAX) { setMenuScanStatus('error', MENU_SCAN_MAX + ' photos au plus à la fois : choisissez les pages principales.'); return; }
+    setMenuScanStatus('busy', 'Préparation des photos…');
+    let images;
+    try { images = await Promise.all(files.map(async (f) => ({ mediaType: 'image/jpeg', data: await menuPhotoToBase64(f) }))); }
+    catch (e) { setMenuScanStatus('error', 'Une des photos n\'a pas pu être ouverte. Réessayez avec une photo JPEG ou PNG.'); return; }
+    setMenuScanStatus('busy', 'Lecture de votre carte… (20 à 60 secondes, ne fermez pas la page)');
+    try {
+      const { data, error } = await sb.functions.invoke('menu-scan', { body: { images } });
+      if (error) {
+        let res = null;
+        try { res = await error.context.json(); } catch (e) { /* réseau */ }
+        throw new Error(res && res.message ? res.message : 'La lecture n\'a pas abouti. Vérifiez votre connexion et réessayez.');
+      }
+      const r = fillMenuFromScan(data.items || []);
+      const missing = data.missingPrices || 0;
+      setMenuScanStatus('ok', '✓ ' + r.added + ' plat' + (r.added > 1 ? 's' : '') + ' ajouté' + (r.added > 1 ? 's' : '') + '. Vérifiez noms et prix' +
+        (missing ? ' (' + missing + ' prix à compléter, en orange)' : '') + (r.dropped ? ' · ' + r.dropped + ' plat(s) en trop non ajoutés (' + MAX_MENU_ITEMS + ' au plus)' : '') + ', puis enregistrez.');
+      const firstMissing = $('pl-menu').querySelector('.m-price.is-missing');
+      ($('pl-menu').firstElementChild || $('pl-menu')).scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (firstMissing) setTimeout(() => firstMissing.focus({ preventScroll: true }), 400);
+    } catch (e) {
+      setMenuScanStatus('error', e.message);
+    }
+  }
+
+  $('pl-menu-scan-input').addEventListener('change', (ev) => {
+    const files = ev.target.files;
+    scanMenuPhotos(files ? [...files] : []).finally(() => { ev.target.value = ''; });
+  });
 
   /** Lit l'éditeur : { items } si tout est valide, sinon { error }. Les lignes vides sont ignorées. */
   function readMenu() {

@@ -100,6 +100,11 @@ export const confidentialite: LegalDoc = {
               basis: "Exécution du contrat ; obligations légales (facturation)",
             },
             {
+              title: "Restaurateurs : photos de la carte (lecture automatique)",
+              detail: "Remplir la carte de la fiche à partir de photos de la carte du restaurant, si le restaurateur le choisit. Les photos sont envoyées à Anthropic pour être lues, puis oubliées : FlashMiam ne les enregistre pas. Seul le nombre de lectures est noté, pour limiter les abus.",
+              basis: "Exécution du contrat (le restaurateur choisit d'envoyer ses photos)",
+            },
+            {
               title: "Connexions : adresse IP et navigateur de chaque session",
               detail: "Garder votre compte connecté sur vos appareils et repérer un usage anormal. Enregistrés par notre prestataire d'authentification le temps de la session ; vous êtes déconnecté après 30 jours sans utilisation, et au plus tard après 180 jours.",
               basis: "Intérêt légitime (sécurité des comptes)",
@@ -130,6 +135,7 @@ export const confidentialite: LegalDoc = {
             "**INSEE** (vérification du SIRET), pour les restaurateurs, et **IGN** (recherche d'adresse) : seule l'adresse tapée lui est transmise, par un restaurateur pour placer sa fiche ou par un client qui préfère taper une adresse plutôt qu'activer la localisation.",
             "**Whop** : paiement de l'abonnement des restaurateurs (page de paiement, moyen de paiement, reçus), dès l'ouverture des abonnements payants. Les données de carte ne transitent que par Whop et ses prestataires de paiement ; FlashMiam ne reçoit que l'état de l'abonnement (formule, échéance, résiliation).",
             "**OpenFreeMap / OpenStreetMap** : fond de carte, chargé sans cookie.",
+            "**Anthropic** (Claude) : lecture des photos de carte envoyées par un restaurateur qui choisit de remplir sa carte ainsi ; les photos ne servent qu'à cette lecture et ne sont pas utilisées pour entraîner ses modèles.",
           ],
         },
         "Les fiches publiées (avec leurs photos, stories et promotions) et les avis sont publics par nature.",
@@ -140,7 +146,7 @@ export const confidentialite: LegalDoc = {
       title: "Transferts hors de l'Union européenne",
       icon: Globe,
       blocks: [
-        "Les données des comptes sont conservées dans l'Union européenne. Certains prestataires (Vercel, GitHub, Google, Cloudflare, Whop) sont établis aux États-Unis : les transferts éventuels sont encadrés par le cadre de protection des données UE–États-Unis (Data Privacy Framework) auquel ils adhèrent, ou par les clauses contractuelles types de la Commission européenne.",
+        "Les données des comptes sont conservées dans l'Union européenne. Certains prestataires (Vercel, GitHub, Google, Cloudflare, Whop, Anthropic) sont établis aux États-Unis : les transferts éventuels sont encadrés par le cadre de protection des données UE–États-Unis (Data Privacy Framework) auquel ils adhèrent, ou par les clauses contractuelles types de la Commission européenne.",
       ],
     },
     {
@@ -165,6 +171,7 @@ export const confidentialite: LegalDoc = {
             { title: "Sessions de connexion (adresse IP, navigateur)", detail: "30 jours sans utilisation, 180 jours au plus : la session est alors fermée." },
             { title: "Compte dont l'adresse n'a jamais été confirmée (code jamais saisi)", detail: "Supprimé 7 jours après l'inscription." },
             { title: "Notifications de paiement reçues de Whop", detail: "30 jours (identifiant et type seulement)." },
+            { title: "Photos de la carte (lecture automatique)", detail: "Jamais enregistrées par FlashMiam ; seul le nombre de lectures est gardé, 30 jours." },
             { title: "Compte, fiche, avis, « j'aime », preuve d'acceptation des conditions", detail: "Jusqu'à leur suppression par vous, ou la suppression du compte." },
             { title: "Alertes sur l'appareil", detail: "Jusqu'à leur désactivation, la déconnexion ou la suppression du compte." },
             { title: "Factures des restaurateurs", detail: "10 ans (obligation comptable)." },
