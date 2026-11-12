@@ -71,8 +71,9 @@
   et supprime que dans le dossier de sa propre fiche ; personne d'autre ne voit les justificatifs.
 - **SIRET de test** `999 999 999 00009` (établissement fictif, sans appel à Sirene) : fiche marquée « de test »
   (`merchants.is_test`, fixé par le serveur seulement). **Refusé par défaut** depuis le 30 octobre 2026 : la fonction
-  ne l'accepte que si `ALLOW_TEST_SIRET=true` (copie de test uniquement, jamais en ligne), et le bouton qui le remplit
-  n'existe plus sur le site publié (`testSiret` vide).
+  ne l'accepte que si `ALLOW_TEST_SIRET=true`. **Réactivé le 12 novembre 2026** pour les essais côté restaurateur :
+  bouton « SIRET de test » de retour sur le site (`testSiret` rempli) ; à retirer avant l'ouverture au public
+  (`testSiret: ''` et secret `ALLOW_TEST_SIRET` supprimé ou à `false`).
 - Fonction `delete-account` (déployée) : « Supprimer mon compte » efface les fichiers de la fiche (photos, stories,
   justificatifs) puis le compte, et tout ce qui lui est lié en cascade.
 - Tests : 116 scénarios de sécurité (`npm run db:test`) ; 12 tests des fonctions serveur ; 378 vérifications dans un
