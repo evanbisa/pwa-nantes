@@ -485,7 +485,7 @@
     @keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
     .ob-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
     .ob-logo { display: flex; align-items: center; gap: 10px; font-weight: 500; }
-    .ob-logo .avatar { width: 32px; height: 32px; font-size: 15px; }
+    .ob-mark { flex: none; width: 36px; height: 36px; border-radius: 10px; }
     .ob-progress { display: flex; gap: 6px; }
     .ob-progress span { width: 22px; height: 4px; border-radius: 2px; background: var(--line-strong); transition: background-color .3s, width .3s; }
     .ob-progress span.is-active { width: 34px; background: var(--accent); }
@@ -539,7 +539,6 @@
       background: rgb(255 255 255 / .04); border-color: rgb(255 255 255 / .1);
     }
     :root[data-theme="dark"] .onboarding .field input:focus { border-color: var(--accent); }
-    :root[data-theme="dark"] .ob-logo .avatar { color: #fff; background: linear-gradient(135deg, #e9a0e4, #a78bfa 55%, #7f95fb); }
     .field { display: block; margin-top: 14px; }
     .field > span { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
     .field input {
@@ -2666,7 +2665,7 @@
   <div id="onboarding" class="onboarding" role="dialog" aria-modal="true" aria-labelledby="auth-title" data-role="client" hidden>
     <div class="ob-panel glass">
       <div class="ob-top">
-        <div class="ob-logo"><span class="avatar" aria-hidden="true">F</span>FlashMiam</div>
+        <div class="ob-logo"><img class="ob-mark" src="icon-192.png?v=2" alt="" width="36" height="36" />FlashMiam</div>
         <div class="ob-progress" id="ob-progress" aria-hidden="true"><span class="is-active" id="ob-dot-1"></span><span id="ob-dot-2"></span></div>
       </div>
       <!-- Étapes du parcours restaurateur -->
@@ -3051,7 +3050,7 @@
   <div id="toast" class="toast" role="status" aria-live="polite"><span id="toast-text"></span><button id="toast-action" type="button" hidden></button></div>
   <!-- Rappel « écran d'accueil » : petite notification à chaque connexion tant que ce n'est pas fait -->
   <div id="install-nudge" class="install-nudge" role="status" aria-live="polite" hidden>
-    <img src="icon-192.png" alt="" width="40" height="40" />
+    <img src="icon-192.png?v=2" alt="" width="40" height="40" />
     <p><b>Mettez FlashMiam sur votre écran d'accueil</b><span>La carte en un geste, comme une vraie appli.</span></p>
     <button class="nudge-go" type="button" id="install-nudge-go">Voir le tuto</button>
     <button class="nudge-close" type="button" id="install-nudge-close" aria-label="Plus tard">&times;</button>
