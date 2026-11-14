@@ -301,6 +301,9 @@ publications. Corrigé :
   autorisées* : `https://flashmiam.fr`, `https://www.flashmiam.fr`, `https://flashmiam.com`. Puis Supabase ›
   *URL Configuration* : *Site URL* `https://flashmiam.fr`, *Redirect URLs* `https://flashmiam.fr/**` et
   `https://flashmiam.com/**` en plus des adresses ci-dessous. Domaines à ajouter aussi au widget Turnstile.
+  ✅ Origines ajoutées le 14 novembre 2026. Puis erreur Supabase « Passed nonce and nonce in id_token should either
+  both exist or not » (Google ajoute parfois un nonce au jeton, FedCM) : le site tire désormais son propre nonce, le
+  donne haché à Google et en clair à Supabase (`index.html` › `GoogleAuth`, `web/components/signup/GoogleSignup.tsx`).
 - **Pages juridiques** (`/app/legal/` : mentions légales, CGU, CGV, confidentialité ; anciennes adresses
   `conditions.html` et `confidentialite.html` redirigées) : compléter les informations entre crochets dans
   `web/lib/legal/site.ts` (éditeur, SIREN/SIRET, adresse, directeur de la publication, TVA, tribunal, médiateur de la
