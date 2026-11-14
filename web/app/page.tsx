@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
-import HomeMap from "@/components/home/HomeMap";
-import { DEMO_MERCHANTS } from "@/lib/demo-merchants";
+import GoToMap from "@/components/home/GoToMap";
 
-/** Démonstration de la future carte (fiches d'exemple) : pas proposée aux moteurs de recherche. */
+/**
+ * /app/ : renvoie vers la carte (site principal). La future carte de l'application (components/home/HomeMap) reste
+ * dans le dépôt pour la suite de la migration, mais n'est plus publiée tant qu'elle montre des fiches d'exemple.
+ */
 export const metadata: Metadata = { robots: { index: false } };
 
 export default function Home() {
-  // Étape suivante de la migration : lecture des fiches publiées dans Supabase (table `merchants`)
-  return (
-    <main className="fixed inset-0">
-      <HomeMap merchants={DEMO_MERCHANTS} />
-    </main>
-  );
+  return <GoToMap />;
 }
