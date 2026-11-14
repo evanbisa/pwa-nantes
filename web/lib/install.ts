@@ -27,7 +27,7 @@ if (typeof window !== "undefined") {
 export const isStandalone = () =>
   window.matchMedia("(display-mode: standalone)").matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
 
-const isMobile = () => {
+export const isMobile = () => {
   const ua = navigator.userAgent;
   return /iPhone|iPad|iPod|Android/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 };
@@ -42,6 +42,12 @@ function markInstalled() {
     localStorage.setItem(INSTALL_KEY, JSON.stringify({ ...saved, done: true, doneAt: new Date().toISOString() }));
   } catch { /* stockage indisponible : la carte le reproposera */ }
 }
+
+/**
+ * « Rester connecté » coché d'office sur téléphone et tablette (appareil personnel ; l'appli de l'écran d'accueil
+ * oublierait sinon la session à chaque fermeture), décoché sur ordinateur, souvent partagé. Même règle que la carte.
+ */
+export const isPersonalDevice = () => isMobile() || isStandalone();
 
 /** La case « Ajouter FlashMiam à mon écran d'accueil » a-t-elle un sens ici ? (téléphone, pas déjà installé) */
 export const canAddToHome = () => isMobile() && !isStandalone() && !alreadyInstalled();

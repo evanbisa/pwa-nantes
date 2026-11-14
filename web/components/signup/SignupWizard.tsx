@@ -8,7 +8,7 @@ import { CAPTCHA_FAILED, captchaRefused, captchaToken } from "@/lib/captcha";
 import AgePicker from "@/components/signup/AgePicker";
 import GoogleSignup from "@/components/signup/GoogleSignup";
 import { useKeyboardInset } from "@/components/signup/useKeyboardInset";
-import { canAddToHome, promptInstall, type InstallResult } from "@/lib/install";
+import { canAddToHome, isPersonalDevice, promptInstall, type InstallResult } from "@/lib/install";
 import {
   EMAIL_RE, MIN_AGE, PASSWORD_RULES, TERMS_VERSION, capitalize, passwordScore, suggestEmail,
 } from "@/lib/signup/validation";
@@ -113,7 +113,7 @@ function Wizard() {
   const [suggestion, setSuggestion] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRememberChoice] = useState(false);
+  const [remember, setRememberChoice] = useState(isPersonalDevice);
   const [busy, setBusy] = useState(false);
   const [viaGoogle, setViaGoogle] = useState(false);
   const [terms, setTerms] = useState(false);   // « J'accepte les conditions d'utilisation »
