@@ -5,15 +5,15 @@
  *
  *   node scripts/seo.mjs <dossier publié> [--base /pwa-nantes/] [--mirror]
  *
- *   SITE_URL   adresse principale du site (par défaut https://pwa-nantes.vercel.app), à changer le jour du nom de
- *              domaine (Vercel › Settings › Environment Variables). Les copies du site (GitHub Pages : --mirror)
- *              annoncent cette adresse comme la bonne (canonical) et n'ont pas de sitemap.
+ *   SITE_URL   adresse principale du site (par défaut https://flashmiam.fr ; autre adresse : Vercel › Settings ›
+ *              Environment Variables). Les copies du site (GitHub Pages : --mirror) annoncent cette adresse comme la
+ *              bonne (canonical) et n'ont pas de sitemap.
  *   --base     chemin du site sur son domaine (« / » par défaut), pour les liens de la page 404
  */
 import fs from 'node:fs';
 import path from 'node:path';
 
-const DEFAULT = 'https://pwa-nantes.vercel.app';
+const DEFAULT = 'https://flashmiam.fr';
 const root = path.join(path.dirname(new URL(import.meta.url).pathname), '..');
 /** Pages proposées aux moteurs de recherche (celles qui existent dans le dossier publié). */
 export const PAGES = ['', 'app/inscription/', 'app/legal/', 'app/legal/cgu/', 'app/legal/cgv/', 'app/legal/confidentialite/', 'app/legal/mentions-legales/'];

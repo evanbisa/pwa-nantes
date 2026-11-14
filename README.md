@@ -137,9 +137,9 @@ en plus) :
   (raccourci Android, déclarées dans `manifest.webmanifest`), plus `web/app/favicon.ico` et `web/app/apple-icon.png`
   (application). Après un changement d'icône, augmenter le numéro `?v=` (manifest, `index.html`, `404.html`) et changer `CACHE` dans `sw.js` : les icônes restent 7 jours dans le cache des téléphones, seule une nouvelle adresse force leur rechargement.
 - **robots.txt, sitemap.xml, page 404** : écrits à la publication par `scripts/seo.mjs` (page 404 : `404.html`).
-- **Adresse principale** : `https://pwa-nantes.vercel.app` par défaut. Le jour du nom de domaine (ex. flashmiam.fr),
-  ajouter dans Vercel › Settings › Environment Variables : `SITE_URL=https://flashmiam.fr` et
-  `NEXT_PUBLIC_SITE_URL=https://flashmiam.fr`, puis republier. La copie GitHub Pages renvoie vers l'adresse principale.
+- **Adresse principale** : `https://flashmiam.fr` (14 novembre 2026 ; `flashmiam.com` et `www.flashmiam.fr` y renvoient,
+  `pwa-nantes.vercel.app` reste en service). Pour une autre adresse : variables `SITE_URL` et `NEXT_PUBLIC_SITE_URL`
+  dans Vercel › Settings › Environment Variables, puis republier. La copie GitHub Pages renvoie vers l'adresse principale.
 - Après la mise en ligne : déclarer le sitemap dans Google Search Console (`https://…/sitemap.xml`) et tester
   l'aperçu d'un lien sur https://www.opengraph.xyz.
 

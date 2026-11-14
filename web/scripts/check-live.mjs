@@ -12,7 +12,7 @@
  * chaque commit (10 minutes d'attente au plus) ; GitHub Pages seulement ceux qui touchent le site (3 minutes au plus).
  */
 const SITES = [
-  { name: "Vercel", url: "https://pwa-nantes.vercel.app/", headers: true, everyCommit: true, waitMin: 10 },
+  { name: "flashmiam.fr (Vercel)", url: "https://flashmiam.fr/", headers: true, everyCommit: true, waitMin: 10 },
   { name: "GitHub Pages", url: "https://evanbisa.github.io/pwa-nantes/", headers: false, everyCommit: false, waitMin: 3 },
 ];
 const EXPECTED = (process.env.EXPECTED_VERSION || "").trim();
