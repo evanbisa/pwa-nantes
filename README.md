@@ -1,95 +1,50 @@
-# Roche Street Food
+# FlashMiam
 
-Carte interactive (PWA) des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon.
+Carte interactive (PWA) des food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon, avec les bons plans du
+moment, les stories des restaurants, les avis et un QR code de visite à montrer en caisse.
 
-**Site en ligne : https://evanbisa.github.io/pwa-nantes/**
+**Site en ligne : https://flashmiam.fr** (aussi https://pwa-nantes.vercel.app ; copie sur
+https://evanbisa.github.io/pwa-nantes/).
 
-Tout le site tient dans un seul fichier : `index.html`.
+## Organisation du dépôt
 
-## Fonctionnalités
+| Partie | Où | Rôle |
+| --- | --- | --- |
+| La carte (site principal) | `index.html` (+ `sw.js`, `manifest.webmanifest`, `vendor/`) | Tout le site client et restaurateur : carte MapLibre, fiches, recherche, offres, stories, avis, notifications, profil, espace restaurateur, scanner de QR codes. Un seul fichier, sans étape de construction. |
+| L'application | `web/` (Next.js, export statique publié sous `/app/`) | Inscription des clients (`/app/inscription/`), pages juridiques (`/app/legal/`), tableau de bord de l'équipe (`/app/tableau-de-bord/`). `/app/` renvoie vers la carte. Voir `web/README.md`. |
+| Le serveur | Supabase (projet `fnypgfyxbyaqrnklhjxc`) : `web/supabase/` | Comptes, base de données protégée par RLS (`migrations/`), fonctions serveur (`functions/` : SIRET, inscription, paiement Whop, alertes push, lecture de carte sur photo, suppression de compte, ménage), tests. |
+| Publication | `vercel.json`, `scripts/build-vercel.sh`, `.github/workflows/` | Vercel republie à chaque modification de la branche principale ; GitHub Pages et Cloudflare Pages en copies. Vérifications automatiques en ligne, contrôle des secrets, sauvegarde chiffrée chaque nuit. |
 
-- Création de compte (prénom, e-mail, mot de passe) à la première visite — mot de passe d'au moins 8 caractères avec
-  une majuscule, une minuscule, un chiffre et un caractère spécial (règles cochées en direct pendant la saisie) — écran de connexion ensuite, option « Rester connecté », déconnexion.
-- Demande de la localisation juste après l'inscription ; si elle est refusée, le bouton en haut à droite la redemande.
-- Carte Google Maps (avec une clé API, voir ci-dessous), à plat (sans 3D), en mode jour ou nuit.
-- Mise en page adaptée : téléphone (filtres en bas, fiches qui montent du bas) et ordinateur (panneau latéral avec recherche et liste).
-- Espace restaurateur : choix « Client / Restaurateur » à l'inscription et à la connexion, puis inscription en 4 étapes (voir ci-dessous).
+État de la sécurité et de la mise en ligne (ce qui est fait, ce qui reste à régler) :
+[`web/docs/SECURITE-ETAT.md`](web/docs/SECURITE-ETAT.md).
+
+## Restaurants d'exemple (démonstration)
+
+Tant que la carte compte **moins de 3 vrais restaurants** en ligne, six restaurants fictifs (liste `SHOPS` de
+`index.html`) sont affichés pour montrer FlashMiam, **toujours signalés « Exemple »** (carte, liste, recherche, offres,
+stories) avec une note « restaurant imaginaire » dans leur fiche ; la pastille des offres ne les compte pas. Ils
+disparaissent d'eux-mêmes dès le 3ᵉ vrai restaurant. Réglage : `CONFIG.demoShops` (`'auto'`, `'on'`, `'off'`) et
+`CONFIG.demoUntil`.
+
+- `?demo=1` à la fin de l'adresse (par exemple pour une présentation à un restaurateur) : restaurants d'exemple **et**
+  fiches de test visibles ; `?demo=0` : rien de fictif.
+- Les **fiches de test** (créées avec le SIRET de test) ne sont visibles que de leur propriétaire, ou avec `?demo=1`.
 
 ## Inscription des restaurateurs
 
-1. **Compte** : prénom, nom, e-mail et téléphone professionnels, mot de passe.
-2. **Vérification** :
-   - le numéro **SIRET** est contrôlé (clé de contrôle), puis interrogé dans le répertoire officiel **Sirene de l'INSEE**
-     via l'API publique [Recherche d'entreprises](https://recherche-entreprises.api.gouv.fr) : l'établissement doit exister,
-     être **en activité** et avoir un **code NAF de restauration** (56.10A/B/C, 56.21Z, 56.30Z, 10.71C/D, 10.52Z, 47.24Z, 47.81Z) ;
-   - justificatifs : **Kbis** (ou avis de situation Sirene / extrait D1) et **attestation de formation à l'hygiène alimentaire (HACCP)**
-     obligatoires ; récépissé de déclaration DDPP et licence facultatifs ;
-   - attestation sur l'honneur.
-3. **Paiement de l'abonnement** (voir ci-dessous).
-4. **Fiche restaurant** : nom, catégorie, description, 1 à 10 photos au **format unique 16:9** (une photo d'un autre format
-   s'ouvre dans un outil de recadrage : glisser pour déplacer, curseur, molette ou pincement pour zoomer ; export JPEG
-   jusqu'à 1600 × 900), adresse (suggestions de la Base Adresse Nationale via la
-   [Géoplateforme de l'IGN](https://data.geopf.fr/geocodage/search)), horaires, offre du moment, téléphone,
-   **la carte** (facultative : plats, prix et détail, classés par rubrique ; jusqu'à 80 plats) → publication sur la carte.
-   Les clients voient la carte dans la fiche du restaurant, et la recherche trouve aussi les plats.
+1. **Compte** : prénom, nom, e-mail et téléphone professionnels, mot de passe (code de confirmation par e-mail).
+2. **Vérification** : le **SIRET** est contrôlé par le serveur (fonction `verify-siret`) dans le répertoire **Sirene**
+   de l'INSEE : établissement en activité, **code NAF de restauration** (56.10A/B/C, 56.21Z, 56.30Z, 10.71C/D, 10.52Z,
+   47.24Z, 47.81Z), SIRET pas déjà pris ; justificatifs **Kbis** et **attestation HACCP** (privés) ; attestation sur
+   l'honneur.
+3. **Abonnement** : formules Essentiel, Premium ou sur devis, paiement par Whop (mode démonstration tant que
+   `billing_settings.whop_live` est faux ; voir `web/README.md`).
+4. **Fiche restaurant** : nom, catégorie, description, 1 à 10 photos 16:9 (recadrage intégré), adresse (Base Adresse
+   Nationale), horaires, téléphone, carte des plats (saisie à la main ou **lue sur photo**, fonction `menu-scan`).
 
-Le restaurateur retrouve ensuite son espace dans le profil (statut, SIRET, abonnement, « Modifier ma fiche »).
-Une inscription interrompue (« Terminer plus tard ») reprend à la bonne étape à la connexion suivante.
-
-### Régler l'abonnement
-
-Dans `index.html`, section « 1. CONFIGURATION », objet `proPlan` :
-
-- `amount` : montant en euros (`null` affiche « Montant à définir ») ; `period` : `'mois'`, `'an'`…
-- `stripePaymentLink` : lien de paiement [Stripe Payment Links](https://stripe.com/fr/payments/payment-links).
-  Vide = **mode démonstration** (aucun paiement réel, clairement signalé). Dans Stripe, réglez la redirection après paiement sur
-  `https://evanbisa.github.io/pwa-nantes/?paiement=ok`.
-  ⚠️ Pour un vrai paiement, la confirmation doit être vérifiée par un serveur (webhook Stripe) : sans serveur, le retour
-  `?paiement=ok` ne peut pas être authentifié.
-
-### Limites actuelles (pas de serveur)
-
-- Les justificatifs sont conservés sur l'appareil du restaurateur ; **aucun contrôle humain** n'est possible tant qu'il n'y a pas
-  de base de données partagée.
-- Un restaurant publié n'est **visible que sur l'appareil où il a été créé**. Pour qu'il apparaisse chez tous les utilisateurs,
-  il faut une base de données en ligne (Firebase, Supabase…) — c'est la prochaine étape indispensable.
-
-## Vérification de l'adresse e-mail (code à 6 chiffres)
-
-**Réservée aux restaurateurs, une seule fois, à l'inscription** : un code à 6 chiffres est envoyé à l'adresse e-mail et
-le compte n'est créé qu'une fois le bon code saisi. Les connexions suivantes se font avec le mot de passe seul.
-Les **clients ne reçoivent aucun code** : un seul e-mail par restaurateur, le quota gratuit d'EmailJS reste donc
-largement suffisant.
-Code valable 10 minutes, 5 essais au maximum, renvoi possible après 60 secondes, 5 codes au plus par adresse et par quart d'heure.
-Les comptes restaurateurs créés avant cette fonction doivent vérifier leur adresse à leur prochaine ouverture.
-
-Tant que l'envoi n'est pas configuré, le site fonctionne en **mode démonstration** : le code est affiché à l'écran (clairement signalé).
-
-### Activer l'envoi des e-mails avec EmailJS (gratuit jusqu'à 200 e-mails/mois)
-
-1. Créez un compte sur https://www.emailjs.com/.
-2. **Email Services** › *Add New Service* › Gmail (ou votre messagerie) › connectez l'adresse d'expédition. Notez le **Service ID**.
-3. **Email Templates** › *Create New Template* :
-   - *To Email* : `{{to_email}}`
-   - *Subject* : `{{code}} est votre code Roche Street Food`
-   - *Content* :
-     ```
-     Bonjour {{to_name}},
-
-     Voici votre code pour {{purpose}} : {{code}}
-     Il est valable {{validity}}.
-
-     Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.
-     {{site_name}} — {{site_url}}
-     ```
-   Notez le **Template ID**.
-4. **Account** › *General* : copiez la **Public Key**.
-5. Dans `index.html`, section « 1. CONFIGURATION », renseignez `email: { … publicKey, serviceId, templateId }`, puis poussez :
-   le site est republié automatiquement.
-
-⚠️ Sans serveur, le code est généré et contrôlé dans le navigateur : la vérification prouve qu'un utilisateur honnête possède
-bien son adresse, mais une personne techniquement avertie pourrait la contourner. Pour une vérification inviolable, il faudra
-la confier à un serveur (par exemple Supabase Auth ou Firebase Authentication), en même temps que la base de données partagée.
+Le restaurateur gère ensuite tout depuis son **espace** (Accueil, Statistiques, Publier, Avis, Ma fiche) et scanne le
+QR code de visite de ses clients. Une fiche ne peut être publiée qu'avec un SIRET vérifié, un abonnement actif et une
+fiche complète : c'est la base qui le refuse, pas seulement l'interface.
 
 ## Style de la carte
 
@@ -143,34 +98,19 @@ en plus) :
 - Après la mise en ligne : déclarer le sitemap dans Google Search Console (`https://…/sitemap.xml`) et tester
   l'aperçu d'un lien sur https://www.opengraph.xyz.
 
-## Activer la vraie carte Google Maps
-
-Sans clé, le site affiche sa propre carte (MapLibre, données OpenStreetMap), au style choisi ci-dessus.
-Pour afficher Google Maps :
-
-1. Ouvrez https://console.cloud.google.com/ et créez un projet (un compte de facturation est demandé ;
-   l'usage d'un petit site reste dans les quotas gratuits de Google).
-2. Menu « API et services » › « Bibliothèque » : activez **Maps JavaScript API**.
-3. « API et services » › « Identifiants » › « Créer des identifiants » › **Clé API**.
-4. Restreignez la clé : *Restrictions d'application* › **Sites web** › ajoutez `https://evanbisa.github.io/*`
-   (et `http://localhost:*/*` pour tester en local) ; *Restrictions d'API* › Maps JavaScript API.
-5. Dans `index.html`, collez la clé dans `googleMapsApiKey: ''` (section « 1. CONFIGURATION »), puis poussez.
-   Le site est republié automatiquement sur GitHub Pages (workflow `.github/workflows/pages.yml`).
-
-Si la clé est refusée, le site bascule tout seul sur la carte de secours.
-
-## Comptes
-
-Il n'y a pas de serveur : les comptes sont enregistrés dans le navigateur de l'appareil
-(mot de passe dérivé avec PBKDF2-SHA-256, jamais stocké en clair). Un compte créé sur le téléphone
-n'existe donc pas sur l'ordinateur. Pour des comptes partagés entre appareils, il faudra un service
-d'authentification (Firebase Authentication, Supabase…).
-
 ## Tester en local
 
-La géolocalisation et la création de compte exigent HTTPS ou `localhost` :
+La géolocalisation et la connexion exigent HTTPS ou `localhost` :
 
 ```sh
 python3 -m http.server 8000
 # puis ouvrir http://localhost:8000
 ```
+
+Les comptes et les données sont ceux du projet Supabase en ligne (aucune copie locale) ; les fonctions serveur
+n'acceptent que les adresses du site (CORS), sauf dans une copie de test. Après toute modification d'un `<script>` de
+`index.html`, recalculer la politique de sécurité : `node scripts/csp.mjs` (la publication le fait aussi d'elle-même ;
+`node scripts/csp.mjs --check` vérifie qu'elle est à jour).
+
+Contrôles : `cd web && npm run lint && npm run build` (application), `deno test supabase/functions/` (fonctions
+serveur), `npm run db:test` (règles de la base, PostgreSQL local), `node scripts/check-live.mjs` (sites en ligne).
