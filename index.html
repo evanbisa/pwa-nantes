@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-VrA+oqSHN8WkBa8ZwYfEDYlfbBZfZbC/fkenaR6Eydg=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-DKwc2DZyCj+2665yPyxvpBnPTmlg41+my2jkZY5atPM=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -332,6 +332,8 @@
     #map.show-labels .pin-label, .pin.is-selected .pin-label, .pin.is-hover .pin-label { opacity: 1; transform: none; }
     #map.show-labels .pin.label-hidden:not(.is-selected):not(.is-hover) .pin-label { opacity: 0; }
     .pin.is-filtered { display: none; }
+    .pin.is-demo .pin-badge { border-style: dashed; }
+    .pin.is-demo .pin-label::after { content: " · exemple"; font-weight: 400; color: var(--amber); }
     #map.zoom-far .pin-badge { scale: .62; }
     #map.zoom-far .pin.is-open .pin-badge::before { animation: none; opacity: 0; }
 
@@ -493,6 +495,7 @@
     .ob-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
     .ob-logo { display: flex; align-items: center; gap: 10px; font-weight: 500; }
     .ob-logo .avatar { width: 32px; height: 32px; font-size: 15px; }
+    .ob-logo .ob-mark { flex: none; width: 32px; height: 32px; border-radius: 9px; box-shadow: 0 1px 3px rgba(0, 0, 0, .18); }
     .ob-progress { display: flex; gap: 6px; }
     .ob-progress span { width: 22px; height: 4px; border-radius: 2px; background: var(--line-strong); transition: background-color .3s, width .3s; }
     .ob-progress span.is-active { width: 34px; background: var(--accent); }
@@ -631,6 +634,7 @@
     .go-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
     .go-row .btn { margin-top: 0; }
     .meta .travel { display: block; margin-top: 2px; color: var(--muted); }
+    .meta .travel[hidden] { display: none; }
     .check input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
     .form-error { margin: 12px 0 0; min-height: 0; font-size: 14px; color: var(--danger); }
     .form-error:empty { display: none; }
@@ -1015,6 +1019,7 @@
 
     /* Fiche commerce : galerie, description, badge */
     .gallery { display: flex; gap: 8px; margin: 14px -20px 0; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 20px; scrollbar-width: none; }
+    .gallery:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 12px; }
     .gallery::-webkit-scrollbar { display: none; }
     .gallery img { flex: none; width: 78%; max-width: 320px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; scroll-snap-align: start; background: var(--hover); }
     .gallery img:only-child { width: 100%; max-width: none; }
@@ -1048,6 +1053,10 @@
     .verified { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; color: var(--green); background: var(--green-soft); }
     .role-tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; white-space: nowrap; color: var(--accent); background: var(--accent-soft); }
     .verified.is-test { color: var(--amber); background: rgba(176, 96, 0, .1); }
+    /* Restaurants d'exemple (fictifs) : toujours signalés comme tels */
+    .demo-tag { display: inline-flex; align-items: center; flex: none; margin-left: 6px; padding: 0 6px; border-radius: 8px; font-size: 11px; font-weight: 500; line-height: 18px; vertical-align: 1px; color: var(--amber); background: rgba(176, 96, 0, .1); white-space: nowrap; }
+    .demo-note { margin: 0 0 12px; padding: 10px 12px; border-radius: 12px; font-size: 13px; line-height: 1.45; color: var(--text); background: rgba(176, 96, 0, .08); border: 1px dashed rgba(176, 96, 0, .45); }
+    .demo-note[hidden] { display: none; }
     /* ---------- Fiche commerce : onglets, abonnement, photos ---------- */
     .follow-btn { margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 18px;
       font-size: 14px; font-weight: 500; color: var(--accent); border: 1px solid var(--line-strong); background: transparent; }
@@ -1661,6 +1670,52 @@
       display: flex; align-items: center; gap: 12px; padding: 10px 8px 10px 12px; border-radius: 16px; color: var(--text); background: var(--panel-solid);
       box-shadow: var(--shadow); animation: rise .3s var(--ease-out) both; }
     .install-nudge[hidden] { display: none; }
+
+    /* Visiteur sans compte : barre « Créer mon compte » en bas de l'écran (au-dessus des fiches qui montent du bas) */
+    body.is-guest { --guest-h: 76px; }
+    .guest-bar { position: fixed; z-index: 55; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 8px;
+      padding: 10px 12px calc(var(--safe-bottom) + 10px); background: var(--panel-solid); border-top: 1px solid var(--line);
+      box-shadow: 0 -6px 18px rgba(0, 0, 0, .1); animation: rise .35s var(--ease-out) both; }
+    .guest-bar[hidden] { display: none; }
+    .guest-cta { flex: 1; min-width: 0; height: 54px; padding: 0 14px; font-size: 16px; font-weight: 500; white-space: nowrap; }
+    .guest-login { flex: none; height: 54px; padding: 0 18px; border-radius: 27px; font-size: 15px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); }
+    .guest-login:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (max-width: 899.98px) {
+      body.is-guest .filters { bottom: calc(var(--safe-bottom) + var(--guest-h) + 10px); }
+      body.is-guest .sheet { padding-bottom: calc(var(--safe-bottom) + var(--guest-h) + 20px); }
+      body.is-guest .net { bottom: calc(var(--safe-bottom) + var(--guest-h) + 76px); }
+      body.is-guest .maplibregl-ctrl-bottom-right { bottom: calc(var(--safe-bottom) + var(--guest-h) + 62px); }
+    }
+    /* Écrans plein écran (compte, recherche, stories, photos) et carte pas encore lancée : la barre se range */
+    body:not(.ui-ready) .guest-bar, .onboarding:not([hidden]) ~ .guest-bar, .search-panel:not([hidden]) ~ .guest-bar,
+    .story-viewer:not([hidden]) ~ .guest-bar, .lightbox:not([hidden]) ~ .guest-bar { display: none; }
+
+    /* Offres réservées aux comptes : floutées, sans leur texte, avec « Créer un compte pour voir la suite » */
+    .locked { position: relative; min-height: 176px; border-radius: 14px; overflow: hidden; }
+    .locked-items { display: grid; gap: 8px; filter: blur(5px); opacity: .7; pointer-events: none; user-select: none; }
+    .locked-items > * { margin: 0; }
+    .lock-gate { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+      padding: 14px; text-align: center; background: color-mix(in srgb, var(--panel-solid) 45%, transparent); }
+    .lock-gate b { font-size: 15px; font-weight: 500; color: var(--text); }
+    .lock-gate small { font-size: 13px; color: var(--muted); }
+    .lock-gate .btn { height: 44px; margin-top: 4px; padding: 0 20px; width: auto; }
+    .lock-ico { font-size: 22px; line-height: 1; }
+    .offers-list .locked { margin-top: 4px; }
+    .si-promo.is-locked { color: var(--accent-strong); }
+
+    /* Écran de compte ouvert depuis une fonction réservée aux comptes */
+    .ob-reason { margin: 0 0 12px; padding: 10px 12px; border-radius: 12px; font-size: 14px; line-height: 1.4; color: var(--text); background: var(--accent-soft); border: 1px solid var(--accent-line); }
+    .ob-reason[hidden] { display: none; }
+    .ob-skip { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; border-radius: 19px;
+      font-size: 14px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); border: 1px solid var(--accent-line); }
+    .ob-skip[hidden] { display: none; }
+    .ob-skip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .rv-note .link-btn { font-weight: 500; }
+    .avatar .guest-ico { width: 58%; height: 58%; }
+    /* Jamais par-dessus une fiche, la recherche, le profil… : il revient sur la carte s'il n'a pas encore expiré */
+    body.sheet-open .install-nudge, body.pro-open .install-nudge, body.vp-open .install-nudge, body.scan-open .install-nudge,
+    body.tour-open .install-nudge, .search-panel:not([hidden]) ~ .install-nudge, .story-viewer:not([hidden]) ~ .install-nudge,
+    .onboarding:not([hidden]) ~ .install-nudge { display: none; }
     .install-nudge img { flex: none; border-radius: 10px; }
     .install-nudge p { flex: 1; min-width: 0; margin: 0; font-size: 13px; line-height: 1.3; }
     .install-nudge b { display: block; font-size: 14px; font-weight: 500; }
@@ -1693,6 +1748,8 @@
       .net { bottom: auto; top: 16px; left: calc(var(--sidebar-w) + 32px); right: 16px; }
       body.sheet-open .toast { left: calc(var(--sidebar-w) + 424px); }   /* à droite de la fiche flottante */
       .maplibregl-ctrl-bottom-right { bottom: 0; }
+      .guest-bar { z-index: 21; left: 16px; right: auto; bottom: 16px; width: var(--sidebar-w); padding: 12px; border-radius: 0 0 16px 16px; box-shadow: none; animation: none; }
+      body.is-guest .shop-list { padding-bottom: 88px; }
 
       #shop-sheet {
         left: calc(var(--sidebar-w) + 28px); right: auto; top: 16px; bottom: auto; width: 380px; max-width: 380px; margin: 0;
@@ -1802,6 +1859,7 @@
     .ps-panel { position: relative; }
     .ps-scan-fab { position: absolute; z-index: 3; right: 14px; bottom: calc(var(--safe-bottom) + 72px); }
     #pro-space .ps-body { padding-bottom: 92px; }
+    #pro-space[data-tab="home"] .ps-scan-fab { display: none; }
     .ps-scan[hidden] { display: none; }
 
     /* Carte « Scanner un client » en tête de l'espace restaurateur */
@@ -1957,7 +2015,7 @@
   </header>
 
   <!-- ===================== STORIES DES RESTAURANTS (téléphone : sous le profil ; ordinateur : dans le panneau) ===================== -->
-  <div class="stories glass ui" id="stories" hidden>
+  <div class="stories glass ui" id="stories" role="region" aria-label="Stories des restaurants" hidden>
     <div class="stories-track" id="stories-track" role="list" aria-label="Stories des restaurants"></div>
   </div>
 
@@ -2078,6 +2136,7 @@
       <button type="button" role="tab" id="tab-reviews" aria-controls="panel-reviews" aria-selected="false" tabindex="-1" data-tab="reviews" hidden>Avis<small id="tab-reviews-n"></small></button>
     </div>
     <div class="tab-panel" id="panel-infos" role="tabpanel" aria-labelledby="tab-infos">
+    <p class="demo-note" id="shop-demo-note" hidden><span aria-hidden="true">🧪</span> Restaurant imaginaire, pour découvrir FlashMiam en attendant les premiers restaurants partenaires de La Roche-sur-Yon : ses offres ne sont pas réelles.</p>
     <!-- Comptes clients : « Profiter de l'offre » (ou « Valider ma visite ») → QR code à montrer en caisse -->
     <div class="visit-box" id="shop-visit-box" hidden>
       <button class="visit-cta" type="button" id="shop-visit">
@@ -2087,7 +2146,7 @@
       </button>
       <button class="link-btn visit-plain" type="button" id="shop-visit-plain" hidden>Juste valider ma visite, sans l'offre</button>
     </div>
-    <div class="gallery" id="shop-gallery" hidden></div>
+    <div class="gallery" id="shop-gallery" tabindex="0" role="group" aria-label="Photos du restaurant (faire défiler)" hidden></div>
     <span class="status" id="shop-status"></span>
     <p class="shop-desc" id="shop-desc" hidden></p>
     <div class="promos" id="shop-promos" hidden></div>
@@ -2682,9 +2741,13 @@
   <div id="onboarding" class="onboarding" role="dialog" aria-modal="true" aria-labelledby="auth-title" data-role="client" hidden>
     <div class="ob-panel glass">
       <div class="ob-top">
-        <div class="ob-logo"><span class="avatar" aria-hidden="true">F</span>FlashMiam</div>
+        <div class="ob-logo"><img class="ob-mark" src="icon-192.png?v=2" alt="" width="32" height="32" />FlashMiam</div>
+        <!-- Visiteur : la carte sans compte (offres limitées) -->
+        <button class="ob-skip" type="button" id="ob-guest-btn" hidden>Voir la carte <span aria-hidden="true">→</span></button>
         <div class="ob-progress" id="ob-progress" aria-hidden="true"><span class="is-active" id="ob-dot-1"></span><span id="ob-dot-2"></span></div>
       </div>
+      <!-- Visiteur : pourquoi un compte est demandé (offre floutée, « Suivre », avis…) -->
+      <p class="ob-reason" id="ob-reason" role="status" hidden></p>
       <!-- Étapes du parcours restaurateur -->
       <ol class="pro-steps" id="pro-steps" hidden>
         <li data-pstep="1"><span>1</span>Compte</li>
@@ -3047,6 +3110,7 @@
         <button class="btn btn-ghost" type="button" id="pl-cancel" data-mode="edit">Annuler</button>
         <button class="link-btn later-btn" type="button" data-pro-later data-mode="create">Terminer plus tard</button>
       </form>
+
     </div>
   </div>
 
@@ -3073,6 +3137,12 @@
   <!-- ===================== TOAST ===================== -->
   <div id="net" class="net" role="status" aria-live="polite" hidden><span class="net-dot" aria-hidden="true"></span><span id="net-text"></span><button type="button" id="net-retry" hidden>Réessayer</button></div>
   <div id="toast" class="toast" role="status" aria-live="polite"><span id="toast-text"></span><button id="toast-action" type="button" hidden></button></div>
+  <!-- ===================== VISITEUR SANS COMPTE : créer son compte, toujours à portée de pouce ===================== -->
+  <div class="guest-bar" id="guest-bar" role="region" aria-label="Créer un compte FlashMiam" hidden>
+    <button class="btn btn-primary guest-cta" type="button" id="guest-signup"><span aria-hidden="true">✨</span> Créer mon compte gratuit</button>
+    <button class="guest-login" type="button" id="guest-login" aria-label="Se connecter">Connexion</button>
+  </div>
+
   <!-- Rappel « écran d'accueil » : petite notification à chaque connexion tant que ce n'est pas fait -->
   <div id="install-nudge" class="install-nudge" role="status" aria-live="polite" hidden>
     <img src="icon-192.png" alt="" width="40" height="40" />
@@ -3170,6 +3240,14 @@
      */
     installPromptDelay: 2500,    // ms sur la carte avant de proposer l'écran d'accueil (chaque visite, tant que ce n'est pas fait)
     tourDelay: 1200,             // ms après l'arrivée sur la carte avant le guide de démarrage (-1 : jamais)
+    /**
+     * Restaurants d'exemple (fictifs, liste SHOPS ci-dessous) : 'auto' = affichés seulement tant que la carte compte moins
+     * de `demoUntil` vrais restaurants en ligne (fiches de test non comptées), toujours signalés « Exemple » ;
+     * 'on' = toujours ; 'off' = jamais. Pour une démonstration (démarchage) : ajouter ?demo=1 à l'adresse
+     * (restaurants d'exemple ET fiches de test visibles) ; ?demo=0 les masque.
+     */
+    demoShops: 'auto',
+    demoUntil: 3,
     mapStyle: 'flashmiam',
     storageKey: 'roche-street-food:v2',
     legacyStorageKey: 'roche-street-food:v1',
@@ -3332,6 +3410,7 @@
     add('gaufres-marche',
       [story('gaufres-1', 5, 'berry', 'Nouveau : la gaufre Nutella-banane 🍌')],
       [{ id: 'demo-p3', kind: 'week', title: '2 gaufres = 1 chocolat chaud offert', endsAt: promoAutoEnd('week').toISOString() }]);
+    SHOPS.forEach((sh) => { sh.isDemo = true; });
   })();
 
   /** Codes NAF acceptés pour un restaurateur (nomenclature NAF rév. 2 de l'INSEE). */
@@ -5050,6 +5129,7 @@
     el.querySelector('.pin-badge').textContent = catOf(shop).emoji;
     el.querySelector('.pin-badge').insertAdjacentHTML('beforeend', '<span class="pin-flag">%</span>');
     el.querySelector('.pin-label').textContent = shop.name;
+    if (shop.isDemo) el.classList.add('is-demo');
     el.addEventListener('click', (ev) => { ev.stopPropagation(); openShop(shop.id, { source: 'map' }); });
     el.addEventListener('mouseenter', () => setHover(shop.id, true));
     el.addEventListener('mouseleave', () => setHover(shop.id, false));
@@ -5060,7 +5140,28 @@
   /** Restaurants inscrits (chargés depuis Supabase). */
   const restaurants = () => cloud.restaurants;
   const restaurantToShop = (r) => ({ ...r, isPro: true, isTest: !!r.isTest });
-  const allShops = () => [...SHOPS, ...Object.values(restaurants()).filter((r) => r.published).map(restaurantToShop)];
+  /** Mode démonstration forcé par l'adresse : ?demo=1 (tout montrer), ?demo=0 (rien de fictif). */
+  const DEMO_PARAM = (() => { try { const v = new URLSearchParams(location.search).get('demo'); return v === '1' ? 'on' : v === '0' ? 'off' : null; } catch (e) { return null; } })();
+  /**
+   * Commerces affichés : les restaurants inscrits en ligne, et les restaurants d'exemple (fictifs, signalés « Exemple »)
+   * tant qu'il y a moins de CONFIG.demoUntil vrais restaurants. Les fiches de test (SIRET de test) ne sont visibles que
+   * de leur propriétaire, ou en mode démonstration (?demo=1) : jamais présentées au public comme de vrais restaurants.
+   */
+  function allShops() {
+    const mode = DEMO_PARAM || CONFIG.demoShops;
+    const me = currentUser();
+    const real = Object.values(restaurants()).filter((r) => r.published && (!r.isTest || mode === 'on' || (me && r.ownerId === me.id)));
+    const showDemo = mode === 'on' || (mode !== 'off' && real.filter((r) => !r.isTest).length < CONFIG.demoUntil);
+    return [...(showDemo ? SHOPS : []), ...real.map(restaurantToShop)];
+  }
+  /** Pastille « Exemple » d'un restaurant fictif (jamais confondu avec un vrai restaurant). */
+  function demoTag() {
+    const t = document.createElement('span');
+    t.className = 'demo-tag';
+    t.textContent = 'Exemple';
+    t.title = 'Restaurant fictif, pour découvrir FlashMiam';
+    return t;
+  }
 
   /** Ajoute ou remplace le marqueur d'un commerce (après publication ou modification d'une fiche). */
   function upsertShopMarker(shop) {
@@ -5097,7 +5198,7 @@
       m.el.classList.toggle('is-soon', !!m.status.soon);
       const promos = activePromos(m.shop, now);
       m.el.classList.toggle('has-promo', promos.length > 0);
-      m.el.setAttribute('aria-label', m.shop.name + ', ' + catOf(m.shop).label + ', ' + m.status.label + (promos.length ? ', promotion en cours' : ''));
+      m.el.setAttribute('aria-label', m.shop.name + (m.shop.isDemo ? ' (exemple fictif)' : '') + ', ' + catOf(m.shop).label + ', ' + m.status.label + (promos.length ? ', promotion en cours' : ''));
     });
     applyFilters();
     if (selectedId) renderShop(markers.get(selectedId));
@@ -5133,7 +5234,7 @@
 
     const searching = filters.q.length > 0 || filters.max !== null;
     const signature = items.map(({ m, d }) => m.shop.id + m.status.label + (d === null ? '' : formatDistance(d)) + activePromos(m.shop).length + JSON.stringify(m.shop.rating)).join('|')
-      + selectedId + '|' + filters.q.join(' ') + '|' + filters.max;
+      + selectedId + '|' + filters.q.join(' ') + '|' + filters.max + '|' + Guest.key();
     if (signature === listSignature) return;
     listSignature = signature;
 
@@ -5164,9 +5265,13 @@
         rt.setAttribute('aria-label', ', noté ' + formatRating(shop.rating.avg) + ' sur 5 (' + shop.rating.count + ' avis)');
         st.appendChild(rt);
       }
-      const best = activePromos(shop)[0];
-      btn.querySelector('.si-promo').textContent = best ? promoLine(best) : (shop.description || '').slice(0, 90);
+      const promos = activePromos(shop);
+      const best = promos.find((p) => Guest.canSee(p, shop)) || promos[0];
+      const promoEl = btn.querySelector('.si-promo');
+      if (best && !Guest.canSee(best, shop)) { promoEl.textContent = '🔒 Offre réservée aux membres'; promoEl.classList.add('is-locked'); }   // visiteur
+      else promoEl.textContent = best ? promoLine(best) : (shop.description || '').slice(0, 90);
       if (shop.isPro && !shop.isTest) { const v = document.createElement('span'); v.className = 'verified'; v.textContent = '✓'; v.title = 'Établissement vérifié'; btn.querySelector('strong').after(v); }
+      if (shop.isDemo) btn.querySelector('strong').after(demoTag());
       // Recherche : plats trouvés dans la carte du restaurant
       const hits = searching ? Search.dishesOf(shop, filters.q, filters.max) : [];
       if (hits.length) {
@@ -5395,7 +5500,7 @@
         b.querySelector('.sr-emoji').textContent = catOf(m.shop).emoji;
         Search.highlight(b.querySelector('b'), item.name, res.q);
         const small = b.querySelector('small');
-        small.append(m.shop.name + ' · ', status(m), dist(m));
+        small.append(m.shop.name + (m.shop.isDemo ? ' (exemple)' : '') + ' · ', status(m), dist(m));
         b.querySelector('.sr-price').textContent = formatPrice(item.price);
         b.addEventListener('click', () => { closeSearchPanel({ restoreFocus: false }); openDish(m.shop.id, [idx]); });
         li.appendChild(b);
@@ -5421,6 +5526,7 @@
         b.innerHTML = '<span class="sr-emoji" aria-hidden="true"></span><span class="sr-body"><b></b><small></small></span>';
         b.querySelector('.sr-emoji').textContent = catOf(m.shop).emoji;
         Search.highlight(b.querySelector('b'), m.shop.name, res.q);
+        if (m.shop.isDemo) b.querySelector('b').after(demoTag());
         const small = b.querySelector('small');
         small.append(status(m));
         if (m.shop.rating) { const r = document.createElement('span'); r.className = 'sr-rating'; r.textContent = ' · ★ ' + formatRating(m.shop.rating.avg); small.append(r); }
@@ -5565,6 +5671,15 @@
       note.hidden = false;
       if (own) note.textContent = 'Répondez à vos clients : votre réponse s\'affiche sous leur avis. Un avis abusif ? Signalez-le.';
       else if (me && me.role === 'pro') note.textContent = 'Les avis sont réservés aux comptes clients.';
+      else if (!me && shop.isPro && Guest.on()) {
+        note.textContent = 'Vous y avez mangé ? ';
+        const go = document.createElement('button');
+        go.type = 'button';
+        go.className = 'link-btn';
+        go.textContent = 'Créez un compte pour donner votre avis';
+        go.addEventListener('click', () => Guest.ask('Créez votre compte gratuit pour donner votre avis sur ce restaurant.'));
+        note.appendChild(go);
+      }
       else note.hidden = true;
       // Liste : le mien d'abord
       const ul = $('rv-list');
@@ -5767,7 +5882,7 @@
       return out.sort((a, b) => a.d - b.d || PROMO_ORDER.indexOf(a.p.kind) - PROMO_ORDER.indexOf(b.p.kind));
     }
     function badge() {
-      const n = list().length;
+      const n = list().filter(({ m }) => !m.shop.isDemo).length;   // pastille : vraies offres seulement
       $('offers-badge').hidden = !n;
       $('offers-badge').textContent = n > 99 ? '99+' : String(n);
       $('offers-btn').setAttribute('aria-label', 'Offres autour de moi' + (n ? ' : ' + plural(n, 'offre en cours', 'offres en cours') : ''));
@@ -5789,7 +5904,9 @@
       document.querySelectorAll('#offers-kinds .chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.kind === kind)));
       const ul = $('offers-list');
       ul.textContent = '';
-      items.forEach(({ p, m, d }) => {
+      // Visiteur : les GUEST_PROMOS plus proches, les autres floutées
+      const visible = items.filter(({ p, m }) => Guest.canSee(p, m.shop)), locked = items.filter(({ p, m }) => !Guest.canSee(p, m.shop));
+      visible.forEach(({ p, m, d }) => {
         const li = document.createElement('li');
         const b = document.createElement('button');
         b.type = 'button';
@@ -5802,6 +5919,7 @@
         const until = promoUntil(p);
         small.textContent = [PROMO_KINDS[p.kind].label, p.details, until].filter(Boolean).join(' · ');
         b.querySelector('.offer-shop').append(catOf(m.shop).emoji + ' ' + m.shop.name + ' · ', statusTag(m.status));
+        if (m.shop.isDemo) b.querySelector('.offer-shop').append(' ', demoTag());
         const dist = b.querySelector('.offer-dist');
         if (located) {
           dist.append(formatDistance(d));
@@ -5829,6 +5947,7 @@
         }
         ul.appendChild(li);
       });
+      if (locked.length) ul.appendChild(Guest.lockedBlock(locked.length, locked.map(({ p }) => p.kind), { others: visible.length > 0 }));
       const empty = $('offers-empty');
       empty.hidden = items.length > 0;
       empty.textContent = !all.length ? 'Aucune offre en cours pour le moment. Revenez plus tard !'
@@ -5850,6 +5969,98 @@
     /** Après un changement (position, horaires, nouvelles offres) : compteur et liste à jour. */
     function refresh() { badge(); if (isOpen()) render(); }
     return { open, refresh, list };
+  })();
+
+  /* ---------- Visiteur sans compte ---------- */
+  /**
+   * Sans compte, on voit la carte, les fiches, les menus, les avis et les stories. Les offres sont un avantage des
+   * comptes : un visiteur en voit GUEST_PROMOS (les plus proches, dans l'ordre de « Offres autour de moi ») ; les autres
+   * sont floutées avec « Créer un compte pour voir la suite », et leur texte n'est pas mis dans la page.
+   * Suivre un restaurant, donner son avis, aimer un plat, le QR code de visite et les notifications ouvrent l'écran de
+   * création de compte, avec la raison. La barre du bas « Créer mon compte gratuit » reste toujours à portée de pouce.
+   */
+  const GUEST_PROMOS = 3;
+  const Guest = (() => {
+    let active = false, memo = null, memoAt = 0;
+    const on = () => active && !currentUser();
+    const promoKey = (p, shop) => shop.id + '|' + p.id;
+    /** Offres visibles sans compte : les GUEST_PROMOS plus proches (recalculées au plus toutes les 0,5 s). */
+    function unlocked() {
+      if (!memo || Date.now() - memoAt > 500) { memo = new Set(Offers.list().slice(0, GUEST_PROMOS).map(({ p, m }) => promoKey(p, m.shop))); memoAt = Date.now(); }
+      return memo;
+    }
+    const canSee = (p, shop) => !on() || unlocked().has(promoKey(p, shop));
+    /** Signature pour la liste : change quand les offres visibles changent. */
+    const key = () => (on() ? 'g' + [...unlocked()].join(',') : '');
+    function paintAvatar() {
+      const av = $('avatar');
+      av.classList.remove('has-photo');
+      av.style.backgroundImage = '';
+      av.innerHTML = '<svg class="guest-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>';
+      $('profile-btn').setAttribute('aria-label', 'Créer un compte ou se connecter');
+    }
+    /** Pas de session : visiteur (offres limitées, barre « Créer mon compte »). */
+    function enter() {
+      active = true;
+      document.body.classList.add('is-guest');
+      $('guest-bar').hidden = false;
+      paintAvatar();
+      refresh();
+    }
+    /** Connexion : tout redevient visible. */
+    function leave() {
+      if (!active) return;
+      active = false;
+      document.body.classList.remove('is-guest');
+      $('guest-bar').hidden = true;
+      refresh();
+    }
+    function refresh() {
+      memo = null;
+      listSignature = '';
+      if (view) refreshStatuses();   // liste, fiche ouverte, offres
+    }
+    /** Fonction réservée aux comptes : écran de création de compte, avec la raison (la carte reste derrière). */
+    function ask(reason = '') {
+      hideToast();
+      setAuthRole('client');
+      showAuthStep('signup');
+      $('ob-reason').textContent = reason;
+      $('ob-reason').hidden = !reason;
+    }
+    /**
+     * Offres cachées : quelques cartes de remplacement floutées (jamais le vrai texte de l'offre) et l'appel à créer un
+     * compte. Dans « Offres autour de moi » (élément de liste) et dans la fiche (inSheet).
+     */
+    function lockedBlock(count, kinds, { inSheet = false, others = false } = {}) {
+      const box = document.createElement(inSheet ? 'div' : 'li');
+      box.className = 'locked';
+      const items = document.createElement('div');
+      items.className = 'locked-items';
+      items.setAttribute('aria-hidden', 'true');
+      // 2 ou 3 cartes de remplacement (de quoi laisser la place au bouton, même pour une seule offre cachée)
+      Array.from({ length: Math.min(3, Math.max(2, kinds.length)) }, (_, i) => kinds[i % kinds.length]).forEach((k) => {
+        const card = document.createElement('div');
+        card.className = inSheet ? 'promo is-' + k : 'offer-hit';
+        card.innerHTML = inSheet
+          ? '<span class="promo-ico"></span><div><small>Offre réservée aux membres</small><strong>Une offre à découvrir ici</strong></div>'
+          : '<span class="offer-ico"></span><span class="offer-body"><b>Une offre à découvrir ici</b><small>Offre réservée aux membres</small></span>';
+        card.querySelector(inSheet ? '.promo-ico' : '.offer-ico').textContent = (PROMO_KINDS[k] || PROMO_KINDS.other).icon;
+        items.appendChild(card);
+      });
+      const gate = document.createElement('div');
+      gate.className = 'lock-gate';
+      gate.innerHTML = '<span class="lock-ico" aria-hidden="true">🔒</span><b></b><small>Compte gratuit, prêt en une minute</small><button class="btn btn-primary" type="button">Créer un compte pour voir la suite</button>';
+      gate.querySelector('b').textContent = count > 1
+        ? count + (others ? ' autres offres' : ' offres') + ' réservées aux membres'
+        : (others ? 'Une autre offre' : 'Une offre') + ' réservée aux membres';
+      gate.querySelector('button').addEventListener('click', () => ask('Créez votre compte gratuit pour voir toutes les offres autour de vous.'));
+      box.append(items, gate);
+      return box;
+    }
+    $('guest-signup').addEventListener('click', () => ask());
+    $('guest-login').addEventListener('click', () => { hideToast(); showAuthStep('login'); });
+    return { on, canSee, key, enter, leave, refresh, ask, lockedBlock };
   })();
 
   /* ---------- « J'aime » : stories et plats (compteurs pour le restaurateur, jamais les noms) ---------- */
@@ -5953,7 +6164,7 @@
     }
     const busy = new Set();
     async function toggle(id, dish) {
-      if (!currentUser()) return;
+      if (!currentUser()) { if (Guest.on()) Guest.ask('Créez votre compte gratuit pour aimer vos plats préférés.'); return; }
       const key = id + '|' + dish;
       if (busy.has(key)) return;                              // double appui : une seule demande
       busy.add(key);
@@ -6173,7 +6384,10 @@
       document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); schedule(); });
       Device.sync();
     }
-    $('notif-btn').addEventListener('click', open);
+    $('notif-btn').addEventListener('click', () => {
+      if (Guest.on()) { Guest.ask('Créez votre compte gratuit pour être prévenu des offres et des stories de vos restaurants préférés.'); return; }
+      open();
+    });
     return { start, load, open, openItem, connect, disconnect, get items() { return items; }, unread, DEVICE_KEY };
   })();
 
@@ -6357,16 +6571,17 @@
     $('shop-name').textContent = shop.name;
     $('shop-cat').textContent = catOf(shop).label;
     // Restaurants inscrits : badge « vérifié », description, photos, téléphone ; l'offre est facultative
-    $('shop-verified').hidden = !shop.isPro;
-    $('shop-verified').classList.toggle('is-test', !!shop.isTest);
-    $('shop-verified').textContent = shop.isTest ? 'Fiche de test' : '✓ Établissement vérifié';
-    $('shop-verified').title = shop.isTest ? 'Créée avec le SIRET de test : établissement fictif' : 'SIRET vérifié auprès du répertoire Sirene';
+    $('shop-verified').hidden = !shop.isPro && !shop.isDemo;
+    $('shop-verified').classList.toggle('is-test', !!(shop.isTest || shop.isDemo));
+    $('shop-verified').textContent = shop.isDemo ? 'Exemple fictif' : shop.isTest ? 'Fiche de test' : '✓ Établissement vérifié';
+    $('shop-verified').title = shop.isDemo ? 'Restaurant imaginaire, pour découvrir FlashMiam' : shop.isTest ? 'Créée avec le SIRET de test : établissement fictif' : 'SIRET vérifié auprès du répertoire Sirene';
+    $('shop-demo-note').hidden = !shop.isDemo;
     $('shop-desc').hidden = !shop.description;
     $('shop-desc').textContent = shop.description || '';
     renderShopPromos(shop);
     VisitPass.renderEntry(shop);
     $('shop-phone-row').hidden = !shop.phone;
-    if (shop.phone) { $('shop-phone').textContent = shop.phone; $('shop-phone').href = 'tel:' + compactPhone(shop.phone); }
+    if (shop.phone) { $('shop-phone').textContent = formatPhone(shop.phone); $('shop-phone').href = 'tel:' + compactPhone(shop.phone); }
     renderGallery(shop);
     renderMenu(shop);
     DishLikes.render(shop);
@@ -6386,6 +6601,8 @@
       km.textContent = formatDistance(d);
       walk.textContent = formatMinutes(walkMinutes(d));
       car.textContent = formatMinutes(driveMinutes(d));
+      // À deux pas (moins de 10 min à pied) : le temps en voiture n'apporte rien (« 1 min en voiture » pour 100 m)
+      dist.querySelector('.travel').hidden = walkMinutes(d) < 10;
     } else {
       dist.textContent = 'Activez la localisation pour connaître la distance et les temps de trajet';
     }
@@ -6550,7 +6767,7 @@
     const me = currentUser();
     const canFollow = !!(shop.isPro && me && !isOwnShop(shop.id, me));
     const btn = $('shop-follow');
-    btn.hidden = !canFollow;
+    btn.hidden = !canFollow && !(shop.isPro && Guest.on());   // visiteur : « Suivre » invite à créer un compte
     const following = canFollow && !!(me.follows && me.follows[shop.id]);
     btn.setAttribute('aria-pressed', String(following));
     $('shop-follow-label').textContent = following ? 'Abonné' : 'Suivre';
@@ -6562,6 +6779,7 @@
   $('shop-follow').addEventListener('click', async () => {
     const me = currentUser();
     const id = selectedId;
+    if (!me && Guest.on()) { Guest.ask('Créez votre compte gratuit pour suivre ce restaurant et être prévenu de ses offres.'); return; }
     if (!me || !id) return;
     const btn = $('shop-follow');
     const name = markers.get(id).shop.name;
@@ -6708,7 +6926,8 @@
     const promos = activePromos(shop);
     box.hidden = !promos.length;
     box.textContent = '';
-    promos.forEach((p) => {
+    const locked = promos.filter((p) => !Guest.canSee(p, shop));   // visiteur : offres réservées aux membres
+    promos.filter((p) => Guest.canSee(p, shop)).forEach((p) => {
       const card = document.createElement('div');
       card.className = 'promo is-' + p.kind;
       card.innerHTML = '<span class="promo-ico" aria-hidden="true"></span><div><small></small><strong></strong><span class="promo-more"></span></div>';
@@ -6730,6 +6949,7 @@
       }
       box.appendChild(card);
     });
+    if (locked.length) box.appendChild(Guest.lockedBlock(locked.length, locked.map((p) => p.kind), { inSheet: true, others: locked.length < promos.length }));
   }
 
   /* ---------- Stories des restaurants (24 h, visibles par tous, sans abonnement) ---------- */
@@ -6770,7 +6990,7 @@
       btn.type = 'button';
       btn.className = 'story-chip' + (g.unseen ? '' : ' is-seen');
       btn.dataset.id = g.shop.id;
-      btn.setAttribute('aria-label', 'Story de ' + g.shop.name + (g.unseen ? ' (nouvelle)' : ''));
+      btn.setAttribute('aria-label', 'Story de ' + g.shop.name + (g.shop.isDemo ? ' (exemple fictif)' : '') + (g.unseen ? ' (nouvelle)' : ''));
       btn.innerHTML = '<span class="story-ring"><span class="story-avatar" aria-hidden="true"></span></span><span class="story-name" aria-hidden="true"></span>';
       btn.querySelector('.story-avatar').textContent = catOf(g.shop).emoji;
       btn.querySelector('.story-name').textContent = g.shop.name;
@@ -6845,6 +7065,7 @@
       g.stories.forEach((_, i) => { const b = document.createElement('span'); b.innerHTML = '<i></i>'; if (i < si) b.firstChild.style.width = '100%'; bars.appendChild(b); });
       $('sv-avatar').textContent = catOf(g.shop).emoji;
       $('sv-name').textContent = g.shop.name;
+      if (g.shop.isDemo) $('sv-name').append(' ', demoTag());
       paintTime();
       $('sv-caption').textContent = st.imageUrl ? (st.text || '') : '';
       const away = distanceLabel(g.shop);
@@ -7714,7 +7935,7 @@
       if (n === proIndex) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
     });
     // L'inscription d'un client a sa propre barre de progression (une question par écran)
-    $('ob-progress').hidden = proIndex > 0 || !(signupLike || step === 'location') || (step === 'signup' && authRole === 'client');
+    $('ob-progress').hidden = proIndex > 0 || !(signupLike || step === 'location') || (step === 'signup' && authRole === 'client') || (step === 'location' && Guest.on());
     $('ob-dot-1').classList.toggle('is-active', signupLike);
     $('ob-dot-2').classList.toggle('is-active', step === 'location');
   }
@@ -7735,6 +7956,11 @@
     const join = step === 'about' || (step === 'signup' && authRole === 'client');
     if (join) Join.enter(step);
     if (step !== 'location') $('ob-welcome').hidden = true;
+    $('ob-reason').hidden = true;   // Guest.ask() l'affiche juste après
+    // Visiteur : « Voir la carte » (sans compte) sur l'accueil et la connexion
+    $('ob-guest-btn').hidden = !(Guest.on() && (step === 'signup' || step === 'login'));
+    $('ob-guest-btn').firstChild.textContent = appStarted ? 'Revenir à la carte ' : 'Voir la carte ';
+    $('ob-guest-btn').setAttribute('aria-label', appStarted ? 'Revenir à la carte' : 'Voir la carte sans créer de compte');
     if (step === 'login') GoogleAuth.mount();
     if (step === 'pro-verify') enterVerifyStep();
     if (step === 'pro-payment') enterPaymentStep();
@@ -7755,6 +7981,8 @@
     cloud.user = user;
     store.write({ lastEmail: user.email, lastRole: user.role });
     applyAccount(user);
+    Guest.leave();
+    whenMapReady(syncShopMarkers);   // fiche de test : visible de son seul propriétaire
   }
 
   /* ---------- Vérification de l'adresse e-mail : code à 6 chiffres envoyé par Supabase ---------- */
@@ -8575,6 +8803,14 @@
     });
   })();
 
+  /** Visiteur : la carte sans compte (choix gardé : les prochaines visites ouvrent directement la carte). */
+  $('ob-guest-btn').addEventListener('click', () => {
+    store.write({ guest: true });
+    if (appStarted) { hideOnboarding(); return; }            // déjà sur la carte : on y retourne
+    if (!store.read().geoConsent) { showAuthStep('location'); return; }
+    finishAuth({ fresh: false });
+  });
+
   $('ob-later').addEventListener('click', () => {
     store.write({ geoConsent: 'later' });
     setLocateState('idle');
@@ -8586,8 +8822,10 @@
     // Clavier refermé d'abord : la carte ne change pas de taille pendant la transition
     const active = document.activeElement;
     if (active && active !== document.body && active.blur) active.blur();
-    document.body.classList.add('ui-intro');
-    setTimeout(() => document.body.classList.remove('ui-intro'), 1400);
+    if (!appStarted) {                                       // (connexion depuis la carte du visiteur : pas d'animation d'arrivée)
+      document.body.classList.add('ui-intro');
+      setTimeout(() => document.body.classList.remove('ui-intro'), 1400);
+    }
     hideOnboarding();
     startApp({ focus, intro: true });
     if (fresh && !located && !focus) setTimeout(() => toast('Activez la localisation à tout moment avec le bouton en haut à droite.'), 2200);
@@ -9771,6 +10009,7 @@
 
     function setTab(t, { focus = false } = {}) {
       tab = TABS.includes(t) ? t : 'home';
+      root.dataset.tab = tab;   // Accueil : la grande carte « Scanner un client » remplace le bouton flottant
       TABS.forEach((k) => {
         const b = $('pst-' + k);
         b.setAttribute('aria-selected', String(k === tab));
@@ -10282,7 +10521,7 @@
         ['Photos', r.photos.length > 0, r.photos.length ? plural(r.photos.length, 'photo', 'photos') : 'aucune'],
         ['Carte (menu)', r.menu.length > 0, r.menu.length ? plural(r.menu.length, 'plat', 'plats') : 'vide'],
         ['Horaires d\'ouverture', r.hours.length > 0, r.hours.length ? plural(r.hours.length, 'service', 'services') : 'non renseignés'],
-        ['Téléphone', !!r.phone, r.phone || 'non renseigné'],
+        ['Téléphone', !!r.phone, r.phone ? formatPhone(r.phone) : 'non renseigné'],
       ] : [];
       const ok = checks.filter((c) => c[1]).length;
       const p = checks.length ? Math.round((ok / checks.length) * 100) : 0;
@@ -10532,6 +10771,16 @@
     const usablePromos = (shop) => activePromos(shop).filter((p) => UUID_RE.test(p.id));
     /** Bouton principal de la fiche (comptes clients) : « Profiter de l'offre » s'il y en a une, sinon « Valider ma visite ». */
     function renderEntry(shop) {
+      if (Guest.on() && shop.isPro && UUID_RE.test(shop.id)) {   // visiteur : le bouton invite à créer un compte
+        const has = activePromos(shop).length > 0;
+        entryPromo = null;
+        $('shop-visit-box').hidden = false;
+        $('shop-visit-title').textContent = has ? 'Profiter de l\'offre' : 'Valider ma visite';
+        $('shop-visit-sub').textContent = 'Créez votre compte gratuit pour obtenir votre QR code';
+        $('shop-visit').setAttribute('aria-label', (has ? 'Profiter de l\'offre' : 'Valider ma visite') + ' chez ' + shop.name + ' : créer un compte');
+        $('shop-visit-plain').hidden = true;
+        return;
+      }
       const ok = canUse(shop) && VisitFeature.check(() => { const m = selectedId && markers.get(selectedId); if (m) { renderShopPromos(m.shop); renderEntry(m.shop); } });
       $('shop-visit-box').hidden = !ok;
       if (!ok) return;
@@ -10684,7 +10933,10 @@
       keepAwake(false);
     }
 
-    $('shop-visit').addEventListener('click', () => selectedId && open(selectedId, entryPromo));
+    $('shop-visit').addEventListener('click', () => {
+      if (Guest.on()) { Guest.ask('Créez votre compte gratuit pour profiter des offres en caisse avec votre QR code.'); return; }
+      if (selectedId) open(selectedId, entryPromo);
+    });
     $('shop-visit-plain').addEventListener('click', () => selectedId && open(selectedId));
     $('vp-close').addEventListener('click', close);
     $('vp-finish').addEventListener('click', close);
@@ -11229,7 +11481,7 @@
   });
   $('profile-btn').addEventListener('click', () => {
     const account = currentUser();
-    if (!account) return;
+    if (!account) { if (Guest.on()) Guest.ask(); return; }
     if (account.role === 'pro') ProSpace.open();
     else openProfileSheet();
   });
@@ -11316,7 +11568,16 @@
      11. LANCEMENT DE LA CARTE APRÈS CONNEXION
      ===================================================================== */
 
+  let appStarted = false;
   function startApp({ focus = null, intro = false } = {}) {
+    // Déjà sur la carte (visiteur qui se connecte) : on complète l'interface sans déplacer la carte
+    if (appStarted) {
+      Install.schedule();
+      Notifs.start();
+      whenMapReady(() => { renderStories(); if (focus && markers.get(focus)) openShop(focus); else Tour.maybeStart(); });
+      return;
+    }
+    appStarted = true;
     document.body.classList.add('ui-ready');
     Install.schedule();
     whenMapReady(renderStories);
@@ -11354,6 +11615,9 @@
   setTheme(currentTheme());
   applyLayout();
   setLocateState('idle');
+  // « Rester connecté » coché d'office sur téléphone et tablette (appareil personnel ; l'appli de l'écran d'accueil
+  // oublierait sinon la session à chaque fermeture), décoché sur ordinateur, souvent partagé.
+  $('li-remember').checked = $('su-remember').checked = authStorage.remember() || detectPlatform() !== 'desktop';
   const params = new URLSearchParams(location.search);
   // Retour de la page de paiement Whop : confirmation attendue une fois la session rétablie
   const paymentReturn = params.get('paiement') === 'retour';
@@ -11421,13 +11685,20 @@
         if (paymentReturn && user.role === 'pro') awaitPayment(user);
         if (pendingVisit) setTimeout(() => openVisitLink(pendingVisit, user), 600);
         else if (pendingShortcut) setTimeout(() => openShortcut(pendingShortcut, user), 600);
-      } else if (store.read().lastEmail || wantLogin) {
-        setAuthRole(store.read().lastRole || 'client');
-        $('li-email').value = store.read().lastEmail || '';
-        showAuthStep('login');
       } else {
-        setAuthRole('client');
-        showAuthStep('signup');
+        // Pas de session : visiteur. Lien vers une fiche, ou carte déjà choisie sans compte : directement la carte ;
+        // sinon l'écran de compte (connexion si un compte a déjà servi ici), avec « Voir la carte sans compte ».
+        Guest.enter();
+        if (wantLogin || (store.read().lastEmail && !pendingLink)) {
+          setAuthRole(store.read().lastRole || 'client');
+          $('li-email').value = store.read().lastEmail || '';
+          showAuthStep('login');
+        } else if (pendingLink || store.read().guest) {
+          finishAuth({ fresh: false });
+        } else {
+          setAuthRole('client');
+          showAuthStep('signup');
+        }
       }
       Loader.endBoot();
     })();
