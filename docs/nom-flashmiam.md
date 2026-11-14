@@ -9,6 +9,9 @@ démarcher des commerçants, imprimer des flyers / un logo, ou créer une socié
 - **Noms de domaine achetés et fonctionnels** : `flashmiam.fr` et `flashmiam.com`.
 - **Réseaux sociaux** : comptes créés sur **Instagram** et **TikTok**.
 
+**Dépôt de marque repoussé** (décision du 14/11/2026) : les étapes 2 à 4 ci-dessous attendent. À reprendre au plus
+tard avant le démarchage des commerçants, les supports imprimés ou le lancement public.
+
 ## Ce qu'on a déjà vérifié (octobre 2026)
 
 - **INPI – Marques** : aucune marque « flashmiam » déposée en France.
