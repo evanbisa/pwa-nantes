@@ -294,6 +294,13 @@ publications. Corrigé :
 - Pages `confidentialite.html` et `conditions.html` (contact : flashmiampro@gmail.com).
 
 ### ⏳ Reste à faire
+- **Domaine `flashmiam.fr` (14 novembre 2026)** : adresse principale du site (Vercel ; `flashmiam.com` et
+  `www.flashmiam.fr` y renvoient, `www.flashmiam.com` ne répond pas encore). Les fonctions serveur l'acceptent déjà (CORS).
+  **Connexion Google cassée sur ce domaine** tant qu'il manque dans le client OAuth : Google renvoie une erreur 403 sur
+  son bouton. À faire : Google Cloud › Identifiants › client « FlashMiam - Site web » › *Origines JavaScript
+  autorisées* : `https://flashmiam.fr`, `https://www.flashmiam.fr`, `https://flashmiam.com`. Puis Supabase ›
+  *URL Configuration* : *Site URL* `https://flashmiam.fr`, *Redirect URLs* `https://flashmiam.fr/**` et
+  `https://flashmiam.com/**` en plus des adresses ci-dessous. Domaines à ajouter aussi au widget Turnstile.
 - **Pages juridiques** (`/app/legal/` : mentions légales, CGU, CGV, confidentialité ; anciennes adresses
   `conditions.html` et `confidentialite.html` redirigées) : compléter les informations entre crochets dans
   `web/lib/legal/site.ts` (éditeur, SIREN/SIRET, adresse, directeur de la publication, TVA, tribunal, médiateur de la
