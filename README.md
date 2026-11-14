@@ -18,6 +18,20 @@ https://evanbisa.github.io/pwa-nantes/).
 État de la sécurité et de la mise en ligne (ce qui est fait, ce qui reste à régler) :
 [`web/docs/SECURITE-ETAT.md`](web/docs/SECURITE-ETAT.md).
 
+## Visiteurs sans compte
+
+La carte s'ouvre **sans compte** : bouton « Voir la carte → » en haut de l'écran d'accueil (le choix est gardé : les
+visites suivantes ouvrent directement la carte), et un lien partagé vers une fiche (`?r=…`) l'ouvre sans passer par
+l'inscription. Un visiteur voit les restaurants, les fiches, les menus, les avis et les stories.
+
+- **Offres réservées aux comptes** : un visiteur en voit **3** (les plus proches, dans l'ordre de « Offres autour de
+  moi ») ; les autres sont **floutées** avec « Créer un compte pour voir la suite », dans les offres, les fiches et la
+  liste. Leur texte n'est pas mis dans la page (réglage : `GUEST_PROMOS` dans `index.html`).
+- **Barre fixe en bas de l'écran** : « Créer mon compte gratuit » (rouvre l'écran de création de compte) et
+  « Connexion » ; sur ordinateur, en bas du panneau latéral.
+- Suivre un restaurant, donner un avis, aimer un plat, le QR code de visite et les notifications ouvrent l'écran de
+  création de compte avec la raison ; « Revenir à la carte → » y ramène.
+
 ## Restaurants d'exemple (démonstration)
 
 Tant que la carte compte **moins de 3 vrais restaurants** en ligne, six restaurants fictifs (liste `SHOPS` de
