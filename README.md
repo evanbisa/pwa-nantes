@@ -26,7 +26,10 @@ l'inscription. Un visiteur voit les restaurants, les fiches, les menus, les avis
 
 - **Offres réservées aux comptes** : un visiteur en voit **3** (les plus proches, dans l'ordre de « Offres autour de
   moi ») ; les autres sont **floutées** avec « Créer un compte pour voir la suite », dans les offres, les fiches et la
-  liste. Leur texte n'est pas mis dans la page (réglage : `GUEST_PROMOS` dans `index.html`).
+  liste. **Verrou côté serveur** : sans compte, la base refuse la lecture de la table des offres ; la fonction
+  `guest_promotions()` les compte toutes mais ne renvoie le texte que de 3 (la plus récente de chaque restaurant
+  d'abord, les mêmes pour tous les visiteurs) : le texte des autres n'arrive jamais sur l'appareil. Les restaurants
+  d'exemple complètent jusqu'à 3 (réglage d'affichage : `GUEST_PROMOS` dans `index.html`).
 - **Barre fixe en bas de l'écran** : « Créer mon compte gratuit » (rouvre l'écran de création de compte) et
   « Connexion » ; sur ordinateur, en bas du panneau latéral.
 - Suivre un restaurant, donner un avis, aimer un plat, le QR code de visite et les notifications ouvrent l'écran de

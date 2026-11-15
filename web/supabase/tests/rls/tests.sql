@@ -210,8 +210,25 @@ insert into promotions (merchant_id, kind, title, created_at, ends_at) values ('
 reset role;
 select set_config('request.jwt.claims', '', false);
 set role anon;
-select t.ok((select count(*) = 2 from stories) and (select count(*) = 3 from promotions), 'visiteur sans compte : voit les 2 stories et 3 promotions en cours, sans abonnement');
-select t.ok(not exists (select 1 from stories where caption = 'Story d''hier') and not exists (select 1 from promotions where title = 'Offre terminée'), 'story expirée et promotion terminée : invisibles');
+select t.ok((select count(*) = 2 from stories), 'visiteur sans compte : voit les 2 stories en cours, sans abonnement');
+select t.fails($$select 1 from promotions$$, 'visiteur sans compte : lecture directe des offres refusée (verrou côté serveur)');
+select t.ok((select count(*) = 3 from guest_promotions()), 'visiteur sans compte : les 3 offres en cours comptées (guest_promotions)');
+select t.ok((select count(*) = 3 from guest_promotions() where not locked and title is not null), 'visiteur sans compte : 3 offres ouvertes au plus, avec leur texte (ici les 3 du même restaurant)');
+select t.ok(not exists (select 1 from stories where caption = 'Story d''hier') and not exists (select 1 from guest_promotions() where title = 'Offre terminée'), 'story expirée et promotion terminée : invisibles');
+-- Plus de 3 offres : seules 3 gardent leur texte ; les autres arrivent sans titre ni détail
+reset role;
+set role service_role;
+insert into promotions (merchant_id, kind, title, details) values ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Offre cachée A', 'Détail caché'), ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Offre cachée B', null);
+reset role;
+set role anon;
+select t.ok((select count(*) = 5 from guest_promotions()) and (select count(*) = 3 from guest_promotions() where not locked)
+  and (select count(*) = 2 from guest_promotions() where locked and title is null and details is null), 'visiteur sans compte : 5 offres en cours, texte de 3 seulement, les 2 autres verrouillées sans titre ni détail');
+reset role;
+set role service_role;
+delete from notifications where ref_id in (select id from promotions where title like 'Offre cachée %');   -- (abonnés prévenus : sans effet sur la suite)
+delete from promotions where title like 'Offre cachée %';
+reset role;
+set role anon;
 select t.fails($$insert into stories (merchant_id, background, caption) values ('aaaaaaaa-0000-0000-0000-000000000001', 'ocean', 'Anonyme')$$, 'visiteur : ne peut pas publier de story');
 select t.fails($$delete from promotions$$, 'visiteur : ne peut pas supprimer de promotion');
 select t.fails($$select track_visit('aaaaaaaa-0000-0000-0000-000000000001', 'story')$$, 'visiteur sans compte : vue de story non comptée');
