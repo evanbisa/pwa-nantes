@@ -88,6 +88,14 @@ const legacy = await rpc("track_merchant_event", { p_merchant_id: zero, p_event:
 report(legacy.status === 401 || legacy.status === 403, `ancien compteur direct (track_merchant_event) : fermé (HTTP ${legacy.status})`);
 const counts = await rpc("dish_like_counts", { p_merchant_id: zero });
 report(counts.status === 200 && Array.isArray(counts.body), `nombre de « j'aime » des plats lisible (HTTP ${counts.status})`);
+// Offres réservées aux comptes : un visiteur ne lit pas la table des offres ; guest_promotions() les compte toutes mais
+// ne donne le texte que de 3
+const promoTable = await get("promotions?select=id,title&limit=1");
+report(denied(promoTable), `offres : lecture directe impossible pour un visiteur (HTTP ${promoTable.status})`);
+const guestPromos = await rpc("guest_promotions", {});
+const opened = Array.isArray(guestPromos.body) ? guestPromos.body.filter((p) => p.title !== null || p.details !== null) : [];
+report(guestPromos.status === 200 && Array.isArray(guestPromos.body) && opened.length <= 3 && guestPromos.body.every((p) => p.locked === (p.title === null)),
+  `offres pour les visiteurs (guest_promotions) : ${Array.isArray(guestPromos.body) ? guestPromos.body.length : "?"} en cours, texte de ${opened.length} seulement, 3 au plus (HTTP ${guestPromos.status})`);
 for (const [fn, body, label] of [
   ["toggle_dish_like", { p_merchant_id: zero, p_dish: "x" }, "« j'aime » d'un plat"],
   ["toggle_story_like", { p_story_id: zero }, "« j'aime » d'une story"],

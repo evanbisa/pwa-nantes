@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-DKwc2DZyCj+2665yPyxvpBnPTmlg41+my2jkZY5atPM=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-DW/3SOP6S6rugrBd63ACG3vgAjOowrPbPNjsw6NKhVM=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -3676,7 +3676,7 @@
     imagePath: st.image_path, imageUrl: st.image_path ? publicUrl('stories', st.image_path) : null,
     createdAt: st.created_at, expiresAt: st.expires_at,
   });
-  const promoFromRow = (pr) => ({ id: pr.id, kind: pr.kind, title: pr.title, details: pr.details || '', createdAt: pr.created_at, endsAt: pr.ends_at });
+  const promoFromRow = (pr) => ({ id: pr.id, kind: pr.kind, title: pr.title || '', details: pr.details || '', createdAt: pr.created_at, endsAt: pr.ends_at, locked: !!pr.locked });
   function restaurantFromRow(m, promos = [], stories = [], rating = null) {
     const hours = m.opening_hours || {};
     return {
@@ -3699,12 +3699,31 @@
   const ratingsFrom = (rows) => new Map((rows || []).map((r) => [r.merchant_id, { avg: Number(r.average), count: r.total }]));
   let loadSeq = 0, appliedSeq = 0;
 
+  /** Session ouverte sur cet appareil (lue localement, sans appel au serveur) ? */
+  async function hasSession() {
+    try { const { data } = await sb.auth.getSession(); return !!(data && data.session); } catch (e) { return false; }
+  }
+  /**
+   * Offres en cours. Avec un compte : la table (texte complet). Sans compte, la base ne laisse plus lire la table : la
+   * fonction guest_promotions() donne toutes les offres en cours mais le texte de 3 seulement (les autres « locked »,
+   * sans titre ni détail) : le verrou est côté serveur, pas seulement un flou à l'écran.
+   * merchantId : les offres d'un seul restaurant.
+   */
+  async function readPromos(merchantId = null) {
+    const fromTable = () => { let q = promoFilter(sb.from('promotions').select('*')); if (merchantId) q = q.eq('merchant_id', merchantId); return q; };
+    if (await hasSession()) return fromTable();
+    const res = await sb.rpc('guest_promotions');
+    if (res.error && missingFn(res.error)) return fromTable();   // fonction pas encore en ligne : ancienne lecture
+    if (!res.error && merchantId) res.data = (res.data || []).filter((x) => x.merchant_id === merchantId);
+    return res;
+  }
+
   /** Restaurants inscrits, avec leurs promotions et stories (la base ne renvoie que ce que l'utilisateur a le droit de voir). */
   async function loadRestaurants() {
     const seq = ++loadSeq;
     const [m, pr, st, rt] = await Promise.all([
       sb.from('merchants').select('*'),
-      promoFilter(sb.from('promotions').select('*')),
+      readPromos(),
       sb.from('stories').select('*').gt('expires_at', liveSince()),
       sb.rpc('merchant_ratings'),
     ]);
@@ -3735,9 +3754,10 @@
       r.stories.forEach((x) => knownStories.set(x.id, x));
       r.promos.forEach((x) => knownPromos.set(x.id, x));
     });
+    const guest = !(await hasSession());
     const [mi, pi, si, rt] = await Promise.all([
       sb.from('merchants').select('id, updated_at'),
-      promoFilter(sb.from('promotions').select('id, merchant_id')),
+      guest ? readPromos() : promoFilter(sb.from('promotions').select('id, merchant_id')),
       sb.from('stories').select('id, merchant_id').gt('expires_at', liveSince()),
       sb.rpc('merchant_ratings'),
     ]);
@@ -3745,7 +3765,7 @@
     if (error) throw error;
     if (!mi.data.length) return loadRestaurants();             // liste vide inattendue : vérification par une lecture complète
     const changed = mi.data.filter((x) => { const r = cloud.restaurants[x.id]; return !r || r.updatedAt !== x.updated_at; }).map((x) => x.id);
-    const newPromos = pi.data.filter((x) => !knownPromos.has(x.id)).map((x) => x.id);
+    const newPromos = guest ? [] : pi.data.filter((x) => !knownPromos.has(x.id)).map((x) => x.id);
     const newStories = si.data.filter((x) => !knownStories.has(x.id)).map((x) => x.id);
     if (changed.length + newPromos.length + newStories.length > 120) return loadRestaurants();   // trop de nouveautés : lecture complète
     const fetchIds = async (table, ids) => {
@@ -3759,6 +3779,7 @@
     appliedSeq = seq;
     if (!rt.error) cloud.ratings = ratingsFrom(rt.data);
     pRows.forEach((x) => knownPromos.set(x.id, promoFromRow(x)));
+    if (guest) pi.data.forEach((x) => knownPromos.set(x.id, promoFromRow(x)));   // sans compte : offres ouvertes ou verrouillées, à jour
     sRows.forEach((x) => knownStories.set(x.id, storyFromRow(x)));
     const rowById = new Map(mRows.map((m) => [m.id, m]));
     const promosOf = groupBy(pi.data, 'merchant_id'), storiesOf = groupBy(si.data, 'merchant_id');
@@ -3792,7 +3813,7 @@
     const seq = ++loadSeq;
     const [m, pr, st] = await Promise.all([
       sb.from('merchants').select('*').eq('id', id).maybeSingle(),
-      promoFilter(sb.from('promotions').select('*').eq('merchant_id', id)),
+      readPromos(id),
       sb.from('stories').select('*').eq('merchant_id', id).gt('expires_at', liveSince()),
     ]);
     const error = m.error || pr.error || st.error;
@@ -4096,14 +4117,19 @@
     let paintQueued = false;
     const paintSoon = () => { if (paintQueued) return; paintQueued = true; requestAnimationFrame(() => { paintQueued = false; applyCloud(); }); };
 
-    function connect() {
-      if (channel || !sb || refused >= 3) return;            // (serveur temps réel complet : on attend la fin de la pause)
+    let connecting = false;
+    async function connect() {
+      if (channel || connecting || !sb || refused >= 3) return;   // (serveur temps réel complet : on attend la fin de la pause)
+      connecting = true;
+      const withPromos = await hasSession();                // sans compte : offres relues par guest_promotions()
+      connecting = false;
+      if (channel) return;
       try {
         channel = sb.channel('carte')
           .on('postgres_changes', { event: '*', schema: 'public', table: 'merchants' }, (ev) => handle('merchants', ev))
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'stories' }, (ev) => handle('stories', ev))
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'promotions' }, (ev) => handle('promotions', ev))
-          .subscribe((status) => {
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'stories' }, (ev) => handle('stories', ev));
+        if (withPromos) channel.on('postgres_changes', { event: '*', schema: 'public', table: 'promotions' }, (ev) => handle('promotions', ev));
+        channel.subscribe((status) => {
             const was = joined;
             joined = status === 'SUBSCRIBED';
             if (joined) refused = 0;
@@ -4185,7 +4211,9 @@
     });
     // Connexion revenue, ou « Réessayer » : tout relire
     Net.onRecover(() => { touch('*'); Notifs.load(); });
-    return { connect, touch, handle, isJoined: () => joined };
+    /** Connexion ou déconnexion : abonnements refaits (les offres en direct sont réservées aux comptes). */
+    function reconnect() { disconnect(); refused = 0; connect(); }
+    return { connect, reconnect, touch, handle, isJoined: () => joined };
   })();
 
   /** Distance à vol d'oiseau en mètres entre deux points [lng, lat]. */
@@ -5984,12 +6012,23 @@
     let active = false, memo = null, memoAt = 0;
     const on = () => active && !currentUser();
     const promoKey = (p, shop) => shop.id + '|' + p.id;
-    /** Offres visibles sans compte : les GUEST_PROMOS plus proches (recalculées au plus toutes les 0,5 s). */
+    /**
+     * Offres visibles sans compte (recalculées au plus toutes les 0,5 s) : les vraies offres dont le serveur a donné le
+     * texte (3 au plus, guest_promotions), puis les offres des restaurants d'exemple les plus proches jusqu'à GUEST_PROMOS.
+     */
     function unlocked() {
-      if (!memo || Date.now() - memoAt > 500) { memo = new Set(Offers.list().slice(0, GUEST_PROMOS).map(({ p, m }) => promoKey(p, m.shop))); memoAt = Date.now(); }
+      if (!memo || Date.now() - memoAt > 500) {
+        const all = Offers.list();
+        const open = all.filter(({ p, m }) => !m.shop.isDemo && !p.locked).slice(0, GUEST_PROMOS);
+        const demo = all.filter(({ m }) => m.shop.isDemo).slice(0, Math.max(0, GUEST_PROMOS - open.length));
+        memo = new Set([...open, ...demo].map(({ p, m }) => promoKey(p, m.shop)));
+        memoAt = Date.now();
+      }
       return memo;
     }
-    const canSee = (p, shop) => !on() || unlocked().has(promoKey(p, shop));
+    // Une offre verrouillée par le serveur n'a pas de texte : jamais affichée (même juste après la connexion, le temps
+    // de relire les offres complètes)
+    const canSee = (p, shop) => !p.locked && (!on() || unlocked().has(promoKey(p, shop)));
     /** Signature pour la liste : change quand les offres visibles changent. */
     const key = () => (on() ? 'g' + [...unlocked()].join(',') : '');
     function paintAvatar() {
@@ -6007,13 +6046,15 @@
       paintAvatar();
       refresh();
     }
-    /** Connexion : tout redevient visible. */
+    /** Connexion : offres relues en entier (la table, avec le compte) et reçues en direct. */
     function leave() {
       if (!active) return;
       active = false;
       document.body.classList.remove('is-guest');
       $('guest-bar').hidden = true;
       refresh();
+      loadRestaurants().then(applyCloud, () => {});
+      Live.reconnect();
     }
     function refresh() {
       memo = null;
