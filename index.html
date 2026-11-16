@@ -2085,6 +2085,35 @@
       .ps-stats-top { top: -28px; margin: -28px 0 0; padding: 12px 0 10px; }
     }
     @media (max-width: 360px) { .ps-quick { grid-template-columns: repeat(4, minmax(0, 1fr)); } .ps-cards strong { font-size: 20px; } }
+
+    /* ----- Espace restaurateur sur ordinateur : fond doux, cartes blanches en léger relief, transitions ----- */
+    @keyframes ps-in { from { opacity: 0; transform: translateY(8px); } }
+    @media (min-width: 900px) {
+      .ps-panel, .ps-body { background: var(--bg); }
+      .ps-head, .ps-tabs { background: var(--panel-solid); }
+      .ps-tabs button { transition: background-color .2s, color .2s; }
+      .ps-tabs button:hover { background: var(--hover); }
+      .ps-pane:not([hidden]) { animation: ps-in .28s var(--ease-out) both; }
+      #pro-space .ps-cards button, #pro-space .kpi, #pro-space .chart, #pro-space .ps-card, #pro-space .pd-block, .ps-quick button, .ps-todo li, .ps-insights li {
+        background: var(--panel-solid); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 1px 2px rgba(60, 64, 67, .08);
+        transition: transform .18s var(--ease-out), box-shadow .18s; }
+      #pro-space .pd-block { padding: 20px; }
+      #pro-space .ps-cards button:hover, .ps-quick button:hover, .ps-todo li:hover { background: var(--panel-solid); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(60, 64, 67, .14); }
+      .ps-cards { gap: 12px; margin-top: 16px; }
+      .ps-cards button { padding: 16px 18px 14px; }
+      .ps-cards .kpi-label { font-size: 13px; }
+      .ps-cards strong { font-size: 32px; font-variant-numeric: tabular-nums; }
+      .ps-home-chart { margin-top: 16px; }
+      .ps-quick { gap: 12px; }
+      .ps-quick button { flex-direction: row; min-height: 56px; gap: 10px; font-size: 14px; }
+      .ps-insights { gap: 12px; }
+      .ps-insights li, .ps-insights li:last-child { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+      .ps-stats-top { background: var(--bg); }
+      .ps-jump button { background: var(--panel-solid); transition: background-color .2s; }
+      .ps-scan { transition: transform .18s var(--ease-out), box-shadow .18s; }
+      .ps-scan:hover { transform: translateY(-2px); }
+    }
+    @media (prefers-reduced-motion: reduce) { .ps-pane:not([hidden]) { animation: none; } }
   </style>
 </head>
 
