@@ -140,5 +140,9 @@ n'acceptent que les adresses du site (CORS), sauf dans une copie de test. Après
 `index.html`, recalculer la politique de sécurité : `node scripts/csp.mjs` (la publication le fait aussi d'elle-même ;
 `node scripts/csp.mjs --check` vérifie qu'elle est à jour).
 
+À la publication, `scripts/minify.mjs` allège la copie publiée de `index.html` (esbuild : environ 750 → 506 Ko, 159 → 120 Ko
+compressés) ; le fichier du dépôt reste lisible et commenté. Photos des fiches et des stories envoyées en WebP (JPEG
+si le navigateur ne sait pas l'encoder).
+
 Contrôles : `cd web && npm run lint && npm run build` (application), `deno test supabase/functions/` (fonctions
 serveur), `npm run db:test` (règles de la base, PostgreSQL local), `node scripts/check-live.mjs` (sites en ligne).

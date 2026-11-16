@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-IWvzOYwojZPgG/BfKEkgahLgmbXu7uAkf9CNjeDRqY4=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-JJ7DKomETquDRf5S0kkglp7AKWol1PeDHUZIEM42Lg4=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -4600,8 +4600,18 @@
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(bitmap, crop.x, crop.y, crop.w, crop.h, 0, 0, outW, outH);
-    return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('format'))), 'image/jpeg', 0.85));
+    return encodePhoto(canvas);
   }
+  /**
+   * Photo prête à envoyer : WebP (environ 30 % plus léger que le JPEG à qualité égale), sinon JPEG pour les navigateurs
+   * qui ne savent pas l'encoder (ils renvoient alors un PNG, bien plus lourd : on refait en JPEG).
+   */
+  async function encodePhoto(canvas) {
+    const make = (type, q) => new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('format'))), type, q));
+    const webp = await make('image/webp', 0.82).catch(() => null);
+    return webp && webp.type === 'image/webp' ? webp : make('image/jpeg', 0.85);
+  }
+  const photoExt = (blob) => (blob.type === 'image/webp' ? 'webp' : 'jpg');
 
   /* ---------- SIRET ---------- */
 
@@ -5513,13 +5523,12 @@
     if (count === 0 && !isDesktop()) toast('Aucun commerce ne correspond à ce filtre pour le moment.');
   });
 
-  $('search').addEventListener('input', (ev) => {
-    filters.query = ev.target.value;
-    filters.q = Search.parse(ev.target.value);
-    applyFilters();
-  });
+  /** Attend une courte pause de frappe avant de relancer un calcul (recherche, suggestions). */
+  const debounce = (fn, ms) => { let t = 0; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+  const searchDesktop = debounce((v) => { filters.query = v; filters.q = Search.parse(v); applyFilters(); }, 120);
+  $('search').addEventListener('input', (ev) => searchDesktop(ev.target.value));
   $('search').addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter') { const first = document.querySelector('.shop-item'); if (first) openShop(first.dataset.id, { source: 'search' }); }
+    if (ev.key === 'Enter') { filters.query = ev.target.value; filters.q = Search.parse(ev.target.value); applyFilters(); const first = document.querySelector('.shop-item'); if (first) openShop(first.dataset.id, { source: 'search' }); }
     // Échap : efface la recherche uniquement (ne ferme pas la fiche ouverte)
     if (ev.key === 'Escape') { ev.target.value = ''; filters.query = ''; filters.q = []; applyFilters(); ev.target.blur(); }
   });
@@ -5735,9 +5744,10 @@
   }
   $('search-open').addEventListener('click', openSearchPanel);
   $('search-close').addEventListener('click', () => closeSearchPanel());
-  $('search-m').addEventListener('input', (ev) => { Search.mobile.query = ev.target.value; Search.mobile.limit = 30; renderSearchPanel(); });
+  const searchMobile = debounce((v) => { Search.mobile.query = v; Search.mobile.limit = 30; renderSearchPanel(); }, 120);
+  $('search-m').addEventListener('input', (ev) => searchMobile(ev.target.value));
   $('search-m').addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter') { ev.preventDefault(); const first = $('search-results').querySelector('.sr-hit'); if (first) first.click(); }
+    if (ev.key === 'Enter') { ev.preventDefault(); Search.mobile.query = ev.target.value; renderSearchPanel(); const first = $('search-results').querySelector('.sr-hit'); if (first) first.click(); }
   });
   $('search-panel').addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { ev.stopPropagation(); closeSearchPanel(); } });
   $('budget').addEventListener('click', (ev) => {
@@ -7446,7 +7456,7 @@
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(bmp, 0, 0, c.width, c.height);
       if (bmp.close) bmp.close();
-      return new Promise((resolve, reject) => c.toBlob((b) => (b ? resolve(b) : reject(new Error('format'))), 'image/jpeg', 0.85));
+      return encodePhoto(c);
     }
     root.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => { mode = b.dataset.mode; $('err-sc').textContent = ''; sync(); }));
     $('sc-text').addEventListener('input', () => { setFieldError('sc-text', ''); $('err-sc').textContent = ''; sync(); });
@@ -7475,8 +7485,8 @@
       btn.disabled = true;
       let imagePath = null;
       if (mode === 'photo') {
-        imagePath = r.id + '/' + uid() + '.jpg';
-        const up = await Loader.run(sb.storage.from('stories').upload(imagePath, blob, { contentType: 'image/jpeg' }), 'Envoi de la photo…');
+        imagePath = r.id + '/' + uid() + '.' + photoExt(blob);
+        const up = await Loader.run(sb.storage.from('stories').upload(imagePath, blob, { contentType: blob.type, cacheControl: '86400' }), 'Envoi de la photo…');
         if (up.error) {
           btn.disabled = false;
           $('err-sc').textContent = 'La photo n\'a pas pu être envoyée. ' + cloudError(up.error);
@@ -9787,8 +9797,8 @@
           : await cropPhoto(bitmap, { index: i + 1, total: batch.length });
         if (!crop) continue;               // photo ignorée
         const blob = await exportCrop(bitmap, crop);
-        const path = currentUser().pro.merchantId + '/' + uid() + '.jpg';
-        const up = await sb.storage.from('photos').upload(path, blob, { contentType: 'image/jpeg' });
+        const path = currentUser().pro.merchantId + '/' + uid() + '.' + photoExt(blob);
+        const up = await sb.storage.from('photos').upload(path, blob, { contentType: blob.type, cacheControl: '31536000' });
         if (up.error) { setFieldError('pl-photos', '« ' + file.name + ' » n\'a pas pu être envoyée. ' + cloudError(up.error)); continue; }
         const url = publicUrl('photos', path);
         proDraft.photos.push(url);

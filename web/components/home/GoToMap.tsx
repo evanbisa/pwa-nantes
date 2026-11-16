@@ -5,11 +5,7 @@ import { useEffect } from "react";
 /** Carte FlashMiam : le site principal (index.html), un dossier au-dessus de l'application. */
 const MAP = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/../`;
 
-/**
- * Racine de l'application (/app/) : la vraie carte est le site principal. L'ancienne carte de démonstration
- * (HomeMap, fiches d'exemple) n'est plus servie ici : ses restaurants fictifs, dont deux marqués « vérifiés »,
- * pouvaient être pris pour de vrais. Redirection immédiate, avec un lien si JavaScript tarde.
- */
+/** Racine de l'application (/app/) : redirection immédiate vers la carte, avec un lien si JavaScript tarde. */
 export default function GoToMap() {
   useEffect(() => { window.location.replace(new URL(MAP, window.location.href).href); }, []);
   return (
