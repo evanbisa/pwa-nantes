@@ -18,6 +18,17 @@ https://evanbisa.github.io/pwa-nantes/).
 État de la sécurité et de la mise en ligne (ce qui est fait, ce qui reste à régler) :
 [`web/docs/SECURITE-ETAT.md`](web/docs/SECURITE-ETAT.md).
 
+## Interface (novembre 2026)
+
+- **Téléphone** : une barre de recherche en haut (logo, « Un plat, un restaurant… »), les filtres juste dessous
+  (Ouverts, Promos, 4 et + d'abord), les stories, un seul bouton flottant (me localiser) et une **barre d'onglets** en
+  bas : Carte, Offres, Alertes, Profil (« Mon resto » pour un restaurateur). Le thème jour / nuit se règle dans le profil.
+- **Fiche** : ouvert / fermé et note sous le nom, puis les actions en une rangée (À pied, En voiture, Appeler, Suivre,
+  Partager).
+- **Espace restaurateur** : accueil synthétique (période 7 / 30 / 90 jours, 6 chiffres clés avec leur évolution, courbe
+  des vues, à faire, 4 actions rapides, 3 points à retenir) ; statistiques avec un sommaire toujours visible, les
+  **visites validées en caisse** (QR codes scannés) et le détail par jour téléchargeable (CSV).
+
 ## Visiteurs sans compte
 
 La carte s'ouvre **sans compte** : bouton « Voir la carte → » en haut de l'écran d'accueil (le choix est gardé : les
@@ -30,8 +41,8 @@ l'inscription. Un visiteur voit les restaurants, les fiches, les menus, les avis
   `guest_promotions()` les compte toutes mais ne renvoie le texte que de 3 (la plus récente de chaque restaurant
   d'abord, les mêmes pour tous les visiteurs) : le texte des autres n'arrive jamais sur l'appareil. Les restaurants
   d'exemple complètent jusqu'à 3 (réglage d'affichage : `GUEST_PROMOS` dans `index.html`).
-- **Barre fixe en bas de l'écran** : « Créer mon compte gratuit » (rouvre l'écran de création de compte) et
-  « Connexion » ; sur ordinateur, en bas du panneau latéral.
+- **En bas de l'écran** : un grand bouton « Créer mon compte » (rouvre l'écran de création de compte) et « Connexion »,
+  dans la barre d'onglets ; sur ordinateur, en bas du panneau latéral.
 - Suivre un restaurant, donner un avis, aimer un plat, le QR code de visite et les notifications ouvrent l'écran de
   création de compte avec la raison ; « Revenir à la carte → » y ramène.
 
