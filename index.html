@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-JJ7DKomETquDRf5S0kkglp7AKWol1PeDHUZIEM42Lg4=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-dFYrhhqx8mmLCuZiCPP6Sdhazu5BS4+QKm5NiQ8U6Dk=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -2114,6 +2114,46 @@
       .ps-scan:hover { transform: translateY(-2px); }
     }
     @media (prefers-reduced-motion: reduce) { .ps-pane:not([hidden]) { animation: none; } }
+
+    /* ----- Fiche restaurant : photo en tête, onglets doux, carte des plats appétissante ----- */
+    .shop-cover { display: block; width: calc(100% + 40px); margin: -10px -20px 14px; padding: 0; border: 0; border-radius: 20px 20px 0 0; overflow: hidden; background: var(--hover); cursor: zoom-in; }
+    .shop-cover[hidden] { display: none; }
+    .shop-cover img { display: block; width: 100%; aspect-ratio: 2 / 1; object-fit: cover; transition: transform .6s var(--ease-out); }
+    .shop-cover:hover img { transform: scale(1.03); }
+    #shop-sheet.has-cover .sheet-grab { position: absolute; z-index: 2; top: 0; left: 0; right: 0; padding: 8px 0 14px; }
+    #shop-sheet.has-cover .sheet-grab::before { background: rgba(255, 255, 255, .85); box-shadow: 0 1px 3px rgba(0, 0, 0, .3); }
+    #shop-sheet.has-cover .sheet-head { margin-top: 0; }
+    #shop-sheet h2#shop-name { font-size: 22px; font-weight: 700; letter-spacing: -.01em; line-height: 1.2; }
+    .shop-tabs { gap: 6px; margin: 16px 0 0; padding: 4px; border: 0; border-radius: 14px; background: var(--hover); }
+    .shop-tabs button { padding: 9px 6px; border-radius: 10px; font-size: 14px; transition: background-color .25s, color .25s, box-shadow .25s; }
+    .shop-tabs button[aria-selected="true"] { color: var(--text); background: var(--panel-solid); box-shadow: 0 1px 3px rgba(60, 64, 67, .18); }
+    .shop-tabs button[aria-selected="true"]::after { display: none; }
+    .tab-panel:not([hidden]) { animation: tab-in .25s var(--ease-out) both; }
+    @keyframes tab-in { from { opacity: 0; transform: translateY(4px); } }
+    .menu-list { padding-top: 6px; }
+    .menu-list h4 { margin: 18px 0 4px; font-size: 16px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--text); }
+    .menu-list li { padding: 12px 0; font-size: 15px; }
+    .menu-list b { font-weight: 500; }
+    .menu-list li small { font-size: 13.5px; line-height: 1.4; }
+    .menu-list .price { padding: 3px 10px; border-radius: 12px; font-size: 14px; color: var(--accent-strong); background: var(--accent-soft); }
+    :root[data-theme="dark"] .menu-list .price { color: var(--accent); }
+    @media (min-width: 900px) {
+      #shop-sheet .shop-cover { border-radius: 16px 16px 0 0; margin: -20px -20px 14px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .tab-panel:not([hidden]) { animation: none; } .shop-cover img { transition: none; } }
+
+    /* Actions de la fiche : boutons ronds, libellé dessous, tous visibles d'un coup d'œil */
+    .shop-actions { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; margin: 14px 0 0; padding: 0; overflow: visible; }
+    .shop-actions .act { flex-direction: column; justify-content: flex-start; gap: 6px; height: auto; padding: 2px 0; border: 0; border-radius: 14px; background: none;
+      font-size: 12.5px; font-weight: 500; color: var(--text); white-space: nowrap; }
+    .shop-actions .act svg { width: 46px; height: 46px; padding: 12px; border-radius: 50%; color: var(--accent); background: var(--accent-soft); transition: background-color .2s, color .2s, transform .15s var(--ease-out); }
+    .shop-actions .act:hover svg { transform: translateY(-1px); }
+    .shop-actions .act-primary { color: var(--text); background: none; }
+    .shop-actions .act-primary svg { color: var(--on-accent); background: var(--accent); box-shadow: 0 3px 10px rgba(26, 115, 232, .35); }
+    .shop-actions .act[aria-pressed="true"] { color: var(--accent); background: none; }
+    .shop-actions .act[aria-pressed="true"] svg { color: var(--on-accent); background: var(--accent); }
+    .shop-actions .act:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (min-width: 900px) { .shop-actions { flex-wrap: nowrap; } }
   </style>
 </head>
 
@@ -2261,6 +2301,7 @@
   <!-- ===================== FICHE COMMERCE ===================== -->
   <section id="shop-sheet" class="sheet glass" role="dialog" aria-modal="false" aria-labelledby="shop-name" aria-hidden="true">
     <button class="sheet-grab" type="button" data-close aria-label="Fermer la fiche"></button>
+    <button class="shop-cover" type="button" id="shop-cover" aria-label="Voir les photos du restaurant" hidden><img alt="" decoding="async" /></button>
     <div class="sheet-head">
       <button class="sheet-emoji" type="button" id="shop-emoji" tabindex="-1" aria-hidden="true"><span id="shop-emoji-in"></span></button>
       <div class="sheet-title">
@@ -2280,9 +2321,9 @@
     </div>
     <div class="shop-tabs" id="shop-tabs" role="tablist" aria-label="Contenu de la fiche" hidden>
       <button type="button" role="tab" id="tab-infos" aria-controls="panel-infos" aria-selected="true" data-tab="infos">Infos</button>
-      <button type="button" role="tab" id="tab-menu" aria-controls="panel-menu" aria-selected="false" tabindex="-1" data-tab="menu">Menu<small id="tab-menu-n"></small></button>
-      <button type="button" role="tab" id="tab-photos" aria-controls="panel-photos" aria-selected="false" tabindex="-1" data-tab="photos">Photos<small id="tab-photos-n"></small></button>
-      <button type="button" role="tab" id="tab-reviews" aria-controls="panel-reviews" aria-selected="false" tabindex="-1" data-tab="reviews" hidden>Avis<small id="tab-reviews-n"></small></button>
+      <button type="button" role="tab" id="tab-menu" aria-controls="panel-menu" aria-selected="false" tabindex="-1" data-tab="menu">Menu</button>
+      <button type="button" role="tab" id="tab-photos" aria-controls="panel-photos" aria-selected="false" tabindex="-1" data-tab="photos">Photos</button>
+      <button type="button" role="tab" id="tab-reviews" aria-controls="panel-reviews" aria-selected="false" tabindex="-1" data-tab="reviews" hidden>Avis</button>
     </div>
     <div class="tab-panel" id="panel-infos" role="tabpanel" aria-labelledby="tab-infos">
     <p class="demo-note" id="shop-demo-note" hidden><span aria-hidden="true">🧪</span> Restaurant imaginaire, pour découvrir FlashMiam en attendant les premiers restaurants partenaires de La Roche-sur-Yon : ses offres ne sont pas réelles.</p>
@@ -2318,7 +2359,7 @@
     </ul>
     </div>
     <div class="tab-panel" id="panel-menu" role="tabpanel" aria-labelledby="tab-menu" hidden>
-      <p class="menu-head" id="shop-menu-count"></p>
+      <p class="menu-head" id="shop-menu-count" hidden></p>
       <div class="menu-list" id="shop-menu-list"></div>
       <p class="menu-empty" id="shop-menu-empty" hidden>Ce restaurant n'a pas encore publié sa carte.</p>
     </div>
@@ -5807,7 +5848,6 @@
       }
       const btn = $('shop-rating');
       btn.hidden = !shop.isPro;
-      $('tab-reviews-n').textContent = shop.rating ? ' ' + shop.rating.count : '';
       if (shop.isPro) {
         btn.textContent = '';
         if (shop.rating) {
@@ -6850,7 +6890,8 @@
     box.textContent = '';
     grid.textContent = '';
     box.hidden = true;
-    $('tab-photos-n').textContent = '';
+    $('shop-cover').hidden = true;
+    $('shop-sheet').classList.remove('has-cover');
     $('shop-photos-empty').hidden = false;
     if (!shop.photos || !shop.photos.length) return;
     galleryUrls = [...shop.photos];
@@ -6872,8 +6913,12 @@
       btn.addEventListener('click', () => Lightbox.open(i));
       grid.appendChild(btn);
     });
-    box.hidden = !galleryUrls.length;
-    $('tab-photos-n').textContent = galleryUrls.length ? ' ' + galleryUrls.length : '';
+    // Première photo en grand en tête de fiche ; le bandeau de l'onglet Infos montre alors les suivantes
+    const cover = $('shop-cover');
+    cover.hidden = !galleryUrls.length;
+    $('shop-sheet').classList.toggle('has-cover', !!galleryUrls.length);
+    if (galleryUrls.length) { const im = cover.firstChild; im.alt = shop.name; watchLoad(im); im.src = galleryUrls[0]; if (box.firstChild) box.firstChild.remove(); }
+    box.hidden = !box.children.length;
     $('shop-photos-empty').hidden = !!galleryUrls.length;
     syncShopTabs(shop);
   }
@@ -6915,6 +6960,7 @@
   });
 
   /* ---------- Visionneuse plein écran (glisser, flèches, Échap) ---------- */
+  $('shop-cover').addEventListener('click', () => { if (galleryUrls.length) Lightbox.open(0); });
   const Lightbox = (() => {
     const root = $('lightbox'), img = $('lb-img');
     let index = 0, returnFocus = null, startX = null, swiped = false;
@@ -9719,7 +9765,6 @@
   function renderMenu(shop) {
     const items = shop.menu || [];
     const key = shop.id + ':' + (shop.updatedAt || '');
-    $('tab-menu-n').textContent = items.length ? ' ' + items.length : '';
     $('shop-menu-empty').hidden = !!items.length;
     if (key === menuFor) return;
     menuFor = key;
