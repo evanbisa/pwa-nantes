@@ -12,7 +12,7 @@
  * chaque commit (10 minutes d'attente au plus) ; GitHub Pages seulement ceux qui touchent le site (3 minutes au plus).
  */
 const SITES = [
-  { name: "Vercel", url: "https://pwa-nantes.vercel.app/", headers: true, everyCommit: true, waitMin: 10 },
+  { name: "flashmiam.fr (Vercel)", url: "https://flashmiam.fr/", headers: true, everyCommit: true, waitMin: 10 },
   { name: "GitHub Pages", url: "https://evanbisa.github.io/pwa-nantes/", headers: false, everyCommit: false, waitMin: 3 },
 ];
 const EXPECTED = (process.env.EXPECTED_VERSION || "").trim();
@@ -71,11 +71,12 @@ for (const site of SITES) {
   // Pages et scripts du site (le fichier de la carte MapLibre, bibliothèque tierce connue, est exclu)
   const files = [[site.url, page.body]];
   const scripts = [...page.body.matchAll(/<script[^>]*\bsrc="([^"]+)"/g), ...page.body.matchAll(/s\.src = '([^']+\.js)'/g)].map((m) => new URL(m[1], site.url).href);
-  for (const extra of ["sw.js", "confidentialite.html", "conditions.html", "app/", "app/legal/cgu/", "app/legal/confidentialite/"]) scripts.push(new URL(extra, site.url).href);
+  for (const extra of ["sw.js", "confidentialite.html", "conditions.html", "app/inscription/", "app/legal/cgu/", "app/legal/confidentialite/"]) scripts.push(new URL(extra, site.url).href);
   for (const url of [...new Set(scripts)].filter((u) => u.startsWith(new URL(site.url).origin) && !u.includes("maplibre"))) {
     try { const f = await text(url); if (f.status === 200) files.push([url, f.body]); } catch { /* fichier absent */ }
   }
-  const app = files.find(([u]) => u.endsWith("/app/"));
+  // Page représentative de l'application (la racine /app/ renvoie vers la carte)
+  const app = files.find(([u]) => u.endsWith("/app/inscription/"));
   if (app) for (const m of app[1].matchAll(/src="([^"]+\/_next\/[^"]+\.js)"/g)) {
     try { const f = await text(new URL(m[1], site.url).href); if (f.status === 200) files.push([m[1], f.body]); } catch { /* ignoré */ }
   }

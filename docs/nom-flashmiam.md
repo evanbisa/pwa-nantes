@@ -1,8 +1,16 @@
 # Nom « FlashMiam » : vérifications et protection à faire
 
-Statut : **à faire plus tard** (noté le 29/10/2026). À traiter **avant** l'un de ces moments :
-acheter un nom de domaine, lancer publiquement le site, démarcher des commerçants,
-imprimer des flyers / un logo, ou créer une société.
+Statut : **en cours** (noté le 29/10/2026, mis à jour le 14/11/2026). Domaines et comptes Instagram / TikTok
+pris ; reste la protection de la marque, à traiter **avant** l'un de ces moments : lancer publiquement le site,
+démarcher des commerçants, imprimer des flyers / un logo, ou créer une société.
+
+## Fait (14 novembre 2026)
+
+- **Noms de domaine achetés et fonctionnels** : `flashmiam.fr` et `flashmiam.com`.
+- **Réseaux sociaux** : comptes créés sur **Instagram** et **TikTok**.
+
+**Dépôt de marque repoussé** (décision du 14/11/2026) : les étapes 2 à 4 ci-dessous attendent. À reprendre au plus
+tard avant le démarchage des commerçants, les supports imprimés ou le lancement public.
 
 ## Ce qu'on a déjà vérifié (octobre 2026)
 
@@ -17,15 +25,13 @@ imprimer des flyers / un logo, ou créer une société.
 
 ## Ce qu'il reste à faire
 
-1. **Noms de domaine** (vérifier puis acheter, renouvellement automatique, à notre nom) :
-   - `flashmiam.fr` et `flash-miam.fr` → Whois Afnic (afnic.fr › « Trouver des informations
-     sur un nom de domaine déjà enregistré »)
-   - `flashmiam.com` et `flash-miam.com` → https://lookup.icann.org
-   - Historique : https://web.archive.org (vérifier que le domaine n'a pas servi à du spam)
+1. **Noms de domaine** : ~~`flashmiam.fr`, `flashmiam.com`~~ achetés. Restent :
+   - vérifier que le **renouvellement automatique** est activé et que les domaines sont **à notre nom** ;
+   - facultatif : `flash-miam.fr` et `flash-miam.com` (Whois Afnic, https://lookup.icann.org), pour éviter
+     qu'un autre les prenne.
 2. **INPI** : refaire une recherche « flash miam » (avec espace) et « miam » dans l'onglet Marques.
 3. **Avis juridique** : rendez-vous d'information gratuit INPI (ou conseil en propriété
    industrielle) en montrant le nom commercial « Flash-Miam » ci-dessus.
 4. **Déposer la marque « FlashMiam » à l'INPI** (≈ 190 € pour une classe + supplément par classe) :
    classes 9 (appli), 35 (promotion / publicité pour les commerçants), éventuellement 42 et 43.
-5. **Réseaux sociaux** : réserver le même pseudo partout (`@flashmiam` ou variante)
-   sur Instagram, TikTok, Snapchat.
+5. **Réseaux sociaux** : ~~Instagram, TikTok~~ faits. Reste **Snapchat** (même pseudo que les deux autres).

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-dcJWQxkzAOPygfoR5udeKpsrzvQLWX8FCIwRAwBisSk=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-dFYrhhqx8mmLCuZiCPP6Sdhazu5BS4+QKm5NiQ8U6Dk=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -16,18 +16,25 @@
   <title>FlashMiam · Le street food de La Roche-sur-Yon sur une carte</title>
   <!-- Adresse principale et aperçu des liens partagés (réseaux sociaux, messageries) : l'adresse est remplacée à la
        publication par SITE_URL (scripts/seo.mjs) -->
-  <link rel="canonical" href="https://pwa-nantes.vercel.app/" />
+  <link rel="canonical" href="https://flashmiam.fr/" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="FlashMiam" />
   <meta property="og:locale" content="fr_FR" />
-  <meta property="og:url" content="https://pwa-nantes.vercel.app/" />
+  <meta property="og:url" content="https://flashmiam.fr/" />
   <meta property="og:title" content="FlashMiam · Le street food de La Roche-sur-Yon" />
   <meta property="og:description" content="Food-trucks, kebabs, burgers et douceurs sur une carte, avec les bons plans du moment." />
-  <meta property="og:image" content="https://pwa-nantes.vercel.app/og-image.jpg" />
+  <meta property="og:image" content="https://flashmiam.fr/og-image.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="FlashMiam : le street food de La Roche-sur-Yon sur une carte" />
   <meta name="twitter:card" content="summary_large_image" />
+  <!-- Nom du site et logo dans les résultats Google (au lieu du nom de domaine et d'un globe) -->
+  <script type="application/ld+json">
+    {"@context":"https://schema.org","@graph":[
+      {"@type":"WebSite","name":"FlashMiam","alternateName":["Flash Miam","FlashMiam La Roche-sur-Yon"],"url":"https://flashmiam.fr/","inLanguage":"fr-FR"},
+      {"@type":"Organization","name":"FlashMiam","url":"https://flashmiam.fr/","logo":"https://flashmiam.fr/icon-512.png"}
+    ]}
+  </script>
   <link rel="icon" href="favicon.ico?v=2" sizes="16x16 32x32 48x48" />
   <link rel="icon" href="favicon-96.png?v=2" type="image/png" sizes="96x96" />
   <link rel="icon" href="icon-192.png?v=2" type="image/png" sizes="192x192" />
@@ -325,6 +332,8 @@
     #map.show-labels .pin-label, .pin.is-selected .pin-label, .pin.is-hover .pin-label { opacity: 1; transform: none; }
     #map.show-labels .pin.label-hidden:not(.is-selected):not(.is-hover) .pin-label { opacity: 0; }
     .pin.is-filtered { display: none; }
+    .pin.is-demo .pin-badge { border-style: dashed; }
+    .pin.is-demo .pin-label::after { content: " · exemple"; font-weight: 400; color: var(--amber); }
     #map.zoom-far .pin-badge { scale: .62; }
     #map.zoom-far .pin.is-open .pin-badge::before { animation: none; opacity: 0; }
 
@@ -485,7 +494,8 @@
     @keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
     .ob-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
     .ob-logo { display: flex; align-items: center; gap: 10px; font-weight: 500; }
-    .ob-mark { flex: none; width: 36px; height: 36px; border-radius: 10px; }
+    .ob-logo .avatar { width: 32px; height: 32px; font-size: 15px; }
+    .ob-logo .ob-mark { flex: none; width: 32px; height: 32px; border-radius: 9px; box-shadow: 0 1px 3px rgba(0, 0, 0, .18); }
     .ob-progress { display: flex; gap: 6px; }
     .ob-progress span { width: 22px; height: 4px; border-radius: 2px; background: var(--line-strong); transition: background-color .3s, width .3s; }
     .ob-progress span.is-active { width: 34px; background: var(--accent); }
@@ -539,6 +549,7 @@
       background: rgb(255 255 255 / .04); border-color: rgb(255 255 255 / .1);
     }
     :root[data-theme="dark"] .onboarding .field input:focus { border-color: var(--accent); }
+    :root[data-theme="dark"] .ob-logo .avatar { color: #fff; background: linear-gradient(135deg, #e9a0e4, #a78bfa 55%, #7f95fb); }
     .field { display: block; margin-top: 14px; }
     .field > span { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
     .field input {
@@ -623,6 +634,7 @@
     .go-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
     .go-row .btn { margin-top: 0; }
     .meta .travel { display: block; margin-top: 2px; color: var(--muted); }
+    .meta .travel[hidden] { display: none; }
     .check input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
     .form-error { margin: 12px 0 0; min-height: 0; font-size: 14px; color: var(--danger); }
     .form-error:empty { display: none; }
@@ -942,6 +954,15 @@
     .menu-row .m-desc { grid-column: 1 / 4; }
     .field .menu-row input.is-invalid { border-color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
     .menu-add { margin-top: 8px; min-height: 42px; }
+    .menu-scan { margin: 8px 0 12px; padding: 12px; border-radius: 12px; border: 1px dashed var(--line); background: var(--panel-solid); }
+    .menu-scan-btn { width: 100%; min-height: 46px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+    .menu-scan-btn[aria-disabled="true"] { opacity: .6; pointer-events: none; }
+    .menu-scan .hint { text-align: center; }
+    .menu-scan-status { margin: 10px 0 0; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .menu-scan-status[data-kind="error"] { color: var(--danger); }
+    .menu-scan-status[data-kind="ok"] { color: var(--green); }
+    .menu-scan-status .spin { width: 16px; height: 16px; flex: none; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: spin .8s linear infinite; }
+    .menu-row .m-price.is-missing { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber); }
     .menu-add[hidden] { display: none; }
 
     /* Recadrage des photos (format unique 16:9) */
@@ -998,6 +1019,7 @@
 
     /* Fiche commerce : galerie, description, badge */
     .gallery { display: flex; gap: 8px; margin: 14px -20px 0; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 20px; scrollbar-width: none; }
+    .gallery:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 12px; }
     .gallery::-webkit-scrollbar { display: none; }
     .gallery img { flex: none; width: 78%; max-width: 320px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; scroll-snap-align: start; background: var(--hover); }
     .gallery img:only-child { width: 100%; max-width: none; }
@@ -1031,6 +1053,10 @@
     .verified { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; color: var(--green); background: var(--green-soft); }
     .role-tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; white-space: nowrap; color: var(--accent); background: var(--accent-soft); }
     .verified.is-test { color: var(--amber); background: rgba(176, 96, 0, .1); }
+    /* Restaurants d'exemple (fictifs) : toujours signalés comme tels */
+    .demo-tag { display: inline-flex; align-items: center; flex: none; margin-left: 6px; padding: 0 6px; border-radius: 8px; font-size: 11px; font-weight: 500; line-height: 18px; vertical-align: 1px; color: var(--amber); background: rgba(176, 96, 0, .1); white-space: nowrap; }
+    .demo-note { margin: 0 0 12px; padding: 10px 12px; border-radius: 12px; font-size: 13px; line-height: 1.45; color: var(--text); background: rgba(176, 96, 0, .08); border: 1px dashed rgba(176, 96, 0, .45); }
+    .demo-note[hidden] { display: none; }
     /* ---------- Fiche commerce : onglets, abonnement, photos ---------- */
     .follow-btn { margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 18px;
       font-size: 14px; font-weight: 500; color: var(--accent); border: 1px solid var(--line-strong); background: transparent; }
@@ -1402,8 +1428,8 @@
       .ps-tabs .ps-ico { width: 40px; }
       .ps-badge { right: -6px; }
       .ps-body { padding: 28px 40px 40px; }
-      .ps-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-      .ps-quick { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      .ps-cards { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      .ps-quick { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       .ps-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       #psp-stats .ps-card, #psp-fiche .ps-card { max-width: none; }
       .ps-insights { grid-template-columns: 1fr 1fr; }
@@ -1418,8 +1444,8 @@
       .ps-pane:not([hidden]) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; align-items: start; }
       .ps-pane > * { grid-column: 1 / -1; }
       #ps-home-live { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); column-gap: 28px; align-items: start; }
-      #ps-home-live > .ps-scan, #ps-home-live > .ps-cards, #ps-home-live > .ps-block:last-child { grid-column: 1 / -1; }
-      #ps-home-live .ps-quick { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      #ps-home-live > .ps-scan, #ps-home-live > .ps-cards, #ps-home-live > .ps-wide { grid-column: 1 / -1; }
+      #ps-home-live > .ps-home-chart + .ps-block { margin-top: 12px; }
       .ps-insights { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       #psp-stats > .chart:first-of-type ~ .chart, #psp-stats > .ps-card, #psp-publish > .pd-block, #psp-fiche > .ps-card { grid-column: auto; }
       #psp-stats > .chart:first-of-type ~ .chart, #psp-stats > .ps-card, #psp-publish > .pd-block, #psp-fiche > .ps-card { margin-top: 22px; }
@@ -1437,13 +1463,6 @@
     .topbar .brand { min-width: 0; flex: 0 1 auto; }
     .brand-text small { white-space: nowrap; min-width: 0; }
     .brand-city { overflow: hidden; text-overflow: ellipsis; }
-    #search-open { flex: none; width: 52px; height: 52px; }
-    /* Petits écrans : la barre du haut se resserre (ville, puis nom masqués ; l'avatar reste) */
-    @media (max-width: 400px) {
-      .topbar { gap: 6px; }
-      #search-open, #offers-btn { width: 48px; height: 48px; }
-      .topbar .brand { min-height: 48px; padding: 4px 14px 4px 4px; gap: 8px; }
-    }
     @media (max-width: 379px) { .topbar .brand-text small { display: none; } }
     @media (max-width: 339px) { .topbar .brand-text { display: none; } .topbar .brand { padding: 4px; } }
 
@@ -1584,8 +1603,6 @@
     .notif-prefs .hint { margin-top: 8px; }
 
     /* Offres autour de moi */
-    #offers-btn { flex: none; width: 52px; height: 52px; }
-    @media (max-width: 400px) { #offers-btn { width: 48px; height: 48px; } }
     .offers-badge {
       position: absolute; top: 3px; right: 3px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
       font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; color: var(--on-accent); background: var(--accent);
@@ -1644,6 +1661,45 @@
       display: flex; align-items: center; gap: 12px; padding: 10px 8px 10px 12px; border-radius: 16px; color: var(--text); background: var(--panel-solid);
       box-shadow: var(--shadow); animation: rise .3s var(--ease-out) both; }
     .install-nudge[hidden] { display: none; }
+
+    /* Visiteur sans compte : barre « Créer mon compte » en bas de l'écran (au-dessus des fiches qui montent du bas) */
+    .guest-bar { position: fixed; z-index: 55; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 8px;
+      padding: 10px 12px calc(var(--safe-bottom) + 10px); background: var(--panel-solid); border-top: 1px solid var(--line);
+      box-shadow: 0 -6px 18px rgba(0, 0, 0, .1); animation: rise .35s var(--ease-out) both; }
+    .guest-bar[hidden] { display: none; }
+    .guest-cta { flex: 1; min-width: 0; height: 54px; padding: 0 14px; font-size: 16px; font-weight: 500; white-space: nowrap; }
+    .guest-login { flex: none; height: 54px; padding: 0 18px; border-radius: 27px; font-size: 15px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); }
+    .guest-login:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    /* Écrans plein écran (compte, recherche, stories, photos) et carte pas encore lancée : la barre se range */
+    body:not(.ui-ready) .guest-bar, .onboarding:not([hidden]) ~ .guest-bar, .search-panel:not([hidden]) ~ .guest-bar,
+    .story-viewer:not([hidden]) ~ .guest-bar, .lightbox:not([hidden]) ~ .guest-bar { display: none; }
+
+    /* Offres réservées aux comptes : floutées, sans leur texte, avec « Créer un compte pour voir la suite » */
+    .locked { position: relative; min-height: 176px; border-radius: 14px; overflow: hidden; }
+    .locked-items { display: grid; gap: 8px; filter: blur(5px); opacity: .7; pointer-events: none; user-select: none; }
+    .locked-items > * { margin: 0; }
+    .lock-gate { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+      padding: 14px; text-align: center; background: color-mix(in srgb, var(--panel-solid) 45%, transparent); }
+    .lock-gate b { font-size: 15px; font-weight: 500; color: var(--text); }
+    .lock-gate small { font-size: 13px; color: var(--muted); }
+    .lock-gate .btn { height: 44px; margin-top: 4px; padding: 0 20px; width: auto; }
+    .lock-ico { font-size: 22px; line-height: 1; }
+    .offers-list .locked { margin-top: 4px; }
+    .si-promo.is-locked { color: var(--accent-strong); }
+
+    /* Écran de compte ouvert depuis une fonction réservée aux comptes */
+    .ob-reason { margin: 0 0 12px; padding: 10px 12px; border-radius: 12px; font-size: 14px; line-height: 1.4; color: var(--text); background: var(--accent-soft); border: 1px solid var(--accent-line); }
+    .ob-reason[hidden] { display: none; }
+    .ob-skip { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; border-radius: 19px;
+      font-size: 14px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); border: 1px solid var(--accent-line); }
+    .ob-skip[hidden] { display: none; }
+    .ob-skip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .rv-note .link-btn { font-weight: 500; }
+    .avatar .guest-ico { width: 58%; height: 58%; }
+    /* Jamais par-dessus une fiche, la recherche, le profil… : il revient sur la carte s'il n'a pas encore expiré */
+    body.sheet-open .install-nudge, body.pro-open .install-nudge, body.vp-open .install-nudge, body.scan-open .install-nudge,
+    body.tour-open .install-nudge, .search-panel:not([hidden]) ~ .install-nudge, .story-viewer:not([hidden]) ~ .install-nudge,
+    .onboarding:not([hidden]) ~ .install-nudge { display: none; }
     .install-nudge img { flex: none; border-radius: 10px; }
     .install-nudge p { flex: 1; min-width: 0; margin: 0; font-size: 13px; line-height: 1.3; }
     .install-nudge b { display: block; font-size: 14px; font-weight: 500; }
@@ -1676,6 +1732,8 @@
       .net { bottom: auto; top: 16px; left: calc(var(--sidebar-w) + 32px); right: 16px; }
       body.sheet-open .toast { left: calc(var(--sidebar-w) + 424px); }   /* à droite de la fiche flottante */
       .maplibregl-ctrl-bottom-right { bottom: 0; }
+      .guest-bar { z-index: 21; left: 16px; right: auto; bottom: 16px; width: var(--sidebar-w); padding: 12px; border-radius: 0 0 16px 16px; box-shadow: none; animation: none; }
+      body.is-guest .shop-list { padding-bottom: 88px; }
 
       #shop-sheet {
         left: calc(var(--sidebar-w) + 28px); right: auto; top: 16px; bottom: auto; width: 380px; max-width: 380px; margin: 0;
@@ -1785,6 +1843,7 @@
     .ps-panel { position: relative; }
     .ps-scan-fab { position: absolute; z-index: 3; right: 14px; bottom: calc(var(--safe-bottom) + 72px); }
     #pro-space .ps-body { padding-bottom: 92px; }
+    #pro-space[data-tab="home"] .ps-scan-fab { display: none; }
     .ps-scan[hidden] { display: none; }
 
     /* Carte « Scanner un client » en tête de l'espace restaurateur */
@@ -1905,6 +1964,196 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
     }
+
+    /* =====================================================================
+       INTERFACE ALLÉGÉE (novembre 2026)
+       Fiche : état et actions en tête. Téléphone : une barre de recherche en haut, les filtres dessous, une barre
+       d'onglets en bas (Carte, Offres, Alertes, Profil ; visiteur : « Créer mon compte » dans la barre).
+       ===================================================================== */
+    .tab-lbl, .tabbar { display: none; }
+    .guest-bar .tab-lbl { display: inline; }
+    .guest-bar .guest-login svg { display: none; }
+
+    /* Fiche : ouvert / fermé et note sous le nom, puis les actions (itinéraires, appel, suivre, partager) */
+    .sheet-status { margin: 4px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; }
+    .sheet-status .status, .sheet-status .rating-link { margin-top: 0; }
+    .shop-actions { display: flex; gap: 8px; margin: 14px -20px 0; padding: 2px 20px; overflow-x: auto; scrollbar-width: none; }
+    .shop-actions::-webkit-scrollbar { display: none; }
+    .shop-actions .act { flex: none; display: inline-flex; align-items: center; gap: 7px; height: 40px; margin: 0; padding: 0 14px; border-radius: 20px;
+      font-size: 14px; font-weight: 500; text-decoration: none; white-space: nowrap; color: var(--accent); background: transparent; border: 1px solid var(--line-strong);
+      transition: background-color .2s, color .2s, border-color .2s, transform .15s var(--ease-out); }
+    .shop-actions .act svg { flex: none; width: 18px; height: 18px; }
+    .shop-actions .act[hidden] { display: none; }
+    .shop-actions .act:active { transform: scale(.96); }
+    .shop-actions .act-primary { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
+    .shop-actions .act[aria-pressed="true"] { color: var(--accent); background: var(--accent-soft); border-color: var(--accent-line); }
+    .shop-actions .act:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (min-width: 900px) { .shop-actions { flex-wrap: wrap; overflow: visible; } }
+
+    @media (max-width: 899.98px) {
+      body { --nav-h: 64px; }
+      /* Haut : la recherche (avec le logo), puis les filtres, puis les stories */
+      .topbar { left: 12px; right: 12px; max-width: none; top: calc(var(--safe-top) + 10px); }
+      #search-open { display: flex; align-items: center; gap: 10px; width: 100%; height: 50px; padding: 0 16px 0 10px; border-radius: 25px; font-size: 15.5px; text-align: left; color: var(--muted); }
+      #search-open:active { transform: scale(.985); }
+      #search-open svg { flex: none; width: 22px; height: 22px; }
+      .so-logo { flex: none; width: 30px; height: 30px; border-radius: 9px; }
+      .so-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .filters { top: calc(var(--safe-top) + 68px); bottom: auto; }
+      body.sheet-open .filters, body:not(.ui-ready) .filters { transform: translateY(-8px); }
+      .stories { top: calc(var(--safe-top) + 116px); max-width: calc(100% - 24px); }
+      .stories-track { gap: 8px; padding: 6px 8px 5px; }
+      .story-chip { width: 58px; gap: 3px; }
+      .story-ring { width: 50px; height: 50px; }
+      .story-avatar { font-size: 22px; }
+      .story-name { max-width: 58px; font-size: 11px; }
+      /* Carte : un seul bouton flottant (me localiser), en bas à droite ; le thème se règle dans le profil */
+      .controls { top: auto; bottom: calc(var(--safe-bottom) + var(--nav-h) + 40px); transition: opacity .2s; }
+      body.sheet-open .controls { opacity: 0; pointer-events: none; }
+      body:not(.ui-ready) .controls { transform: translateY(12px); }
+      #theme-btn { display: none; }
+      .scan-fab:not(.ps-scan-fab) { bottom: calc(var(--safe-bottom) + var(--nav-h) + 16px); }
+      .scan-fab:not([hidden]) ~ .controls { bottom: calc(var(--safe-bottom) + var(--nav-h) + 84px); }
+      /* Bas : barre d'onglets, toujours visible sous les fiches et les panneaux */
+      .sheet { padding-bottom: calc(var(--safe-bottom) + var(--nav-h) + 20px); }
+      .net { bottom: calc(var(--safe-bottom) + var(--nav-h) + 14px); }
+      .maplibregl-ctrl-bottom-right { bottom: calc(var(--safe-bottom) + var(--nav-h) + 2px); }
+      .guest-bar { display: none; }
+      .tabbar { position: fixed; z-index: 55; left: 0; right: 0; bottom: 0; display: flex; align-items: stretch; gap: 4px;
+        height: calc(var(--nav-h) + var(--safe-bottom)); padding: 6px 8px calc(var(--safe-bottom) + 6px);
+        background: var(--panel-solid); border-top: 1px solid var(--line); }
+      body:not(.ui-ready) .tabbar { transform: translateY(12px); }
+      .tabbar > button { position: relative; flex: 1 1 0; min-width: 0; width: auto; height: auto; min-height: 0; margin: 0; padding: 0 2px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+        border: 0; border-radius: 14px; background: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none;
+        font-size: 11.5px; font-weight: 500; text-align: center; color: var(--muted); transition: color .2s, transform .15s var(--ease-out); }
+      .tabbar > button:active { transform: scale(.94); }
+      .tabbar > button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+      .tabbar > button > svg, .tabbar .avatar { position: relative; z-index: 1; }
+      .tabbar > button > svg { width: 24px; height: 24px; }
+      .tabbar .tab-lbl { display: block; line-height: 1.15; white-space: nowrap; }
+      .tabbar .brand-text { display: none; }
+      .tabbar .avatar { width: 26px; height: 26px; font-size: 13px; }
+      .tabbar .offers-badge, .tabbar .notif-badge { z-index: 2; top: 0; right: auto; left: calc(50% + 4px); }
+      /* Onglet actif : couleur, et pastille derrière l'icône */
+      .tabbar > button::before { content: ""; position: absolute; top: 2px; left: 50%; width: 56px; height: 30px; margin-left: -28px; border-radius: 15px; background: var(--accent-soft); opacity: 0; transition: opacity .2s; }
+      body:not([data-panel]) #nav-map, body[data-panel="shop-sheet"] #nav-map, body[data-panel="offers-sheet"] .tabbar #offers-btn,
+      body[data-panel="notif-sheet"] .tabbar #notif-btn, body[data-panel="profile-sheet"] .tabbar #profile-btn { color: var(--accent); }
+      body:not([data-panel]) #nav-map::before, body[data-panel="shop-sheet"] #nav-map::before, body[data-panel="offers-sheet"] .tabbar #offers-btn::before,
+      body[data-panel="notif-sheet"] .tabbar #notif-btn::before, body[data-panel="profile-sheet"] .tabbar #profile-btn::before { opacity: 1; }
+      /* Visiteur sans compte : « Créer mon compte » (grand bouton) et « Connexion » à la place d'Alertes et Profil */
+      .tabbar #guest-signup, .tabbar #guest-login, .tabbar .gs-more { display: none; }
+      body.is-guest .tabbar #notif-btn, body.is-guest .tabbar #profile-btn { display: none; }
+      body.is-guest .tabbar #guest-login { display: flex; }
+      body.is-guest .tabbar #guest-signup { display: flex; flex: 0 0 auto; flex-direction: row; gap: 6px; align-self: center; height: 48px; padding: 0 16px; border-radius: 24px;
+        font-size: 14.5px; white-space: nowrap; color: var(--on-accent); background: var(--accent); box-shadow: 0 2px 8px rgba(26, 115, 232, .35); }
+      body.is-guest .tabbar #guest-signup::before { display: none; }
+      body.is-guest .tabbar > .tab, body.is-guest .tabbar #offers-btn, body.is-guest .tabbar #guest-login { flex: 1 1 0; max-width: 76px; }
+      body.is-guest .tabbar { justify-content: space-between; }
+    }
+
+    /* ----- Espace restaurateur : accueil synthétique (période, 6 chiffres, courbe), sommaire des statistiques ----- */
+    .ps-home-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .ps-home-head .ps-hello { flex: 1; min-width: 0; }
+    .ps-period { flex: none; }
+    .ps-period[hidden] { display: none; }
+    .ps-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 12px; }
+    .ps-cards button { min-width: 0; padding: 10px 10px 9px; }
+    .ps-cards .kpi-label { gap: 5px; font-size: 12.5px; white-space: nowrap; overflow: hidden; }
+    .ps-cards strong { font-size: 23px; }
+    .ps-cards .trend { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ps-home-chart { margin-top: 12px; }
+    .ps-home-chart[hidden] { display: none; }
+    .ps-quick { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .ps-quick button { min-height: 68px; gap: 4px; padding: 8px 4px; font-size: 12.5px; }
+    .ps-quick button span { font-size: 22px; }
+    .ps-insights { gap: 0; }
+    .ps-insights li { padding: 11px 2px; border: 0; border-radius: 0; border-bottom: 1px solid var(--line); }
+    .ps-insights li:last-child { border-bottom: 0; }
+    .ps-stats-top { position: sticky; top: -16px; z-index: 3; display: flex; align-items: center; gap: 10px; margin: -16px -16px 0; padding: 10px 16px 8px;
+      background: var(--panel-solid); border-bottom: 1px solid var(--line); }
+    .ps-jump { flex: 1; min-width: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+    .ps-jump::-webkit-scrollbar { display: none; }
+    .ps-jump button { flex: none; height: 32px; padding: 0 12px; border-radius: 16px; font-size: 13px; font-weight: 500; white-space: nowrap; color: var(--text); border: 1px solid var(--line-strong); }
+    .ps-jump button:hover { background: var(--hover); }
+    .ps-jump button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+    #psp-stats .ps-card, #psp-stats .kpis { scroll-margin-top: 62px; }
+    .ps-csv { display: block; margin: 10px 0 4px; font-size: 13.5px; }
+    @media (min-width: 900px) {
+      .ps-cards { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      .ps-cards strong { font-size: 28px; }
+      .ps-stats-top { top: -28px; margin: -28px 0 0; padding: 12px 0 10px; }
+    }
+    @media (max-width: 360px) { .ps-quick { grid-template-columns: repeat(4, minmax(0, 1fr)); } .ps-cards strong { font-size: 20px; } }
+
+    /* ----- Espace restaurateur sur ordinateur : fond doux, cartes blanches en léger relief, transitions ----- */
+    @keyframes ps-in { from { opacity: 0; transform: translateY(8px); } }
+    @media (min-width: 900px) {
+      .ps-panel, .ps-body { background: var(--bg); }
+      .ps-head, .ps-tabs { background: var(--panel-solid); }
+      .ps-tabs button { transition: background-color .2s, color .2s; }
+      .ps-tabs button:hover { background: var(--hover); }
+      .ps-pane:not([hidden]) { animation: ps-in .28s var(--ease-out) both; }
+      #pro-space .ps-cards button, #pro-space .kpi, #pro-space .chart, #pro-space .ps-card, #pro-space .pd-block, .ps-quick button, .ps-todo li, .ps-insights li {
+        background: var(--panel-solid); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 1px 2px rgba(60, 64, 67, .08);
+        transition: transform .18s var(--ease-out), box-shadow .18s; }
+      #pro-space .pd-block { padding: 20px; }
+      #pro-space .ps-cards button:hover, .ps-quick button:hover, .ps-todo li:hover { background: var(--panel-solid); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(60, 64, 67, .14); }
+      .ps-cards { gap: 12px; margin-top: 16px; }
+      .ps-cards button { padding: 16px 18px 14px; }
+      .ps-cards .kpi-label { font-size: 13px; }
+      .ps-cards strong { font-size: 32px; font-variant-numeric: tabular-nums; }
+      .ps-home-chart { margin-top: 16px; }
+      .ps-quick { gap: 12px; }
+      .ps-quick button { flex-direction: row; min-height: 56px; gap: 10px; font-size: 14px; }
+      .ps-insights { gap: 12px; }
+      .ps-insights li, .ps-insights li:last-child { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+      .ps-stats-top { background: var(--bg); }
+      .ps-jump button { background: var(--panel-solid); transition: background-color .2s; }
+      .ps-scan { transition: transform .18s var(--ease-out), box-shadow .18s; }
+      .ps-scan:hover { transform: translateY(-2px); }
+    }
+    @media (prefers-reduced-motion: reduce) { .ps-pane:not([hidden]) { animation: none; } }
+
+    /* ----- Fiche restaurant : photo en tête, onglets doux, carte des plats appétissante ----- */
+    .shop-cover { display: block; width: calc(100% + 40px); margin: -10px -20px 14px; padding: 0; border: 0; border-radius: 20px 20px 0 0; overflow: hidden; background: var(--hover); cursor: zoom-in; }
+    .shop-cover[hidden] { display: none; }
+    .shop-cover img { display: block; width: 100%; aspect-ratio: 2 / 1; object-fit: cover; transition: transform .6s var(--ease-out); }
+    .shop-cover:hover img { transform: scale(1.03); }
+    #shop-sheet.has-cover .sheet-grab { position: absolute; z-index: 2; top: 0; left: 0; right: 0; padding: 8px 0 14px; }
+    #shop-sheet.has-cover .sheet-grab::before { background: rgba(255, 255, 255, .85); box-shadow: 0 1px 3px rgba(0, 0, 0, .3); }
+    #shop-sheet.has-cover .sheet-head { margin-top: 0; }
+    #shop-sheet h2#shop-name { font-size: 22px; font-weight: 700; letter-spacing: -.01em; line-height: 1.2; }
+    .shop-tabs { gap: 6px; margin: 16px 0 0; padding: 4px; border: 0; border-radius: 14px; background: var(--hover); }
+    .shop-tabs button { padding: 9px 6px; border-radius: 10px; font-size: 14px; transition: background-color .25s, color .25s, box-shadow .25s; }
+    .shop-tabs button[aria-selected="true"] { color: var(--text); background: var(--panel-solid); box-shadow: 0 1px 3px rgba(60, 64, 67, .18); }
+    .shop-tabs button[aria-selected="true"]::after { display: none; }
+    .tab-panel:not([hidden]) { animation: tab-in .25s var(--ease-out) both; }
+    @keyframes tab-in { from { opacity: 0; transform: translateY(4px); } }
+    .menu-list { padding-top: 6px; }
+    .menu-list h4 { margin: 18px 0 4px; font-size: 16px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--text); }
+    .menu-list li { padding: 12px 0; font-size: 15px; }
+    .menu-list b { font-weight: 500; }
+    .menu-list li small { font-size: 13.5px; line-height: 1.4; }
+    .menu-list .price { padding: 3px 10px; border-radius: 12px; font-size: 14px; color: var(--accent-strong); background: var(--accent-soft); }
+    :root[data-theme="dark"] .menu-list .price { color: var(--accent); }
+    @media (min-width: 900px) {
+      #shop-sheet .shop-cover { border-radius: 16px 16px 0 0; margin: -20px -20px 14px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .tab-panel:not([hidden]) { animation: none; } .shop-cover img { transition: none; } }
+
+    /* Actions de la fiche : boutons ronds, libellé dessous, tous visibles d'un coup d'œil */
+    .shop-actions { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; margin: 14px 0 0; padding: 0; overflow: visible; }
+    .shop-actions .act { flex-direction: column; justify-content: flex-start; gap: 6px; height: auto; padding: 2px 0; border: 0; border-radius: 14px; background: none;
+      font-size: 12.5px; font-weight: 500; color: var(--text); white-space: nowrap; }
+    .shop-actions .act svg { width: 46px; height: 46px; padding: 12px; border-radius: 50%; color: var(--accent); background: var(--accent-soft); transition: background-color .2s, color .2s, transform .15s var(--ease-out); }
+    .shop-actions .act:hover svg { transform: translateY(-1px); }
+    .shop-actions .act-primary { color: var(--text); background: none; }
+    .shop-actions .act-primary svg { color: var(--on-accent); background: var(--accent); box-shadow: 0 3px 10px rgba(26, 115, 232, .35); }
+    .shop-actions .act[aria-pressed="true"] { color: var(--accent); background: none; }
+    .shop-actions .act[aria-pressed="true"] svg { color: var(--on-accent); background: var(--accent); }
+    .shop-actions .act:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (min-width: 900px) { .shop-actions { flex-wrap: nowrap; } }
   </style>
 </head>
 
@@ -1929,18 +2178,22 @@
         <strong>FlashMiam</strong>
         <small><span class="live-dot" aria-hidden="true"></span><span class="brand-city">La Roche-sur-Yon</span></small>
       </span>
+      <span class="tab-lbl" id="profile-lbl">Profil</span>
     </button>
     <button id="offers-btn" class="ctrl glass" type="button" aria-label="Offres autour de moi" title="Offres autour de moi">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>
       <span class="offers-badge" id="offers-badge" aria-hidden="true" hidden></span>
+      <span class="tab-lbl">Offres</span>
     </button>
-    <button id="search-open" class="ctrl glass" type="button" aria-label="Rechercher un plat ou un restaurant" title="Rechercher un plat ou un restaurant">
+    <button id="search-open" class="ctrl glass" type="button" aria-label="Rechercher un plat ou un restaurant">
+      <img class="so-logo" src="icon-192.png?v=2" alt="" width="30" height="30" />
+      <span class="so-text">Un plat, un restaurant…</span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
     </button>
   </header>
 
   <!-- ===================== STORIES DES RESTAURANTS (téléphone : sous le profil ; ordinateur : dans le panneau) ===================== -->
-  <div class="stories glass ui" id="stories" hidden>
+  <div class="stories glass ui" id="stories" role="region" aria-label="Stories des restaurants" hidden>
     <div class="stories-track" id="stories-track" role="list" aria-label="Stories des restaurants"></div>
   </div>
 
@@ -1968,6 +2221,7 @@
     <button id="notif-btn" class="ctrl glass" type="button" aria-label="Notifications" title="Notifications">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg>
       <span class="notif-badge" id="notif-badge" aria-hidden="true" hidden></span>
+      <span class="tab-lbl">Alertes</span>
     </button>
     <!-- Recentrer sur ma position (redemande l'autorisation si elle a été refusée) -->
     <button id="locate-btn" class="ctrl glass" type="button" data-state="idle" data-follow="false" aria-label="Me localiser" title="Me localiser">
@@ -2000,6 +2254,10 @@
   <!-- ===================== FILTRES (téléphone : en bas ; ordinateur : déplacés dans le panneau) ===================== -->
   <nav class="filters ui" id="filters" aria-label="Filtrer les commerces">
     <div class="filters-track" id="filters-track">
+      <button class="chip glass" type="button" id="open-only" aria-pressed="false"><span class="dot-green" aria-hidden="true"></span>Ouverts</button>
+      <button class="chip glass" type="button" id="promo-only" aria-pressed="false">🎁 Promos</button>
+      <button class="chip glass" type="button" id="rated-only" aria-pressed="false">⭐ 4 et +</button>
+      <span class="chip-sep" aria-hidden="true"></span>
       <button class="chip glass" type="button" data-cat="all" aria-pressed="true">Tout</button>
       <button class="chip glass" type="button" data-cat="Food-truck" aria-pressed="false">🚚 Food-truck</button>
       <button class="chip glass" type="button" data-cat="Kebab" aria-pressed="false">🥙 Kebab</button>
@@ -2007,11 +2265,16 @@
       <button class="chip glass" type="button" data-cat="Sweets" aria-pressed="false">🧁 Sweets</button>
       <button class="chip glass" type="button" data-cat="Pizza" aria-pressed="false">🍕 Pizza</button>
       <button class="chip glass" type="button" data-cat="Autre" aria-pressed="false">🍽️ Autres</button>
-      <span class="chip-sep" aria-hidden="true"></span>
-      <button class="chip glass" type="button" id="open-only" aria-pressed="false"><span class="dot-green" aria-hidden="true"></span>Ouverts</button>
-      <button class="chip glass" type="button" id="promo-only" aria-pressed="false">🎁 Promos</button>
-      <button class="chip glass" type="button" id="rated-only" aria-pressed="false">⭐ 4 et +</button>
     </div>
+  </nav>
+
+  <!-- ===================== BARRE D'ONGLETS (téléphone) : Carte, Offres, Alertes, Profil ; visiteur : créer son compte =====================
+       Les boutons Offres, Alertes, Profil et ceux du visiteur y sont placés par applyLayout() (sur ordinateur : panneau latéral). -->
+  <nav class="tabbar ui" id="tabbar" aria-label="Navigation principale">
+    <button class="tab" type="button" id="nav-map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L3 6.5v13L9 17l6 3 6-2.5v-13L15 7 9 4zM9 4v13M15 7v13"/></svg>
+      <span class="tab-lbl">Carte</span>
+    </button>
   </nav>
 
   <!-- ===================== RECHERCHE (téléphone : plein écran ; ordinateur : panneau latéral) ===================== -->
@@ -2038,29 +2301,32 @@
   <!-- ===================== FICHE COMMERCE ===================== -->
   <section id="shop-sheet" class="sheet glass" role="dialog" aria-modal="false" aria-labelledby="shop-name" aria-hidden="true">
     <button class="sheet-grab" type="button" data-close aria-label="Fermer la fiche"></button>
+    <button class="shop-cover" type="button" id="shop-cover" aria-label="Voir les photos du restaurant" hidden><img alt="" decoding="async" /></button>
     <div class="sheet-head">
       <button class="sheet-emoji" type="button" id="shop-emoji" tabindex="-1" aria-hidden="true"><span id="shop-emoji-in"></span></button>
       <div class="sheet-title">
         <h2 id="shop-name"></h2>
         <p class="eyebrow"><span id="shop-cat"></span><span class="verified" id="shop-verified" hidden title="SIRET vérifié auprès du répertoire Sirene">✓ Établissement vérifié</span><span id="shop-followers" hidden></span></p>
-        <button class="rating-link" type="button" id="shop-rating" hidden></button>
-        <button class="follow-btn" type="button" id="shop-follow" aria-pressed="false" hidden>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg>
-          <span id="shop-follow-label">Suivre</span>
-        </button>
+        <p class="sheet-status"><span class="status" id="shop-status"></span><button class="rating-link" type="button" id="shop-rating" hidden></button></p>
       </div>
-      <button class="icon-btn" type="button" id="shop-share" aria-label="Partager ce restaurant" title="Partager">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13"/></svg>
-      </button>
       <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
+    </div>
+    <!-- Actions principales, toujours en haut de la fiche : itinéraires (Google Maps), appel, suivre, partager -->
+    <div class="shop-actions" id="shop-actions">
+      <a id="shop-go" class="act act-primary" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM9 21l2-6 2.5 2.5V21M8 12l2-4.5 3.5 1 2 3.5 2.5 1M10 7.5L7.5 9 7 12"/></svg>À pied</a>
+      <a id="shop-go-car" class="act" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17h14M6.5 17v2M17.5 17v2M4 17v-4.5L6 7.5A2 2 0 017.9 6h8.2A2 2 0 0118 7.5l2 5V17"/><path d="M4 12.5h16"/><circle cx="7.5" cy="14.75" r=".9" fill="currentColor"/><circle cx="16.5" cy="14.75" r=".9" fill="currentColor"/></svg>En voiture</a>
+      <a id="shop-call" class="act" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.4 1.8.7 2.7a2 2 0 01-.5 2.1L8 9.8a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.7.7a2 2 0 011.7 2z"/></svg>Appeler</a>
+      <button class="act follow-btn" type="button" id="shop-follow" aria-pressed="false" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg><span id="shop-follow-label">Suivre</span></button>
+      <button class="act" type="button" id="shop-share" aria-label="Partager ce restaurant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13"/></svg>Partager</button>
     </div>
     <div class="shop-tabs" id="shop-tabs" role="tablist" aria-label="Contenu de la fiche" hidden>
       <button type="button" role="tab" id="tab-infos" aria-controls="panel-infos" aria-selected="true" data-tab="infos">Infos</button>
-      <button type="button" role="tab" id="tab-menu" aria-controls="panel-menu" aria-selected="false" tabindex="-1" data-tab="menu">Menu<small id="tab-menu-n"></small></button>
-      <button type="button" role="tab" id="tab-photos" aria-controls="panel-photos" aria-selected="false" tabindex="-1" data-tab="photos">Photos<small id="tab-photos-n"></small></button>
-      <button type="button" role="tab" id="tab-reviews" aria-controls="panel-reviews" aria-selected="false" tabindex="-1" data-tab="reviews" hidden>Avis<small id="tab-reviews-n"></small></button>
+      <button type="button" role="tab" id="tab-menu" aria-controls="panel-menu" aria-selected="false" tabindex="-1" data-tab="menu">Menu</button>
+      <button type="button" role="tab" id="tab-photos" aria-controls="panel-photos" aria-selected="false" tabindex="-1" data-tab="photos">Photos</button>
+      <button type="button" role="tab" id="tab-reviews" aria-controls="panel-reviews" aria-selected="false" tabindex="-1" data-tab="reviews" hidden>Avis</button>
     </div>
     <div class="tab-panel" id="panel-infos" role="tabpanel" aria-labelledby="tab-infos">
+    <p class="demo-note" id="shop-demo-note" hidden><span aria-hidden="true">🧪</span> Restaurant imaginaire, pour découvrir FlashMiam en attendant les premiers restaurants partenaires de La Roche-sur-Yon : ses offres ne sont pas réelles.</p>
     <!-- Comptes clients : « Profiter de l'offre » (ou « Valider ma visite ») → QR code à montrer en caisse -->
     <div class="visit-box" id="shop-visit-box" hidden>
       <button class="visit-cta" type="button" id="shop-visit">
@@ -2070,8 +2336,7 @@
       </button>
       <button class="link-btn visit-plain" type="button" id="shop-visit-plain" hidden>Juste valider ma visite, sans l'offre</button>
     </div>
-    <div class="gallery" id="shop-gallery" hidden></div>
-    <span class="status" id="shop-status"></span>
+    <div class="gallery" id="shop-gallery" tabindex="0" role="group" aria-label="Photos du restaurant (faire défiler)" hidden></div>
     <p class="shop-desc" id="shop-desc" hidden></p>
     <div class="promos" id="shop-promos" hidden></div>
     <ul class="meta">
@@ -2092,20 +2357,9 @@
         <a id="shop-phone" href="#"></a>
       </li>
     </ul>
-    <!-- Itinéraires dans Google Maps : à pied ou en voiture -->
-    <div class="go-row">
-      <a id="shop-go" class="btn btn-primary" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM9 21l2-6 2.5 2.5V21M8 12l2-4.5 3.5 1 2 3.5 2.5 1M10 7.5L7.5 9 7 12"/></svg>
-        À pied
-      </a>
-      <a id="shop-go-car" class="btn btn-ghost" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17h14M6.5 17v2M17.5 17v2M4 17v-4.5L6 7.5A2 2 0 017.9 6h8.2A2 2 0 0118 7.5l2 5V17"/><path d="M4 12.5h16"/><circle cx="7.5" cy="14.75" r=".9" fill="currentColor"/><circle cx="16.5" cy="14.75" r=".9" fill="currentColor"/></svg>
-        En voiture
-      </a>
-    </div>
     </div>
     <div class="tab-panel" id="panel-menu" role="tabpanel" aria-labelledby="tab-menu" hidden>
-      <p class="menu-head" id="shop-menu-count"></p>
+      <p class="menu-head" id="shop-menu-count" hidden></p>
       <div class="menu-list" id="shop-menu-list"></div>
       <p class="menu-empty" id="shop-menu-empty" hidden>Ce restaurant n'a pas encore publié sa carte.</p>
     </div>
@@ -2467,7 +2721,14 @@
       <div class="ps-body" id="ps-body">
         <!-- Accueil -->
         <section class="ps-pane" id="psp-home" role="tabpanel" aria-labelledby="pst-home">
-          <p class="ps-hello" id="ps-hello"></p>
+          <div class="ps-home-head">
+            <p class="ps-hello" id="ps-hello"></p>
+            <div class="seg ps-period" id="ph-period" role="group" aria-label="Période des chiffres">
+              <button type="button" data-days="7" aria-pressed="true" aria-label="7 jours">7 j</button>
+              <button type="button" data-days="30" aria-pressed="false" aria-label="30 jours">30 j</button>
+              <button type="button" data-days="90" aria-pressed="false" aria-label="90 jours">90 j</button>
+            </div>
+          </div>
           <div class="ps-alert" id="ps-alert" role="status" hidden><p></p><button class="pill-btn" type="button"></button></div>
           <div id="ps-home-live">
             <button class="ps-scan" type="button" id="ps-scan">
@@ -2476,22 +2737,25 @@
               <span class="ps-scan-today"><b id="ps-scan-n">–</b><small>aujourd'hui</small></span>
             </button>
             <div class="ps-cards" id="ps-cards"></div>
+            <figure class="chart ps-home-chart">
+              <figcaption>Vues de la fiche par jour<small id="ph-chart-sub"></small></figcaption>
+              <div class="chart-box" id="ph-chart"></div>
+              <div class="chart-tip" id="ph-tip" role="status" hidden></div>
+            </figure>
             <section class="ps-block" aria-labelledby="ps-todo-title">
               <h3 id="ps-todo-title">À faire</h3>
               <ul class="ps-todo" id="ps-todo"></ul>
             </section>
-            <section class="ps-block" aria-labelledby="ps-quick-title">
+            <section class="ps-block ps-wide" aria-labelledby="ps-quick-title">
               <h3 id="ps-quick-title">Actions rapides</h3>
               <div class="ps-quick" id="ps-quick">
-                <button type="button" data-act="story"><span aria-hidden="true">📸</span>Publier une story</button>
-                <button type="button" data-act="promo"><span aria-hidden="true">🎁</span>Créer une promo</button>
-                <button type="button" data-act="reviews"><span aria-hidden="true">💬</span>Répondre aux avis</button>
-                <button type="button" data-act="edit"><span aria-hidden="true">✏️</span>Modifier ma fiche</button>
-                <button type="button" data-act="show"><span aria-hidden="true">👀</span>Voir ma fiche</button>
-                <button type="button" data-act="share"><span aria-hidden="true">🔗</span>Partager ma fiche</button>
+                <button type="button" data-act="story"><span aria-hidden="true">📸</span>Story</button>
+                <button type="button" data-act="promo"><span aria-hidden="true">🎁</span>Promo</button>
+                <button type="button" data-act="edit"><span aria-hidden="true">✏️</span>Ma fiche</button>
+                <button type="button" data-act="show"><span aria-hidden="true">👀</span>Aperçu</button>
               </div>
             </section>
-            <section class="ps-block" aria-labelledby="ps-insights-title">
+            <section class="ps-block ps-wide" aria-labelledby="ps-insights-title">
               <h3 id="ps-insights-title">Ce qu'il faut retenir</h3>
               <ul class="ps-insights" id="ps-insights"></ul>
               <button class="btn btn-ghost" type="button" id="ps-more-stats">Voir toutes les statistiques</button>
@@ -2501,13 +2765,23 @@
 
         <!-- Statistiques -->
         <section class="ps-pane" id="psp-stats" role="tabpanel" aria-labelledby="pst-stats" hidden>
-          <div class="stats-head">
-            <h3>Ce que font vos clients</h3>
-            <div class="seg" id="ps-period" role="group" aria-label="Période">
-              <button type="button" data-days="7" aria-pressed="true">7 jours</button>
-              <button type="button" data-days="30" aria-pressed="false">30 jours</button>
-              <button type="button" data-days="90" aria-pressed="false">90 jours</button>
+          <!-- Toujours en haut pendant le défilement : la période et le sommaire des statistiques -->
+          <div class="ps-stats-top">
+            <div class="seg ps-period" id="ps-period" role="group" aria-label="Période">
+              <button type="button" data-days="7" aria-pressed="true" aria-label="7 jours">7 j</button>
+              <button type="button" data-days="30" aria-pressed="false" aria-label="30 jours">30 j</button>
+              <button type="button" data-days="90" aria-pressed="false" aria-label="90 jours">90 j</button>
             </div>
+            <nav class="ps-jump" id="ps-jump" aria-label="Aller à une partie des statistiques">
+              <button type="button" data-go="ps-kpis">Résumé</button>
+              <button type="button" data-go="ps-visits-card">En caisse</button>
+              <button type="button" data-go="ps-sources-card">Visiteurs</button>
+              <button type="button" data-go="ps-aud-card">Public</button>
+              <button type="button" data-go="ps-acts-card">Actions</button>
+              <button type="button" data-go="ps-fans-card">Fidélité</button>
+              <button type="button" data-go="ps-st-card">Stories et promos</button>
+              <button type="button" data-go="ps-dish-card">Plats</button>
+            </nav>
           </div>
           <p class="hint" id="ps-period-sub"></p>
           <div class="kpis ps-kpis" id="ps-kpis"></div>
@@ -2517,6 +2791,7 @@
             <div class="chart-tip" id="pd-tip" role="status" hidden></div>
             <details class="chart-table">
               <summary>Voir le détail par jour</summary>
+              <button class="link-btn ps-csv" type="button" id="pd-csv">⬇ Télécharger ce tableau (CSV, pour Excel)</button>
               <table id="pd-table"><thead><tr><th scope="col">Jour</th><th scope="col">Vues</th><th scope="col">Personnes</th><th scope="col">Itinéraires</th><th scope="col">Appels</th><th scope="col">Stories vues</th><th scope="col">Abonnés +</th></tr></thead><tbody></tbody></table>
             </details>
           </figure>
@@ -2529,26 +2804,31 @@
               <table id="ps-hours-table"><thead><tr><th scope="col">Heure</th><th scope="col">Vues</th></tr></thead><tbody></tbody></table>
             </details>
           </figure>
-          <section class="ps-block ps-card" aria-labelledby="ps-sources-title">
+          <section class="ps-block ps-card" id="ps-visits-card" aria-labelledby="ps-visits-title">
+            <h4 id="ps-visits-title">Visites validées en caisse</h4>
+            <p class="hint">Clients venus chez vous qui ont montré leur QR code FlashMiam, que vous avez scanné.</p>
+            <dl class="kv" id="ps-visits"></dl>
+          </section>
+          <section class="ps-block ps-card" id="ps-sources-card" aria-labelledby="ps-sources-title">
             <h4 id="ps-sources-title">D'où viennent vos visiteurs</h4>
             <p class="hint">Comment les gens arrivent sur votre fiche (chaque personne comptée une fois par jour).</p>
             <div class="hbars" id="ps-sources"></div>
           </section>
-          <section class="ps-block ps-card" aria-labelledby="ps-aud-title">
+          <section class="ps-block ps-card" id="ps-aud-card" aria-labelledby="ps-aud-title">
             <h4 id="ps-aud-title">Votre public</h4>
             <p class="hint" id="ps-aud-sub">Clients venus sur votre fiche pendant la période, d'après ce qu'ils ont indiqué à l'inscription.</p>
             <div class="ps-aud" id="ps-audience"></div>
           </section>
-          <section class="ps-block ps-card" aria-labelledby="ps-acts-title">
+          <section class="ps-block ps-card" id="ps-acts-card" aria-labelledby="ps-acts-title">
             <h4 id="ps-acts-title">Ce qu'ils font sur votre fiche</h4>
             <p class="hint">Nombre de fois sur la période. Partages, avis et Google : une fois par personne et par jour.</p>
             <div class="hbars" id="ps-acts"></div>
           </section>
-          <section class="ps-block ps-card" aria-labelledby="ps-fans-title">
+          <section class="ps-block ps-card" id="ps-fans-card" aria-labelledby="ps-fans-title">
             <h4 id="ps-fans-title">Abonnés et clients fidèles</h4>
             <dl class="kv" id="ps-fans"></dl>
           </section>
-          <section class="ps-block ps-card" aria-labelledby="ps-st-title">
+          <section class="ps-block ps-card" id="ps-st-card" aria-labelledby="ps-st-title">
             <h4 id="ps-st-title">Vos stories (30 derniers jours)</h4>
             <p class="hint">Vues : personnes différentes. Fiche ouverte : depuis le bouton de la story.</p>
             <div class="ps-table-wrap"><table class="ps-table" id="ps-stories-table"><thead><tr><th scope="col">Story</th><th scope="col">Vues</th><th scope="col">♥</th><th scope="col">Fiche ouverte</th></tr></thead><tbody></tbody></table></div>
@@ -2558,7 +2838,7 @@
             <p class="hint">Clics : personnes ayant ouvert votre fiche depuis l'offre (« Offres autour de moi », notification).</p>
             <div class="ps-table-wrap"><table class="ps-table" id="ps-promos-table"><thead><tr><th scope="col">Offre</th><th scope="col">État</th><th scope="col">Clics</th></tr></thead><tbody></tbody></table></div>
           </section>
-          <section class="ps-block ps-card" aria-labelledby="ps-dish-title">
+          <section class="ps-block ps-card" id="ps-dish-card" aria-labelledby="ps-dish-title">
             <h4 id="ps-dish-title">Plats préférés de vos clients</h4>
             <p class="hint">« J'aime » sur les plats de votre carte, depuis toujours.</p>
             <div class="hbars" id="ps-dishes"></div>
@@ -2665,9 +2945,13 @@
   <div id="onboarding" class="onboarding" role="dialog" aria-modal="true" aria-labelledby="auth-title" data-role="client" hidden>
     <div class="ob-panel glass">
       <div class="ob-top">
-        <div class="ob-logo"><img class="ob-mark" src="icon-192.png?v=2" alt="" width="36" height="36" />FlashMiam</div>
+        <div class="ob-logo"><img class="ob-mark" src="icon-192.png?v=2" alt="" width="32" height="32" />FlashMiam</div>
+        <!-- Visiteur : la carte sans compte (offres limitées) -->
+        <button class="ob-skip" type="button" id="ob-guest-btn" hidden>Voir la carte <span aria-hidden="true">→</span></button>
         <div class="ob-progress" id="ob-progress" aria-hidden="true"><span class="is-active" id="ob-dot-1"></span><span id="ob-dot-2"></span></div>
       </div>
+      <!-- Visiteur : pourquoi un compte est demandé (offre floutée, « Suivre », avis…) -->
+      <p class="ob-reason" id="ob-reason" role="status" hidden></p>
       <!-- Étapes du parcours restaurateur -->
       <ol class="pro-steps" id="pro-steps" hidden>
         <li data-pstep="1"><span>1</span>Compte</li>
@@ -2982,6 +3266,14 @@
         <div class="field" id="field-pl-menu">
           <span>La carte (facultatif) <small class="counter" id="pl-menu-count"></small></span>
           <p class="hint menu-hint">Vos plats et leurs prix, classés par rubrique (Entrées, Plats, Desserts, Boissons…).</p>
+          <div class="menu-scan" id="pl-menu-scan">
+            <label class="btn btn-primary menu-scan-btn" id="pl-menu-scan-btn">
+              <input type="file" id="pl-menu-scan-input" accept="image/*" multiple hidden />
+              <span aria-hidden="true">📷</span>Remplir avec une photo de ma carte
+            </label>
+            <p class="hint">1 à 5 photos (une par page, bien à plat et nette). Plats, rubriques et prix sont remplis automatiquement : il ne vous reste qu'à vérifier.</p>
+            <p class="menu-scan-status" id="pl-menu-scan-status" aria-live="polite" hidden></p>
+          </div>
           <div class="menu-edit" id="pl-menu"></div>
           <button class="btn btn-ghost menu-add" type="button" id="pl-menu-add">＋ Ajouter un plat</button>
           <datalist id="menu-sections">
@@ -3022,6 +3314,7 @@
         <button class="btn btn-ghost" type="button" id="pl-cancel" data-mode="edit">Annuler</button>
         <button class="link-btn later-btn" type="button" data-pro-later data-mode="create">Terminer plus tard</button>
       </form>
+
     </div>
   </div>
 
@@ -3048,9 +3341,18 @@
   <!-- ===================== TOAST ===================== -->
   <div id="net" class="net" role="status" aria-live="polite" hidden><span class="net-dot" aria-hidden="true"></span><span id="net-text"></span><button type="button" id="net-retry" hidden>Réessayer</button></div>
   <div id="toast" class="toast" role="status" aria-live="polite"><span id="toast-text"></span><button id="toast-action" type="button" hidden></button></div>
+  <!-- ===================== VISITEUR SANS COMPTE : créer son compte, toujours à portée de pouce ===================== -->
+  <div class="guest-bar" id="guest-bar" role="region" aria-label="Créer un compte FlashMiam" hidden>
+    <button class="btn btn-primary guest-cta" type="button" id="guest-signup"><span aria-hidden="true">✨</span> <span>Créer mon compte<span class="gs-more">&nbsp;gratuit</span></span></button>
+    <button class="guest-login" type="button" id="guest-login" aria-label="Se connecter">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>
+      <span class="tab-lbl">Connexion</span>
+    </button>
+  </div>
+
   <!-- Rappel « écran d'accueil » : petite notification à chaque connexion tant que ce n'est pas fait -->
   <div id="install-nudge" class="install-nudge" role="status" aria-live="polite" hidden>
-    <img src="icon-192.png?v=2" alt="" width="40" height="40" />
+    <img src="icon-192.png" alt="" width="40" height="40" />
     <p><b>Mettez FlashMiam sur votre écran d'accueil</b><span>La carte en un geste, comme une vraie appli.</span></p>
     <button class="nudge-go" type="button" id="install-nudge-go">Voir le tuto</button>
     <button class="nudge-close" type="button" id="install-nudge-close" aria-label="Plus tard">&times;</button>
@@ -3145,6 +3447,14 @@
      */
     installPromptDelay: 2500,    // ms sur la carte avant de proposer l'écran d'accueil (chaque visite, tant que ce n'est pas fait)
     tourDelay: 1200,             // ms après l'arrivée sur la carte avant le guide de démarrage (-1 : jamais)
+    /**
+     * Restaurants d'exemple (fictifs, liste SHOPS ci-dessous) : 'auto' = affichés seulement tant que la carte compte moins
+     * de `demoUntil` vrais restaurants en ligne (fiches de test non comptées), toujours signalés « Exemple » ;
+     * 'on' = toujours ; 'off' = jamais. Pour une démonstration (démarchage) : ajouter ?demo=1 à l'adresse
+     * (restaurants d'exemple ET fiches de test visibles) ; ?demo=0 les masque.
+     */
+    demoShops: 'auto',
+    demoUntil: 3,
     mapStyle: 'flashmiam',
     storageKey: 'roche-street-food:v2',
     legacyStorageKey: 'roche-street-food:v1',
@@ -3168,14 +3478,14 @@
     /**
      * Connexion « Continuer avec Google » (clients). Identifiant client OAuth (public) créé gratuitement dans
      * Google Cloud Console › API et services › Identifiants › ID client OAuth › Application Web,
-     * origines JavaScript autorisées : https://pwa-nantes.vercel.app et https://evanbisa.github.io. Vide = bouton Google masqué.
+     * origines JavaScript autorisées : https://flashmiam.fr, https://flashmiam.com, https://pwa-nantes.vercel.app et https://evanbisa.github.io. Vide = bouton Google masqué.
      */
     googleClientId: '87416467106-adp7ojfn62mmkr1pmaa0mpna86drug86.apps.googleusercontent.com',
     /**
      * SIRET fictif pour essayer l'espace restaurateur sans établissement réel (fiche marquée « Fiche de test »).
-     * Vide en ligne : bouton masqué, et le serveur le refuse (accepté seulement avec ALLOW_TEST_SIRET=true, en test).
+     * Rempli : bouton « SIRET de test » affiché ; le serveur ne l'accepte qu'avec le secret ALLOW_TEST_SIRET=true. Vide = bouton masqué.
      */
-    testSiret: '',
+    testSiret: '99999999900009',
     /**
      * Anti-robots Cloudflare Turnstile (connexion, inscription, mot de passe oublié, Google) : clé de SITE, publique par
      * nature. Vide = désactivé. À renseigner AVANT d'activer le CAPTCHA dans Supabase (Authentication › Attack Protection).
@@ -3307,6 +3617,7 @@
     add('gaufres-marche',
       [story('gaufres-1', 5, 'berry', 'Nouveau : la gaufre Nutella-banane 🍌')],
       [{ id: 'demo-p3', kind: 'week', title: '2 gaufres = 1 chocolat chaud offert', endsAt: promoAutoEnd('week').toISOString() }]);
+    SHOPS.forEach((sh) => { sh.isDemo = true; });
   })();
 
   /** Codes NAF acceptés pour un restaurateur (nomenclature NAF rév. 2 de l'INSEE). */
@@ -3572,7 +3883,7 @@
     imagePath: st.image_path, imageUrl: st.image_path ? publicUrl('stories', st.image_path) : null,
     createdAt: st.created_at, expiresAt: st.expires_at,
   });
-  const promoFromRow = (pr) => ({ id: pr.id, kind: pr.kind, title: pr.title, details: pr.details || '', createdAt: pr.created_at, endsAt: pr.ends_at });
+  const promoFromRow = (pr) => ({ id: pr.id, kind: pr.kind, title: pr.title || '', details: pr.details || '', createdAt: pr.created_at, endsAt: pr.ends_at, locked: !!pr.locked });
   function restaurantFromRow(m, promos = [], stories = [], rating = null) {
     const hours = m.opening_hours || {};
     return {
@@ -3595,12 +3906,31 @@
   const ratingsFrom = (rows) => new Map((rows || []).map((r) => [r.merchant_id, { avg: Number(r.average), count: r.total }]));
   let loadSeq = 0, appliedSeq = 0;
 
+  /** Session ouverte sur cet appareil (lue localement, sans appel au serveur) ? */
+  async function hasSession() {
+    try { const { data } = await sb.auth.getSession(); return !!(data && data.session); } catch (e) { return false; }
+  }
+  /**
+   * Offres en cours. Avec un compte : la table (texte complet). Sans compte, la base ne laisse plus lire la table : la
+   * fonction guest_promotions() donne toutes les offres en cours mais le texte de 3 seulement (les autres « locked »,
+   * sans titre ni détail) : le verrou est côté serveur, pas seulement un flou à l'écran.
+   * merchantId : les offres d'un seul restaurant.
+   */
+  async function readPromos(merchantId = null) {
+    const fromTable = () => { let q = promoFilter(sb.from('promotions').select('*')); if (merchantId) q = q.eq('merchant_id', merchantId); return q; };
+    if (await hasSession()) return fromTable();
+    const res = await sb.rpc('guest_promotions');
+    if (res.error && missingFn(res.error)) return fromTable();   // fonction pas encore en ligne : ancienne lecture
+    if (!res.error && merchantId) res.data = (res.data || []).filter((x) => x.merchant_id === merchantId);
+    return res;
+  }
+
   /** Restaurants inscrits, avec leurs promotions et stories (la base ne renvoie que ce que l'utilisateur a le droit de voir). */
   async function loadRestaurants() {
     const seq = ++loadSeq;
     const [m, pr, st, rt] = await Promise.all([
       sb.from('merchants').select('*'),
-      promoFilter(sb.from('promotions').select('*')),
+      readPromos(),
       sb.from('stories').select('*').gt('expires_at', liveSince()),
       sb.rpc('merchant_ratings'),
     ]);
@@ -3631,9 +3961,10 @@
       r.stories.forEach((x) => knownStories.set(x.id, x));
       r.promos.forEach((x) => knownPromos.set(x.id, x));
     });
+    const guest = !(await hasSession());
     const [mi, pi, si, rt] = await Promise.all([
       sb.from('merchants').select('id, updated_at'),
-      promoFilter(sb.from('promotions').select('id, merchant_id')),
+      guest ? readPromos() : promoFilter(sb.from('promotions').select('id, merchant_id')),
       sb.from('stories').select('id, merchant_id').gt('expires_at', liveSince()),
       sb.rpc('merchant_ratings'),
     ]);
@@ -3641,7 +3972,7 @@
     if (error) throw error;
     if (!mi.data.length) return loadRestaurants();             // liste vide inattendue : vérification par une lecture complète
     const changed = mi.data.filter((x) => { const r = cloud.restaurants[x.id]; return !r || r.updatedAt !== x.updated_at; }).map((x) => x.id);
-    const newPromos = pi.data.filter((x) => !knownPromos.has(x.id)).map((x) => x.id);
+    const newPromos = guest ? [] : pi.data.filter((x) => !knownPromos.has(x.id)).map((x) => x.id);
     const newStories = si.data.filter((x) => !knownStories.has(x.id)).map((x) => x.id);
     if (changed.length + newPromos.length + newStories.length > 120) return loadRestaurants();   // trop de nouveautés : lecture complète
     const fetchIds = async (table, ids) => {
@@ -3655,6 +3986,7 @@
     appliedSeq = seq;
     if (!rt.error) cloud.ratings = ratingsFrom(rt.data);
     pRows.forEach((x) => knownPromos.set(x.id, promoFromRow(x)));
+    if (guest) pi.data.forEach((x) => knownPromos.set(x.id, promoFromRow(x)));   // sans compte : offres ouvertes ou verrouillées, à jour
     sRows.forEach((x) => knownStories.set(x.id, storyFromRow(x)));
     const rowById = new Map(mRows.map((m) => [m.id, m]));
     const promosOf = groupBy(pi.data, 'merchant_id'), storiesOf = groupBy(si.data, 'merchant_id');
@@ -3688,7 +4020,7 @@
     const seq = ++loadSeq;
     const [m, pr, st] = await Promise.all([
       sb.from('merchants').select('*').eq('id', id).maybeSingle(),
-      promoFilter(sb.from('promotions').select('*').eq('merchant_id', id)),
+      readPromos(id),
       sb.from('stories').select('*').eq('merchant_id', id).gt('expires_at', liveSince()),
     ]);
     const error = m.error || pr.error || st.error;
@@ -3992,14 +4324,19 @@
     let paintQueued = false;
     const paintSoon = () => { if (paintQueued) return; paintQueued = true; requestAnimationFrame(() => { paintQueued = false; applyCloud(); }); };
 
-    function connect() {
-      if (channel || !sb || refused >= 3) return;            // (serveur temps réel complet : on attend la fin de la pause)
+    let connecting = false;
+    async function connect() {
+      if (channel || connecting || !sb || refused >= 3) return;   // (serveur temps réel complet : on attend la fin de la pause)
+      connecting = true;
+      const withPromos = await hasSession();                // sans compte : offres relues par guest_promotions()
+      connecting = false;
+      if (channel) return;
       try {
         channel = sb.channel('carte')
           .on('postgres_changes', { event: '*', schema: 'public', table: 'merchants' }, (ev) => handle('merchants', ev))
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'stories' }, (ev) => handle('stories', ev))
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'promotions' }, (ev) => handle('promotions', ev))
-          .subscribe((status) => {
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'stories' }, (ev) => handle('stories', ev));
+        if (withPromos) channel.on('postgres_changes', { event: '*', schema: 'public', table: 'promotions' }, (ev) => handle('promotions', ev));
+        channel.subscribe((status) => {
             const was = joined;
             joined = status === 'SUBSCRIBED';
             if (joined) refused = 0;
@@ -4081,7 +4418,9 @@
     });
     // Connexion revenue, ou « Réessayer » : tout relire
     Net.onRecover(() => { touch('*'); Notifs.load(); });
-    return { connect, touch, handle, isJoined: () => joined };
+    /** Connexion ou déconnexion : abonnements refaits (les offres en direct sont réservées aux comptes). */
+    function reconnect() { disconnect(); refused = 0; connect(); }
+    return { connect, reconnect, touch, handle, isJoined: () => joined };
   })();
 
   /** Distance à vol d'oiseau en mètres entre deux points [lng, lat]. */
@@ -4302,8 +4641,18 @@
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(bitmap, crop.x, crop.y, crop.w, crop.h, 0, 0, outW, outH);
-    return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('format'))), 'image/jpeg', 0.85));
+    return encodePhoto(canvas);
   }
+  /**
+   * Photo prête à envoyer : WebP (environ 30 % plus léger que le JPEG à qualité égale), sinon JPEG pour les navigateurs
+   * qui ne savent pas l'encoder (ils renvoient alors un PNG, bien plus lourd : on refait en JPEG).
+   */
+  async function encodePhoto(canvas) {
+    const make = (type, q) => new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('format'))), type, q));
+    const webp = await make('image/webp', 0.82).catch(() => null);
+    return webp && webp.type === 'image/webp' ? webp : make('image/jpeg', 0.85);
+  }
+  const photoExt = (blob) => (blob.type === 'image/webp' ? 'webp' : 'jpg');
 
   /* ---------- SIRET ---------- */
 
@@ -4991,11 +5340,11 @@
   function applyLayout() {
     const desktop = isDesktop();
     document.body.classList.toggle('is-desktop', desktop);
-    (desktop ? $('sb-brand-slot') : $('topbar')).prepend($('profile-btn'));
+    if (desktop) $('sb-brand-slot').prepend($('profile-btn'));
     (desktop ? $('sb-filters-slot') : $('filters')).appendChild($('filters-track'));
     (desktop ? $('sb-stories-slot') : $('stories')).appendChild($('stories-track'));
-    if (desktop) $('sb-brand-slot').append($('offers-btn'), $('notif-btn'));
-    else { $('controls').prepend($('notif-btn')); $('topbar').insertBefore($('offers-btn'), $('search-open')); }
+    if (desktop) { $('sb-brand-slot').append($('offers-btn'), $('notif-btn')); $('guest-bar').append($('guest-signup'), $('guest-login')); }
+    else $('tabbar').append($('offers-btn'), $('notif-btn'), $('profile-btn'), $('guest-signup'), $('guest-login'));
     if (desktop) $('sb-budget-slot').appendChild($('budget')); else $('search-panel').insertBefore($('budget'), $('search-results'));
     whenMapReady(() => view.setPadding(selectedId ? shopPadding() : basePadding()));
   }
@@ -5025,6 +5374,7 @@
     el.querySelector('.pin-badge').textContent = catOf(shop).emoji;
     el.querySelector('.pin-badge').insertAdjacentHTML('beforeend', '<span class="pin-flag">%</span>');
     el.querySelector('.pin-label').textContent = shop.name;
+    if (shop.isDemo) el.classList.add('is-demo');
     el.addEventListener('click', (ev) => { ev.stopPropagation(); openShop(shop.id, { source: 'map' }); });
     el.addEventListener('mouseenter', () => setHover(shop.id, true));
     el.addEventListener('mouseleave', () => setHover(shop.id, false));
@@ -5035,7 +5385,28 @@
   /** Restaurants inscrits (chargés depuis Supabase). */
   const restaurants = () => cloud.restaurants;
   const restaurantToShop = (r) => ({ ...r, isPro: true, isTest: !!r.isTest });
-  const allShops = () => [...SHOPS, ...Object.values(restaurants()).filter((r) => r.published).map(restaurantToShop)];
+  /** Mode démonstration forcé par l'adresse : ?demo=1 (tout montrer), ?demo=0 (rien de fictif). */
+  const DEMO_PARAM = (() => { try { const v = new URLSearchParams(location.search).get('demo'); return v === '1' ? 'on' : v === '0' ? 'off' : null; } catch (e) { return null; } })();
+  /**
+   * Commerces affichés : les restaurants inscrits en ligne, et les restaurants d'exemple (fictifs, signalés « Exemple »)
+   * tant qu'il y a moins de CONFIG.demoUntil vrais restaurants. Les fiches de test (SIRET de test) ne sont visibles que
+   * de leur propriétaire, ou en mode démonstration (?demo=1) : jamais présentées au public comme de vrais restaurants.
+   */
+  function allShops() {
+    const mode = DEMO_PARAM || CONFIG.demoShops;
+    const me = currentUser();
+    const real = Object.values(restaurants()).filter((r) => r.published && (!r.isTest || mode === 'on' || (me && r.ownerId === me.id)));
+    const showDemo = mode === 'on' || (mode !== 'off' && real.filter((r) => !r.isTest).length < CONFIG.demoUntil);
+    return [...(showDemo ? SHOPS : []), ...real.map(restaurantToShop)];
+  }
+  /** Pastille « Exemple » d'un restaurant fictif (jamais confondu avec un vrai restaurant). */
+  function demoTag() {
+    const t = document.createElement('span');
+    t.className = 'demo-tag';
+    t.textContent = 'Exemple';
+    t.title = 'Restaurant fictif, pour découvrir FlashMiam';
+    return t;
+  }
 
   /** Ajoute ou remplace le marqueur d'un commerce (après publication ou modification d'une fiche). */
   function upsertShopMarker(shop) {
@@ -5072,7 +5443,7 @@
       m.el.classList.toggle('is-soon', !!m.status.soon);
       const promos = activePromos(m.shop, now);
       m.el.classList.toggle('has-promo', promos.length > 0);
-      m.el.setAttribute('aria-label', m.shop.name + ', ' + catOf(m.shop).label + ', ' + m.status.label + (promos.length ? ', promotion en cours' : ''));
+      m.el.setAttribute('aria-label', m.shop.name + (m.shop.isDemo ? ' (exemple fictif)' : '') + ', ' + catOf(m.shop).label + ', ' + m.status.label + (promos.length ? ', promotion en cours' : ''));
     });
     applyFilters();
     if (selectedId) renderShop(markers.get(selectedId));
@@ -5108,7 +5479,7 @@
 
     const searching = filters.q.length > 0 || filters.max !== null;
     const signature = items.map(({ m, d }) => m.shop.id + m.status.label + (d === null ? '' : formatDistance(d)) + activePromos(m.shop).length + JSON.stringify(m.shop.rating)).join('|')
-      + selectedId + '|' + filters.q.join(' ') + '|' + filters.max;
+      + selectedId + '|' + filters.q.join(' ') + '|' + filters.max + '|' + Guest.key();
     if (signature === listSignature) return;
     listSignature = signature;
 
@@ -5139,9 +5510,13 @@
         rt.setAttribute('aria-label', ', noté ' + formatRating(shop.rating.avg) + ' sur 5 (' + shop.rating.count + ' avis)');
         st.appendChild(rt);
       }
-      const best = activePromos(shop)[0];
-      btn.querySelector('.si-promo').textContent = best ? promoLine(best) : (shop.description || '').slice(0, 90);
+      const promos = activePromos(shop);
+      const best = promos.find((p) => Guest.canSee(p, shop)) || promos[0];
+      const promoEl = btn.querySelector('.si-promo');
+      if (best && !Guest.canSee(best, shop)) { promoEl.textContent = '🔒 Offre réservée aux membres'; promoEl.classList.add('is-locked'); }   // visiteur
+      else promoEl.textContent = best ? promoLine(best) : (shop.description || '').slice(0, 90);
       if (shop.isPro && !shop.isTest) { const v = document.createElement('span'); v.className = 'verified'; v.textContent = '✓'; v.title = 'Établissement vérifié'; btn.querySelector('strong').after(v); }
+      if (shop.isDemo) btn.querySelector('strong').after(demoTag());
       // Recherche : plats trouvés dans la carte du restaurant
       const hits = searching ? Search.dishesOf(shop, filters.q, filters.max) : [];
       if (hits.length) {
@@ -5189,13 +5564,12 @@
     if (count === 0 && !isDesktop()) toast('Aucun commerce ne correspond à ce filtre pour le moment.');
   });
 
-  $('search').addEventListener('input', (ev) => {
-    filters.query = ev.target.value;
-    filters.q = Search.parse(ev.target.value);
-    applyFilters();
-  });
+  /** Attend une courte pause de frappe avant de relancer un calcul (recherche, suggestions). */
+  const debounce = (fn, ms) => { let t = 0; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+  const searchDesktop = debounce((v) => { filters.query = v; filters.q = Search.parse(v); applyFilters(); }, 120);
+  $('search').addEventListener('input', (ev) => searchDesktop(ev.target.value));
   $('search').addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter') { const first = document.querySelector('.shop-item'); if (first) openShop(first.dataset.id, { source: 'search' }); }
+    if (ev.key === 'Enter') { filters.query = ev.target.value; filters.q = Search.parse(ev.target.value); applyFilters(); const first = document.querySelector('.shop-item'); if (first) openShop(first.dataset.id, { source: 'search' }); }
     // Échap : efface la recherche uniquement (ne ferme pas la fiche ouverte)
     if (ev.key === 'Escape') { ev.target.value = ''; filters.query = ''; filters.q = []; applyFilters(); ev.target.blur(); }
   });
@@ -5370,7 +5744,7 @@
         b.querySelector('.sr-emoji').textContent = catOf(m.shop).emoji;
         Search.highlight(b.querySelector('b'), item.name, res.q);
         const small = b.querySelector('small');
-        small.append(m.shop.name + ' · ', status(m), dist(m));
+        small.append(m.shop.name + (m.shop.isDemo ? ' (exemple)' : '') + ' · ', status(m), dist(m));
         b.querySelector('.sr-price').textContent = formatPrice(item.price);
         b.addEventListener('click', () => { closeSearchPanel({ restoreFocus: false }); openDish(m.shop.id, [idx]); });
         li.appendChild(b);
@@ -5396,6 +5770,7 @@
         b.innerHTML = '<span class="sr-emoji" aria-hidden="true"></span><span class="sr-body"><b></b><small></small></span>';
         b.querySelector('.sr-emoji').textContent = catOf(m.shop).emoji;
         Search.highlight(b.querySelector('b'), m.shop.name, res.q);
+        if (m.shop.isDemo) b.querySelector('b').after(demoTag());
         const small = b.querySelector('small');
         small.append(status(m));
         if (m.shop.rating) { const r = document.createElement('span'); r.className = 'sr-rating'; r.textContent = ' · ★ ' + formatRating(m.shop.rating.avg); small.append(r); }
@@ -5410,9 +5785,10 @@
   }
   $('search-open').addEventListener('click', openSearchPanel);
   $('search-close').addEventListener('click', () => closeSearchPanel());
-  $('search-m').addEventListener('input', (ev) => { Search.mobile.query = ev.target.value; Search.mobile.limit = 30; renderSearchPanel(); });
+  const searchMobile = debounce((v) => { Search.mobile.query = v; Search.mobile.limit = 30; renderSearchPanel(); }, 120);
+  $('search-m').addEventListener('input', (ev) => searchMobile(ev.target.value));
   $('search-m').addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter') { ev.preventDefault(); const first = $('search-results').querySelector('.sr-hit'); if (first) first.click(); }
+    if (ev.key === 'Enter') { ev.preventDefault(); Search.mobile.query = ev.target.value; renderSearchPanel(); const first = $('search-results').querySelector('.sr-hit'); if (first) first.click(); }
   });
   $('search-panel').addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { ev.stopPropagation(); closeSearchPanel(); } });
   $('budget').addEventListener('click', (ev) => {
@@ -5472,7 +5848,6 @@
       }
       const btn = $('shop-rating');
       btn.hidden = !shop.isPro;
-      $('tab-reviews-n').textContent = shop.rating ? ' ' + shop.rating.count : '';
       if (shop.isPro) {
         btn.textContent = '';
         if (shop.rating) {
@@ -5540,6 +5915,15 @@
       note.hidden = false;
       if (own) note.textContent = 'Répondez à vos clients : votre réponse s\'affiche sous leur avis. Un avis abusif ? Signalez-le.';
       else if (me && me.role === 'pro') note.textContent = 'Les avis sont réservés aux comptes clients.';
+      else if (!me && shop.isPro && Guest.on()) {
+        note.textContent = 'Vous y avez mangé ? ';
+        const go = document.createElement('button');
+        go.type = 'button';
+        go.className = 'link-btn';
+        go.textContent = 'Créez un compte pour donner votre avis';
+        go.addEventListener('click', () => Guest.ask('Créez votre compte gratuit pour donner votre avis sur ce restaurant.'));
+        note.appendChild(go);
+      }
       else note.hidden = true;
       // Liste : le mien d'abord
       const ul = $('rv-list');
@@ -5742,7 +6126,7 @@
       return out.sort((a, b) => a.d - b.d || PROMO_ORDER.indexOf(a.p.kind) - PROMO_ORDER.indexOf(b.p.kind));
     }
     function badge() {
-      const n = list().length;
+      const n = list().filter(({ m }) => !m.shop.isDemo).length;   // pastille : vraies offres seulement
       $('offers-badge').hidden = !n;
       $('offers-badge').textContent = n > 99 ? '99+' : String(n);
       $('offers-btn').setAttribute('aria-label', 'Offres autour de moi' + (n ? ' : ' + plural(n, 'offre en cours', 'offres en cours') : ''));
@@ -5764,7 +6148,9 @@
       document.querySelectorAll('#offers-kinds .chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.kind === kind)));
       const ul = $('offers-list');
       ul.textContent = '';
-      items.forEach(({ p, m, d }) => {
+      // Visiteur : les GUEST_PROMOS plus proches, les autres floutées
+      const visible = items.filter(({ p, m }) => Guest.canSee(p, m.shop)), locked = items.filter(({ p, m }) => !Guest.canSee(p, m.shop));
+      visible.forEach(({ p, m, d }) => {
         const li = document.createElement('li');
         const b = document.createElement('button');
         b.type = 'button';
@@ -5777,6 +6163,7 @@
         const until = promoUntil(p);
         small.textContent = [PROMO_KINDS[p.kind].label, p.details, until].filter(Boolean).join(' · ');
         b.querySelector('.offer-shop').append(catOf(m.shop).emoji + ' ' + m.shop.name + ' · ', statusTag(m.status));
+        if (m.shop.isDemo) b.querySelector('.offer-shop').append(' ', demoTag());
         const dist = b.querySelector('.offer-dist');
         if (located) {
           dist.append(formatDistance(d));
@@ -5804,6 +6191,7 @@
         }
         ul.appendChild(li);
       });
+      if (locked.length) ul.appendChild(Guest.lockedBlock(locked.length, locked.map(({ p }) => p.kind), { others: visible.length > 0 }));
       const empty = $('offers-empty');
       empty.hidden = items.length > 0;
       empty.textContent = !all.length ? 'Aucune offre en cours pour le moment. Revenez plus tard !'
@@ -5825,6 +6213,111 @@
     /** Après un changement (position, horaires, nouvelles offres) : compteur et liste à jour. */
     function refresh() { badge(); if (isOpen()) render(); }
     return { open, refresh, list };
+  })();
+
+  /* ---------- Visiteur sans compte ---------- */
+  /**
+   * Sans compte, on voit la carte, les fiches, les menus, les avis et les stories. Les offres sont un avantage des
+   * comptes : un visiteur en voit GUEST_PROMOS (les plus proches, dans l'ordre de « Offres autour de moi ») ; les autres
+   * sont floutées avec « Créer un compte pour voir la suite », et leur texte n'est pas mis dans la page.
+   * Suivre un restaurant, donner son avis, aimer un plat, le QR code de visite et les notifications ouvrent l'écran de
+   * création de compte, avec la raison. La barre du bas « Créer mon compte gratuit » reste toujours à portée de pouce.
+   */
+  const GUEST_PROMOS = 3;
+  const Guest = (() => {
+    let active = false, memo = null, memoAt = 0;
+    const on = () => active && !currentUser();
+    const promoKey = (p, shop) => shop.id + '|' + p.id;
+    /**
+     * Offres visibles sans compte (recalculées au plus toutes les 0,5 s) : les vraies offres dont le serveur a donné le
+     * texte (3 au plus, guest_promotions), puis les offres des restaurants d'exemple les plus proches jusqu'à GUEST_PROMOS.
+     */
+    function unlocked() {
+      if (!memo || Date.now() - memoAt > 500) {
+        const all = Offers.list();
+        const open = all.filter(({ p, m }) => !m.shop.isDemo && !p.locked).slice(0, GUEST_PROMOS);
+        const demo = all.filter(({ m }) => m.shop.isDemo).slice(0, Math.max(0, GUEST_PROMOS - open.length));
+        memo = new Set([...open, ...demo].map(({ p, m }) => promoKey(p, m.shop)));
+        memoAt = Date.now();
+      }
+      return memo;
+    }
+    // Une offre verrouillée par le serveur n'a pas de texte : jamais affichée (même juste après la connexion, le temps
+    // de relire les offres complètes)
+    const canSee = (p, shop) => !p.locked && (!on() || unlocked().has(promoKey(p, shop)));
+    /** Signature pour la liste : change quand les offres visibles changent. */
+    const key = () => (on() ? 'g' + [...unlocked()].join(',') : '');
+    function paintAvatar() {
+      const av = $('avatar');
+      av.classList.remove('has-photo');
+      av.style.backgroundImage = '';
+      av.innerHTML = '<svg class="guest-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>';
+      $('profile-btn').setAttribute('aria-label', 'Créer un compte ou se connecter');
+    }
+    /** Pas de session : visiteur (offres limitées, barre « Créer mon compte »). */
+    function enter() {
+      active = true;
+      document.body.classList.add('is-guest');
+      $('guest-bar').hidden = false;
+      paintAvatar();
+      refresh();
+    }
+    /** Connexion : offres relues en entier (la table, avec le compte) et reçues en direct. */
+    function leave() {
+      if (!active) return;
+      active = false;
+      document.body.classList.remove('is-guest');
+      $('guest-bar').hidden = true;
+      refresh();
+      loadRestaurants().then(applyCloud, () => {});
+      Live.reconnect();
+    }
+    function refresh() {
+      memo = null;
+      listSignature = '';
+      if (view) refreshStatuses();   // liste, fiche ouverte, offres
+    }
+    /** Fonction réservée aux comptes : écran de création de compte, avec la raison (la carte reste derrière). */
+    function ask(reason = '') {
+      hideToast();
+      setAuthRole('client');
+      showAuthStep('signup');
+      $('ob-reason').textContent = reason;
+      $('ob-reason').hidden = !reason;
+    }
+    /**
+     * Offres cachées : quelques cartes de remplacement floutées (jamais le vrai texte de l'offre) et l'appel à créer un
+     * compte. Dans « Offres autour de moi » (élément de liste) et dans la fiche (inSheet).
+     */
+    function lockedBlock(count, kinds, { inSheet = false, others = false } = {}) {
+      const box = document.createElement(inSheet ? 'div' : 'li');
+      box.className = 'locked';
+      const items = document.createElement('div');
+      items.className = 'locked-items';
+      items.setAttribute('aria-hidden', 'true');
+      // 2 ou 3 cartes de remplacement (de quoi laisser la place au bouton, même pour une seule offre cachée)
+      Array.from({ length: Math.min(3, Math.max(2, kinds.length)) }, (_, i) => kinds[i % kinds.length]).forEach((k) => {
+        const card = document.createElement('div');
+        card.className = inSheet ? 'promo is-' + k : 'offer-hit';
+        card.innerHTML = inSheet
+          ? '<span class="promo-ico"></span><div><small>Offre réservée aux membres</small><strong>Une offre à découvrir ici</strong></div>'
+          : '<span class="offer-ico"></span><span class="offer-body"><b>Une offre à découvrir ici</b><small>Offre réservée aux membres</small></span>';
+        card.querySelector(inSheet ? '.promo-ico' : '.offer-ico').textContent = (PROMO_KINDS[k] || PROMO_KINDS.other).icon;
+        items.appendChild(card);
+      });
+      const gate = document.createElement('div');
+      gate.className = 'lock-gate';
+      gate.innerHTML = '<span class="lock-ico" aria-hidden="true">🔒</span><b></b><small>Compte gratuit, prêt en une minute</small><button class="btn btn-primary" type="button">Créer un compte pour voir la suite</button>';
+      gate.querySelector('b').textContent = count > 1
+        ? count + (others ? ' autres offres' : ' offres') + ' réservées aux membres'
+        : (others ? 'Une autre offre' : 'Une offre') + ' réservée aux membres';
+      gate.querySelector('button').addEventListener('click', () => ask('Créez votre compte gratuit pour voir toutes les offres autour de vous.'));
+      box.append(items, gate);
+      return box;
+    }
+    $('guest-signup').addEventListener('click', () => ask());
+    $('guest-login').addEventListener('click', () => { hideToast(); showAuthStep('login'); });
+    return { on, canSee, key, enter, leave, refresh, ask, lockedBlock };
   })();
 
   /* ---------- « J'aime » : stories et plats (compteurs pour le restaurateur, jamais les noms) ---------- */
@@ -5928,7 +6421,7 @@
     }
     const busy = new Set();
     async function toggle(id, dish) {
-      if (!currentUser()) return;
+      if (!currentUser()) { if (Guest.on()) Guest.ask('Créez votre compte gratuit pour aimer vos plats préférés.'); return; }
       const key = id + '|' + dish;
       if (busy.has(key)) return;                              // double appui : une seule demande
       busy.add(key);
@@ -6148,7 +6641,10 @@
       document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); schedule(); });
       Device.sync();
     }
-    $('notif-btn').addEventListener('click', open);
+    $('notif-btn').addEventListener('click', () => {
+      if (Guest.on()) { Guest.ask('Créez votre compte gratuit pour être prévenu des offres et des stories de vos restaurants préférés.'); return; }
+      open();
+    });
     return { start, load, open, openItem, connect, disconnect, get items() { return items; }, unread, DEVICE_KEY };
   })();
 
@@ -6260,6 +6756,7 @@
   function openPanel(panel, { modal = false } = {}) {
     if (activePanel && activePanel !== panel) closePanel(activePanel, { silent: true });
     activePanel = panel;
+    document.body.dataset.panel = panel.id;   // onglet actif de la barre du bas (CSS)
     panel.classList.add('is-open');
     panel.setAttribute('aria-hidden', 'false');
     $('backdrop').classList.toggle('is-visible', modal);
@@ -6275,7 +6772,7 @@
     panel.classList.remove('is-open');
     panel.setAttribute('aria-hidden', 'true');
     panel.style.transform = '';
-    if (activePanel === panel) activePanel = null;
+    if (activePanel === panel) { activePanel = null; delete document.body.dataset.panel; }
     if (panel.id === 'shop-sheet') deselectShop();
     if (!silent) {
       $('backdrop').classList.remove('is-visible');
@@ -6288,6 +6785,8 @@
     enableDragToClose(panel);
   });
   $('backdrop').addEventListener('click', () => closePanel(activePanel));
+  // Onglet « Carte » : referme ce qui est ouvert (fiche, offres, alertes, profil, recherche)
+  $('nav-map').addEventListener('click', () => { closeSearchPanel({ restoreFocus: false }); if (activePanel) closePanel(activePanel); });
   document.addEventListener('keydown', (ev) => {
     if (ev.key === 'Escape' && activePanel && ev.target !== $('search')) closePanel(activePanel);
   });
@@ -6332,16 +6831,19 @@
     $('shop-name').textContent = shop.name;
     $('shop-cat').textContent = catOf(shop).label;
     // Restaurants inscrits : badge « vérifié », description, photos, téléphone ; l'offre est facultative
-    $('shop-verified').hidden = !shop.isPro;
-    $('shop-verified').classList.toggle('is-test', !!shop.isTest);
-    $('shop-verified').textContent = shop.isTest ? 'Fiche de test' : '✓ Établissement vérifié';
-    $('shop-verified').title = shop.isTest ? 'Créée avec le SIRET de test : établissement fictif' : 'SIRET vérifié auprès du répertoire Sirene';
+    $('shop-verified').hidden = !shop.isPro && !shop.isDemo;
+    $('shop-verified').classList.toggle('is-test', !!(shop.isTest || shop.isDemo));
+    $('shop-verified').textContent = shop.isDemo ? 'Exemple fictif' : shop.isTest ? 'Fiche de test' : '✓ Établissement vérifié';
+    $('shop-verified').title = shop.isDemo ? 'Restaurant imaginaire, pour découvrir FlashMiam' : shop.isTest ? 'Créée avec le SIRET de test : établissement fictif' : 'SIRET vérifié auprès du répertoire Sirene';
+    $('shop-demo-note').hidden = !shop.isDemo;
     $('shop-desc').hidden = !shop.description;
     $('shop-desc').textContent = shop.description || '';
     renderShopPromos(shop);
     VisitPass.renderEntry(shop);
     $('shop-phone-row').hidden = !shop.phone;
-    if (shop.phone) { $('shop-phone').textContent = shop.phone; $('shop-phone').href = 'tel:' + compactPhone(shop.phone); }
+    if (shop.phone) { $('shop-phone').textContent = formatPhone(shop.phone); $('shop-phone').href = 'tel:' + compactPhone(shop.phone); }
+    $('shop-call').hidden = !shop.phone;
+    if (shop.phone) { $('shop-call').href = 'tel:' + compactPhone(shop.phone); $('shop-call').setAttribute('aria-label', 'Appeler ' + shop.name); }
     renderGallery(shop);
     renderMenu(shop);
     DishLikes.render(shop);
@@ -6361,6 +6863,8 @@
       km.textContent = formatDistance(d);
       walk.textContent = formatMinutes(walkMinutes(d));
       car.textContent = formatMinutes(driveMinutes(d));
+      // À deux pas (moins de 10 min à pied) : le temps en voiture n'apporte rien (« 1 min en voiture » pour 100 m)
+      dist.querySelector('.travel').hidden = walkMinutes(d) < 10;
     } else {
       dist.textContent = 'Activez la localisation pour connaître la distance et les temps de trajet';
     }
@@ -6386,7 +6890,8 @@
     box.textContent = '';
     grid.textContent = '';
     box.hidden = true;
-    $('tab-photos-n').textContent = '';
+    $('shop-cover').hidden = true;
+    $('shop-sheet').classList.remove('has-cover');
     $('shop-photos-empty').hidden = false;
     if (!shop.photos || !shop.photos.length) return;
     galleryUrls = [...shop.photos];
@@ -6408,8 +6913,12 @@
       btn.addEventListener('click', () => Lightbox.open(i));
       grid.appendChild(btn);
     });
-    box.hidden = !galleryUrls.length;
-    $('tab-photos-n').textContent = galleryUrls.length ? ' ' + galleryUrls.length : '';
+    // Première photo en grand en tête de fiche ; le bandeau de l'onglet Infos montre alors les suivantes
+    const cover = $('shop-cover');
+    cover.hidden = !galleryUrls.length;
+    $('shop-sheet').classList.toggle('has-cover', !!galleryUrls.length);
+    if (galleryUrls.length) { const im = cover.firstChild; im.alt = shop.name; watchLoad(im); im.src = galleryUrls[0]; if (box.firstChild) box.firstChild.remove(); }
+    box.hidden = !box.children.length;
     $('shop-photos-empty').hidden = !!galleryUrls.length;
     syncShopTabs(shop);
   }
@@ -6451,6 +6960,7 @@
   });
 
   /* ---------- Visionneuse plein écran (glisser, flèches, Échap) ---------- */
+  $('shop-cover').addEventListener('click', () => { if (galleryUrls.length) Lightbox.open(0); });
   const Lightbox = (() => {
     const root = $('lightbox'), img = $('lb-img');
     let index = 0, returnFocus = null, startX = null, swiped = false;
@@ -6525,7 +7035,7 @@
     const me = currentUser();
     const canFollow = !!(shop.isPro && me && !isOwnShop(shop.id, me));
     const btn = $('shop-follow');
-    btn.hidden = !canFollow;
+    btn.hidden = !canFollow && !(shop.isPro && Guest.on());   // visiteur : « Suivre » invite à créer un compte
     const following = canFollow && !!(me.follows && me.follows[shop.id]);
     btn.setAttribute('aria-pressed', String(following));
     $('shop-follow-label').textContent = following ? 'Abonné' : 'Suivre';
@@ -6537,6 +7047,7 @@
   $('shop-follow').addEventListener('click', async () => {
     const me = currentUser();
     const id = selectedId;
+    if (!me && Guest.on()) { Guest.ask('Créez votre compte gratuit pour suivre ce restaurant et être prévenu de ses offres.'); return; }
     if (!me || !id) return;
     const btn = $('shop-follow');
     const name = markers.get(id).shop.name;
@@ -6659,6 +7170,7 @@
   $('shop-go').addEventListener('click', () => selectedId && Stats.track(selectedId, 'walk'));
   $('shop-go-car').addEventListener('click', () => selectedId && Stats.track(selectedId, 'car'));
   $('shop-phone').addEventListener('click', () => selectedId && Stats.track(selectedId, 'phone'));
+  $('shop-call').addEventListener('click', () => selectedId && Stats.track(selectedId, 'phone'));
 
   /* ---------- Promotions ---------- */
   /** Promotions en cours d'un commerce (l'ancienne « offre du moment » compte comme un bon plan), les plus urgentes d'abord. */
@@ -6683,7 +7195,8 @@
     const promos = activePromos(shop);
     box.hidden = !promos.length;
     box.textContent = '';
-    promos.forEach((p) => {
+    const locked = promos.filter((p) => !Guest.canSee(p, shop));   // visiteur : offres réservées aux membres
+    promos.filter((p) => Guest.canSee(p, shop)).forEach((p) => {
       const card = document.createElement('div');
       card.className = 'promo is-' + p.kind;
       card.innerHTML = '<span class="promo-ico" aria-hidden="true"></span><div><small></small><strong></strong><span class="promo-more"></span></div>';
@@ -6705,6 +7218,7 @@
       }
       box.appendChild(card);
     });
+    if (locked.length) box.appendChild(Guest.lockedBlock(locked.length, locked.map((p) => p.kind), { inSheet: true, others: locked.length < promos.length }));
   }
 
   /* ---------- Stories des restaurants (24 h, visibles par tous, sans abonnement) ---------- */
@@ -6745,7 +7259,7 @@
       btn.type = 'button';
       btn.className = 'story-chip' + (g.unseen ? '' : ' is-seen');
       btn.dataset.id = g.shop.id;
-      btn.setAttribute('aria-label', 'Story de ' + g.shop.name + (g.unseen ? ' (nouvelle)' : ''));
+      btn.setAttribute('aria-label', 'Story de ' + g.shop.name + (g.shop.isDemo ? ' (exemple fictif)' : '') + (g.unseen ? ' (nouvelle)' : ''));
       btn.innerHTML = '<span class="story-ring"><span class="story-avatar" aria-hidden="true"></span></span><span class="story-name" aria-hidden="true"></span>';
       btn.querySelector('.story-avatar').textContent = catOf(g.shop).emoji;
       btn.querySelector('.story-name').textContent = g.shop.name;
@@ -6820,6 +7334,7 @@
       g.stories.forEach((_, i) => { const b = document.createElement('span'); b.innerHTML = '<i></i>'; if (i < si) b.firstChild.style.width = '100%'; bars.appendChild(b); });
       $('sv-avatar').textContent = catOf(g.shop).emoji;
       $('sv-name').textContent = g.shop.name;
+      if (g.shop.isDemo) $('sv-name').append(' ', demoTag());
       paintTime();
       $('sv-caption').textContent = st.imageUrl ? (st.text || '') : '';
       const away = distanceLabel(g.shop);
@@ -6987,7 +7502,7 @@
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(bmp, 0, 0, c.width, c.height);
       if (bmp.close) bmp.close();
-      return new Promise((resolve, reject) => c.toBlob((b) => (b ? resolve(b) : reject(new Error('format'))), 'image/jpeg', 0.85));
+      return encodePhoto(c);
     }
     root.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => { mode = b.dataset.mode; $('err-sc').textContent = ''; sync(); }));
     $('sc-text').addEventListener('input', () => { setFieldError('sc-text', ''); $('err-sc').textContent = ''; sync(); });
@@ -7016,8 +7531,8 @@
       btn.disabled = true;
       let imagePath = null;
       if (mode === 'photo') {
-        imagePath = r.id + '/' + uid() + '.jpg';
-        const up = await Loader.run(sb.storage.from('stories').upload(imagePath, blob, { contentType: 'image/jpeg' }), 'Envoi de la photo…');
+        imagePath = r.id + '/' + uid() + '.' + photoExt(blob);
+        const up = await Loader.run(sb.storage.from('stories').upload(imagePath, blob, { contentType: blob.type, cacheControl: '86400' }), 'Envoi de la photo…');
         if (up.error) {
           btn.disabled = false;
           $('err-sc').textContent = 'La photo n\'a pas pu être envoyée. ' + cloudError(up.error);
@@ -7689,7 +8204,7 @@
       if (n === proIndex) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
     });
     // L'inscription d'un client a sa propre barre de progression (une question par écran)
-    $('ob-progress').hidden = proIndex > 0 || !(signupLike || step === 'location') || (step === 'signup' && authRole === 'client');
+    $('ob-progress').hidden = proIndex > 0 || !(signupLike || step === 'location') || (step === 'signup' && authRole === 'client') || (step === 'location' && Guest.on());
     $('ob-dot-1').classList.toggle('is-active', signupLike);
     $('ob-dot-2').classList.toggle('is-active', step === 'location');
   }
@@ -7710,6 +8225,11 @@
     const join = step === 'about' || (step === 'signup' && authRole === 'client');
     if (join) Join.enter(step);
     if (step !== 'location') $('ob-welcome').hidden = true;
+    $('ob-reason').hidden = true;   // Guest.ask() l'affiche juste après
+    // Visiteur : « Voir la carte » (sans compte) sur l'accueil et la connexion
+    $('ob-guest-btn').hidden = !(Guest.on() && (step === 'signup' || step === 'login'));
+    $('ob-guest-btn').firstChild.textContent = appStarted ? 'Revenir à la carte ' : 'Voir la carte ';
+    $('ob-guest-btn').setAttribute('aria-label', appStarted ? 'Revenir à la carte' : 'Voir la carte sans créer de compte');
     if (step === 'login') GoogleAuth.mount();
     if (step === 'pro-verify') enterVerifyStep();
     if (step === 'pro-payment') enterPaymentStep();
@@ -7730,6 +8250,8 @@
     cloud.user = user;
     store.write({ lastEmail: user.email, lastRole: user.role });
     applyAccount(user);
+    Guest.leave();
+    whenMapReady(syncShopMarkers);   // fiche de test : visible de son seul propriétaire
   }
 
   /* ---------- Vérification de l'adresse e-mail : code à 6 chiffres envoyé par Supabase ---------- */
@@ -8300,6 +8822,18 @@
   /* ---------- Connexion avec Google (clients) : Google Identity Services ---------- */
   const GoogleAuth = (() => {
     let loading = null, ready = false;
+    /*
+     * Code à usage unique (nonce) : Google le recopie, haché, dans le jeton ; Supabase reçoit l'original et vérifie qu'ils
+     * correspondent. Sans lui, Supabase refuse les jetons où Google en a mis un de lui-même (FedCM) : « Passed nonce and
+     * nonce in id_token should either both exist or not ».
+     */
+    let rawNonce = null;
+    async function newNonce() {
+      const bytes = crypto.getRandomValues(new Uint8Array(32));
+      rawNonce = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+      const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawNonce));
+      return Array.from(new Uint8Array(hash), (b) => b.toString(16).padStart(2, '0')).join('');
+    }
     const enabled = () => !!CONFIG.googleClientId;
     const load = () => loading || (loading = new Promise((resolve, reject) => {
       const sc = document.createElement('script');
@@ -8330,7 +8864,7 @@
       if ($('li-google-note').textContent === CONSENT_NOTE) note('');
       try { await load(); } catch (e) { overlay(false); return 'failed'; }
       if (!ready) {
-        google.accounts.id.initialize({ client_id: CONFIG.googleClientId, callback: onGoogleCredential, ux_mode: 'popup', auto_select: false, cancel_on_tap_outside: true, use_fedcm_for_button: true });
+        google.accounts.id.initialize({ client_id: CONFIG.googleClientId, callback: onGoogleCredential, ux_mode: 'popup', auto_select: false, cancel_on_tap_outside: true, use_fedcm_for_button: true, nonce: await newNonce() });
         ready = true;
       }
       const el = $('li-google');
@@ -8363,7 +8897,9 @@
     });
     // Accord donné ou retiré pendant que l'écran de connexion est affiché
     Consent.onChange(() => { if (!$('onboarding').hidden && currentStep === 'login') mount(); });
-    return { enabled, mount };
+    /** Code de la connexion en cours, remis à Supabase. Le prochain affichage du bouton en tirera un neuf. */
+    function takeNonce() { ready = false; return rawNonce; }
+    return { enabled, mount, takeNonce };
   })();
 
   /**
@@ -8376,7 +8912,7 @@
     authStorage.setRemember($('li-remember').checked);
     const captchaToken = await Captcha.token().catch(() => null);
     if (captchaToken === null) { errBox.textContent = Captcha.failMessage; return; }
-    const { data, error } = await Loader.run(sb.auth.signInWithIdToken({ provider: 'google', token: response.credential, options: { captchaToken } }), 'Connexion avec Google…');
+    const { data, error } = await Loader.run(sb.auth.signInWithIdToken({ provider: 'google', token: response.credential, nonce: GoogleAuth.takeNonce() || undefined, options: { captchaToken } }), 'Connexion avec Google…');
     if (error || !data.user) { errBox.textContent = captchaRefused(error) ? Captcha.failMessage : 'La connexion avec Google a échoué. Réessayez.'; return; }
     let user;
     try { user = await loadUser(data.user); } catch (e) { errBox.textContent = cloudError(e); return; }
@@ -8536,6 +9072,14 @@
     });
   })();
 
+  /** Visiteur : la carte sans compte (choix gardé : les prochaines visites ouvrent directement la carte). */
+  $('ob-guest-btn').addEventListener('click', () => {
+    store.write({ guest: true });
+    if (appStarted) { hideOnboarding(); return; }            // déjà sur la carte : on y retourne
+    if (!store.read().geoConsent) { showAuthStep('location'); return; }
+    finishAuth({ fresh: false });
+  });
+
   $('ob-later').addEventListener('click', () => {
     store.write({ geoConsent: 'later' });
     setLocateState('idle');
@@ -8547,8 +9091,10 @@
     // Clavier refermé d'abord : la carte ne change pas de taille pendant la transition
     const active = document.activeElement;
     if (active && active !== document.body && active.blur) active.blur();
-    document.body.classList.add('ui-intro');
-    setTimeout(() => document.body.classList.remove('ui-intro'), 1400);
+    if (!appStarted) {                                       // (connexion depuis la carte du visiteur : pas d'animation d'arrivée)
+      document.body.classList.add('ui-intro');
+      setTimeout(() => document.body.classList.remove('ui-intro'), 1400);
+    }
     hideOnboarding();
     startApp({ focus, intro: true });
     if (fresh && !located && !focus) setTimeout(() => toast('Activez la localisation à tout moment avec le bouton en haut à droite.'), 2200);
@@ -9057,6 +9603,7 @@
     const closed = listed ? r.closedOn : [];
     $('pl-closed').querySelectorAll('input').forEach((i) => { i.checked = closed.includes(Number(i.value)); });
     $('pl-phone').value = listed ? r.phone || '' : (me.phone || '');
+    setMenuScanStatus('', '');
     $('pl-menu').textContent = '';
     ((r && r.menu) || []).forEach((it) => addMenuRow(it));
     if (!$('pl-menu').childElementCount) addMenuRow();
@@ -9113,6 +9660,91 @@
 
   $('pl-menu-add').addEventListener('click', () => addMenuRow({}, { focus: true }));
 
+  /* ---------- Carte lue sur photo (fonction serveur « menu-scan ») ---------- */
+
+  const MENU_SCAN_MAX = 5;           // photos par lecture
+  const MENU_SCAN_EDGE = 2000;       // plus grand côté envoyé, en pixels (lisible, et moins de 1 Mo en JPEG)
+
+  /** Photo de la carte → JPEG réduit, en base64 (sans l'en-tête « data: »). */
+  async function menuPhotoToBase64(file) {
+    const bmp = await decodeImage(file);
+    const k = Math.min(1, MENU_SCAN_EDGE / Math.max(bmp.width, bmp.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bmp.width * k); canvas.height = Math.round(bmp.height * k);
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+    if (bmp.close) bmp.close();
+    const blob = await new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('format'))), 'image/jpeg', 0.85));
+    const url = await new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(r.result); r.onerror = reject; r.readAsDataURL(blob); });
+    return String(url).slice(String(url).indexOf(',') + 1);
+  }
+
+  function setMenuScanStatus(kind, text) {
+    const el = $('pl-menu-scan-status');
+    el.hidden = !text;
+    el.dataset.kind = kind;
+    el.textContent = '';
+    if (kind === 'busy') { const sp = document.createElement('span'); sp.className = 'spin'; sp.setAttribute('aria-hidden', 'true'); el.appendChild(sp); }
+    el.appendChild(document.createTextNode(text || ''));
+    $('pl-menu-scan-btn').setAttribute('aria-disabled', kind === 'busy' ? 'true' : 'false');
+  }
+
+  /** Met les plats lus dans l'éditeur : remplace la carte (ou l'ajoute à la suite si le restaurateur le préfère). */
+  function fillMenuFromScan(items) {
+    const filled = [...$('pl-menu').children].filter((row) => row.querySelector('.m-name').value.trim());
+    let replace = true;
+    if (filled.length) replace = window.confirm('Remplacer les ' + filled.length + ' plat' + (filled.length > 1 ? 's' : '') + ' déjà saisi' + (filled.length > 1 ? 's' : '') + ' par ceux lus sur la photo ?\n\nOK : remplacer · Annuler : ajouter à la suite');
+    const list = $('pl-menu');
+    if (replace) list.textContent = '';
+    else [...list.children].forEach((row) => { if (!row.querySelector('.m-name').value.trim() && !row.querySelector('.m-price').value.trim()) row.remove(); });
+    const room = MAX_MENU_ITEMS - list.childElementCount;
+    const added = items.slice(0, Math.max(0, room));
+    added.forEach((it) => addMenuRow({ section: it.section || '', name: it.name, price: typeof it.price === 'number' ? it.price : null, desc: it.desc || '' }));
+    // Prix non lus : case signalée, à remplir avant d'enregistrer
+    [...list.children].slice(-added.length).forEach((row) => {
+      const p = row.querySelector('.m-price');
+      if (!p.value) { p.classList.add('is-missing'); p.placeholder = 'Prix ?'; p.addEventListener('input', () => p.classList.remove('is-missing'), { once: true }); }
+    });
+    if (!list.childElementCount) addMenuRow();
+    syncMenuEditor();
+    setFieldError('pl-menu', '');
+    return { added: added.length, dropped: items.length - added.length };
+  }
+
+  async function scanMenuPhotos(files) {
+    files = [...files].filter((f) => /^image\//.test(f.type) || /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name));
+    if (!files.length) return;
+    if (files.length > MENU_SCAN_MAX) { setMenuScanStatus('error', MENU_SCAN_MAX + ' photos au plus à la fois : choisissez les pages principales.'); return; }
+    setMenuScanStatus('busy', 'Préparation des photos…');
+    let images;
+    try { images = await Promise.all(files.map(async (f) => ({ mediaType: 'image/jpeg', data: await menuPhotoToBase64(f) }))); }
+    catch (e) { setMenuScanStatus('error', 'Une des photos n\'a pas pu être ouverte. Réessayez avec une photo JPEG ou PNG.'); return; }
+    setMenuScanStatus('busy', 'Lecture de votre carte… (20 à 60 secondes, ne fermez pas la page)');
+    try {
+      const { data, error } = await sb.functions.invoke('menu-scan', { body: { images } });
+      if (error) {
+        let res = null;
+        try { res = await error.context.json(); } catch (e) { /* réseau */ }
+        throw new Error(res && res.message ? res.message : 'La lecture n\'a pas abouti. Vérifiez votre connexion et réessayez.');
+      }
+      const r = fillMenuFromScan(data.items || []);
+      const missing = data.missingPrices || 0;
+      setMenuScanStatus('ok', '✓ ' + r.added + ' plat' + (r.added > 1 ? 's' : '') + ' ajouté' + (r.added > 1 ? 's' : '') + '. Vérifiez noms et prix' +
+        (missing ? ' (' + missing + ' prix à compléter, en orange)' : '') + (r.dropped ? ' · ' + r.dropped + ' plat(s) en trop non ajoutés (' + MAX_MENU_ITEMS + ' au plus)' : '') + ', puis enregistrez.');
+      const firstMissing = $('pl-menu').querySelector('.m-price.is-missing');
+      ($('pl-menu').firstElementChild || $('pl-menu')).scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (firstMissing) setTimeout(() => firstMissing.focus({ preventScroll: true }), 400);
+    } catch (e) {
+      setMenuScanStatus('error', e.message);
+    }
+  }
+
+  $('pl-menu-scan-input').addEventListener('change', (ev) => {
+    const files = ev.target.files;
+    scanMenuPhotos(files ? [...files] : []).finally(() => { ev.target.value = ''; });
+  });
+
   /** Lit l'éditeur : { items } si tout est valide, sinon { error }. Les lignes vides sont ignorées. */
   function readMenu() {
     const items = [];
@@ -9133,7 +9765,6 @@
   function renderMenu(shop) {
     const items = shop.menu || [];
     const key = shop.id + ':' + (shop.updatedAt || '');
-    $('tab-menu-n').textContent = items.length ? ' ' + items.length : '';
     $('shop-menu-empty').hidden = !!items.length;
     if (key === menuFor) return;
     menuFor = key;
@@ -9211,8 +9842,8 @@
           : await cropPhoto(bitmap, { index: i + 1, total: batch.length });
         if (!crop) continue;               // photo ignorée
         const blob = await exportCrop(bitmap, crop);
-        const path = currentUser().pro.merchantId + '/' + uid() + '.jpg';
-        const up = await sb.storage.from('photos').upload(path, blob, { contentType: 'image/jpeg' });
+        const path = currentUser().pro.merchantId + '/' + uid() + '.' + photoExt(blob);
+        const up = await sb.storage.from('photos').upload(path, blob, { contentType: blob.type, cacheControl: '31536000' });
         if (up.error) { setFieldError('pl-photos', '« ' + file.name + ' » n\'a pas pu être envoyée. ' + cloudError(up.error)); continue; }
         const url = publicUrl('photos', path);
         proDraft.photos.push(url);
@@ -9576,6 +10207,7 @@
   function applyAccount(account) {
     paintAvatar($('avatar'), account);
     $('profile-btn').setAttribute('aria-label', 'Profil de ' + account.name);
+    $('profile-lbl').textContent = account.role === 'pro' ? 'Mon resto' : 'Profil';
     Scanner.renderEntry();
   }
 
@@ -9646,6 +10278,7 @@
 
     function setTab(t, { focus = false } = {}) {
       tab = TABS.includes(t) ? t : 'home';
+      root.dataset.tab = tab;   // Accueil : la grande carte « Scanner un client » remplace le bouton flottant
       TABS.forEach((k) => {
         const b = $('pst-' + k);
         b.setAttribute('aria-selected', String(k === tab));
@@ -9655,6 +10288,7 @@
       $('ps-body').scrollTop = 0;
       if (focus) $('pst-' + tab).focus({ preventScroll: true });
       if (tab === 'stats') requestAnimationFrame(renderStatsTab);
+      if (tab === 'home') requestAnimationFrame(renderHomeChart);
       if (tab === 'publish') renderPublish();
       if (tab === 'reviews') loadReviews();
       if (tab === 'fiche') renderFiche();
@@ -9750,6 +10384,8 @@
       const sm = document.createElement('small');
       sm.textContent = s.listed ? 'Voici ce que vos clients ont fait ces ' + plural(days, 'dernier jour', 'derniers jours') + '.' : 'Bienvenue dans votre espace restaurateur.';
       hello.appendChild(sm);
+      $('ph-period').hidden = !s.listed;
+      syncPeriod();
       // Bandeau d'état
       const alert = $('ps-alert'), btn = alert.querySelector('button');
       alert.hidden = true; btn.hidden = false; btn.onclick = null;
@@ -9766,10 +10402,12 @@
       const cards = $('ps-cards');
       cards.textContent = '';
       [
-        { key: 'views', ico: '👁️', label: 'Vues de la fiche', v: T && T.views, prev: P && P.views },
-        { key: 'visitors', ico: '🧑', label: 'Personnes', v: T && T.visitors, prev: P && P.visitors },
-        { key: 'routes', ico: '🧭', label: 'Itinéraires', v: T && T.walk + T.car, prev: P && P.routes },
-        { key: 'followers', ico: '❤️', label: 'Abonnés', v: T && T.followers, extra: T ? (T.new_followers ? '+' + nf(T.new_followers) + (T.new_followers > 1 ? ' nouveaux' : ' nouveau') : 'aucun nouveau') : '' },
+        { key: 'views', ico: '👁️', label: 'Vues', full: 'Vues de la fiche', v: T && nf(T.views), trend: T && [T.views, P.views] },
+        { key: 'visitors', ico: '🧑', label: 'Personnes', full: 'Personnes différentes', v: T && nf(T.visitors), trend: T && [T.visitors, P.visitors] },
+        { key: 'routes', ico: '🧭', label: 'Itinéraires', full: 'Itinéraires demandés', v: T && nf(T.walk + T.car), trend: T && [T.walk + T.car, P.routes] },
+        { key: 'calls', ico: '📞', label: 'Appels', full: 'Appels', v: T && nf(T.phone), trend: T && [T.phone, P.phone] },
+        { key: 'followers', ico: '❤️', label: 'Abonnés', full: 'Abonnés', v: T && nf(T.followers), extra: T ? (T.new_followers ? '+' + nf(T.new_followers) : '=') : '', up: T && T.new_followers > 0 },
+        { key: 'rating', ico: '⭐', label: 'Note', full: 'Note moyenne', v: T && (T.rating ? formatRating(T.rating) : '–'), extra: T ? (T.reviews ? plural(T.reviews, 'avis', 'avis') : 'aucun avis') : '', go: 'reviews' },
       ].forEach((c) => {
         const b = document.createElement('button');
         b.type = 'button';
@@ -9777,16 +10415,41 @@
         b.innerHTML = '<span class="kpi-label"><span aria-hidden="true"></span><span></span></span><strong></strong>';
         b.querySelector('.kpi-label span').textContent = c.ico;
         b.querySelector('.kpi-label span:last-child').textContent = c.label;
-        b.querySelector('strong').textContent = T ? nf(c.v) : failed ? '–' : '…';
+        b.querySelector('strong').textContent = T ? c.v : failed ? '–' : '…';
         if (!T && !failed) b.querySelector('strong').classList.add('skel-text');
-        if (T && c.prev != null) b.appendChild(trend(c.v, c.prev));
-        if (T && c.extra) { const x = document.createElement('span'); x.className = 'trend' + (T.new_followers ? ' is-up' : ''); x.textContent = c.extra; b.appendChild(x); }
-        b.setAttribute('aria-label', c.label + ' : ' + (T ? nf(c.v) : 'chargement') + ' — voir les statistiques');
-        b.addEventListener('click', () => setTab('stats'));
+        if (T && c.trend) b.appendChild(trend(c.trend[0], c.trend[1]));
+        if (T && c.extra) { const x = document.createElement('span'); x.className = 'trend' + (c.up ? ' is-up' : ''); x.textContent = c.extra; b.appendChild(x); }
+        b.setAttribute('aria-label', c.full + ' : ' + (T ? c.v : 'chargement') + (c.go ? ' — voir les avis' : ' — voir les statistiques'));
+        b.addEventListener('click', () => setTab(c.go || 'stats'));
         cards.appendChild(b);
       });
+      if (tab === 'home') renderHomeChart();
       renderTodo(s);
       renderInsights(s);
+    }
+
+    /** Accueil : les vues jour par jour, pour voir la tendance d'un coup d'œil (détail dans « Statistiques »). */
+    function renderHomeChart() {
+      if (!isOpen() || tab !== 'home') return;
+      const fig = $('ph-chart').closest('figure');
+      fig.hidden = !data;
+      if (!data) return;
+      $('ph-chart-sub').textContent = plural(days, 'dernier jour', 'derniers jours');
+      renderViewsChart($('ph-chart'), $('ph-tip'), (data.daily || []).map((d) => ({ date: new Date(d.day + 'T12:00:00'), views: d.views, visitors: d.visitors })));
+    }
+    const syncPeriod = () => root.querySelectorAll('.ps-period button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.days) === days)));
+    /** Statistiques : visites validées en caisse (QR codes scannés), comptées par la base. */
+    function renderVisits() {
+      const box = $('ps-visits');
+      box.textContent = '';
+      const v = Scanner.summary;
+      const row = (a, z) => { const d = document.createElement('div'); d.innerHTML = '<dt></dt><dd></dd>'; d.firstChild.textContent = a; d.lastChild.textContent = z; box.appendChild(d); };
+      if (!v) { row('Visites validées', '–'); return; }
+      row('Aujourd\'hui', nf(v.today) + (Number(v.today_offers) ? ' (dont ' + nf(v.today_offers) + ' avec une offre)' : ''));
+      row('7 derniers jours', nf(v.last_7d));
+      row('30 derniers jours', nf(v.last_30d));
+      row('Clients différents (30 jours)', nf(v.clients_30d));
+      row('Clients fidèles (2 visites ou plus)', nf(v.returning_30d));
     }
 
     function renderTodo(s) {
@@ -9845,6 +10508,7 @@
       if (data.dishes && data.dishes.length) add('♥', ['Plat le plus aimé : ', b('« ' + data.dishes[0].dish + ' »'), ' (' + plural(data.dishes[0].likes, 'j\'aime', 'j\'aime') + ').']);
       if (T.returning) add('🔁', [b(plural(T.returning, 'client est revenu', 'clients sont revenus')), ' voir votre fiche plusieurs jours différents.']);
       if (T.shares) add('🔗', ['Votre fiche a été partagée ', b(plural(T.shares, 'fois', 'fois')), '.']);
+      while (ul.children.length > 3) ul.lastChild.remove();   // l'essentiel seulement ; tout le détail est dans « Statistiques »
     }
 
     /* ----- Statistiques ----- */
@@ -9916,7 +10580,8 @@
 
     function renderStatsTab() {
       if (!isOpen() || tab !== 'stats') return;
-      document.querySelectorAll('#ps-period button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.days) === days)));
+      syncPeriod();
+      renderVisits();
       if (!data) {
         $('ps-period-sub').textContent = !stateOf().listed ? 'Les statistiques apparaîtront quand votre fiche sera en ligne.' : failed ? '' : 'Chargement…';
         const k = $('ps-kpis');
@@ -10017,14 +10682,35 @@
       hbars($('ps-dishes'), (data.dishes || []).map((d) => ({ label: d.dish, n: d.likes })),
         { empty: stateOf().r.menu.length ? 'Pas encore de « j\'aime » sur vos plats.' : 'Ajoutez votre carte (Ma fiche › Modifier) pour que les clients puissent aimer vos plats.' });
     }
-    document.querySelectorAll('#ps-period button').forEach((b) => b.addEventListener('click', () => {
+    root.querySelectorAll('.ps-period button').forEach((b) => b.addEventListener('click', () => {
+      if (Number(b.dataset.days) === days) return;
       days = Number(b.dataset.days);
       data = null;
+      renderHome();
       renderStatsTab();
       load();
     }));
+    // Sommaire des statistiques : fait défiler jusqu'à la partie choisie
+    $('ps-jump').addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-go]');
+      if (b) $(b.dataset.go).scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
+    // Détail par jour, à ouvrir dans un tableur (séparateur « ; », lu directement par Excel en français)
+    $('pd-csv').addEventListener('click', () => {
+      if (!data || !(data.daily || []).length) return;
+      const rows = [['Jour', 'Vues', 'Personnes', 'Itinéraires', 'Appels', 'Stories vues', 'Nouveaux abonnés'],
+        ...data.daily.map((d) => [d.day, d.views, d.visitors, d.routes, d.phone, d.story_views, d.new_followers])];
+      const url = URL.createObjectURL(new Blob(['\ufeff' + rows.map((r) => r.join(';')).join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'flashmiam-statistiques-' + data.period.from + '-au-' + data.period.to + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    });
     let resizeTimer = null;
-    window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (isOpen() && tab === 'stats') renderStatsTab(); }, 200); });
+    window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (isOpen() && tab === 'stats') renderStatsTab(); if (isOpen() && tab === 'home') renderHomeChart(); }, 200); });
 
     /* ----- Publier ----- */
     function renderPublish() {
@@ -10157,7 +10843,7 @@
         ['Photos', r.photos.length > 0, r.photos.length ? plural(r.photos.length, 'photo', 'photos') : 'aucune'],
         ['Carte (menu)', r.menu.length > 0, r.menu.length ? plural(r.menu.length, 'plat', 'plats') : 'vide'],
         ['Horaires d\'ouverture', r.hours.length > 0, r.hours.length ? plural(r.hours.length, 'service', 'services') : 'non renseignés'],
-        ['Téléphone', !!r.phone, r.phone || 'non renseigné'],
+        ['Téléphone', !!r.phone, r.phone ? formatPhone(r.phone) : 'non renseigné'],
       ] : [];
       const ok = checks.filter((c) => c[1]).length;
       const p = checks.length ? Math.round((ok / checks.length) * 100) : 0;
@@ -10281,7 +10967,7 @@
       try { await navigator.clipboard.writeText(url); toast('Lien de votre fiche copié : collez-le sur vos réseaux, dans un message…'); }
       catch (e) { toast('Lien de votre fiche : ' + url); }
     }
-    const ACTIONS = { story: () => StoryComposer.open(), promo: goPromo, reviews: () => setTab('reviews'), edit: editListing, show: () => showOnMap(), share: shareListing };
+    const ACTIONS = { story: () => StoryComposer.open(), promo: goPromo, edit: editListing, show: () => showOnMap() };
     $('ps-quick').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => ACTIONS[b.dataset.act]()));
     $('ps-more-stats').addEventListener('click', () => setTab('stats'));
     $('pd-edit').addEventListener('click', editListing);
@@ -10290,7 +10976,7 @@
     $('ps-share').addEventListener('click', shareListing);
     $('ps-account').addEventListener('click', () => { close(); openProfileSheet(); });
 
-    return { open, close, isOpen, render, refresh: load, storyStats, promoStats, tab: () => tab };
+    return { open, close, isOpen, render, renderVisits, refresh: load, storyStats, promoStats, tab: () => tab };
   })();
 
   /* ---------- QR code de visite ----------
@@ -10407,6 +11093,16 @@
     const usablePromos = (shop) => activePromos(shop).filter((p) => UUID_RE.test(p.id));
     /** Bouton principal de la fiche (comptes clients) : « Profiter de l'offre » s'il y en a une, sinon « Valider ma visite ». */
     function renderEntry(shop) {
+      if (Guest.on() && shop.isPro && UUID_RE.test(shop.id)) {   // visiteur : le bouton invite à créer un compte
+        const has = activePromos(shop).length > 0;
+        entryPromo = null;
+        $('shop-visit-box').hidden = false;
+        $('shop-visit-title').textContent = has ? 'Profiter de l\'offre' : 'Valider ma visite';
+        $('shop-visit-sub').textContent = 'Créez votre compte gratuit pour obtenir votre QR code';
+        $('shop-visit').setAttribute('aria-label', (has ? 'Profiter de l\'offre' : 'Valider ma visite') + ' chez ' + shop.name + ' : créer un compte');
+        $('shop-visit-plain').hidden = true;
+        return;
+      }
       const ok = canUse(shop) && VisitFeature.check(() => { const m = selectedId && markers.get(selectedId); if (m) { renderShopPromos(m.shop); renderEntry(m.shop); } });
       $('shop-visit-box').hidden = !ok;
       if (!ok) return;
@@ -10559,7 +11255,10 @@
       keepAwake(false);
     }
 
-    $('shop-visit').addEventListener('click', () => selectedId && open(selectedId, entryPromo));
+    $('shop-visit').addEventListener('click', () => {
+      if (Guest.on()) { Guest.ask('Créez votre compte gratuit pour profiter des offres en caisse avec votre QR code.'); return; }
+      if (selectedId) open(selectedId, entryPromo);
+    });
     $('shop-visit-plain').addEventListener('click', () => selectedId && open(selectedId));
     $('vp-close').addEventListener('click', close);
     $('vp-finish').addEventListener('click', close);
@@ -10877,7 +11576,7 @@
     async function loadSummary() {
       try {
         const { data, error } = await sb.rpc('merchant_visit_summary');
-        if (!error && data) { summary = data; renderCount(); }
+        if (!error && data) { summary = data; renderCount(); if (ProSpace.isOpen()) ProSpace.renderVisits(); }
       } catch (e) { /* hors ligne : le compteur attendra */ }
     }
     function renderCount() {
@@ -10889,7 +11588,7 @@
         : 'Visite ou offre : scannez le QR code de son téléphone';
     }
 
-    return { open, close, isOpen, next, renderEntry, loadSummary, hasResult: () => !$('scan-result').hidden && $('scan-result').classList.contains('is-shown') };
+    return { open, close, isOpen, next, renderEntry, loadSummary, get summary() { return summary; }, hasResult: () => !$('scan-result').hidden && $('scan-result').classList.contains('is-shown') };
   })();
 
   // Échap : ferme le QR code ou le scanner (avant les autres fenêtres, restées dessous)
@@ -11104,7 +11803,7 @@
   });
   $('profile-btn').addEventListener('click', () => {
     const account = currentUser();
-    if (!account) return;
+    if (!account) { if (Guest.on()) Guest.ask(); return; }
     if (account.role === 'pro') ProSpace.open();
     else openProfileSheet();
   });
@@ -11191,7 +11890,16 @@
      11. LANCEMENT DE LA CARTE APRÈS CONNEXION
      ===================================================================== */
 
+  let appStarted = false;
   function startApp({ focus = null, intro = false } = {}) {
+    // Déjà sur la carte (visiteur qui se connecte) : on complète l'interface sans déplacer la carte
+    if (appStarted) {
+      Install.schedule();
+      Notifs.start();
+      whenMapReady(() => { renderStories(); if (focus && markers.get(focus)) openShop(focus); else Tour.maybeStart(); });
+      return;
+    }
+    appStarted = true;
     document.body.classList.add('ui-ready');
     Install.schedule();
     whenMapReady(renderStories);
@@ -11229,6 +11937,9 @@
   setTheme(currentTheme());
   applyLayout();
   setLocateState('idle');
+  // « Rester connecté » coché d'office sur téléphone et tablette (appareil personnel ; l'appli de l'écran d'accueil
+  // oublierait sinon la session à chaque fermeture), décoché sur ordinateur, souvent partagé.
+  $('li-remember').checked = $('su-remember').checked = authStorage.remember() || detectPlatform() !== 'desktop';
   const params = new URLSearchParams(location.search);
   // Retour de la page de paiement Whop : confirmation attendue une fois la session rétablie
   const paymentReturn = params.get('paiement') === 'retour';
@@ -11296,13 +12007,20 @@
         if (paymentReturn && user.role === 'pro') awaitPayment(user);
         if (pendingVisit) setTimeout(() => openVisitLink(pendingVisit, user), 600);
         else if (pendingShortcut) setTimeout(() => openShortcut(pendingShortcut, user), 600);
-      } else if (store.read().lastEmail || wantLogin) {
-        setAuthRole(store.read().lastRole || 'client');
-        $('li-email').value = store.read().lastEmail || '';
-        showAuthStep('login');
       } else {
-        setAuthRole('client');
-        showAuthStep('signup');
+        // Pas de session : visiteur. Lien vers une fiche, ou carte déjà choisie sans compte : directement la carte ;
+        // sinon l'écran de compte (connexion si un compte a déjà servi ici), avec « Voir la carte sans compte ».
+        Guest.enter();
+        if (wantLogin || (store.read().lastEmail && !pendingLink)) {
+          setAuthRole(store.read().lastRole || 'client');
+          $('li-email').value = store.read().lastEmail || '';
+          showAuthStep('login');
+        } else if (pendingLink || store.read().guest) {
+          finishAuth({ fresh: false });
+        } else {
+          setAuthRole('client');
+          showAuthStep('signup');
+        }
       }
       Loader.endBoot();
     })();

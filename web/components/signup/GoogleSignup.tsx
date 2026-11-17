@@ -48,6 +48,18 @@ function loadGsi(): Promise<Gsi> {
   });
 }
 
+/**
+ * Code à usage unique (nonce) : Google le recopie, haché (SHA-256), dans le jeton ; Supabase reçoit l'original et vérifie
+ * qu'ils correspondent. Sans lui, Supabase refuse les jetons où Google en a mis un de lui-même (FedCM) : « Passed nonce
+ * and nonce in id_token should either both exist or not ».
+ */
+async function makeNonce(): Promise<{ raw: string; hashed: string }> {
+  const hex = (b: Uint8Array) => Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
+  const raw = hex(crypto.getRandomValues(new Uint8Array(32)));
+  const hashed = hex(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw))));
+  return { raw, hashed };
+}
+
 /** Accord Google déjà donné sur cet appareil (rendu sur le serveur : supposé donné, pour n'afficher aucune mention). */
 const noSubscribe = () => () => {};
 const useGoogleConsent = () => useSyncExternalStore(noSubscribe, () => readConsent()?.google ?? false, () => true);
@@ -56,7 +68,7 @@ const useGoogleConsent = () => useSyncExternalStore(noSubscribe, () => readConse
  * locked : case des conditions pas encore cochée. Le vrai bouton de Google est alors retiré (un toucher ne peut pas
  * créer de compte) et notre bouton appelle onLocked, qui rappelle de cocher la case.
  */
-export default function GoogleSignup({ onCredential, locked = false, onLocked }: { onCredential: (credential: string) => void; locked?: boolean; onLocked?: () => void }) {
+export default function GoogleSignup({ onCredential, locked = false, onLocked }: { onCredential: (credential: string, nonce: string) => void; locked?: boolean; onLocked?: () => void }) {
   const box = useRef<HTMLButtonElement>(null);
   const slot = useRef<HTMLDivElement>(null);
   const callback = useRef(onCredential);
@@ -69,11 +81,13 @@ export default function GoogleSignup({ onCredential, locked = false, onLocked }:
   useEffect(() => { callback.current = onCredential; }, [onCredential]);
 
   const UNAVAILABLE = "Connexion Google indisponible pour le moment. Inscrivez-vous avec votre adresse e-mail, ou réessayez plus tard.";
-  /** Pose le vrai bouton de Google sur le nôtre. */
-  function install(gsi: Gsi) {
+  /** Pose le vrai bouton de Google sur le nôtre (avec un code à usage unique neuf). */
+  async function install(gsi: Gsi) {
+    const nonce = await makeNonce();
     gsi.initialize({
       client_id: CLIENT_ID, ux_mode: "popup", auto_select: false, cancel_on_tap_outside: true, use_fedcm_for_button: true,
-      callback: (r: { credential?: string }) => { if (r.credential) callback.current(r.credential); },
+      nonce: nonce.hashed,
+      callback: (r: { credential?: string }) => { if (r.credential) callback.current(r.credential, nonce.raw); },
     });
     if (!slot.current) return;
     slot.current.textContent = "";
@@ -89,7 +103,7 @@ export default function GoogleSignup({ onCredential, locked = false, onLocked }:
   useEffect(() => {
     if (!CLIENT_ID || !consented) return;
     let alive = true;
-    loadGsi().then((gsi) => { if (alive) install(gsi); }, () => { if (alive) setNote(UNAVAILABLE); });
+    loadGsi().then((gsi) => { if (alive) void install(gsi); }, () => { if (alive) setNote(UNAVAILABLE); });
     return () => { alive = false; };
   }, [consented]);
 
@@ -100,7 +114,7 @@ export default function GoogleSignup({ onCredential, locked = false, onLocked }:
     setNote("Ouverture de Google…");
     const gsi = await loadGsi().catch(() => null);
     if (!gsi) return setNote(UNAVAILABLE);
-    install(gsi);
+    await install(gsi);
     setNote("");
     try {
       gsi.prompt((n) => {

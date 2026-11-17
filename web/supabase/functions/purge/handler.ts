@@ -4,6 +4,7 @@
  * totaux de plus de 180 jours, plafond anti-triche de la veille, tentatives d'inscription de plus de 2 jours,
  * notifications de paiement Whop de plus de 30 jours, visites du site de plus de 13 mois,
  * QR codes de visite de plus d'un jour, visites validées au restaurant (QR code) de plus de 13 mois,
+ * lectures de carte sur photo (comptage) de plus de 30 jours,
  * stories finies depuis plus de 30 jours (avec leur photo, retirée du stockage).
  *
  * Sessions de connexion : déconnectées après 30 jours sans utilisation, 180 jours au plus.
@@ -46,6 +47,7 @@ export const RULES: { table: string; column: string; days: number; date?: boolea
   { table: "site_events", column: "day", days: 395, date: true },   // visites du site : 13 mois
   { table: "visit_passes", column: "expires_at", days: 1 },          // QR codes de visite : un jour
   { table: "visits", column: "visited_at", days: 395 },              // visites validées au restaurant : 13 mois
+  { table: "menu_scans", column: "created_at", days: 30 },          // lectures de carte sur photo (comptage) : 30 jours
 ];
 export const STORY_KEEP_DAYS = 30;
 /** Sessions : déconnectées après 30 jours sans utilisation, 180 jours au plus (la page Confidentialité l'annonce). */

@@ -71,8 +71,9 @@
   et supprime que dans le dossier de sa propre fiche ; personne d'autre ne voit les justificatifs.
 - **SIRET de test** `999 999 999 00009` (établissement fictif, sans appel à Sirene) : fiche marquée « de test »
   (`merchants.is_test`, fixé par le serveur seulement). **Refusé par défaut** depuis le 30 octobre 2026 : la fonction
-  ne l'accepte que si `ALLOW_TEST_SIRET=true` (copie de test uniquement, jamais en ligne), et le bouton qui le remplit
-  n'existe plus sur le site publié (`testSiret` vide).
+  ne l'accepte que si `ALLOW_TEST_SIRET=true`. **Réactivé le 12 novembre 2026** pour les essais côté restaurateur :
+  bouton « SIRET de test » de retour sur le site (`testSiret` rempli) ; à retirer avant l'ouverture au public
+  (`testSiret: ''` et secret `ALLOW_TEST_SIRET` supprimé ou à `false`).
 - Fonction `delete-account` (déployée) : « Supprimer mon compte » efface les fichiers de la fiche (photos, stories,
   justificatifs) puis le compte, et tout ce qui lui est lié en cascade.
 - Tests : 116 scénarios de sécurité (`npm run db:test`) ; 12 tests des fonctions serveur ; 378 vérifications dans un
@@ -293,6 +294,16 @@ publications. Corrigé :
 - Pages `confidentialite.html` et `conditions.html` (contact : flashmiampro@gmail.com).
 
 ### ⏳ Reste à faire
+- **Domaine `flashmiam.fr` (14 novembre 2026)** : adresse principale du site (Vercel ; `flashmiam.com` et
+  `www.flashmiam.fr` y renvoient, `www.flashmiam.com` ne répond pas encore). Les fonctions serveur l'acceptent déjà (CORS).
+  **Connexion Google cassée sur ce domaine** tant qu'il manque dans le client OAuth : Google renvoie une erreur 403 sur
+  son bouton. À faire : Google Cloud › Identifiants › client « FlashMiam - Site web » › *Origines JavaScript
+  autorisées* : `https://flashmiam.fr`, `https://www.flashmiam.fr`, `https://flashmiam.com`. Puis Supabase ›
+  *URL Configuration* : *Site URL* `https://flashmiam.fr`, *Redirect URLs* `https://flashmiam.fr/**` et
+  `https://flashmiam.com/**` en plus des adresses ci-dessous. Domaines à ajouter aussi au widget Turnstile.
+  ✅ Origines ajoutées le 14 novembre 2026. Puis erreur Supabase « Passed nonce and nonce in id_token should either
+  both exist or not » (Google ajoute parfois un nonce au jeton, FedCM) : le site tire désormais son propre nonce, le
+  donne haché à Google et en clair à Supabase (`index.html` › `GoogleAuth`, `web/components/signup/GoogleSignup.tsx`).
 - **Pages juridiques** (`/app/legal/` : mentions légales, CGU, CGV, confidentialité ; anciennes adresses
   `conditions.html` et `confidentialite.html` redirigées) : compléter les informations entre crochets dans
   `web/lib/legal/site.ts` (éditeur, SIREN/SIRET, adresse, directeur de la publication, TVA, tribunal, médiateur de la

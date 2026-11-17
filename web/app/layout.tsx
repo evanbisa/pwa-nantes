@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 import { OG_IMAGE } from "@/lib/seo";
 import "./globals.css";
 
-/** Adresse principale du site (aperçu des liens partagés) : NEXT_PUBLIC_SITE_URL, à changer le jour du nom de domaine. */
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://pwa-nantes.vercel.app";
+/** Adresse principale du site (aperçu des liens partagés) : flashmiam.fr, ou NEXT_PUBLIC_SITE_URL pour une autre adresse. */
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://flashmiam.fr";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

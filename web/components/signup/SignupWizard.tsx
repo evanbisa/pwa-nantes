@@ -8,7 +8,7 @@ import { CAPTCHA_FAILED, captchaRefused, captchaToken } from "@/lib/captcha";
 import AgePicker from "@/components/signup/AgePicker";
 import GoogleSignup from "@/components/signup/GoogleSignup";
 import { useKeyboardInset } from "@/components/signup/useKeyboardInset";
-import { canAddToHome, promptInstall, type InstallResult } from "@/lib/install";
+import { canAddToHome, isPersonalDevice, promptInstall, type InstallResult } from "@/lib/install";
 import {
   EMAIL_RE, MIN_AGE, PASSWORD_RULES, TERMS_VERSION, capitalize, passwordScore, suggestEmail,
 } from "@/lib/signup/validation";
@@ -113,7 +113,7 @@ function Wizard() {
   const [suggestion, setSuggestion] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRememberChoice] = useState(false);
+  const [remember, setRememberChoice] = useState(isPersonalDevice);
   const [busy, setBusy] = useState(false);
   const [viaGoogle, setViaGoogle] = useState(false);
   const [terms, setTerms] = useState(false);   // « J'accepte les conditions d'utilisation »
@@ -326,7 +326,7 @@ function Wizard() {
    * Inscription avec Google : Supabase vérifie le jeton et crée le compte client (ou ouvre celui qui existe). Compte tout
    * neuf : le prénom, le sexe et l'âge déjà répondus sont enregistrés. Un compte restaurateur ne passe pas par Google.
    */
-  async function googleSignIn(credential: string) {
+  async function googleSignIn(credential: string, nonce?: string) {
     const at: Step = step === "name" ? "name" : "email";   // écran où le bouton a été touché
     setBusy(true);
     setError(at, null);
@@ -334,7 +334,7 @@ function Wizard() {
     const fail = (message: ReactNode) => { setBusy(false); setError(at, message); };
     let token: string | undefined;
     try { token = await captchaToken(); } catch { return fail(CAPTCHA_FAILED); }
-    const { data, error } = await sb.auth.signInWithIdToken({ provider: "google", token: credential, options: { captchaToken: token } });
+    const { data, error } = await sb.auth.signInWithIdToken({ provider: "google", token: credential, nonce, options: { captchaToken: token } });
     if (error || !data.user) return fail(captchaRefused(error) ? CAPTCHA_FAILED : "La connexion avec Google a échoué. Réessayez.");
     const { data: profile } = await sb.from("profiles").select("role, created_at, first_name").eq("id", data.user.id).single();
     if (profile?.role === "merchant") {
