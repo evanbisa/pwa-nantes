@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-+nXAMAuK+CSUrYCG8ui3TjAAZeh0l1khzpgm7veVdwk=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-o9xCUBp2PUMicS2f4n0xBsY6b5pKlcazBALj5uvbnCo=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -939,7 +939,7 @@
     .cat-picker button[aria-checked="true"] { background: #e8f0fe; color: #1967d2; border-color: var(--accent-line); }
     :root[data-theme="dark"] .cat-picker button[aria-checked="true"] { background: var(--accent-soft); color: var(--accent); }
     .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .photo-item, .photo-add { position: relative; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; }
+    .photo-item, .photo-add { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; }
     .photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .photo-item .photo-del { position: absolute; top: 4px; right: 4px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0, 0, 0, .6); color: #fff; font-size: 16px; line-height: 1; }
     .photo-item .photo-main { position: absolute; left: 4px; bottom: 4px; padding: 1px 6px; border-radius: 4px; font-size: 11px; color: #fff; background: rgba(0, 0, 0, .6); }
@@ -970,7 +970,7 @@
     .menu-row .m-price.is-missing { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber); }
     .menu-add[hidden] { display: none; }
 
-    /* Recadrage des photos (format unique 16:9) */
+    /* Recadrage des photos (format unique carré) */
     .cropper { position: fixed; inset: 0; z-index: 110; display: flex; align-items: center; justify-content: center; padding: calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 16px); background: rgba(0, 0, 0, .72); overflow-y: auto; overscroll-behavior: contain; }
     .cropper[hidden] { display: none; }
     .crop-panel { width: 100%; max-width: 640px; margin: auto; padding: 20px; border-radius: 20px; background: var(--panel-solid); animation: rise .35s var(--ease-out) both; }
@@ -980,7 +980,7 @@
     /* Photo de profil : cadre carré, l'extérieur du rond assombri */
     .cropper.is-round .crop-panel { max-width: 440px; }
     .cropper.is-round .crop-frame::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 999px rgba(0, 0, 0, .55); pointer-events: none; }
-    .crop-frame { position: relative; margin-top: 14px; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: #000; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+    .crop-frame { position: relative; margin-top: 14px; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: #000; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
     .crop-frame.is-dragging { cursor: grabbing; }
     .crop-frame:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .crop-frame canvas { display: block; width: 100%; height: 100%; }
@@ -1026,7 +1026,7 @@
     .gallery { display: flex; gap: 8px; margin: 14px -20px 0; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 20px; scrollbar-width: none; }
     .gallery:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 12px; }
     .gallery::-webkit-scrollbar { display: none; }
-    .gallery img { flex: none; width: 78%; max-width: 320px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; scroll-snap-align: start; background: var(--hover); }
+    .gallery img { flex: none; width: 62%; max-width: 260px; aspect-ratio: 1; object-fit: cover; border-radius: 12px; scroll-snap-align: start; background: var(--hover); }
     .gallery img:only-child { width: 100%; max-width: none; }
     .shop-desc { margin: 10px 0 0; font-size: 14.5px; color: var(--text); white-space: pre-line; }
     /* La carte du restaurant (fiche) */
@@ -1081,7 +1081,7 @@
     .menu-head { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
     .menu-empty, .photos-empty { margin: 18px 0 4px; font-size: 14px; color: var(--muted); }
     .photo-grid-view { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
-    .photo-grid-view button { padding: 0; border-radius: 10px; overflow: hidden; aspect-ratio: 16 / 9; background: var(--hover); cursor: zoom-in; }
+    .photo-grid-view button { padding: 0; border-radius: 10px; overflow: hidden; aspect-ratio: 1; background: var(--hover); cursor: zoom-in; }
     .photo-grid-view button:first-child { grid-column: 1 / -1; }
     .photo-grid-view img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .photo-grid-view button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -1089,7 +1089,7 @@
     /* Visionneuse plein écran */
     .lightbox { position: fixed; inset: 0; z-index: 112; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, .92); touch-action: pan-y; }
     .lightbox[hidden] { display: none; }
-    .lightbox img { max-width: 100%; max-height: calc(100dvh - 120px); aspect-ratio: 16 / 9; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+    .lightbox img { max-width: 100%; max-height: calc(100dvh - 120px); aspect-ratio: 1; object-fit: contain; user-select: none; -webkit-user-drag: none; }
     .lb-btn { position: absolute; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: #fff; background: rgba(255, 255, 255, .14); font-size: 26px; line-height: 1; }
     .lb-btn:hover { background: rgba(255, 255, 255, .24); }
     .lb-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
@@ -2131,7 +2131,7 @@
     /* ----- Fiche restaurant : photo en tête, onglets doux, carte des plats appétissante ----- */
     .shop-cover { display: block; width: calc(100% + 40px); margin: -10px -20px 14px; padding: 0; border: 0; border-radius: 20px 20px 0 0; overflow: hidden; background: var(--hover); cursor: zoom-in; }
     .shop-cover[hidden] { display: none; }
-    .shop-cover img { display: block; width: 100%; aspect-ratio: 2 / 1; object-fit: cover; transition: transform .6s var(--ease-out); }
+    .shop-cover img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; transition: transform .6s var(--ease-out); }
     .shop-cover:hover img { transform: scale(1.03); }
     #shop-sheet.has-cover .sheet-grab { position: absolute; z-index: 2; top: 0; left: 0; right: 0; padding: 8px 0 14px; }
     #shop-sheet.has-cover .sheet-grab::before { background: rgba(255, 255, 255, .85); box-shadow: 0 1px 3px rgba(0, 0, 0, .3); }
@@ -3279,7 +3279,7 @@
         </label>
 
         <div class="field" id="field-pl-photos">
-          <span>Photos (1 à 10 · format paysage 16:9 · la première est la photo principale)</span>
+          <span>Photos (1 à 10 · format carré · la première est la photo principale)</span>
           <div class="photo-grid" id="pl-photos">
             <label class="photo-add" id="pl-photo-add">
               <input type="file" id="pl-photo-input" accept="image/jpeg,image/png,image/webp" multiple hidden />
@@ -3348,7 +3348,7 @@
   <div id="cropper" class="cropper" role="dialog" aria-modal="true" aria-labelledby="crop-title" aria-describedby="crop-hint" hidden>
     <div class="crop-panel">
       <div class="crop-head"><h2 id="crop-title">Recadrer la photo</h2><span id="crop-count"></span></div>
-      <p class="hint" id="crop-hint">Toutes les photos sont au format 16:9. Faites glisser l'image pour choisir le cadrage, zoomez avec le curseur, la molette ou en pinçant.</p>
+      <p class="hint" id="crop-hint">Toutes les photos sont au format carré. Faites glisser l'image pour choisir le cadrage, zoomez avec le curseur, la molette ou en pinçant.</p>
       <div class="crop-frame" id="crop-frame" tabindex="0" role="img" aria-label="Aperçu du cadrage. Flèches : déplacer, + et − : zoomer.">
         <canvas id="crop-canvas"></canvas>
       </div>
@@ -4634,11 +4634,11 @@
   const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
   const formatSize = (b) => (b < 1024 * 1024 ? Math.max(1, Math.round(b / 1024)) + ' Ko' : (b / 1024 / 1024).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' Mo');
 
-  /* ---------- Photos : format unique 16:9 ---------- */
+  /* ---------- Photos : format unique carré (comme sur Instagram : rend bien en galerie et en tête de fiche) ---------- */
 
-  const PHOTO_RATIO = 16 / 9;
+  const PHOTO_RATIO = 1;
   const PHOTO_MIN_W = 640;          // largeur minimale exportée (les petites images sont agrandies)
-  const PHOTO_MAX_W = 1600;         // largeur maximale exportée (1600 × 900)
+  const PHOTO_MAX_W = 1200;         // largeur maximale exportée (1200 × 1200)
   const PHOTO_RATIO_TOLERANCE = 0.01;
 
   async function decodeImage(file) {
@@ -4648,7 +4648,7 @@
     }
   }
 
-  /** Plus grand cadre 16:9 (ou du rapport demandé) contenu dans l'image, centré. */
+  /** Plus grand cadre carré (ou du rapport demandé) contenu dans l'image, centré. */
   function fullCrop(w, h, ratio = PHOTO_RATIO) {
     const cw = w / h > ratio ? h * ratio : w;
     const ch = cw / ratio;
@@ -4657,7 +4657,7 @@
 
   const isPhotoRatio = (w, h) => Math.abs(w / h / PHOTO_RATIO - 1) <= PHOTO_RATIO_TOLERANCE;
 
-  /** Exporte la zone `crop` (coordonnées de l'image source) en JPEG 16:9. */
+  /** Exporte la zone `crop` (coordonnées de l'image source) en JPEG carré. */
   function exportCrop(bitmap, crop) {
     const outW = Math.round(Math.min(PHOTO_MAX_W, Math.max(PHOTO_MIN_W, crop.w)));
     const outH = Math.round(outW / PHOTO_RATIO);
@@ -9885,7 +9885,7 @@
       (sections.length ? ' · ' + sections.slice(0, 3).join(', ') + (sections.length > 3 ? '…' : '') : '');
   }
 
-  /* Photos : recadrées en 16:9 puis envoyées dans le stockage « photos » (adresse publique) */
+  /* Photos : recadrées en carré puis envoyées dans le stockage « photos » (adresse publique) */
   function renderPhotos() {
     const ids = [...proDraft.photos];
     const grid = $('pl-photos');
@@ -9927,7 +9927,7 @@
       let bitmap;
       try {
         bitmap = await decodeImage(file);
-        // Déjà au format 16:9 : pas besoin de recadrer. Sinon, le restaurateur choisit son cadrage.
+        // Déjà carrée : pas besoin de recadrer. Sinon, le restaurateur choisit son cadrage.
         const crop = isPhotoRatio(bitmap.width, bitmap.height)
           ? fullCrop(bitmap.width, bitmap.height)
           : await cropPhoto(bitmap, { index: i + 1, total: batch.length });
@@ -9950,11 +9950,11 @@
     renderPhotos();
   }
 
-  /* ---------- Recadreur (photos des fiches en 16:9, photo de profil carrée et ronde) ---------- */
+  /* ---------- Recadreur (photos des fiches en carré, photo de profil carrée et ronde) ---------- */
 
   /**
    * Ouvre le recadreur sur `bitmap`. Résout avec la zone choisie { x, y, w, h } (pixels de l'image),
-   * ou null si la photo est ignorée. Options : ratio (16:9 par défaut), round (masque rond), textes.
+   * ou null si la photo est ignorée. Options : ratio (carré par défaut), round (masque rond), textes.
    */
   const cropPhoto = (() => {
     const root = $('cropper');
@@ -10096,7 +10096,7 @@
 
     const TEXTS = {
       title: 'Recadrer la photo',
-      hint: 'Toutes les photos sont au format 16:9. Faites glisser l\'image pour choisir le cadrage, zoomez avec le curseur, la molette ou en pinçant.',
+      hint: 'Toutes les photos sont au format carré. Faites glisser l\'image pour choisir le cadrage, zoomez avec le curseur, la molette ou en pinçant.',
       ok: 'Valider le cadrage', skip: 'Ignorer cette photo',
     };
     return (bitmap, { index = 1, total = 1, ratio = PHOTO_RATIO, round = false, ...texts } = {}) => new Promise((resolve) => {

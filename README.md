@@ -67,7 +67,7 @@ disparaissent d'eux-mêmes dès le 3ᵉ vrai restaurant. Réglage : `CONFIG.demo
    l'honneur.
 3. **Abonnement** : formules Essentiel, Premium ou sur devis, paiement par Whop (mode démonstration tant que
    `billing_settings.whop_live` est faux ; voir `web/README.md`).
-4. **Fiche restaurant** : nom, catégorie, description, 1 à 10 photos 16:9 (recadrage intégré), adresse (Base Adresse
+4. **Fiche restaurant** : nom, catégorie, description, 1 à 10 photos carrées (recadrage intégré), adresse (Base Adresse
    Nationale), horaires, téléphone, carte des plats (saisie à la main ou **lue sur photo**, fonction `menu-scan`).
 
 Le restaurateur gère ensuite tout depuis son **espace** (Accueil, Statistiques, Publier, Avis, Ma fiche) et scanne le
