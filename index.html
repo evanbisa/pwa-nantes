@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-poIG8AwTFuTHSDjoEBB3vVlYPPWy5zSG4cXGSmE7CYQ=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-+nXAMAuK+CSUrYCG8ui3TjAAZeh0l1khzpgm7veVdwk=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -332,7 +332,6 @@
     #map.show-labels .pin-label, .pin.is-selected .pin-label, .pin.is-hover .pin-label { opacity: 1; transform: none; }
     #map.show-labels .pin.label-hidden:not(.is-selected):not(.is-hover) .pin-label { opacity: 0; }
     .pin.is-filtered { display: none; }
-    .pin.is-demo .pin-badge { border-style: dashed; }
     .pin.is-demo .pin-label::after { content: " · exemple"; font-weight: 400; color: var(--amber); }
     #map.zoom-far .pin-badge { scale: .62; }
     #map.zoom-far .pin.is-open .pin-badge::before { animation: none; opacity: 0; }
@@ -500,6 +499,13 @@
     .ob-progress span { width: 22px; height: 4px; border-radius: 2px; background: var(--line-strong); transition: background-color .3s, width .3s; }
     .ob-progress span.is-active { width: 34px; background: var(--accent); }
     .ob-step { animation: rise .4s var(--ease-out) both; }
+    /*
+     * Sobriété : pas d'émojis décoratifs (questions, listes, tuiles, notifications). Seuls les pictogrammes des
+     * catégories de restaurants restent (marqueurs, recherche, stories).
+     */
+    .jn-hero, .jn-emoji, .jn-choices button > span[aria-hidden], .mail-badge, .trial-ico, .lock-ico, div.sheet-emoji,
+    .pf-ico, .promo-ico, .offer-ico, .promo-admin .pa-ico, .n-ico, .ps-todo .td-ico, .doc-ico,
+    .ps-insights li > span:first-child, .ps-cards .kpi-label span:first-child:not(:last-child) { display: none !important; }
     .ob-step h1, .ob-step h2 { margin: 0; font-weight: 400; font-size: 26px; line-height: 1.2; }
     .ob-step h1 em, .ob-step h2 em { font-style: normal; color: var(--accent); font-weight: 500; }
     /*
@@ -774,8 +780,7 @@
     /* E-mail */
     /* Mot de passe : jauge de solidité */
     .ob-welcome { margin: 0 0 14px; padding: 12px 14px; border-radius: 14px; font-size: 15px; font-weight: 500; line-height: 1.4; color: var(--accent); background: var(--accent-soft); animation: rise .5s var(--ease-out) both; }
-    .ob-welcome::before { content: "🎉 "; }
-    .ob-welcome[hidden] { display: none; }
+        .ob-welcome[hidden] { display: none; }
     /* Fête : confettis quand le compte est créé */
     .confetti { position: fixed; inset: 0; z-index: 140; pointer-events: none; overflow: hidden; }
     .confetti i { position: absolute; top: -12px; width: 9px; height: 14px; border-radius: 2px; animation: confetti 1.6s cubic-bezier(.2, .6, .4, 1) forwards; }
@@ -1310,6 +1315,7 @@
     .ps-tabs button { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 60px; padding: 8px 2px 6px; font-size: 11.5px; font-weight: 500; color: var(--muted); }
     .ps-tabs button > span:last-child { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .ps-tabs .ps-ico { position: relative; display: grid; place-items: center; width: 56px; height: 30px; border-radius: 15px; font-size: 19px; line-height: 1; transition: background-color .2s; }
+    .ps-tabs .ps-ico svg { width: 22px; height: 22px; }
     .ps-tabs button[aria-selected="true"] { color: var(--text); }
     .ps-tabs button[aria-selected="true"] .ps-ico { background: var(--accent-soft); }
     .ps-badge { position: absolute; top: -2px; right: 8px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; font-size: 11px; font-weight: 600; line-height: 18px; color: #fff; background: var(--danger); }
@@ -1519,6 +1525,13 @@
     /* Ordinateur : plats trouvés sous chaque restaurant de la liste */
     .sb-budget { padding: 0 16px 6px; }
     .sb-budget .budget { padding: 0; flex-wrap: wrap; overflow: visible; }
+    .sb-budget .radius { margin-top: 6px; }
+    /* Distance personnalisée : curseur de 200 m à 10 km */
+    .radius-custom { display: flex; align-items: center; gap: 10px; padding: 0 12px 8px; font-size: 13px; color: var(--muted); }
+    .radius-custom[hidden] { display: none; }
+    .radius-custom input { flex: 1; min-width: 0; accent-color: var(--accent); }
+    .radius-custom output { flex: none; min-width: 4.5em; text-align: right; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
+    .sb-budget .radius-custom { padding: 6px 0 0; }
     .si-dishes { display: grid; gap: 1px; margin-top: 3px; }
     .si-dishes span { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--text); }
     .si-dishes span i { font-style: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -2255,16 +2268,16 @@
   <nav class="filters ui" id="filters" aria-label="Filtrer les commerces">
     <div class="filters-track" id="filters-track">
       <button class="chip glass" type="button" id="open-only" aria-pressed="false"><span class="dot-green" aria-hidden="true"></span>Ouverts</button>
-      <button class="chip glass" type="button" id="promo-only" aria-pressed="false">🎁 Promos</button>
-      <button class="chip glass" type="button" id="rated-only" aria-pressed="false">⭐ 4 et +</button>
+      <button class="chip glass" type="button" id="promo-only" aria-pressed="false">Promos</button>
+      <button class="chip glass" type="button" id="rated-only" aria-pressed="false">★ 4 et +</button>
       <span class="chip-sep" aria-hidden="true"></span>
       <button class="chip glass" type="button" data-cat="all" aria-pressed="true">Tout</button>
-      <button class="chip glass" type="button" data-cat="Food-truck" aria-pressed="false">🚚 Food-truck</button>
-      <button class="chip glass" type="button" data-cat="Kebab" aria-pressed="false">🥙 Kebab</button>
-      <button class="chip glass" type="button" data-cat="Burger" aria-pressed="false">🍔 Burger</button>
-      <button class="chip glass" type="button" data-cat="Sweets" aria-pressed="false">🧁 Sweets</button>
-      <button class="chip glass" type="button" data-cat="Pizza" aria-pressed="false">🍕 Pizza</button>
-      <button class="chip glass" type="button" data-cat="Autre" aria-pressed="false">🍽️ Autres</button>
+      <button class="chip glass" type="button" data-cat="Food-truck" aria-pressed="false">Food-truck</button>
+      <button class="chip glass" type="button" data-cat="Kebab" aria-pressed="false">Kebab</button>
+      <button class="chip glass" type="button" data-cat="Burger" aria-pressed="false">Burger</button>
+      <button class="chip glass" type="button" data-cat="Sweets" aria-pressed="false">Sweets</button>
+      <button class="chip glass" type="button" data-cat="Pizza" aria-pressed="false">Pizza</button>
+      <button class="chip glass" type="button" data-cat="Autre" aria-pressed="false">Autres</button>
     </div>
   </nav>
 
@@ -2293,6 +2306,19 @@
       <button class="chip" type="button" data-max="5" aria-pressed="false">≤ 5 €</button>
       <button class="chip" type="button" data-max="10" aria-pressed="false">≤ 10 €</button>
       <button class="chip" type="button" data-max="15" aria-pressed="false">≤ 15 €</button>
+    </div>
+    <div class="budget radius" id="radius" role="group" aria-label="Distance">
+      <button class="chip" type="button" data-r="" aria-pressed="true">Partout</button>
+      <button class="chip" type="button" data-r="500" aria-pressed="false">500 m</button>
+      <button class="chip" type="button" data-r="1000" aria-pressed="false">1 km</button>
+      <button class="chip" type="button" data-r="2000" aria-pressed="false">2 km</button>
+      <button class="chip" type="button" data-r="5000" aria-pressed="false">5 km</button>
+      <button class="chip" type="button" data-r="custom" aria-pressed="false" aria-expanded="false" aria-controls="radius-custom">Autre…</button>
+    </div>
+    <div class="radius-custom" id="radius-custom" hidden>
+      <label for="radius-range">Distance maximale</label>
+      <input type="range" id="radius-range" min="200" max="10000" step="100" value="1500" />
+      <output id="radius-out" for="radius-range">1,5 km</output>
     </div>
     <div class="sp-body" id="search-results"></div>
     <p class="visually-hidden" id="search-live" aria-live="polite"></p>
@@ -2326,7 +2352,7 @@
       <button type="button" role="tab" id="tab-reviews" aria-controls="panel-reviews" aria-selected="false" tabindex="-1" data-tab="reviews" hidden>Avis</button>
     </div>
     <div class="tab-panel" id="panel-infos" role="tabpanel" aria-labelledby="tab-infos">
-    <p class="demo-note" id="shop-demo-note" hidden><span aria-hidden="true">🧪</span> Restaurant imaginaire, pour découvrir FlashMiam en attendant les premiers restaurants partenaires de La Roche-sur-Yon : ses offres ne sont pas réelles.</p>
+    <p class="demo-note" id="shop-demo-note" hidden>Restaurant imaginaire, pour découvrir FlashMiam en attendant les premiers restaurants partenaires de La Roche-sur-Yon : ses offres ne sont pas réelles.</p>
     <!-- Comptes clients : « Profiter de l'offre » (ou « Valider ma visite ») → QR code à montrer en caisse -->
     <div class="visit-box" id="shop-visit-box" hidden>
       <button class="visit-cta" type="button" id="shop-visit">
@@ -2434,7 +2460,7 @@
         <button class="icon-btn" type="button" id="sc-close" aria-label="Fermer">&times;</button>
       </div>
       <div class="seg" role="group" aria-label="Type de story" style="margin-top:12px">
-        <button type="button" data-mode="photo" aria-pressed="true">📷 Photo</button>
+        <button type="button" data-mode="photo" aria-pressed="true">Photo</button>
         <button type="button" data-mode="text" aria-pressed="false">Aa Texte</button>
       </div>
       <div class="sc-body">
@@ -2496,9 +2522,9 @@
       <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
     </div>
     <ul class="ins-perks">
-      <li><span aria-hidden="true">⚡</span>La carte en un geste, en plein écran, comme une appli</li>
-      <li><span aria-hidden="true">🔔</span>Les promos de vos restos préférés en alerte</li>
-      <li><span aria-hidden="true">📦</span>Rien à télécharger sur un store, presque aucune place</li>
+      <li>La carte en un geste, en plein écran, comme une appli</li>
+      <li>Les promos de vos restos préférés en alerte</li>
+      <li>Rien à télécharger sur un store, presque aucune place</li>
     </ul>
     <ol class="ins-steps" data-install="ios" hidden>
       <li>Touchez <svg class="ins-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 10H6a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> <b>Partager</b> (en bas de Safari, en haut à droite sur iPad)</li>
@@ -2543,10 +2569,10 @@
     </div>
     <div class="budget offers-kinds" id="offers-kinds" role="group" aria-label="Type d'offre">
       <button class="chip" type="button" data-kind="" aria-pressed="true">Toutes</button>
-      <button class="chip" type="button" data-kind="day" aria-pressed="false">⏱️ Du jour</button>
-      <button class="chip" type="button" data-kind="week" aria-pressed="false">📅 De la semaine</button>
-      <button class="chip" type="button" data-kind="student" aria-pressed="false">🎓 Étudiantes</button>
-      <button class="chip" type="button" data-kind="other" aria-pressed="false">🎁 Bons plans</button>
+      <button class="chip" type="button" data-kind="day" aria-pressed="false">Du jour</button>
+      <button class="chip" type="button" data-kind="week" aria-pressed="false">De la semaine</button>
+      <button class="chip" type="button" data-kind="student" aria-pressed="false">Étudiantes</button>
+      <button class="chip" type="button" data-kind="other" aria-pressed="false">Bons plans</button>
     </div>
     <label class="check offers-open"><input type="checkbox" id="offers-open" /> Restaurants ouverts maintenant</label>
     <ul class="offers-list" id="offers-list"></ul>
@@ -2591,12 +2617,12 @@
       <div class="pf-id">
         <h3 id="profile-name"></h3>
         <p class="pf-email" id="profile-email"></p>
-        <p class="pf-meta">📍 La Roche-sur-Yon · membre depuis le <span id="profile-since"></span></p>
+        <p class="pf-meta">La Roche-sur-Yon · membre depuis le <span id="profile-since"></span></p>
       </div>
       <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
     </div>
     <div class="pro-entry" id="pro-entry" hidden>
-      <button class="btn btn-primary" type="button" id="profile-pro">🍽️ Ouvrir mon espace restaurateur</button>
+      <button class="btn btn-primary" type="button" id="profile-pro">Ouvrir mon espace restaurateur</button>
     </div>
 
     <p class="pf-label">Mon compte</p>
@@ -2634,7 +2660,7 @@
     <div class="tour-spot is-none" id="tour-spot" aria-hidden="true"></div>
     <div class="tour-card" id="tour-card">
       <div class="tour-demo" id="tour-demo" aria-hidden="true" hidden>
-        <div class="visit-cta"><span class="visit-cta-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17.5 20.5h3v-3"/></svg></span><span class="visit-cta-txt"><strong>Profiter de l'offre</strong><small>🎓 -20 % étudiant</small></span></div>
+        <div class="visit-cta"><span class="visit-cta-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17.5 20.5h3v-3"/></svg></span><span class="visit-cta-txt"><strong>Profiter de l'offre</strong><small>-20 % étudiant</small></span></div>
       </div>
       <p class="tour-step" id="tour-step"></p>
       <h2 id="tour-title"></h2>
@@ -2682,13 +2708,13 @@
       <button class="scan-btn" type="button" id="scan-torch" aria-pressed="false" aria-label="Lampe de la caméra" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></button>
     </header>
     <p class="scan-help" id="scan-help" role="status" aria-live="polite">Visez le QR code du client</p>
-    <div class="scan-off" id="scan-off" hidden><span aria-hidden="true">📷</span><p id="scan-off-text"></p></div>
+    <div class="scan-off" id="scan-off" hidden><p id="scan-off-text"></p></div>
     <div class="scan-foot">
       <form class="scan-manual" id="scan-manual" hidden autocomplete="off">
         <input id="scan-code" type="text" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="16" placeholder="K7P4-QX9M-2T" aria-label="Code affiché sous le QR code du client" />
         <button type="submit" id="scan-code-go" disabled>Valider</button>
       </form>
-      <button class="scan-type" type="button" id="scan-type">⌨️ Saisir le code à la main</button>
+      <button class="scan-type" type="button" id="scan-type">Saisir le code à la main</button>
     </div>
     <div class="scan-result" id="scan-result" data-kind="ok" role="alert" hidden>
       <div class="sr-ico" id="sr-ico" aria-hidden="true"></div>
@@ -2711,11 +2737,11 @@
         <button class="icon-btn" type="button" id="ps-close" aria-label="Fermer l'espace restaurateur">&times;</button>
       </header>
       <nav class="ps-tabs" role="tablist" aria-label="Espace restaurateur">
-        <button type="button" role="tab" id="pst-home" data-tab="home" aria-controls="psp-home" aria-selected="true"><span class="ps-ico" aria-hidden="true">🏠</span><span>Accueil</span></button>
-        <button type="button" role="tab" id="pst-stats" data-tab="stats" aria-controls="psp-stats" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true">📊</span><span class="ps-lbl" data-short="Stats">Statistiques</span></button>
-        <button type="button" role="tab" id="pst-publish" data-tab="publish" aria-controls="psp-publish" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true">✨</span><span>Publier</span></button>
-        <button type="button" role="tab" id="pst-reviews" data-tab="reviews" aria-controls="psp-reviews" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true">⭐<b class="ps-badge" id="ps-reviews-badge" hidden></b></span><span>Avis</span></button>
-        <button type="button" role="tab" id="pst-fiche" data-tab="fiche" aria-controls="psp-fiche" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true">🛠️</span><span>Ma fiche</span></button>
+        <button type="button" role="tab" id="pst-home" data-tab="home" aria-controls="psp-home" aria-selected="true"><span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z"/></svg></span><span>Accueil</span></button>
+        <button type="button" role="tab" id="pst-stats" data-tab="stats" aria-controls="psp-stats" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="ps-lbl" data-short="Stats">Statistiques</span></button>
+        <button type="button" role="tab" id="pst-publish" data-tab="publish" aria-controls="psp-publish" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span><span>Publier</span></button>
+        <button type="button" role="tab" id="pst-reviews" data-tab="reviews" aria-controls="psp-reviews" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><b class="ps-badge" id="ps-reviews-badge" hidden></b></span><span>Avis</span></button>
+        <button type="button" role="tab" id="pst-fiche" data-tab="fiche" aria-controls="psp-fiche" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4m4 0h10M3 17h10m4 0h4M9 4v6M15 14v6"/></svg></span><span>Ma fiche</span></button>
       </nav>
       <button class="scan-fab ps-scan-fab" type="button" id="ps-scan-fab" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8V5a2 2 0 012-2h3M16 3h3a2 2 0 012 2v3M21 16v3a2 2 0 01-2 2h-3M8 21H5a2 2 0 01-2-2v-3M7 12h10"/></svg><span>Scanner</span></button>
       <div class="ps-body" id="ps-body">
@@ -2749,10 +2775,10 @@
             <section class="ps-block ps-wide" aria-labelledby="ps-quick-title">
               <h3 id="ps-quick-title">Actions rapides</h3>
               <div class="ps-quick" id="ps-quick">
-                <button type="button" data-act="story"><span aria-hidden="true">📸</span>Story</button>
-                <button type="button" data-act="promo"><span aria-hidden="true">🎁</span>Promo</button>
-                <button type="button" data-act="edit"><span aria-hidden="true">✏️</span>Ma fiche</button>
-                <button type="button" data-act="show"><span aria-hidden="true">👀</span>Aperçu</button>
+                <button type="button" data-act="story">Story</button>
+                <button type="button" data-act="promo">Promo</button>
+                <button type="button" data-act="edit">Ma fiche</button>
+                <button type="button" data-act="show">Aperçu</button>
               </div>
             </section>
             <section class="ps-block ps-wide" aria-labelledby="ps-insights-title">
@@ -2843,7 +2869,7 @@
             <p class="hint">« J'aime » sur les plats de votre carte, depuis toujours.</p>
             <div class="hbars" id="ps-dishes"></div>
           </section>
-          <p class="hint ps-privacy">🔒 Ce sont des totaux : vous ne voyez jamais qui a fait quoi. Seuls les clients qui acceptent les statistiques sont comptés, et vos propres visites ne le sont pas. Historique conservé 90 jours.</p>
+          <p class="hint ps-privacy">Ce sont des totaux : vous ne voyez jamais qui a fait quoi. Seuls les clients qui acceptent les statistiques sont comptés, et vos propres visites ne le sont pas. Historique conservé 90 jours.</p>
         </section>
 
         <!-- Publier -->
@@ -2851,15 +2877,15 @@
           <p class="ps-alert is-info" id="ps-publish-off" hidden></p>
           <section class="pd-block" id="pd-stories" aria-labelledby="pd-stories-title" hidden>
             <div class="stats-head">
-              <h3 id="pd-stories-title">📸 Mes stories</h3>
+              <h3 id="pd-stories-title">Mes stories</h3>
               <button class="pill-btn" type="button" id="pd-story-new">＋ Publier une story</button>
             </div>
-            <p class="hint">Photo ou message affiché en haut de la carte pour tout le monde pendant 24 h. Vos abonnés sont prévenus. Sous chaque story : combien l'ont vue (👁) et aimée (♥).</p>
+            <p class="hint">Photo ou message affiché en haut de la carte pour tout le monde pendant 24 h. Vos abonnés sont prévenus. Sous chaque story : combien l'ont vue et aimée (♥).</p>
             <ul class="story-admin" id="pd-story-list"></ul>
           </section>
           <section class="pd-block" id="pd-promos" aria-labelledby="pd-promos-title" hidden>
-            <h3 id="pd-promos-title">🎁 Mes promotions</h3>
-            <p class="hint">Affichées sur votre fiche, dans « Offres autour de moi » et avec le filtre « 🎁 Promos ». Vos abonnés sont prévenus.</p>
+            <h3 id="pd-promos-title">Mes promotions</h3>
+            <p class="hint">Affichées sur votre fiche, dans « Offres autour de moi » et avec le filtre « Promos ». Vos abonnés sont prévenus.</p>
             <ul class="promo-admin" id="pd-promo-list"></ul>
             <form class="promo-form" id="pd-promo-form" novalidate>
               <div class="kind-pick" id="pp-kind" role="radiogroup" aria-label="Type de promotion"></div>
@@ -2962,8 +2988,8 @@
 
       <!-- Choix du type de compte -->
       <div class="role-switch" id="role-switch" role="radiogroup" aria-label="Type de compte">
-        <button type="button" role="radio" data-role="client" aria-checked="true"><span aria-hidden="true">👤</span> Client</button>
-        <button type="button" role="radio" data-role="pro" aria-checked="false"><span aria-hidden="true">🍽️</span> Restaurateur</button>
+        <button type="button" role="radio" data-role="client" aria-checked="true">Client</button>
+        <button type="button" role="radio" data-role="pro" aria-checked="false">Restaurateur</button>
       </div>
 
       <!-- Création de compte (client ou restaurateur) -->
@@ -2982,11 +3008,11 @@
           <h1 id="jn-title">Les restaurants de <span class="nw">La Roche-sur-Yon</span>, <em>à deux pas</em></h1>
           <p class="lead">Promos du jour, stories des food-trucks, avis des étudiants… Votre compte est prêt en une minute.</p>
           <ul class="jn-perks" aria-label="Avec FlashMiam">
-            <li><span aria-hidden="true">🎁</span>Les bons plans autour de vous</li>
-            <li><span aria-hidden="true">🔔</span>Prévenu des promos de vos restos préférés</li>
-            <li><span aria-hidden="true">⭐</span>Les vrais avis, sans pub</li>
+            <li>Les bons plans autour de vous</li>
+            <li>Prévenu des promos de vos restos préférés</li>
+            <li>Les vrais avis, sans pub</li>
           </ul>
-          <button class="btn btn-primary jn-go" type="button" id="jn-start">C'est parti <span aria-hidden="true">✨</span></button>
+          <button class="btn btn-primary jn-go" type="button" id="jn-start">C'est parti</button>
           <p class="ob-switch">Déjà un compte ? <button class="link-btn" type="button" data-goto="login">Se connecter</button></p>
         </section>
 
@@ -3166,9 +3192,9 @@
         <div class="radar" aria-hidden="true"></div>
         <h2 id="ob-loc-title">Activez votre <em>localisation</em></h2>
         <ul class="perks">
-          <li><span aria-hidden="true">🎯</span>Voir les commerces les plus proches de vous</li>
-          <li><span aria-hidden="true">🚶</span>Connaître la distance et le temps de marche</li>
-          <li><span aria-hidden="true">🔒</span>Votre position n'est jamais partagée</li>
+          <li>Voir les commerces les plus proches de vous</li>
+          <li>Connaître la distance et le temps de marche</li>
+          <li>Votre position n'est jamais partagée</li>
         </ul>
         <button class="btn btn-primary" type="button" id="ob-allow">Autoriser la localisation</button>
         <button class="link-btn ob-address-toggle" type="button" id="ob-address-toggle" aria-expanded="false" aria-controls="ob-address">Ou tapez une adresse à la place</button>
@@ -3269,7 +3295,7 @@
           <div class="menu-scan" id="pl-menu-scan">
             <label class="btn btn-primary menu-scan-btn" id="pl-menu-scan-btn">
               <input type="file" id="pl-menu-scan-input" accept="image/*" multiple hidden />
-              <span aria-hidden="true">📷</span>Remplir avec une photo de ma carte
+              Remplir avec une photo de ma carte
             </label>
             <p class="hint">1 à 5 photos (une par page, bien à plat et nette). Plats, rubriques et prix sont remplis automatiquement : il ne vous reste qu'à vérifier.</p>
             <p class="menu-scan-status" id="pl-menu-scan-status" aria-live="polite" hidden></p>
@@ -3343,7 +3369,7 @@
   <div id="toast" class="toast" role="status" aria-live="polite"><span id="toast-text"></span><button id="toast-action" type="button" hidden></button></div>
   <!-- ===================== VISITEUR SANS COMPTE : créer son compte, toujours à portée de pouce ===================== -->
   <div class="guest-bar" id="guest-bar" role="region" aria-label="Créer un compte FlashMiam" hidden>
-    <button class="btn btn-primary guest-cta" type="button" id="guest-signup"><span aria-hidden="true">✨</span> <span>Créer mon compte<span class="gs-more">&nbsp;gratuit</span></span></button>
+    <button class="btn btn-primary guest-cta" type="button" id="guest-signup"><span>Créer mon compte<span class="gs-more">&nbsp;gratuit</span></span></button>
     <button class="guest-login" type="button" id="guest-login" aria-label="Se connecter">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>
       <span class="tab-lbl">Connexion</span>
@@ -3361,7 +3387,7 @@
   <!-- ===================== COOKIES (choix au premier lancement) ===================== -->
   <div id="consent" class="consent" role="dialog" aria-modal="true" aria-labelledby="cs-title" aria-describedby="cs-intro" hidden>
     <div class="cs-panel">
-      <h2 id="cs-title"><span aria-hidden="true">🍪</span> Vos choix de cookies</h2>
+      <h2 id="cs-title">Vos choix de cookies</h2>
       <p id="cs-intro">FlashMiam garde dans votre navigateur votre session et vos préférences : c'est indispensable au fonctionnement du site.
         Avec votre accord, nous utilisons aussi des <b>statistiques de fréquentation</b> et les <b>services Google</b>.
         Vous pouvez changer d'avis à tout moment (Profil › Cookies).</p>
@@ -3609,13 +3635,13 @@
     const story = (id, h, bg, text) => ({ id: 'demo-' + id, bg, text, createdAt: new Date(at(h)).toISOString(), expiresAt: new Date(at(h) + STORY_TTL).toISOString() });
     const add = (id, stories, promos) => Object.assign(SHOPS.find((x) => x.id === id), { stories, promos });
     add('camion-napoleon',
-      [story('camion-1', 3, 'sunset', '☀️ Le préfou sort du four : venez le goûter tout chaud !'), story('camion-2', 0.6, 'forest', 'Ce midi : galette saucisse + boisson à 7,50 €')],
+      [story('camion-1', 3, 'sunset', 'Le préfou sort du four : venez le goûter tout chaud !'), story('camion-2', 0.6, 'forest', 'Ce midi : galette saucisse + boisson à 7,50 €')],
       [{ id: 'demo-p1', kind: 'day', title: 'Galette saucisse + boisson à 7,50 €', endsAt: promoAutoEnd('day').toISOString() }]);
     add('kebab-clemenceau',
-      [story('kebab-1', 2, 'ocean', '🎓 Étudiants : -15 % toute la semaine sur présentation de votre carte')],
+      [story('kebab-1', 2, 'ocean', 'Étudiants : -15 % toute la semaine sur présentation de votre carte')],
       [{ id: 'demo-p2', kind: 'student', title: '-15 % sur tout le menu', details: 'Sur présentation de la carte étudiante' }]);
     add('gaufres-marche',
-      [story('gaufres-1', 5, 'berry', 'Nouveau : la gaufre Nutella-banane 🍌')],
+      [story('gaufres-1', 5, 'berry', 'Nouveau : la gaufre Nutella-banane')],
       [{ id: 'demo-p3', kind: 'week', title: '2 gaufres = 1 chocolat chaud offert', endsAt: promoAutoEnd('week').toISOString() }]);
     SHOPS.forEach((sh) => { sh.isDemo = true; });
   })();
@@ -5345,7 +5371,8 @@
     (desktop ? $('sb-stories-slot') : $('stories')).appendChild($('stories-track'));
     if (desktop) { $('sb-brand-slot').append($('offers-btn'), $('notif-btn')); $('guest-bar').append($('guest-signup'), $('guest-login')); }
     else $('tabbar').append($('offers-btn'), $('notif-btn'), $('profile-btn'), $('guest-signup'), $('guest-login'));
-    if (desktop) $('sb-budget-slot').appendChild($('budget')); else $('search-panel').insertBefore($('budget'), $('search-results'));
+    if (desktop) $('sb-budget-slot').append($('budget'), $('radius'), $('radius-custom'));
+    else $('search-results').before($('budget'), $('radius'), $('radius-custom'));
     whenMapReady(() => view.setPadding(selectedId ? shopPadding() : basePadding()));
   }
   desktopMQ.addEventListener('change', applyLayout);
@@ -5362,7 +5389,9 @@
      ===================================================================== */
 
   const markers = new Map();          // id → { shop, marker, el, status }
-  const filters = { category: 'all', openOnly: false, promoOnly: false, ratedOnly: false, query: '', q: [], max: null };
+  const filters = { category: 'all', openOnly: false, promoOnly: false, ratedOnly: false, query: '', q: [], max: null, radius: null };
+  /** Distance maximale choisie (mètres, null = partout) : sans position connue, le filtre ne retire rien. */
+  const withinRadius = (m) => filters.radius === null || !Geo.position || distance(Geo.position, m.shop.coords) <= filters.radius;
   let selectedId = null;
 
   function createShopMarker(shop) {
@@ -5455,7 +5484,7 @@
     (!filters.openOnly || m.status.open) &&
     (!filters.promoOnly || activePromos(m.shop).length > 0) &&
     (!filters.ratedOnly || !!(m.shop.rating && m.shop.rating.avg >= 4)) &&
-    Search.shopMatches(m.shop, filters.q, filters.max);
+    withinRadius(m) && Search.shopMatches(m.shop, filters.q, filters.max);
 
   function applyFilters() {
     markers.forEach((m) => {
@@ -5479,7 +5508,7 @@
 
     const searching = filters.q.length > 0 || filters.max !== null;
     const signature = items.map(({ m, d }) => m.shop.id + m.status.label + (d === null ? '' : formatDistance(d)) + activePromos(m.shop).length + JSON.stringify(m.shop.rating)).join('|')
-      + selectedId + '|' + filters.q.join(' ') + '|' + filters.max + '|' + Guest.key();
+      + selectedId + '|' + filters.q.join(' ') + '|' + filters.max + '|' + filters.radius + '|' + Guest.key();
     if (signature === listSignature) return;
     listSignature = signature;
 
@@ -5513,7 +5542,7 @@
       const promos = activePromos(shop);
       const best = promos.find((p) => Guest.canSee(p, shop)) || promos[0];
       const promoEl = btn.querySelector('.si-promo');
-      if (best && !Guest.canSee(best, shop)) { promoEl.textContent = '🔒 Offre réservée aux membres'; promoEl.classList.add('is-locked'); }   // visiteur
+      if (best && !Guest.canSee(best, shop)) { promoEl.textContent = 'Offre réservée aux membres'; promoEl.classList.add('is-locked'); }   // visiteur
       else promoEl.textContent = best ? promoLine(best) : (shop.description || '').slice(0, 90);
       if (shop.isPro && !shop.isTest) { const v = document.createElement('span'); v.className = 'verified'; v.textContent = '✓'; v.title = 'Établissement vérifié'; btn.querySelector('strong').after(v); }
       if (shop.isDemo) btn.querySelector('strong').after(demoTag());
@@ -5630,12 +5659,14 @@
     /** Résultats pour le panneau de recherche (téléphone). */
     function run(query, max = null) {
       const q = parse(query);
-      const all = [...markers.values()];
+      const all = [...markers.values()].filter(withinRadius);
       const d = (m) => (Geo.position ? distance(Geo.position, m.shop.coords) : Infinity);
       const dishes = [];
       if (q.length || max !== null) all.forEach((m) => dishesOf(m.shop, q, max).forEach((hit) => dishes.push({ ...hit, m })));
       dishes.sort((a, b) => b.score - a.score || (b.m.status.open - a.m.status.open) || (d(a.m) - d(b.m)) || a.item.price - b.item.price);
-      const shops = !q.length ? [] : all.filter((m) => { const sw = shopWords(m.shop); return q.every((w) => has(sw, w)) && (max === null || dishesOf(m.shop, [], max).length); });
+      // Distance choisie sans mot tapé : tous les restaurants à cette distance
+      const shops = !q.length ? (filters.radius !== null && max === null ? all : [])
+        : all.filter((m) => { const sw = shopWords(m.shop); return q.every((w) => has(sw, w)) && (max === null || dishesOf(m.shop, [], max).length); });
       shops.sort((a, b) => (b.status.open - a.status.open) || (d(a) - d(b)) || a.shop.name.localeCompare(b.shop.name));
       return { q, dishes, shops };
     }
@@ -5704,7 +5735,7 @@
     const title = (text) => { const h = document.createElement('h3'); h.className = 'sr-title'; h.textContent = text; box.appendChild(h); };
     const status = (m) => statusTag(m.status);
     const dist = (m) => (Geo.position ? ' · ' + formatDistance(distance(Geo.position, m.shop.coords)) : '');
-    if (!res.q.length && max === null) {
+    if (!res.q.length && max === null && filters.radius === null) {
       title('Idées');
       const ideas = document.createElement('div');
       ideas.className = 'sr-ideas';
@@ -5726,8 +5757,10 @@
       const p = document.createElement('div');
       p.className = 'sr-empty';
       p.innerHTML = '<b></b><span></span>';
-      p.querySelector('b').textContent = res.q.length ? 'Aucun résultat pour « ' + query.trim() + ' »' : 'Aucun plat dans ce budget';
-      p.querySelector('span').textContent = res.q.length ? 'Essayez un autre mot (« burger », « kebab »…) ou un budget plus large.' : 'Essayez un budget plus large.';
+      const near = filters.radius !== null ? ' à moins de ' + formatDistance(filters.radius) : '';
+      p.querySelector('b').textContent = (res.q.length ? 'Aucun résultat pour « ' + query.trim() + ' »' : max !== null ? 'Aucun plat dans ce budget' : 'Aucun restaurant') + near;
+      p.querySelector('span').textContent = (res.q.length ? 'Essayez un autre mot (« burger », « kebab »…)' : 'Essayez')
+        + (max !== null ? ' un budget plus large' : '') + (near ? (max !== null ? ' ou' : '') + ' une distance plus grande.' : '.');
       box.appendChild(p);
       $('search-live').textContent = 'Aucun résultat';
       return;
@@ -5799,6 +5832,43 @@
     if (isDesktop()) { filters.max = max; applyFilters(); }
     else { Search.mobile.max = max; Search.mobile.limit = 30; renderSearchPanel(); }
   });
+
+  /* Distance : boutons (500 m à 5 km) ou curseur « Autre… » ; la position est demandée si elle manque */
+  function setRadius(r) {
+    filters.radius = r;
+    const preset = [...document.querySelectorAll('#radius .chip')].find((c) => c.dataset.r !== 'custom' && (c.dataset.r ? Number(c.dataset.r) : null) === r);
+    document.querySelectorAll('#radius .chip').forEach((c) => c.setAttribute('aria-pressed', String(preset ? c === preset : c.dataset.r === 'custom')));
+    const custom = document.querySelector('#radius [data-r="custom"]');
+    custom.textContent = preset || r === null ? 'Autre…' : 'Autre : ' + formatDistance(r);
+    applyFilters();
+    if (!$('search-panel').hidden) { Search.mobile.limit = 30; renderSearchPanel(); }
+  }
+  async function needPosition() {
+    if (Geo.position) return true;
+    const result = await requestLocation({ fromButton: true });
+    if (result === 'granted') return true;
+    toast('Activez la localisation pour trier par distance.');
+    return false;
+  }
+  $('radius').addEventListener('click', async (ev) => {
+    const chip = ev.target.closest('.chip');
+    if (!chip) return;
+    if (chip.dataset.r === 'custom') {
+      const box = $('radius-custom'), open = box.hidden;
+      box.hidden = !open;
+      chip.setAttribute('aria-expanded', String(open));
+      if (open && await needPosition()) setRadius(Number($('radius-range').value));
+      return;
+    }
+    const r = chip.dataset.r ? Number(chip.dataset.r) : null;
+    $('radius-custom').hidden = true;
+    document.querySelector('#radius [data-r="custom"]').setAttribute('aria-expanded', 'false');
+    if (r !== null && !(await needPosition())) return;
+    setRadius(r);
+  });
+  const radiusLabel = () => { $('radius-out').textContent = formatDistance(Number($('radius-range').value)); };
+  $('radius-range').addEventListener('input', () => { radiusLabel(); if (Geo.position) setRadius(Number($('radius-range').value)); });
+  radiusLabel();
 
   /* ---------- Avis : note sur 5, commentaire, réponse du restaurateur ---------- */
   // Colonnes lisibles des avis : l'identifiant du compte de l'auteur n'est jamais transmis (avis non reliables entre eux)
@@ -6872,7 +6942,7 @@
     const dist = $('shop-distance');
     if (Geo.position) {
       const d = distance(Geo.position, shop.coords);
-      dist.innerHTML = '<b></b> · environ <b></b> à pied<span class="travel">🚗 environ <b></b> en voiture</span>';
+      dist.innerHTML = '<b></b> · environ <b></b> à pied<span class="travel">environ <b></b> en voiture</span>';
       const [km, walk, car] = dist.querySelectorAll('b');
       km.textContent = formatDistance(d);
       walk.textContent = formatMinutes(walkMinutes(d));
@@ -7200,7 +7270,7 @@
     if (shop.promo) list.push({ id: 'offre', kind: /[ée]tudiant/i.test(shop.promo) ? 'student' : 'other', title: shop.promo });
     return list.sort((a, b) => PROMO_ORDER.indexOf(a.kind) - PROMO_ORDER.indexOf(b.kind));
   }
-  const promoLine = (p) => PROMO_KINDS[p.kind].icon + ' ' + p.title;
+  const promoLine = (p) => p.title;
   /** « Jusqu'à ce soir », « Jusqu'à dimanche soir », « Jusqu'au 12 novembre » */
   function promoUntil(p, now = new Date()) {
     if (!p.endsAt) return '';
@@ -7390,7 +7460,7 @@
       const g = groups[gi], st = current();
       if (!g || !st) return;
       const away = distanceLabel(g.shop);
-      $('sv-time').textContent = timeAgo(st.createdAt) + (away ? ' · 📍 ' + away : '');
+      $('sv-time').textContent = timeAgo(st.createdAt) + (away ? ' · ' + away : '');
       const status = getStatus(g.shop);
       const el = $('sv-status');
       el.className = 'sv-status ' + (status.soon ? 'is-soon' : status.open ? 'is-open' : 'is-closed');
@@ -7596,7 +7666,7 @@
       const left = Math.max(1, Math.round((new Date(st.expiresAt) - Date.now()) / 3600e3));
       li.querySelector('small').textContent = 'encore ' + left + ' h\npubliée ' + timeAgo(st.createdAt);
       const stat = ProSpace.storyStats(st.id);
-      if (stat) { const n = document.createElement('small'); n.className = 'sa-stats'; n.textContent = '👁 ' + stat.views + ' · ♥ ' + stat.likes; n.setAttribute('aria-label', plural(stat.views, 'vue', 'vues') + ', ' + plural(stat.likes, 'j\'aime', 'j\'aime')); li.appendChild(n); }
+      if (stat) { const n = document.createElement('small'); n.className = 'sa-stats'; n.textContent = plural(stat.views, 'vue', 'vues') + ' · ♥ ' + stat.likes; n.setAttribute('aria-label', plural(stat.views, 'vue', 'vues') + ', ' + plural(stat.likes, 'j\'aime', 'j\'aime')); li.appendChild(n); }
       li.querySelector('.sa-del').setAttribute('aria-label', 'Supprimer la story publiée ' + timeAgo(st.createdAt));
       li.querySelector('.sa-del').addEventListener('click', async () => {
         if (!window.confirm('Supprimer cette story ?')) return;
@@ -7663,7 +7733,7 @@
       li.querySelector('strong').textContent = p.title;
       const until = promoUntil(p);
       const stat = ProSpace.promoStats(p.id);
-      li.querySelector('small').textContent = PROMO_KINDS[p.kind].label + (until ? ' · ' + until : ' · sans date de fin') + (p.details ? ' · ' + p.details : '') + (stat ? ' · 👆 ' + plural(stat.clicks, 'clic', 'clics') : '');
+      li.querySelector('small').textContent = PROMO_KINDS[p.kind].label + (until ? ' · ' + until : ' · sans date de fin') + (p.details ? ' · ' + p.details : '') + (stat ? ' · ' + plural(stat.clicks, 'clic', 'clics') : '');
       li.querySelector('button').setAttribute('aria-label', 'Retirer la promotion « ' + p.title + ' »');
       li.querySelector('button').addEventListener('click', async () => {
         const { error } = await sb.from('promotions').delete().eq('id', p.id);
@@ -7852,7 +7922,7 @@
     Geo.accuracy = pos.coords.accuracy;
     whenMapReady(drawUserLocation);
     setLocateState('active');
-    renderList();
+    if (filters.radius !== null) applyFilters(); else renderList();
     Offers.refresh();
     StoryViewer.refreshDistance();
 
@@ -8109,7 +8179,7 @@
       SiteStats.track('installed');
       markDone();
       closePanel($('install-sheet'));
-      toast('FlashMiam est sur votre écran d\'accueil 🎉');
+      toast('FlashMiam est sur votre écran d\'accueil.');
     });
     $('install-go').addEventListener('click', go);
     $('install-done').addEventListener('click', () => {
@@ -9615,7 +9685,7 @@
     $('pl-desc').value = r ? r.description : '';
     $('pl-desc-count').textContent = $('pl-desc').value.length + ' / 600';
     $('pl-address').value = listed ? r.address : '';
-    $('pl-address-status').textContent = listed ? '📍 Adresse localisée sur la carte' : '';
+    $('pl-address-status').textContent = listed ? 'Adresse localisée sur la carte' : '';
     $('pl-use-sirene').hidden = !company.address || !!listed;
     const [s1, s2] = listed && r.hours.length ? r.hours : [['11:30', '14:30'], ['18:30', '22:30']];
     $('pl-h1-on').checked = !!s1; if (s1) { $('pl-h1-from').value = s1[0]; $('pl-h1-to').value = s1[1]; }
@@ -10089,7 +10159,7 @@
   function chooseAddress(a) {
     proDraft.address = { label: a.label, coords: a.coords };
     addrInput.value = a.label;
-    $('pl-address-status').textContent = '📍 Adresse localisée sur la carte';
+    $('pl-address-status').textContent = 'Adresse localisée sur la carte';
     setFieldError('pl-address', '');
     closeAddrList();
   }
@@ -10401,7 +10471,7 @@
       const s = stateOf();
       const { account, r } = s;
       const hello = $('ps-hello');
-      hello.textContent = 'Bonjour ' + (account.name || '') + ' 👋';
+      hello.textContent = 'Bonjour ' + (account.name || '');
       const sm = document.createElement('small');
       sm.textContent = s.listed ? 'Voici ce que vos clients ont fait ces ' + plural(days, 'dernier jour', 'derniers jours') + '.' : 'Bienvenue dans votre espace restaurateur.';
       hello.appendChild(sm);
@@ -10572,8 +10642,8 @@
         hbars(bars, rows.filter((x) => x.n || !x.optional), { share: true, empty: 'Personne n\'a répondu.' });
       };
       group('Sexe', [
-        { key: 'female', label: '👩 Femmes', n: A.female }, { key: 'male', label: '👨 Hommes', n: A.male },
-        { key: 'other', label: '🌈 Autre', n: A.other }, { key: 'unknown', label: 'Non précisé', n: A.gender_unknown, optional: true },
+        { key: 'female', label: 'Femmes', n: A.female }, { key: 'male', label: 'Hommes', n: A.male },
+        { key: 'other', label: 'Autre', n: A.other }, { key: 'unknown', label: 'Non précisé', n: A.gender_unknown, optional: true },
       ]);
       group('Âge', [
         { key: '15', label: '15-17 ans', n: A.age_15_17 }, { key: '18', label: '18-24 ans', n: A.age_18_24 },
@@ -10653,11 +10723,11 @@
       renderAudience(data.audience);
       // Actions sur la fiche
       hbars($('ps-acts'), [
-        { key: 'menu', label: '📖 Menu consulté', n: T.menu }, { key: 'photos', label: '🖼️ Photos regardées', n: T.photos },
-        { key: 'reviews', label: '⭐ Avis lus', n: T.reviews_tab }, { key: 'walk', label: '🚶 Itinéraire à pied', n: T.walk },
-        { key: 'car', label: '🚗 Itinéraire en voiture', n: T.car }, { key: 'phone', label: '📞 Appel', n: T.phone },
-        { key: 'share', label: '🔗 Partage de la fiche', n: T.shares }, { key: 'google', label: '🌐 Avis Google ouverts', n: T.google },
-        { key: 'offer', label: '🎁 Clic sur une de vos offres', n: T.offer_clicks }, { key: 'story_cta', label: '📸 Fiche ouverte depuis une story', n: T.story_cta },
+        { key: 'menu', label: 'Menu consulté', n: T.menu }, { key: 'photos', label: 'Photos regardées', n: T.photos },
+        { key: 'reviews', label: 'Avis lus', n: T.reviews_tab }, { key: 'walk', label: 'Itinéraire à pied', n: T.walk },
+        { key: 'car', label: 'Itinéraire en voiture', n: T.car }, { key: 'phone', label: 'Appel', n: T.phone },
+        { key: 'share', label: 'Partage de la fiche', n: T.shares }, { key: 'google', label: 'Avis Google ouverts', n: T.google },
+        { key: 'offer', label: 'Clic sur une de vos offres', n: T.offer_clicks }, { key: 'story_cta', label: 'Fiche ouverte depuis une story', n: T.story_cta },
         { key: 'story_like', label: '♥ « J\'aime » sur une story', n: T.story_likes },
       ], { empty: 'Aucune action sur la période.' });
       // Abonnés et fidélité
@@ -10692,7 +10762,7 @@
       pb.textContent = '';
       (data.promos || []).forEach((p) => {
         const tr = pb.insertRow();
-        tr.insertCell().textContent = ((PROMO_KINDS[p.kind] || {}).icon || '🎁') + ' ' + p.title;
+        tr.insertCell().textContent = p.title;
         const st = tr.insertCell();
         st.textContent = p.active ? 'en cours' : 'terminée';
         if (p.active) st.className = 'is-live';
@@ -10783,7 +10853,7 @@
       const list = rvFilter === 'todo' ? todo : rvList;
       if (!list.length) {
         const li = document.createElement('li'); li.className = 'rv-empty';
-        li.textContent = !rvList.length ? 'Pas encore d\'avis. Ils apparaîtront ici dès qu\'un client en publiera un.' : 'Vous avez répondu à tous les avis 👍';
+        li.textContent = !rvList.length ? 'Pas encore d\'avis. Ils apparaîtront ici dès qu\'un client en publiera un.' : 'Vous avez répondu à tous les avis.';
         ul.appendChild(li); return;
       }
       list.forEach((x) => ul.appendChild(reviewItem(r, x)));
@@ -11131,7 +11201,7 @@
       entryPromo = offers[0] || null;
       $('shop-visit-title').textContent = entryPromo ? 'Profiter de l\'offre' : 'Valider ma visite';
       $('shop-visit-sub').textContent = entryPromo
-        ? PROMO_KINDS[entryPromo.kind].icon + ' ' + entryPromo.title + (offers.length > 1 ? ' · et ' + plural(offers.length - 1, 'autre offre', 'autres offres') + ' plus bas' : '')
+        ? entryPromo.title + (offers.length > 1 ? ' · et ' + plural(offers.length - 1, 'autre offre', 'autres offres') + ' plus bas' : '')
         : 'Un QR code à montrer en caisse';
       $('shop-visit').setAttribute('aria-label', (entryPromo ? 'Profiter de l\'offre « ' + entryPromo.title + ' »' : 'Valider ma visite') + ' chez ' + shop.name + ' : afficher mon QR code');
       $('shop-visit-plain').hidden = !entryPromo;
@@ -11160,7 +11230,7 @@
       $('vp-emoji').textContent = catOf(m.shop).emoji;
       $('vp-shop').textContent = m.shop.name;
       $('vp-offer').hidden = !promo;
-      $('vp-offer').textContent = promo ? PROMO_KINDS[promo.kind].icon + ' ' + promo.title : '';
+      $('vp-offer').textContent = promo ? promo.title : '';
       $('vp-title').textContent = promo ? 'Montrez ce QR code pour profiter de l\'offre' : 'Montrez ce QR code au restaurateur';
       $('vp-code').hidden = true;
       $('vp-timer').textContent = '';
@@ -11267,7 +11337,7 @@
       const n = Number(d.visit_number) || 1;
       $('vp-title').textContent = promo ? 'Offre validée !' : 'Visite validée !';
       $('vp-status').className = 'vp-status is-ok';
-      $('vp-status').textContent = n > 1 ? nth(n) + ' visite chez ' + name + ' 🎉' : 'Première visite chez ' + name + ' 🎉';
+      $('vp-status').textContent = n > 1 ? nth(n) + ' visite chez ' + name : 'Première visite chez ' + name;
       $('vp-code').hidden = true;
       $('vp-timer').textContent = promo ? 'Le restaurateur applique l\'offre sur votre commande.' : 'Merci et bon appétit !';
       $('vp-hint').hidden = true;
@@ -11497,19 +11567,19 @@
         return;
       }
       const d = data || {};
-      const offer = d.promo_title ? '🎁 À appliquer : ' + d.promo_title : '';
+      const offer = d.promo_title ? 'À appliquer : ' + d.promo_title : '';
       switch (d.status) {
         case 'ok': {
           const n = Number(d.visit_number) || 1;
           if (summary) { summary.today = (summary.today || 0) + 1; if (d.promo_title) summary.today_offers = (summary.today_offers || 0) + 1; renderCount(); }
-          show('ok', d.promo_title ? 'Offre validée' : 'Visite validée', n > 1 ? nth(n) + ' visite de ce client chez vous' : 'Première visite de ce client chez vous 🎉', {
+          show('ok', d.promo_title ? 'Offre validée' : 'Visite validée', n > 1 ? nth(n) + ' visite de ce client chez vous' : 'Première visite de ce client chez vous', {
             offer, warn: d.promo_used_today ? '⚠️ Ce client a déjà profité de cette offre aujourd\'hui.' : '', wait: d.promo_title || d.promo_used_today ? 7000 : 2600 });
           setTimeout(loadSummary, 800);
           break;
         }
         case 'duplicate': {
           const min = Number(d.minutes_ago) || 0;
-          show('warn', 'Déjà validé', 'Ce client a été validé ' + (min < 1 ? 'à l\'instant' : 'il y a ' + min + ' min') + ' : sa visite n\'est pas comptée deux fois.', { offer: d.promo_title ? '🎁 Offre : ' + d.promo_title : '', wait: 4500 });
+          show('warn', 'Déjà validé', 'Ce client a été validé ' + (min < 1 ? 'à l\'instant' : 'il y a ' + min + ' min') + ' : sa visite n\'est pas comptée deux fois.', { offer: d.promo_title ? 'Offre : ' + d.promo_title : '', wait: 4500 });
           break;
         }
         case 'used': show('bad', 'QR code déjà utilisé', 'Chaque QR code ne sert qu\'une fois : le client doit afficher son nouveau QR code.', { wait: 4000 }); break;
@@ -11657,7 +11727,7 @@
         ].filter((st) => visible(st.el()));
       }
       return [
-        { el: centralPin, title: 'Bienvenue sur FlashMiam 👋', text: 'Chaque pastille est un restaurant : touchez-en une pour voir le menu, les photos, les horaires et les avis.', round: true },
+        { el: centralPin, title: 'Bienvenue sur FlashMiam', text: 'Chaque pastille est un restaurant : touchez-en une pour voir le menu, les photos, les horaires et les avis.', round: true },
         { el: () => $('offers-btn'), title: 'Les bons plans autour de vous', text: 'Promos du jour, offres étudiantes… les plus proches d\'abord.' },
         { el: null, demo: true, title: 'Profitez-en en caisse', text: 'Dans la fiche, « Profiter de l\'offre » affiche un QR code : montrez-le au restaurateur, il le scanne et c\'est validé.' },
         { el: () => (desktop() ? $('search') : $('search-open')), title: 'Une envie précise ?', text: 'Cherchez un plat (« tacos », « crêpe »…) ou un restaurant.' },
