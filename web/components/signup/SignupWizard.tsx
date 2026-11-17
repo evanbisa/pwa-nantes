@@ -618,7 +618,7 @@ function Wizard() {
               <Field label="Code reçu par e-mail" errorId="err-code" error={errors.code}>
                 <input
                   id="su-code" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={8} enterKeyHint="go"
-                  placeholder="––––––" value={code} aria-describedby="err-code"
+                  placeholder="––––––––" value={code} aria-describedby="err-code"
                   onChange={(e) => {
                     const digits = e.target.value.replace(/\D/g, "").slice(0, 8);
                     setCode(digits);
