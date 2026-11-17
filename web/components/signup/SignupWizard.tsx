@@ -290,7 +290,7 @@ function Wizard() {
   async function verifyCode(ev?: FormEvent) {
     ev?.preventDefault();
     const digits = code.replace(/\D/g, "");
-    if (digits.length !== 6) return setError("code", "Saisissez les 6 chiffres reçus par e-mail.");
+    if (digits.length < 6 || digits.length > 8) return setError("code", "Saisissez le code reçu par e-mail (6 à 8 chiffres).");
     if (busy) return;
     setBusy(true);
     setError("code", null);
@@ -612,18 +612,18 @@ function Wizard() {
             <form onSubmit={verifyCode} noValidate className="flex flex-1 flex-col">
               <Title id="q-code">Vérifiez votre <Em>adresse e-mail</Em></Title>
               <Hint>
-                Un code à 6 chiffres vient d&apos;être envoyé à <strong className="break-all text-slate-900 dark:text-zinc-50">{cleanEmail}</strong>.
+                Un code vient d&apos;être envoyé à <strong className="break-all text-slate-900 dark:text-zinc-50">{cleanEmail}</strong>.
                 Saisissez-le pour activer votre compte (pensez à regarder dans les courriers indésirables).
               </Hint>
               <Field label="Code reçu par e-mail" errorId="err-code" error={errors.code}>
                 <input
-                  id="su-code" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6} enterKeyHint="go"
+                  id="su-code" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={8} enterKeyHint="go"
                   placeholder="––––––" value={code} aria-describedby="err-code"
                   onChange={(e) => {
-                    const digits = e.target.value.replace(/\D/g, "").slice(0, 6);
+                    const digits = e.target.value.replace(/\D/g, "").slice(0, 8);
                     setCode(digits);
                     setError("code", null);
-                    if (digits.length === 6) setTimeout(() => (document.getElementById("su-code") as HTMLInputElement | null)?.form?.requestSubmit(), 0);
+                    if (digits.length === 8) setTimeout(() => (document.getElementById("su-code") as HTMLInputElement | null)?.form?.requestSubmit(), 0);
                   }}
                   className={`${inputClass(!!errors.code)} text-center text-2xl tracking-[0.5em] tabular-nums`}
                 />
@@ -632,7 +632,7 @@ function Wizard() {
                 Vous avez déjà un compte avec cette adresse ? Aucun code n&apos;est envoyé dans ce cas :{" "}
                 <button type="button" className={linkClass} onClick={() => openLogin(cleanEmail)}>connectez-vous</button>.
               </p>
-              <Primary busy={busy} disabled={code.length !== 6}>{busy ? "Vérification…" : "Valider le code"}</Primary>
+              <Primary busy={busy} disabled={code.length < 6}>{busy ? "Vérification…" : "Valider le code"}</Primary>
               <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
                 <button id="su-resend" type="button" disabled={resendIn > 0 || busy} onClick={resendCode}
                   className="rounded-full px-3 py-2 font-medium text-brand underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:text-slate-400 disabled:no-underline dark:text-brand-night">
