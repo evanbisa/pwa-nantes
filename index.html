@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-o9xCUBp2PUMicS2f4n0xBsY6b5pKlcazBALj5uvbnCo=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-Ye1ue9alYumXhxf7tbgE0UhDaGmociZ4nv3iUUG7F7Y=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -3149,7 +3149,7 @@
       <form id="ob-email-code" class="ob-step" novalidate data-step="verify-email" hidden aria-labelledby="ec-title">
         <div class="mail-badge" aria-hidden="true">✉️</div>
         <h2 id="ec-title">Vérifiez votre <em>adresse e-mail</em></h2>
-        <p class="lead" id="ec-lead">Un code à 6 chiffres a été envoyé à <b id="ec-email"></b>. Saisissez-le ci-dessous (vous pouvez aussi cliquer sur le lien de l'e-mail).</p>
+        <p class="lead" id="ec-lead">Un code a été envoyé à <b id="ec-email"></b>. Saisissez-le ci-dessous (vous pouvez aussi cliquer sur le lien de l'e-mail).</p>
         <label class="field" id="field-ec-code">
           <span>Code de vérification</span>
           <input id="ec-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="––––––" aria-describedby="ec-lead" />
@@ -3166,7 +3166,7 @@
       <form id="ob-reset" class="ob-step" novalidate data-step="reset-password" hidden aria-labelledby="rs-title">
         <div class="mail-badge" aria-hidden="true">🔑</div>
         <h2 id="rs-title">Nouveau <em>mot de passe</em></h2>
-        <p class="lead" id="rs-lead">Si un compte FlashMiam existe avec l'adresse <b id="rs-email"></b>, un code à 6 chiffres vient d'y être envoyé. Saisissez-le, puis choisissez votre nouveau mot de passe.</p>
+        <p class="lead" id="rs-lead">Si un compte FlashMiam existe avec l'adresse <b id="rs-email"></b>, un code vient d'y être envoyé. Saisissez-le, puis choisissez votre nouveau mot de passe.</p>
         <label class="field" id="field-rs-code">
           <span>Code reçu par e-mail</span>
           <input id="rs-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="––––––" />
@@ -8422,10 +8422,10 @@
   });
   $('ec-code').addEventListener('input', () => {
     const input = $('ec-code');
-    const digits = onlyDigits(input.value).slice(0, 6);
+    const digits = onlyDigits(input.value).slice(0, 8);
     if (digits !== input.value) input.value = digits;
     $('err-email-code').textContent = '';
-    if (digits.length === 6) $('ob-email-code').requestSubmit();   // validation automatique au 6e chiffre
+    if (digits.length === 8) $('ob-email-code').requestSubmit();   // validation automatique au 8e chiffre (code de 6 : bouton)
   });
 
   let verifying = false;
@@ -8434,7 +8434,7 @@
     const check = emailCheck;
     if (!check || verifying) return;
     const code = onlyDigits($('ec-code').value);
-    if (code.length !== 6) { setFieldError('ec-code', 'Saisissez les 6 chiffres reçus par e-mail.'); return; }
+    if (code.length < 6 || code.length > 8) { setFieldError('ec-code', 'Saisissez le code reçu par e-mail (6 à 8 chiffres).'); return; }
     verifying = true;
     let { data, error } = await Loader.run(sb.auth.verifyOtp({ email: check.email, token: code, type: 'email' }), 'Vérification du code…');
     if (error) ({ data, error } = await sb.auth.verifyOtp({ email: check.email, token: code, type: 'signup' }));
@@ -9070,13 +9070,13 @@
     if (error) { $('err-login').textContent = captchaRefused(error) ? Captcha.failMessage : cloudError(error); return; }
     showReset(email);
   });
-  $('rs-code').addEventListener('input', () => { const d = onlyDigits($('rs-code').value).slice(0, 6); if (d !== $('rs-code').value) $('rs-code').value = d; });
+  $('rs-code').addEventListener('input', () => { const d = onlyDigits($('rs-code').value).slice(0, 8); if (d !== $('rs-code').value) $('rs-code').value = d; });
   $('ob-reset').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const code = onlyDigits($('rs-code').value);
     const password = $('rs-password').value;
     let bad = false;
-    if (!resetByLink && code.length !== 6) { setFieldError('rs-code', 'Saisissez les 6 chiffres reçus par e-mail.'); bad = true; }
+    if (!resetByLink && (code.length < 6 || code.length > 8)) { setFieldError('rs-code', 'Saisissez le code reçu par e-mail (6 à 8 chiffres).'); bad = true; }
     const missing = missingPasswordRules(password);
     if (missing.length) { setFieldError('rs-password', 'Mot de passe trop faible : il manque ' + listFr(missing.map((r) => r.label)) + '.'); bad = true; }
     if (bad) return;
