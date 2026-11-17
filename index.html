@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-aCZyZKQWSGfMVBwK1lDdAFqt+Wrpa0smXE9E7nisX8M=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-fCzAioNczAlAyeSrJWR/DulRX9b3KU1B+puUOUX7aUo=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -2167,6 +2167,49 @@
     .shop-actions .act[aria-pressed="true"] svg { color: var(--on-accent); background: var(--accent); }
     .shop-actions .act:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     @media (min-width: 900px) { .shop-actions { flex-wrap: nowrap; } }
+    /* ----- Restaurateur : « mode service » sur téléphone (scanner en écran d'accueil, tableau de bord en bas) ----- */
+    .scan { --cam-h: 100%; }
+    .scan.is-home { --cam-h: 78%; }
+    .scan.is-home video { height: var(--cam-h); }
+    .scan.is-home .scan-frame { top: calc(var(--cam-h) * .5); width: min(66vw, 280px, 40vh); }
+    .scan.is-home .scan-help { top: calc(var(--cam-h) * .5 + min(33vw, 140px, 20vh) + 16px); }
+    .scan.is-home .scan-off { top: calc(var(--cam-h) * .45); }
+    .scan.is-home .scan-foot { bottom: calc(100% - var(--cam-h)); padding-bottom: 16px; }
+    .scan.is-home .scan-result { bottom: calc(100% - var(--cam-h) + 12px); }
+    .scan.is-home #scan-close { visibility: hidden; }
+    .scan-dock { position: absolute; left: 0; right: 0; bottom: 0; height: calc(100% - var(--cam-h)); min-height: 136px; display: flex; flex-direction: column; justify-content: center; gap: 10px;
+      padding: 14px max(16px, env(safe-area-inset-right, 0px)) calc(var(--safe-bottom) + 14px) max(16px, env(safe-area-inset-left, 0px));
+      color: var(--text); background: var(--panel-solid); border-radius: 24px 24px 0 0; box-shadow: 0 -8px 30px rgba(0, 0, 0, .35); }
+    .scan-dock[hidden] { display: none; }
+    .dock-main { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 64px; padding: 10px 16px; border-radius: 18px; text-align: left; color: var(--on-accent); background: var(--accent); }
+    .dock-main:active, .dock-sec:active { transform: scale(.985); }
+    .dock-main svg { flex: none; width: 28px; height: 28px; }
+    .dock-main > span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+    .dock-main strong { font-size: 17px; font-weight: 600; }
+    .dock-main small { font-size: 13px; opacity: .88; }
+    .dock-main b { flex: none; font-size: 26px; font-weight: 400; line-height: 1; }
+    .dock-sec { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 44px; border-radius: 14px; font-size: 14.5px; font-weight: 500; color: var(--text); background: var(--hover); }
+    .dock-sec svg { width: 20px; height: 20px; }
+    /* Tableau de bord : grandes tuiles d'accès direct */
+    .ps-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 18px; }
+    @media (min-width: 640px) { .ps-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+    .ps-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; min-height: 96px; padding: 14px; border-radius: 16px; text-align: left; color: var(--text); background: var(--panel-solid); border: 1px solid var(--line); transition: transform .15s, box-shadow .2s; }
+    .ps-tile:hover { box-shadow: 0 6px 16px rgba(60, 64, 67, .14); }
+    .ps-tile:active { transform: scale(.98); }
+    .ps-tile i { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 11px; color: var(--accent); background: var(--accent-soft); }
+    .ps-tile i svg { width: 20px; height: 20px; }
+    .ps-tile strong { font-size: 14.5px; font-weight: 600; line-height: 1.25; }
+    .ps-tile small { font-size: 12.5px; line-height: 1.3; color: var(--muted); }
+    /* Aperçu client : bandeau en haut, interface du restaurateur masquée */
+    .preview-bar { position: fixed; z-index: 140; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 10px;
+      padding: calc(env(safe-area-inset-top, 0px) + 8px) max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px));
+      color: var(--on-accent); background: var(--accent); box-shadow: 0 2px 12px rgba(0, 0, 0, .25); font-size: 14px; }
+    .preview-bar[hidden] { display: none; }
+    .preview-bar p { flex: 1; min-width: 0; margin: 0; line-height: 1.3; }
+    .preview-bar small { display: block; font-size: 12.5px; opacity: .88; }
+    .preview-bar button { flex: none; height: 38px; padding: 0 14px; border-radius: 19px; font-weight: 600; color: var(--accent); background: #fff; }
+    body.client-preview { --safe-top: calc(env(safe-area-inset-top, 0px) + 56px); }
+    body.client-preview .scan-fab, body.client-preview #profile-btn { display: none !important; }
   </style>
 </head>
 
@@ -2724,6 +2767,17 @@
       <p class="sr-warn" id="sr-warn" hidden></p>
       <button class="btn btn-primary sr-next" type="button" id="sr-next"><i id="sr-bar"></i><span>Client suivant</span></button>
     </div>
+    <!-- Mode service (téléphone) : le tableau de bord à portée de pouce, sous la caméra -->
+    <nav class="scan-dock" id="scan-dock" aria-label="Espace restaurateur" hidden>
+      <button class="dock-main" type="button" id="dock-dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg><span><strong>Mon tableau de bord</strong><small>Stats, carte, horaires, stories, avis</small></span><b aria-hidden="true">›</b></button>
+      <button class="dock-sec" type="button" id="dock-preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zM12 15a3 3 0 100-6 3 3 0 000 6z"/></svg>Voir ma fiche comme un client</button>
+    </nav>
+  </div>
+
+  <!-- Aperçu client (restaurateur) -->
+  <div class="preview-bar" id="preview-bar" role="status" hidden>
+    <p><b>Aperçu client</b><small>Vous voyez FlashMiam comme vos clients.</small></p>
+    <button type="button" id="preview-exit">Revenir à mon espace</button>
   </div>
 
   <div id="pro-space" class="pro-space" role="dialog" aria-modal="true" aria-labelledby="ps-title" hidden>
@@ -2762,6 +2816,16 @@
               <span class="ps-scan-txt"><strong>Scanner un client</strong><small id="ps-scan-sub">Visite ou offre : scannez le QR code de son téléphone</small></span>
               <span class="ps-scan-today"><b id="ps-scan-n">–</b><small>aujourd'hui</small></span>
             </button>
+            <div class="ps-tiles ps-wide" id="ps-tiles" role="group" aria-label="Accès rapides">
+              <button class="ps-tile" type="button" data-act="story"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></i><strong>Publier une story</strong><small>Photo ou texte, 24 h</small></button>
+              <button class="ps-tile" type="button" data-act="promo"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0L2 12V2h10l8.6 8.6a2 2 0 010 2.8zM7 7h.01"/></svg></i><strong>Créer une offre</strong><small>Promo pour attirer du monde</small></button>
+              <button class="ps-tile" type="button" data-act="menu"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg></i><strong>Ma carte</strong><small>Plats et prix</small></button>
+              <button class="ps-tile" type="button" data-act="hours"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v5l3 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></i><strong>Horaires</strong><small>Ouverture et fermeture</small></button>
+              <button class="ps-tile" type="button" data-act="stats"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></i><strong>Statistiques</strong><small>Vues, visites, clients</small></button>
+              <button class="ps-tile" type="button" data-act="reviews"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></i><strong>Avis</strong><small>Lire et répondre</small></button>
+              <button class="ps-tile" type="button" data-act="preview"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zM12 15a3 3 0 100-6 3 3 0 000 6z"/></svg></i><strong>Voir comme un client</strong><small>Ma fiche côté client</small></button>
+              <button class="ps-tile" type="button" data-act="edit"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></i><strong>Toute ma fiche</strong><small>Photos, description, adresse</small></button>
+            </div>
             <div class="ps-cards" id="ps-cards"></div>
             <figure class="chart ps-home-chart">
               <figcaption>Vues de la fiche par jour<small id="ph-chart-sub"></small></figcaption>
@@ -2771,15 +2835,6 @@
             <section class="ps-block" aria-labelledby="ps-todo-title">
               <h3 id="ps-todo-title">À faire</h3>
               <ul class="ps-todo" id="ps-todo"></ul>
-            </section>
-            <section class="ps-block ps-wide" aria-labelledby="ps-quick-title">
-              <h3 id="ps-quick-title">Actions rapides</h3>
-              <div class="ps-quick" id="ps-quick">
-                <button type="button" data-act="story">Story</button>
-                <button type="button" data-act="promo">Promo</button>
-                <button type="button" data-act="edit">Ma fiche</button>
-                <button type="button" data-act="show">Aperçu</button>
-              </div>
             </section>
             <section class="ps-block ps-wide" aria-labelledby="ps-insights-title">
               <h3 id="ps-insights-title">Ce qu'il faut retenir</h3>
@@ -2959,7 +3014,7 @@
               <div><dt>Abonnement</dt><dd id="pd-plan"></dd></div>
             </dl>
           </section>
-          <button class="btn btn-ghost" type="button" id="pd-show">Voir ma fiche sur la carte</button>
+          <button class="btn btn-ghost" type="button" id="pd-show">Voir ma fiche comme un client</button>
           <button class="btn btn-ghost" type="button" id="ps-share">Partager le lien de ma fiche</button>
           <button class="btn btn-ghost" type="button" id="ps-account">Mon compte (profil, déconnexion)</button>
         </section>
@@ -5909,7 +5964,7 @@
     }
     const mineIn = (list, id) => (list && myReviewIds && myReviewIds[id] ? list.find((r) => r.id === myReviewIds[id]) || null : null);
     const starText = (n) => '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
-    const canReview = (shop, me = currentUser()) => !!(shop.isPro && me && me.role === 'client' && !isOwnShop(shop.id, me));
+    const canReview = (shop, me = currentUser()) => !!(shop.isPro && me && (me.role === 'client' || previewAsClient) && !isOwnShop(shop.id, me));
     const ownShop = (shop) => !!(shop.isPro && isOwnShop(shop.id));
 
     async function load(id) {
@@ -7125,7 +7180,10 @@
   })();
 
   /* ---------- Abonnements (« Suivre » un restaurant) ---------- */
+  /** Aperçu client : le restaurateur voit sa fiche comme un client (ni « ma fiche », ni statistiques comptées). */
+  let previewAsClient = false;
   function isOwnShop(shopId, account = currentUser()) {
+    if (previewAsClient) return false;
     const r = restaurants()[shopId];
     return !!(r && account && r.ownerId === account.id);
   }
@@ -7185,7 +7243,7 @@
     /** Évènement sur une fiche inscrite (la base ignore les visites du restaurateur sur sa propre fiche,
      *  ne compte que les personnes connectées, et au plus 50 actions par personne, fiche et jour). */
     function track(shopId, event, { ref = null, source = null } = {}) {
-      if (!Consent.has('stats') || !currentUser() || !restaurants()[shopId] || !EVENTS[event]) return;   // statistiques refusées : rien n'est envoyé
+      if (previewAsClient || !Consent.has('stats') || !currentUser() || !restaurants()[shopId] || !EVENTS[event]) return;   // statistiques refusées : rien n'est envoyé
       sb.rpc('track_visit', { p_merchant_id: shopId, p_event: EVENTS[event], p_ref: ref && UUID_RE.test(ref) ? ref : null, p_source: source })
         .then(() => {}, () => {});
     }
@@ -10412,6 +10470,7 @@
       root.hidden = false;
       document.body.classList.add('pro-open');
       setTab(t, { focus: true });
+      $('ps-close').setAttribute('aria-label', ProHome.canScanHome() ? 'Retour au scanner' : 'Fermer l\'espace restaurateur');
       render();
       load();
       Scanner.loadSummary();
@@ -10420,12 +10479,14 @@
       clearInterval(timer);
       timer = setInterval(() => { if (!document.hidden && tab !== 'publish') load(); }, 60 * 1000);
     }
-    function close() {
+    /** toHome : sur téléphone, on revient au scanner (écran d'accueil du restaurateur) au lieu de la carte. */
+    function close({ toHome = false } = {}) {
       if (!isOpen()) return;
       root.hidden = true;
       clearInterval(timer);
       replyFor = null;
       document.body.classList.remove('pro-open');
+      if (toHome && ProHome.scanHome()) return;
       if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
     }
 
@@ -10456,9 +10517,9 @@
         setTab(TABS[(i + step + TABS.length) % TABS.length], { focus: true });
       });
     });
-    $('ps-close').addEventListener('click', close);
-    root.addEventListener('click', (ev) => { if (ev.target === root) close(); });
-    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && isOpen() && !activePanel && $('onboarding').hidden) { ev.preventDefault(); close(); } });
+    $('ps-close').addEventListener('click', () => close({ toHome: true }));
+    root.addEventListener('click', (ev) => { if (ev.target === root) close({ toHome: true }); });
+    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && isOpen() && !activePanel && $('onboarding').hidden) { ev.preventDefault(); close({ toHome: true }); } });
 
     /** Chiffres de la période (et de la précédente), calculés par la base. */
     async function load() {
@@ -11098,10 +11159,12 @@
     $('ps-visible').addEventListener('click', () => setVisible($('ps-visible').getAttribute('aria-checked') !== 'true'));
 
     /* ----- Actions ----- */
-    function editListing() {
+    /** Formulaire de la fiche ; field : rubrique à montrer directement (carte, horaires). */
+    function editListing(field = null) {
       close();
       const step = proStepFor(currentUser());
       showAuthStep(step || 'pro-listing', { mode: step ? 'create' : 'edit' });
+      if (field && !step) setTimeout(() => { const f = $(field); if (f) f.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' }); }, 450);
     }
     function showOnMap(tabName) {
       const r = myRestaurant();
@@ -11120,11 +11183,14 @@
       try { await navigator.clipboard.writeText(url); toast('Lien de votre fiche copié : collez-le sur vos réseaux, dans un message…'); }
       catch (e) { toast('Lien de votre fiche : ' + url); }
     }
-    const ACTIONS = { story: () => StoryComposer.open(), promo: goPromo, edit: editListing, show: () => showOnMap() };
-    $('ps-quick').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => ACTIONS[b.dataset.act]()));
+    const ACTIONS = {
+      story: () => StoryComposer.open(), promo: goPromo, edit: () => editListing(), menu: () => editListing('field-pl-menu'), hours: () => editListing('field-pl-hours'),
+      stats: () => setTab('stats'), reviews: () => setTab('reviews'), preview: () => ClientPreview.start(),
+    };
+    $('ps-tiles').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => ACTIONS[b.dataset.act]()));
     $('ps-more-stats').addEventListener('click', () => setTab('stats'));
-    $('pd-edit').addEventListener('click', editListing);
-    $('pd-show').addEventListener('click', () => showOnMap());
+    $('pd-edit').addEventListener('click', () => editListing());
+    $('pd-show').addEventListener('click', () => ClientPreview.start());
     $('pd-reviews').addEventListener('click', () => showOnMap('reviews'));
     $('ps-share').addEventListener('click', shareListing);
     $('ps-account').addEventListener('click', () => { close(); openProfileSheet(); });
@@ -11239,7 +11305,7 @@
     let shopId = null, promo = null, token = null, prevToken = null, prevUntil = 0, issuedAt = 0, seq = 0;
     let tick = null, poll = null, ring = null, lock = null, lastFocus = null, done = false, failures = 0, prefetched = false, renewing = false;
     const isOpen = () => !root.hidden;
-    const canUse = (shop, me = currentUser()) => !!(shop && shop.isPro && UUID_RE.test(shop.id) && me && me.role === 'client' && !isOwnShop(shop.id, me));
+    const canUse = (shop, me = currentUser()) => !!(shop && shop.isPro && UUID_RE.test(shop.id) && me && (me.role === 'client' || previewAsClient) && !isOwnShop(shop.id, me));
 
     let entryPromo = null;
     /** Offres de la fiche utilisables avec le QR code (enregistrées dans la base), la plus intéressante d'abord. */
@@ -11432,7 +11498,7 @@
     const HELP = 'Visez le QR code du client';
     let stream = null, track = null, detector = null, detectorPrep = null, worker = null, loopTimer = null, camSeq = 0, busy = false, manual = false;
     const seen = new Map();            // codes déjà traités → dernière fois vus devant la caméra
-    let wrongAt = 0, summary = null, lastFocus = null, nextTimer = null, bar = null, canvas = null, ctx = null;
+    let wrongAt = 0, summary = null, lastFocus = null, nextTimer = null, bar = null, canvas = null, ctx = null, homeMode = false;
     const isOpen = () => !root.hidden;
     const nf = (n) => Number(n || 0).toLocaleString('fr-FR');
     const listed = () => { const r = myRestaurant(); return !!(r && r.published); };
@@ -11450,11 +11516,15 @@
     }
     function help(text, warn = false) { $('scan-help').textContent = text; $('scan-help').classList.toggle('is-warn', warn); }
 
-    async function open({ code = null } = {}) {
+    /** home : « mode service » du téléphone (caméra en haut, tableau de bord en bas, pas de bouton Fermer). */
+    async function open({ code = null, home = null } = {}) {
       const me = currentUser();
       if (!me || me.role !== 'pro') return;
       if (!isOpen()) lastFocus = document.activeElement;
       if (activePanel) closePanel(activePanel);
+      homeMode = home === null ? ProHome.phone() && listed() : !!home;
+      root.classList.toggle('is-home', homeMode);
+      $('scan-dock').hidden = !homeMode;
       root.hidden = false;
       document.body.classList.add('scan-open');
       busy = false; seen.clear();
@@ -11462,7 +11532,7 @@
       setManual(false);
       help(HELP);
       Beep.prepare();
-      $('scan-close').focus({ preventScroll: true });
+      (homeMode ? $('dock-dashboard') : $('scan-close')).focus({ preventScroll: true });
       renderCount();
       loadSummary();
       startCamera();
@@ -11474,6 +11544,9 @@
       clearTimeout(nextTimer);
       if (bar) { bar.cancel(); bar = null; }
       root.hidden = true;
+      homeMode = false;
+      root.classList.remove('is-home');
+      $('scan-dock').hidden = true;
       document.body.classList.remove('scan-open');
       if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
     }
@@ -11741,13 +11814,80 @@
         : 'Visite ou offre : scannez le QR code de son téléphone';
     }
 
-    return { open, close, isOpen, next, renderEntry, loadSummary, get summary() { return summary; }, hasResult: () => !$('scan-result').hidden && $('scan-result').classList.contains('is-shown') };
+    return { open, close, isOpen, next, renderEntry, loadSummary, isHome: () => homeMode, get summary() { return summary; }, hasResult: () => !$('scan-result').hidden && $('scan-result').classList.contains('is-shown') };
+  })();
+
+  /* ---------- Restaurateur : écran d'accueil (téléphone : le scanner ; ordinateur : le tableau de bord) ---------- */
+  const ProHome = (() => {
+    const phone = () => window.matchMedia('(max-width: 899px)').matches;
+    const isPro = () => { const me = currentUser(); return !!(me && me.role === 'pro' && !proStepFor(me)); };
+    /** Le scanner peut-il servir d'accueil ? (téléphone, fiche en ligne, validation des visites disponible) */
+    const canScanHome = () => { const r = myRestaurant(); return phone() && isPro() && !!(r && r.published) && VisitFeature.check(() => {}); };
+    function scanHome() { if (!canScanHome()) return false; Scanner.open({ home: true }); return true; }
+    function go() {
+      if (!isPro() || previewAsClient) return;
+      if (!scanHome()) ProSpace.open('home');
+    }
+    let landed = false;
+    /** À l'arrivée sur l'application (connexion, réouverture), une fois par chargement de la page. */
+    function landing() {
+      if (landed || !isPro()) return;
+      landed = true;
+      const run = () => { if (!currentStep && !activePanel && !ProSpace.isOpen() && !Scanner.isOpen() && !previewAsClient) go(); };
+      if (VisitFeature.check(run) || !phone()) setTimeout(run, 400);
+      else setTimeout(run, 4000);   // réponse du serveur trop lente : on décide quand même
+    }
+    $('dock-dashboard').addEventListener('click', () => { Scanner.close(); ProSpace.open('home'); });
+    $('dock-preview').addEventListener('click', () => ClientPreview.start());
+    return { phone, go, landing, scanHome, canScanHome };
+  })();
+
+  /* ---------- Aperçu client : le restaurateur voit la carte et sa fiche comme un client ---------- */
+  const ClientPreview = (() => {
+    function start() {
+      const me = currentUser();
+      if (!me || me.role !== 'pro') return;
+      Scanner.close();
+      ProSpace.close();
+      if (activePanel) closePanel(activePanel);
+      previewAsClient = true;
+      document.body.classList.add('client-preview');
+      $('preview-bar').hidden = false;
+      $('preview-exit').focus({ preventScroll: true });
+      const r = myRestaurant();
+      whenMapReady(() => {
+        if (r && r.published) { upsertShopMarker(restaurantToShop(r)); openShop(r.id); }
+        else toast('Votre fiche n\'est pas encore en ligne : vos clients ne la voient pas encore sur la carte.');
+      });
+    }
+    function stop() {
+      if (!previewAsClient) return;
+      previewAsClient = false;
+      document.body.classList.remove('client-preview');
+      $('preview-bar').hidden = true;
+      if (activePanel) closePanel(activePanel);
+      ProHome.go();
+    }
+    $('preview-exit').addEventListener('click', stop);
+    // Boutons des clients (s'abonner, QR code de visite, « j'aime », avis) : montrés, mais sans effet en aperçu
+    const CLIENT_ONLY = '#shop-follow, #shop-visit, .dish-like';
+    document.addEventListener('click', (ev) => {
+      if (!previewAsClient || !ev.target.closest || !ev.target.closest(CLIENT_ONLY)) return;
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      toast('Aperçu : ce bouton fonctionne pour vos clients.');
+    }, true);
+    document.addEventListener('submit', (ev) => {
+      if (!previewAsClient || ev.target.id !== 'rv-form') return;
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      toast('Aperçu : vos clients peuvent laisser un avis ici.');
+    }, true);
+    return { start, stop, on: () => previewAsClient };
   })();
 
   // Échap : ferme le QR code ou le scanner (avant les autres fenêtres, restées dessous)
   document.addEventListener('keydown', (ev) => {
     if (ev.key !== 'Escape') return;
-    if (Scanner.isOpen()) { ev.stopPropagation(); ev.preventDefault(); if (Scanner.hasResult()) Scanner.next(); else Scanner.close(); }
+    if (Scanner.isOpen()) { ev.stopPropagation(); ev.preventDefault(); if (Scanner.hasResult()) Scanner.next(); else if (!Scanner.isHome()) Scanner.close(); }
     else if (VisitPass.isOpen()) { ev.stopPropagation(); ev.preventDefault(); VisitPass.close(); }
   }, true);
   /** QR code de visite lu par l'appareil photo du téléphone (lien « #visite=… ») : scanner du restaurateur. */
@@ -12045,6 +12185,8 @@
 
   let appStarted = false;
   function startApp({ focus = null, intro = false } = {}) {
+    // Restaurateur : il arrive sur son écran d'accueil (scanner sur téléphone, tableau de bord sur ordinateur)
+    if (!focus && !pendingLink) ProHome.landing();
     // Déjà sur la carte (visiteur qui se connecte) : on complète l'interface sans déplacer la carte
     if (appStarted) {
       Install.schedule();
