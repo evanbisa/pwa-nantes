@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-Ye1ue9alYumXhxf7tbgE0UhDaGmociZ4nv3iUUG7F7Y=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-aCZyZKQWSGfMVBwK1lDdAFqt+Wrpa0smXE9E7nisX8M=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -3162,27 +3162,48 @@
         <p class="hint center">Pensez à regarder dans vos courriers indésirables. <button class="link-btn" type="button" id="ec-change">Modifier l'adresse</button></p>
       </form>
 
-      <!-- Mot de passe oublié : code reçu par e-mail + nouveau mot de passe -->
+      <!-- Mot de passe oublié, en deux temps : 1. code reçu par e-mail, 2. nouveau mot de passe + confirmation -->
       <form id="ob-reset" class="ob-step" novalidate data-step="reset-password" hidden aria-labelledby="rs-title">
         <div class="mail-badge" aria-hidden="true">🔑</div>
-        <h2 id="rs-title">Nouveau <em>mot de passe</em></h2>
-        <p class="lead" id="rs-lead">Si un compte FlashMiam existe avec l'adresse <b id="rs-email"></b>, un code vient d'y être envoyé. Saisissez-le, puis choisissez votre nouveau mot de passe.</p>
-        <label class="field" id="field-rs-code">
-          <span>Code reçu par e-mail</span>
-          <input id="rs-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="––––––––" />
-          <small class="field-error" id="err-rs-code" aria-live="polite"></small>
-        </label>
-        <label class="field" id="field-rs-password">
-          <span>Nouveau mot de passe</span>
-          <span class="pw-wrap">
-            <input id="rs-password" type="password" autocomplete="new-password" minlength="8" maxlength="128" />
-            <button class="pw-toggle" type="button" data-toggle-pw="rs-password">Afficher</button>
-          </span>
-          <small class="hint">8 caractères minimum, avec une majuscule, une minuscule, un chiffre et un caractère spécial.</small>
-          <small class="field-error" id="err-rs-password" aria-live="polite"></small>
-        </label>
+        <h2 id="rs-title">Mot de passe <em>oublié</em></h2>
+        <div id="rs-phase-code">
+          <p class="lead" id="rs-lead">Si un compte FlashMiam existe avec l'adresse <b id="rs-email"></b>, un code vient d'y être envoyé. Saisissez-le pour choisir un nouveau mot de passe.</p>
+          <label class="field" id="field-rs-code">
+            <span>Code reçu par e-mail</span>
+            <input id="rs-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="––––––––" />
+            <small class="field-error" id="err-rs-code" aria-live="polite"></small>
+          </label>
+        </div>
+        <div id="rs-phase-password" hidden>
+          <p class="lead">Code accepté. Choisissez votre nouveau mot de passe, puis confirmez-le.</p>
+          <label class="field" id="field-rs-password">
+            <span>Nouveau mot de passe</span>
+            <span class="pw-wrap">
+              <input id="rs-password" type="password" autocomplete="new-password" minlength="8" maxlength="128" aria-describedby="rs-pw-rules" />
+              <button class="pw-toggle" type="button" data-toggle-pw="rs-password">Afficher</button>
+            </span>
+            <ul class="pw-rules" id="rs-pw-rules" aria-label="Le mot de passe doit contenir">
+              <li data-rule="length">8 caractères</li>
+              <li data-rule="upper">1 majuscule</li>
+              <li data-rule="lower">1 minuscule</li>
+              <li data-rule="digit">1 chiffre</li>
+              <li data-rule="special">1 caractère spécial</li>
+            </ul>
+            <small class="field-error" id="err-rs-password" aria-live="polite"></small>
+          </label>
+          <label class="field" id="field-rs-password2">
+            <span>Confirmer le mot de passe</span>
+            <span class="pw-wrap">
+              <input id="rs-password2" type="password" autocomplete="new-password" maxlength="128" aria-describedby="rs-match" />
+              <button class="pw-toggle" type="button" data-toggle-pw="rs-password2">Afficher</button>
+            </span>
+            <p class="pw-match" id="rs-match" aria-live="polite"></p>
+            <small class="field-error" id="err-rs-password2" aria-live="polite"></small>
+          </label>
+        </div>
         <p class="form-error" id="err-reset" role="alert"></p>
-        <button class="btn btn-primary" type="submit">Changer mon mot de passe</button>
+        <button class="btn btn-primary" type="submit" id="rs-submit">Valider le code</button>
+        <p class="ob-switch" id="rs-resend-row">Pas reçu ? <button class="link-btn" type="button" id="rs-resend">Renvoyer le code</button></p>
         <p class="ob-switch"><button class="link-btn" type="button" data-goto="login">Retour à la connexion</button></p>
       </form>
 
@@ -9050,43 +9071,84 @@
   }
 
   /* ---------- Mot de passe oublié : code par e-mail, puis nouveau mot de passe ---------- */
-  let resetEmail = null, resetByLink = false;
+  let resetEmail = null, resetByLink = false, resetPhase = 'code';
+  /** Étape affichée : « code » (saisie du code reçu) ou « password » (nouveau mot de passe + confirmation). */
+  function setResetPhase(phase) {
+    resetPhase = phase;
+    $('rs-phase-code').hidden = phase !== 'code';
+    $('rs-phase-password').hidden = phase !== 'password';
+    $('rs-resend-row').hidden = phase !== 'code';
+    $('rs-title').innerHTML = phase === 'code' ? 'Mot de passe <em>oublié</em>' : 'Nouveau <em>mot de passe</em>';
+    $('rs-submit').textContent = phase === 'code' ? 'Valider le code' : 'Changer mon mot de passe';
+    $('err-reset').textContent = '';
+    setTimeout(() => { const f = $(phase === 'code' ? 'rs-code' : 'rs-password'); if (f && !f.closest('[hidden]')) f.focus(); }, 60);
+  }
   function showReset(email, { byLink = false } = {}) {
     resetEmail = email; resetByLink = byLink;
     $('rs-email').textContent = email || '';
-    $('rs-lead').hidden = byLink;
-    $('field-rs-code').hidden = byLink;
-    $('rs-code').value = ''; $('rs-password').value = '';
-    ['rs-code', 'rs-password'].forEach((f) => setFieldError(f, ''));
-    $('err-reset').textContent = '';
+    $('rs-code').value = ''; $('rs-password').value = ''; $('rs-password2').value = '';
+    ['rs-code', 'rs-password', 'rs-password2'].forEach((f) => setFieldError(f, ''));
+    renderResetPassword();
     showAuthStep('reset-password');
+    setResetPhase(byLink ? 'password' : 'code');   // lien de l'e-mail : déjà vérifié, directement le mot de passe
+  }
+  async function sendResetCode(email) {
+    const captchaToken = await Captcha.token().catch(() => null);
+    if (captchaToken === null) return { error: { message: Captcha.failMessage, captcha: true } };
+    return Loader.run(sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname, captchaToken }), 'Envoi du code…');
   }
   $('forgot-btn').addEventListener('click', async () => {
     const email = $('li-email').value.trim().toLowerCase();
     if (!EMAIL_RE.test(email)) { setFieldError('li-email', 'Saisissez d\'abord l\'adresse e-mail de votre compte.'); $('li-email').focus(); return; }
-    const captchaToken = await Captcha.token().catch(() => null);
-    if (captchaToken === null) { $('err-login').textContent = Captcha.failMessage; return; }
-    const { error } = await Loader.run(sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname, captchaToken }), 'Envoi du code…');
-    if (error) { $('err-login').textContent = captchaRefused(error) ? Captcha.failMessage : cloudError(error); return; }
+    const { error } = await sendResetCode(email);
+    if (error) { $('err-login').textContent = error.captcha || captchaRefused(error) ? Captcha.failMessage : cloudError(error); return; }
     showReset(email);
   });
-  $('rs-code').addEventListener('input', () => { const d = onlyDigits($('rs-code').value).slice(0, 8); if (d !== $('rs-code').value) $('rs-code').value = d; });
+  $('rs-resend').addEventListener('click', async () => {
+    if (!resetEmail) return;
+    const { error } = await sendResetCode(resetEmail);
+    if (error) { $('err-reset').textContent = error.captcha || captchaRefused(error) ? Captcha.failMessage : cloudError(error); return; }
+    $('rs-code').value = ''; setFieldError('rs-code', '');
+    toast('Nouveau code envoyé.');
+  });
+  $('rs-code').addEventListener('input', () => {
+    const d = onlyDigits($('rs-code').value).slice(0, 8);
+    if (d !== $('rs-code').value) $('rs-code').value = d;
+    setFieldError('rs-code', '');
+    if (d.length === 8) $('ob-reset').requestSubmit();   // validation automatique au 8e chiffre (code de 6 : bouton)
+  });
+  function renderResetPassword() {
+    const p = $('rs-password').value;
+    PASSWORD_RULES.forEach((r) => $('rs-pw-rules').querySelector('[data-rule="' + r.id + '"]').classList.toggle('is-ok', r.test(p)));
+    showPasswordMatch(p, $('rs-password2').value, $('rs-match'));
+  }
+  $('rs-password').addEventListener('input', () => { setFieldError('rs-password', ''); renderResetPassword(); });
+  $('rs-password2').addEventListener('input', () => { setFieldError('rs-password2', ''); renderResetPassword(); });
+  let resetBusy = false;
   $('ob-reset').addEventListener('submit', async (ev) => {
     ev.preventDefault();
-    const code = onlyDigits($('rs-code').value);
+    if (resetBusy) return;
+    if (resetPhase === 'code') {
+      const code = onlyDigits($('rs-code').value);
+      if (code.length < 6 || code.length > 8) { setFieldError('rs-code', 'Saisissez le code reçu par e-mail (6 à 8 chiffres).'); return; }
+      resetBusy = true;
+      const { error } = await Loader.run(sb.auth.verifyOtp({ email: resetEmail, token: code, type: 'recovery' }), 'Vérification du code…').finally(() => { resetBusy = false; });
+      if (error) { setFieldError('rs-code', 'Code incorrect ou expiré. Vérifiez le dernier e-mail reçu, ou demandez un nouveau code.'); return; }
+      setResetPhase('password');   // code bon : la session de récupération est ouverte
+      return;
+    }
     const password = $('rs-password').value;
+    const confirmation = $('rs-password2').value;
     let bad = false;
-    if (!resetByLink && (code.length < 6 || code.length > 8)) { setFieldError('rs-code', 'Saisissez le code reçu par e-mail (6 à 8 chiffres).'); bad = true; }
     const missing = missingPasswordRules(password);
     if (missing.length) { setFieldError('rs-password', 'Mot de passe trop faible : il manque ' + listFr(missing.map((r) => r.label)) + '.'); bad = true; }
+    if (!confirmation) { setFieldError('rs-password2', 'Confirmez votre nouveau mot de passe.'); bad = true; }
+    else if (confirmation !== password) { setFieldError('rs-password2', 'Les deux mots de passe ne sont pas identiques.'); bad = true; }
     if (bad) return;
-    if (!resetByLink) {
-      const { error } = await Loader.run(sb.auth.verifyOtp({ email: resetEmail, token: code, type: 'recovery' }), 'Vérification du code…');
-      if (error) { setFieldError('rs-code', 'Code incorrect ou expiré. Demandez un nouveau code depuis l\'écran de connexion.'); return; }
-    }
-    const { data, error } = await Loader.run(sb.auth.updateUser({ password }), 'Enregistrement du mot de passe…');
+    resetBusy = true;
+    const { data, error } = await Loader.run(sb.auth.updateUser({ password }), 'Enregistrement du mot de passe…').finally(() => { resetBusy = false; });
     if (error) { $('err-reset').textContent = error.code === 'same_password' ? 'Choisissez un mot de passe différent de l\'ancien.' : cloudError(error); return; }
-    $('rs-password').value = '';
+    $('rs-password').value = ''; $('rs-password2').value = '';
     toast('Mot de passe modifié.');
     const user = await Loader.run(loadUser(data.user), 'Ouverture de votre compte…');
     setAuthRole(user.role);
