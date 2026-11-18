@@ -8,8 +8,7 @@ import { THEME_KEY } from "@/lib/legal/theme";
 function storedTheme(): "night" | "day" {
   let t: string | null = null;
   try { t = localStorage.getItem(THEME_KEY); } catch { /* navigation privée */ }
-  if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  return t === "dark" ? "night" : "day";
+  return t === "dark" ? "night" : "day";   // par défaut : mode jour
 }
 
 /** Thème lu directement sur <html> (posé par le script du layout ou par le bouton), suivi à chaque changement. */
