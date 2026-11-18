@@ -13,11 +13,12 @@
   <link rel="icon" href="{{BASE}}favicon-96.png?v=2" type="image/png" sizes="96x96" />
   <link rel="apple-touch-icon" href="{{BASE}}apple-touch-icon.png?v=2" sizes="180x180" />
   <style>
-    :root { --bg: #f8fafc; --text: #0f172a; --muted: #475569; --card: #fff; --line: #e2e8f0; --accent: #1a73e8; --on-accent: #fff; }
+    :root { --bg: #f8fafc; --text: #0f172a; --muted: #475569; --card: #fff; --line: #e2e8f0; --accent: #d9381e; --on-accent: #fff; }
+    em { background: linear-gradient(90deg, #e67700, #f0501f 50%, #d9301a); -webkit-background-clip: text; background-clip: text; color: transparent; }
     @media (prefers-color-scheme: dark) {
-      :root { --bg: #111113; --text: #fafafa; --muted: #a1a1aa; --card: rgb(255 255 255 / .05); --line: rgb(255 255 255 / .1); --accent: #a78bfa; --on-accent: #111113; }
-      body { background: radial-gradient(38rem 26rem at 50% 10%, rgb(124 58 237 / .14), transparent 70%) no-repeat fixed, var(--bg); }
-      em { background: linear-gradient(90deg, #e9a0e4, #a78bfa 55%, #7f95fb); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      :root { --bg: #111113; --text: #fafafa; --muted: #a1a1aa; --card: rgb(255 255 255 / .05); --line: rgb(255 255 255 / .1); --accent: #ff8a5c; --on-accent: #1a0d07; }
+      body { background: radial-gradient(38rem 26rem at 50% 10%, rgb(255 138 61 / .14), transparent 70%) no-repeat fixed, var(--bg); }
+      em { background: linear-gradient(90deg, #ffd25e, #ff9a4d 50%, #ff6a4a); -webkit-background-clip: text; background-clip: text; color: transparent; }
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; min-height: 100%; }
@@ -26,7 +27,7 @@
     .logo { display: block; width: 72px; height: 72px; margin: 0 auto; border-radius: 18px; }
     .code { margin: 28px 0 0; font-size: 14px; font-weight: 600; letter-spacing: .12em; color: var(--muted); }
     h1 { margin: 8px 0 0; font-size: 30px; line-height: 1.15; letter-spacing: -.02em; }
-    em { font-style: normal; color: var(--accent); }
+    em { font-style: normal; }
     p { margin: 14px 0 0; color: var(--muted); }
     .go { display: flex; align-items: center; justify-content: center; min-height: 54px; margin-top: 32px; border-radius: 999px; font-weight: 600; text-decoration: none; color: var(--on-accent); background: var(--accent); }
     .go:focus-visible, .alt:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
