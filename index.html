@@ -524,74 +524,70 @@
     .onboarding .field input:focus { box-shadow: none; }
     .ob-switch .link-btn { font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
     /*
-     * Nuit : la palette de l'inscription (web/app/globals.css) plutôt que le bleu de la carte : violet, mots clés en
-     * dégradé rose → violet → bleu, halos doux dans la carte, bouton sombre au contour dégradé, surfaces en verre.
+     * Couleurs du logo (icon-512.png) : jaune #ffc233, orange #ff8a3d, rouge #ff4d2e. Accueil, connexion et inscription
+     * (web/app/globals.css) les reprennent : dégradé jaune → orange → rouge (pastilles, barre de progression), mots clés
+     * et bouton principal orange → rouge (assez foncés pour rester lisibles), halos chauds dans la carte.
+     * --ob-grad : dégradé décoratif ; --ob-text : mots clés ; --ob-btn : fond du bouton principal (jour).
      */
+    :root[data-theme="light"] .onboarding {
+      --accent: #d9381e; --accent-strong: #b93815; --accent-soft: rgb(255 77 46 / .08); --accent-line: rgb(255 77 46 / .3); --on-accent: #fff;
+      --ob-grad: linear-gradient(100deg, #ffc233, #ff8a3d 50%, #ff4d2e);
+      --ob-text: linear-gradient(90deg, #e67700, #f0501f 50%, #d9301a);
+      --ob-btn: linear-gradient(100deg, #f2610c, #e8401c 55%, #d9301a);
+    }
     :root[data-theme="dark"] .onboarding {
-      --accent: #a78bfa; --accent-strong: #c4b5fd; --accent-soft: rgb(167 139 250 / .14); --accent-line: rgb(167 139 250 / .45); --on-accent: #fff;
+      --accent: #ff8a5c; --accent-strong: #ffab85; --accent-soft: rgb(255 122 69 / .14); --accent-line: rgb(255 122 69 / .45); --on-accent: #1a0d07;
+      --ob-grad: linear-gradient(100deg, #ffc233, #ff8a3d 50%, #ff4d2e);
+      --ob-text: linear-gradient(90deg, #ffd25e, #ff9a4d 50%, #ff6a4a);
+    }
+    :root[data-theme="light"] .ob-panel {
+      border-color: rgb(255 255 255 / .9);
+      background:
+        radial-gradient(30rem 20rem at 88% -6%, rgb(255 194 51 / .22), transparent 70%),
+        radial-gradient(28rem 22rem at -8% 42%, rgb(255 138 61 / .12), transparent 70%),
+        radial-gradient(26rem 20rem at 100% 100%, rgb(255 77 46 / .10), transparent 70%),
+        rgb(255 253 250 / .95);
+      box-shadow: 0 30px 60px -20px rgb(150 50 10 / .25), 0 0 0 1px rgb(255 120 60 / .08);
     }
     :root[data-theme="dark"] .ob-panel {
       border-color: rgb(255 255 255 / .1);
       background:
-        radial-gradient(38rem 26rem at 50% 18%, rgb(124 58 237 / .13), transparent 70%),
-        radial-gradient(26rem 22rem at 8% 72%, rgb(219 39 119 / .08), transparent 70%),
-        radial-gradient(28rem 24rem at 96% 92%, rgb(59 130 246 / .09), transparent 70%),
-        rgb(17 17 19 / .75);
+        radial-gradient(38rem 26rem at 50% 16%, rgb(255 138 61 / .13), transparent 70%),
+        radial-gradient(26rem 22rem at 6% 74%, rgb(255 77 46 / .09), transparent 70%),
+        radial-gradient(28rem 24rem at 96% 94%, rgb(255 194 51 / .07), transparent 70%),
+        rgb(20 16 14 / .78);
     }
-    :root[data-theme="dark"] .ob-step h1 em, :root[data-theme="dark"] .ob-step h2 em {
-      background: linear-gradient(90deg, #e9a0e4, #a78bfa 55%, #7f95fb);
-      -webkit-background-clip: text; background-clip: text; color: transparent;
-      -webkit-box-decoration-break: clone; box-decoration-break: clone;
-    }
-    :root[data-theme="dark"] .onboarding .btn-primary {
-      border: 1.5px solid transparent; color: #fff;
-      background: linear-gradient(#17171b, #17171b) padding-box, linear-gradient(100deg, #e9a0e4, #a78bfa 50%, #6f8cfb) border-box;
-      box-shadow: 0 10px 36px -14px rgb(167 139 250 / .7);
-    }
-    :root[data-theme="dark"] .onboarding .btn-primary:hover {
-      background: linear-gradient(#1f1f25, #1f1f25) padding-box, linear-gradient(100deg, #e9a0e4, #a78bfa 50%, #6f8cfb) border-box;
-    }
-    :root[data-theme="dark"] .onboarding .jn-perks li, :root[data-theme="dark"] .onboarding .field input {
-      background: rgb(255 255 255 / .04); border-color: rgb(255 255 255 / .1);
-    }
-    :root[data-theme="dark"] .onboarding .field input:focus { border-color: var(--accent); }
-    :root[data-theme="dark"] .ob-logo .avatar { color: #fff; background: linear-gradient(135deg, #e9a0e4, #a78bfa 55%, #7f95fb); }
-    /*
-     * Jour : la même identité que la nuit, en version lumineuse (comme l'inscription, web/app/globals.css) : carte blanche
-     * aux halos pastel, mots clés et bouton principal en dégradé framboise → violet → indigo, avantages cochés.
-     */
-    :root[data-theme="light"] .onboarding {
-      --accent: #7c3aed; --accent-strong: #6d28d9; --accent-soft: rgb(124 58 237 / .08); --accent-line: rgb(124 58 237 / .28); --on-accent: #fff;
-      --ob-grad: linear-gradient(100deg, #db2777, #7c3aed 50%, #4f46e5);
-    }
-    :root[data-theme="dark"] .onboarding { --ob-grad: linear-gradient(100deg, #e9a0e4, #a78bfa 50%, #6f8cfb); }
-    :root[data-theme="light"] .ob-panel {
-      border-color: rgb(255 255 255 / .9);
-      background:
-        radial-gradient(30rem 20rem at 85% -4%, rgb(236 72 153 / .12), transparent 70%),
-        radial-gradient(28rem 22rem at -6% 40%, rgb(124 58 237 / .10), transparent 70%),
-        radial-gradient(26rem 20rem at 100% 100%, rgb(79 70 229 / .10), transparent 70%),
-        rgb(255 255 255 / .94);
-      box-shadow: 0 30px 60px -20px rgb(76 29 149 / .28), 0 0 0 1px rgb(124 58 237 / .06);
-    }
-    :root[data-theme="light"] .ob-step h1 em, :root[data-theme="light"] .ob-step h2 em {
-      background: var(--ob-grad);
+    .onboarding .ob-step h1 em, .onboarding .ob-step h2 em {
+      background: var(--ob-text);
       -webkit-background-clip: text; background-clip: text; color: transparent;
       -webkit-box-decoration-break: clone; box-decoration-break: clone;
     }
     :root[data-theme="light"] .onboarding .btn-primary {
-      border: 0; color: #fff; background: var(--ob-grad);
-      box-shadow: 0 14px 30px -12px rgb(124 58 237 / .55), inset 0 1px 0 rgb(255 255 255 / .25);
+      border: 0; color: #fff; background: var(--ob-btn); text-shadow: 0 1px 1px rgb(120 30 0 / .25);
+      box-shadow: 0 14px 30px -12px rgb(232 64 28 / .5), inset 0 1px 0 rgb(255 255 255 / .25);
       transition: transform .15s var(--ease-out), box-shadow .2s, filter .2s;
     }
-    :root[data-theme="light"] .onboarding .btn-primary:hover { background: var(--ob-grad); filter: brightness(1.06); box-shadow: 0 18px 34px -12px rgb(124 58 237 / .6), inset 0 1px 0 rgb(255 255 255 / .25); }
-    :root[data-theme="light"] .onboarding .btn-primary:active { transform: scale(.98); }
-    :root[data-theme="light"] .onboarding .jn-perks li { background: rgb(255 255 255 / .85); border-color: rgb(124 58 237 / .12); box-shadow: 0 1px 2px rgb(76 29 149 / .05); }
-    :root[data-theme="light"] .onboarding .field input { background: #fff; border-color: #e7e3f0; }
-    :root[data-theme="light"] .onboarding .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgb(124 58 237 / .12); }
-    :root[data-theme="light"] .onboarding .field.has-error input { border-color: var(--danger); box-shadow: none; }
-    :root[data-theme="light"] .onboarding .role-switch { background: rgb(124 58 237 / .06); border-color: rgb(124 58 237 / .1); }
-    :root[data-theme="light"] .onboarding .role-switch button[aria-checked="true"] { box-shadow: 0 2px 8px -2px rgb(76 29 149 / .25); }
+    :root[data-theme="light"] .onboarding .btn-primary:hover { background: var(--ob-btn); filter: brightness(1.05); box-shadow: 0 18px 34px -12px rgb(232 64 28 / .55), inset 0 1px 0 rgb(255 255 255 / .25); }
+    .onboarding .btn-primary:active { transform: scale(.98); }
+    :root[data-theme="dark"] .onboarding .btn-primary {
+      border: 1.5px solid transparent; color: #fff;
+      background: linear-gradient(#17171b, #17171b) padding-box, var(--ob-grad) border-box;
+      box-shadow: 0 10px 36px -14px rgb(255 106 61 / .6);
+    }
+    :root[data-theme="dark"] .onboarding .btn-primary:hover {
+      background: linear-gradient(#1f1f25, #1f1f25) padding-box, var(--ob-grad) border-box;
+    }
+    :root[data-theme="light"] .onboarding .jn-perks li { background: rgb(255 255 255 / .85); border-color: rgb(255 120 60 / .16); box-shadow: 0 1px 2px rgb(150 50 10 / .05); }
+    :root[data-theme="dark"] .onboarding .jn-perks li, :root[data-theme="dark"] .onboarding .field input {
+      background: rgb(255 255 255 / .04); border-color: rgb(255 255 255 / .1);
+    }
+    :root[data-theme="light"] .onboarding .field input { background: #fff; border-color: #efe5dc; }
+    :root[data-theme="light"] .onboarding .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgb(255 77 46 / .14); }
+    :root[data-theme="dark"] .onboarding .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgb(255 122 69 / .16); }
+    .onboarding .field.has-error input { border-color: var(--danger); box-shadow: none; }
+    :root[data-theme="light"] .onboarding .role-switch { background: rgb(255 138 61 / .08); border-color: rgb(255 120 60 / .14); }
+    :root[data-theme="light"] .onboarding .role-switch button[aria-checked="true"] { box-shadow: 0 2px 8px -2px rgb(150 50 10 / .22); }
+    .ob-logo .avatar { color: #fff; background: var(--ob-grad, var(--accent)); }
     /* Avantages : une coche dans une pastille en dégradé (jour et nuit) */
     .onboarding .jn-perks li::before {
       content: ""; flex: none; width: 24px; height: 24px; border-radius: 50%;

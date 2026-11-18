@@ -687,7 +687,7 @@ const primaryClass =
 const inputClass = (invalid: boolean) =>
   `h-14 w-full rounded-2xl border-2 bg-white px-4 text-lg text-slate-900 transition placeholder:text-slate-400 focus:outline-none dark:bg-white/[0.04] dark:text-zinc-50 dark:backdrop-blur-xl dark:placeholder:text-zinc-500 ${invalid
     ? "border-red-500 focus:border-red-500"
-    : "border-slate-200 focus:border-brand dark:border-white/10 dark:focus:border-brand-night dark:focus:shadow-[0_0_0_4px_rgb(167_139_250/0.18)]"}`;
+    : "border-slate-200 focus:border-brand dark:border-white/10 dark:focus:border-brand-night dark:focus:shadow-[0_0_0_4px_rgb(255_122_69/0.18)]"}`;
 
 /** « Ajouter FlashMiam à mon écran d'accueil », cochée par défaut : on peut la décocher. */
 function HomeShortcut({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
