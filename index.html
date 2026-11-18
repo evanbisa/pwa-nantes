@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-BAm7fkbxvb8/kBYBEFyPXUTXKjyzii/IWzDJpYDmRnQ=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-IcuuQooDQTTWHQ/qr8kZCPJifXWRYVQQaH/y9Vn1eqo=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -3424,7 +3424,7 @@
   <div id="cropper" class="cropper" role="dialog" aria-modal="true" aria-labelledby="crop-title" aria-describedby="crop-hint" hidden>
     <div class="crop-panel">
       <div class="crop-head"><h2 id="crop-title">Recadrer la photo</h2><span id="crop-count"></span></div>
-      <p class="hint" id="crop-hint">Toutes les photos sont au format carré. Faites glisser l'image pour choisir le cadrage, zoomez avec le curseur, la molette ou en pinçant.</p>
+      <p class="hint" id="crop-hint">Toutes les photos sont au format carré. Faites glisser l'image pour choisir le cadrage. Zoomez ou dézoomez avec le curseur, la molette ou en pinçant : tout à gauche, la photo entière est gardée.</p>
       <div class="crop-frame" id="crop-frame" tabindex="0" role="img" aria-label="Aperçu du cadrage. Flèches : déplacer, + et − : zoomer.">
         <canvas id="crop-canvas"></canvas>
       </div>
@@ -4736,6 +4736,30 @@
     return { x: (w - cw) / 2, y: (h - ch) / 2, w: cw, h: ch };
   }
 
+  /**
+   * Dessine la zone `crop` de `bitmap` sur tout le canevas (outW × outH). La zone peut déborder de l'image
+   * (photo dézoomée pour rester entière) : le vide est alors rempli par un fond flou tiré de la photo.
+   */
+  function paintCrop(ctx, bitmap, crop, outW, outH) {
+    const W = bitmap.width, H = bitmap.height;
+    const sx = outW / crop.w, sy = outH / crop.h;
+    const x0 = Math.max(0, crop.x), y0 = Math.max(0, crop.y);
+    const x1 = Math.min(W, crop.x + crop.w), y1 = Math.min(H, crop.y + crop.h);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    if (crop.x < -0.5 || crop.y < -0.5 || x1 < crop.x + crop.w - 0.5 || y1 < crop.y + crop.h - 0.5) {
+      // Fond : la photo réduite à quelques pixels puis agrandie (flou fiable sur tous les navigateurs)
+      const tiny = document.createElement('canvas');
+      tiny.width = tiny.height = 12;
+      const c = fullCrop(W, H, outW / outH);
+      tiny.getContext('2d').drawImage(bitmap, c.x, c.y, c.w, c.h, 0, 0, 12, 12);
+      ctx.drawImage(tiny, 0, 0, outW, outH);
+      ctx.fillStyle = 'rgba(0, 0, 0, .18)';
+      ctx.fillRect(0, 0, outW, outH);
+    }
+    if (x1 > x0 && y1 > y0) ctx.drawImage(bitmap, x0, y0, x1 - x0, y1 - y0, (x0 - crop.x) * sx, (y0 - crop.y) * sy, (x1 - x0) * sx, (y1 - y0) * sy);
+  }
+
   const isPhotoRatio = (w, h) => Math.abs(w / h / PHOTO_RATIO - 1) <= PHOTO_RATIO_TOLERANCE;
 
   /** Exporte la zone `crop` (coordonnées de l'image source) en JPEG carré. */
@@ -4745,9 +4769,7 @@
     const canvas = document.createElement('canvas');
     canvas.width = outW;
     canvas.height = outH;
-    const ctx = canvas.getContext('2d');
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(bitmap, crop.x, crop.y, crop.w, crop.h, 0, 0, outW, outH);
+    paintCrop(canvas.getContext('2d'), bitmap, crop, outW, outH);
     return encodePhoto(canvas);
   }
   /**
@@ -10096,12 +10118,17 @@
       const w = st.base.w / st.zoom, h = st.base.h / st.zoom;
       return { x: st.cx - w / 2, y: st.cy - h / 2, w, h };
     };
-    /** Garde le cadre à l'intérieur de l'image. */
+    /**
+     * Zoom 1 : le cadre est rempli par la photo. En dessous (jusqu'à minZoom), on dézoome : la photo entière tient
+     * dans le cadre et le reste est comblé par un fond flou. Le cadre ne sort jamais de l'image quand il est plus
+     * petit qu'elle ; quand il est plus grand, c'est l'image qui reste dans le cadre.
+     */
+    const fit = (c, size, full) => { const lo = Math.min(size / 2, full - size / 2), hi = Math.max(size / 2, full - size / 2); return Math.min(hi, Math.max(lo, c)); };
     function clamp() {
-      st.zoom = Math.min(MAX_ZOOM, Math.max(1, st.zoom));
+      st.zoom = Math.min(MAX_ZOOM, Math.max(st.minZoom, st.zoom));
       const w = st.base.w / st.zoom, h = st.base.h / st.zoom;
-      st.cx = Math.min(st.bitmap.width - w / 2, Math.max(w / 2, st.cx));
-      st.cy = Math.min(st.bitmap.height - h / 2, Math.max(h / 2, st.cy));
+      st.cx = fit(st.cx, w, st.bitmap.width);
+      st.cy = fit(st.cy, h, st.bitmap.height);
     }
     function draw() {
       if (!st) return;
@@ -10111,9 +10138,8 @@
       if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
       const r = cropRect();
       const ctx = canvas.getContext('2d');
-      ctx.imageSmoothingQuality = 'high';
       ctx.clearRect(0, 0, cw, ch);
-      ctx.drawImage(st.bitmap, r.x, r.y, r.w, r.h, 0, 0, cw, ch);
+      paintCrop(ctx, st.bitmap, r, cw, ch);
       slider.value = String(st.zoom);
       slider.setAttribute('aria-valuetext', Math.round(st.zoom * 100) + ' %');
     }
@@ -10121,7 +10147,7 @@
     function zoomTo(z, fx = 0.5, fy = 0.5) {
       const r = cropRect();
       const px = r.x + fx * r.w, py = r.y + fy * r.h;
-      st.zoom = Math.min(MAX_ZOOM, Math.max(1, z));
+      st.zoom = Math.min(MAX_ZOOM, Math.max(st.minZoom, z));
       const w = st.base.w / st.zoom, h = st.base.h / st.zoom;
       st.cx = px - fx * w + w / 2;
       st.cy = py - fy * h + h / 2;
@@ -10208,9 +10234,9 @@
 
     function close(result) {
       const { resolve, returnFocus } = st;
-      if (result) {                        // arrondi au pixel, sans sortir de l'image
-        const w = Math.min(st.bitmap.width, Math.round(result.w)), h = Math.min(st.bitmap.height, Math.round(w / st.ratio));
-        result = { x: Math.min(st.bitmap.width - w, Math.max(0, Math.round(result.x))), y: Math.min(st.bitmap.height - h, Math.max(0, Math.round(result.y))), w, h };
+      if (result) {                        // arrondi au pixel (la zone peut déborder de l'image si elle est dézoomée)
+        const w = Math.max(1, Math.round(result.w)), h = Math.max(1, Math.round(w / st.ratio));
+        result = { x: Math.round(result.x), y: Math.round(result.y), w, h };
       }
       st = null;
       pointers.clear(); pinch = drag = null;
@@ -10222,12 +10248,15 @@
 
     const TEXTS = {
       title: 'Recadrer la photo',
-      hint: 'Toutes les photos sont au format carré. Faites glisser l\'image pour choisir le cadrage, zoomez avec le curseur, la molette ou en pinçant.',
+      hint: 'Toutes les photos sont au format carré. Faites glisser l\'image pour choisir le cadrage. Zoomez ou dézoomez avec le curseur, la molette ou en pinçant : tout à gauche, la photo entière est gardée.',
       ok: 'Valider le cadrage', skip: 'Ignorer cette photo',
     };
     return (bitmap, { index = 1, total = 1, ratio = PHOTO_RATIO, round = false, ...texts } = {}) => new Promise((resolve) => {
       const base = fullCrop(bitmap.width, bitmap.height, ratio);
-      st = { bitmap, base, ratio, zoom: 1, cx: bitmap.width / 2, cy: bitmap.height / 2, resolve, returnFocus: document.activeElement };
+      // Zoom minimal : la photo entière tient dans le cadre
+      const minZoom = Math.min(1, base.w / bitmap.width, base.h / bitmap.height);
+      slider.min = String(Math.floor(minZoom * 100) / 100);
+      st = { bitmap, base, ratio, minZoom, zoom: 1, cx: bitmap.width / 2, cy: bitmap.height / 2, resolve, returnFocus: document.activeElement };
       const t = { ...TEXTS, ...texts };
       $('crop-title').textContent = t.title; $('crop-hint').textContent = t.hint;
       $('crop-ok').textContent = t.ok; $('crop-skip').textContent = t.skip;
@@ -12128,14 +12157,12 @@
     closePanel($('profile-sheet'));   // le recadrage prend tout l'écran ; la fiche revient ensuite
     const crop = await cropPhoto(bitmap, {
       ratio: 1, round: true, title: 'Votre photo de profil', ok: 'Utiliser cette photo', skip: 'Annuler',
-      hint: 'Faites glisser la photo pour centrer votre visage dans le rond, zoomez avec le curseur ou en pinçant.',
+      hint: 'Faites glisser la photo pour centrer votre visage dans le rond, zoomez ou dézoomez avec le curseur ou en pinçant.',
     });
     if (!crop) { openProfileSheet(); return; }
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = AVATAR_SIZE;
-    const ctx = canvas.getContext('2d');
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(bitmap, crop.x, crop.y, crop.w, crop.h, 0, 0, AVATAR_SIZE, AVATAR_SIZE);
+    paintCrop(canvas.getContext('2d'), bitmap, crop, AVATAR_SIZE, AVATAR_SIZE);
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85));
     if (!blob) { toast('Cette photo ne peut pas être préparée. Essayez-en une autre.'); return; }
     const path = account.id + '/' + uid() + '.jpg';
