@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-fCzAioNczAlAyeSrJWR/DulRX9b3KU1B+puUOUX7aUo=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-BAm7fkbxvb8/kBYBEFyPXUTXKjyzii/IWzDJpYDmRnQ=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -3557,6 +3557,11 @@
      */
     demoShops: 'auto',
     demoUntil: 3,
+    /**
+     * Fiches de test montrées à TOUT le monde comme exemple (démarchage des restaurateurs) : identifiants de fiches.
+     * Toujours signalées « Exemple » (jamais « vérifié ») ; à vider avant l'ouverture au public si on ne veut plus d'exemple.
+     */
+    showcaseIds: ['7fc5e17d-cbb0-414f-a07d-a1aac01ec2ed'],
     mapStyle: 'flashmiam',
     storageKey: 'roche-street-food:v2',
     legacyStorageKey: 'roche-street-food:v1',
@@ -5497,10 +5502,11 @@
    * tant qu'il y a moins de CONFIG.demoUntil vrais restaurants. Les fiches de test (SIRET de test) ne sont visibles que
    * de leur propriétaire, ou en mode démonstration (?demo=1) : jamais présentées au public comme de vrais restaurants.
    */
+  const isShowcase = (r) => !!r && (CONFIG.showcaseIds || []).includes(r.id);
   function allShops() {
     const mode = DEMO_PARAM || CONFIG.demoShops;
     const me = currentUser();
-    const real = Object.values(restaurants()).filter((r) => r.published && (!r.isTest || mode === 'on' || (me && r.ownerId === me.id)));
+    const real = Object.values(restaurants()).filter((r) => r.published && (!r.isTest || isShowcase(r) || mode === 'on' || (me && r.ownerId === me.id)));
     const showDemo = mode === 'on' || (mode !== 'off' && real.filter((r) => !r.isTest).length < CONFIG.demoUntil);
     return [...(showDemo ? SHOPS : []), ...real.map(restaurantToShop)];
   }
@@ -5621,7 +5627,7 @@
       if (best && !Guest.canSee(best, shop)) { promoEl.textContent = 'Offre réservée aux membres'; promoEl.classList.add('is-locked'); }   // visiteur
       else promoEl.textContent = best ? promoLine(best) : (shop.description || '').slice(0, 90);
       if (shop.isPro && !shop.isTest) { const v = document.createElement('span'); v.className = 'verified'; v.textContent = '✓'; v.title = 'Établissement vérifié'; btn.querySelector('strong').after(v); }
-      if (shop.isDemo) btn.querySelector('strong').after(demoTag());
+      if (shop.isDemo || isShowcase(shop)) btn.querySelector('strong').after(demoTag());
       // Recherche : plats trouvés dans la carte du restaurant
       const hits = searching ? Search.dishesOf(shop, filters.q, filters.max) : [];
       if (hits.length) {
@@ -5879,7 +5885,7 @@
         b.innerHTML = '<span class="sr-emoji" aria-hidden="true"></span><span class="sr-body"><b></b><small></small></span>';
         b.querySelector('.sr-emoji').textContent = catOf(m.shop).emoji;
         Search.highlight(b.querySelector('b'), m.shop.name, res.q);
-        if (m.shop.isDemo) b.querySelector('b').after(demoTag());
+        if (m.shop.isDemo || isShowcase(m.shop)) b.querySelector('b').after(demoTag());
         const small = b.querySelector('small');
         small.append(status(m));
         if (m.shop.rating) { const r = document.createElement('span'); r.className = 'sr-rating'; r.textContent = ' · ★ ' + formatRating(m.shop.rating.avg); small.append(r); }
@@ -6309,7 +6315,7 @@
         const until = promoUntil(p);
         small.textContent = [PROMO_KINDS[p.kind].label, p.details, until].filter(Boolean).join(' · ');
         b.querySelector('.offer-shop').append(catOf(m.shop).emoji + ' ' + m.shop.name + ' · ', statusTag(m.status));
-        if (m.shop.isDemo) b.querySelector('.offer-shop').append(' ', demoTag());
+        if (m.shop.isDemo || isShowcase(m.shop)) b.querySelector('.offer-shop').append(' ', demoTag());
         const dist = b.querySelector('.offer-dist');
         if (located) {
           dist.append(formatDistance(d));
@@ -6993,8 +6999,8 @@
     // Restaurants inscrits : badge « vérifié », description, photos, téléphone ; l'offre est facultative
     $('shop-verified').hidden = !shop.isPro && !shop.isDemo;
     $('shop-verified').classList.toggle('is-test', !!(shop.isTest || shop.isDemo));
-    $('shop-verified').textContent = shop.isDemo ? 'Exemple fictif' : shop.isTest ? 'Fiche de test' : '✓ Établissement vérifié';
-    $('shop-verified').title = shop.isDemo ? 'Restaurant imaginaire, pour découvrir FlashMiam' : shop.isTest ? 'Créée avec le SIRET de test : établissement fictif' : 'SIRET vérifié auprès du répertoire Sirene';
+    $('shop-verified').textContent = shop.isDemo ? 'Exemple fictif' : isShowcase(shop) ? 'Fiche d\'exemple' : shop.isTest ? 'Fiche de test' : '✓ Établissement vérifié';
+    $('shop-verified').title = shop.isDemo ? 'Restaurant imaginaire, pour découvrir FlashMiam' : isShowcase(shop) ? 'Exemple de fiche FlashMiam, pour découvrir ce que voient les clients' : shop.isTest ? 'Créée avec le SIRET de test : établissement fictif' : 'SIRET vérifié auprès du répertoire Sirene';
     $('shop-demo-note').hidden = !shop.isDemo;
     $('shop-desc').hidden = !shop.description;
     $('shop-desc').textContent = shop.description || '';
@@ -7504,7 +7510,7 @@
       g.stories.forEach((_, i) => { const b = document.createElement('span'); b.innerHTML = '<i></i>'; if (i < si) b.firstChild.style.width = '100%'; bars.appendChild(b); });
       $('sv-avatar').textContent = catOf(g.shop).emoji;
       $('sv-name').textContent = g.shop.name;
-      if (g.shop.isDemo) $('sv-name').append(' ', demoTag());
+      if (g.shop.isDemo || isShowcase(g.shop)) $('sv-name').append(' ', demoTag());
       paintTime();
       $('sv-caption').textContent = st.imageUrl ? (st.text || '') : '';
       const away = distanceLabel(g.shop);
