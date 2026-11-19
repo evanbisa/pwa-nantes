@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-3ycJhzZj27ljrS5lWLLdgQTzVluBGt6jNgwXZMuiOcU=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-q7xgUN6iVI+df9JwafuMbaZFpA18BE7VRi9WY3hMDnQ=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1575,6 +1575,17 @@
       box-shadow: 0 0 0 2px var(--panel-solid); font-variant-numeric: tabular-nums;
     }
     #notif-btn.has-unread { color: var(--accent); }
+    #profile-btn { position: relative; }
+    .notif-badge.pro-badge { top: 0; right: auto; left: 30px; }
+    .notif-badge.pro-badge[hidden] { display: none; }
+    .docs-later { margin: 4px 0 8px; }
+    .docs-later b { display: block; margin-bottom: 2px; }
+    .ps-tabs button[hidden] { display: none; }
+    /* Onglet « Compléter » : où en est la fiche, puis les justificatifs à déposer */
+    .todo-state { display: flex; flex-direction: column; gap: 3px; margin: 10px 0 14px; padding: 12px 14px; border-radius: 12px; font-size: 14px; line-height: 1.45; }
+    .todo-state b { font-size: 15px; }
+    .todo-state.is-warn { color: var(--text); background: color-mix(in srgb, #ff8a3d 14%, transparent); border: 1px solid color-mix(in srgb, #ff8a3d 40%, transparent); }
+    .todo-state.is-ok { color: var(--text); background: var(--green-soft); border: 1px solid color-mix(in srgb, var(--green) 35%, transparent); }
     #notif-btn.ring svg { animation: ring 1s var(--ease-out); transform-origin: 50% 10%; }
     @keyframes ring { 0%, 100% { transform: none; } 20% { transform: rotate(14deg); } 40% { transform: rotate(-12deg); } 60% { transform: rotate(8deg); } 80% { transform: rotate(-4deg); } }
     .sb-brand { display: flex; align-items: center; gap: 4px; }
@@ -2144,6 +2155,7 @@
       .tabbar .brand-text { display: none; }
       .tabbar .avatar { width: 26px; height: 26px; font-size: 13px; }
       .tabbar .offers-badge, .tabbar .notif-badge { z-index: 2; top: 0; right: auto; left: calc(50% + 4px); }
+      .tabbar .notif-badge.pro-badge { top: 0; left: calc(50% + 4px); }
       /* Onglet actif : couleur, et pastille derrière l'icône */
       .tabbar > button::before { content: ""; position: absolute; top: 2px; left: 50%; width: 56px; height: 30px; margin-left: -28px; border-radius: 15px; background: var(--accent-soft); opacity: 0; transition: opacity .2s; }
       body:not([data-panel]) #nav-map, body[data-panel="shop-sheet"] #nav-map, body[data-panel="offers-sheet"] .tabbar #offers-btn,
@@ -2326,6 +2338,8 @@
   <header class="topbar ui" id="topbar">
     <button id="profile-btn" class="brand glass" type="button" aria-label="Ouvrir mon profil">
       <span class="avatar" id="avatar" aria-hidden="true">?</span>
+      <!-- Restaurateur : nombre de justificatifs encore à ajouter -->
+      <span class="notif-badge pro-badge" id="profile-badge" aria-hidden="true" hidden></span>
       <span class="brand-text">
         <strong>FlashMiam</strong>
         <small><span class="live-dot" aria-hidden="true"></span><span class="brand-city">La Roche-sur-Yon</span></small>
@@ -2892,6 +2906,7 @@
       </header>
       <nav class="ps-tabs" role="tablist" aria-label="Espace restaurateur">
         <button type="button" role="tab" id="pst-home" data-tab="home" aria-controls="psp-home" aria-selected="true"><span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z"/></svg></span><span>Accueil</span></button>
+        <button type="button" role="tab" id="pst-todo" data-tab="todo" aria-controls="psp-todo" aria-selected="false" tabindex="-1" hidden><span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2h9"/></svg><b class="ps-badge" id="ps-todo-badge" hidden></b></span><span>Compléter</span></button>
         <button type="button" role="tab" id="pst-stats" data-tab="stats" aria-controls="psp-stats" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="ps-lbl" data-short="Stats">Statistiques</span></button>
         <button type="button" role="tab" id="pst-publish" data-tab="publish" aria-controls="psp-publish" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span><span>Publier</span></button>
         <button type="button" role="tab" id="pst-reviews" data-tab="reviews" aria-controls="psp-reviews" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><b class="ps-badge" id="ps-reviews-badge" hidden></b></span><span>Avis</span></button>
@@ -3077,6 +3092,17 @@
           <ul class="rv-list ps-rv-list" id="ps-rv-list"></ul>
           <p class="hint">Votre réponse s'affiche sous l'avis, et le client est prévenu. Un avis abusif ? Signalez-le depuis votre fiche.</p>
           <button class="btn btn-ghost" type="button" id="pd-reviews">Voir les avis sur ma fiche</button>
+        </section>
+
+        <!-- Compléter mon profil : justificatifs ajoutés après l'inscription -->
+        <section class="ps-pane" id="psp-todo" role="tabpanel" aria-labelledby="pst-todo" hidden>
+          <section class="ps-card" aria-labelledby="ps-todo-h">
+            <h4 id="ps-todo-h">Compléter mon profil</h4>
+            <div class="todo-state" id="ps-todo-state" role="status"></div>
+            <div class="docs" id="ps-docs"></div>
+            <p class="hint">PDF, JPG ou PNG · 10 Mo maximum par fichier. Une photo nette du document suffit.</p>
+            <p class="form-error" id="err-ps-docs" role="alert"></p>
+          </section>
         </section>
 
         <!-- Ma fiche -->
@@ -3402,6 +3428,7 @@
         <div class="verify-card" id="pv-result" hidden aria-live="polite"></div>
 
         <h3 class="ob-sub">Justificatifs</h3>
+        <p class="notice docs-later"><b>Pas vos documents sous la main ?</b> Continuez : vous pourrez les ajouter plus tard depuis votre espace restaurateur (onglet « Compléter »). Votre fiche n'apparaîtra sur la carte qu'une fois les justificatifs obligatoires ajoutés.</p>
         <p class="hint">PDF, JPG ou PNG · 10 Mo maximum par fichier.</p>
         <div class="docs" id="pv-docs"></div>
 
@@ -3862,6 +3889,8 @@
     { key: 'ddpp', icon: '🏛️', label: 'Récépissé de déclaration DDPP (Cerfa n° 13984)', detail: 'Déclaration de manipulation de denrées animales', required: false },
     { key: 'licence', icon: '🍷', label: 'Licence de débit de boissons ou licence restaurant', detail: 'Si vous servez de l\'alcool', required: false },
   ];
+  /** Justificatifs obligatoires encore manquants. Facultatifs pour s'inscrire, ils sont nécessaires pour apparaître sur la carte. */
+  const missingDocs = (pro) => (pro && pro.merchantId ? DOC_TYPES.filter((t) => t.required && !(pro.docs || {})[t.key]) : []);
   const MAX_DOC_SIZE = 10 * 1024 * 1024;
   const MAX_PHOTOS = 10;
   const MAX_MENU_ITEMS = 80;
@@ -4322,11 +4351,12 @@
       siret, test: m.is_test, legalName: m.is_test ? 'ÉTABLISSEMENT DE TEST (fictif)' : (priv.legal_name || ''), tradeName: m.name,
       address: m.address || '', coords: m.lat != null ? [m.lng, m.lat] : null, naf: priv.naf_code || '', nafLabel: NAF_RESTAURATION[priv.naf_code] || '',
     } : null;
-    const docsOk = DOC_TYPES.every((t) => !t.required || docs[t.key]);
     const subscribed = !!(sub && sub.status !== 'canceled');
-    const status = m.status !== 'draft' ? 'published' : (!verified || !docsOk || !m.honor_at) ? 'verification' : !subscribed ? 'payment' : 'listing';
+    // Les justificatifs peuvent être ajoutés plus tard : la fiche attend alors (« awaiting_docs ») avant d'apparaître sur la carte
+    const status = m.status !== 'draft' ? 'published' : (!verified || !m.honor_at) ? 'verification' : !subscribed ? 'payment' : 'listing';
     return {
       merchantId: m.id, restaurantId: m.id, siret, company, docs, honorAt: m.honor_at, status, suspended: m.status === 'suspended',
+      awaitingDocs: m.status === 'awaiting_docs',
       verifiedAt: priv && priv.siret_verified_at,
       payment: subscribed ? { status: 'paid', mode: sub.mode, paidAt: sub.started_at } : null,
       subscription: sub ? {
@@ -9513,9 +9543,8 @@
     $('pv-honor').checked = !!pro.honorAt;
   }
 
-  /** Lignes des justificatifs (une par type de document). */
-  function renderDocs(docs) {
-    const box = $('pv-docs');
+  /** Lignes des justificatifs (une par type de document) dans `box` : étape de vérification ou onglet « Compléter ». */
+  function renderDocs(docs, box = $('pv-docs'), errId = 'err-pro-verify', onSaved = null) {
     box.textContent = '';
     DOC_TYPES.forEach((type) => {
       const meta = docs[type.key];
@@ -9536,29 +9565,36 @@
       row.querySelector('small').textContent = meta ? meta.name + ' · ' + formatSize(meta.size) : type.detail;
       row.querySelector('.doc-btn span').textContent = meta ? 'Remplacer' : 'Ajouter';
       row.querySelector('input').setAttribute('aria-label', type.label);
-      row.querySelector('input').addEventListener('change', (ev) => onDocSelected(type, ev.target.files[0], row));
+      row.querySelector('input').addEventListener('change', (ev) => {
+        const file = ev.target.files[0];
+        ev.target.value = '';
+        onDocSelected(type, file, row, { box, errId, onSaved });
+      });
       box.appendChild(row);
     });
   }
 
-  async function onDocSelected(type, file, row) {
+  async function onDocSelected(type, file, row, ctx = {}) {
     if (!file) return;
-    $('err-pro-verify').textContent = '';
-    if (file.size > MAX_DOC_SIZE) { $('err-pro-verify').textContent = '« ' + file.name + ' » dépasse 10 Mo.'; return; }
+    const err = $(ctx.errId || 'err-pro-verify');
+    err.textContent = '';
+    if (file.size > MAX_DOC_SIZE) { err.textContent = '« ' + file.name + ' » dépasse 10 Mo.'; return; }
     // Contenu réellement vérifié (et non le nom ou le type annoncés) : un fichier renommé en .pdf est refusé
     const real = await sniffDoc(file).catch(() => null);
-    if (!real) { $('err-pro-verify').textContent = '« ' + file.name + ' » : format non accepté (PDF, JPG ou PNG).'; return; }
+    if (!real) { err.textContent = '« ' + file.name + ' » : format non accepté (PDF, JPG ou PNG).'; return; }
     const pro = currentUser().pro || {};
-    if (!pro.merchantId) { $('err-pro-verify').textContent = 'Faites d\'abord vérifier votre numéro SIRET (bouton « Vérifier »), puis ajoutez vos justificatifs.'; return; }
+    if (!pro.merchantId) { err.textContent = 'Faites d\'abord vérifier votre numéro SIRET (bouton « Vérifier »), puis ajoutez vos justificatifs.'; return; }
     const path = docPath(pro.merchantId, type.key, file.name, real.ext);
     row.classList.add('is-busy');
     const { error } = await Loader.run(sb.storage.from('documents').upload(path, file, { contentType: real.mime }), 'Envoi du justificatif…');
     row.classList.remove('is-busy');
-    if (error) { $('err-pro-verify').textContent = '« ' + file.name + ' » n\'a pas pu être envoyé. ' + cloudError(error); return; }
+    if (error) { err.textContent = '« ' + file.name + ' » n\'a pas pu être envoyé. ' + cloudError(error); return; }
     const previous = (pro.docs || {})[type.key];
     pro.docs = { ...(pro.docs || {}), [type.key]: { name: file.name, size: file.size, path } };
     if (previous) removeFiles('documents', [previous.path]);
-    renderDocs(pro.docs);
+    renderDocs(pro.docs, ctx.box, ctx.errId, ctx.onSaved);
+    syncProfileBadge();
+    if (ctx.onSaved) await ctx.onSaved(pro);
   }
 
   /**
@@ -9690,10 +9726,7 @@
       errors.push('Faites vérifier votre numéro SIRET (bouton « Vérifier »).');
       if (!$('err-pv-siret').textContent) setFieldError('pv-siret', 'SIRET non vérifié.');
     }
-    const docs = pro.docs || {};
-    const missing = DOC_TYPES.filter((t) => t.required && !docs[t.key]);
-    document.querySelectorAll('#pv-docs .doc').forEach((row) => row.classList.toggle('has-error', missing.some((t) => t.key === row.dataset.doc)));
-    if (missing.length) errors.push('Ajoutez les justificatifs obligatoires : ' + missing.map((t) => t.label.split(',')[0].toLowerCase()).join(' ; ') + '.');
+    // Justificatifs facultatifs à cette étape (inscription faite avec le restaurateur, documents envoyés plus tard)
     if (!$('pv-honor').checked) errors.push('Cochez l\'attestation sur l\'honneur.');
     if (errors.length) { $('err-pro-verify').textContent = errors.join(' '); return; }
 
@@ -9703,6 +9736,8 @@
     }
     me.pro = await Loader.run(loadPro(me), 'Enregistrement…');
     showAuthStep(me.pro.payment ? 'pro-listing' : 'pro-payment');
+    const later = missingDocs(me.pro).length;
+    if (later) toast(plural(later, 'justificatif', 'justificatifs') + ' à ajouter plus tard : onglet « Compléter » de votre espace.');
   });
 
   /* ---------- Étape 3 : abonnement (formule au choix, paiement sur Whop) ---------- */
@@ -10715,7 +10750,15 @@
     await Loader.run(refreshCloud(), 'Mise à jour de la carte…');
     const restaurant = restaurants()[pro.merchantId];
 
-    if (mode === 'edit') {
+    if (restaurant && restaurant.status === 'awaiting_docs') {
+      // Fiche complète et enregistrée, mais justificatifs manquants : invisible sur la carte jusqu'à leur dépôt
+      if (mode === 'edit') hideOnboarding(); else finishAuth({ fresh: true });
+      setTimeout(() => {
+        ProSpace.open('todo');
+        toast(mode === 'edit' ? 'Fiche enregistrée. Ajoutez vos justificatifs pour apparaître sur la carte.'
+          : 'Votre fiche est prête ! Ajoutez vos justificatifs pour apparaître sur la carte.');
+      }, mode === 'edit' ? 0 : 900);
+    } else if (mode === 'edit') {
       hideOnboarding();
       whenMapReady(() => { upsertShopMarker(restaurantToShop(restaurant)); openShop(restaurant.id); });
       toast('Votre fiche a été mise à jour.');
@@ -10737,9 +10780,18 @@
     el.style.backgroundImage = url ? 'url("' + url + '")' : '';
   }
 
+  /** Pastille du bouton du profil : justificatifs encore à ajouter (restaurateur). */
+  function syncProfileBadge(account = currentUser()) {
+    const n = account && account.role === 'pro' ? missingDocs(account.pro).length : 0;
+    $('profile-badge').hidden = !n;
+    $('profile-badge').textContent = String(n);
+    if (account) $('profile-btn').setAttribute('aria-label', 'Profil de ' + account.name + (n ? ' : ' + plural(n, 'élément', 'éléments') + ' à compléter' : ''));
+  }
+
   function applyAccount(account) {
     paintAvatar($('avatar'), account);
     $('profile-btn').setAttribute('aria-label', 'Profil de ' + account.name);
+    syncProfileBadge(account);
     $('profile-lbl').textContent = account.role === 'pro' ? 'Mon resto' : 'Profil';
     Scanner.renderEntry();
   }
@@ -10757,7 +10809,7 @@
   /* ---------- Espace restaurateur : accueil, statistiques, publications, avis, fiche ---------- */
   const ProSpace = (() => {
     const root = $('pro-space');
-    const TABS = ['home', 'stats', 'publish', 'reviews', 'fiche'];
+    const TABS = ['home', 'todo', 'stats', 'publish', 'reviews', 'fiche'];
     let tab = 'home', days = 7, data = null, token = 0, timer = null, lastFocus = null;
     let rvList = null, rvFilter = 'todo', replyFor = null, rvToken = 0, failed = false;
     /** Statistiques indisponibles (serveur saturé) : message et bouton « Réessayer ». */
@@ -10781,7 +10833,8 @@
       const pro = (account && account.pro) || {};
       const r = myRestaurant(account);
       const listed = !!(r && r.status === 'published');
-      return { account, pro, r, step: proStepFor(account), suspended: !!pro.suspended, listed, live: !!(r && r.published), hidden: listed && !r.isOpen };
+      return { account, pro, r, step: proStepFor(account), suspended: !!pro.suspended, listed, live: !!(r && r.published), hidden: listed && !r.isOpen,
+        awaitingDocs: !!(r && r.status === 'awaiting_docs'), missing: missingDocs(pro) };
     }
 
     function open(t = 'home') {
@@ -10828,6 +10881,7 @@
       if (tab === 'publish') renderPublish();
       if (tab === 'reviews') loadReviews();
       if (tab === 'fiche') renderFiche();
+      syncTodo();   // onglet « Compléter » (et son contenu s'il est affiché)
     }
     TABS.forEach((k, i) => {
       const b = $('pst-' + k);
@@ -10836,7 +10890,9 @@
         const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[ev.key];
         if (!step) return;
         ev.preventDefault();
-        setTab(TABS[(i + step + TABS.length) % TABS.length], { focus: true });
+        let j = i;
+        do j = (j + step + TABS.length) % TABS.length; while ($('pst-' + TABS[j]).hidden && j !== i);   // onglets masqués sautés
+        setTab(TABS[j], { focus: true });
       });
     });
     $('ps-close').addEventListener('click', () => close({ toHome: true }));
@@ -10874,6 +10930,7 @@
       const dot = document.createElement('span');
       if (s.suspended) { dot.className = 'is-off'; dot.textContent = '● Suspendue'; }
       else if (s.live) { dot.className = 'is-on'; dot.textContent = '● En ligne sur la carte'; }
+      else if (s.awaitingDocs) { dot.className = 'is-off'; dot.textContent = '● En attente des justificatifs'; }
       else if (s.hidden) { dot.className = 'is-off'; dot.textContent = '● Masquée'; }
       else { dot.className = 'is-off'; dot.textContent = '● Inscription à terminer'; }
       sub.append(dot);
@@ -10883,6 +10940,48 @@
       // (statistiques : redessinées seulement quand elles changent, voir load() ; pas à chaque mise à jour de la carte)
       if (tab === 'publish') renderPublish();
       if (tab === 'fiche') renderFiche();
+      syncTodo(s);
+    }
+
+    /** Onglet « Compléter » : affiché tant qu'il manque des justificatifs, avec leur nombre. */
+    function syncTodo(s = stateOf()) {
+      const n = s.missing.length;
+      const b = $('pst-todo');
+      b.hidden = !n && tab !== 'todo';
+      $('ps-todo-badge').hidden = !n;
+      $('ps-todo-badge').textContent = String(n);
+      b.setAttribute('aria-label', 'Compléter mon profil' + (n ? ', ' + plural(n, 'justificatif', 'justificatifs') + ' à ajouter' : ''));
+      if (tab === 'todo') renderTodoTab(s);
+      syncProfileBadge(s.account);
+    }
+    function renderTodoTab(s = stateOf()) {
+      const n = s.missing.length;
+      const box = $('ps-todo-state');
+      box.className = 'todo-state ' + (n ? 'is-warn' : 'is-ok');
+      box.innerHTML = '<b></b><span></span>';
+      const [title, text] = box.children;
+      if (n) {
+        title.textContent = s.awaitingDocs ? 'Votre fiche n\'est pas encore visible sur la carte' : plural(n, 'justificatif obligatoire', 'justificatifs obligatoires') + ' à ajouter';
+        text.textContent = (n > 1 ? 'Ajoutez les ' + n + ' justificatifs marqués « Obligatoire »' : 'Ajoutez le justificatif marqué « Obligatoire »')
+          + (s.awaitingDocs ? (n > 1 ? ' : votre fiche apparaîtra sur la carte dès qu\'ils seront tous déposés.' : ' : votre fiche apparaîtra sur la carte dès qu\'il sera déposé.')
+            : (n > 1 ? ' : sans eux, votre fiche ne pourra pas apparaître sur la carte.' : ' : sans lui, votre fiche ne pourra pas apparaître sur la carte.'));
+      } else {
+        title.textContent = '✓ Tout est complet';
+        text.textContent = s.live ? 'Vos justificatifs sont déposés et votre fiche est visible sur la carte.' : 'Vos justificatifs sont déposés.';
+      }
+      renderDocs(s.pro.docs || {}, $('ps-docs'), 'err-ps-docs', afterDocSaved);
+    }
+    /** Dernier justificatif obligatoire déposé : la fiche qui attendait passe en ligne (contrôlé par la base). */
+    async function afterDocSaved(pro) {
+      const r = myRestaurant();
+      if (!missingDocs(pro).length && r && r.status === 'awaiting_docs') {
+        const { error } = await Loader.run(sb.from('merchants').update({ status: 'published' }).eq('id', r.id), 'Mise en ligne de votre fiche…');
+        if (error) { $('err-ps-docs').textContent = /[éèà]/.test(error.message || '') ? error.message : cloudError(error); render(); return; }
+        await Loader.run(refreshCloud(), 'Mise à jour de la carte…');
+        const now = myRestaurant();
+        if (now && now.published) toast('Bravo ! « ' + now.name + ' » est maintenant visible sur la carte.');
+      }
+      render();
     }
 
     function badge() {
@@ -10929,6 +11028,7 @@
       if (s.suspended) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche est suspendue par la modération : elle n\'est plus visible. Écrivez-nous pour en savoir plus.'; btn.hidden = true; }
       else if (s.step === 'pro-payment' && sub && sub.status === 'canceled') { alert.hidden = false; alert.querySelector('p').textContent = 'Votre abonnement est terminé : votre fiche n\'apparaît plus sur la carte. Vos avis, abonnés et statistiques sont conservés.'; btn.textContent = 'Choisir un abonnement'; btn.onclick = editListing; }
       else if (sub && sub.status === 'past_due') { alert.hidden = false; alert.querySelector('p').textContent = 'Le dernier paiement de votre abonnement a été refusé : mettez à jour votre carte pour garder votre fiche en ligne.'; btn.textContent = 'Voir mon abonnement'; btn.onclick = () => setTab('fiche'); }
+      else if (s.awaitingDocs) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche est prête, mais elle n\'apparaît pas encore sur la carte : ' + (s.missing.length ? plural(s.missing.length, 'justificatif obligatoire', 'justificatifs obligatoires') + ' à ajouter.' : 'justificatifs en cours de prise en compte.'); btn.textContent = 'Ajouter mes justificatifs'; btn.onclick = () => setTab('todo'); }
       else if (s.step || !s.listed) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre inscription n\'est pas terminée : votre restaurant n\'apparaît pas encore sur la carte.'; btn.textContent = 'Terminer mon inscription'; btn.onclick = editListing; }
       else if (s.hidden) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche est masquée : les clients ne la voient plus sur la carte.'; btn.textContent = 'Remettre en ligne'; btn.onclick = () => setVisible(true); }
       $('ps-home-live').hidden = !s.listed;
@@ -10992,6 +11092,7 @@
       const { r } = s;
       const T = data ? data.totals : null;
       const items = [];
+      if (s.missing.length) items.push({ ico: '📄', title: plural(s.missing.length, 'justificatif à ajouter', 'justificatifs à ajouter'), sub: s.awaitingDocs ? 'Votre fiche n\'apparaît pas sur la carte tant qu\'ils manquent.' : 'Nécessaires pour apparaître sur la carte.', go: 'Compléter', run: () => setTab('todo') });
       if (T && T.unanswered) items.push({ ico: '💬', title: plural(T.unanswered, 'avis attend', 'avis attendent') + ' votre réponse', sub: 'Répondre montre que vous êtes à l\'écoute.', go: 'Répondre', run: () => setTab('reviews') });
       if (s.live && !liveStories(r).length) items.push({ ico: '📸', title: 'Aucune story en ligne', sub: 'Plat du jour, nouveauté, coulisses : visible par tous pendant 24 h.', go: 'Publier', run: () => StoryComposer.open() });
       if (s.live && !activePromos({ promos: r.promos }).length) items.push({ ico: '🎁', title: 'Aucune promotion en cours', sub: 'Elle apparaît dans « Offres autour de moi » et vos abonnés sont prévenus.', go: 'Créer', run: goPromo });
@@ -11381,6 +11482,7 @@
         ['Carte (menu)', r.menu.length > 0, r.menu.length ? plural(r.menu.length, 'plat', 'plats') : 'vide', 'field-pl-menu'],
         ['Horaires d\'ouverture', r.hours.length > 0, r.hours.length ? plural(r.hours.length, 'service', 'services') : 'non renseignés', 'field-pl-hours'],
         ['Téléphone', !!r.phone, r.phone ? formatPhone(r.phone) : 'non renseigné', 'field-pl-phone'],
+        ['Justificatifs (Kbis, hygiène)', !s.missing.length, s.missing.length ? plural(s.missing.length, 'à ajouter', 'à ajouter') : 'déposés', 'todo'],
       ] : [];
       const ok = checks.filter((c) => c[1]).length;
       const p = checks.length ? Math.round((ok / checks.length) * 100) : 0;
@@ -11397,7 +11499,7 @@
         b.children[1].textContent = label;
         b.querySelector('small').textContent = info;
         b.setAttribute('aria-label', 'Modifier : ' + label + ' (' + (done ? 'fait' : 'à compléter') + (info ? ', ' + info : '') + ')');
-        b.addEventListener('click', () => editListing(field));
+        b.addEventListener('click', () => (field === 'todo' ? setTab('todo') : editListing(field)));
         ul.appendChild(li);
       });
       // Visibilité
@@ -11405,6 +11507,7 @@
       sw.disabled = !s.listed || s.suspended;
       sw.setAttribute('aria-checked', String(s.live));
       $('ps-vis-hint').textContent = s.suspended ? 'Fiche suspendue par la modération.'
+        : s.awaitingDocs ? 'Disponible une fois vos justificatifs ajoutés (onglet « Compléter »).'
         : !s.listed ? 'Disponible une fois votre fiche publiée.'
         : s.live ? 'Les clients voient votre fiche, vos stories et vos promotions. Masquez-la en cas de fermeture exceptionnelle.'
         : 'Masquée : personne ne la voit. Vos abonnés, vos avis et vos statistiques sont conservés.';
@@ -12422,7 +12525,7 @@
   $('profile-btn').addEventListener('click', () => {
     const account = currentUser();
     if (!account) { if (Guest.on()) Guest.ask(); return; }
-    if (account.role === 'pro') ProSpace.open();
+    if (account.role === 'pro') ProSpace.open(missingDocs(account.pro).length && !proStepFor(account) ? 'todo' : 'home');
     else openProfileSheet();
   });
   $('profile-pro').addEventListener('click', () => ProSpace.open());

@@ -78,7 +78,16 @@ select t.fails($$insert into merchant_subscriptions (merchant_id, mode) values (
 select t.fails($$insert into merchant_subscriptions (merchant_id) values ('aaaaaaaa-0000-0000-0000-000000000002')$$, 'abonnement sur la fiche d''un autre refusé');
 select t.ok(t.affected($$insert into merchant_subscriptions (merchant_id) values ('aaaaaaaa-0000-0000-0000-000000000001')$$) = 1, 'abonnement de démonstration souscrit');
 select t.fails($$update merchants set is_test = true where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$, 'restaurateur : ne peut pas modifier le marquage « fiche de test »');
-select t.ok(t.affected($$update merchants set status = 'published' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 1, 'publication acceptée : SIRET vérifié, attestation, abonnement et fiche complète');
+-- Justificatifs facultatifs à l'inscription : sans eux, la fiche attend (« awaiting_docs ») et reste invisible
+select t.ok(t.affected($$update merchants set status = 'published' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 1, 'publication sans justificatifs acceptée (inscription faite avec le restaurateur)');
+select t.ok((select status = 'awaiting_docs' and published_at is null from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'sans Kbis ni attestation d''hygiène : fiche en attente, pas en ligne');
+select t.ok(not private.merchant_is_live('aaaaaaaa-0000-0000-0000-000000000001'), 'fiche en attente des justificatifs : invisible (avis, stories, offres)');
+select t.ok(t.affected($$insert into storage.objects (bucket_id, name) values ('documents', 'aaaaaaaa-0000-0000-0000-000000000001/kbis--1--kbis.pdf')$$) = 1, 'Kbis déposé après l''inscription');
+select t.ok(t.affected($$update merchants set status = 'published' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 1
+  and (select status = 'awaiting_docs' from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'Kbis seul : la fiche attend encore l''attestation d''hygiène');
+select t.ok(t.affected($$insert into storage.objects (bucket_id, name) values ('documents', 'aaaaaaaa-0000-0000-0000-000000000001/hygiene--1--haccp.pdf')$$) = 1, 'attestation d''hygiène déposée');
+select t.ok(t.affected($$update merchants set status = 'published' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 1, 'publication acceptée : SIRET vérifié, attestation, abonnement, justificatifs et fiche complète');
+select t.ok((select status = 'published' from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001') and private.merchant_is_live('aaaaaaaa-0000-0000-0000-000000000001'), 'justificatifs déposés : fiche en ligne');
 select t.ok((select published_at is not null from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'date de publication renseignée automatiquement');
 select t.fails($$update merchants set photos_urls = '{}' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$, 'fiche publiée : impossible de retirer toutes les photos');
 reset role;
@@ -160,7 +169,7 @@ set role authenticated;
 select t.ok(t.affected($$insert into storage.objects (bucket_id, name) values ('photos', 'aaaaaaaa-0000-0000-0000-000000000001/burger.jpg')$$) = 1, 'photo déposée dans le dossier de sa fiche');
 select t.fails($$insert into storage.objects (bucket_id, name) values ('photos', 'aaaaaaaa-0000-0000-0000-000000000002/pirate.jpg')$$, 'photo dans le dossier d''une autre fiche refusée');
 select t.ok(t.affected($$insert into storage.objects (bucket_id, name) values ('documents', 'aaaaaaaa-0000-0000-0000-000000000001/kbis.pdf')$$) = 1, 'justificatif déposé (stockage privé)');
-select t.ok((select count(*) = 1 from storage.objects where bucket_id = 'documents'), 'restaurateur : voit ses justificatifs');
+select t.ok((select count(*) = 3 from storage.objects where bucket_id = 'documents'), 'restaurateur : voit ses justificatifs');
 select t.ok(t.affected($$insert into storage.objects (bucket_id, name) values ('photos', 'aaaaaaaa-0000-0000-0000-000000000001/retiree.jpg')$$) = 1
   and t.affected($$delete from storage.objects where bucket_id = 'photos' and name = 'aaaaaaaa-0000-0000-0000-000000000001/retiree.jpg'$$) = 1, 'restaurateur : supprime une photo retirée de sa fiche');
 reset role;
