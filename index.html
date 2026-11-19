@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-tscd+iibhVVugpkuOhWPgGK3nFwO2YxjDXnYntgnNFY=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-3ycJhzZj27ljrS5lWLLdgQTzVluBGt6jNgwXZMuiOcU=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -991,11 +991,45 @@
     .cat-picker button { height: 36px; padding: 0 12px; border-radius: 18px; font-size: 14px; border: 1px solid var(--line-strong); }
     .cat-picker button[aria-checked="true"] { background: #e8f0fe; color: #1967d2; border-color: var(--accent-line); }
     :root[data-theme="dark"] .cat-picker button[aria-checked="true"] { background: var(--accent-soft); color: var(--accent); }
-    .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .photo-grid { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .photo-item, .photo-add { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; }
-    .photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .photo-item .photo-del { position: absolute; top: 4px; right: 4px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0, 0, 0, .6); color: #fff; font-size: 16px; line-height: 1; }
-    .photo-item .photo-main { position: absolute; left: 4px; bottom: 4px; padding: 1px 6px; border-radius: 4px; font-size: 11px; color: #fff; background: rgba(0, 0, 0, .6); }
+    /* Vignettes déplaçables : appui maintenu (doigt) ou glisser (souris) ; pas de menu « enregistrer l'image » d'iOS */
+    .photo-item { background: var(--hover); cursor: grab; touch-action: pan-y; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; transition: box-shadow .2s; }
+    .photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; -webkit-user-drag: none; }
+    .photo-item .photo-del { position: absolute; top: 4px; right: 4px; width: 30px; height: 30px; border-radius: 50%; background: rgba(0, 0, 0, .6); color: #fff; font-size: 17px; line-height: 1; }
+    .photo-num { position: absolute; left: 5px; top: 5px; display: grid; place-items: center; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 11px;
+      font-size: 12px; font-weight: 700; color: #fff; background: rgba(0, 0, 0, .55); pointer-events: none; }
+    /* Photo principale : badge en bas à gauche (la place de la flèche « avancer », inutile pour elle) */
+    .photo-num.is-main { z-index: 1; top: auto; bottom: 7px; left: 4px; height: 20px; padding: 0 6px; font-size: 10.5px; letter-spacing: -.01em; background: var(--ob-btn, var(--accent)); box-shadow: 0 2px 6px rgba(0, 0, 0, .25); }
+    .photo-tools { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: space-between; padding: 14px 4px 4px; background: linear-gradient(transparent, rgba(0, 0, 0, .5)); }
+    .photo-tools button { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #fff; background: rgba(0, 0, 0, .4); }
+    .photo-tools button:disabled { visibility: hidden; }
+    .photo-tools button[hidden] { display: grid; visibility: hidden; }
+    .photo-tools svg { width: 16px; height: 16px; }
+    .photo-tools button:focus-visible, .photo-item .photo-del:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+    @media (hover: hover) { .photo-tools button:hover, .photo-item .photo-del:hover { background: rgba(0, 0, 0, .7); } }
+    .photo-item.is-dragging { z-index: 3; cursor: grabbing; box-shadow: 0 14px 30px rgba(0, 0, 0, .35); }
+    .photo-item.is-dragging .photo-tools, .photo-item.is-dragging .photo-del { opacity: 0; }
+    .photo-item.is-dropping { z-index: 2; transition: transform .2s var(--ease-out), box-shadow .2s; }
+    .photo-grid.is-sorting .photo-item:not(.is-dragging) { opacity: .85; }
+    .photo-hint { margin: 2px 0 10px; }
+    .photo-hint[hidden] { display: none; }
+    /* Formulaire de la fiche : accès direct aux rubriques, rubrique mise en évidence à l'arrivée */
+    .pl-jump { display: flex; gap: 6px; margin: 14px -2px 2px; padding: 2px; overflow-x: auto; scrollbar-width: none; }
+    .pl-jump::-webkit-scrollbar { display: none; }
+    .pl-jump button { flex: none; height: 34px; padding: 0 14px; border-radius: 17px; font-size: 13.5px; font-weight: 500; color: var(--text); background: var(--accent-soft); border: 1px solid var(--accent-line); }
+    @media (hover: hover) { .pl-jump button:hover { border-color: var(--accent); } }
+    #form-pro-listing .field { scroll-margin-top: 16px; }
+    .field.is-flash { animation: field-flash 1.6s var(--ease-out); border-radius: 14px; }
+    @keyframes field-flash { 0%, 35% { box-shadow: 0 0 0 6px var(--accent-soft); background: var(--accent-soft); } 100% { box-shadow: 0 0 0 6px transparent; background: transparent; } }
+    /* Barre d'enregistrement collée en bas de l'écran pendant toute la saisie */
+    .pl-actions { position: sticky; bottom: calc(-16px - var(--safe-bottom)); z-index: 4; display: flex; gap: 10px; margin: 14px -22px 0; padding: 12px 22px calc(12px + var(--safe-bottom));
+      background: var(--panel-solid); border-top: 1px solid var(--line); box-shadow: 0 -10px 24px -18px rgba(0, 0, 0, .35); }
+    .pl-actions .btn { flex: 1; margin: 0 !important; }
+    .pl-actions .btn-primary { flex: 2; }
+    .onboarding[data-mode="edit"] #form-pro-listing { padding-bottom: 0; }
+    .onboarding[data-mode="edit"] .ob-panel:has(#form-pro-listing:not([hidden])) { padding-bottom: 0; }
+    .onboarding[data-mode="edit"] .pl-actions { margin-bottom: 0; border-radius: 0 0 28px 28px; }
     .photo-add { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; color: var(--accent); border: 1px dashed var(--accent-line); cursor: pointer; }
     .photo-add span { font-size: 22px; line-height: 1; }
     .photo-add:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -1460,11 +1494,15 @@
     .ps-meter { height: 8px; margin-top: 10px; border-radius: 4px; background: var(--hover); overflow: hidden; }
     .ps-meter i { display: block; height: 100%; width: 0; border-radius: 4px; background: var(--green); transition: width .4s var(--ease-out); }
     .ps-check { margin: 10px 0 0; padding: 0; list-style: none; }
-    .ps-check li { display: flex; align-items: center; gap: 10px; padding: 9px 2px; font-size: 14px; border-bottom: 1px solid var(--line); }
-    .ps-check li > span:first-child { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 13px; font-weight: 600; }
-    .ps-check li.is-ok > span:first-child { color: #fff; background: var(--green); }
-    .ps-check li:not(.is-ok) > span:first-child { color: var(--muted); border: 1.5px solid var(--line-strong); }
+    .ps-check li { border-bottom: 1px solid var(--line); }
+    /* Chaque ligne ouvre directement la bonne rubrique du formulaire */
+    .ps-check li > button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 2px; font: inherit; font-size: 14px; text-align: left; color: var(--text); border-radius: 8px; }
+    @media (hover: hover) { .ps-check li > button:hover { background: var(--accent-soft); } }
+    .ps-check .pc-ico { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 13px; font-weight: 600; }
+    .ps-check li.is-ok .pc-ico { color: #fff; background: var(--green); }
+    .ps-check li:not(.is-ok) .pc-ico { color: var(--muted); border: 1.5px solid var(--line-strong); }
     .ps-check li small { margin-left: auto; color: var(--muted); font-size: 12.5px; text-align: right; }
+    .ps-check .pc-chev { flex: none; font-size: 20px; line-height: 1; color: var(--muted); }
     .ps-switch-row { display: flex; align-items: center; gap: 14px; margin-top: 10px; }
     .ps-switch-row > div { flex: 1; min-width: 0; font-size: 14px; }
     .ps-switch-row b { font-weight: 500; }
@@ -3398,6 +3436,15 @@
       <form id="form-pro-listing" class="ob-step" novalidate data-step="pro-listing" hidden aria-labelledby="pl-title">
         <h2 id="pl-title"><span data-mode="create">Votre <em>restaurant</em> sur la carte</span><span data-mode="edit">Modifier ma <em>fiche</em></span></h2>
         <p class="lead" data-mode="create">Dernière étape : présentez votre établissement. Ces informations seront visibles par tous les utilisateurs.</p>
+        <!-- Accès direct à chaque rubrique (le formulaire est long) -->
+        <nav class="pl-jump" id="pl-jump" aria-label="Aller à une rubrique de la fiche">
+          <button type="button" data-jump="field-pl-name">Infos</button>
+          <button type="button" data-jump="field-pl-photos">Photos</button>
+          <button type="button" data-jump="field-pl-menu">Carte</button>
+          <button type="button" data-jump="field-pl-address">Adresse</button>
+          <button type="button" data-jump="field-pl-hours">Horaires</button>
+          <button type="button" data-jump="field-pl-phone">Téléphone</button>
+        </nav>
 
         <label class="field" id="field-pl-name">
           <span>Nom du restaurant</span>
@@ -3418,7 +3465,8 @@
         </label>
 
         <div class="field" id="field-pl-photos">
-          <span>Photos (1 à 10 · format carré · la première est la photo principale)</span>
+          <span>Photos (1 à 10 · format carré)</span>
+          <p class="hint photo-hint" id="pl-photos-hint">La 1<sup>re</sup> est la photo principale, celle que les clients voient en premier. Pour changer l'ordre, maintenez une photo puis faites-la glisser, ou touchez les flèches. L'étoile la met en photo principale.</p>
           <div class="photo-grid" id="pl-photos">
             <label class="photo-add" id="pl-photo-add">
               <input type="file" id="pl-photo-input" accept="image/jpeg,image/png,image/webp" multiple hidden />
@@ -3426,6 +3474,7 @@
             </label>
           </div>
           <small class="field-error" id="err-pl-photos" aria-live="polite"></small>
+          <p class="visually-hidden" id="pl-photos-live" aria-live="polite"></p>
         </div>
 
         <div class="field" id="field-pl-menu">
@@ -3475,8 +3524,11 @@
         <p class="hint">Vos promotions (du jour, de la semaine, offre étudiante…) et vos stories se publient ensuite depuis votre espace restaurateur.</p>
 
         <p class="form-error" id="err-pro-listing" role="alert"></p>
-        <button class="btn btn-primary" type="submit"><span data-mode="create">Publier sur la carte</span><span data-mode="edit">Enregistrer les modifications</span></button>
-        <button class="btn btn-ghost" type="button" id="pl-cancel" data-mode="edit">Annuler</button>
+        <!-- Barre collée en bas de l'écran : enregistrer sans avoir à descendre tout en bas du formulaire -->
+        <div class="pl-actions">
+          <button class="btn btn-ghost" type="button" id="pl-cancel" data-mode="edit">Annuler</button>
+          <button class="btn btn-primary" type="submit"><span data-mode="create">Publier sur la carte</span><span data-mode="edit">Enregistrer</span></button>
+        </div>
         <button class="link-btn later-btn" type="button" data-pro-later data-mode="create">Terminer plus tard</button>
       </form>
 
@@ -9446,6 +9498,8 @@
 
   // Brouillon en cours (non encore enregistré dans le compte)
   const proDraft = { company: null, photos: [], addedPhotos: [], removedPhotos: [], address: null, category: null };
+  /** Fiche modifiée depuis l'ouverture du formulaire (on demande confirmation avant d'annuler). */
+  let listingDirty = false;
 
   /* ---------- Étape 2 : vérification SIRET + justificatifs ---------- */
 
@@ -9894,6 +9948,7 @@
     const listed = r && r.status !== 'draft';        // fiche déjà publiée : formulaire prérempli
     proDraft.addedPhotos = []; proDraft.removedPhotos = [];
     proDraft.photos = r ? [...(r.photos || [])] : [];
+    listingDirty = false;
     proDraft.address = listed ? { label: r.address, coords: r.coords } : null;
     $('pl-name').value = listed ? r.name : (company.tradeName || company.legalName || '').replace(/\s+\(.*\)$/, '');
     setListingCategory(listed ? r.category : null);
@@ -10100,25 +10155,169 @@
       (sections.length ? ' · ' + sections.slice(0, 3).join(', ') + (sections.length > 3 ? '…' : '') : '');
   }
 
-  /* Photos : recadrées en carré puis envoyées dans le stockage « photos » (adresse publique) */
+  /* Photos : recadrées en carré puis envoyées dans le stockage « photos » (adresse publique).
+     Ordre modifiable : appui maintenu puis glisser (doigt), glisser (souris), flèches, ou étoile (photo principale). */
+  const ICON_PREV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+  const ICON_NEXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+  const ICON_STAR = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.2l2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.5l6-.8z"/></svg>';
+  const photoItems = () => [...$('pl-photos').querySelectorAll('.photo-item')];
+
   function renderPhotos() {
-    const ids = [...proDraft.photos];
     const grid = $('pl-photos');
     const add = $('pl-photo-add');
-    grid.querySelectorAll('.photo-item').forEach((el) => el.remove());
-    ids.forEach((url, i) => {
+    photoItems().forEach((el) => el.remove());
+    proDraft.photos.forEach((url) => {
       const item = document.createElement('div');
       item.className = 'photo-item';
-      item.innerHTML = '<img alt="" /><button class="photo-del" type="button">×</button>';
+      item.dataset.url = url;
+      item.innerHTML = '<img alt="" draggable="false" /><span class="photo-num" aria-hidden="true"></span><button class="photo-del" type="button">×</button>'
+        + '<div class="photo-tools"><button class="photo-move" type="button" data-dir="-1">' + ICON_PREV + '</button>'
+        + '<button class="photo-star" type="button">' + ICON_STAR + '</button>'
+        + '<button class="photo-move" type="button" data-dir="1">' + ICON_NEXT + '</button></div>';
       item.querySelector('img').src = url;
-      item.querySelector('img').alt = 'Photo ' + (i + 1);
-      item.querySelector('.photo-del').setAttribute('aria-label', 'Retirer la photo ' + (i + 1));
-      item.querySelector('.photo-del').addEventListener('click', () => removePhoto(url));
-      if (i === 0) { const tag = document.createElement('span'); tag.className = 'photo-main'; tag.textContent = 'Principale'; item.appendChild(tag); }
       grid.insertBefore(item, add);
     });
-    add.hidden = ids.length >= MAX_PHOTOS;
+    syncPhotoLabels();
   }
+
+  /** Numéros, badge « Principale », flèches et libellés d'après l'ordre affiché. */
+  function syncPhotoLabels() {
+    const items = photoItems(), n = items.length;
+    items.forEach((item, i) => {
+      const num = item.querySelector('.photo-num');
+      num.textContent = i === 0 ? 'Principale' : String(i + 1);
+      num.classList.toggle('is-main', i === 0);
+      item.querySelector('img').alt = i === 0 ? 'Photo principale' : 'Photo ' + (i + 1);
+      item.querySelector('.photo-del').setAttribute('aria-label', 'Retirer la photo ' + (i + 1));
+      const [prev, next] = item.querySelectorAll('.photo-move');
+      prev.disabled = i === 0; next.disabled = i === n - 1;
+      prev.setAttribute('aria-label', 'Photo ' + (i + 1) + ' : avancer d\'une place');
+      next.setAttribute('aria-label', 'Photo ' + (i + 1) + ' : reculer d\'une place');
+      const star = item.querySelector('.photo-star');
+      star.hidden = i === 0;
+      star.setAttribute('aria-label', 'Photo ' + (i + 1) + ' : en faire la photo principale');
+      prev.parentNode.hidden = n < 2;
+    });
+    $('pl-photo-add').hidden = n >= MAX_PHOTOS;
+    $('pl-photos-hint').hidden = n < 2;
+  }
+
+  /** Fait glisser les vignettes vers leur nouvelle place après un changement d'ordre (sauf `skip`, déjà sous le doigt). */
+  function flipPhotos(mutate, skip = null) {
+    const els = photoItems();
+    const before = new Map(els.map((el) => [el, [el.offsetLeft, el.offsetTop]]));
+    mutate();
+    if (reduceMotion) return;
+    els.forEach((el) => {
+      if (el === skip) return;
+      const [x, y] = before.get(el);
+      const dx = x - el.offsetLeft, dy = y - el.offsetTop;
+      if (dx || dy) el.animate([{ transform: 'translate(' + dx + 'px, ' + dy + 'px)' }, { transform: 'none' }], { duration: 220, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+    });
+  }
+
+  /** Ordre affiché → brouillon de la fiche, avec une annonce pour les lecteurs d'écran. */
+  function commitPhotoOrder(url) {
+    const order = photoItems().map((el) => el.dataset.url);
+    const before = proDraft.photos.indexOf(url), to = order.indexOf(url);
+    proDraft.photos = order;
+    syncPhotoLabels();
+    if (before === to) return;
+    listingDirty = true;
+    $('pl-photos-live').textContent = to === 0 ? 'Nouvelle photo principale.' : 'Photo déplacée en position ' + (to + 1) + ' sur ' + order.length + '.';
+  }
+
+  function movePhoto(from, to, focusSel) {
+    const items = photoItems();
+    if (to < 0 || to >= items.length || from === to) return;
+    const item = items[from];
+    flipPhotos(() => $('pl-photos').insertBefore(item, to > from ? items[to].nextSibling : items[to]));
+    commitPhotoOrder(item.dataset.url);
+    if (focusSel) {
+      const b = item.querySelector(focusSel);
+      (b && !b.disabled && !b.hidden ? b : item.querySelector('.photo-del')).focus({ preventScroll: true });
+    }
+  }
+
+  $('pl-photos').addEventListener('click', (ev) => {
+    const btn = ev.target.closest('button');
+    const item = btn && btn.closest('.photo-item');
+    if (!item) return;
+    const i = photoItems().indexOf(item);
+    if (btn.classList.contains('photo-del')) removePhoto(item.dataset.url);
+    else if (btn.classList.contains('photo-star')) movePhoto(i, 0, '.photo-move[data-dir="1"]');
+    else if (btn.classList.contains('photo-move')) {
+      const dir = Number(btn.dataset.dir);
+      movePhoto(i, i + dir, '.photo-move[data-dir="' + dir + '"]');
+    }
+  });
+
+  // Glisser-déposer : souris dès qu'elle bouge ; doigt après un appui maintenu (sinon, le doigt fait défiler la page)
+  (() => {
+    const grid = $('pl-photos');
+    let pending = null, drag = null, hold = 0;
+    const cancelHold = () => { clearTimeout(hold); hold = 0; };
+    grid.addEventListener('pointerdown', (ev) => {
+      const item = ev.target.closest('.photo-item');
+      if (!item || ev.target.closest('button') || ev.button > 0 || drag || photoItems().length < 2) return;
+      pending = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, item };
+      if (ev.pointerType !== 'mouse') hold = setTimeout(() => begin(pending.x, pending.y), 300);
+    });
+    grid.addEventListener('pointermove', (ev) => {
+      if (drag) { if (ev.pointerId === drag.id) { ev.preventDefault(); follow(ev.clientX, ev.clientY); } return; }
+      if (!pending || ev.pointerId !== pending.id) return;
+      const moved = Math.hypot(ev.clientX - pending.x, ev.clientY - pending.y);
+      if (ev.pointerType === 'mouse') { if (moved > 6) begin(ev.clientX, ev.clientY); }
+      else if (moved > 10) { cancelHold(); pending = null; }
+      else { pending.x = ev.clientX; pending.y = ev.clientY; }
+    });
+    // Pendant le glisser au doigt, la page ne défile pas ; pas de menu contextuel sur l'appui long
+    grid.addEventListener('touchmove', (ev) => { if (drag) ev.preventDefault(); }, { passive: false });
+    grid.addEventListener('contextmenu', (ev) => { if (pending || drag) ev.preventDefault(); });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((type) => grid.addEventListener(type, (ev) => {
+      if (drag && ev.pointerId !== drag.id) return;
+      cancelHold(); pending = null;
+      if (drag) end();
+    }));
+
+    function begin(x, y) {
+      cancelHold();
+      if (!pending) return;
+      const { item, id } = pending;
+      const r = item.getBoundingClientRect();
+      drag = { item, id, grabX: x - r.left, grabY: y - r.top };
+      pending = null;
+      try { grid.setPointerCapture(id); } catch (e) { /* pointeur déjà relâché */ }
+      item.getAnimations().forEach((a) => a.cancel());
+      item.classList.add('is-dragging');
+      grid.classList.add('is-sorting');
+      if (navigator.vibrate) navigator.vibrate(12);
+      follow(x, y);
+    }
+    function follow(x, y) {
+      const { item } = drag;
+      const g = grid.getBoundingClientRect();
+      // Vignette survolée, d'après les places (pas les positions animées) : pas d'aller-retour pendant les animations
+      const items = photoItems();
+      const over = items.find((el) => el !== item && x >= g.left + el.offsetLeft && x <= g.left + el.offsetLeft + el.offsetWidth
+        && y >= g.top + el.offsetTop && y <= g.top + el.offsetTop + el.offsetHeight);
+      if (over) {
+        const i = items.indexOf(item), j = items.indexOf(over);
+        flipPhotos(() => grid.insertBefore(item, j > i ? over.nextSibling : over), item);
+      }
+      item.style.transform = 'translate(' + (x - g.left - drag.grabX - item.offsetLeft) + 'px, ' + (y - g.top - drag.grabY - item.offsetTop) + 'px) scale(1.05)';
+    }
+    function end() {
+      const { item } = drag;
+      drag = null;
+      grid.classList.remove('is-sorting');
+      item.classList.remove('is-dragging');
+      item.classList.add('is-dropping');
+      item.style.transform = '';
+      setTimeout(() => item.classList.remove('is-dropping'), 230);
+      commitPhotoOrder(item.dataset.url);
+    }
+  })();
 
   // Les ajouts sont traités l'un après l'autre : un seul recadrage ouvert à la fois.
   let photoQueue = Promise.resolve();
@@ -10153,6 +10352,7 @@
         if (up.error) { setFieldError('pl-photos', '« ' + file.name + ' » n\'a pas pu être envoyée. ' + cloudError(up.error)); continue; }
         const url = publicUrl('photos', path);
         proDraft.photos.push(url);
+        listingDirty = true;
         proDraft.addedPhotos.push(url);
         renderPhotos();
       } catch (e) {
@@ -10339,6 +10539,7 @@
   /** Photo retirée : supprimée tout de suite si elle vient d'être ajoutée, sinon à l'enregistrement de la fiche. */
   function removePhoto(url) {
     setFieldError('pl-photos', '');
+    listingDirty = true;
     proDraft.photos = proDraft.photos.filter((p) => p !== url);
     if (proDraft.addedPhotos.includes(url)) {
       proDraft.addedPhotos = proDraft.addedPhotos.filter((p) => p !== url);
@@ -10429,9 +10630,28 @@
   });
 
   $('pl-cancel').addEventListener('click', async () => {
+    if (listingDirty && !window.confirm('Quitter sans enregistrer ?\n\nVos modifications de la fiche seront perdues.')) return;
     await discardDraftPhotos();
+    listingDirty = false;
     hideOnboarding();
   });
+  // Toute saisie ou tout choix dans le formulaire compte comme une modification
+  ['input', 'change'].forEach((type) => $('form-pro-listing').addEventListener(type, () => { listingDirty = true; }));
+  $('form-pro-listing').addEventListener('click', (ev) => {
+    if (ev.target.closest('.cat-picker button, .m-del, #pl-menu-add, #pl-use-sirene, .addr-list li')) listingDirty = true;
+  });
+
+  /** Amène une rubrique du formulaire de la fiche à l'écran et la met brièvement en évidence. */
+  function revealListingField(id) {
+    const f = $(id);
+    if (!f) return;
+    f.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
+    f.classList.remove('is-flash');
+    void f.offsetWidth;   // relance l'animation
+    f.classList.add('is-flash');
+    setTimeout(() => f.classList.remove('is-flash'), 1700);
+  }
+  $('pl-jump').addEventListener('click', (ev) => { const b = ev.target.closest('[data-jump]'); if (b) revealListingField(b.dataset.jump); });
 
   $('form-pro-listing').addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -11152,14 +11372,15 @@
       $('ps-share').hidden = !s.live;
       $('pd-edit').textContent = s.step ? 'Terminer mon inscription' : 'Modifier ma fiche';
       // Fiche complète ?
+      // [libellé, fait, détail, rubrique du formulaire ouverte par la ligne]
       const checks = r ? [
-        ['Nom et catégorie', !!(r.name && r.status !== 'draft'), r.status !== 'draft' ? catOf(r).label : ''],
-        ['Adresse sur la carte', !!(r.address && r.coords), r.address ? r.address.split(' ').slice(0, 4).join(' ') + '…' : ''],
-        ['Description', (r.description || '').length >= 30, (r.description || '').length ? plural(r.description.length, 'caractère', 'caractères') : 'à écrire'],
-        ['Photos', r.photos.length > 0, r.photos.length ? plural(r.photos.length, 'photo', 'photos') : 'aucune'],
-        ['Carte (menu)', r.menu.length > 0, r.menu.length ? plural(r.menu.length, 'plat', 'plats') : 'vide'],
-        ['Horaires d\'ouverture', r.hours.length > 0, r.hours.length ? plural(r.hours.length, 'service', 'services') : 'non renseignés'],
-        ['Téléphone', !!r.phone, r.phone ? formatPhone(r.phone) : 'non renseigné'],
+        ['Nom et catégorie', !!(r.name && r.status !== 'draft'), r.status !== 'draft' ? catOf(r).label : '', 'field-pl-name'],
+        ['Adresse sur la carte', !!(r.address && r.coords), r.address ? r.address.split(' ').slice(0, 4).join(' ') + '…' : '', 'field-pl-address'],
+        ['Description', (r.description || '').length >= 30, (r.description || '').length ? plural(r.description.length, 'caractère', 'caractères') : 'à écrire', 'field-pl-desc'],
+        ['Photos', r.photos.length > 0, r.photos.length ? plural(r.photos.length, 'photo', 'photos') : 'aucune', 'field-pl-photos'],
+        ['Carte (menu)', r.menu.length > 0, r.menu.length ? plural(r.menu.length, 'plat', 'plats') : 'vide', 'field-pl-menu'],
+        ['Horaires d\'ouverture', r.hours.length > 0, r.hours.length ? plural(r.hours.length, 'service', 'services') : 'non renseignés', 'field-pl-hours'],
+        ['Téléphone', !!r.phone, r.phone ? formatPhone(r.phone) : 'non renseigné', 'field-pl-phone'],
       ] : [];
       const ok = checks.filter((c) => c[1]).length;
       const p = checks.length ? Math.round((ok / checks.length) * 100) : 0;
@@ -11167,14 +11388,16 @@
       $('ps-complete-bar').style.width = p + '%';
       const ul = $('ps-checklist');
       ul.textContent = '';
-      checks.forEach(([label, done, info]) => {
+      checks.forEach(([label, done, info, field]) => {
         const li = document.createElement('li');
         li.className = done ? 'is-ok' : '';
-        li.innerHTML = '<span aria-hidden="true"></span><span></span><small></small>';
-        li.firstChild.textContent = done ? '✓' : '';
-        li.children[1].textContent = label;
-        li.lastChild.textContent = info;
-        li.setAttribute('aria-label', label + ' : ' + (done ? 'fait' : 'à compléter') + (info ? ' (' + info + ')' : ''));
+        li.innerHTML = '<button type="button"><span class="pc-ico" aria-hidden="true"></span><span></span><small></small><span class="pc-chev" aria-hidden="true">›</span></button>';
+        const b = li.firstChild;
+        b.querySelector('.pc-ico').textContent = done ? '✓' : '';
+        b.children[1].textContent = label;
+        b.querySelector('small').textContent = info;
+        b.setAttribute('aria-label', 'Modifier : ' + label + ' (' + (done ? 'fait' : 'à compléter') + (info ? ', ' + info : '') + ')');
+        b.addEventListener('click', () => editListing(field));
         ul.appendChild(li);
       });
       // Visibilité
@@ -11266,7 +11489,7 @@
       close();
       const step = proStepFor(currentUser());
       showAuthStep(step || 'pro-listing', { mode: step ? 'create' : 'edit' });
-      if (field && !step) setTimeout(() => { const f = $(field); if (f) f.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' }); }, 450);
+      if (field && !step) setTimeout(() => revealListingField(field), 450);
     }
     function showOnMap(tabName) {
       const r = myRestaurant();
