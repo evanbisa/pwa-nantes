@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-8Kiu0UewhJMtK1Z+mK7M2x6ef0lqj4ZEB5Df5VNNtHM=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-tscd+iibhVVugpkuOhWPgGK3nFwO2YxjDXnYntgnNFY=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -585,8 +585,10 @@
     :root[data-theme="light"] .onboarding .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgb(255 77 46 / .14); }
     :root[data-theme="dark"] .onboarding .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgb(255 122 69 / .16); }
     .onboarding .field.has-error input { border-color: var(--danger); box-shadow: none; }
-    :root[data-theme="light"] .onboarding .role-switch { background: rgb(255 138 61 / .08); border-color: rgb(255 120 60 / .14); }
-    :root[data-theme="light"] .onboarding .role-switch button[aria-checked="true"] { box-shadow: 0 2px 8px -2px rgb(150 50 10 / .22); }
+    :root[data-theme="light"] .onboarding .role-check { background: rgb(255 255 255 / .85); border-color: rgb(255 120 60 / .16); }
+    :root[data-theme="light"] .onboarding .role-check:has(input:checked) { background: rgb(255 138 61 / .08); border-color: rgb(255 77 46 / .35); }
+    :root[data-theme="dark"] .onboarding .role-check { background: rgb(255 255 255 / .04); border-color: rgb(255 255 255 / .1); }
+    :root[data-theme="dark"] .onboarding .role-check:has(input:checked) { background: rgb(255 122 69 / .1); border-color: rgb(255 122 69 / .45); }
     .ob-logo .avatar { color: #fff; background: var(--ob-grad, var(--accent)); }
     /* Avantages : une coche dans une pastille en dégradé (jour et nuit) */
     .onboarding .jn-perks li::before {
@@ -831,7 +833,7 @@
     /* Petits écrans (hauteur) : le bouton principal reste visible sans faire défiler */
     @media (max-height: 740px) {
       .onboarding[data-role="client"] .ob-top { margin-bottom: 12px; }
-      .onboarding[data-role="client"] .role-switch { margin-bottom: 12px; }
+      .role-check { margin-top: 12px; padding: 9px 12px; }
       .jn-screen { min-height: 0; }
       .jn-screen .btn { margin-top: 12px; }
       .jn-hero { zoom: .66; margin: 0; }
@@ -847,9 +849,22 @@
     }
     @media (max-height: 600px) { .jn-hero { display: none; } .jn-perks li { padding: 6px 10px; } }
 
-    .role-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin: 0 0 18px; border-radius: 999px; background: var(--hover); border: 1px solid var(--line); }
-    .role-switch button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; border-radius: 999px; font-weight: 500; font-size: 14px; color: var(--muted); transition: background-color .2s, color .2s, box-shadow .2s; }
-    .role-switch button[aria-checked="true"] { background: var(--panel-solid); color: var(--accent); box-shadow: 0 1px 3px rgba(0, 0, 0, .18); }
+    /* « Je suis restaurateur » : case à cocher sous l'accueil et la connexion (remplace les onglets Client / Restaurateur) */
+    .role-check { position: relative; display: flex; align-items: center; gap: 12px; margin: 18px 0 0; padding: 12px 14px; border-radius: 16px; cursor: pointer;
+      border: 1px solid var(--line); background: var(--panel-solid); transition: border-color .2s, background-color .2s, box-shadow .2s; -webkit-tap-highlight-color: transparent; }
+    .role-check[hidden] { display: none; }
+    .role-check input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+    .rc-box { flex: none; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; border: 2px solid var(--line-strong); background: var(--input-bg, #fff); transition: background-color .15s, border-color .15s; }
+    .rc-box::after { content: ""; width: 14px; height: 14px; opacity: 0; transform: scale(.6); transition: opacity .15s, transform .2s var(--ease-out);
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat; }
+    .rc-text { flex: 1; min-width: 0; }
+    .rc-text b { display: block; font-size: 15px; font-weight: 600; color: var(--text); }
+    .rc-text small { display: block; margin-top: 1px; font-size: 13px; color: var(--muted); }
+    .role-check input:checked ~ .rc-box { border-color: transparent; background: var(--ob-btn, var(--ob-grad, var(--accent))); }
+    .role-check input:checked ~ .rc-box::after { opacity: 1; transform: none; }
+    .role-check:has(input:checked) { border-color: var(--accent-line); background: var(--accent-soft); }
+    .role-check:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (hover: hover) { .role-check:hover { border-color: var(--accent-line); } }
     .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
     @media (max-width: 380px) { .field-row { grid-template-columns: 1fr; } }
 
@@ -3088,12 +3103,6 @@
         <li data-pstep="4"><span>4</span>Restaurant</li>
       </ol>
 
-      <!-- Choix du type de compte -->
-      <div class="role-switch" id="role-switch" role="radiogroup" aria-label="Type de compte">
-        <button type="button" role="radio" data-role="client" aria-checked="true">Client</button>
-        <button type="button" role="radio" data-role="pro" aria-checked="false">Restaurateur</button>
-      </div>
-
       <!-- Création de compte (client ou restaurateur) -->
       <!-- Inscription d'un client : une question par écran, avec animations -->
       <form id="form-join" class="ob-step join" novalidate data-step="signup" data-only="client" hidden>
@@ -3246,6 +3255,13 @@
         </div>
         <p class="ob-switch">Pas encore de compte ? <button class="link-btn" type="button" data-goto="signup">Créer un compte</button></p>
       </form>
+
+      <!-- Type de compte : client par défaut ; cochée, l'accueil et la connexion passent à l'espace restaurateur -->
+      <label class="role-check" id="role-switch">
+        <input type="checkbox" id="role-pro" />
+        <span class="rc-box" aria-hidden="true"></span>
+        <span class="rc-text"><b>Je suis restaurateur</b><small id="role-pro-hint">Inscrivez votre établissement sur la carte</small></span>
+      </label>
 
       <!-- Vérification de l'adresse e-mail par code (création de compte et connexion) -->
       <form id="ob-email-code" class="ob-step" novalidate data-step="verify-email" hidden aria-labelledby="ec-title">
@@ -8411,10 +8427,8 @@
   function setAuthRole(role) {
     authRole = role === 'pro' ? 'pro' : 'client';
     $('onboarding').dataset.role = authRole;
-    document.querySelectorAll('#role-switch [data-role]').forEach((b) => {
-      b.setAttribute('aria-checked', String(b.dataset.role === authRole));
-      b.tabIndex = b.dataset.role === authRole ? 0 : -1;
-    });
+    $('role-pro').checked = authRole === 'pro';
+    syncRoleHint();
     $('err-signup').textContent = ''; $('err-login').textContent = '';
     if (currentStep === 'signup' || currentStep === 'login') updateProgress(currentStep, 'create');
     if (currentStep === 'signup') {
@@ -8422,12 +8436,19 @@
       if (authRole === 'client') Join.syncChrome();
     }
   }
-  $('role-switch').addEventListener('click', (ev) => { const b = ev.target.closest('[data-role]'); if (b) setAuthRole(b.dataset.role); });
-  $('role-switch').addEventListener('keydown', (ev) => {
-    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(ev.key)) return;
-    ev.preventDefault();
-    setAuthRole(authRole === 'pro' ? 'client' : 'pro');
-    $('role-switch').querySelector('[aria-checked="true"]').focus();
+  /** Sous-titre de la case : ce qu'elle ouvre, selon l'écran (création de compte ou connexion). */
+  function syncRoleHint() {
+    $('role-pro-hint').textContent = currentStep === 'login'
+      ? (authRole === 'pro' ? 'Connexion à l\'espace de votre établissement' : 'Accédez à l\'espace de votre établissement')
+      : (authRole === 'pro' ? 'Décochez pour créer un compte client' : 'Inscrivez votre établissement sur la carte');
+  }
+  $('role-pro').addEventListener('change', (ev) => {
+    setAuthRole(ev.target.checked ? 'pro' : 'client');
+    if (currentStep === 'signup' || currentStep === 'login') {
+      $('onboarding').scrollTop = 0;
+      const first = currentStep === 'login' ? $('li-email') : authRole === 'pro' ? $('su-name') : null;
+      if (first && !matchMedia('(pointer: coarse)').matches) first.focus({ preventScroll: true });
+    }
   });
 
   const PRO_STEP_INDEX = { 'pro-verify': 2, 'pro-payment': 3, 'pro-listing': 4 };
@@ -8462,6 +8483,7 @@
     // « about » : questions sexe et âge seules (compte Google tout neuf, modification depuis le profil)
     document.querySelectorAll('#onboarding .ob-step').forEach((el) => { el.hidden = step === 'about' ? el.id !== 'form-join' : el.dataset.step !== step; });
     $('role-switch').hidden = !(step === 'signup' || step === 'login');
+    syncRoleHint();
     updateProgress(step, mode);
     ob.setAttribute('aria-labelledby', STEP_TITLES[step]);
     ob.scrollTop = 0;
@@ -8744,7 +8766,7 @@
       if (focus) { const el = $(focusId()); if (el) el.focus({ preventScroll: true }); }
     }
 
-    /** Sélecteur client/restaurateur visible seulement sur l'écran d'accueil ; titre du dialogue = question affichée. */
+    /** Case « Je suis restaurateur » visible seulement sur l'écran d'accueil ; titre du dialogue = question affichée. */
     function syncChrome() {
       if (currentStep !== 'signup' && currentStep !== 'about') return;
       if (currentStep === 'signup') $('role-switch').hidden = authRole === 'client' && current() !== 'hello';
@@ -9052,7 +9074,7 @@
       cloud.user = null;
       showAuthStep('login');
       $('err-login').innerHTML = (user.role === 'pro' ? 'Ce compte est un compte restaurateur.' : 'Ce compte est un compte client.') +
-        ' <button class="link-btn" type="button" id="switch-role">Passer en mode ' + (user.role === 'pro' ? 'Restaurateur' : 'Client') + '</button>';
+        ' <button class="link-btn" type="button" id="switch-role">' + (user.role === 'pro' ? 'Me connecter en tant que restaurateur' : 'Me connecter en tant que client') + '</button>';
       $('switch-role').addEventListener('click', () => { setAuthRole(user.role); $('form-login').requestSubmit(); });
       return;
     }
