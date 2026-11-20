@@ -2152,6 +2152,10 @@
       .so-logo { flex: none; width: 30px; height: 30px; border-radius: 9px; }
       .so-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .filters { top: calc(var(--safe-top) + 68px); bottom: auto; }
+      /* Filtres alignés sur les bords de la barre de recherche ; fondu à droite = on peut faire défiler */
+      .filters { left: 12px; right: 12px; }
+      .filters .ft-row { padding: 4px 28px 4px 0; scroll-padding-inline: 0;
+        -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
       body.sheet-open .filters, body:not(.ui-ready) .filters { transform: translateY(-8px); }
       .stories { top: calc(var(--safe-top) + 160px); max-width: calc(100% - 24px); }
       .stories-track { gap: 8px; padding: 6px 8px 5px; }
