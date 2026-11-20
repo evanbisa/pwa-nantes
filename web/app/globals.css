@@ -15,14 +15,16 @@
 }
 
 /*
- * Inscription pas à pas (components/signup). Jour : bleu de la marque. Nuit : noir profond, violet et dégradé
- * rose → violet → bleu (comme les néons de la carte), surfaces en verre dépoli.
+ * Inscription pas à pas (components/signup), aux couleurs du logo : jaune #ffc233, orange #ff8a3d, rouge #ff4d2e
+ * (comme l'accueil et la connexion de index.html). Jour : carte blanche aux halos chauds, mots clés et bouton principal
+ * orange → rouge (assez foncés pour rester lisibles). Nuit : noir profond, mêmes couleurs plus lumineuses, bouton sombre
+ * au contour dégradé, surfaces en verre dépoli.
  * Passage d'une question à l'autre : l'écran glisse, et ses éléments apparaissent l'un après l'autre en sortant du flou.
  */
 @theme {
-  --color-brand: #1a73e8;
-  --color-brand-strong: #1557b0;
-  --color-brand-night: #a78bfa;
+  --color-brand: #d9381e;
+  --color-brand-strong: #b93815;
+  --color-brand-night: #ff8a5c;
   --color-night: #111113;
   --animate-step-next: step-next 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-step-prev: step-prev 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -43,46 +45,63 @@
   .su-cascade > * > :nth-child(n + 6) { animation-delay: 250ms; }
 }
 
-/* Nuit : halos colorés très doux derrière la page */
-.su-glow { display: none; }
-[data-theme="night"] .su-glow {
-  display: block;
+/* Jour : halos chauds dans la carte, mots clés et bouton principal orange → rouge, choix coché au contour dégradé */
+.su-glow {
   background:
-    radial-gradient(38rem 26rem at 50% 18%, rgb(124 58 237 / 0.13), transparent 70%),
-    radial-gradient(26rem 22rem at 8% 72%, rgb(219 39 119 / 0.08), transparent 70%),
-    radial-gradient(28rem 24rem at 96% 92%, rgb(59 130 246 / 0.09), transparent 70%);
+    radial-gradient(30rem 20rem at 88% -6%, rgb(255 194 51 / 0.22), transparent 70%),
+    radial-gradient(28rem 22rem at -8% 45%, rgb(255 138 61 / 0.12), transparent 70%),
+    radial-gradient(26rem 20rem at 100% 100%, rgb(255 77 46 / 0.10), transparent 70%);
 }
-/* Nuit : mots clés en dégradé */
-[data-theme="night"] .su-em {
-  background: linear-gradient(90deg, #e9a0e4, #a78bfa 55%, #7f95fb);
+.su-em {
+  background: linear-gradient(90deg, #e67700, #f0501f 50%, #d9301a);
   -webkit-background-clip: text; background-clip: text; color: transparent;
   -webkit-box-decoration-break: clone; box-decoration-break: clone;
 }
-/* Nuit : bouton principal sombre au contour dégradé, avec une lueur violette */
+.su-cta {
+  background: linear-gradient(100deg, #f2610c, #e8401c 55%, #d9301a);
+  text-shadow: 0 1px 1px rgb(120 30 0 / 0.25);
+  box-shadow: 0 14px 30px -12px rgb(232 64 28 / 0.5), inset 0 1px 0 rgb(255 255 255 / 0.25);
+}
+.su-cta:hover:not(:disabled) { filter: brightness(1.05); }
+.su-cta:disabled { box-shadow: none; }
+.su-picked {
+  border-color: transparent;
+  background: linear-gradient(#fff6ef, #fff6ef) padding-box, linear-gradient(135deg, #ffc233, #ff8a3d 50%, #ff4d2e) border-box;
+  box-shadow: 0 8px 24px -12px rgb(232 64 28 / 0.4);
+}
+.su-gradient { background: linear-gradient(90deg, #ffc233, #ff8a3d 50%, #ff4d2e); }
+
+/* Nuit : halos chauds très doux derrière la page */
+[data-theme="night"] .su-glow {
+  background:
+    radial-gradient(38rem 26rem at 50% 16%, rgb(255 138 61 / 0.13), transparent 70%),
+    radial-gradient(26rem 22rem at 6% 74%, rgb(255 77 46 / 0.09), transparent 70%),
+    radial-gradient(28rem 24rem at 96% 94%, rgb(255 194 51 / 0.07), transparent 70%);
+}
+/* Nuit : mots clés en dégradé, plus lumineux */
+[data-theme="night"] .su-em { background: linear-gradient(90deg, #ffd25e, #ff9a4d 50%, #ff6a4a); -webkit-background-clip: text; background-clip: text; }
+/* Nuit : bouton principal sombre au contour dégradé, avec une lueur orangée */
 [data-theme="night"] .su-cta {
   border: 1.5px solid transparent;
-  background: linear-gradient(#17171b, #17171b) padding-box, linear-gradient(100deg, #e9a0e4, #a78bfa 50%, #6f8cfb) border-box;
-  color: #fff;
-  box-shadow: 0 10px 36px -14px rgb(167 139 250 / 0.7);
+  background: linear-gradient(#17171b, #17171b) padding-box, linear-gradient(100deg, #ffc233, #ff8a3d 50%, #ff4d2e) border-box;
+  color: #fff; text-shadow: none;
+  box-shadow: 0 10px 36px -14px rgb(255 106 61 / 0.6);
 }
 [data-theme="night"] .su-cta:hover:not(:disabled) {
-  background: linear-gradient(#1f1f25, #1f1f25) padding-box, linear-gradient(100deg, #e9a0e4, #a78bfa 50%, #6f8cfb) border-box;
+  filter: none;
+  background: linear-gradient(#1f1f25, #1f1f25) padding-box, linear-gradient(100deg, #ffc233, #ff8a3d 50%, #ff4d2e) border-box;
 }
 [data-theme="night"] .su-cta:disabled { box-shadow: none; }
 /* Nuit : choix coché (sexe), contour dégradé */
 [data-theme="night"] .su-picked {
-  border-color: transparent;
-  background: linear-gradient(#1c1a26, #1c1a26) padding-box, linear-gradient(135deg, #e9a0e4, #a78bfa 50%, #6f8cfb) border-box;
-  box-shadow: 0 8px 30px -12px rgb(167 139 250 / 0.6);
+  background: linear-gradient(#1f1915, #1f1915) padding-box, linear-gradient(135deg, #ffc233, #ff8a3d 50%, #ff4d2e) border-box;
+  box-shadow: 0 8px 30px -12px rgb(255 106 61 / 0.55);
 }
-/* Nuit : barre de progression et curseur d'âge en dégradé */
-[data-theme="night"] .su-gradient { background: linear-gradient(90deg, #e9a0e4, #a78bfa 55%, #7f95fb); }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #202124;
-    --foreground: #e8eaed;
-  }
+/* Mode nuit seulement s'il a été choisi (par défaut : mode jour, quel que soit le réglage du téléphone) */
+[data-theme="night"] {
+  --background: #202124;
+  --foreground: #e8eaed;
 }
 
 html,

@@ -38,14 +38,13 @@ const FLOW: Step[] = ["name", "gender", "age", "email", "confirm", "password"];
 const QUESTIONS: Step[] = ["name", "gender", "age", "email", "password"];
 /** Compte créé avec Google dès le premier écran : il ne reste que le sexe et l'âge. */
 const GOOGLE_FLOW: Step[] = ["name", "gender", "age"];
-const GENDERS: { value: Gender; label: string; emoji: string }[] = [
-  { value: "female", label: "Une femme", emoji: "👩" },
-  { value: "male", label: "Un homme", emoji: "👨" },
-  { value: "other", label: "Autre", emoji: "🌈" },
-  { value: "", label: "Je préfère ne pas le dire", emoji: "🤐" },
+const GENDERS: { value: Gender; label: string }[] = [
+  { value: "female", label: "Une femme" },
+  { value: "male", label: "Un homme" },
+  { value: "other", label: "Autre" },
+  { value: "", label: "Je préfère ne pas le dire" },
 ];
-const AGE_EMOJI: [number, string][] = [[15, "🧒"], [18, "🎒"], [25, "🎓"], [35, "💼"], [50, "😎"], [Infinity, "🌟"]];
-const STRENGTH = ["", "Trop faible", "Trop faible", "Moyen", "Presque !", "Solide 💪"];
+const STRENGTH = ["", "Trop faible", "Trop faible", "Moyen", "Presque !", "Solide"];
 /** Carte (site principal), un niveau au-dessus de l'application : « /app/../ » → « / ». */
 const APP_HOME = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/../`;
 /** Délai de l'écran « Bienvenue » avant l'arrivée sur la carte. */
@@ -127,7 +126,7 @@ function Wizard() {
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suggestedFor = useRef("");
   const checkedEmail = useRef("");
-  const keyboard = useKeyboardInset();   // clavier ouvert : marge sous la page, emoji masqué pour gagner de la place
+  const keyboard = useKeyboardInset();   // clavier ouvert : marge sous la page
 
   const firstName = capitalize(name.trim().split(/\s+/)[0] ?? "");
   const cleanEmail = email.trim().toLowerCase();
@@ -291,7 +290,7 @@ function Wizard() {
   async function verifyCode(ev?: FormEvent) {
     ev?.preventDefault();
     const digits = code.replace(/\D/g, "");
-    if (digits.length !== 6) return setError("code", "Saisissez les 6 chiffres reçus par e-mail.");
+    if (digits.length < 6 || digits.length > 8) return setError("code", "Saisissez le code reçu par e-mail (6 à 8 chiffres).");
     if (busy) return;
     setBusy(true);
     setError("code", null);
@@ -427,7 +426,7 @@ function Wizard() {
         <div key={step} className={`su-cascade flex flex-1 flex-col ${dir === "next" ? "motion-safe:animate-step-next" : "motion-safe:animate-step-prev"}`}>
           {step === "name" && (
             <form onSubmit={submitName} noValidate className="flex flex-1 flex-col">
-              <Title emoji={name.trim().length >= 2 ? "👋" : "😊"} id="q-name">Comment vous <Em>appelez-vous</Em> ?</Title>
+              <Title id="q-name">Comment vous <Em>appelez-vous</Em> ?</Title>
               <Hint>C&apos;est le nom que verront les restaurants quand vous laissez un avis.</Hint>
               <Field label="Prénom" errorId="err-name" error={errors.name}>
                 <input
@@ -437,7 +436,7 @@ function Wizard() {
                 />
               </Field>
               <p className="mt-3 min-h-6 text-base font-medium text-brand-strong" aria-live="polite">
-                {firstName.length >= 2 && <><span className="su-em">Bienvenue, {firstName} !</span> 😊</>}
+                {firstName.length >= 2 && <><span className="su-em">Bienvenue, {firstName} !</span></>}
               </p>
               <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-[15px] leading-relaxed text-slate-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300">
                 <input
@@ -459,7 +458,7 @@ function Wizard() {
 
           {step === "gender" && (
             <div className="flex flex-1 flex-col">
-              <Title emoji={GENDERS.find((g) => g.value === gender)?.emoji ?? "✨"} id="q-gender">
+              <Title id="q-gender">
                 {firstName ? `${firstName}, vous êtes…` : "Vous êtes…"}
               </Title>
               <Hint>Facultatif. Les restaurants voient seulement des statistiques globales, jamais votre réponse.</Hint>
@@ -474,7 +473,6 @@ function Wizard() {
                         ? "su-picked border-brand bg-brand/10 text-brand dark:text-white"
                         : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-white/[0.04] dark:backdrop-blur-xl dark:hover:border-white/20 dark:hover:bg-white/[0.07]"}`}
                     >
-                      <span aria-hidden className={`text-3xl ${checked ? "motion-safe:animate-pop" : ""}`}>{g.emoji}</span>
                       {g.label}
                     </button>
                   );
@@ -485,7 +483,7 @@ function Wizard() {
 
           {step === "age" && (
             <form onSubmit={submitAge} noValidate className="flex flex-1 flex-col">
-              <Title emoji={AGE_EMOJI.find(([max]) => age < max)?.[1] ?? "🎓"} id="q-age">Quel âge <Em>avez-vous</Em> ?</Title>
+              <Title id="q-age">Quel âge <Em>avez-vous</Em> ?</Title>
               <Hint>FlashMiam est réservé aux {MIN_AGE} ans et plus. Les restaurants voient seulement des tranches d&apos;âge (18-24 ans…), jamais le vôtre.</Hint>
               <AgePicker value={age} onChange={(v) => { setAge(v); setError("age", null); }} labelledBy="q-age" onEnter={answerAge} />
               <p role={errors.age ? "alert" : undefined} className={`mt-3 min-h-6 text-sm ${errors.age ? "font-medium text-red-600 dark:text-red-400" : "text-slate-500"}`} aria-live="polite">
@@ -498,7 +496,7 @@ function Wizard() {
 
           {step === "email" && (
             <form onSubmit={submitEmail} noValidate className="flex flex-1 flex-col">
-              <Title emoji="📬" id="q-email">Votre adresse <Em>e-mail</Em> ?</Title>
+              <Title id="q-email">Votre adresse <Em>e-mail</Em> ?</Title>
               <Hint>Elle vous servira à vous connecter, et à retrouver votre compte si vous oubliez votre mot de passe.</Hint>
               <Field label="Adresse e-mail" errorId="err-email" error={errors.email}>
                 <div className="relative">
@@ -535,7 +533,7 @@ function Wizard() {
 
           {step === "confirm" && (
             <div className="flex flex-1 flex-col">
-              <Title emoji="🔎" id="q-confirm">Confirmez votre <Em>adresse</Em></Title>
+              <Title id="q-confirm">Confirmez votre <Em>adresse</Em></Title>
               <p className="mt-6 rounded-2xl bg-white px-5 py-6 text-center text-2xl font-semibold break-all shadow-sm ring-1 ring-slate-200 dark:bg-white/[0.04] dark:ring-white/10 dark:backdrop-blur-xl">
                 {cleanEmail.slice(0, cleanEmail.lastIndexOf("@"))}
                 <span className="text-slate-400">@</span>
@@ -553,7 +551,7 @@ function Wizard() {
 
           {step === "password" && (
             <form onSubmit={createAccount} noValidate className="flex flex-1 flex-col">
-              <Title emoji={score === 5 ? "🛡️" : score >= 3 ? "🔑" : "🔒"} id="q-password">Choisissez un <Em>mot de passe</Em></Title>
+              <Title id="q-password">Choisissez un <Em>mot de passe</Em></Title>
               {/* Identifiant caché : les gestionnaires de mots de passe l'associent à la bonne adresse */}
               <input type="email" autoComplete="username" value={cleanEmail} readOnly hidden />
               <Field label="Mot de passe" errorId="err-password" error={errors.password}>
@@ -601,7 +599,7 @@ function Wizard() {
                   Rester connecté sur cet appareil
                 </label>
               </div>
-              <Primary busy={busy} disabled={score < PASSWORD_RULES.length} className="mt-0">{busy ? "Création du compte…" : "Créer mon compte 🎉"}</Primary>
+              <Primary busy={busy} disabled={score < PASSWORD_RULES.length} className="mt-0">{busy ? "Création du compte…" : "Créer mon compte"}</Primary>
               <p className="mt-4 text-center text-xs leading-relaxed text-slate-500 dark:text-zinc-400">
                 En créant un compte, vous acceptez les{" "}
                 <a className="underline" href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/legal/cgu/`}>conditions d&apos;utilisation</a> et la{" "}
@@ -612,20 +610,20 @@ function Wizard() {
 
           {step === "code" && (
             <form onSubmit={verifyCode} noValidate className="flex flex-1 flex-col">
-              <Title emoji="✉️" id="q-code">Vérifiez votre <Em>adresse e-mail</Em></Title>
+              <Title id="q-code">Vérifiez votre <Em>adresse e-mail</Em></Title>
               <Hint>
-                Un code à 6 chiffres vient d&apos;être envoyé à <strong className="break-all text-slate-900 dark:text-zinc-50">{cleanEmail}</strong>.
+                Un code vient d&apos;être envoyé à <strong className="break-all text-slate-900 dark:text-zinc-50">{cleanEmail}</strong>.
                 Saisissez-le pour activer votre compte (pensez à regarder dans les courriers indésirables).
               </Hint>
               <Field label="Code reçu par e-mail" errorId="err-code" error={errors.code}>
                 <input
-                  id="su-code" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6} enterKeyHint="go"
-                  placeholder="––––––" value={code} aria-describedby="err-code"
+                  id="su-code" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={8} enterKeyHint="go"
+                  placeholder="––––––––" value={code} aria-describedby="err-code"
                   onChange={(e) => {
-                    const digits = e.target.value.replace(/\D/g, "").slice(0, 6);
+                    const digits = e.target.value.replace(/\D/g, "").slice(0, 8);
                     setCode(digits);
                     setError("code", null);
-                    if (digits.length === 6) setTimeout(() => (document.getElementById("su-code") as HTMLInputElement | null)?.form?.requestSubmit(), 0);
+                    if (digits.length === 8) setTimeout(() => (document.getElementById("su-code") as HTMLInputElement | null)?.form?.requestSubmit(), 0);
                   }}
                   className={`${inputClass(!!errors.code)} text-center text-2xl tracking-[0.5em] tabular-nums`}
                 />
@@ -634,7 +632,7 @@ function Wizard() {
                 Vous avez déjà un compte avec cette adresse ? Aucun code n&apos;est envoyé dans ce cas :{" "}
                 <button type="button" className={linkClass} onClick={() => openLogin(cleanEmail)}>connectez-vous</button>.
               </p>
-              <Primary busy={busy} disabled={code.length !== 6}>{busy ? "Vérification…" : "Valider le code"}</Primary>
+              <Primary busy={busy} disabled={code.length < 6}>{busy ? "Vérification…" : "Valider le code"}</Primary>
               <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
                 <button id="su-resend" type="button" disabled={resendIn > 0 || busy} onClick={resendCode}
                   className="rounded-full px-3 py-2 font-medium text-brand underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:text-slate-400 disabled:no-underline dark:text-brand-night">
@@ -650,8 +648,7 @@ function Wizard() {
 
           {step === "done" && (
             <div className="flex flex-1 flex-col items-center justify-center text-center">
-              <span aria-hidden className="text-7xl motion-safe:animate-pop">🎉</span>
-              <h1 id="su-done" tabIndex={-1} className="mt-6 text-3xl font-bold tracking-tight text-balance focus:outline-none">
+              <h1 id="su-done" tabIndex={-1} className="text-3xl font-bold tracking-tight text-balance focus:outline-none">
                 Bienvenue sur <Em>FlashMiam</Em>, {firstName} !
               </h1>
               <p className="mt-3 text-slate-600 dark:text-zinc-400">Votre compte est prêt. Les bons plans food de La Roche-sur-Yon vous attendent.</p>
@@ -690,7 +687,7 @@ const primaryClass =
 const inputClass = (invalid: boolean) =>
   `h-14 w-full rounded-2xl border-2 bg-white px-4 text-lg text-slate-900 transition placeholder:text-slate-400 focus:outline-none dark:bg-white/[0.04] dark:text-zinc-50 dark:backdrop-blur-xl dark:placeholder:text-zinc-500 ${invalid
     ? "border-red-500 focus:border-red-500"
-    : "border-slate-200 focus:border-brand dark:border-white/10 dark:focus:border-brand-night dark:focus:shadow-[0_0_0_4px_rgb(167_139_250/0.18)]"}`;
+    : "border-slate-200 focus:border-brand dark:border-white/10 dark:focus:border-brand-night dark:focus:shadow-[0_0_0_4px_rgb(255_122_69/0.18)]"}`;
 
 /** « Ajouter FlashMiam à mon écran d'accueil », cochée par défaut : on peut la décocher. */
 function HomeShortcut({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
@@ -705,13 +702,8 @@ function HomeShortcut({ checked, onChange }: { checked: boolean; onChange: (v: b
   );
 }
 
-function Title({ emoji, id, children }: { emoji: string; id: string; children: ReactNode }) {
-  return (
-    <>
-      <span aria-hidden className="text-5xl leading-none group-data-[kb]/page:hidden">{emoji}</span>
-      <h1 id={id} className="mt-5 text-[28px] group-data-[kb]/page:mt-0 leading-tight font-bold tracking-tight text-balance">{children}</h1>
-    </>
-  );
+function Title({ id, children }: { id: string; children: ReactNode }) {
+  return <h1 id={id} className="text-[28px] leading-tight font-bold tracking-tight text-balance">{children}</h1>;
 }
 const Em = ({ children }: { children: ReactNode }) => <span className="su-em text-brand">{children}</span>;
 const Hint = ({ children }: { children: ReactNode }) => <p className="mt-3 text-[15px] leading-relaxed text-slate-600 dark:text-zinc-400">{children}</p>;

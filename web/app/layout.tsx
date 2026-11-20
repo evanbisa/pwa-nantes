@@ -18,10 +18,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#202124" },
-  ],
+  themeColor: "#ffffff",   // mode jour par défaut (le mode nuit se choisit sur la carte)
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

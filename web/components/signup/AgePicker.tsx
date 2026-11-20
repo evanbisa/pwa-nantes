@@ -80,7 +80,7 @@ export default function AgePicker({ value, onChange, labelledBy, onEnter }: {
         </span>
         <span
           aria-hidden
-          className="su-thumb absolute top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-brand bg-white shadow-md transition-transform group-active:scale-110 dark:border-brand-night dark:bg-night dark:shadow-[0_0_18px_rgb(167_139_250/0.45)]"
+          className="su-thumb absolute top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-brand bg-white shadow-md transition-transform group-active:scale-110 dark:border-brand-night dark:bg-night dark:shadow-[0_0_18px_rgb(255_122_69/0.45)]"
           style={{ left: `${pct}%` }}
         />
       </div>

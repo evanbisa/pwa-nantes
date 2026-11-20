@@ -35,7 +35,7 @@ Pour toucher aussi les jeunes actifs et les trentenaires, pas seulement les étu
 
 - **Types d'offres** : en plus de « du jour », « de la semaine », « étudiante » et « bon plan », le restaurateur peut
   publier une **formule midi**, un **afterwork / happy hour** et une offre **du week-end** (brunch…), retirée
-  automatiquement le dimanche soir (migration `20261119090000_promo_kinds_meal_vouchers.sql`).
+  automatiquement le dimanche soir (migration `20261119085900_promo_kinds_meal_vouchers.sql`).
 - **Filtres de la carte** : ☀️ Midi (ouvert entre 12 h et 14 h aujourd'hui, ou formule midi en cours), 🌙 Ce soir
   (ouvert entre 19 h et 22 h, ou afterwork), 🥞 Ce week-end (ouvert samedi ou dimanche, ou offre du week-end), un seul
   moment à la fois ; 🎫 Titres-resto (restaurants qui les acceptent).
@@ -84,7 +84,7 @@ disparaissent d'eux-mêmes dès le 3ᵉ vrai restaurant. Réglage : `CONFIG.demo
    l'honneur.
 3. **Abonnement** : formules Essentiel, Premium ou sur devis, paiement par Whop (mode démonstration tant que
    `billing_settings.whop_live` est faux ; voir `web/README.md`).
-4. **Fiche restaurant** : nom, catégorie, description, 1 à 10 photos 16:9 (recadrage intégré), adresse (Base Adresse
+4. **Fiche restaurant** : nom, catégorie, description, 1 à 10 photos carrées (recadrage intégré), adresse (Base Adresse
    Nationale), horaires, téléphone, carte des plats (saisie à la main ou **lue sur photo**, fonction `menu-scan`).
 
 Le restaurateur gère ensuite tout depuis son **espace** (Accueil, Statistiques, Publier, Avis, Ma fiche) et scanne le

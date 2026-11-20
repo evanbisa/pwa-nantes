@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-bDM5Zn6IJBIIo2zyJ2DbAEYw8mi7bnQHkEF0KtbslwI=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-zx/ZVw/wU++SfH/kvwn5bjvMA0mor6Ustq7IYuavwTE=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -50,7 +50,7 @@
       if (window.top !== window.self) document.documentElement.style.display = 'none';
       var t = null;
       try { t = localStorage.getItem('roche-street-food:theme'); } catch (e) {}
-      if (t !== 'light' && t !== 'dark') t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      if (t !== 'light' && t !== 'dark') t = 'light';   // par défaut : mode jour (le mode nuit se choisit dans le profil)
       document.documentElement.setAttribute('data-theme', t);
       document.getElementById('meta-theme').setAttribute('content', t === 'dark' ? '#242f3e' : '#f1f3f4');
       // Feuille de style de la carte chargée sans bloquer l'affichage (l'écran de chargement peut apparaître tout de suite)
@@ -332,7 +332,6 @@
     #map.show-labels .pin-label, .pin.is-selected .pin-label, .pin.is-hover .pin-label { opacity: 1; transform: none; }
     #map.show-labels .pin.label-hidden:not(.is-selected):not(.is-hover) .pin-label { opacity: 0; }
     .pin.is-filtered { display: none; }
-    .pin.is-demo .pin-badge { border-style: dashed; }
     .pin.is-demo .pin-label::after { content: " · exemple"; font-weight: 400; color: var(--amber); }
     #map.zoom-far .pin-badge { scale: .62; }
     #map.zoom-far .pin.is-open .pin-badge::before { animation: none; opacity: 0; }
@@ -500,6 +499,13 @@
     .ob-progress span { width: 22px; height: 4px; border-radius: 2px; background: var(--line-strong); transition: background-color .3s, width .3s; }
     .ob-progress span.is-active { width: 34px; background: var(--accent); }
     .ob-step { animation: rise .4s var(--ease-out) both; }
+    /*
+     * Sobriété : pas d'émojis décoratifs (questions, listes, tuiles, notifications). Seuls les pictogrammes des
+     * catégories de restaurants restent (marqueurs, recherche, stories).
+     */
+    .jn-hero, .jn-emoji, .jn-choices button > span[aria-hidden], .mail-badge, .trial-ico, .lock-ico, div.sheet-emoji,
+    .pf-ico, .promo-ico, .offer-ico, .promo-admin .pa-ico, .n-ico, .ps-todo .td-ico, .doc-ico,
+    .ps-insights li > span:first-child, .ps-cards .kpi-label span:first-child:not(:last-child) { display: none !important; }
     .ob-step h1, .ob-step h2 { margin: 0; font-weight: 400; font-size: 26px; line-height: 1.2; }
     .ob-step h1 em, .ob-step h2 em { font-style: normal; color: var(--accent); font-weight: 500; }
     /*
@@ -518,38 +524,78 @@
     .onboarding .field input:focus { box-shadow: none; }
     .ob-switch .link-btn { font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
     /*
-     * Nuit : la palette de l'inscription (web/app/globals.css) plutôt que le bleu de la carte : violet, mots clés en
-     * dégradé rose → violet → bleu, halos doux dans la carte, bouton sombre au contour dégradé, surfaces en verre.
+     * Couleurs du logo (icon-512.png) : jaune #ffc233, orange #ff8a3d, rouge #ff4d2e. Accueil, connexion et inscription
+     * (web/app/globals.css) les reprennent : dégradé jaune → orange → rouge (pastilles, barre de progression), mots clés
+     * et bouton principal orange → rouge (assez foncés pour rester lisibles), halos chauds dans la carte.
+     * --ob-grad : dégradé décoratif ; --ob-text : mots clés ; --ob-btn : fond du bouton principal (jour).
      */
+    :root[data-theme="light"] .onboarding {
+      --accent: #d9381e; --accent-strong: #b93815; --accent-soft: rgb(255 77 46 / .08); --accent-line: rgb(255 77 46 / .3); --on-accent: #fff;
+      --ob-grad: linear-gradient(100deg, #ffc233, #ff8a3d 50%, #ff4d2e);
+      --ob-text: linear-gradient(90deg, #e67700, #f0501f 50%, #d9301a);
+      --ob-btn: linear-gradient(100deg, #f2610c, #e8401c 55%, #d9301a);
+    }
     :root[data-theme="dark"] .onboarding {
-      --accent: #a78bfa; --accent-strong: #c4b5fd; --accent-soft: rgb(167 139 250 / .14); --accent-line: rgb(167 139 250 / .45); --on-accent: #fff;
+      --accent: #ff8a5c; --accent-strong: #ffab85; --accent-soft: rgb(255 122 69 / .14); --accent-line: rgb(255 122 69 / .45); --on-accent: #1a0d07;
+      --ob-grad: linear-gradient(100deg, #ffc233, #ff8a3d 50%, #ff4d2e);
+      --ob-text: linear-gradient(90deg, #ffd25e, #ff9a4d 50%, #ff6a4a);
+    }
+    :root[data-theme="light"] .ob-panel {
+      border-color: rgb(255 255 255 / .9);
+      background:
+        radial-gradient(30rem 20rem at 88% -6%, rgb(255 194 51 / .22), transparent 70%),
+        radial-gradient(28rem 22rem at -8% 42%, rgb(255 138 61 / .12), transparent 70%),
+        radial-gradient(26rem 20rem at 100% 100%, rgb(255 77 46 / .10), transparent 70%),
+        rgb(255 253 250 / .95);
+      box-shadow: 0 30px 60px -20px rgb(150 50 10 / .25), 0 0 0 1px rgb(255 120 60 / .08);
     }
     :root[data-theme="dark"] .ob-panel {
       border-color: rgb(255 255 255 / .1);
       background:
-        radial-gradient(38rem 26rem at 50% 18%, rgb(124 58 237 / .13), transparent 70%),
-        radial-gradient(26rem 22rem at 8% 72%, rgb(219 39 119 / .08), transparent 70%),
-        radial-gradient(28rem 24rem at 96% 92%, rgb(59 130 246 / .09), transparent 70%),
-        rgb(17 17 19 / .75);
+        radial-gradient(38rem 26rem at 50% 16%, rgb(255 138 61 / .13), transparent 70%),
+        radial-gradient(26rem 22rem at 6% 74%, rgb(255 77 46 / .09), transparent 70%),
+        radial-gradient(28rem 24rem at 96% 94%, rgb(255 194 51 / .07), transparent 70%),
+        rgb(20 16 14 / .78);
     }
-    :root[data-theme="dark"] .ob-step h1 em, :root[data-theme="dark"] .ob-step h2 em {
-      background: linear-gradient(90deg, #e9a0e4, #a78bfa 55%, #7f95fb);
+    .onboarding .ob-step h1 em, .onboarding .ob-step h2 em {
+      background: var(--ob-text);
       -webkit-background-clip: text; background-clip: text; color: transparent;
       -webkit-box-decoration-break: clone; box-decoration-break: clone;
     }
+    :root[data-theme="light"] .onboarding .btn-primary {
+      border: 0; color: #fff; background: var(--ob-btn); text-shadow: 0 1px 1px rgb(120 30 0 / .25);
+      box-shadow: 0 14px 30px -12px rgb(232 64 28 / .5), inset 0 1px 0 rgb(255 255 255 / .25);
+      transition: transform .15s var(--ease-out), box-shadow .2s, filter .2s;
+    }
+    :root[data-theme="light"] .onboarding .btn-primary:hover { background: var(--ob-btn); filter: brightness(1.05); box-shadow: 0 18px 34px -12px rgb(232 64 28 / .55), inset 0 1px 0 rgb(255 255 255 / .25); }
+    .onboarding .btn-primary:active { transform: scale(.98); }
     :root[data-theme="dark"] .onboarding .btn-primary {
       border: 1.5px solid transparent; color: #fff;
-      background: linear-gradient(#17171b, #17171b) padding-box, linear-gradient(100deg, #e9a0e4, #a78bfa 50%, #6f8cfb) border-box;
-      box-shadow: 0 10px 36px -14px rgb(167 139 250 / .7);
+      background: linear-gradient(#17171b, #17171b) padding-box, var(--ob-grad) border-box;
+      box-shadow: 0 10px 36px -14px rgb(255 106 61 / .6);
     }
     :root[data-theme="dark"] .onboarding .btn-primary:hover {
-      background: linear-gradient(#1f1f25, #1f1f25) padding-box, linear-gradient(100deg, #e9a0e4, #a78bfa 50%, #6f8cfb) border-box;
+      background: linear-gradient(#1f1f25, #1f1f25) padding-box, var(--ob-grad) border-box;
     }
+    :root[data-theme="light"] .onboarding .jn-perks li { background: rgb(255 255 255 / .85); border-color: rgb(255 120 60 / .16); box-shadow: 0 1px 2px rgb(150 50 10 / .05); }
     :root[data-theme="dark"] .onboarding .jn-perks li, :root[data-theme="dark"] .onboarding .field input {
       background: rgb(255 255 255 / .04); border-color: rgb(255 255 255 / .1);
     }
-    :root[data-theme="dark"] .onboarding .field input:focus { border-color: var(--accent); }
-    :root[data-theme="dark"] .ob-logo .avatar { color: #fff; background: linear-gradient(135deg, #e9a0e4, #a78bfa 55%, #7f95fb); }
+    :root[data-theme="light"] .onboarding .field input { background: #fff; border-color: #efe5dc; }
+    :root[data-theme="light"] .onboarding .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgb(255 77 46 / .14); }
+    :root[data-theme="dark"] .onboarding .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgb(255 122 69 / .16); }
+    .onboarding .field.has-error input { border-color: var(--danger); box-shadow: none; }
+    :root[data-theme="light"] .onboarding .role-check { background: rgb(255 255 255 / .85); border-color: rgb(255 120 60 / .16); }
+    :root[data-theme="light"] .onboarding .role-check:has(input:checked) { background: rgb(255 138 61 / .08); border-color: rgb(255 77 46 / .35); }
+    :root[data-theme="dark"] .onboarding .role-check { background: rgb(255 255 255 / .04); border-color: rgb(255 255 255 / .1); }
+    :root[data-theme="dark"] .onboarding .role-check:has(input:checked) { background: rgb(255 122 69 / .1); border-color: rgb(255 122 69 / .45); }
+    .ob-logo .avatar { color: #fff; background: var(--ob-grad, var(--accent)); }
+    /* Avantages : une coche dans une pastille en dégradé (jour et nuit) */
+    .onboarding .jn-perks li::before {
+      content: ""; flex: none; width: 24px; height: 24px; border-radius: 50%;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4L18 8.5'/%3E%3C/svg%3E") center / 14px no-repeat, var(--ob-grad, var(--accent));
+    }
+    .onboarding .jn-bar i { background: var(--ob-grad, var(--accent)); }
     .field { display: block; margin-top: 14px; }
     .field > span { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
     .field input {
@@ -774,8 +820,7 @@
     /* E-mail */
     /* Mot de passe : jauge de solidité */
     .ob-welcome { margin: 0 0 14px; padding: 12px 14px; border-radius: 14px; font-size: 15px; font-weight: 500; line-height: 1.4; color: var(--accent); background: var(--accent-soft); animation: rise .5s var(--ease-out) both; }
-    .ob-welcome::before { content: "🎉 "; }
-    .ob-welcome[hidden] { display: none; }
+        .ob-welcome[hidden] { display: none; }
     /* Fête : confettis quand le compte est créé */
     .confetti { position: fixed; inset: 0; z-index: 140; pointer-events: none; overflow: hidden; }
     .confetti i { position: absolute; top: -12px; width: 9px; height: 14px; border-radius: 2px; animation: confetti 1.6s cubic-bezier(.2, .6, .4, 1) forwards; }
@@ -788,7 +833,7 @@
     /* Petits écrans (hauteur) : le bouton principal reste visible sans faire défiler */
     @media (max-height: 740px) {
       .onboarding[data-role="client"] .ob-top { margin-bottom: 12px; }
-      .onboarding[data-role="client"] .role-switch { margin-bottom: 12px; }
+      .role-check { margin-top: 12px; padding: 9px 12px; }
       .jn-screen { min-height: 0; }
       .jn-screen .btn { margin-top: 12px; }
       .jn-hero { zoom: .66; margin: 0; }
@@ -804,9 +849,22 @@
     }
     @media (max-height: 600px) { .jn-hero { display: none; } .jn-perks li { padding: 6px 10px; } }
 
-    .role-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin: 0 0 18px; border-radius: 999px; background: var(--hover); border: 1px solid var(--line); }
-    .role-switch button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 40px; border-radius: 999px; font-weight: 500; font-size: 14px; color: var(--muted); transition: background-color .2s, color .2s, box-shadow .2s; }
-    .role-switch button[aria-checked="true"] { background: var(--panel-solid); color: var(--accent); box-shadow: 0 1px 3px rgba(0, 0, 0, .18); }
+    /* « Je suis restaurateur » : case à cocher sous l'accueil et la connexion (remplace les onglets Client / Restaurateur) */
+    .role-check { position: relative; display: flex; align-items: center; gap: 12px; margin: 18px 0 0; padding: 12px 14px; border-radius: 16px; cursor: pointer;
+      border: 1px solid var(--line); background: var(--panel-solid); transition: border-color .2s, background-color .2s, box-shadow .2s; -webkit-tap-highlight-color: transparent; }
+    .role-check[hidden] { display: none; }
+    .role-check input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+    .rc-box { flex: none; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; border: 2px solid var(--line-strong); background: var(--input-bg, #fff); transition: background-color .15s, border-color .15s; }
+    .rc-box::after { content: ""; width: 14px; height: 14px; opacity: 0; transform: scale(.6); transition: opacity .15s, transform .2s var(--ease-out);
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat; }
+    .rc-text { flex: 1; min-width: 0; }
+    .rc-text b { display: block; font-size: 15px; font-weight: 600; color: var(--text); }
+    .rc-text small { display: block; margin-top: 1px; font-size: 13px; color: var(--muted); }
+    .role-check input:checked ~ .rc-box { border-color: transparent; background: var(--ob-btn, var(--ob-grad, var(--accent))); }
+    .role-check input:checked ~ .rc-box::after { opacity: 1; transform: none; }
+    .role-check:has(input:checked) { border-color: var(--accent-line); background: var(--accent-soft); }
+    .role-check:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (hover: hover) { .role-check:hover { border-color: var(--accent-line); } }
     .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
     @media (max-width: 380px) { .field-row { grid-template-columns: 1fr; } }
 
@@ -933,11 +991,45 @@
     .cat-picker button { height: 36px; padding: 0 12px; border-radius: 18px; font-size: 14px; border: 1px solid var(--line-strong); }
     .cat-picker button[aria-checked="true"] { background: #e8f0fe; color: #1967d2; border-color: var(--accent-line); }
     :root[data-theme="dark"] .cat-picker button[aria-checked="true"] { background: var(--accent-soft); color: var(--accent); }
-    .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .photo-item, .photo-add { position: relative; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; }
-    .photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .photo-item .photo-del { position: absolute; top: 4px; right: 4px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0, 0, 0, .6); color: #fff; font-size: 16px; line-height: 1; }
-    .photo-item .photo-main { position: absolute; left: 4px; bottom: 4px; padding: 1px 6px; border-radius: 4px; font-size: 11px; color: #fff; background: rgba(0, 0, 0, .6); }
+    .photo-grid { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .photo-item, .photo-add { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; }
+    /* Vignettes déplaçables : appui maintenu (doigt) ou glisser (souris) ; pas de menu « enregistrer l'image » d'iOS */
+    .photo-item { background: var(--hover); cursor: grab; touch-action: pan-y; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; transition: box-shadow .2s; }
+    .photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; -webkit-user-drag: none; }
+    .photo-item .photo-del { position: absolute; top: 4px; right: 4px; width: 30px; height: 30px; border-radius: 50%; background: rgba(0, 0, 0, .6); color: #fff; font-size: 17px; line-height: 1; }
+    .photo-num { position: absolute; left: 5px; top: 5px; display: grid; place-items: center; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 11px;
+      font-size: 12px; font-weight: 700; color: #fff; background: rgba(0, 0, 0, .55); pointer-events: none; }
+    /* Photo principale : badge en bas à gauche (la place de la flèche « avancer », inutile pour elle) */
+    .photo-num.is-main { z-index: 1; top: auto; bottom: 7px; left: 4px; height: 20px; padding: 0 6px; font-size: 10.5px; letter-spacing: -.01em; background: var(--ob-btn, var(--accent)); box-shadow: 0 2px 6px rgba(0, 0, 0, .25); }
+    .photo-tools { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: space-between; padding: 14px 4px 4px; background: linear-gradient(transparent, rgba(0, 0, 0, .5)); }
+    .photo-tools button { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #fff; background: rgba(0, 0, 0, .4); }
+    .photo-tools button:disabled { visibility: hidden; }
+    .photo-tools button[hidden] { display: grid; visibility: hidden; }
+    .photo-tools svg { width: 16px; height: 16px; }
+    .photo-tools button:focus-visible, .photo-item .photo-del:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+    @media (hover: hover) { .photo-tools button:hover, .photo-item .photo-del:hover { background: rgba(0, 0, 0, .7); } }
+    .photo-item.is-dragging { z-index: 3; cursor: grabbing; box-shadow: 0 14px 30px rgba(0, 0, 0, .35); }
+    .photo-item.is-dragging .photo-tools, .photo-item.is-dragging .photo-del { opacity: 0; }
+    .photo-item.is-dropping { z-index: 2; transition: transform .2s var(--ease-out), box-shadow .2s; }
+    .photo-grid.is-sorting .photo-item:not(.is-dragging) { opacity: .85; }
+    .photo-hint { margin: 2px 0 10px; }
+    .photo-hint[hidden] { display: none; }
+    /* Formulaire de la fiche : accès direct aux rubriques, rubrique mise en évidence à l'arrivée */
+    .pl-jump { display: flex; gap: 6px; margin: 14px -2px 2px; padding: 2px; overflow-x: auto; scrollbar-width: none; }
+    .pl-jump::-webkit-scrollbar { display: none; }
+    .pl-jump button { flex: none; height: 34px; padding: 0 14px; border-radius: 17px; font-size: 13.5px; font-weight: 500; color: var(--text); background: var(--accent-soft); border: 1px solid var(--accent-line); }
+    @media (hover: hover) { .pl-jump button:hover { border-color: var(--accent); } }
+    #form-pro-listing .field { scroll-margin-top: 16px; }
+    .field.is-flash { animation: field-flash 1.6s var(--ease-out); border-radius: 14px; }
+    @keyframes field-flash { 0%, 35% { box-shadow: 0 0 0 6px var(--accent-soft); background: var(--accent-soft); } 100% { box-shadow: 0 0 0 6px transparent; background: transparent; } }
+    /* Barre d'enregistrement collée en bas de l'écran pendant toute la saisie */
+    .pl-actions { position: sticky; bottom: calc(-16px - var(--safe-bottom)); z-index: 4; display: flex; gap: 10px; margin: 14px -22px 0; padding: 12px 22px calc(12px + var(--safe-bottom));
+      background: var(--panel-solid); border-top: 1px solid var(--line); box-shadow: 0 -10px 24px -18px rgba(0, 0, 0, .35); }
+    .pl-actions .btn { flex: 1; margin: 0 !important; }
+    .pl-actions .btn-primary { flex: 2; }
+    .onboarding[data-mode="edit"] #form-pro-listing { padding-bottom: 0; }
+    .onboarding[data-mode="edit"] .ob-panel:has(#form-pro-listing:not([hidden])) { padding-bottom: 0; }
+    .onboarding[data-mode="edit"] .pl-actions { margin-bottom: 0; border-radius: 0 0 28px 28px; }
     .photo-add { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; color: var(--accent); border: 1px dashed var(--accent-line); cursor: pointer; }
     .photo-add span { font-size: 22px; line-height: 1; }
     .photo-add:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -965,7 +1057,7 @@
     .menu-row .m-price.is-missing { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber); }
     .menu-add[hidden] { display: none; }
 
-    /* Recadrage des photos (format unique 16:9) */
+    /* Recadrage des photos (format unique carré) */
     .cropper { position: fixed; inset: 0; z-index: 110; display: flex; align-items: center; justify-content: center; padding: calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 16px); background: rgba(0, 0, 0, .72); overflow-y: auto; overscroll-behavior: contain; }
     .cropper[hidden] { display: none; }
     .crop-panel { width: 100%; max-width: 640px; margin: auto; padding: 20px; border-radius: 20px; background: var(--panel-solid); animation: rise .35s var(--ease-out) both; }
@@ -975,7 +1067,7 @@
     /* Photo de profil : cadre carré, l'extérieur du rond assombri */
     .cropper.is-round .crop-panel { max-width: 440px; }
     .cropper.is-round .crop-frame::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 999px rgba(0, 0, 0, .55); pointer-events: none; }
-    .crop-frame { position: relative; margin-top: 14px; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: #000; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+    .crop-frame { position: relative; margin-top: 14px; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: #000; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
     .crop-frame.is-dragging { cursor: grabbing; }
     .crop-frame:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .crop-frame canvas { display: block; width: 100%; height: 100%; }
@@ -1021,7 +1113,7 @@
     .gallery { display: flex; gap: 8px; margin: 14px -20px 0; padding: 0 20px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 20px; scrollbar-width: none; }
     .gallery:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 12px; }
     .gallery::-webkit-scrollbar { display: none; }
-    .gallery img { flex: none; width: 78%; max-width: 320px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; scroll-snap-align: start; background: var(--hover); }
+    .gallery img { flex: none; width: 62%; max-width: 260px; aspect-ratio: 1; object-fit: cover; border-radius: 12px; scroll-snap-align: start; background: var(--hover); }
     .gallery img:only-child { width: 100%; max-width: none; }
     .shop-desc { margin: 10px 0 0; font-size: 14.5px; color: var(--text); white-space: pre-line; }
     /* La carte du restaurant (fiche) */
@@ -1076,7 +1168,7 @@
     .menu-head { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
     .menu-empty, .photos-empty { margin: 18px 0 4px; font-size: 14px; color: var(--muted); }
     .photo-grid-view { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
-    .photo-grid-view button { padding: 0; border-radius: 10px; overflow: hidden; aspect-ratio: 16 / 9; background: var(--hover); cursor: zoom-in; }
+    .photo-grid-view button { padding: 0; border-radius: 10px; overflow: hidden; aspect-ratio: 1; background: var(--hover); cursor: zoom-in; }
     .photo-grid-view button:first-child { grid-column: 1 / -1; }
     .photo-grid-view img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .photo-grid-view button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -1084,7 +1176,7 @@
     /* Visionneuse plein écran */
     .lightbox { position: fixed; inset: 0; z-index: 112; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, .92); touch-action: pan-y; }
     .lightbox[hidden] { display: none; }
-    .lightbox img { max-width: 100%; max-height: calc(100dvh - 120px); aspect-ratio: 16 / 9; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+    .lightbox img { max-width: 100%; max-height: calc(100dvh - 120px); aspect-ratio: 1; object-fit: contain; user-select: none; -webkit-user-drag: none; }
     .lb-btn { position: absolute; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: #fff; background: rgba(255, 255, 255, .14); font-size: 26px; line-height: 1; }
     .lb-btn:hover { background: rgba(255, 255, 255, .24); }
     .lb-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
@@ -1192,7 +1284,12 @@
     .sv-bars i { display: block; height: 100%; width: 0; background: #fff; }
     .sv-head { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
     .sv-avatar { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 50%; font-size: 19px; background: rgba(255, 255, 255, .92); }
-    .sv-head div { flex: 1; min-width: 0; }
+    .sv-profile { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 2px 6px 2px 0; border-radius: 22px; color: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .sv-profile:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+    .sv-profile:active .sv-avatar { transform: scale(.92); }
+    .sv-avatar { transition: transform .15s var(--ease-out); box-shadow: 0 0 0 2px rgba(255, 255, 255, .9); }
+    @media (hover: hover) { .sv-profile:hover strong { text-decoration: underline; text-underline-offset: 2px; } }
+    .sv-who { flex: 1; min-width: 0; }
     .sv-head strong { display: block; font-size: 14.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sv-head small { display: block; font-size: 12px; opacity: .8; }
     /* État de l'établissement : pastille colorée, texte blanc (lisible sur toutes les photos) */
@@ -1310,6 +1407,7 @@
     .ps-tabs button { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 60px; padding: 8px 2px 6px; font-size: 11.5px; font-weight: 500; color: var(--muted); }
     .ps-tabs button > span:last-child { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .ps-tabs .ps-ico { position: relative; display: grid; place-items: center; width: 56px; height: 30px; border-radius: 15px; font-size: 19px; line-height: 1; transition: background-color .2s; }
+    .ps-tabs .ps-ico svg { width: 22px; height: 22px; }
     .ps-tabs button[aria-selected="true"] { color: var(--text); }
     .ps-tabs button[aria-selected="true"] .ps-ico { background: var(--accent-soft); }
     .ps-badge { position: absolute; top: -2px; right: 8px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; font-size: 11px; font-weight: 600; line-height: 18px; color: #fff; background: var(--danger); }
@@ -1396,11 +1494,15 @@
     .ps-meter { height: 8px; margin-top: 10px; border-radius: 4px; background: var(--hover); overflow: hidden; }
     .ps-meter i { display: block; height: 100%; width: 0; border-radius: 4px; background: var(--green); transition: width .4s var(--ease-out); }
     .ps-check { margin: 10px 0 0; padding: 0; list-style: none; }
-    .ps-check li { display: flex; align-items: center; gap: 10px; padding: 9px 2px; font-size: 14px; border-bottom: 1px solid var(--line); }
-    .ps-check li > span:first-child { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 13px; font-weight: 600; }
-    .ps-check li.is-ok > span:first-child { color: #fff; background: var(--green); }
-    .ps-check li:not(.is-ok) > span:first-child { color: var(--muted); border: 1.5px solid var(--line-strong); }
+    .ps-check li { border-bottom: 1px solid var(--line); }
+    /* Chaque ligne ouvre directement la bonne rubrique du formulaire */
+    .ps-check li > button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 2px; font: inherit; font-size: 14px; text-align: left; color: var(--text); border-radius: 8px; }
+    @media (hover: hover) { .ps-check li > button:hover { background: var(--accent-soft); } }
+    .ps-check .pc-ico { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 13px; font-weight: 600; }
+    .ps-check li.is-ok .pc-ico { color: #fff; background: var(--green); }
+    .ps-check li:not(.is-ok) .pc-ico { color: var(--muted); border: 1.5px solid var(--line-strong); }
     .ps-check li small { margin-left: auto; color: var(--muted); font-size: 12.5px; text-align: right; }
+    .ps-check .pc-chev { flex: none; font-size: 20px; line-height: 1; color: var(--muted); }
     .ps-switch-row { display: flex; align-items: center; gap: 14px; margin-top: 10px; }
     .ps-switch-row > div { flex: 1; min-width: 0; font-size: 14px; }
     .ps-switch-row b { font-weight: 500; }
@@ -1473,6 +1575,17 @@
       box-shadow: 0 0 0 2px var(--panel-solid); font-variant-numeric: tabular-nums;
     }
     #notif-btn.has-unread { color: var(--accent); }
+    #profile-btn { position: relative; }
+    .notif-badge.pro-badge { top: 0; right: auto; left: 30px; }
+    .notif-badge.pro-badge[hidden] { display: none; }
+    .docs-later { margin: 4px 0 8px; }
+    .docs-later b { display: block; margin-bottom: 2px; }
+    .ps-tabs button[hidden] { display: none; }
+    /* Onglet « Compléter » : où en est la fiche, puis les justificatifs à déposer */
+    .todo-state { display: flex; flex-direction: column; gap: 3px; margin: 10px 0 14px; padding: 12px 14px; border-radius: 12px; font-size: 14px; line-height: 1.45; }
+    .todo-state b { font-size: 15px; }
+    .todo-state.is-warn { color: var(--text); background: color-mix(in srgb, #ff8a3d 14%, transparent); border: 1px solid color-mix(in srgb, #ff8a3d 40%, transparent); }
+    .todo-state.is-ok { color: var(--text); background: var(--green-soft); border: 1px solid color-mix(in srgb, var(--green) 35%, transparent); }
     #notif-btn.ring svg { animation: ring 1s var(--ease-out); transform-origin: 50% 10%; }
     @keyframes ring { 0%, 100% { transform: none; } 20% { transform: rotate(14deg); } 40% { transform: rotate(-12deg); } 60% { transform: rotate(8deg); } 80% { transform: rotate(-4deg); } }
     .sb-brand { display: flex; align-items: center; gap: 4px; }
@@ -1519,6 +1632,13 @@
     /* Ordinateur : plats trouvés sous chaque restaurant de la liste */
     .sb-budget { padding: 0 16px 6px; }
     .sb-budget .budget { padding: 0; flex-wrap: wrap; overflow: visible; }
+    .sb-budget .radius { margin-top: 6px; }
+    /* Distance personnalisée : curseur de 200 m à 10 km */
+    .radius-custom { display: flex; align-items: center; gap: 10px; padding: 0 12px 8px; font-size: 13px; color: var(--muted); }
+    .radius-custom[hidden] { display: none; }
+    .radius-custom input { flex: 1; min-width: 0; accent-color: var(--accent); }
+    .radius-custom output { flex: none; min-width: 4.5em; text-align: right; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
+    .sb-budget .radius-custom { padding: 6px 0 0; }
     .si-dishes { display: grid; gap: 1px; margin-top: 3px; }
     .si-dishes span { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--text); }
     .si-dishes span i { font-style: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -2035,6 +2155,7 @@
       .tabbar .brand-text { display: none; }
       .tabbar .avatar { width: 26px; height: 26px; font-size: 13px; }
       .tabbar .offers-badge, .tabbar .notif-badge { z-index: 2; top: 0; right: auto; left: calc(50% + 4px); }
+      .tabbar .notif-badge.pro-badge { top: 0; left: calc(50% + 4px); }
       /* Onglet actif : couleur, et pastille derrière l'icône */
       .tabbar > button::before { content: ""; position: absolute; top: 2px; left: 50%; width: 56px; height: 30px; margin-left: -28px; border-radius: 15px; background: var(--accent-soft); opacity: 0; transition: opacity .2s; }
       body:not([data-panel]) #nav-map, body[data-panel="shop-sheet"] #nav-map, body[data-panel="offers-sheet"] .tabbar #offers-btn,
@@ -2118,7 +2239,7 @@
     /* ----- Fiche restaurant : photo en tête, onglets doux, carte des plats appétissante ----- */
     .shop-cover { display: block; width: calc(100% + 40px); margin: -10px -20px 14px; padding: 0; border: 0; border-radius: 20px 20px 0 0; overflow: hidden; background: var(--hover); cursor: zoom-in; }
     .shop-cover[hidden] { display: none; }
-    .shop-cover img { display: block; width: 100%; aspect-ratio: 2 / 1; object-fit: cover; transition: transform .6s var(--ease-out); }
+    .shop-cover img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; transition: transform .6s var(--ease-out); }
     .shop-cover:hover img { transform: scale(1.03); }
     #shop-sheet.has-cover .sheet-grab { position: absolute; z-index: 2; top: 0; left: 0; right: 0; padding: 8px 0 14px; }
     #shop-sheet.has-cover .sheet-grab::before { background: rgba(255, 255, 255, .85); box-shadow: 0 1px 3px rgba(0, 0, 0, .3); }
@@ -2175,6 +2296,49 @@
     .places-edit[hidden] { display: none; }
     .places-privacy { margin-top: 14px; }
     .place-pin { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; font-size: 18px; background: var(--panel-solid); border: 3px solid var(--accent); box-shadow: 0 2px 6px rgba(0, 0, 0, .3); pointer-events: none; }
+    /* ----- Restaurateur : « mode service » sur téléphone (scanner en écran d'accueil, tableau de bord en bas) ----- */
+    .scan { --cam-h: 100%; }
+    .scan.is-home { --cam-h: 78%; }
+    .scan.is-home video { height: var(--cam-h); }
+    .scan.is-home .scan-frame { top: calc(var(--cam-h) * .5); width: min(66vw, 280px, 40vh); }
+    .scan.is-home .scan-help { top: calc(var(--cam-h) * .5 + min(33vw, 140px, 20vh) + 16px); }
+    .scan.is-home .scan-off { top: calc(var(--cam-h) * .45); }
+    .scan.is-home .scan-foot { bottom: calc(100% - var(--cam-h)); padding-bottom: 16px; }
+    .scan.is-home .scan-result { bottom: calc(100% - var(--cam-h) + 12px); }
+    .scan.is-home #scan-close { visibility: hidden; }
+    .scan-dock { position: absolute; left: 0; right: 0; bottom: 0; height: calc(100% - var(--cam-h)); min-height: 136px; display: flex; flex-direction: column; justify-content: center; gap: 10px;
+      padding: 14px max(16px, env(safe-area-inset-right, 0px)) calc(var(--safe-bottom) + 14px) max(16px, env(safe-area-inset-left, 0px));
+      color: var(--text); background: var(--panel-solid); border-radius: 24px 24px 0 0; box-shadow: 0 -8px 30px rgba(0, 0, 0, .35); }
+    .scan-dock[hidden] { display: none; }
+    .dock-main { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 64px; padding: 10px 16px; border-radius: 18px; text-align: left; color: var(--on-accent); background: var(--accent); }
+    .dock-main:active, .dock-sec:active { transform: scale(.985); }
+    .dock-main svg { flex: none; width: 28px; height: 28px; }
+    .dock-main > span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+    .dock-main strong { font-size: 17px; font-weight: 600; }
+    .dock-main small { font-size: 13px; opacity: .88; }
+    .dock-main b { flex: none; font-size: 26px; font-weight: 400; line-height: 1; }
+    .dock-sec { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 44px; border-radius: 14px; font-size: 14.5px; font-weight: 500; color: var(--text); background: var(--hover); }
+    .dock-sec svg { width: 20px; height: 20px; }
+    /* Tableau de bord : grandes tuiles d'accès direct */
+    .ps-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 18px; }
+    @media (min-width: 640px) { .ps-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+    .ps-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; min-height: 96px; padding: 14px; border-radius: 16px; text-align: left; color: var(--text); background: var(--panel-solid); border: 1px solid var(--line); transition: transform .15s, box-shadow .2s; }
+    .ps-tile:hover { box-shadow: 0 6px 16px rgba(60, 64, 67, .14); }
+    .ps-tile:active { transform: scale(.98); }
+    .ps-tile i { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 11px; color: var(--accent); background: var(--accent-soft); }
+    .ps-tile i svg { width: 20px; height: 20px; }
+    .ps-tile strong { font-size: 14.5px; font-weight: 600; line-height: 1.25; }
+    .ps-tile small { font-size: 12.5px; line-height: 1.3; color: var(--muted); }
+    /* Aperçu client : bandeau en haut, interface du restaurateur masquée */
+    .preview-bar { position: fixed; z-index: 140; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 10px;
+      padding: calc(env(safe-area-inset-top, 0px) + 8px) max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px));
+      color: var(--on-accent); background: var(--accent); box-shadow: 0 2px 12px rgba(0, 0, 0, .25); font-size: 14px; }
+    .preview-bar[hidden] { display: none; }
+    .preview-bar p { flex: 1; min-width: 0; margin: 0; line-height: 1.3; }
+    .preview-bar small { display: block; font-size: 12.5px; opacity: .88; }
+    .preview-bar button { flex: none; height: 38px; padding: 0 14px; border-radius: 19px; font-weight: 600; color: var(--accent); background: #fff; }
+    body.client-preview { --safe-top: calc(env(safe-area-inset-top, 0px) + 56px); }
+    body.client-preview .scan-fab, body.client-preview #profile-btn { display: none !important; }
   </style>
 </head>
 
@@ -2195,6 +2359,8 @@
   <header class="topbar ui" id="topbar">
     <button id="profile-btn" class="brand glass" type="button" aria-label="Ouvrir mon profil">
       <span class="avatar" id="avatar" aria-hidden="true">?</span>
+      <!-- Restaurateur : nombre de justificatifs encore à ajouter -->
+      <span class="notif-badge pro-badge" id="profile-badge" aria-hidden="true" hidden></span>
       <span class="brand-text">
         <strong>FlashMiam</strong>
         <small><span class="live-dot" aria-hidden="true"></span><span class="brand-city">La Roche-sur-Yon</span></small>
@@ -2275,22 +2441,22 @@
   <!-- ===================== FILTRES (téléphone : en bas ; ordinateur : déplacés dans le panneau) ===================== -->
   <nav class="filters ui" id="filters" aria-label="Filtrer les commerces">
     <div class="filters-track" id="filters-track">
-      <button class="chip glass place-chip" type="button" id="place-chip" aria-haspopup="dialog"><span id="place-chip-lbl">📍 Ma position</span><span class="pc-caret" aria-hidden="true">▾</span></button>
+      <button class="chip glass place-chip" type="button" id="place-chip" aria-haspopup="dialog"><span id="place-chip-lbl">Ma position</span><span class="pc-caret" aria-hidden="true">▾</span></button>
       <button class="chip glass" type="button" id="open-only" aria-pressed="false"><span class="dot-green" aria-hidden="true"></span>Ouverts</button>
-      <button class="chip glass" type="button" id="promo-only" aria-pressed="false">🎁 Promos</button>
-      <button class="chip glass" type="button" id="rated-only" aria-pressed="false">⭐ 4 et +</button>
-      <button class="chip glass" type="button" data-when="lunch" aria-pressed="false">☀️ Midi</button>
-      <button class="chip glass" type="button" data-when="evening" aria-pressed="false">🌙 Ce soir</button>
-      <button class="chip glass" type="button" data-when="weekend" aria-pressed="false">🥞 Ce week-end</button>
-      <button class="chip glass" type="button" id="mv-only" aria-pressed="false">🎫 Titres-resto</button>
+      <button class="chip glass" type="button" id="promo-only" aria-pressed="false">Promos</button>
+      <button class="chip glass" type="button" id="rated-only" aria-pressed="false">★ 4 et +</button>
+      <button class="chip glass" type="button" data-when="lunch" aria-pressed="false">Midi</button>
+      <button class="chip glass" type="button" data-when="evening" aria-pressed="false">Ce soir</button>
+      <button class="chip glass" type="button" data-when="weekend" aria-pressed="false">Ce week-end</button>
+      <button class="chip glass" type="button" id="mv-only" aria-pressed="false">Titres-resto</button>
       <span class="chip-sep" aria-hidden="true"></span>
       <button class="chip glass" type="button" data-cat="all" aria-pressed="true">Tout</button>
-      <button class="chip glass" type="button" data-cat="Food-truck" aria-pressed="false">🚚 Food-truck</button>
-      <button class="chip glass" type="button" data-cat="Kebab" aria-pressed="false">🥙 Kebab</button>
-      <button class="chip glass" type="button" data-cat="Burger" aria-pressed="false">🍔 Burger</button>
-      <button class="chip glass" type="button" data-cat="Sweets" aria-pressed="false">🧁 Sweets</button>
-      <button class="chip glass" type="button" data-cat="Pizza" aria-pressed="false">🍕 Pizza</button>
-      <button class="chip glass" type="button" data-cat="Autre" aria-pressed="false">🍽️ Autres</button>
+      <button class="chip glass" type="button" data-cat="Food-truck" aria-pressed="false">Food-truck</button>
+      <button class="chip glass" type="button" data-cat="Kebab" aria-pressed="false">Kebab</button>
+      <button class="chip glass" type="button" data-cat="Burger" aria-pressed="false">Burger</button>
+      <button class="chip glass" type="button" data-cat="Sweets" aria-pressed="false">Sweets</button>
+      <button class="chip glass" type="button" data-cat="Pizza" aria-pressed="false">Pizza</button>
+      <button class="chip glass" type="button" data-cat="Autre" aria-pressed="false">Autres</button>
     </div>
   </nav>
 
@@ -2319,6 +2485,19 @@
       <button class="chip" type="button" data-max="5" aria-pressed="false">≤ 5 €</button>
       <button class="chip" type="button" data-max="10" aria-pressed="false">≤ 10 €</button>
       <button class="chip" type="button" data-max="15" aria-pressed="false">≤ 15 €</button>
+    </div>
+    <div class="budget radius" id="radius" role="group" aria-label="Distance">
+      <button class="chip" type="button" data-r="" aria-pressed="true">Partout</button>
+      <button class="chip" type="button" data-r="500" aria-pressed="false">500 m</button>
+      <button class="chip" type="button" data-r="1000" aria-pressed="false">1 km</button>
+      <button class="chip" type="button" data-r="2000" aria-pressed="false">2 km</button>
+      <button class="chip" type="button" data-r="5000" aria-pressed="false">5 km</button>
+      <button class="chip" type="button" data-r="custom" aria-pressed="false" aria-expanded="false" aria-controls="radius-custom">Autre…</button>
+    </div>
+    <div class="radius-custom" id="radius-custom" hidden>
+      <label for="radius-range">Distance maximale</label>
+      <input type="range" id="radius-range" min="200" max="10000" step="100" value="1500" />
+      <output id="radius-out" for="radius-range">1,5 km</output>
     </div>
     <div class="sp-body" id="search-results"></div>
     <p class="visually-hidden" id="search-live" aria-live="polite"></p>
@@ -2352,7 +2531,7 @@
       <button type="button" role="tab" id="tab-reviews" aria-controls="panel-reviews" aria-selected="false" tabindex="-1" data-tab="reviews" hidden>Avis</button>
     </div>
     <div class="tab-panel" id="panel-infos" role="tabpanel" aria-labelledby="tab-infos">
-    <p class="demo-note" id="shop-demo-note" hidden><span aria-hidden="true">🧪</span> Restaurant imaginaire, pour découvrir FlashMiam en attendant les premiers restaurants partenaires de La Roche-sur-Yon : ses offres ne sont pas réelles.</p>
+    <p class="demo-note" id="shop-demo-note" hidden>Restaurant imaginaire, pour découvrir FlashMiam en attendant les premiers restaurants partenaires de La Roche-sur-Yon : ses offres ne sont pas réelles.</p>
     <!-- Comptes clients : « Profiter de l'offre » (ou « Valider ma visite ») → QR code à montrer en caisse -->
     <div class="visit-box" id="shop-visit-box" hidden>
       <button class="visit-cta" type="button" id="shop-visit">
@@ -2438,8 +2617,11 @@
       <div class="sv-top">
         <div class="sv-bars" id="sv-bars" aria-hidden="true"></div>
         <div class="sv-head">
-          <span class="sv-avatar" id="sv-avatar" aria-hidden="true"></span>
-          <div><strong id="sv-name"></strong><small id="sv-time"></small><small class="sv-status" id="sv-status"></small></div>
+          <!-- Comme sur Instagram : la photo de profil (ou le nom) ouvre la page du restaurant -->
+          <button class="sv-profile" type="button" id="sv-profile">
+            <span class="sv-avatar" id="sv-avatar" aria-hidden="true"></span>
+            <span class="sv-who"><strong id="sv-name"></strong><small id="sv-time"></small><small class="sv-status" id="sv-status"></small></span>
+          </button>
           <button class="sv-like" type="button" id="sv-like" aria-pressed="false" aria-label="J'aime cette story" hidden>♡</button>
           <button class="sv-pause" type="button" id="sv-pause" aria-label="Mettre en pause">❚❚</button>
           <button class="sv-close" type="button" id="sv-close" aria-label="Fermer les stories">&times;</button>
@@ -2461,7 +2643,7 @@
         <button class="icon-btn" type="button" id="sc-close" aria-label="Fermer">&times;</button>
       </div>
       <div class="seg" role="group" aria-label="Type de story" style="margin-top:12px">
-        <button type="button" data-mode="photo" aria-pressed="true">📷 Photo</button>
+        <button type="button" data-mode="photo" aria-pressed="true">Photo</button>
         <button type="button" data-mode="text" aria-pressed="false">Aa Texte</button>
       </div>
       <div class="sc-body">
@@ -2523,9 +2705,9 @@
       <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
     </div>
     <ul class="ins-perks">
-      <li><span aria-hidden="true">⚡</span>La carte en un geste, en plein écran, comme une appli</li>
-      <li><span aria-hidden="true">🔔</span>Les promos de vos restos préférés en alerte</li>
-      <li><span aria-hidden="true">📦</span>Rien à télécharger sur un store, presque aucune place</li>
+      <li>La carte en un geste, en plein écran, comme une appli</li>
+      <li>Les promos de vos restos préférés en alerte</li>
+      <li>Rien à télécharger sur un store, presque aucune place</li>
     </ul>
     <ol class="ins-steps" data-install="ios" hidden>
       <li>Touchez <svg class="ins-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 10H6a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> <b>Partager</b> (en bas de Safari, en haut à droite sur iPad)</li>
@@ -2570,13 +2752,13 @@
     </div>
     <div class="budget offers-kinds" id="offers-kinds" role="group" aria-label="Type d'offre">
       <button class="chip" type="button" data-kind="" aria-pressed="true">Toutes</button>
-      <button class="chip" type="button" data-kind="day" aria-pressed="false">⏱️ Du jour</button>
-      <button class="chip" type="button" data-kind="lunch" aria-pressed="false">🍽️ Midi</button>
-      <button class="chip" type="button" data-kind="afterwork" aria-pressed="false">🍻 Afterwork</button>
-      <button class="chip" type="button" data-kind="weekend" aria-pressed="false">🥞 Week-end</button>
-      <button class="chip" type="button" data-kind="week" aria-pressed="false">📅 De la semaine</button>
-      <button class="chip" type="button" data-kind="student" aria-pressed="false">🎓 Étudiantes</button>
-      <button class="chip" type="button" data-kind="other" aria-pressed="false">🎁 Bons plans</button>
+      <button class="chip" type="button" data-kind="day" aria-pressed="false">Du jour</button>
+      <button class="chip" type="button" data-kind="lunch" aria-pressed="false">Midi</button>
+      <button class="chip" type="button" data-kind="afterwork" aria-pressed="false">Afterwork</button>
+      <button class="chip" type="button" data-kind="weekend" aria-pressed="false">Week-end</button>
+      <button class="chip" type="button" data-kind="week" aria-pressed="false">De la semaine</button>
+      <button class="chip" type="button" data-kind="student" aria-pressed="false">Étudiantes</button>
+      <button class="chip" type="button" data-kind="other" aria-pressed="false">Bons plans</button>
     </div>
     <label class="check offers-open"><input type="checkbox" id="offers-open" /> Restaurants ouverts maintenant</label>
     <ul class="offers-list" id="offers-list"></ul>
@@ -2647,12 +2829,12 @@
       <div class="pf-id">
         <h3 id="profile-name"></h3>
         <p class="pf-email" id="profile-email"></p>
-        <p class="pf-meta">📍 La Roche-sur-Yon · membre depuis le <span id="profile-since"></span></p>
+        <p class="pf-meta">La Roche-sur-Yon · membre depuis le <span id="profile-since"></span></p>
       </div>
       <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
     </div>
     <div class="pro-entry" id="pro-entry" hidden>
-      <button class="btn btn-primary" type="button" id="profile-pro">🍽️ Ouvrir mon espace restaurateur</button>
+      <button class="btn btn-primary" type="button" id="profile-pro">Ouvrir mon espace restaurateur</button>
     </div>
 
     <p class="pf-label">Mon compte</p>
@@ -2679,6 +2861,7 @@
       <button class="pf-row" type="button" id="profile-install"><span class="pf-ico" aria-hidden="true">📲</span><span class="pf-k">Mettre FlashMiam sur l'écran d'accueil<small id="profile-install-state">Tutoriel en 3 étapes</small></span><span class="pf-chev" aria-hidden="true">›</span></button>
       <button class="pf-row" type="button" id="profile-tour"><span class="pf-ico" aria-hidden="true">🧭</span><span class="pf-k">Revoir le guide de l'application</span><span class="pf-chev" aria-hidden="true">›</span></button>
       <a class="pf-row" id="profile-team" href="app/tableau-de-bord/" hidden><span class="pf-ico" aria-hidden="true">📊</span><span class="pf-k">Tableau de bord de l'équipe</span><span class="pf-chev" aria-hidden="true">›</span></a>
+      <a class="pf-row" id="profile-instagram" href="https://www.instagram.com/flashmiam85/" target="_blank" rel="noopener"><span class="pf-ico" aria-hidden="true">📸</span><span class="pf-k">Suivre FlashMiam sur Instagram<small>@flashmiam85</small></span><span class="pf-chev" aria-hidden="true">›</span></a>
       <button class="pf-row" type="button" id="profile-logout"><span class="pf-ico" aria-hidden="true">👋</span><span class="pf-k">Se déconnecter</span><span class="pf-chev" aria-hidden="true">›</span></button>
     </div>
     <button class="pf-delete" type="button" id="profile-delete">Supprimer mon compte</button>
@@ -2691,7 +2874,7 @@
     <div class="tour-spot is-none" id="tour-spot" aria-hidden="true"></div>
     <div class="tour-card" id="tour-card">
       <div class="tour-demo" id="tour-demo" aria-hidden="true" hidden>
-        <div class="visit-cta"><span class="visit-cta-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17.5 20.5h3v-3"/></svg></span><span class="visit-cta-txt"><strong>Profiter de l'offre</strong><small>🎓 -20 % étudiant</small></span></div>
+        <div class="visit-cta"><span class="visit-cta-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17.5 20.5h3v-3"/></svg></span><span class="visit-cta-txt"><strong>Profiter de l'offre</strong><small>-20 % étudiant</small></span></div>
       </div>
       <p class="tour-step" id="tour-step"></p>
       <h2 id="tour-title"></h2>
@@ -2739,13 +2922,13 @@
       <button class="scan-btn" type="button" id="scan-torch" aria-pressed="false" aria-label="Lampe de la caméra" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></button>
     </header>
     <p class="scan-help" id="scan-help" role="status" aria-live="polite">Visez le QR code du client</p>
-    <div class="scan-off" id="scan-off" hidden><span aria-hidden="true">📷</span><p id="scan-off-text"></p></div>
+    <div class="scan-off" id="scan-off" hidden><p id="scan-off-text"></p></div>
     <div class="scan-foot">
       <form class="scan-manual" id="scan-manual" hidden autocomplete="off">
         <input id="scan-code" type="text" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="16" placeholder="K7P4-QX9M-2T" aria-label="Code affiché sous le QR code du client" />
         <button type="submit" id="scan-code-go" disabled>Valider</button>
       </form>
-      <button class="scan-type" type="button" id="scan-type">⌨️ Saisir le code à la main</button>
+      <button class="scan-type" type="button" id="scan-type">Saisir le code à la main</button>
     </div>
     <div class="scan-result" id="scan-result" data-kind="ok" role="alert" hidden>
       <div class="sr-ico" id="sr-ico" aria-hidden="true"></div>
@@ -2755,6 +2938,17 @@
       <p class="sr-warn" id="sr-warn" hidden></p>
       <button class="btn btn-primary sr-next" type="button" id="sr-next"><i id="sr-bar"></i><span>Client suivant</span></button>
     </div>
+    <!-- Mode service (téléphone) : le tableau de bord à portée de pouce, sous la caméra -->
+    <nav class="scan-dock" id="scan-dock" aria-label="Espace restaurateur" hidden>
+      <button class="dock-main" type="button" id="dock-dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></svg><span><strong>Mon tableau de bord</strong><small>Stats, carte, horaires, stories, avis</small></span><b aria-hidden="true">›</b></button>
+      <button class="dock-sec" type="button" id="dock-preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zM12 15a3 3 0 100-6 3 3 0 000 6z"/></svg>Voir ma fiche comme un client</button>
+    </nav>
+  </div>
+
+  <!-- Aperçu client (restaurateur) -->
+  <div class="preview-bar" id="preview-bar" role="status" hidden>
+    <p><b>Aperçu client</b><small>Vous voyez FlashMiam comme vos clients.</small></p>
+    <button type="button" id="preview-exit">Revenir à mon espace</button>
   </div>
 
   <div id="pro-space" class="pro-space" role="dialog" aria-modal="true" aria-labelledby="ps-title" hidden>
@@ -2768,11 +2962,12 @@
         <button class="icon-btn" type="button" id="ps-close" aria-label="Fermer l'espace restaurateur">&times;</button>
       </header>
       <nav class="ps-tabs" role="tablist" aria-label="Espace restaurateur">
-        <button type="button" role="tab" id="pst-home" data-tab="home" aria-controls="psp-home" aria-selected="true"><span class="ps-ico" aria-hidden="true">🏠</span><span>Accueil</span></button>
-        <button type="button" role="tab" id="pst-stats" data-tab="stats" aria-controls="psp-stats" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true">📊</span><span class="ps-lbl" data-short="Stats">Statistiques</span></button>
-        <button type="button" role="tab" id="pst-publish" data-tab="publish" aria-controls="psp-publish" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true">✨</span><span>Publier</span></button>
-        <button type="button" role="tab" id="pst-reviews" data-tab="reviews" aria-controls="psp-reviews" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true">⭐<b class="ps-badge" id="ps-reviews-badge" hidden></b></span><span>Avis</span></button>
-        <button type="button" role="tab" id="pst-fiche" data-tab="fiche" aria-controls="psp-fiche" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true">🛠️</span><span>Ma fiche</span></button>
+        <button type="button" role="tab" id="pst-home" data-tab="home" aria-controls="psp-home" aria-selected="true"><span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z"/></svg></span><span>Accueil</span></button>
+        <button type="button" role="tab" id="pst-todo" data-tab="todo" aria-controls="psp-todo" aria-selected="false" tabindex="-1" hidden><span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2h9"/></svg><b class="ps-badge" id="ps-todo-badge" hidden></b></span><span>Compléter</span></button>
+        <button type="button" role="tab" id="pst-stats" data-tab="stats" aria-controls="psp-stats" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="ps-lbl" data-short="Stats">Statistiques</span></button>
+        <button type="button" role="tab" id="pst-publish" data-tab="publish" aria-controls="psp-publish" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span><span>Publier</span></button>
+        <button type="button" role="tab" id="pst-reviews" data-tab="reviews" aria-controls="psp-reviews" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><b class="ps-badge" id="ps-reviews-badge" hidden></b></span><span>Avis</span></button>
+        <button type="button" role="tab" id="pst-fiche" data-tab="fiche" aria-controls="psp-fiche" aria-selected="false" tabindex="-1"><span class="ps-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4m4 0h10M3 17h10m4 0h4M9 4v6M15 14v6"/></svg></span><span>Ma fiche</span></button>
       </nav>
       <button class="scan-fab ps-scan-fab" type="button" id="ps-scan-fab" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8V5a2 2 0 012-2h3M16 3h3a2 2 0 012 2v3M21 16v3a2 2 0 01-2 2h-3M8 21H5a2 2 0 01-2-2v-3M7 12h10"/></svg><span>Scanner</span></button>
       <div class="ps-body" id="ps-body">
@@ -2793,6 +2988,16 @@
               <span class="ps-scan-txt"><strong>Scanner un client</strong><small id="ps-scan-sub">Visite ou offre : scannez le QR code de son téléphone</small></span>
               <span class="ps-scan-today"><b id="ps-scan-n">–</b><small>aujourd'hui</small></span>
             </button>
+            <div class="ps-tiles ps-wide" id="ps-tiles" role="group" aria-label="Accès rapides">
+              <button class="ps-tile" type="button" data-act="story"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></i><strong>Publier une story</strong><small>Photo ou texte, 24 h</small></button>
+              <button class="ps-tile" type="button" data-act="promo"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0L2 12V2h10l8.6 8.6a2 2 0 010 2.8zM7 7h.01"/></svg></i><strong>Créer une offre</strong><small>Promo pour attirer du monde</small></button>
+              <button class="ps-tile" type="button" data-act="menu"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg></i><strong>Ma carte</strong><small>Plats et prix</small></button>
+              <button class="ps-tile" type="button" data-act="hours"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v5l3 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></i><strong>Horaires</strong><small>Ouverture et fermeture</small></button>
+              <button class="ps-tile" type="button" data-act="stats"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></i><strong>Statistiques</strong><small>Vues, visites, clients</small></button>
+              <button class="ps-tile" type="button" data-act="reviews"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></i><strong>Avis</strong><small>Lire et répondre</small></button>
+              <button class="ps-tile" type="button" data-act="preview"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zM12 15a3 3 0 100-6 3 3 0 000 6z"/></svg></i><strong>Voir comme un client</strong><small>Ma fiche côté client</small></button>
+              <button class="ps-tile" type="button" data-act="edit"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></i><strong>Toute ma fiche</strong><small>Photos, description, adresse</small></button>
+            </div>
             <div class="ps-cards" id="ps-cards"></div>
             <figure class="chart ps-home-chart">
               <figcaption>Vues de la fiche par jour<small id="ph-chart-sub"></small></figcaption>
@@ -2802,15 +3007,6 @@
             <section class="ps-block" aria-labelledby="ps-todo-title">
               <h3 id="ps-todo-title">À faire</h3>
               <ul class="ps-todo" id="ps-todo"></ul>
-            </section>
-            <section class="ps-block ps-wide" aria-labelledby="ps-quick-title">
-              <h3 id="ps-quick-title">Actions rapides</h3>
-              <div class="ps-quick" id="ps-quick">
-                <button type="button" data-act="story"><span aria-hidden="true">📸</span>Story</button>
-                <button type="button" data-act="promo"><span aria-hidden="true">🎁</span>Promo</button>
-                <button type="button" data-act="edit"><span aria-hidden="true">✏️</span>Ma fiche</button>
-                <button type="button" data-act="show"><span aria-hidden="true">👀</span>Aperçu</button>
-              </div>
             </section>
             <section class="ps-block ps-wide" aria-labelledby="ps-insights-title">
               <h3 id="ps-insights-title">Ce qu'il faut retenir</h3>
@@ -2900,7 +3096,7 @@
             <p class="hint">« J'aime » sur les plats de votre carte, depuis toujours.</p>
             <div class="hbars" id="ps-dishes"></div>
           </section>
-          <p class="hint ps-privacy">🔒 Ce sont des totaux : vous ne voyez jamais qui a fait quoi. Seuls les clients qui acceptent les statistiques sont comptés, et vos propres visites ne le sont pas. Historique conservé 90 jours.</p>
+          <p class="hint ps-privacy">Ce sont des totaux : vous ne voyez jamais qui a fait quoi. Seuls les clients qui acceptent les statistiques sont comptés, et vos propres visites ne le sont pas. Historique conservé 90 jours.</p>
         </section>
 
         <!-- Publier -->
@@ -2908,15 +3104,15 @@
           <p class="ps-alert is-info" id="ps-publish-off" hidden></p>
           <section class="pd-block" id="pd-stories" aria-labelledby="pd-stories-title" hidden>
             <div class="stats-head">
-              <h3 id="pd-stories-title">📸 Mes stories</h3>
+              <h3 id="pd-stories-title">Mes stories</h3>
               <button class="pill-btn" type="button" id="pd-story-new">＋ Publier une story</button>
             </div>
-            <p class="hint">Photo ou message affiché en haut de la carte pour tout le monde pendant 24 h. Vos abonnés sont prévenus. Sous chaque story : combien l'ont vue (👁) et aimée (♥).</p>
+            <p class="hint">Photo ou message affiché en haut de la carte pour tout le monde pendant 24 h. Vos abonnés sont prévenus. Sous chaque story : combien l'ont vue et aimée (♥).</p>
             <ul class="story-admin" id="pd-story-list"></ul>
           </section>
           <section class="pd-block" id="pd-promos" aria-labelledby="pd-promos-title" hidden>
-            <h3 id="pd-promos-title">🎁 Mes promotions</h3>
-            <p class="hint">Affichées sur votre fiche, dans « Offres autour de moi » et avec le filtre « 🎁 Promos ». Vos abonnés sont prévenus.</p>
+            <h3 id="pd-promos-title">Mes promotions</h3>
+            <p class="hint">Affichées sur votre fiche, dans « Offres autour de moi » et avec le filtre « Promos ». Vos abonnés sont prévenus.</p>
             <ul class="promo-admin" id="pd-promo-list"></ul>
             <form class="promo-form" id="pd-promo-form" novalidate>
               <div class="kind-pick" id="pp-kind" role="radiogroup" aria-label="Type de promotion"></div>
@@ -2955,6 +3151,17 @@
           <button class="btn btn-ghost" type="button" id="pd-reviews">Voir les avis sur ma fiche</button>
         </section>
 
+        <!-- Compléter mon profil : justificatifs ajoutés après l'inscription -->
+        <section class="ps-pane" id="psp-todo" role="tabpanel" aria-labelledby="pst-todo" hidden>
+          <section class="ps-card" aria-labelledby="ps-todo-h">
+            <h4 id="ps-todo-h">Compléter mon profil</h4>
+            <div class="todo-state" id="ps-todo-state" role="status"></div>
+            <div class="docs" id="ps-docs"></div>
+            <p class="hint">PDF, JPG ou PNG · 10 Mo maximum par fichier. Une photo nette du document suffit.</p>
+            <p class="form-error" id="err-ps-docs" role="alert"></p>
+          </section>
+        </section>
+
         <!-- Ma fiche -->
         <section class="ps-pane" id="psp-fiche" role="tabpanel" aria-labelledby="pst-fiche" hidden>
           <section class="ps-card" aria-labelledby="ps-complete-title">
@@ -2990,7 +3197,7 @@
               <div><dt>Abonnement</dt><dd id="pd-plan"></dd></div>
             </dl>
           </section>
-          <button class="btn btn-ghost" type="button" id="pd-show">Voir ma fiche sur la carte</button>
+          <button class="btn btn-ghost" type="button" id="pd-show">Voir ma fiche comme un client</button>
           <button class="btn btn-ghost" type="button" id="ps-share">Partager le lien de ma fiche</button>
           <button class="btn btn-ghost" type="button" id="ps-account">Mon compte (profil, déconnexion)</button>
         </section>
@@ -3017,12 +3224,6 @@
         <li data-pstep="4"><span>4</span>Restaurant</li>
       </ol>
 
-      <!-- Choix du type de compte -->
-      <div class="role-switch" id="role-switch" role="radiogroup" aria-label="Type de compte">
-        <button type="button" role="radio" data-role="client" aria-checked="true"><span aria-hidden="true">👤</span> Client</button>
-        <button type="button" role="radio" data-role="pro" aria-checked="false"><span aria-hidden="true">🍽️</span> Restaurateur</button>
-      </div>
-
       <!-- Création de compte (client ou restaurateur) -->
       <!-- Inscription d'un client : une question par écran, avec animations -->
       <form id="form-join" class="ob-step join" novalidate data-step="signup" data-only="client" hidden>
@@ -3039,11 +3240,11 @@
           <h1 id="jn-title">Les restaurants de <span class="nw">La Roche-sur-Yon</span>, <em>à deux pas</em></h1>
           <p class="lead">Promos du jour, stories des food-trucks, avis des étudiants… Votre compte est prêt en une minute.</p>
           <ul class="jn-perks" aria-label="Avec FlashMiam">
-            <li><span aria-hidden="true">🎁</span>Les bons plans autour de vous</li>
-            <li><span aria-hidden="true">🔔</span>Prévenu des promos de vos restos préférés</li>
-            <li><span aria-hidden="true">⭐</span>Les vrais avis, sans pub</li>
+            <li>Les bons plans autour de vous</li>
+            <li>Prévenu des promos de vos restos préférés</li>
+            <li>Les vrais avis, sans pub</li>
           </ul>
-          <button class="btn btn-primary jn-go" type="button" id="jn-start">C'est parti <span aria-hidden="true">✨</span></button>
+          <button class="btn btn-primary jn-go" type="button" id="jn-start">C'est parti</button>
           <p class="ob-switch">Déjà un compte ? <button class="link-btn" type="button" data-goto="login">Se connecter</button></p>
         </section>
 
@@ -3176,14 +3377,21 @@
         <p class="ob-switch">Pas encore de compte ? <button class="link-btn" type="button" data-goto="signup">Créer un compte</button></p>
       </form>
 
+      <!-- Type de compte : client par défaut ; cochée, l'accueil et la connexion passent à l'espace restaurateur -->
+      <label class="role-check" id="role-switch">
+        <input type="checkbox" id="role-pro" />
+        <span class="rc-box" aria-hidden="true"></span>
+        <span class="rc-text"><b>Je suis restaurateur</b><small id="role-pro-hint">Inscrivez votre établissement sur la carte</small></span>
+      </label>
+
       <!-- Vérification de l'adresse e-mail par code (création de compte et connexion) -->
       <form id="ob-email-code" class="ob-step" novalidate data-step="verify-email" hidden aria-labelledby="ec-title">
         <div class="mail-badge" aria-hidden="true">✉️</div>
         <h2 id="ec-title">Vérifiez votre <em>adresse e-mail</em></h2>
-        <p class="lead" id="ec-lead">Un code à 6 chiffres a été envoyé à <b id="ec-email"></b>. Saisissez-le ci-dessous (vous pouvez aussi cliquer sur le lien de l'e-mail).</p>
+        <p class="lead" id="ec-lead">Un code a été envoyé à <b id="ec-email"></b>. Saisissez-le ci-dessous (vous pouvez aussi cliquer sur le lien de l'e-mail).</p>
         <label class="field" id="field-ec-code">
           <span>Code de vérification</span>
-          <input id="ec-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="––––––" aria-describedby="ec-lead" />
+          <input id="ec-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="––––––––" aria-describedby="ec-lead" />
           <small class="field-error" id="err-ec-code" aria-live="polite"></small>
         </label>
         <p class="hint" id="ec-exists" hidden>Vous avez déjà un compte avec cette adresse ? Aucun code n'est envoyé dans ce cas : <button class="link-btn" type="button" id="ec-to-login">connectez-vous</button> (ou utilisez « Mot de passe oublié »).</p>
@@ -3193,27 +3401,48 @@
         <p class="hint center">Pensez à regarder dans vos courriers indésirables. <button class="link-btn" type="button" id="ec-change">Modifier l'adresse</button></p>
       </form>
 
-      <!-- Mot de passe oublié : code reçu par e-mail + nouveau mot de passe -->
+      <!-- Mot de passe oublié, en deux temps : 1. code reçu par e-mail, 2. nouveau mot de passe + confirmation -->
       <form id="ob-reset" class="ob-step" novalidate data-step="reset-password" hidden aria-labelledby="rs-title">
         <div class="mail-badge" aria-hidden="true">🔑</div>
-        <h2 id="rs-title">Nouveau <em>mot de passe</em></h2>
-        <p class="lead" id="rs-lead">Si un compte FlashMiam existe avec l'adresse <b id="rs-email"></b>, un code à 6 chiffres vient d'y être envoyé. Saisissez-le, puis choisissez votre nouveau mot de passe.</p>
-        <label class="field" id="field-rs-code">
-          <span>Code reçu par e-mail</span>
-          <input id="rs-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="––––––" />
-          <small class="field-error" id="err-rs-code" aria-live="polite"></small>
-        </label>
-        <label class="field" id="field-rs-password">
-          <span>Nouveau mot de passe</span>
-          <span class="pw-wrap">
-            <input id="rs-password" type="password" autocomplete="new-password" minlength="8" maxlength="128" />
-            <button class="pw-toggle" type="button" data-toggle-pw="rs-password">Afficher</button>
-          </span>
-          <small class="hint">8 caractères minimum, avec une majuscule, une minuscule, un chiffre et un caractère spécial.</small>
-          <small class="field-error" id="err-rs-password" aria-live="polite"></small>
-        </label>
+        <h2 id="rs-title">Mot de passe <em>oublié</em></h2>
+        <div id="rs-phase-code">
+          <p class="lead" id="rs-lead">Si un compte FlashMiam existe avec l'adresse <b id="rs-email"></b>, un code vient d'y être envoyé. Saisissez-le pour choisir un nouveau mot de passe.</p>
+          <label class="field" id="field-rs-code">
+            <span>Code reçu par e-mail</span>
+            <input id="rs-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="––––––––" />
+            <small class="field-error" id="err-rs-code" aria-live="polite"></small>
+          </label>
+        </div>
+        <div id="rs-phase-password" hidden>
+          <p class="lead">Code accepté. Choisissez votre nouveau mot de passe, puis confirmez-le.</p>
+          <label class="field" id="field-rs-password">
+            <span>Nouveau mot de passe</span>
+            <span class="pw-wrap">
+              <input id="rs-password" type="password" autocomplete="new-password" minlength="8" maxlength="128" aria-describedby="rs-pw-rules" />
+              <button class="pw-toggle" type="button" data-toggle-pw="rs-password">Afficher</button>
+            </span>
+            <ul class="pw-rules" id="rs-pw-rules" aria-label="Le mot de passe doit contenir">
+              <li data-rule="length">8 caractères</li>
+              <li data-rule="upper">1 majuscule</li>
+              <li data-rule="lower">1 minuscule</li>
+              <li data-rule="digit">1 chiffre</li>
+              <li data-rule="special">1 caractère spécial</li>
+            </ul>
+            <small class="field-error" id="err-rs-password" aria-live="polite"></small>
+          </label>
+          <label class="field" id="field-rs-password2">
+            <span>Confirmer le mot de passe</span>
+            <span class="pw-wrap">
+              <input id="rs-password2" type="password" autocomplete="new-password" maxlength="128" aria-describedby="rs-match" />
+              <button class="pw-toggle" type="button" data-toggle-pw="rs-password2">Afficher</button>
+            </span>
+            <p class="pw-match" id="rs-match" aria-live="polite"></p>
+            <small class="field-error" id="err-rs-password2" aria-live="polite"></small>
+          </label>
+        </div>
         <p class="form-error" id="err-reset" role="alert"></p>
-        <button class="btn btn-primary" type="submit">Changer mon mot de passe</button>
+        <button class="btn btn-primary" type="submit" id="rs-submit">Valider le code</button>
+        <p class="ob-switch" id="rs-resend-row">Pas reçu ? <button class="link-btn" type="button" id="rs-resend">Renvoyer le code</button></p>
         <p class="ob-switch"><button class="link-btn" type="button" data-goto="login">Retour à la connexion</button></p>
       </form>
 
@@ -3223,9 +3452,9 @@
         <div class="radar" aria-hidden="true"></div>
         <h2 id="ob-loc-title">Activez votre <em>localisation</em></h2>
         <ul class="perks">
-          <li><span aria-hidden="true">🎯</span>Voir les commerces les plus proches de vous</li>
-          <li><span aria-hidden="true">🚶</span>Connaître la distance et le temps de marche</li>
-          <li><span aria-hidden="true">🔒</span>Votre position n'est jamais partagée</li>
+          <li>Voir les commerces les plus proches de vous</li>
+          <li>Connaître la distance et le temps de marche</li>
+          <li>Votre position n'est jamais partagée</li>
         </ul>
         <button class="btn btn-primary" type="button" id="ob-allow">Autoriser la localisation</button>
         <button class="link-btn ob-address-toggle" type="button" id="ob-address-toggle" aria-expanded="false" aria-controls="ob-address">Ou tapez une adresse à la place</button>
@@ -3256,6 +3485,7 @@
         <div class="verify-card" id="pv-result" hidden aria-live="polite"></div>
 
         <h3 class="ob-sub">Justificatifs</h3>
+        <p class="notice docs-later"><b>Pas vos documents sous la main ?</b> Continuez : vous pourrez les ajouter plus tard depuis votre espace restaurateur (onglet « Compléter »). Votre fiche n'apparaîtra sur la carte qu'une fois les justificatifs obligatoires ajoutés.</p>
         <p class="hint">PDF, JPG ou PNG · 10 Mo maximum par fichier.</p>
         <div class="docs" id="pv-docs"></div>
 
@@ -3290,6 +3520,15 @@
       <form id="form-pro-listing" class="ob-step" novalidate data-step="pro-listing" hidden aria-labelledby="pl-title">
         <h2 id="pl-title"><span data-mode="create">Votre <em>restaurant</em> sur la carte</span><span data-mode="edit">Modifier ma <em>fiche</em></span></h2>
         <p class="lead" data-mode="create">Dernière étape : présentez votre établissement. Ces informations seront visibles par tous les utilisateurs.</p>
+        <!-- Accès direct à chaque rubrique (le formulaire est long) -->
+        <nav class="pl-jump" id="pl-jump" aria-label="Aller à une rubrique de la fiche">
+          <button type="button" data-jump="field-pl-name">Infos</button>
+          <button type="button" data-jump="field-pl-photos">Photos</button>
+          <button type="button" data-jump="field-pl-menu">Carte</button>
+          <button type="button" data-jump="field-pl-address">Adresse</button>
+          <button type="button" data-jump="field-pl-hours">Horaires</button>
+          <button type="button" data-jump="field-pl-phone">Téléphone</button>
+        </nav>
 
         <label class="field" id="field-pl-name">
           <span>Nom du restaurant</span>
@@ -3310,7 +3549,8 @@
         </label>
 
         <div class="field" id="field-pl-photos">
-          <span>Photos (1 à 10 · format paysage 16:9 · la première est la photo principale)</span>
+          <span>Photos (1 à 10 · format carré)</span>
+          <p class="hint photo-hint" id="pl-photos-hint">La 1<sup>re</sup> est la photo principale, celle que les clients voient en premier. Pour changer l'ordre, maintenez une photo puis faites-la glisser, ou touchez les flèches. L'étoile la met en photo principale.</p>
           <div class="photo-grid" id="pl-photos">
             <label class="photo-add" id="pl-photo-add">
               <input type="file" id="pl-photo-input" accept="image/jpeg,image/png,image/webp" multiple hidden />
@@ -3318,6 +3558,7 @@
             </label>
           </div>
           <small class="field-error" id="err-pl-photos" aria-live="polite"></small>
+          <p class="visually-hidden" id="pl-photos-live" aria-live="polite"></p>
         </div>
 
         <div class="field" id="field-pl-menu">
@@ -3326,7 +3567,7 @@
           <div class="menu-scan" id="pl-menu-scan">
             <label class="btn btn-primary menu-scan-btn" id="pl-menu-scan-btn">
               <input type="file" id="pl-menu-scan-input" accept="image/*" multiple hidden />
-              <span aria-hidden="true">📷</span>Remplir avec une photo de ma carte
+              Remplir avec une photo de ma carte
             </label>
             <p class="hint">1 à 5 photos (une par page, bien à plat et nette). Plats, rubriques et prix sont remplis automatiquement : il ne vous reste qu'à vérifier.</p>
             <p class="menu-scan-status" id="pl-menu-scan-status" aria-live="polite" hidden></p>
@@ -3368,8 +3609,11 @@
         <p class="hint">Vos promotions (formule midi, afterwork, week-end, offre étudiante…) et vos stories se publient ensuite depuis votre espace restaurateur.</p>
 
         <p class="form-error" id="err-pro-listing" role="alert"></p>
-        <button class="btn btn-primary" type="submit"><span data-mode="create">Publier sur la carte</span><span data-mode="edit">Enregistrer les modifications</span></button>
-        <button class="btn btn-ghost" type="button" id="pl-cancel" data-mode="edit">Annuler</button>
+        <!-- Barre collée en bas de l'écran : enregistrer sans avoir à descendre tout en bas du formulaire -->
+        <div class="pl-actions">
+          <button class="btn btn-ghost" type="button" id="pl-cancel" data-mode="edit">Annuler</button>
+          <button class="btn btn-primary" type="submit"><span data-mode="create">Publier sur la carte</span><span data-mode="edit">Enregistrer</span></button>
+        </div>
         <button class="link-btn later-btn" type="button" data-pro-later data-mode="create">Terminer plus tard</button>
       </form>
 
@@ -3380,7 +3624,7 @@
   <div id="cropper" class="cropper" role="dialog" aria-modal="true" aria-labelledby="crop-title" aria-describedby="crop-hint" hidden>
     <div class="crop-panel">
       <div class="crop-head"><h2 id="crop-title">Recadrer la photo</h2><span id="crop-count"></span></div>
-      <p class="hint" id="crop-hint">Toutes les photos sont au format 16:9. Faites glisser l'image pour choisir le cadrage, zoomez avec le curseur, la molette ou en pinçant.</p>
+      <p class="hint" id="crop-hint">Toutes les photos sont au format carré. Faites glisser l'image pour choisir le cadrage. Zoomez ou dézoomez avec le curseur, la molette ou en pinçant : tout à gauche, la photo entière est gardée.</p>
       <div class="crop-frame" id="crop-frame" tabindex="0" role="img" aria-label="Aperçu du cadrage. Flèches : déplacer, + et − : zoomer.">
         <canvas id="crop-canvas"></canvas>
       </div>
@@ -3401,7 +3645,7 @@
   <div id="toast" class="toast" role="status" aria-live="polite"><span id="toast-text"></span><button id="toast-action" type="button" hidden></button></div>
   <!-- ===================== VISITEUR SANS COMPTE : créer son compte, toujours à portée de pouce ===================== -->
   <div class="guest-bar" id="guest-bar" role="region" aria-label="Créer un compte FlashMiam" hidden>
-    <button class="btn btn-primary guest-cta" type="button" id="guest-signup"><span aria-hidden="true">✨</span> <span>Créer mon compte<span class="gs-more">&nbsp;gratuit</span></span></button>
+    <button class="btn btn-primary guest-cta" type="button" id="guest-signup"><span>Créer mon compte<span class="gs-more">&nbsp;gratuit</span></span></button>
     <button class="guest-login" type="button" id="guest-login" aria-label="Se connecter">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>
       <span class="tab-lbl">Connexion</span>
@@ -3419,7 +3663,7 @@
   <!-- ===================== COOKIES (choix au premier lancement) ===================== -->
   <div id="consent" class="consent" role="dialog" aria-modal="true" aria-labelledby="cs-title" aria-describedby="cs-intro" hidden>
     <div class="cs-panel">
-      <h2 id="cs-title"><span aria-hidden="true">🍪</span> Vos choix de cookies</h2>
+      <h2 id="cs-title">Vos choix de cookies</h2>
       <p id="cs-intro">FlashMiam garde dans votre navigateur votre session et vos préférences : c'est indispensable au fonctionnement du site.
         Avec votre accord, nous utilisons aussi des <b>statistiques de fréquentation</b> et les <b>services Google</b>.
         Vous pouvez changer d'avis à tout moment (Profil › Cookies).</p>
@@ -3513,6 +3757,11 @@
      */
     demoShops: 'auto',
     demoUntil: 3,
+    /**
+     * Fiches de test montrées à TOUT le monde comme exemple (démarchage des restaurateurs) : identifiants de fiches.
+     * Toujours signalées « Exemple » (jamais « vérifié ») ; à vider avant l'ouverture au public si on ne veut plus d'exemple.
+     */
+    showcaseIds: ['7fc5e17d-cbb0-414f-a07d-a1aac01ec2ed'],
     mapStyle: 'flashmiam',
     storageKey: 'roche-street-food:v2',
     legacyStorageKey: 'roche-street-food:v1',
@@ -3670,13 +3919,13 @@
     const story = (id, h, bg, text) => ({ id: 'demo-' + id, bg, text, createdAt: new Date(at(h)).toISOString(), expiresAt: new Date(at(h) + STORY_TTL).toISOString() });
     const add = (id, stories, promos) => Object.assign(SHOPS.find((x) => x.id === id), { stories, promos });
     add('camion-napoleon',
-      [story('camion-1', 3, 'sunset', '☀️ Le préfou sort du four : venez le goûter tout chaud !'), story('camion-2', 0.6, 'forest', 'Ce midi : galette saucisse + boisson à 7,50 €')],
+      [story('camion-1', 3, 'sunset', 'Le préfou sort du four : venez le goûter tout chaud !'), story('camion-2', 0.6, 'forest', 'Ce midi : galette saucisse + boisson à 7,50 €')],
       [{ id: 'demo-p1', kind: 'day', title: 'Galette saucisse + boisson à 7,50 €', endsAt: promoAutoEnd('day').toISOString() }]);
     add('kebab-clemenceau',
-      [story('kebab-1', 2, 'ocean', '🎓 Étudiants : -15 % toute la semaine sur présentation de votre carte')],
+      [story('kebab-1', 2, 'ocean', 'Étudiants : -15 % toute la semaine sur présentation de votre carte')],
       [{ id: 'demo-p2', kind: 'student', title: '-15 % sur tout le menu', details: 'Sur présentation de la carte étudiante' }]);
     add('gaufres-marche',
-      [story('gaufres-1', 5, 'berry', 'Nouveau : la gaufre Nutella-banane 🍌')],
+      [story('gaufres-1', 5, 'berry', 'Nouveau : la gaufre Nutella-banane')],
       [{ id: 'demo-p3', kind: 'week', title: '2 gaufres = 1 chocolat chaud offert', endsAt: promoAutoEnd('week').toISOString() }]);
     SHOPS.forEach((sh) => { sh.isDemo = true; sh.mealVouchers = ['camion-napoleon', 'kebab-clemenceau', 'burger-halles'].includes(sh.id); });
   })();
@@ -3701,6 +3950,8 @@
     { key: 'ddpp', icon: '🏛️', label: 'Récépissé de déclaration DDPP (Cerfa n° 13984)', detail: 'Déclaration de manipulation de denrées animales', required: false },
     { key: 'licence', icon: '🍷', label: 'Licence de débit de boissons ou licence restaurant', detail: 'Si vous servez de l\'alcool', required: false },
   ];
+  /** Justificatifs obligatoires encore manquants. Facultatifs pour s'inscrire, ils sont nécessaires pour apparaître sur la carte. */
+  const missingDocs = (pro) => (pro && pro.merchantId ? DOC_TYPES.filter((t) => t.required && !(pro.docs || {})[t.key]) : []);
   const MAX_DOC_SIZE = 10 * 1024 * 1024;
   const MAX_PHOTOS = 10;
   const MAX_MENU_ITEMS = 80;
@@ -4161,11 +4412,12 @@
       siret, test: m.is_test, legalName: m.is_test ? 'ÉTABLISSEMENT DE TEST (fictif)' : (priv.legal_name || ''), tradeName: m.name,
       address: m.address || '', coords: m.lat != null ? [m.lng, m.lat] : null, naf: priv.naf_code || '', nafLabel: NAF_RESTAURATION[priv.naf_code] || '',
     } : null;
-    const docsOk = DOC_TYPES.every((t) => !t.required || docs[t.key]);
     const subscribed = !!(sub && sub.status !== 'canceled');
-    const status = m.status !== 'draft' ? 'published' : (!verified || !docsOk || !m.honor_at) ? 'verification' : !subscribed ? 'payment' : 'listing';
+    // Les justificatifs peuvent être ajoutés plus tard : la fiche attend alors (« awaiting_docs ») avant d'apparaître sur la carte
+    const status = m.status !== 'draft' ? 'published' : (!verified || !m.honor_at) ? 'verification' : !subscribed ? 'payment' : 'listing';
     return {
       merchantId: m.id, restaurantId: m.id, siret, company, docs, honorAt: m.honor_at, status, suspended: m.status === 'suspended',
+      awaitingDocs: m.status === 'awaiting_docs',
       verifiedAt: priv && priv.siret_verified_at,
       payment: subscribed ? { status: 'paid', mode: sub.mode, paidAt: sub.started_at } : null,
       subscription: sub ? {
@@ -4669,11 +4921,11 @@
   const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
   const formatSize = (b) => (b < 1024 * 1024 ? Math.max(1, Math.round(b / 1024)) + ' Ko' : (b / 1024 / 1024).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' Mo');
 
-  /* ---------- Photos : format unique 16:9 ---------- */
+  /* ---------- Photos : format unique carré (comme sur Instagram : rend bien en galerie et en tête de fiche) ---------- */
 
-  const PHOTO_RATIO = 16 / 9;
+  const PHOTO_RATIO = 1;
   const PHOTO_MIN_W = 640;          // largeur minimale exportée (les petites images sont agrandies)
-  const PHOTO_MAX_W = 1600;         // largeur maximale exportée (1600 × 900)
+  const PHOTO_MAX_W = 1200;         // largeur maximale exportée (1200 × 1200)
   const PHOTO_RATIO_TOLERANCE = 0.01;
 
   async function decodeImage(file) {
@@ -4683,25 +4935,47 @@
     }
   }
 
-  /** Plus grand cadre 16:9 (ou du rapport demandé) contenu dans l'image, centré. */
+  /** Plus grand cadre carré (ou du rapport demandé) contenu dans l'image, centré. */
   function fullCrop(w, h, ratio = PHOTO_RATIO) {
     const cw = w / h > ratio ? h * ratio : w;
     const ch = cw / ratio;
     return { x: (w - cw) / 2, y: (h - ch) / 2, w: cw, h: ch };
   }
 
+  /**
+   * Dessine la zone `crop` de `bitmap` sur tout le canevas (outW × outH). La zone peut déborder de l'image
+   * (photo dézoomée pour rester entière) : le vide est alors rempli par un fond flou tiré de la photo.
+   */
+  function paintCrop(ctx, bitmap, crop, outW, outH) {
+    const W = bitmap.width, H = bitmap.height;
+    const sx = outW / crop.w, sy = outH / crop.h;
+    const x0 = Math.max(0, crop.x), y0 = Math.max(0, crop.y);
+    const x1 = Math.min(W, crop.x + crop.w), y1 = Math.min(H, crop.y + crop.h);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    if (crop.x < -0.5 || crop.y < -0.5 || x1 < crop.x + crop.w - 0.5 || y1 < crop.y + crop.h - 0.5) {
+      // Fond : la photo réduite à quelques pixels puis agrandie (flou fiable sur tous les navigateurs)
+      const tiny = document.createElement('canvas');
+      tiny.width = tiny.height = 12;
+      const c = fullCrop(W, H, outW / outH);
+      tiny.getContext('2d').drawImage(bitmap, c.x, c.y, c.w, c.h, 0, 0, 12, 12);
+      ctx.drawImage(tiny, 0, 0, outW, outH);
+      ctx.fillStyle = 'rgba(0, 0, 0, .18)';
+      ctx.fillRect(0, 0, outW, outH);
+    }
+    if (x1 > x0 && y1 > y0) ctx.drawImage(bitmap, x0, y0, x1 - x0, y1 - y0, (x0 - crop.x) * sx, (y0 - crop.y) * sy, (x1 - x0) * sx, (y1 - y0) * sy);
+  }
+
   const isPhotoRatio = (w, h) => Math.abs(w / h / PHOTO_RATIO - 1) <= PHOTO_RATIO_TOLERANCE;
 
-  /** Exporte la zone `crop` (coordonnées de l'image source) en JPEG 16:9. */
+  /** Exporte la zone `crop` (coordonnées de l'image source) en JPEG carré. */
   function exportCrop(bitmap, crop) {
     const outW = Math.round(Math.min(PHOTO_MAX_W, Math.max(PHOTO_MIN_W, crop.w)));
     const outH = Math.round(outW / PHOTO_RATIO);
     const canvas = document.createElement('canvas');
     canvas.width = outW;
     canvas.height = outH;
-    const ctx = canvas.getContext('2d');
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(bitmap, crop.x, crop.y, crop.w, crop.h, 0, 0, outW, outH);
+    paintCrop(canvas.getContext('2d'), bitmap, crop, outW, outH);
     return encodePhoto(canvas);
   }
   /**
@@ -5367,27 +5641,21 @@
 
   /* =====================================================================
      5. MODE JOUR / NUIT
-     Par défaut : réglage du système. Un choix manuel est mémorisé.
+     Par défaut : mode jour, quel que soit le réglage du téléphone. Le choix du mode nuit est mémorisé.
      ===================================================================== */
 
   function currentTheme() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
-  function readThemeChoice() {
-    try { const t = localStorage.getItem(CONFIG.themeKey); return t === 'light' || t === 'dark' ? t : null; } catch (e) { return null; }
-  }
 
   function setTheme(theme, { persist = false } = {}) {
     document.documentElement.setAttribute('data-theme', theme);
     $('meta-theme').setAttribute('content', palette(theme).background);
     $('theme-btn').setAttribute('aria-label', theme === 'dark' ? 'Passer en mode jour' : 'Passer en mode nuit');
     if (persist) { try { localStorage.setItem(CONFIG.themeKey, theme); } catch (e) { /* ignore */ } }
-    $('profile-theme').textContent = (theme === 'dark' ? 'Mode nuit' : 'Mode jour') + (readThemeChoice() ? '' : ' (automatique)');
+    $('profile-theme').textContent = theme === 'dark' ? 'Mode nuit' : 'Mode jour';
     whenMapReady(() => view.setTheme(theme));
   }
 
   $('theme-btn').addEventListener('click', () => setTheme(currentTheme() === 'dark' ? 'light' : 'dark', { persist: true }));
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    if (!readThemeChoice()) setTheme(e.matches ? 'dark' : 'light');
-  });
 
   /* =====================================================================
      6. MISE EN PAGE TÉLÉPHONE / ORDINATEUR
@@ -5406,7 +5674,8 @@
     (desktop ? $('sb-stories-slot') : $('stories')).appendChild($('stories-track'));
     if (desktop) { $('sb-brand-slot').append($('offers-btn'), $('notif-btn')); $('guest-bar').append($('guest-signup'), $('guest-login')); }
     else $('tabbar').append($('offers-btn'), $('notif-btn'), $('profile-btn'), $('guest-signup'), $('guest-login'));
-    if (desktop) $('sb-budget-slot').appendChild($('budget')); else $('search-panel').insertBefore($('budget'), $('search-results'));
+    if (desktop) $('sb-budget-slot').append($('budget'), $('radius'), $('radius-custom'));
+    else $('search-results').before($('budget'), $('radius'), $('radius-custom'));
     whenMapReady(() => view.setPadding(selectedId ? shopPadding() : basePadding()));
   }
   desktopMQ.addEventListener('change', applyLayout);
@@ -5423,7 +5692,9 @@
      ===================================================================== */
 
   const markers = new Map();          // id → { shop, marker, el, status }
-  const filters = { category: 'all', openOnly: false, promoOnly: false, ratedOnly: false, when: '', mvOnly: false, query: '', q: [], max: null };
+  const filters = { category: 'all', openOnly: false, promoOnly: false, ratedOnly: false, query: '', q: [], max: null, radius: null, when: '', mvOnly: false };
+  /** Distance maximale choisie (mètres, null = partout) : sans position connue, le filtre ne retire rien. */
+  const withinRadius = (m) => filters.radius === null || !here() || distance(here(), m.shop.coords) <= filters.radius;
   let selectedId = null;
 
   function createShopMarker(shop) {
@@ -5453,10 +5724,11 @@
    * tant qu'il y a moins de CONFIG.demoUntil vrais restaurants. Les fiches de test (SIRET de test) ne sont visibles que
    * de leur propriétaire, ou en mode démonstration (?demo=1) : jamais présentées au public comme de vrais restaurants.
    */
+  const isShowcase = (r) => !!r && (CONFIG.showcaseIds || []).includes(r.id);
   function allShops() {
     const mode = DEMO_PARAM || CONFIG.demoShops;
     const me = currentUser();
-    const real = Object.values(restaurants()).filter((r) => r.published && (!r.isTest || mode === 'on' || (me && r.ownerId === me.id)));
+    const real = Object.values(restaurants()).filter((r) => r.published && (!r.isTest || isShowcase(r) || mode === 'on' || (me && r.ownerId === me.id)));
     const showDemo = mode === 'on' || (mode !== 'off' && real.filter((r) => !r.isTest).length < CONFIG.demoUntil);
     return [...(showDemo ? SHOPS : []), ...real.map(restaurantToShop)];
   }
@@ -5535,7 +5807,7 @@
     (!filters.openOnly || m.status.open) &&
     (!filters.promoOnly || activePromos(m.shop).length > 0) &&
     (!filters.ratedOnly || !!(m.shop.rating && m.shop.rating.avg >= 4)) &&
-    Search.shopMatches(m.shop, filters.q, filters.max);
+    withinRadius(m) && Search.shopMatches(m.shop, filters.q, filters.max);
 
   function applyFilters() {
     markers.forEach((m) => {
@@ -5563,7 +5835,7 @@
 
     const searching = filters.q.length > 0 || filters.max !== null;
     const signature = items.map(({ m, d }) => m.shop.id + m.status.label + (d === null ? '' : formatDistance(d)) + activePromos(m.shop).length + JSON.stringify(m.shop.rating)).join('|')
-      + selectedId + '|' + filters.q.join(' ') + '|' + filters.max + '|' + Guest.key();
+      + selectedId + '|' + filters.q.join(' ') + '|' + filters.max + '|' + filters.radius + '|' + Guest.key();
     if (signature === listSignature) return;
     listSignature = signature;
 
@@ -5597,10 +5869,10 @@
       const promos = activePromos(shop);
       const best = promos.find((p) => Guest.canSee(p, shop)) || promos[0];
       const promoEl = btn.querySelector('.si-promo');
-      if (best && !Guest.canSee(best, shop)) { promoEl.textContent = '🔒 Offre réservée aux membres'; promoEl.classList.add('is-locked'); }   // visiteur
+      if (best && !Guest.canSee(best, shop)) { promoEl.textContent = 'Offre réservée aux membres'; promoEl.classList.add('is-locked'); }   // visiteur
       else promoEl.textContent = best ? promoLine(best) : (shop.description || '').slice(0, 90);
       if (shop.isPro && !shop.isTest) { const v = document.createElement('span'); v.className = 'verified'; v.textContent = '✓'; v.title = 'Établissement vérifié'; btn.querySelector('strong').after(v); }
-      if (shop.isDemo) btn.querySelector('strong').after(demoTag());
+      if (shop.isDemo || isShowcase(shop)) btn.querySelector('strong').after(demoTag());
       // Recherche : plats trouvés dans la carte du restaurant
       const hits = searching ? Search.dishesOf(shop, filters.q, filters.max) : [];
       if (hits.length) {
@@ -5724,12 +5996,14 @@
     /** Résultats pour le panneau de recherche (téléphone). */
     function run(query, max = null) {
       const q = parse(query);
-      const all = [...markers.values()];
+      const all = [...markers.values()].filter(withinRadius);
       const d = (m) => (here() ? distance(here(), m.shop.coords) : Infinity);
       const dishes = [];
       if (q.length || max !== null) all.forEach((m) => dishesOf(m.shop, q, max).forEach((hit) => dishes.push({ ...hit, m })));
       dishes.sort((a, b) => b.score - a.score || (b.m.status.open - a.m.status.open) || (d(a.m) - d(b.m)) || a.item.price - b.item.price);
-      const shops = !q.length ? [] : all.filter((m) => { const sw = shopWords(m.shop); return q.every((w) => has(sw, w)) && (max === null || dishesOf(m.shop, [], max).length); });
+      // Distance choisie sans mot tapé : tous les restaurants à cette distance
+      const shops = !q.length ? (filters.radius !== null && max === null ? all : [])
+        : all.filter((m) => { const sw = shopWords(m.shop); return q.every((w) => has(sw, w)) && (max === null || dishesOf(m.shop, [], max).length); });
       shops.sort((a, b) => (b.status.open - a.status.open) || (d(a) - d(b)) || a.shop.name.localeCompare(b.shop.name));
       return { q, dishes, shops };
     }
@@ -5798,7 +6072,7 @@
     const title = (text) => { const h = document.createElement('h3'); h.className = 'sr-title'; h.textContent = text; box.appendChild(h); };
     const status = (m) => statusTag(m.status);
     const dist = (m) => (here() ? ' · ' + formatDistance(distance(here(), m.shop.coords)) : '');
-    if (!res.q.length && max === null) {
+    if (!res.q.length && max === null && filters.radius === null) {
       title('Idées');
       const ideas = document.createElement('div');
       ideas.className = 'sr-ideas';
@@ -5820,8 +6094,10 @@
       const p = document.createElement('div');
       p.className = 'sr-empty';
       p.innerHTML = '<b></b><span></span>';
-      p.querySelector('b').textContent = res.q.length ? 'Aucun résultat pour « ' + query.trim() + ' »' : 'Aucun plat dans ce budget';
-      p.querySelector('span').textContent = res.q.length ? 'Essayez un autre mot (« burger », « kebab »…) ou un budget plus large.' : 'Essayez un budget plus large.';
+      const near = filters.radius !== null ? ' à moins de ' + formatDistance(filters.radius) : '';
+      p.querySelector('b').textContent = (res.q.length ? 'Aucun résultat pour « ' + query.trim() + ' »' : max !== null ? 'Aucun plat dans ce budget' : 'Aucun restaurant') + near;
+      p.querySelector('span').textContent = (res.q.length ? 'Essayez un autre mot (« burger », « kebab »…)' : 'Essayez')
+        + (max !== null ? ' un budget plus large' : '') + (near ? (max !== null ? ' ou' : '') + ' une distance plus grande.' : '.');
       box.appendChild(p);
       $('search-live').textContent = 'Aucun résultat';
       return;
@@ -5864,7 +6140,7 @@
         b.innerHTML = '<span class="sr-emoji" aria-hidden="true"></span><span class="sr-body"><b></b><small></small></span>';
         b.querySelector('.sr-emoji').textContent = catOf(m.shop).emoji;
         Search.highlight(b.querySelector('b'), m.shop.name, res.q);
-        if (m.shop.isDemo) b.querySelector('b').after(demoTag());
+        if (m.shop.isDemo || isShowcase(m.shop)) b.querySelector('b').after(demoTag());
         const small = b.querySelector('small');
         small.append(status(m));
         if (m.shop.rating) { const r = document.createElement('span'); r.className = 'sr-rating'; r.textContent = ' · ★ ' + formatRating(m.shop.rating.avg); small.append(r); }
@@ -5894,6 +6170,43 @@
     else { Search.mobile.max = max; Search.mobile.limit = 30; renderSearchPanel(); }
   });
 
+  /* Distance : boutons (500 m à 5 km) ou curseur « Autre… » ; la position est demandée si elle manque */
+  function setRadius(r) {
+    filters.radius = r;
+    const preset = [...document.querySelectorAll('#radius .chip')].find((c) => c.dataset.r !== 'custom' && (c.dataset.r ? Number(c.dataset.r) : null) === r);
+    document.querySelectorAll('#radius .chip').forEach((c) => c.setAttribute('aria-pressed', String(preset ? c === preset : c.dataset.r === 'custom')));
+    const custom = document.querySelector('#radius [data-r="custom"]');
+    custom.textContent = preset || r === null ? 'Autre…' : 'Autre : ' + formatDistance(r);
+    applyFilters();
+    if (!$('search-panel').hidden) { Search.mobile.limit = 30; renderSearchPanel(); }
+  }
+  async function needPosition() {
+    if (Geo.position) return true;
+    const result = await requestLocation({ fromButton: true });
+    if (result === 'granted') return true;
+    toast('Activez la localisation pour trier par distance.');
+    return false;
+  }
+  $('radius').addEventListener('click', async (ev) => {
+    const chip = ev.target.closest('.chip');
+    if (!chip) return;
+    if (chip.dataset.r === 'custom') {
+      const box = $('radius-custom'), open = box.hidden;
+      box.hidden = !open;
+      chip.setAttribute('aria-expanded', String(open));
+      if (open && await needPosition()) setRadius(Number($('radius-range').value));
+      return;
+    }
+    const r = chip.dataset.r ? Number(chip.dataset.r) : null;
+    $('radius-custom').hidden = true;
+    document.querySelector('#radius [data-r="custom"]').setAttribute('aria-expanded', 'false');
+    if (r !== null && !(await needPosition())) return;
+    setRadius(r);
+  });
+  const radiusLabel = () => { $('radius-out').textContent = formatDistance(Number($('radius-range').value)); };
+  $('radius-range').addEventListener('input', () => { radiusLabel(); if (Geo.position) setRadius(Number($('radius-range').value)); });
+  radiusLabel();
+
   /* ---------- Avis : note sur 5, commentaire, réponse du restaurateur ---------- */
   // Colonnes lisibles des avis : l'identifiant du compte de l'auteur n'est jamais transmis (avis non reliables entre eux)
   const REVIEW_COLS = 'id, merchant_id, rating, comment, author_name, created_at, updated_at, reply, replied_at, reported_at';
@@ -5912,7 +6225,7 @@
     }
     const mineIn = (list, id) => (list && myReviewIds && myReviewIds[id] ? list.find((r) => r.id === myReviewIds[id]) || null : null);
     const starText = (n) => '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
-    const canReview = (shop, me = currentUser()) => !!(shop.isPro && me && me.role === 'client' && !isOwnShop(shop.id, me));
+    const canReview = (shop, me = currentUser()) => !!(shop.isPro && me && (me.role === 'client' || previewAsClient) && !isOwnShop(shop.id, me));
     const ownShop = (shop) => !!(shop.isPro && isOwnShop(shop.id));
 
     async function load(id) {
@@ -6236,7 +6549,7 @@
     }
     function sync() {
       const a = activePlace = active();
-      $('place-chip-lbl').textContent = a ? a.icon + ' ' + a.label : '📍 Ma position';
+      $('place-chip-lbl').textContent = a ? a.label : 'Ma position';
       $('place-chip').classList.toggle('is-place', !!a);
       $('place-chip').setAttribute('aria-label', 'Distances depuis : ' + (a ? a.label : 'ma position') + ' (changer)');
       const n = ['work', 'school'].filter((k) => data[k]).length;
@@ -6396,7 +6709,7 @@
         const until = promoUntil(p);
         small.textContent = [PROMO_KINDS[p.kind].label, p.details, until].filter(Boolean).join(' · ');
         b.querySelector('.offer-shop').append(catOf(m.shop).emoji + ' ' + m.shop.name + ' · ', statusTag(m.status));
-        if (m.shop.isDemo) b.querySelector('.offer-shop').append(' ', demoTag());
+        if (m.shop.isDemo || isShowcase(m.shop)) b.querySelector('.offer-shop').append(' ', demoTag());
         const dist = b.querySelector('.offer-dist');
         if (located) {
           dist.append(formatDistance(d));
@@ -6904,17 +7217,31 @@
         : box.checked ? (Push.active() ? 'Activées : vous êtes prévenu même quand FlashMiam est fermé.' : 'Activées : vous êtes prévenu quand FlashMiam est ouvert en arrière-plan.')
         : 'Recevez une alerte de votre téléphone ou de votre ordinateur à chaque nouvelle notification.';
     }
-    $('np-device').addEventListener('change', async (ev) => {
-      if (!ev.target.checked) { setWanted(false); await Push.unsubscribe(); renderPref(); toast('Alertes désactivées sur cet appareil.'); return; }
+    /** Active les alertes de l'appareil (à appeler pendant un toucher : la fenêtre d'autorisation l'exige). */
+    async function enable() {
       let perm = Notification.permission;
       if (perm === 'default') { try { perm = await Notification.requestPermission(); } catch (e) { perm = 'denied'; } }
-      if (perm !== 'granted') { setWanted(false); renderPref(); toast('Alertes refusées par le navigateur.'); return; }
+      if (perm !== 'granted') { setWanted(false); renderPref(); toast('Alertes refusées par le navigateur.'); return false; }
       setWanted(true);
       await register();
       await Push.subscribe();
       renderPref();
       toast('Alertes activées sur cet appareil.');
+      return true;
+    }
+    $('np-device').addEventListener('change', async (ev) => {
+      if (!ev.target.checked) { setWanted(false); await Push.unsubscribe(); renderPref(); toast('Alertes désactivées sur cet appareil.'); return; }
+      await enable();
     });
+    /**
+     * Que proposer après « Suivre » : 'on' (déjà activées), 'ask' (demande possible), 'install' (iPhone hors de l'icône :
+     * Apple n'autorise les alertes que dans l'app de l'écran d'accueil), 'no' (refusées ou navigateur incompatible).
+     */
+    function offer() {
+      if (!supported) return isIOS && !standalone ? 'install' : 'no';
+      if (Notification.permission === 'denied') return 'no';
+      return Notification.permission === 'granted' && wanted() ? 'on' : 'ask';
+    }
     /** Au démarrage : service de notifications de l'appareil (clic sur une alerte → la fiche s'ouvre). */
     async function sync() {
       if (!supported) return;
@@ -6936,7 +7263,7 @@
     }
     /** Alertes de l'appareil demandées, sans abonnement « push » : la page doit continuer à relever les notifications en arrière-plan. */
     const background = () => supported && wanted() && Notification.permission === 'granted' && !Push.active();
-    return { supported, register, renderPref, sync, alert, background };
+    return { supported, register, renderPref, sync, alert, background, enable, offer };
   })();
 
   /* ---------- Notifications « push » : alertes même quand FlashMiam est fermé (fonction serveur send-push) ---------- */
@@ -7066,8 +7393,8 @@
     // Restaurants inscrits : badge « vérifié », description, photos, téléphone ; l'offre est facultative
     $('shop-verified').hidden = !shop.isPro && !shop.isDemo;
     $('shop-verified').classList.toggle('is-test', !!(shop.isTest || shop.isDemo));
-    $('shop-verified').textContent = shop.isDemo ? 'Exemple fictif' : shop.isTest ? 'Fiche de test' : '✓ Établissement vérifié';
-    $('shop-verified').title = shop.isDemo ? 'Restaurant imaginaire, pour découvrir FlashMiam' : shop.isTest ? 'Créée avec le SIRET de test : établissement fictif' : 'SIRET vérifié auprès du répertoire Sirene';
+    $('shop-verified').textContent = shop.isDemo ? 'Exemple fictif' : isShowcase(shop) ? 'Fiche d\'exemple' : shop.isTest ? 'Fiche de test' : '✓ Établissement vérifié';
+    $('shop-verified').title = shop.isDemo ? 'Restaurant imaginaire, pour découvrir FlashMiam' : isShowcase(shop) ? 'Exemple de fiche FlashMiam, pour découvrir ce que voient les clients' : shop.isTest ? 'Créée avec le SIRET de test : établissement fictif' : 'SIRET vérifié auprès du répertoire Sirene';
     $('shop-demo-note').hidden = !shop.isDemo;
     $('shop-desc').hidden = !shop.description;
     $('shop-desc').textContent = shop.description || '';
@@ -7092,7 +7419,7 @@
     const dist = $('shop-distance');
     if (here()) {
       const d = distance(here(), shop.coords);
-      dist.innerHTML = '<b></b> · environ <b></b> à pied<span class="travel">🚗 environ <b></b> en voiture</span>';
+      dist.innerHTML = '<b></b> · environ <b></b> à pied<span class="travel">environ <b></b> en voiture</span>';
       const [km, walk, car] = dist.querySelectorAll('b');
       km.textContent = formatDistance(d);
       walk.textContent = formatMinutes(walkMinutes(d));
@@ -7256,7 +7583,10 @@
   })();
 
   /* ---------- Abonnements (« Suivre » un restaurant) ---------- */
+  /** Aperçu client : le restaurateur voit sa fiche comme un client (ni « ma fiche », ni statistiques comptées). */
+  let previewAsClient = false;
   function isOwnShop(shopId, account = currentUser()) {
+    if (previewAsClient) return false;
     const r = restaurants()[shopId];
     return !!(r && account && r.ownerId === account.id);
   }
@@ -7296,7 +7626,14 @@
     if (error) { toast(cloudError(error)); return; }
     me.follows = { ...(me.follows || {}) };
     if (following) { delete me.follows[id]; toast('Vous ne suivez plus ' + name + '.'); }
-    else { me.follows[id] = new Date().toISOString(); toast('Vous suivez ' + name + ' : ses offres apparaîtront dans votre profil.'); }
+    else {
+      me.follows[id] = new Date().toISOString();
+      // Alertes pas encore activées sur cet appareil : on les propose maintenant, au moment où elles ont un sens
+      const offer = Device.offer();
+      if (offer === 'ask') toast('Vous suivez ' + name + '. Être prévenu de ses promos sur cet appareil ?', { label: 'Activer', run: () => Device.enable() });
+      else if (offer === 'install') toast('Vous suivez ' + name + '. Pour être prévenu de ses promos, ajoutez FlashMiam à l\'écran d\'accueil.', { label: 'Voir le tuto', run: () => Install.open() });
+      else toast('Vous suivez ' + name + ' : ses offres apparaîtront dans votre profil.');
+    }
     cloud.followerCounts.set(id, Math.max(0, (cloud.followerCounts.get(id) || 0) + (following ? -1 : 1)));
     if (selectedId === id) renderFollow(markers.get(id).shop);
     fetchFollowerCount(id);
@@ -7309,7 +7646,7 @@
     /** Évènement sur une fiche inscrite (la base ignore les visites du restaurateur sur sa propre fiche,
      *  ne compte que les personnes connectées, et au plus 50 actions par personne, fiche et jour). */
     function track(shopId, event, { ref = null, source = null } = {}) {
-      if (!Consent.has('stats') || !currentUser() || !restaurants()[shopId] || !EVENTS[event]) return;   // statistiques refusées : rien n'est envoyé
+      if (previewAsClient || !Consent.has('stats') || !currentUser() || !restaurants()[shopId] || !EVENTS[event]) return;   // statistiques refusées : rien n'est envoyé
       sb.rpc('track_visit', { p_merchant_id: shopId, p_event: EVENTS[event], p_ref: ref && UUID_RE.test(ref) ? ref : null, p_source: source })
         .then(() => {}, () => {});
     }
@@ -7415,7 +7752,7 @@
     if (shop.promo) list.push({ id: 'offre', kind: /[ée]tudiant/i.test(shop.promo) ? 'student' : 'other', title: shop.promo });
     return list.sort((a, b) => PROMO_ORDER.indexOf(a.kind) - PROMO_ORDER.indexOf(b.kind));
   }
-  const promoLine = (p) => PROMO_KINDS[p.kind].icon + ' ' + p.title;
+  const promoLine = (p) => p.title;
   /** « Jusqu'à ce soir », « Jusqu'à dimanche soir », « Jusqu'au 12 novembre » */
   function promoUntil(p, now = new Date()) {
     if (!p.endsAt) return '';
@@ -7570,7 +7907,8 @@
       g.stories.forEach((_, i) => { const b = document.createElement('span'); b.innerHTML = '<i></i>'; if (i < si) b.firstChild.style.width = '100%'; bars.appendChild(b); });
       $('sv-avatar').textContent = catOf(g.shop).emoji;
       $('sv-name').textContent = g.shop.name;
-      if (g.shop.isDemo) $('sv-name').append(' ', demoTag());
+      if (g.shop.isDemo || isShowcase(g.shop)) $('sv-name').append(' ', demoTag());
+      $('sv-profile').setAttribute('aria-label', 'Voir la page de ' + g.shop.name);
       paintTime();
       $('sv-caption').textContent = st.imageUrl ? (st.text || '') : '';
       const away = distanceLabel(g.shop);
@@ -7605,7 +7943,7 @@
       const g = groups[gi], st = current();
       if (!g || !st) return;
       const away = distanceLabel(g.shop);
-      $('sv-time').textContent = timeAgo(st.createdAt) + (away ? ' · 📍 ' + away : '');
+      $('sv-time').textContent = timeAgo(st.createdAt) + (away ? ' · ' + away : '');
       const status = getStatus(g.shop);
       const el = $('sv-status');
       el.className = 'sv-status ' + (status.soon ? 'is-soon' : status.open ? 'is-open' : 'is-closed');
@@ -7641,12 +7979,15 @@
     }
     $('sv-close').addEventListener('click', close);
     $('sv-pause').addEventListener('click', () => setPaused(!paused));
-    $('sv-cta').addEventListener('click', () => {
+    /** Ouvre la page du restaurant de la story en cours (bouton du bas, photo de profil ou nom en haut). */
+    function openCurrentShop() {
       const id = groups[gi].shop.id, st = current();
       if (st && !isOwnShop(id)) Stats.track(id, 'story_cta', { ref: st.id });
       close();
       whenMapReady(() => openShop(id, { source: 'story' }));
-    });
+    }
+    $('sv-cta').addEventListener('click', openCurrentShop);
+    $('sv-profile').addEventListener('click', openCurrentShop);
     // Appui court : story suivante / précédente ; appui long : pause ; glisser vers le bas : fermer
     ['sv-prev', 'sv-next'].forEach((id) => {
       const el = $(id);
@@ -7668,7 +8009,7 @@
       else if (ev.key === 'ArrowRight') { ev.preventDefault(); next(); }
       else if (ev.key === 'ArrowLeft') { ev.preventDefault(); prev(); }
       else if (ev.key === 'Tab') {               // le focus reste dans la visionneuse
-        const items = ['sv-close', 'sv-pause', 'sv-cta'].map($);
+        const items = ['sv-profile', 'sv-close', 'sv-pause', 'sv-cta'].map($);
         const at = items.indexOf(document.activeElement);
         ev.preventDefault();
         items[(at + (ev.shiftKey ? items.length - 1 : 1)) % items.length].focus();
@@ -7811,7 +8152,7 @@
       const left = Math.max(1, Math.round((new Date(st.expiresAt) - Date.now()) / 3600e3));
       li.querySelector('small').textContent = 'encore ' + left + ' h\npubliée ' + timeAgo(st.createdAt);
       const stat = ProSpace.storyStats(st.id);
-      if (stat) { const n = document.createElement('small'); n.className = 'sa-stats'; n.textContent = '👁 ' + stat.views + ' · ♥ ' + stat.likes; n.setAttribute('aria-label', plural(stat.views, 'vue', 'vues') + ', ' + plural(stat.likes, 'j\'aime', 'j\'aime')); li.appendChild(n); }
+      if (stat) { const n = document.createElement('small'); n.className = 'sa-stats'; n.textContent = plural(stat.views, 'vue', 'vues') + ' · ♥ ' + stat.likes; n.setAttribute('aria-label', plural(stat.views, 'vue', 'vues') + ', ' + plural(stat.likes, 'j\'aime', 'j\'aime')); li.appendChild(n); }
       li.querySelector('.sa-del').setAttribute('aria-label', 'Supprimer la story publiée ' + timeAgo(st.createdAt));
       li.querySelector('.sa-del').addEventListener('click', async () => {
         if (!window.confirm('Supprimer cette story ?')) return;
@@ -7879,7 +8220,7 @@
       li.querySelector('strong').textContent = p.title;
       const until = promoUntil(p);
       const stat = ProSpace.promoStats(p.id);
-      li.querySelector('small').textContent = PROMO_KINDS[p.kind].label + (until ? ' · ' + until : ' · sans date de fin') + (p.details ? ' · ' + p.details : '') + (stat ? ' · 👆 ' + plural(stat.clicks, 'clic', 'clics') : '');
+      li.querySelector('small').textContent = PROMO_KINDS[p.kind].label + (until ? ' · ' + until : ' · sans date de fin') + (p.details ? ' · ' + p.details : '') + (stat ? ' · ' + plural(stat.clicks, 'clic', 'clics') : '');
       li.querySelector('button').setAttribute('aria-label', 'Retirer la promotion « ' + p.title + ' »');
       li.querySelector('button').addEventListener('click', async () => {
         const { error } = await sb.from('promotions').delete().eq('id', p.id);
@@ -8068,7 +8409,7 @@
     Geo.accuracy = pos.coords.accuracy;
     whenMapReady(drawUserLocation);
     setLocateState('active');
-    renderList();
+    if (filters.radius !== null) applyFilters(); else renderList();
     Offers.refresh();
     StoryViewer.refreshDistance();
 
@@ -8325,7 +8666,7 @@
       SiteStats.track('installed');
       markDone();
       closePanel($('install-sheet'));
-      toast('FlashMiam est sur votre écran d\'accueil 🎉');
+      toast('FlashMiam est sur votre écran d\'accueil.');
     });
     $('install-go').addEventListener('click', go);
     $('install-done').addEventListener('click', () => {
@@ -8405,10 +8746,8 @@
   function setAuthRole(role) {
     authRole = role === 'pro' ? 'pro' : 'client';
     $('onboarding').dataset.role = authRole;
-    document.querySelectorAll('#role-switch [data-role]').forEach((b) => {
-      b.setAttribute('aria-checked', String(b.dataset.role === authRole));
-      b.tabIndex = b.dataset.role === authRole ? 0 : -1;
-    });
+    $('role-pro').checked = authRole === 'pro';
+    syncRoleHint();
     $('err-signup').textContent = ''; $('err-login').textContent = '';
     if (currentStep === 'signup' || currentStep === 'login') updateProgress(currentStep, 'create');
     if (currentStep === 'signup') {
@@ -8416,12 +8755,19 @@
       if (authRole === 'client') Join.syncChrome();
     }
   }
-  $('role-switch').addEventListener('click', (ev) => { const b = ev.target.closest('[data-role]'); if (b) setAuthRole(b.dataset.role); });
-  $('role-switch').addEventListener('keydown', (ev) => {
-    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(ev.key)) return;
-    ev.preventDefault();
-    setAuthRole(authRole === 'pro' ? 'client' : 'pro');
-    $('role-switch').querySelector('[aria-checked="true"]').focus();
+  /** Sous-titre de la case : ce qu'elle ouvre, selon l'écran (création de compte ou connexion). */
+  function syncRoleHint() {
+    $('role-pro-hint').textContent = currentStep === 'login'
+      ? (authRole === 'pro' ? 'Connexion à l\'espace de votre établissement' : 'Accédez à l\'espace de votre établissement')
+      : (authRole === 'pro' ? 'Décochez pour créer un compte client' : 'Inscrivez votre établissement sur la carte');
+  }
+  $('role-pro').addEventListener('change', (ev) => {
+    setAuthRole(ev.target.checked ? 'pro' : 'client');
+    if (currentStep === 'signup' || currentStep === 'login') {
+      $('onboarding').scrollTop = 0;
+      const first = currentStep === 'login' ? $('li-email') : authRole === 'pro' ? $('su-name') : null;
+      if (first && !matchMedia('(pointer: coarse)').matches) first.focus({ preventScroll: true });
+    }
   });
 
   const PRO_STEP_INDEX = { 'pro-verify': 2, 'pro-payment': 3, 'pro-listing': 4 };
@@ -8456,6 +8802,7 @@
     // « about » : questions sexe et âge seules (compte Google tout neuf, modification depuis le profil)
     document.querySelectorAll('#onboarding .ob-step').forEach((el) => { el.hidden = step === 'about' ? el.id !== 'form-join' : el.dataset.step !== step; });
     $('role-switch').hidden = !(step === 'signup' || step === 'login');
+    syncRoleHint();
     updateProgress(step, mode);
     ob.setAttribute('aria-labelledby', STEP_TITLES[step]);
     ob.scrollTop = 0;
@@ -8568,10 +8915,10 @@
   });
   $('ec-code').addEventListener('input', () => {
     const input = $('ec-code');
-    const digits = onlyDigits(input.value).slice(0, 6);
+    const digits = onlyDigits(input.value).slice(0, 8);
     if (digits !== input.value) input.value = digits;
     $('err-email-code').textContent = '';
-    if (digits.length === 6) $('ob-email-code').requestSubmit();   // validation automatique au 6e chiffre
+    if (digits.length === 8) $('ob-email-code').requestSubmit();   // validation automatique au 8e chiffre (code de 6 : bouton)
   });
 
   let verifying = false;
@@ -8580,7 +8927,7 @@
     const check = emailCheck;
     if (!check || verifying) return;
     const code = onlyDigits($('ec-code').value);
-    if (code.length !== 6) { setFieldError('ec-code', 'Saisissez les 6 chiffres reçus par e-mail.'); return; }
+    if (code.length < 6 || code.length > 8) { setFieldError('ec-code', 'Saisissez le code reçu par e-mail (6 à 8 chiffres).'); return; }
     verifying = true;
     let { data, error } = await Loader.run(sb.auth.verifyOtp({ email: check.email, token: code, type: 'email' }), 'Vérification du code…');
     if (error) ({ data, error } = await sb.auth.verifyOtp({ email: check.email, token: code, type: 'signup' }));
@@ -8738,7 +9085,7 @@
       if (focus) { const el = $(focusId()); if (el) el.focus({ preventScroll: true }); }
     }
 
-    /** Sélecteur client/restaurateur visible seulement sur l'écran d'accueil ; titre du dialogue = question affichée. */
+    /** Case « Je suis restaurateur » visible seulement sur l'écran d'accueil ; titre du dialogue = question affichée. */
     function syncChrome() {
       if (currentStep !== 'signup' && currentStep !== 'about') return;
       if (currentStep === 'signup') $('role-switch').hidden = authRole === 'client' && current() !== 'hello';
@@ -9046,7 +9393,7 @@
       cloud.user = null;
       showAuthStep('login');
       $('err-login').innerHTML = (user.role === 'pro' ? 'Ce compte est un compte restaurateur.' : 'Ce compte est un compte client.') +
-        ' <button class="link-btn" type="button" id="switch-role">Passer en mode ' + (user.role === 'pro' ? 'Restaurateur' : 'Client') + '</button>';
+        ' <button class="link-btn" type="button" id="switch-role">' + (user.role === 'pro' ? 'Me connecter en tant que restaurateur' : 'Me connecter en tant que client') + '</button>';
       $('switch-role').addEventListener('click', () => { setAuthRole(user.role); $('form-login').requestSubmit(); });
       return;
     }
@@ -9196,43 +9543,84 @@
   }
 
   /* ---------- Mot de passe oublié : code par e-mail, puis nouveau mot de passe ---------- */
-  let resetEmail = null, resetByLink = false;
+  let resetEmail = null, resetByLink = false, resetPhase = 'code';
+  /** Étape affichée : « code » (saisie du code reçu) ou « password » (nouveau mot de passe + confirmation). */
+  function setResetPhase(phase) {
+    resetPhase = phase;
+    $('rs-phase-code').hidden = phase !== 'code';
+    $('rs-phase-password').hidden = phase !== 'password';
+    $('rs-resend-row').hidden = phase !== 'code';
+    $('rs-title').innerHTML = phase === 'code' ? 'Mot de passe <em>oublié</em>' : 'Nouveau <em>mot de passe</em>';
+    $('rs-submit').textContent = phase === 'code' ? 'Valider le code' : 'Changer mon mot de passe';
+    $('err-reset').textContent = '';
+    setTimeout(() => { const f = $(phase === 'code' ? 'rs-code' : 'rs-password'); if (f && !f.closest('[hidden]')) f.focus(); }, 60);
+  }
   function showReset(email, { byLink = false } = {}) {
     resetEmail = email; resetByLink = byLink;
     $('rs-email').textContent = email || '';
-    $('rs-lead').hidden = byLink;
-    $('field-rs-code').hidden = byLink;
-    $('rs-code').value = ''; $('rs-password').value = '';
-    ['rs-code', 'rs-password'].forEach((f) => setFieldError(f, ''));
-    $('err-reset').textContent = '';
+    $('rs-code').value = ''; $('rs-password').value = ''; $('rs-password2').value = '';
+    ['rs-code', 'rs-password', 'rs-password2'].forEach((f) => setFieldError(f, ''));
+    renderResetPassword();
     showAuthStep('reset-password');
+    setResetPhase(byLink ? 'password' : 'code');   // lien de l'e-mail : déjà vérifié, directement le mot de passe
+  }
+  async function sendResetCode(email) {
+    const captchaToken = await Captcha.token().catch(() => null);
+    if (captchaToken === null) return { error: { message: Captcha.failMessage, captcha: true } };
+    return Loader.run(sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname, captchaToken }), 'Envoi du code…');
   }
   $('forgot-btn').addEventListener('click', async () => {
     const email = $('li-email').value.trim().toLowerCase();
     if (!EMAIL_RE.test(email)) { setFieldError('li-email', 'Saisissez d\'abord l\'adresse e-mail de votre compte.'); $('li-email').focus(); return; }
-    const captchaToken = await Captcha.token().catch(() => null);
-    if (captchaToken === null) { $('err-login').textContent = Captcha.failMessage; return; }
-    const { error } = await Loader.run(sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname, captchaToken }), 'Envoi du code…');
-    if (error) { $('err-login').textContent = captchaRefused(error) ? Captcha.failMessage : cloudError(error); return; }
+    const { error } = await sendResetCode(email);
+    if (error) { $('err-login').textContent = error.captcha || captchaRefused(error) ? Captcha.failMessage : cloudError(error); return; }
     showReset(email);
   });
-  $('rs-code').addEventListener('input', () => { const d = onlyDigits($('rs-code').value).slice(0, 6); if (d !== $('rs-code').value) $('rs-code').value = d; });
+  $('rs-resend').addEventListener('click', async () => {
+    if (!resetEmail) return;
+    const { error } = await sendResetCode(resetEmail);
+    if (error) { $('err-reset').textContent = error.captcha || captchaRefused(error) ? Captcha.failMessage : cloudError(error); return; }
+    $('rs-code').value = ''; setFieldError('rs-code', '');
+    toast('Nouveau code envoyé.');
+  });
+  $('rs-code').addEventListener('input', () => {
+    const d = onlyDigits($('rs-code').value).slice(0, 8);
+    if (d !== $('rs-code').value) $('rs-code').value = d;
+    setFieldError('rs-code', '');
+    if (d.length === 8) $('ob-reset').requestSubmit();   // validation automatique au 8e chiffre (code de 6 : bouton)
+  });
+  function renderResetPassword() {
+    const p = $('rs-password').value;
+    PASSWORD_RULES.forEach((r) => $('rs-pw-rules').querySelector('[data-rule="' + r.id + '"]').classList.toggle('is-ok', r.test(p)));
+    showPasswordMatch(p, $('rs-password2').value, $('rs-match'));
+  }
+  $('rs-password').addEventListener('input', () => { setFieldError('rs-password', ''); renderResetPassword(); });
+  $('rs-password2').addEventListener('input', () => { setFieldError('rs-password2', ''); renderResetPassword(); });
+  let resetBusy = false;
   $('ob-reset').addEventListener('submit', async (ev) => {
     ev.preventDefault();
-    const code = onlyDigits($('rs-code').value);
+    if (resetBusy) return;
+    if (resetPhase === 'code') {
+      const code = onlyDigits($('rs-code').value);
+      if (code.length < 6 || code.length > 8) { setFieldError('rs-code', 'Saisissez le code reçu par e-mail (6 à 8 chiffres).'); return; }
+      resetBusy = true;
+      const { error } = await Loader.run(sb.auth.verifyOtp({ email: resetEmail, token: code, type: 'recovery' }), 'Vérification du code…').finally(() => { resetBusy = false; });
+      if (error) { setFieldError('rs-code', 'Code incorrect ou expiré. Vérifiez le dernier e-mail reçu, ou demandez un nouveau code.'); return; }
+      setResetPhase('password');   // code bon : la session de récupération est ouverte
+      return;
+    }
     const password = $('rs-password').value;
+    const confirmation = $('rs-password2').value;
     let bad = false;
-    if (!resetByLink && code.length !== 6) { setFieldError('rs-code', 'Saisissez les 6 chiffres reçus par e-mail.'); bad = true; }
     const missing = missingPasswordRules(password);
     if (missing.length) { setFieldError('rs-password', 'Mot de passe trop faible : il manque ' + listFr(missing.map((r) => r.label)) + '.'); bad = true; }
+    if (!confirmation) { setFieldError('rs-password2', 'Confirmez votre nouveau mot de passe.'); bad = true; }
+    else if (confirmation !== password) { setFieldError('rs-password2', 'Les deux mots de passe ne sont pas identiques.'); bad = true; }
     if (bad) return;
-    if (!resetByLink) {
-      const { error } = await Loader.run(sb.auth.verifyOtp({ email: resetEmail, token: code, type: 'recovery' }), 'Vérification du code…');
-      if (error) { setFieldError('rs-code', 'Code incorrect ou expiré. Demandez un nouveau code depuis l\'écran de connexion.'); return; }
-    }
-    const { data, error } = await Loader.run(sb.auth.updateUser({ password }), 'Enregistrement du mot de passe…');
+    resetBusy = true;
+    const { data, error } = await Loader.run(sb.auth.updateUser({ password }), 'Enregistrement du mot de passe…').finally(() => { resetBusy = false; });
     if (error) { $('err-reset').textContent = error.code === 'same_password' ? 'Choisissez un mot de passe différent de l\'ancien.' : cloudError(error); return; }
-    $('rs-password').value = '';
+    $('rs-password').value = ''; $('rs-password2').value = '';
     toast('Mot de passe modifié.');
     const user = await Loader.run(loadUser(data.user), 'Ouverture de votre compte…');
     setAuthRole(user.role);
@@ -9377,6 +9765,8 @@
 
   // Brouillon en cours (non encore enregistré dans le compte)
   const proDraft = { company: null, photos: [], addedPhotos: [], removedPhotos: [], address: null, category: null };
+  /** Fiche modifiée depuis l'ouverture du formulaire (on demande confirmation avant d'annuler). */
+  let listingDirty = false;
 
   /* ---------- Étape 2 : vérification SIRET + justificatifs ---------- */
 
@@ -9390,9 +9780,8 @@
     $('pv-honor').checked = !!pro.honorAt;
   }
 
-  /** Lignes des justificatifs (une par type de document). */
-  function renderDocs(docs) {
-    const box = $('pv-docs');
+  /** Lignes des justificatifs (une par type de document) dans `box` : étape de vérification ou onglet « Compléter ». */
+  function renderDocs(docs, box = $('pv-docs'), errId = 'err-pro-verify', onSaved = null) {
     box.textContent = '';
     DOC_TYPES.forEach((type) => {
       const meta = docs[type.key];
@@ -9413,29 +9802,36 @@
       row.querySelector('small').textContent = meta ? meta.name + ' · ' + formatSize(meta.size) : type.detail;
       row.querySelector('.doc-btn span').textContent = meta ? 'Remplacer' : 'Ajouter';
       row.querySelector('input').setAttribute('aria-label', type.label);
-      row.querySelector('input').addEventListener('change', (ev) => onDocSelected(type, ev.target.files[0], row));
+      row.querySelector('input').addEventListener('change', (ev) => {
+        const file = ev.target.files[0];
+        ev.target.value = '';
+        onDocSelected(type, file, row, { box, errId, onSaved });
+      });
       box.appendChild(row);
     });
   }
 
-  async function onDocSelected(type, file, row) {
+  async function onDocSelected(type, file, row, ctx = {}) {
     if (!file) return;
-    $('err-pro-verify').textContent = '';
-    if (file.size > MAX_DOC_SIZE) { $('err-pro-verify').textContent = '« ' + file.name + ' » dépasse 10 Mo.'; return; }
+    const err = $(ctx.errId || 'err-pro-verify');
+    err.textContent = '';
+    if (file.size > MAX_DOC_SIZE) { err.textContent = '« ' + file.name + ' » dépasse 10 Mo.'; return; }
     // Contenu réellement vérifié (et non le nom ou le type annoncés) : un fichier renommé en .pdf est refusé
     const real = await sniffDoc(file).catch(() => null);
-    if (!real) { $('err-pro-verify').textContent = '« ' + file.name + ' » : format non accepté (PDF, JPG ou PNG).'; return; }
+    if (!real) { err.textContent = '« ' + file.name + ' » : format non accepté (PDF, JPG ou PNG).'; return; }
     const pro = currentUser().pro || {};
-    if (!pro.merchantId) { $('err-pro-verify').textContent = 'Faites d\'abord vérifier votre numéro SIRET (bouton « Vérifier »), puis ajoutez vos justificatifs.'; return; }
+    if (!pro.merchantId) { err.textContent = 'Faites d\'abord vérifier votre numéro SIRET (bouton « Vérifier »), puis ajoutez vos justificatifs.'; return; }
     const path = docPath(pro.merchantId, type.key, file.name, real.ext);
     row.classList.add('is-busy');
     const { error } = await Loader.run(sb.storage.from('documents').upload(path, file, { contentType: real.mime }), 'Envoi du justificatif…');
     row.classList.remove('is-busy');
-    if (error) { $('err-pro-verify').textContent = '« ' + file.name + ' » n\'a pas pu être envoyé. ' + cloudError(error); return; }
+    if (error) { err.textContent = '« ' + file.name + ' » n\'a pas pu être envoyé. ' + cloudError(error); return; }
     const previous = (pro.docs || {})[type.key];
     pro.docs = { ...(pro.docs || {}), [type.key]: { name: file.name, size: file.size, path } };
     if (previous) removeFiles('documents', [previous.path]);
-    renderDocs(pro.docs);
+    renderDocs(pro.docs, ctx.box, ctx.errId, ctx.onSaved);
+    syncProfileBadge();
+    if (ctx.onSaved) await ctx.onSaved(pro);
   }
 
   /**
@@ -9567,10 +9963,7 @@
       errors.push('Faites vérifier votre numéro SIRET (bouton « Vérifier »).');
       if (!$('err-pv-siret').textContent) setFieldError('pv-siret', 'SIRET non vérifié.');
     }
-    const docs = pro.docs || {};
-    const missing = DOC_TYPES.filter((t) => t.required && !docs[t.key]);
-    document.querySelectorAll('#pv-docs .doc').forEach((row) => row.classList.toggle('has-error', missing.some((t) => t.key === row.dataset.doc)));
-    if (missing.length) errors.push('Ajoutez les justificatifs obligatoires : ' + missing.map((t) => t.label.split(',')[0].toLowerCase()).join(' ; ') + '.');
+    // Justificatifs facultatifs à cette étape (inscription faite avec le restaurateur, documents envoyés plus tard)
     if (!$('pv-honor').checked) errors.push('Cochez l\'attestation sur l\'honneur.');
     if (errors.length) { $('err-pro-verify').textContent = errors.join(' '); return; }
 
@@ -9580,6 +9973,8 @@
     }
     me.pro = await Loader.run(loadPro(me), 'Enregistrement…');
     showAuthStep(me.pro.payment ? 'pro-listing' : 'pro-payment');
+    const later = missingDocs(me.pro).length;
+    if (later) toast(plural(later, 'justificatif', 'justificatifs') + ' à ajouter plus tard : onglet « Compléter » de votre espace.');
   });
 
   /* ---------- Étape 3 : abonnement (formule au choix, paiement sur Whop) ---------- */
@@ -9825,13 +10220,14 @@
     const listed = r && r.status !== 'draft';        // fiche déjà publiée : formulaire prérempli
     proDraft.addedPhotos = []; proDraft.removedPhotos = [];
     proDraft.photos = r ? [...(r.photos || [])] : [];
+    listingDirty = false;
     proDraft.address = listed ? { label: r.address, coords: r.coords } : null;
     $('pl-name').value = listed ? r.name : (company.tradeName || company.legalName || '').replace(/\s+\(.*\)$/, '');
     setListingCategory(listed ? r.category : null);
     $('pl-desc').value = r ? r.description : '';
     $('pl-desc-count').textContent = $('pl-desc').value.length + ' / 600';
     $('pl-address').value = listed ? r.address : '';
-    $('pl-address-status').textContent = listed ? '📍 Adresse localisée sur la carte' : '';
+    $('pl-address-status').textContent = listed ? 'Adresse localisée sur la carte' : '';
     $('pl-use-sirene').hidden = !company.address || !!listed;
     const [s1, s2] = listed && r.hours.length ? r.hours : [['11:30', '14:30'], ['18:30', '22:30']];
     $('pl-h1-on').checked = !!s1; if (s1) { $('pl-h1-from').value = s1[0]; $('pl-h1-to').value = s1[1]; }
@@ -10032,25 +10428,169 @@
       (sections.length ? ' · ' + sections.slice(0, 3).join(', ') + (sections.length > 3 ? '…' : '') : '');
   }
 
-  /* Photos : recadrées en 16:9 puis envoyées dans le stockage « photos » (adresse publique) */
+  /* Photos : recadrées en carré puis envoyées dans le stockage « photos » (adresse publique).
+     Ordre modifiable : appui maintenu puis glisser (doigt), glisser (souris), flèches, ou étoile (photo principale). */
+  const ICON_PREV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+  const ICON_NEXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+  const ICON_STAR = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.2l2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.5l6-.8z"/></svg>';
+  const photoItems = () => [...$('pl-photos').querySelectorAll('.photo-item')];
+
   function renderPhotos() {
-    const ids = [...proDraft.photos];
     const grid = $('pl-photos');
     const add = $('pl-photo-add');
-    grid.querySelectorAll('.photo-item').forEach((el) => el.remove());
-    ids.forEach((url, i) => {
+    photoItems().forEach((el) => el.remove());
+    proDraft.photos.forEach((url) => {
       const item = document.createElement('div');
       item.className = 'photo-item';
-      item.innerHTML = '<img alt="" /><button class="photo-del" type="button">×</button>';
+      item.dataset.url = url;
+      item.innerHTML = '<img alt="" draggable="false" /><span class="photo-num" aria-hidden="true"></span><button class="photo-del" type="button">×</button>'
+        + '<div class="photo-tools"><button class="photo-move" type="button" data-dir="-1">' + ICON_PREV + '</button>'
+        + '<button class="photo-star" type="button">' + ICON_STAR + '</button>'
+        + '<button class="photo-move" type="button" data-dir="1">' + ICON_NEXT + '</button></div>';
       item.querySelector('img').src = url;
-      item.querySelector('img').alt = 'Photo ' + (i + 1);
-      item.querySelector('.photo-del').setAttribute('aria-label', 'Retirer la photo ' + (i + 1));
-      item.querySelector('.photo-del').addEventListener('click', () => removePhoto(url));
-      if (i === 0) { const tag = document.createElement('span'); tag.className = 'photo-main'; tag.textContent = 'Principale'; item.appendChild(tag); }
       grid.insertBefore(item, add);
     });
-    add.hidden = ids.length >= MAX_PHOTOS;
+    syncPhotoLabels();
   }
+
+  /** Numéros, badge « Principale », flèches et libellés d'après l'ordre affiché. */
+  function syncPhotoLabels() {
+    const items = photoItems(), n = items.length;
+    items.forEach((item, i) => {
+      const num = item.querySelector('.photo-num');
+      num.textContent = i === 0 ? 'Principale' : String(i + 1);
+      num.classList.toggle('is-main', i === 0);
+      item.querySelector('img').alt = i === 0 ? 'Photo principale' : 'Photo ' + (i + 1);
+      item.querySelector('.photo-del').setAttribute('aria-label', 'Retirer la photo ' + (i + 1));
+      const [prev, next] = item.querySelectorAll('.photo-move');
+      prev.disabled = i === 0; next.disabled = i === n - 1;
+      prev.setAttribute('aria-label', 'Photo ' + (i + 1) + ' : avancer d\'une place');
+      next.setAttribute('aria-label', 'Photo ' + (i + 1) + ' : reculer d\'une place');
+      const star = item.querySelector('.photo-star');
+      star.hidden = i === 0;
+      star.setAttribute('aria-label', 'Photo ' + (i + 1) + ' : en faire la photo principale');
+      prev.parentNode.hidden = n < 2;
+    });
+    $('pl-photo-add').hidden = n >= MAX_PHOTOS;
+    $('pl-photos-hint').hidden = n < 2;
+  }
+
+  /** Fait glisser les vignettes vers leur nouvelle place après un changement d'ordre (sauf `skip`, déjà sous le doigt). */
+  function flipPhotos(mutate, skip = null) {
+    const els = photoItems();
+    const before = new Map(els.map((el) => [el, [el.offsetLeft, el.offsetTop]]));
+    mutate();
+    if (reduceMotion) return;
+    els.forEach((el) => {
+      if (el === skip) return;
+      const [x, y] = before.get(el);
+      const dx = x - el.offsetLeft, dy = y - el.offsetTop;
+      if (dx || dy) el.animate([{ transform: 'translate(' + dx + 'px, ' + dy + 'px)' }, { transform: 'none' }], { duration: 220, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+    });
+  }
+
+  /** Ordre affiché → brouillon de la fiche, avec une annonce pour les lecteurs d'écran. */
+  function commitPhotoOrder(url) {
+    const order = photoItems().map((el) => el.dataset.url);
+    const before = proDraft.photos.indexOf(url), to = order.indexOf(url);
+    proDraft.photos = order;
+    syncPhotoLabels();
+    if (before === to) return;
+    listingDirty = true;
+    $('pl-photos-live').textContent = to === 0 ? 'Nouvelle photo principale.' : 'Photo déplacée en position ' + (to + 1) + ' sur ' + order.length + '.';
+  }
+
+  function movePhoto(from, to, focusSel) {
+    const items = photoItems();
+    if (to < 0 || to >= items.length || from === to) return;
+    const item = items[from];
+    flipPhotos(() => $('pl-photos').insertBefore(item, to > from ? items[to].nextSibling : items[to]));
+    commitPhotoOrder(item.dataset.url);
+    if (focusSel) {
+      const b = item.querySelector(focusSel);
+      (b && !b.disabled && !b.hidden ? b : item.querySelector('.photo-del')).focus({ preventScroll: true });
+    }
+  }
+
+  $('pl-photos').addEventListener('click', (ev) => {
+    const btn = ev.target.closest('button');
+    const item = btn && btn.closest('.photo-item');
+    if (!item) return;
+    const i = photoItems().indexOf(item);
+    if (btn.classList.contains('photo-del')) removePhoto(item.dataset.url);
+    else if (btn.classList.contains('photo-star')) movePhoto(i, 0, '.photo-move[data-dir="1"]');
+    else if (btn.classList.contains('photo-move')) {
+      const dir = Number(btn.dataset.dir);
+      movePhoto(i, i + dir, '.photo-move[data-dir="' + dir + '"]');
+    }
+  });
+
+  // Glisser-déposer : souris dès qu'elle bouge ; doigt après un appui maintenu (sinon, le doigt fait défiler la page)
+  (() => {
+    const grid = $('pl-photos');
+    let pending = null, drag = null, hold = 0;
+    const cancelHold = () => { clearTimeout(hold); hold = 0; };
+    grid.addEventListener('pointerdown', (ev) => {
+      const item = ev.target.closest('.photo-item');
+      if (!item || ev.target.closest('button') || ev.button > 0 || drag || photoItems().length < 2) return;
+      pending = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, item };
+      if (ev.pointerType !== 'mouse') hold = setTimeout(() => begin(pending.x, pending.y), 300);
+    });
+    grid.addEventListener('pointermove', (ev) => {
+      if (drag) { if (ev.pointerId === drag.id) { ev.preventDefault(); follow(ev.clientX, ev.clientY); } return; }
+      if (!pending || ev.pointerId !== pending.id) return;
+      const moved = Math.hypot(ev.clientX - pending.x, ev.clientY - pending.y);
+      if (ev.pointerType === 'mouse') { if (moved > 6) begin(ev.clientX, ev.clientY); }
+      else if (moved > 10) { cancelHold(); pending = null; }
+      else { pending.x = ev.clientX; pending.y = ev.clientY; }
+    });
+    // Pendant le glisser au doigt, la page ne défile pas ; pas de menu contextuel sur l'appui long
+    grid.addEventListener('touchmove', (ev) => { if (drag) ev.preventDefault(); }, { passive: false });
+    grid.addEventListener('contextmenu', (ev) => { if (pending || drag) ev.preventDefault(); });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((type) => grid.addEventListener(type, (ev) => {
+      if (drag && ev.pointerId !== drag.id) return;
+      cancelHold(); pending = null;
+      if (drag) end();
+    }));
+
+    function begin(x, y) {
+      cancelHold();
+      if (!pending) return;
+      const { item, id } = pending;
+      const r = item.getBoundingClientRect();
+      drag = { item, id, grabX: x - r.left, grabY: y - r.top };
+      pending = null;
+      try { grid.setPointerCapture(id); } catch (e) { /* pointeur déjà relâché */ }
+      item.getAnimations().forEach((a) => a.cancel());
+      item.classList.add('is-dragging');
+      grid.classList.add('is-sorting');
+      if (navigator.vibrate) navigator.vibrate(12);
+      follow(x, y);
+    }
+    function follow(x, y) {
+      const { item } = drag;
+      const g = grid.getBoundingClientRect();
+      // Vignette survolée, d'après les places (pas les positions animées) : pas d'aller-retour pendant les animations
+      const items = photoItems();
+      const over = items.find((el) => el !== item && x >= g.left + el.offsetLeft && x <= g.left + el.offsetLeft + el.offsetWidth
+        && y >= g.top + el.offsetTop && y <= g.top + el.offsetTop + el.offsetHeight);
+      if (over) {
+        const i = items.indexOf(item), j = items.indexOf(over);
+        flipPhotos(() => grid.insertBefore(item, j > i ? over.nextSibling : over), item);
+      }
+      item.style.transform = 'translate(' + (x - g.left - drag.grabX - item.offsetLeft) + 'px, ' + (y - g.top - drag.grabY - item.offsetTop) + 'px) scale(1.05)';
+    }
+    function end() {
+      const { item } = drag;
+      drag = null;
+      grid.classList.remove('is-sorting');
+      item.classList.remove('is-dragging');
+      item.classList.add('is-dropping');
+      item.style.transform = '';
+      setTimeout(() => item.classList.remove('is-dropping'), 230);
+      commitPhotoOrder(item.dataset.url);
+    }
+  })();
 
   // Les ajouts sont traités l'un après l'autre : un seul recadrage ouvert à la fois.
   let photoQueue = Promise.resolve();
@@ -10074,7 +10614,7 @@
       let bitmap;
       try {
         bitmap = await decodeImage(file);
-        // Déjà au format 16:9 : pas besoin de recadrer. Sinon, le restaurateur choisit son cadrage.
+        // Déjà carrée : pas besoin de recadrer. Sinon, le restaurateur choisit son cadrage.
         const crop = isPhotoRatio(bitmap.width, bitmap.height)
           ? fullCrop(bitmap.width, bitmap.height)
           : await cropPhoto(bitmap, { index: i + 1, total: batch.length });
@@ -10085,6 +10625,7 @@
         if (up.error) { setFieldError('pl-photos', '« ' + file.name + ' » n\'a pas pu être envoyée. ' + cloudError(up.error)); continue; }
         const url = publicUrl('photos', path);
         proDraft.photos.push(url);
+        listingDirty = true;
         proDraft.addedPhotos.push(url);
         renderPhotos();
       } catch (e) {
@@ -10097,11 +10638,11 @@
     renderPhotos();
   }
 
-  /* ---------- Recadreur (photos des fiches en 16:9, photo de profil carrée et ronde) ---------- */
+  /* ---------- Recadreur (photos des fiches en carré, photo de profil carrée et ronde) ---------- */
 
   /**
    * Ouvre le recadreur sur `bitmap`. Résout avec la zone choisie { x, y, w, h } (pixels de l'image),
-   * ou null si la photo est ignorée. Options : ratio (16:9 par défaut), round (masque rond), textes.
+   * ou null si la photo est ignorée. Options : ratio (carré par défaut), round (masque rond), textes.
    */
   const cropPhoto = (() => {
     const root = $('cropper');
@@ -10117,12 +10658,17 @@
       const w = st.base.w / st.zoom, h = st.base.h / st.zoom;
       return { x: st.cx - w / 2, y: st.cy - h / 2, w, h };
     };
-    /** Garde le cadre à l'intérieur de l'image. */
+    /**
+     * Zoom 1 : le cadre est rempli par la photo. En dessous (jusqu'à minZoom), on dézoome : la photo entière tient
+     * dans le cadre et le reste est comblé par un fond flou. Le cadre ne sort jamais de l'image quand il est plus
+     * petit qu'elle ; quand il est plus grand, c'est l'image qui reste dans le cadre.
+     */
+    const fit = (c, size, full) => { const lo = Math.min(size / 2, full - size / 2), hi = Math.max(size / 2, full - size / 2); return Math.min(hi, Math.max(lo, c)); };
     function clamp() {
-      st.zoom = Math.min(MAX_ZOOM, Math.max(1, st.zoom));
+      st.zoom = Math.min(MAX_ZOOM, Math.max(st.minZoom, st.zoom));
       const w = st.base.w / st.zoom, h = st.base.h / st.zoom;
-      st.cx = Math.min(st.bitmap.width - w / 2, Math.max(w / 2, st.cx));
-      st.cy = Math.min(st.bitmap.height - h / 2, Math.max(h / 2, st.cy));
+      st.cx = fit(st.cx, w, st.bitmap.width);
+      st.cy = fit(st.cy, h, st.bitmap.height);
     }
     function draw() {
       if (!st) return;
@@ -10132,9 +10678,8 @@
       if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
       const r = cropRect();
       const ctx = canvas.getContext('2d');
-      ctx.imageSmoothingQuality = 'high';
       ctx.clearRect(0, 0, cw, ch);
-      ctx.drawImage(st.bitmap, r.x, r.y, r.w, r.h, 0, 0, cw, ch);
+      paintCrop(ctx, st.bitmap, r, cw, ch);
       slider.value = String(st.zoom);
       slider.setAttribute('aria-valuetext', Math.round(st.zoom * 100) + ' %');
     }
@@ -10142,7 +10687,7 @@
     function zoomTo(z, fx = 0.5, fy = 0.5) {
       const r = cropRect();
       const px = r.x + fx * r.w, py = r.y + fy * r.h;
-      st.zoom = Math.min(MAX_ZOOM, Math.max(1, z));
+      st.zoom = Math.min(MAX_ZOOM, Math.max(st.minZoom, z));
       const w = st.base.w / st.zoom, h = st.base.h / st.zoom;
       st.cx = px - fx * w + w / 2;
       st.cy = py - fy * h + h / 2;
@@ -10229,9 +10774,9 @@
 
     function close(result) {
       const { resolve, returnFocus } = st;
-      if (result) {                        // arrondi au pixel, sans sortir de l'image
-        const w = Math.min(st.bitmap.width, Math.round(result.w)), h = Math.min(st.bitmap.height, Math.round(w / st.ratio));
-        result = { x: Math.min(st.bitmap.width - w, Math.max(0, Math.round(result.x))), y: Math.min(st.bitmap.height - h, Math.max(0, Math.round(result.y))), w, h };
+      if (result) {                        // arrondi au pixel (la zone peut déborder de l'image si elle est dézoomée)
+        const w = Math.max(1, Math.round(result.w)), h = Math.max(1, Math.round(w / st.ratio));
+        result = { x: Math.round(result.x), y: Math.round(result.y), w, h };
       }
       st = null;
       pointers.clear(); pinch = drag = null;
@@ -10243,12 +10788,15 @@
 
     const TEXTS = {
       title: 'Recadrer la photo',
-      hint: 'Toutes les photos sont au format 16:9. Faites glisser l\'image pour choisir le cadrage, zoomez avec le curseur, la molette ou en pinçant.',
+      hint: 'Toutes les photos sont au format carré. Faites glisser l\'image pour choisir le cadrage. Zoomez ou dézoomez avec le curseur, la molette ou en pinçant : tout à gauche, la photo entière est gardée.',
       ok: 'Valider le cadrage', skip: 'Ignorer cette photo',
     };
     return (bitmap, { index = 1, total = 1, ratio = PHOTO_RATIO, round = false, ...texts } = {}) => new Promise((resolve) => {
       const base = fullCrop(bitmap.width, bitmap.height, ratio);
-      st = { bitmap, base, ratio, zoom: 1, cx: bitmap.width / 2, cy: bitmap.height / 2, resolve, returnFocus: document.activeElement };
+      // Zoom minimal : la photo entière tient dans le cadre
+      const minZoom = Math.min(1, base.w / bitmap.width, base.h / bitmap.height);
+      slider.min = String(Math.floor(minZoom * 100) / 100);
+      st = { bitmap, base, ratio, minZoom, zoom: 1, cx: bitmap.width / 2, cy: bitmap.height / 2, resolve, returnFocus: document.activeElement };
       const t = { ...TEXTS, ...texts };
       $('crop-title').textContent = t.title; $('crop-hint').textContent = t.hint;
       $('crop-ok').textContent = t.ok; $('crop-skip').textContent = t.skip;
@@ -10264,6 +10812,7 @@
   /** Photo retirée : supprimée tout de suite si elle vient d'être ajoutée, sinon à l'enregistrement de la fiche. */
   function removePhoto(url) {
     setFieldError('pl-photos', '');
+    listingDirty = true;
     proDraft.photos = proDraft.photos.filter((p) => p !== url);
     if (proDraft.addedPhotos.includes(url)) {
       proDraft.addedPhotos = proDraft.addedPhotos.filter((p) => p !== url);
@@ -10306,7 +10855,7 @@
   function chooseAddress(a) {
     proDraft.address = { label: a.label, coords: a.coords };
     addrInput.value = a.label;
-    $('pl-address-status').textContent = '📍 Adresse localisée sur la carte';
+    $('pl-address-status').textContent = 'Adresse localisée sur la carte';
     setFieldError('pl-address', '');
     closeAddrList();
   }
@@ -10354,9 +10903,28 @@
   });
 
   $('pl-cancel').addEventListener('click', async () => {
+    if (listingDirty && !window.confirm('Quitter sans enregistrer ?\n\nVos modifications de la fiche seront perdues.')) return;
     await discardDraftPhotos();
+    listingDirty = false;
     hideOnboarding();
   });
+  // Toute saisie ou tout choix dans le formulaire compte comme une modification
+  ['input', 'change'].forEach((type) => $('form-pro-listing').addEventListener(type, () => { listingDirty = true; }));
+  $('form-pro-listing').addEventListener('click', (ev) => {
+    if (ev.target.closest('.cat-picker button, .m-del, #pl-menu-add, #pl-use-sirene, .addr-list li')) listingDirty = true;
+  });
+
+  /** Amène une rubrique du formulaire de la fiche à l'écran et la met brièvement en évidence. */
+  function revealListingField(id) {
+    const f = $(id);
+    if (!f) return;
+    f.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
+    f.classList.remove('is-flash');
+    void f.offsetWidth;   // relance l'animation
+    f.classList.add('is-flash');
+    setTimeout(() => f.classList.remove('is-flash'), 1700);
+  }
+  $('pl-jump').addEventListener('click', (ev) => { const b = ev.target.closest('[data-jump]'); if (b) revealListingField(b.dataset.jump); });
 
   $('form-pro-listing').addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -10421,7 +10989,15 @@
     await Loader.run(refreshCloud(), 'Mise à jour de la carte…');
     const restaurant = restaurants()[pro.merchantId];
 
-    if (mode === 'edit') {
+    if (restaurant && restaurant.status === 'awaiting_docs') {
+      // Fiche complète et enregistrée, mais justificatifs manquants : invisible sur la carte jusqu'à leur dépôt
+      if (mode === 'edit') hideOnboarding(); else finishAuth({ fresh: true });
+      setTimeout(() => {
+        ProSpace.open('todo');
+        toast(mode === 'edit' ? 'Fiche enregistrée. Ajoutez vos justificatifs pour apparaître sur la carte.'
+          : 'Votre fiche est prête ! Ajoutez vos justificatifs pour apparaître sur la carte.');
+      }, mode === 'edit' ? 0 : 900);
+    } else if (mode === 'edit') {
       hideOnboarding();
       whenMapReady(() => { upsertShopMarker(restaurantToShop(restaurant)); openShop(restaurant.id); });
       toast('Votre fiche a été mise à jour.');
@@ -10443,9 +11019,18 @@
     el.style.backgroundImage = url ? 'url("' + url + '")' : '';
   }
 
+  /** Pastille du bouton du profil : justificatifs encore à ajouter (restaurateur). */
+  function syncProfileBadge(account = currentUser()) {
+    const n = account && account.role === 'pro' ? missingDocs(account.pro).length : 0;
+    $('profile-badge').hidden = !n;
+    $('profile-badge').textContent = String(n);
+    if (account) $('profile-btn').setAttribute('aria-label', 'Profil de ' + account.name + (n ? ' : ' + plural(n, 'élément', 'éléments') + ' à compléter' : ''));
+  }
+
   function applyAccount(account) {
     paintAvatar($('avatar'), account);
     $('profile-btn').setAttribute('aria-label', 'Profil de ' + account.name);
+    syncProfileBadge(account);
     $('profile-lbl').textContent = account.role === 'pro' ? 'Mon resto' : 'Profil';
     Scanner.renderEntry();
   }
@@ -10463,7 +11048,7 @@
   /* ---------- Espace restaurateur : accueil, statistiques, publications, avis, fiche ---------- */
   const ProSpace = (() => {
     const root = $('pro-space');
-    const TABS = ['home', 'stats', 'publish', 'reviews', 'fiche'];
+    const TABS = ['home', 'todo', 'stats', 'publish', 'reviews', 'fiche'];
     let tab = 'home', days = 7, data = null, token = 0, timer = null, lastFocus = null;
     let rvList = null, rvFilter = 'todo', replyFor = null, rvToken = 0, failed = false;
     /** Statistiques indisponibles (serveur saturé) : message et bouton « Réessayer ». */
@@ -10487,7 +11072,8 @@
       const pro = (account && account.pro) || {};
       const r = myRestaurant(account);
       const listed = !!(r && r.status === 'published');
-      return { account, pro, r, step: proStepFor(account), suspended: !!pro.suspended, listed, live: !!(r && r.published), hidden: listed && !r.isOpen };
+      return { account, pro, r, step: proStepFor(account), suspended: !!pro.suspended, listed, live: !!(r && r.published), hidden: listed && !r.isOpen,
+        awaitingDocs: !!(r && r.status === 'awaiting_docs'), missing: missingDocs(pro) };
     }
 
     function open(t = 'home') {
@@ -10498,6 +11084,7 @@
       root.hidden = false;
       document.body.classList.add('pro-open');
       setTab(t, { focus: true });
+      $('ps-close').setAttribute('aria-label', ProHome.canScanHome() ? 'Retour au scanner' : 'Fermer l\'espace restaurateur');
       render();
       load();
       Scanner.loadSummary();
@@ -10506,12 +11093,14 @@
       clearInterval(timer);
       timer = setInterval(() => { if (!document.hidden && tab !== 'publish') load(); }, 60 * 1000);
     }
-    function close() {
+    /** toHome : sur téléphone, on revient au scanner (écran d'accueil du restaurateur) au lieu de la carte. */
+    function close({ toHome = false } = {}) {
       if (!isOpen()) return;
       root.hidden = true;
       clearInterval(timer);
       replyFor = null;
       document.body.classList.remove('pro-open');
+      if (toHome && ProHome.scanHome()) return;
       if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
     }
 
@@ -10531,6 +11120,7 @@
       if (tab === 'publish') renderPublish();
       if (tab === 'reviews') loadReviews();
       if (tab === 'fiche') renderFiche();
+      syncTodo();   // onglet « Compléter » (et son contenu s'il est affiché)
     }
     TABS.forEach((k, i) => {
       const b = $('pst-' + k);
@@ -10539,12 +11129,14 @@
         const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[ev.key];
         if (!step) return;
         ev.preventDefault();
-        setTab(TABS[(i + step + TABS.length) % TABS.length], { focus: true });
+        let j = i;
+        do j = (j + step + TABS.length) % TABS.length; while ($('pst-' + TABS[j]).hidden && j !== i);   // onglets masqués sautés
+        setTab(TABS[j], { focus: true });
       });
     });
-    $('ps-close').addEventListener('click', close);
-    root.addEventListener('click', (ev) => { if (ev.target === root) close(); });
-    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && isOpen() && !activePanel && $('onboarding').hidden) { ev.preventDefault(); close(); } });
+    $('ps-close').addEventListener('click', () => close({ toHome: true }));
+    root.addEventListener('click', (ev) => { if (ev.target === root) close({ toHome: true }); });
+    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && isOpen() && !activePanel && $('onboarding').hidden) { ev.preventDefault(); close({ toHome: true }); } });
 
     /** Chiffres de la période (et de la précédente), calculés par la base. */
     async function load() {
@@ -10577,6 +11169,7 @@
       const dot = document.createElement('span');
       if (s.suspended) { dot.className = 'is-off'; dot.textContent = '● Suspendue'; }
       else if (s.live) { dot.className = 'is-on'; dot.textContent = '● En ligne sur la carte'; }
+      else if (s.awaitingDocs) { dot.className = 'is-off'; dot.textContent = '● En attente des justificatifs'; }
       else if (s.hidden) { dot.className = 'is-off'; dot.textContent = '● Masquée'; }
       else { dot.className = 'is-off'; dot.textContent = '● Inscription à terminer'; }
       sub.append(dot);
@@ -10586,6 +11179,48 @@
       // (statistiques : redessinées seulement quand elles changent, voir load() ; pas à chaque mise à jour de la carte)
       if (tab === 'publish') renderPublish();
       if (tab === 'fiche') renderFiche();
+      syncTodo(s);
+    }
+
+    /** Onglet « Compléter » : affiché tant qu'il manque des justificatifs, avec leur nombre. */
+    function syncTodo(s = stateOf()) {
+      const n = s.missing.length;
+      const b = $('pst-todo');
+      b.hidden = !n && tab !== 'todo';
+      $('ps-todo-badge').hidden = !n;
+      $('ps-todo-badge').textContent = String(n);
+      b.setAttribute('aria-label', 'Compléter mon profil' + (n ? ', ' + plural(n, 'justificatif', 'justificatifs') + ' à ajouter' : ''));
+      if (tab === 'todo') renderTodoTab(s);
+      syncProfileBadge(s.account);
+    }
+    function renderTodoTab(s = stateOf()) {
+      const n = s.missing.length;
+      const box = $('ps-todo-state');
+      box.className = 'todo-state ' + (n ? 'is-warn' : 'is-ok');
+      box.innerHTML = '<b></b><span></span>';
+      const [title, text] = box.children;
+      if (n) {
+        title.textContent = s.awaitingDocs ? 'Votre fiche n\'est pas encore visible sur la carte' : plural(n, 'justificatif obligatoire', 'justificatifs obligatoires') + ' à ajouter';
+        text.textContent = (n > 1 ? 'Ajoutez les ' + n + ' justificatifs marqués « Obligatoire »' : 'Ajoutez le justificatif marqué « Obligatoire »')
+          + (s.awaitingDocs ? (n > 1 ? ' : votre fiche apparaîtra sur la carte dès qu\'ils seront tous déposés.' : ' : votre fiche apparaîtra sur la carte dès qu\'il sera déposé.')
+            : (n > 1 ? ' : sans eux, votre fiche ne pourra pas apparaître sur la carte.' : ' : sans lui, votre fiche ne pourra pas apparaître sur la carte.'));
+      } else {
+        title.textContent = '✓ Tout est complet';
+        text.textContent = s.live ? 'Vos justificatifs sont déposés et votre fiche est visible sur la carte.' : 'Vos justificatifs sont déposés.';
+      }
+      renderDocs(s.pro.docs || {}, $('ps-docs'), 'err-ps-docs', afterDocSaved);
+    }
+    /** Dernier justificatif obligatoire déposé : la fiche qui attendait passe en ligne (contrôlé par la base). */
+    async function afterDocSaved(pro) {
+      const r = myRestaurant();
+      if (!missingDocs(pro).length && r && r.status === 'awaiting_docs') {
+        const { error } = await Loader.run(sb.from('merchants').update({ status: 'published' }).eq('id', r.id), 'Mise en ligne de votre fiche…');
+        if (error) { $('err-ps-docs').textContent = /[éèà]/.test(error.message || '') ? error.message : cloudError(error); render(); return; }
+        await Loader.run(refreshCloud(), 'Mise à jour de la carte…');
+        const now = myRestaurant();
+        if (now && now.published) toast('Bravo ! « ' + now.name + ' » est maintenant visible sur la carte.');
+      }
+      render();
     }
 
     function badge() {
@@ -10619,7 +11254,7 @@
       const s = stateOf();
       const { account, r } = s;
       const hello = $('ps-hello');
-      hello.textContent = 'Bonjour ' + (account.name || '') + ' 👋';
+      hello.textContent = 'Bonjour ' + (account.name || '');
       const sm = document.createElement('small');
       sm.textContent = s.listed ? 'Voici ce que vos clients ont fait ces ' + plural(days, 'dernier jour', 'derniers jours') + '.' : 'Bienvenue dans votre espace restaurateur.';
       hello.appendChild(sm);
@@ -10632,6 +11267,7 @@
       if (s.suspended) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche est suspendue par la modération : elle n\'est plus visible. Écrivez-nous pour en savoir plus.'; btn.hidden = true; }
       else if (s.step === 'pro-payment' && sub && sub.status === 'canceled') { alert.hidden = false; alert.querySelector('p').textContent = 'Votre abonnement est terminé : votre fiche n\'apparaît plus sur la carte. Vos avis, abonnés et statistiques sont conservés.'; btn.textContent = 'Choisir un abonnement'; btn.onclick = editListing; }
       else if (sub && sub.status === 'past_due') { alert.hidden = false; alert.querySelector('p').textContent = 'Le dernier paiement de votre abonnement a été refusé : mettez à jour votre carte pour garder votre fiche en ligne.'; btn.textContent = 'Voir mon abonnement'; btn.onclick = () => setTab('fiche'); }
+      else if (s.awaitingDocs) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche est prête, mais elle n\'apparaît pas encore sur la carte : ' + (s.missing.length ? plural(s.missing.length, 'justificatif obligatoire', 'justificatifs obligatoires') + ' à ajouter.' : 'justificatifs en cours de prise en compte.'); btn.textContent = 'Ajouter mes justificatifs'; btn.onclick = () => setTab('todo'); }
       else if (s.step || !s.listed) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre inscription n\'est pas terminée : votre restaurant n\'apparaît pas encore sur la carte.'; btn.textContent = 'Terminer mon inscription'; btn.onclick = editListing; }
       else if (s.hidden) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche est masquée : les clients ne la voient plus sur la carte.'; btn.textContent = 'Remettre en ligne'; btn.onclick = () => setVisible(true); }
       $('ps-home-live').hidden = !s.listed;
@@ -10695,6 +11331,7 @@
       const { r } = s;
       const T = data ? data.totals : null;
       const items = [];
+      if (s.missing.length) items.push({ ico: '📄', title: plural(s.missing.length, 'justificatif à ajouter', 'justificatifs à ajouter'), sub: s.awaitingDocs ? 'Votre fiche n\'apparaît pas sur la carte tant qu\'ils manquent.' : 'Nécessaires pour apparaître sur la carte.', go: 'Compléter', run: () => setTab('todo') });
       if (T && T.unanswered) items.push({ ico: '💬', title: plural(T.unanswered, 'avis attend', 'avis attendent') + ' votre réponse', sub: 'Répondre montre que vous êtes à l\'écoute.', go: 'Répondre', run: () => setTab('reviews') });
       if (s.live && !liveStories(r).length) items.push({ ico: '📸', title: 'Aucune story en ligne', sub: 'Plat du jour, nouveauté, coulisses : visible par tous pendant 24 h.', go: 'Publier', run: () => StoryComposer.open() });
       if (s.live && !activePromos({ promos: r.promos }).length) items.push({ ico: '🎁', title: 'Aucune promotion en cours', sub: 'Elle apparaît dans « Offres autour de moi » et vos abonnés sont prévenus.', go: 'Créer', run: goPromo });
@@ -10790,8 +11427,8 @@
         hbars(bars, rows.filter((x) => x.n || !x.optional), { share: true, empty: 'Personne n\'a répondu.' });
       };
       group('Sexe', [
-        { key: 'female', label: '👩 Femmes', n: A.female }, { key: 'male', label: '👨 Hommes', n: A.male },
-        { key: 'other', label: '🌈 Autre', n: A.other }, { key: 'unknown', label: 'Non précisé', n: A.gender_unknown, optional: true },
+        { key: 'female', label: 'Femmes', n: A.female }, { key: 'male', label: 'Hommes', n: A.male },
+        { key: 'other', label: 'Autre', n: A.other }, { key: 'unknown', label: 'Non précisé', n: A.gender_unknown, optional: true },
       ]);
       group('Âge', [
         { key: '15', label: '15-17 ans', n: A.age_15_17 }, { key: '18', label: '18-24 ans', n: A.age_18_24 },
@@ -10871,11 +11508,11 @@
       renderAudience(data.audience);
       // Actions sur la fiche
       hbars($('ps-acts'), [
-        { key: 'menu', label: '📖 Menu consulté', n: T.menu }, { key: 'photos', label: '🖼️ Photos regardées', n: T.photos },
-        { key: 'reviews', label: '⭐ Avis lus', n: T.reviews_tab }, { key: 'walk', label: '🚶 Itinéraire à pied', n: T.walk },
-        { key: 'car', label: '🚗 Itinéraire en voiture', n: T.car }, { key: 'phone', label: '📞 Appel', n: T.phone },
-        { key: 'share', label: '🔗 Partage de la fiche', n: T.shares }, { key: 'google', label: '🌐 Avis Google ouverts', n: T.google },
-        { key: 'offer', label: '🎁 Clic sur une de vos offres', n: T.offer_clicks }, { key: 'story_cta', label: '📸 Fiche ouverte depuis une story', n: T.story_cta },
+        { key: 'menu', label: 'Menu consulté', n: T.menu }, { key: 'photos', label: 'Photos regardées', n: T.photos },
+        { key: 'reviews', label: 'Avis lus', n: T.reviews_tab }, { key: 'walk', label: 'Itinéraire à pied', n: T.walk },
+        { key: 'car', label: 'Itinéraire en voiture', n: T.car }, { key: 'phone', label: 'Appel', n: T.phone },
+        { key: 'share', label: 'Partage de la fiche', n: T.shares }, { key: 'google', label: 'Avis Google ouverts', n: T.google },
+        { key: 'offer', label: 'Clic sur une de vos offres', n: T.offer_clicks }, { key: 'story_cta', label: 'Fiche ouverte depuis une story', n: T.story_cta },
         { key: 'story_like', label: '♥ « J\'aime » sur une story', n: T.story_likes },
       ], { empty: 'Aucune action sur la période.' });
       // Abonnés et fidélité
@@ -10910,7 +11547,7 @@
       pb.textContent = '';
       (data.promos || []).forEach((p) => {
         const tr = pb.insertRow();
-        tr.insertCell().textContent = ((PROMO_KINDS[p.kind] || {}).icon || '🎁') + ' ' + p.title;
+        tr.insertCell().textContent = p.title;
         const st = tr.insertCell();
         st.textContent = p.active ? 'en cours' : 'terminée';
         if (p.active) st.className = 'is-live';
@@ -11001,7 +11638,7 @@
       const list = rvFilter === 'todo' ? todo : rvList;
       if (!list.length) {
         const li = document.createElement('li'); li.className = 'rv-empty';
-        li.textContent = !rvList.length ? 'Pas encore d\'avis. Ils apparaîtront ici dès qu\'un client en publiera un.' : 'Vous avez répondu à tous les avis 👍';
+        li.textContent = !rvList.length ? 'Pas encore d\'avis. Ils apparaîtront ici dès qu\'un client en publiera un.' : 'Vous avez répondu à tous les avis.';
         ul.appendChild(li); return;
       }
       list.forEach((x) => ul.appendChild(reviewItem(r, x)));
@@ -11075,14 +11712,16 @@
       $('ps-share').hidden = !s.live;
       $('pd-edit').textContent = s.step ? 'Terminer mon inscription' : 'Modifier ma fiche';
       // Fiche complète ?
+      // [libellé, fait, détail, rubrique du formulaire ouverte par la ligne]
       const checks = r ? [
-        ['Nom et catégorie', !!(r.name && r.status !== 'draft'), r.status !== 'draft' ? catOf(r).label : ''],
-        ['Adresse sur la carte', !!(r.address && r.coords), r.address ? r.address.split(' ').slice(0, 4).join(' ') + '…' : ''],
-        ['Description', (r.description || '').length >= 30, (r.description || '').length ? plural(r.description.length, 'caractère', 'caractères') : 'à écrire'],
-        ['Photos', r.photos.length > 0, r.photos.length ? plural(r.photos.length, 'photo', 'photos') : 'aucune'],
-        ['Carte (menu)', r.menu.length > 0, r.menu.length ? plural(r.menu.length, 'plat', 'plats') : 'vide'],
-        ['Horaires d\'ouverture', r.hours.length > 0, r.hours.length ? plural(r.hours.length, 'service', 'services') : 'non renseignés'],
-        ['Téléphone', !!r.phone, r.phone ? formatPhone(r.phone) : 'non renseigné'],
+        ['Nom et catégorie', !!(r.name && r.status !== 'draft'), r.status !== 'draft' ? catOf(r).label : '', 'field-pl-name'],
+        ['Adresse sur la carte', !!(r.address && r.coords), r.address ? r.address.split(' ').slice(0, 4).join(' ') + '…' : '', 'field-pl-address'],
+        ['Description', (r.description || '').length >= 30, (r.description || '').length ? plural(r.description.length, 'caractère', 'caractères') : 'à écrire', 'field-pl-desc'],
+        ['Photos', r.photos.length > 0, r.photos.length ? plural(r.photos.length, 'photo', 'photos') : 'aucune', 'field-pl-photos'],
+        ['Carte (menu)', r.menu.length > 0, r.menu.length ? plural(r.menu.length, 'plat', 'plats') : 'vide', 'field-pl-menu'],
+        ['Horaires d\'ouverture', r.hours.length > 0, r.hours.length ? plural(r.hours.length, 'service', 'services') : 'non renseignés', 'field-pl-hours'],
+        ['Téléphone', !!r.phone, r.phone ? formatPhone(r.phone) : 'non renseigné', 'field-pl-phone'],
+        ['Justificatifs (Kbis, hygiène)', !s.missing.length, s.missing.length ? plural(s.missing.length, 'à ajouter', 'à ajouter') : 'déposés', 'todo'],
       ] : [];
       const ok = checks.filter((c) => c[1]).length;
       const p = checks.length ? Math.round((ok / checks.length) * 100) : 0;
@@ -11090,14 +11729,16 @@
       $('ps-complete-bar').style.width = p + '%';
       const ul = $('ps-checklist');
       ul.textContent = '';
-      checks.forEach(([label, done, info]) => {
+      checks.forEach(([label, done, info, field]) => {
         const li = document.createElement('li');
         li.className = done ? 'is-ok' : '';
-        li.innerHTML = '<span aria-hidden="true"></span><span></span><small></small>';
-        li.firstChild.textContent = done ? '✓' : '';
-        li.children[1].textContent = label;
-        li.lastChild.textContent = info;
-        li.setAttribute('aria-label', label + ' : ' + (done ? 'fait' : 'à compléter') + (info ? ' (' + info + ')' : ''));
+        li.innerHTML = '<button type="button"><span class="pc-ico" aria-hidden="true"></span><span></span><small></small><span class="pc-chev" aria-hidden="true">›</span></button>';
+        const b = li.firstChild;
+        b.querySelector('.pc-ico').textContent = done ? '✓' : '';
+        b.children[1].textContent = label;
+        b.querySelector('small').textContent = info;
+        b.setAttribute('aria-label', 'Modifier : ' + label + ' (' + (done ? 'fait' : 'à compléter') + (info ? ', ' + info : '') + ')');
+        b.addEventListener('click', () => (field === 'todo' ? setTab('todo') : editListing(field)));
         ul.appendChild(li);
       });
       // Visibilité
@@ -11105,6 +11746,7 @@
       sw.disabled = !s.listed || s.suspended;
       sw.setAttribute('aria-checked', String(s.live));
       $('ps-vis-hint').textContent = s.suspended ? 'Fiche suspendue par la modération.'
+        : s.awaitingDocs ? 'Disponible une fois vos justificatifs ajoutés (onglet « Compléter »).'
         : !s.listed ? 'Disponible une fois votre fiche publiée.'
         : s.live ? 'Les clients voient votre fiche, vos stories et vos promotions. Masquez-la en cas de fermeture exceptionnelle.'
         : 'Masquée : personne ne la voit. Vos abonnés, vos avis et vos statistiques sont conservés.';
@@ -11184,10 +11826,12 @@
     $('ps-visible').addEventListener('click', () => setVisible($('ps-visible').getAttribute('aria-checked') !== 'true'));
 
     /* ----- Actions ----- */
-    function editListing() {
+    /** Formulaire de la fiche ; field : rubrique à montrer directement (carte, horaires). */
+    function editListing(field = null) {
       close();
       const step = proStepFor(currentUser());
       showAuthStep(step || 'pro-listing', { mode: step ? 'create' : 'edit' });
+      if (field && !step) setTimeout(() => revealListingField(field), 450);
     }
     function showOnMap(tabName) {
       const r = myRestaurant();
@@ -11206,11 +11850,14 @@
       try { await navigator.clipboard.writeText(url); toast('Lien de votre fiche copié : collez-le sur vos réseaux, dans un message…'); }
       catch (e) { toast('Lien de votre fiche : ' + url); }
     }
-    const ACTIONS = { story: () => StoryComposer.open(), promo: goPromo, edit: editListing, show: () => showOnMap() };
-    $('ps-quick').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => ACTIONS[b.dataset.act]()));
+    const ACTIONS = {
+      story: () => StoryComposer.open(), promo: goPromo, edit: () => editListing(), menu: () => editListing('field-pl-menu'), hours: () => editListing('field-pl-hours'),
+      stats: () => setTab('stats'), reviews: () => setTab('reviews'), preview: () => ClientPreview.start(),
+    };
+    $('ps-tiles').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => ACTIONS[b.dataset.act]()));
     $('ps-more-stats').addEventListener('click', () => setTab('stats'));
-    $('pd-edit').addEventListener('click', editListing);
-    $('pd-show').addEventListener('click', () => showOnMap());
+    $('pd-edit').addEventListener('click', () => editListing());
+    $('pd-show').addEventListener('click', () => ClientPreview.start());
     $('pd-reviews').addEventListener('click', () => showOnMap('reviews'));
     $('ps-share').addEventListener('click', shareListing);
     $('ps-account').addEventListener('click', () => { close(); openProfileSheet(); });
@@ -11325,7 +11972,7 @@
     let shopId = null, promo = null, token = null, prevToken = null, prevUntil = 0, issuedAt = 0, seq = 0;
     let tick = null, poll = null, ring = null, lock = null, lastFocus = null, done = false, failures = 0, prefetched = false, renewing = false;
     const isOpen = () => !root.hidden;
-    const canUse = (shop, me = currentUser()) => !!(shop && shop.isPro && UUID_RE.test(shop.id) && me && me.role === 'client' && !isOwnShop(shop.id, me));
+    const canUse = (shop, me = currentUser()) => !!(shop && shop.isPro && UUID_RE.test(shop.id) && me && (me.role === 'client' || previewAsClient) && !isOwnShop(shop.id, me));
 
     let entryPromo = null;
     /** Offres de la fiche utilisables avec le QR code (enregistrées dans la base), la plus intéressante d'abord. */
@@ -11349,7 +11996,7 @@
       entryPromo = offers[0] || null;
       $('shop-visit-title').textContent = entryPromo ? 'Profiter de l\'offre' : 'Valider ma visite';
       $('shop-visit-sub').textContent = entryPromo
-        ? PROMO_KINDS[entryPromo.kind].icon + ' ' + entryPromo.title + (offers.length > 1 ? ' · et ' + plural(offers.length - 1, 'autre offre', 'autres offres') + ' plus bas' : '')
+        ? entryPromo.title + (offers.length > 1 ? ' · et ' + plural(offers.length - 1, 'autre offre', 'autres offres') + ' plus bas' : '')
         : 'Un QR code à montrer en caisse';
       $('shop-visit').setAttribute('aria-label', (entryPromo ? 'Profiter de l\'offre « ' + entryPromo.title + ' »' : 'Valider ma visite') + ' chez ' + shop.name + ' : afficher mon QR code');
       $('shop-visit-plain').hidden = !entryPromo;
@@ -11378,7 +12025,7 @@
       $('vp-emoji').textContent = catOf(m.shop).emoji;
       $('vp-shop').textContent = m.shop.name;
       $('vp-offer').hidden = !promo;
-      $('vp-offer').textContent = promo ? PROMO_KINDS[promo.kind].icon + ' ' + promo.title : '';
+      $('vp-offer').textContent = promo ? promo.title : '';
       $('vp-title').textContent = promo ? 'Montrez ce QR code pour profiter de l\'offre' : 'Montrez ce QR code au restaurateur';
       $('vp-code').hidden = true;
       $('vp-timer').textContent = '';
@@ -11485,7 +12132,7 @@
       const n = Number(d.visit_number) || 1;
       $('vp-title').textContent = promo ? 'Offre validée !' : 'Visite validée !';
       $('vp-status').className = 'vp-status is-ok';
-      $('vp-status').textContent = n > 1 ? nth(n) + ' visite chez ' + name + ' 🎉' : 'Première visite chez ' + name + ' 🎉';
+      $('vp-status').textContent = n > 1 ? nth(n) + ' visite chez ' + name : 'Première visite chez ' + name;
       $('vp-code').hidden = true;
       $('vp-timer').textContent = promo ? 'Le restaurateur applique l\'offre sur votre commande.' : 'Merci et bon appétit !';
       $('vp-hint').hidden = true;
@@ -11518,7 +12165,7 @@
     const HELP = 'Visez le QR code du client';
     let stream = null, track = null, detector = null, detectorPrep = null, worker = null, loopTimer = null, camSeq = 0, busy = false, manual = false;
     const seen = new Map();            // codes déjà traités → dernière fois vus devant la caméra
-    let wrongAt = 0, summary = null, lastFocus = null, nextTimer = null, bar = null, canvas = null, ctx = null;
+    let wrongAt = 0, summary = null, lastFocus = null, nextTimer = null, bar = null, canvas = null, ctx = null, homeMode = false;
     const isOpen = () => !root.hidden;
     const nf = (n) => Number(n || 0).toLocaleString('fr-FR');
     const listed = () => { const r = myRestaurant(); return !!(r && r.published); };
@@ -11536,11 +12183,15 @@
     }
     function help(text, warn = false) { $('scan-help').textContent = text; $('scan-help').classList.toggle('is-warn', warn); }
 
-    async function open({ code = null } = {}) {
+    /** home : « mode service » du téléphone (caméra en haut, tableau de bord en bas, pas de bouton Fermer). */
+    async function open({ code = null, home = null } = {}) {
       const me = currentUser();
       if (!me || me.role !== 'pro') return;
       if (!isOpen()) lastFocus = document.activeElement;
       if (activePanel) closePanel(activePanel);
+      homeMode = home === null ? ProHome.phone() && listed() : !!home;
+      root.classList.toggle('is-home', homeMode);
+      $('scan-dock').hidden = !homeMode;
       root.hidden = false;
       document.body.classList.add('scan-open');
       busy = false; seen.clear();
@@ -11548,7 +12199,7 @@
       setManual(false);
       help(HELP);
       Beep.prepare();
-      $('scan-close').focus({ preventScroll: true });
+      (homeMode ? $('dock-dashboard') : $('scan-close')).focus({ preventScroll: true });
       renderCount();
       loadSummary();
       startCamera();
@@ -11560,6 +12211,9 @@
       clearTimeout(nextTimer);
       if (bar) { bar.cancel(); bar = null; }
       root.hidden = true;
+      homeMode = false;
+      root.classList.remove('is-home');
+      $('scan-dock').hidden = true;
       document.body.classList.remove('scan-open');
       if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
     }
@@ -11715,19 +12369,19 @@
         return;
       }
       const d = data || {};
-      const offer = d.promo_title ? '🎁 À appliquer : ' + d.promo_title : '';
+      const offer = d.promo_title ? 'À appliquer : ' + d.promo_title : '';
       switch (d.status) {
         case 'ok': {
           const n = Number(d.visit_number) || 1;
           if (summary) { summary.today = (summary.today || 0) + 1; if (d.promo_title) summary.today_offers = (summary.today_offers || 0) + 1; renderCount(); }
-          show('ok', d.promo_title ? 'Offre validée' : 'Visite validée', n > 1 ? nth(n) + ' visite de ce client chez vous' : 'Première visite de ce client chez vous 🎉', {
+          show('ok', d.promo_title ? 'Offre validée' : 'Visite validée', n > 1 ? nth(n) + ' visite de ce client chez vous' : 'Première visite de ce client chez vous', {
             offer, warn: d.promo_used_today ? '⚠️ Ce client a déjà profité de cette offre aujourd\'hui.' : '', wait: d.promo_title || d.promo_used_today ? 7000 : 2600 });
           setTimeout(loadSummary, 800);
           break;
         }
         case 'duplicate': {
           const min = Number(d.minutes_ago) || 0;
-          show('warn', 'Déjà validé', 'Ce client a été validé ' + (min < 1 ? 'à l\'instant' : 'il y a ' + min + ' min') + ' : sa visite n\'est pas comptée deux fois.', { offer: d.promo_title ? '🎁 Offre : ' + d.promo_title : '', wait: 4500 });
+          show('warn', 'Déjà validé', 'Ce client a été validé ' + (min < 1 ? 'à l\'instant' : 'il y a ' + min + ' min') + ' : sa visite n\'est pas comptée deux fois.', { offer: d.promo_title ? 'Offre : ' + d.promo_title : '', wait: 4500 });
           break;
         }
         case 'used': show('bad', 'QR code déjà utilisé', 'Chaque QR code ne sert qu\'une fois : le client doit afficher son nouveau QR code.', { wait: 4000 }); break;
@@ -11827,13 +12481,80 @@
         : 'Visite ou offre : scannez le QR code de son téléphone';
     }
 
-    return { open, close, isOpen, next, renderEntry, loadSummary, get summary() { return summary; }, hasResult: () => !$('scan-result').hidden && $('scan-result').classList.contains('is-shown') };
+    return { open, close, isOpen, next, renderEntry, loadSummary, isHome: () => homeMode, get summary() { return summary; }, hasResult: () => !$('scan-result').hidden && $('scan-result').classList.contains('is-shown') };
+  })();
+
+  /* ---------- Restaurateur : écran d'accueil (téléphone : le scanner ; ordinateur : le tableau de bord) ---------- */
+  const ProHome = (() => {
+    const phone = () => window.matchMedia('(max-width: 899px)').matches;
+    const isPro = () => { const me = currentUser(); return !!(me && me.role === 'pro' && !proStepFor(me)); };
+    /** Le scanner peut-il servir d'accueil ? (téléphone, fiche en ligne, validation des visites disponible) */
+    const canScanHome = () => { const r = myRestaurant(); return phone() && isPro() && !!(r && r.published) && VisitFeature.check(() => {}); };
+    function scanHome() { if (!canScanHome()) return false; Scanner.open({ home: true }); return true; }
+    function go() {
+      if (!isPro() || previewAsClient) return;
+      if (!scanHome()) ProSpace.open('home');
+    }
+    let landed = false;
+    /** À l'arrivée sur l'application (connexion, réouverture), une fois par chargement de la page. */
+    function landing() {
+      if (landed || !isPro()) return;
+      landed = true;
+      const run = () => { if (!currentStep && !activePanel && !ProSpace.isOpen() && !Scanner.isOpen() && !previewAsClient) go(); };
+      if (VisitFeature.check(run) || !phone()) setTimeout(run, 400);
+      else setTimeout(run, 4000);   // réponse du serveur trop lente : on décide quand même
+    }
+    $('dock-dashboard').addEventListener('click', () => { Scanner.close(); ProSpace.open('home'); });
+    $('dock-preview').addEventListener('click', () => ClientPreview.start());
+    return { phone, go, landing, scanHome, canScanHome };
+  })();
+
+  /* ---------- Aperçu client : le restaurateur voit la carte et sa fiche comme un client ---------- */
+  const ClientPreview = (() => {
+    function start() {
+      const me = currentUser();
+      if (!me || me.role !== 'pro') return;
+      Scanner.close();
+      ProSpace.close();
+      if (activePanel) closePanel(activePanel);
+      previewAsClient = true;
+      document.body.classList.add('client-preview');
+      $('preview-bar').hidden = false;
+      $('preview-exit').focus({ preventScroll: true });
+      const r = myRestaurant();
+      whenMapReady(() => {
+        if (r && r.published) { upsertShopMarker(restaurantToShop(r)); openShop(r.id); }
+        else toast('Votre fiche n\'est pas encore en ligne : vos clients ne la voient pas encore sur la carte.');
+      });
+    }
+    function stop() {
+      if (!previewAsClient) return;
+      previewAsClient = false;
+      document.body.classList.remove('client-preview');
+      $('preview-bar').hidden = true;
+      if (activePanel) closePanel(activePanel);
+      ProHome.go();
+    }
+    $('preview-exit').addEventListener('click', stop);
+    // Boutons des clients (s'abonner, QR code de visite, « j'aime », avis) : montrés, mais sans effet en aperçu
+    const CLIENT_ONLY = '#shop-follow, #shop-visit, .dish-like';
+    document.addEventListener('click', (ev) => {
+      if (!previewAsClient || !ev.target.closest || !ev.target.closest(CLIENT_ONLY)) return;
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      toast('Aperçu : ce bouton fonctionne pour vos clients.');
+    }, true);
+    document.addEventListener('submit', (ev) => {
+      if (!previewAsClient || ev.target.id !== 'rv-form') return;
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      toast('Aperçu : vos clients peuvent laisser un avis ici.');
+    }, true);
+    return { start, stop, on: () => previewAsClient };
   })();
 
   // Échap : ferme le QR code ou le scanner (avant les autres fenêtres, restées dessous)
   document.addEventListener('keydown', (ev) => {
     if (ev.key !== 'Escape') return;
-    if (Scanner.isOpen()) { ev.stopPropagation(); ev.preventDefault(); if (Scanner.hasResult()) Scanner.next(); else Scanner.close(); }
+    if (Scanner.isOpen()) { ev.stopPropagation(); ev.preventDefault(); if (Scanner.hasResult()) Scanner.next(); else if (!Scanner.isHome()) Scanner.close(); }
     else if (VisitPass.isOpen()) { ev.stopPropagation(); ev.preventDefault(); VisitPass.close(); }
   }, true);
   /** QR code de visite lu par l'appareil photo du téléphone (lien « #visite=… ») : scanner du restaurateur. */
@@ -11875,7 +12596,7 @@
         ].filter((st) => visible(st.el()));
       }
       return [
-        { el: centralPin, title: 'Bienvenue sur FlashMiam 👋', text: 'Chaque pastille est un restaurant : touchez-en une pour voir le menu, les photos, les horaires et les avis.', round: true },
+        { el: centralPin, title: 'Bienvenue sur FlashMiam', text: 'Chaque pastille est un restaurant : touchez-en une pour voir le menu, les photos, les horaires et les avis.', round: true },
         { el: () => $('offers-btn'), title: 'Les bons plans autour de vous', text: 'Promos du jour, offres étudiantes… les plus proches d\'abord.' },
         { el: null, demo: true, title: 'Profitez-en en caisse', text: 'Dans la fiche, « Profiter de l\'offre » affiche un QR code : montrez-le au restaurateur, il le scanne et c\'est validé.' },
         { el: () => (desktop() ? $('search') : $('search-open')), title: 'Une envie précise ?', text: 'Cherchez un plat (« tacos », « crêpe »…) ou un restaurant.' },
@@ -12043,7 +12764,7 @@
   $('profile-btn').addEventListener('click', () => {
     const account = currentUser();
     if (!account) { if (Guest.on()) Guest.ask(); return; }
-    if (account.role === 'pro') ProSpace.open();
+    if (account.role === 'pro') ProSpace.open(missingDocs(account.pro).length && !proStepFor(account) ? 'todo' : 'home');
     else openProfileSheet();
   });
   $('profile-pro').addEventListener('click', () => ProSpace.open());
@@ -12068,14 +12789,12 @@
     closePanel($('profile-sheet'));   // le recadrage prend tout l'écran ; la fiche revient ensuite
     const crop = await cropPhoto(bitmap, {
       ratio: 1, round: true, title: 'Votre photo de profil', ok: 'Utiliser cette photo', skip: 'Annuler',
-      hint: 'Faites glisser la photo pour centrer votre visage dans le rond, zoomez avec le curseur ou en pinçant.',
+      hint: 'Faites glisser la photo pour centrer votre visage dans le rond, zoomez ou dézoomez avec le curseur ou en pinçant.',
     });
     if (!crop) { openProfileSheet(); return; }
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = AVATAR_SIZE;
-    const ctx = canvas.getContext('2d');
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(bitmap, crop.x, crop.y, crop.w, crop.h, 0, 0, AVATAR_SIZE, AVATAR_SIZE);
+    paintCrop(canvas.getContext('2d'), bitmap, crop, AVATAR_SIZE, AVATAR_SIZE);
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85));
     if (!blob) { toast('Cette photo ne peut pas être préparée. Essayez-en une autre.'); return; }
     const path = account.id + '/' + uid() + '.jpg';
@@ -12131,6 +12850,8 @@
 
   let appStarted = false;
   function startApp({ focus = null, intro = false } = {}) {
+    // Restaurateur : il arrive sur son écran d'accueil (scanner sur téléphone, tableau de bord sur ordinateur)
+    if (!focus && !pendingLink) ProHome.landing();
     // Déjà sur la carte (visiteur qui se connecte) : on complète l'interface sans déplacer la carte
     if (appStarted) {
       Install.schedule();
