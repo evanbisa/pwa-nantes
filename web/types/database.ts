@@ -795,6 +795,17 @@ export type Database = {
         Args: { p_days?: number }
         Returns: Json
       }
+      team_error_triage: {
+        Args: { p_fingerprint: string; p_status?: string | null }
+        Returns: undefined
+      }
+      report_client_error: {
+        Args: {
+          p_kind: string; p_app: string; p_message: string; p_source?: string | null; p_stack?: string | null
+          p_page?: string | null; p_platform?: string | null; p_browser?: string | null; p_release?: string | null
+        }
+        Returns: undefined
+      }
       track_site_event: {
         Args: { p_event: string; p_visitor: string; p_platform: string; p_standalone?: boolean }
         Returns: undefined

@@ -95,6 +95,11 @@ export const confidentialite: LegalDoc = {
               basis: "Consentement (choix des cookies)",
             },
             {
+              title: "Détection des bugs",
+              detail: "Quand une erreur technique se produit sur votre appareil (page qui plante, serveur qui ne répond pas), FlashMiam reçoit le message d'erreur, la page concernée (sans ses paramètres), le type d'appareil, le navigateur et la version du site. Aucun identifiant de compte ni d'appareil, aucun cookie ; les adresses e-mail et identifiants qui figureraient dans un message sont effacés à la réception. Seule l'équipe FlashMiam voit ces informations, pour corriger les bugs.",
+              basis: "Intérêt légitime (bon fonctionnement du service)",
+            },
+            {
               title: "Restaurateurs : nom, téléphone, SIRET, justificatifs, fiche",
               detail: "Vérifier l'établissement (répertoire Sirene de l'INSEE), publier sa fiche, gérer l'abonnement. Les justificatifs ne sont visibles que par le restaurateur et l'équipe de vérification.",
               basis: "Exécution du contrat ; obligations légales (facturation)",
@@ -166,6 +171,7 @@ export const confidentialite: LegalDoc = {
             { title: "Totaux quotidiens des restaurants", detail: "6 mois ; ils ne contiennent aucune donnée personnelle." },
             { title: "Stories", detail: "Publiques 24 heures, puis visibles par leur seul restaurateur ; supprimées avec leur photo 30 jours après leur fin." },
             { title: "Fréquentation du site (identifiant d'appareil tiré au hasard)", detail: "13 mois." },
+            { title: "Rapports de bugs (sans identifiant)", detail: "90 jours." },
             { title: "QR codes de visite", detail: "Valables 75 secondes, effacés au bout d'un jour." },
             { title: "Visites validées au restaurant (QR code)", detail: "13 mois." },
             { title: "Tentatives d'inscription (empreinte IP)", detail: "2 jours." },

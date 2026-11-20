@@ -767,6 +767,59 @@ reset role;
 select t.ok((select terms_version = '2026-10-29' and terms_accepted_at is not null from profiles where id = '66666666-6666-6666-6666-666666666666'), 'acceptation des conditions : toujours enregistrée via le relais public');
 select set_config('request.jwt.claims', '', false);
 
+-- ===== Bugs vus sur les appareils (tableau de bord de l'équipe) =====
+set role anon;
+select public.report_client_error('js', 'carte', 'TypeError: x is null pour lea@exemple.fr, id 3f2b1c4d-1111-2222-3333-444455556666, jeton eyJhbGciOiJIUzI1NiJ9.abc.def',
+  'https://flashmiam.fr/?r=abc&token=secret:4521:13', 'at f (https://flashmiam.fr/?r=abc:4521:13)', '/?r=secret#x', 'ios', 'Safari 18', 'e485bcb0123');
+select public.report_client_error('js', 'carte', 'TypeError: x is null pour lea@exemple.fr, id 3f2b1c4d-1111-2222-3333-444455556666, jeton eyJhbGciOiJIUzI1NiJ9.abc.def',
+  'https://flashmiam.fr/:4600:2', null, '/', 'android', 'Chrome 131', 'zzz');
+select public.report_client_error('server', 'carte', 'POST /functions/v1/menu-scan → 502 · numéro 0612345678', null, null, '/', 'desktop', 'Firefox 133', null);
+select public.report_client_error('nimporte', 'carte', 'ignoré');
+select public.report_client_error('js', 'carte', '   ');
+select t.fails($$select * from client_errors$$, 'bugs : illisibles pour un visiteur');
+reset role;
+select t.ok((select count(*) = 2 from client_errors), 'bugs : un même bug (même message, même fichier, autre ligne) compté sur une seule ligne ; entrées invalides ignorées');
+select t.ok((select occurrences = 2 and platforms = '{"ios": 1, "android": 1}'::jsonb and releases = '{"e485bcb": 1, "inconnue": 1}'::jsonb and pages = '{"/": 2}'::jsonb
+             from client_errors where kind = 'js'), 'bugs : appareils, versions et pages comptés, sans paramètres d''adresse');
+select t.ok((select message !~ 'lea@exemple|3f2b1c4d|eyJhbG' and message ~ '\[e-mail\]' and message ~ '\[id\]' and message ~ '\[jeton\]'
+             and source !~ 'secret|token' and stack !~ 'abc' from client_errors where kind = 'js'), 'bugs : e-mail, identifiant, jeton et paramètres d''adresse effacés par la base');
+select t.ok((select message !~ '0612345678' and message ~ '502' from client_errors where kind = 'server'), 'bugs : numéros longs effacés, codes d''erreur gardés');
+select t.ok((select signed_in = 0 from client_errors where kind = 'server'), 'bugs : aucun compte relié (seulement « connecté ou non »)');
+select set_config('request.jwt.claims', '{"sub":"66666666-6666-6666-6666-666666666666","role":"authenticated"}', false);
+set role authenticated;
+select public.report_client_error('promise', 'app', 'Erreur de l''inscription', null, null, '/app/inscription/', 'android', 'Chrome 131', null);
+select t.fails($$select * from client_errors$$, 'bugs : illisibles pour une personne connectée');
+select t.fails($$select public.team_error_triage((select md5('x')), 'resolved')$$, 'suivi des bugs : refusé à une cliente');
+select t.fails($$insert into error_triage (fingerprint, status) values (md5('x'), 'ignored')$$, 'suivi des bugs : aucune écriture directe');
+reset role;
+select t.ok((select signed_in = 1 from client_errors where kind = 'promise'), 'bugs : « avec un compte connecté » compté');
+-- Membre de l'équipe : tableau de bord complet et suivi des bugs
+insert into team_admins (user_id) values ('66666666-6666-6666-6666-666666666666');
+select set_config('test.bug', (select fingerprint from client_errors where kind = 'server'), false);
+set role authenticated;
+select t.ok((select d ? 'errors' and d ? 'error_list' and d ? 'health' and d ? 'merchant_funnel' and d ? 'activity' and d ? 'visits' and d ? 'accounts'
+             and (d -> 'errors' ->> 'occurrences')::int = 4 and jsonb_array_length(d -> 'error_list') = 3 and jsonb_array_length(d -> 'errors_daily') = 30
+             from (select public.team_dashboard(30) d) x), 'tableau de bord : chiffres existants et nouveaux (bugs, santé, entonnoirs, activité) pour l''équipe');
+select public.team_error_triage(current_setting('test.bug'), 'resolved');
+select t.ok((select count(*) = 1 from (select jsonb_array_elements(public.team_dashboard(30) -> 'error_list') b) x where (b ->> 'open')::boolean = false),
+  'suivi des bugs : marqué corrigé par l''équipe');
+select t.fails($$select public.team_error_triage('pas-une-empreinte', 'resolved')$$, 'suivi des bugs : empreinte invalide refusée');
+select t.fails($$select public.team_error_triage(md5('x'), 'supprimé')$$, 'suivi des bugs : état inconnu refusé');
+reset role;
+update error_triage set updated_at = now() - interval '1 hour';
+set role anon;
+select public.report_client_error('server', 'carte', 'POST /functions/v1/menu-scan → 500 · numéro 0699999999', null, null, '/', 'desktop', 'Firefox 133', null);
+reset role;
+set role authenticated;
+select t.ok((select (b ->> 'reappeared')::boolean and (b ->> 'open')::boolean from (select jsonb_array_elements(public.team_dashboard(30) -> 'error_list') b) x where b ->> 'kind' = 'server'),
+  'suivi des bugs : un bug corrigé qui revient est signalé « réapparu »');
+select public.team_error_triage(current_setting('test.bug'), null);
+reset role;
+select t.ok(not exists (select 1 from error_triage), 'suivi des bugs : bug rouvert');
+delete from team_admins where user_id = '66666666-6666-6666-6666-666666666666';
+delete from client_errors;
+select set_config('request.jwt.claims', '', false);
+
 -- ===== QR code de visite (usage unique, validé par le restaurateur) =====
 set session_replication_role = replica;   -- mise en place directe : fiche de Sam en ligne, offre de Nina
 update merchants set status = 'published', is_open = true where id = 'aaaaaaaa-0000-0000-0000-000000000005';

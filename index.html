@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-Ft3A8OFYQAEeIyI1p5ejAPmpg4RSf3WJUys4+cdeLlo=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-tZSk8gJgttor9bFSR7a7Qy/vpgmYxbKHVGTUvRv8nLA=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -4142,7 +4142,7 @@
     const READ_RPC = /\/rest\/v1\/rpc\/(merchant_ratings|dish_like_counts|my_merchant_analytics|merchant_follower_count|my_merchant_stats|my_merchant_totals)(\?|$)/;
     const ATTEMPTS = 4, READ_TIMEOUT = 15000, WRITE_TIMEOUT = 30000, FUNCTION_TIMEOUT = 60000;
     const listeners = [];
-    let state = 'ok', backTimer = null, troubleAt = 0, onlineAt = 0;
+    let state = 'ok', backTimer = null, troubleAt = 0, onlineAt = 0, failureHook = null;
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     function delay(i, res) {
       const after = res && Number(res.headers.get('retry-after'));
@@ -4198,6 +4198,8 @@
           }
           if (RETRY_STATUS.has(res.status)) set(read ? 'down' : 'slow');
           else if (state === 'down' || state === 'offline') set('ok');   // « connexion difficile » : s'efface tout seul (settle)
+          // Panne du serveur (5xx) ou table / fonction introuvable : signalée au tableau de bord de l'équipe
+          if (failureHook && (res.status >= 500 || (res.status === 404 && url.includes('/rest/v1/')))) failureHook(method, url, res);
           return res;
         } catch (e) {
           if (outer && outer.aborted) throw e;                // abandon voulu par l'appelant
@@ -4224,6 +4226,8 @@
       onRecover: (fn) => listeners.push(fn),
       /** Problème signalé par le reste du site (ex. : chargement initial impossible). */
       trouble: (kind = 'down') => set(navigator.onLine === false ? 'offline' : kind),
+      /** Rappel sur une réponse en erreur du serveur (après les nouvelles tentatives) : voir BugReport. */
+      onServerFailure: (fn) => { failureHook = fn; },
     };
   })();
 
@@ -4248,6 +4252,73 @@
       db: { retry: false },                                   // une seule couche de nouvelles tentatives : Net (sinon elles se multiplient)
     })
     : null;
+
+  /*
+   * Bugs vus sur l'appareil, pour le tableau de bord de l'équipe (onglet « Bugs ») : erreurs JavaScript non rattrapées
+   * et réponses en erreur du serveur (5xx, table ou fonction introuvable). Rien qui désigne la personne ou l'appareil :
+   * le message, le fichier, la page (sans ses paramètres), le type d'appareil, le navigateur et la version publiée ;
+   * la base efface encore les e-mails, jetons et identifiants qui traîneraient dans un message. Au plus 10 envois par
+   * visite, un seul par bug ; bruit ignoré (extensions du navigateur, scripts d'autres sites, coupures de réseau).
+   */
+  const BugReport = (() => {
+    const MAX = 10;
+    const seen = new Set();
+    let sentCount = 0, release = null;
+    const IGNORE = /^(Script error\.?|ResizeObserver loop|Failed to fetch|Load failed|NetworkError when attempting|network error|The operation was aborted|AbortError|TimeoutError|Délai dépassé|cancelled|annulé)/i;
+    function browser() {
+      const ua = navigator.userAgent;
+      const m = /(Instagram|FBAN|FBAV|TikTok|Snapchat)/.exec(ua);
+      if (m) return { FBAN: 'Facebook', FBAV: 'Facebook' }[m[1]] || m[1];
+      for (const [name, re] of [['Samsung', /SamsungBrowser\/(\d+)/], ['Edge', /Edg(?:A|iOS)?\/(\d+)/], ['Firefox', /(?:Firefox|FxiOS)\/(\d+)/],
+        ['Chrome', /(?:Chrome|CriOS)\/(\d+)/], ['Safari', /Version\/(\d+)[\d.]* (?:Mobile\/\S+ )?Safari/]]) {
+        const v = re.exec(ua);
+        if (v) return name + ' ' + v[1];
+      }
+      return /AppleWebKit/.test(ua) ? 'WebKit' : 'Autre';
+    }
+    /** Version publiée (commit, dans version.txt) : lue une fois, au premier bug. */
+    function version() {
+      if (!release) release = fetch('version.txt', { cache: 'no-store' })
+        .then((r) => (r.ok ? r.text() : ''), () => '').then((t) => (/^[0-9a-f]{7,40}$/.test(t.trim()) ? t.trim() : null));
+      return release;
+    }
+    function send(kind, message, source, stack) {
+      message = String(message || '').trim();
+      if (!sb || !message || IGNORE.test(message) || sentCount >= MAX || navigator.onLine === false) return;
+      const key = kind + '|' + message.slice(0, 200) + '|' + (source || '').replace(/(:\d+)+$/, '');
+      if (seen.has(key)) return;
+      seen.add(key);
+      sentCount++;
+      version().then((rel) => sb.rpc('report_client_error', {
+        p_kind: kind, p_app: 'carte', p_message: message.slice(0, 1000), p_source: (source || '').slice(0, 1000) || null,
+        p_stack: (stack || '').slice(0, 4000) || null, p_page: location.pathname, p_platform: detectPlatform(), p_browser: browser(), p_release: rel,
+      })).then(() => {}, () => {});
+    }
+    const sameSite = (file) => !file || file.startsWith(location.origin);
+    window.addEventListener('error', (e) => {
+      if (!e.error && !e.message) return;                      // ressource (image…) introuvable : pas un bug de code
+      if (!sameSite(e.filename)) return;                       // extension du navigateur, script d'un autre site
+      const stack = e.error && e.error.stack;
+      if (stack && /(chrome|moz|safari(-web)?)-extension:|webkit-masked-url/.test(stack)) return;
+      send('js', e.message || String(e.error), e.filename ? e.filename + ':' + e.lineno + ':' + e.colno : '', stack);
+    });
+    window.addEventListener('unhandledrejection', (e) => {
+      const r = e.reason;
+      if (!r || (r.name && /AbortError|TimeoutError/.test(r.name))) return;
+      const stack = r && r.stack;
+      if (stack && /(chrome|moz|safari(-web)?)-extension:|webkit-masked-url/.test(stack)) return;
+      const message = r instanceof Error ? (r.name && r.name !== 'Error' ? r.name + ': ' : '') + r.message : typeof r === 'string' ? r : (r.message || JSON.stringify(r).slice(0, 300));
+      send('promise', message, '', stack);
+    });
+    Net.onServerFailure((method, url, res) => {
+      if (url.includes('/rpc/report_client_error')) return;    // jamais de boucle
+      let path;
+      try { path = new URL(url).pathname.replace(/\/storage\/v1\/object\/(?:public\/|sign\/)?([^/]+)\/.*/, '/storage/v1/object/$1/…'); } catch (e) { return; }
+      res.clone().json().then((b) => b && (b.message || b.error_description || b.msg || b.error), () => '')
+        .then((detail) => send('server', method + ' ' + path + ' → ' + res.status + (detail ? ' · ' + String(detail).slice(0, 200) : ''), path, ''));
+    });
+    return { send };
+  })();
 
   /** Données chargées : compte connecté et restaurants inscrits (fiches en ligne + la sienne). */
   const cloud = { user: null, restaurants: {}, followerCounts: new Map(), ratings: new Map(), ready: Promise.resolve(), loaded: Promise.resolve(), fromCache: false };

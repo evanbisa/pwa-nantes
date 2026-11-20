@@ -119,8 +119,24 @@ en plus) :
 ## Tableau de bord de l'équipe
 
 - Adresse : `/app/tableau-de-bord/` (aussi depuis le profil : « 📊 Tableau de bord de l'équipe »), réservé aux comptes
-  de l'équipe : visiteurs par jour, appareils, écran d'accueil, nouveaux comptes, restaurants, revenu mensuel,
-  utilisation des fiches, audience. Périodes 7, 30 ou 90 jours.
+  de l'équipe. Périodes 7, 30 ou 90 jours, comparées à la période précédente ; actualisé toutes les 5 minutes. Onglets
+  (lien direct : `#users`, `#restaurants`, `#bugs`, `#server`) :
+  - **Vue d'ensemble** : « À surveiller » (nouveaux bugs, bug corrigé qui revient, tâche planifiée en échec, ménage
+    en retard, paiement refusé, quotas de l'offre gratuite, avis signalés, restaurateurs à relancer), 6 chiffres clés,
+    visiteurs et comptes par jour, activité récente, restaurants les plus vus.
+  - **Utilisateurs** : visiteurs du jour / 7 j / 30 j, nouveaux et déjà venus, fidélité, comptes et connexions,
+    entonnoir visiteurs → comptes → clients actifs → visite en caisse, appareils, écran d'accueil, jours et heures,
+    sexe et âge, alertes.
+  - **Restaurants** : entonnoir de l'inscription à la carte, restaurateurs à relancer (étape qui manque, e-mail),
+    abonnements et formules, contenu publié, avis signalés, utilisation des fiches.
+  - **Bugs** : erreurs JavaScript de la carte et de l'application, réponses en erreur du serveur (5xx, table ou
+    fonction introuvable), par jour et en liste (fichier, pile d'appels, pages, appareils, navigateurs, version publiée
+    avec lien vers le commit). « Marquer corrigé » (signalé « réapparu » s'il revient), « Ignorer », « Copier le
+    résumé » (à coller dans une demande de correction). Envoyés par `BugReport` (`index.html`) et
+    `web/components/BugReporter.tsx`, sans identifiant ni cookie, nettoyés par la base, gardés 90 jours
+    (migration `20261120090000_team_dashboard_v2.sql`).
+  - **Serveur** : base et stockage face aux limites de l'offre gratuite, plus grosses tables, tâches planifiées, ménage
+    nocturne, Whop, tentatives d'inscription, plafonds du jour, liens vers les journaux Supabase, Vercel et GitHub.
 - Les visites ne sont comptées qu'avec l'accord « statistiques » des cookies (identifiant d'appareil tiré au hasard,
   13 mois).
 - Ajouter un membre : Supabase › SQL Editor,

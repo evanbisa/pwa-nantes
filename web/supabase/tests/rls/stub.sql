@@ -6,7 +6,8 @@ alter default privileges in schema public grant all on tables to anon, authentic
 alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
 alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
 create schema auth; grant usage on schema auth to anon, authenticated, service_role;
-create table auth.users (id uuid primary key default gen_random_uuid(), email text, encrypted_password text, raw_user_meta_data jsonb);
+create table auth.users (id uuid primary key default gen_random_uuid(), email text, encrypted_password text, raw_user_meta_data jsonb,
+  raw_app_meta_data jsonb, last_sign_in_at timestamptz);
 -- Sessions de connexion (comme Supabase Auth : refreshed_at sans fuseau, en heure UTC)
 create table auth.sessions (id uuid primary key default gen_random_uuid(), user_id uuid not null references auth.users(id) on delete cascade,
   created_at timestamptz default now(), updated_at timestamptz default now(), refreshed_at timestamp without time zone, not_after timestamptz,
