@@ -137,6 +137,15 @@ en plus) :
     (migration `20261120090000_team_dashboard_v2.sql`).
   - **Serveur** : base et stockage face aux limites de l'offre gratuite, plus grosses tables, tâches planifiées, ménage
     nocturne, Whop, tentatives d'inscription, plafonds du jour, liens vers les journaux Supabase, Vercel et GitHub.
+- **Restaurants** : `/app/tableau-de-bord/restaurants/` (lien « Fiches des restaurants → » en haut du tableau de bord) :
+  tous les comptes restaurateur, avec leurs justificatifs (Kbis et hygiène obligatoires, DDPP et licence facultatifs),
+  SIRET, abonnement, vues, abonnés, avis ; recherche (nom, responsable, e-mail, SIRET) et filtres (en ligne, en
+  préparation, justificatifs manquants, test). `?id=…` ouvre la fiche complète : justificatifs à ouvrir (liens
+  temporaires de 10 minutes, l'espace « documents » reste privé), entreprise (Sirene), responsable, abonnement, fiche
+  publique, **les mêmes statistiques que l'espace du restaurateur** (fonction `merchant_analytics`, commune aux deux),
+  visites en caisse, avis et historique de modération (migration `20261121090000_team_restaurants.sql`).
+- **Modération des avis** : sur les avis signalés (onglet Restaurants) et sur la fiche d'un restaurant, « Garder
+  l'avis » (signalement levé) ou « Supprimer » ; chaque décision est notée (`team_actions`, 13 mois).
 - Les visites ne sont comptées qu'avec l'accord « statistiques » des cookies (identifiant d'appareil tiré au hasard,
   13 mois).
 - Ajouter un membre : Supabase › SQL Editor,

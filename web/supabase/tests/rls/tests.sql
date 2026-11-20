@@ -816,6 +816,47 @@ select t.ok((select (b ->> 'reappeared')::boolean and (b ->> 'open')::boolean fr
 select public.team_error_triage(current_setting('test.bug'), null);
 reset role;
 select t.ok(not exists (select 1 from error_triage), 'suivi des bugs : bug rouvert');
+-- ===== Restaurants vus par l'équipe (fiche complète, justificatifs) et modération des avis =====
+insert into reviews (id, merchant_id, user_id, rating, comment) values
+  ('cccccccc-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000002', '66666666-6666-6666-6666-666666666666', 1, 'Avis à modérer'),
+  ('cccccccc-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000002', '33333333-3333-3333-3333-333333333333', 2, 'Avis à supprimer');
+update reviews set reported_at = now() where id in ('cccccccc-0000-0000-0000-000000000001', 'cccccccc-0000-0000-0000-000000000002');
+insert into storage.objects (bucket_id, name, metadata) values
+  ('documents', 'aaaaaaaa-0000-0000-0000-000000000002/kbis--1700000000000--kbis.pdf', '{"size": 1234, "mimetype": "application/pdf"}');
+-- Chiffres du restaurateur, vus par lui-même (pour comparer)
+select set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}', false);
+set role authenticated;
+select set_config('test.nina_analytics', public.my_merchant_analytics(30)::text, false);
+select t.fails($$select public.team_merchants()$$, 'restaurants (équipe) : liste refusée à un restaurateur');
+select t.fails($$select public.team_merchant('aaaaaaaa-0000-0000-0000-000000000002', 30)$$, 'restaurants (équipe) : fiche complète refusée à un restaurateur');
+select t.ok((select count(*) = 1 from storage.objects where bucket_id = 'documents' and name like 'aaaaaaaa-0000-0000-0000-000000000002/%'), 'justificatifs : toujours visibles par leur restaurateur');
+reset role;
+select t.ok(current_setting('test.nina_analytics') <> '' and (current_setting('test.nina_analytics')::jsonb -> 'totals') is not null, 'restaurateur : ses statistiques toujours disponibles (même calcul pour l''équipe)');
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.fails($$select public.team_moderate_review('cccccccc-0000-0000-0000-000000000002', 'delete')$$, 'modération : refusée à une cliente');
+select t.ok((select count(*) = 0 from storage.objects where bucket_id = 'documents'), 'justificatifs : invisibles pour une cliente');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"66666666-6666-6666-6666-666666666666","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select bool_or(x ->> 'id' = 'aaaaaaaa-0000-0000-0000-000000000002' and (x -> 'docs' ->> 'kbis')::boolean and not (x -> 'docs' ->> 'hygiene')::boolean and (x ->> 'reported')::int = 2)
+             from jsonb_array_elements(public.team_merchants()) x), 'restaurants (équipe) : liste avec justificatifs déposés et avis signalés');
+select t.ok((select d -> 'analytics' = current_setting('test.nina_analytics')::jsonb and jsonb_array_length(d -> 'documents') = 1
+                    and d -> 'owner' ? 'email' and d -> 'legal' ->> 'siret' = '98765432100019' and not (d ->> 'docs_ok')::boolean
+             from (select public.team_merchant('aaaaaaaa-0000-0000-0000-000000000002', 30) d) x),
+  'restaurants (équipe) : fiche complète, mêmes statistiques que le restaurateur, justificatifs, SIRET');
+select t.ok((select count(*) = 1 from storage.objects where bucket_id = 'documents' and name like 'aaaaaaaa-0000-0000-0000-000000000002/kbis--%'), 'justificatifs : lisibles par l''équipe (pour les ouvrir)');
+select t.fails($$select public.team_merchant('aaaaaaaa-0000-0000-0000-0000000000ff', 30)$$, 'restaurants (équipe) : fiche inconnue');
+select public.team_moderate_review('cccccccc-0000-0000-0000-000000000001', 'keep');
+select public.team_moderate_review('cccccccc-0000-0000-0000-000000000002', 'delete');
+select t.fails($$select public.team_moderate_review('cccccccc-0000-0000-0000-000000000001', 'cacher')$$, 'modération : action inconnue refusée');
+select t.fails($$select * from team_actions$$, 'journal de modération : illisible depuis le site');
+reset role;
+select t.ok((select reported_at is null from reviews where id = 'cccccccc-0000-0000-0000-000000000001'), 'modération : avis gardé, signalement levé');
+select t.ok(not exists (select 1 from reviews where id = 'cccccccc-0000-0000-0000-000000000002'), 'modération : avis supprimé');
+select t.ok((select count(*) = 2 and bool_and(user_id = '66666666-6666-6666-6666-666666666666') from team_actions), 'modération : chaque décision notée (qui, quoi, quel restaurant)');
+delete from reviews where id = 'cccccccc-0000-0000-0000-000000000001';
+delete from storage.objects where bucket_id = 'documents' and name like 'aaaaaaaa-0000-0000-0000-000000000002/%';
 delete from team_admins where user_id = '66666666-6666-6666-6666-666666666666';
 delete from client_errors;
 select set_config('request.jwt.claims', '', false);

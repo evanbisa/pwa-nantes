@@ -795,6 +795,18 @@ export type Database = {
         Args: { p_days?: number }
         Returns: Json
       }
+      team_merchants: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      team_merchant: {
+        Args: { p_merchant_id: string; p_days?: number }
+        Returns: Json
+      }
+      team_moderate_review: {
+        Args: { p_review_id: string; p_action: string }
+        Returns: undefined
+      }
       team_error_triage: {
         Args: { p_fingerprint: string; p_status?: string | null }
         Returns: undefined

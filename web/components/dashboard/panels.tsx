@@ -3,9 +3,10 @@
 import type { ReactNode } from "react";
 import { AlertOctagon, AlertTriangle, CheckCircle2, ChevronRight, ExternalLink, Info } from "lucide-react";
 import {
-  DB_LIMIT, REPO, STORAGE_LIMIT, SUPABASE_PROJECT, ago, bytes, dateTime, delta, euros, hoursSince, n, pct,
+  DB_LIMIT, REPO, RESTAURANTS_URL, STORAGE_LIMIT, SUPABASE_PROJECT, ago, bytes, dateTime, delta, euros, hoursSince, n, pct, restaurantUrl,
   type Activity, type Data, type PendingMerchant,
 } from "./data";
+import { ModerationButtons } from "./moderation";
 import type { Alert, Tab } from "./alerts";
 import { Bars, Card, Funnel, HBars, Kv, Meter, Muted, Pill, Tile } from "./ui";
 
@@ -247,7 +248,7 @@ function nextStep(m: PendingMerchant) {
   return "Compléter et publier la fiche";
 }
 
-export function Restaurants({ d }: { d: Data }) {
+export function Restaurants({ d, reload }: { d: Data; reload: () => Promise<void> }) {
   const f = d.merchant_funnel, s = d.subscriptions_more, c = d.content;
   return (
     <>
@@ -280,7 +281,8 @@ export function Restaurants({ d }: { d: Data }) {
         </Card>
       </div>
 
-      <Card className="mt-3" title="À relancer" hint="Restaurateurs inscrits pas encore sur la carte, le plus ancien en haut.">
+      <Card className="mt-3" title="À relancer" hint="Restaurateurs inscrits pas encore sur la carte, le plus ancien en haut."
+        action={<a href={RESTAURANTS_URL} className="shrink-0 text-sm font-medium text-[var(--viz-1)] hover:underline">Tous les restaurants →</a>}>
         {d.merchants_pending.length ? (
           <div className="-mx-5 overflow-x-auto px-5">
             <table className="w-full min-w-[640px] text-sm">
@@ -291,7 +293,7 @@ export function Restaurants({ d }: { d: Data }) {
               <tbody>
                 {d.merchants_pending.map((m, i) => (
                   <tr key={i} className="border-t border-slate-200 align-top dark:border-white/10">
-                    <td className="py-2 pr-3">{m.name}</td>
+                    <td className="py-2 pr-3">{m.id ? <a href={restaurantUrl(m.id)} className="font-medium text-[var(--viz-1)] hover:underline">{m.name}</a> : m.name}</td>
                     <td className="py-2 pr-3"><Pill tone={m.status === "suspended" ? "critical" : m.status === "awaiting_docs" ? "warning" : "neutral"}>{STATUS_LABEL[m.status] ?? m.status}</Pill></td>
                     <td className="py-2 pr-3">{nextStep(m)}</td>
                     <td className="py-2 pr-3 whitespace-nowrap" title={dateTime(m.created_at)}>{ago(m.created_at)}{hoursSince(m.created_at) > 72 && m.status !== "suspended" && <span className="sr-only"> (plus de 3 jours)</span>}</td>
@@ -315,17 +317,18 @@ export function Restaurants({ d }: { d: Data }) {
             <Kv k="Notifications" v={n(c.notifs_period)} sub={`${pct(c.pushed_period, c.notifs_period)} % en alerte`} />
           </dl>
         </Card>
-        <Card title="Avis signalés" hint="Signalés par les restaurateurs ; à vérifier (Supabase › table reviews).">
+        <Card title="Avis signalés" hint="Signalés par les restaurateurs. « Garder » lève le signalement ; « Supprimer » retire l'avis.">
           {d.reported_reviews.length ? (
             <ul className="grid gap-3">
               {d.reported_reviews.map((r) => (
                 <li key={r.id} className="rounded-xl p-3 text-sm ring-1 ring-slate-200 dark:ring-white/10">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <b className="font-semibold">{r.merchant}</b>
+                    <a href={restaurantUrl(r.merchant_id)} className="font-semibold text-[var(--viz-1)] hover:underline">{r.merchant}</a>
                     <span className="text-xs text-slate-600 dark:text-zinc-400">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)} · signalé {ago(r.reported_at)}</span>
                   </div>
                   <p className="mt-1 break-words">{r.comment || <i className="text-slate-500">(sans commentaire)</i>}</p>
                   <p className="mt-1 text-xs text-slate-500 dark:text-zinc-400">{r.author_name} · avis du {dateTime(r.created_at)}</p>
+                  <ModerationButtons reviewId={r.id} reported onDone={reload} />
                 </li>
               ))}
             </ul>

@@ -172,6 +172,7 @@ export const confidentialite: LegalDoc = {
             { title: "Stories", detail: "Publiques 24 heures, puis visibles par leur seul restaurateur ; supprimées avec leur photo 30 jours après leur fin." },
             { title: "Fréquentation du site (identifiant d'appareil tiré au hasard)", detail: "13 mois." },
             { title: "Rapports de bugs (sans identifiant)", detail: "90 jours." },
+            { title: "Décisions de modération des avis (avis supprimé ou gardé, par qui)", detail: "13 mois." },
             { title: "QR codes de visite", detail: "Valables 75 secondes, effacés au bout d'un jour." },
             { title: "Visites validées au restaurant (QR code)", detail: "13 mois." },
             { title: "Tentatives d'inscription (empreinte IP)", detail: "2 jours." },

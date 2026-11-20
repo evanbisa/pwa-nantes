@@ -12,7 +12,7 @@ export type ErrorItem = {
 };
 
 export type PendingMerchant = {
-  name: string; status: "no_fiche" | "draft" | "awaiting_docs" | "suspended"; created_at: string; email: string | null;
+  id: string | null; name: string; status: "no_fiche" | "draft" | "awaiting_docs" | "suspended"; created_at: string; email: string | null;
   siret: boolean; docs: boolean; honor: boolean; subscription: string | null;
 };
 
@@ -60,7 +60,7 @@ export type Data = {
     reviews_period: number; rating_period: number | null; replied_period: number; follows_period: number; likes_period: number;
     notifs_period: number; pushed_period: number; qr_visits: number; qr_with_promo: number;
   };
-  reported_reviews: { id: string; merchant: string; rating: number; comment: string | null; author_name: string | null; created_at: string; reported_at: string }[];
+  reported_reviews: { id: string; merchant_id: string; merchant: string; rating: number; comment: string | null; author_name: string | null; created_at: string; reported_at: string }[];
   errors: { occurrences: number; server: number; distinct: number; new_24h: number; today: number };
   errors_daily: (Day & { js: number; server: number })[];
   error_list: ErrorItem[];
@@ -72,6 +72,13 @@ export const DB_LIMIT = 500 * 1024 ** 2;
 export const STORAGE_LIMIT = 1024 ** 3;
 export const SUPABASE_PROJECT = "fnypgfyxbyaqrnklhjxc";
 export const REPO = "https://github.com/evanbisa/pwa-nantes";
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+/** Pages de l'équipe : tableau de bord, liste des restaurants, fiche d'un restaurant. */
+export const DASHBOARD_URL = `${BASE}/tableau-de-bord/`;
+export const RESTAURANTS_URL = `${BASE}/tableau-de-bord/restaurants/`;
+export const restaurantUrl = (id: string) => `${RESTAURANTS_URL}?id=${id}`;
+/** La carte (site principal), et la fiche d'un restaurant sur la carte. */
+export const MAP_URL = `${BASE}/../`;
 
 const nf = new Intl.NumberFormat("fr-FR");
 export const n = (v: number | null | undefined) => nf.format(v ?? 0);

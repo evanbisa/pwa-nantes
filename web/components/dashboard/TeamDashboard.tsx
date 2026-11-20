@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
 import { siteClient } from "@/lib/supabase/site-session";
-import { dayLabel, type Data } from "./data";
+import { MAP_URL, RESTAURANTS_URL, dayLabel, type Data } from "./data";
 import { alerts, type Tab } from "./alerts";
 import { Notice, Shell, Centered } from "./ui";
 import { Overview, Restaurants, Server, Users } from "./panels";
@@ -19,7 +19,7 @@ import { Bugs } from "./bugs";
 type State = { status: "loading" } | { status: "signed-out" } | { status: "forbidden" } | { status: "error"; message: string } | { status: "ready"; data: Data };
 
 const PERIODS = [7, 30, 90] as const;
-const MAP = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/../`;
+const MAP = MAP_URL;
 const TABS: { id: Tab; label: string }[] = [
   { id: "overview", label: "Vue d'ensemble" },
   { id: "users", label: "Utilisateurs" },
@@ -138,12 +138,13 @@ function Dashboard() {
             {tab === t.id && <span className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-slate-900 dark:bg-white" />}
           </button>
         ))}
+        <a href={RESTAURANTS_URL} className="ml-auto shrink-0 px-3 py-3 text-sm font-medium whitespace-nowrap text-[var(--viz-1)] hover:underline">Fiches des restaurants →</a>
       </nav>
 
       <div role="tabpanel" className="mt-5">
         {tab === "overview" && <Overview d={d} alerts={list} go={setTab} />}
         {tab === "users" && <Users d={d} />}
-        {tab === "restaurants" && <Restaurants d={d} />}
+        {tab === "restaurants" && <Restaurants d={d} reload={() => load(days)} />}
         {tab === "bugs" && <Bugs d={d} reload={() => load(days)} />}
         {tab === "server" && <Server d={d} />}
       </div>
