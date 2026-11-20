@@ -29,6 +29,7 @@ export const mentionsLegales: LegalDoc = {
             ["TVA intracommunautaire", LEGAL.vatNumber],
             ["Téléphone", LEGAL.phone],
             ["E-mail", `{{${LEGAL.email}|mailto:${LEGAL.email}}}`],
+            ["Instagram", `{{@${LEGAL.instagram}|https://www.instagram.com/${LEGAL.instagram}/}}`],
           ],
         },
       ],

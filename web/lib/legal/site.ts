@@ -19,6 +19,8 @@ export const LEGAL = {
   vatNumber: "[NUMÉRO_TVA_INTRACOMMUNAUTAIRE]",
   phone: "[TÉLÉPHONE]",
   email: "flashmiampro@gmail.com",
+  /** Compte Instagram (sans @) */
+  instagram: "flashmiam85",
   publicationDirector: "[DIRECTEUR_DE_LA_PUBLICATION]",
 
   // ----- Abonnements restaurateurs (CGV) : mêmes prix que la table billing_plans de la base et que le site -----
