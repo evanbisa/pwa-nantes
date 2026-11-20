@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-dFYrhhqx8mmLCuZiCPP6Sdhazu5BS4+QKm5NiQ8U6Dk=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5p8IZ5+q2i1Xjg/prPDD0c9DYNqgSirtND4g09yCGUk=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-bDM5Zn6IJBIIo2zyJ2DbAEYw8mi7bnQHkEF0KtbslwI=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -2154,6 +2154,27 @@
     .shop-actions .act[aria-pressed="true"] svg { color: var(--on-accent); background: var(--accent); }
     .shop-actions .act:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     @media (min-width: 900px) { .shop-actions { flex-wrap: nowrap; } }
+
+    /* ----- Public élargi : moments de la journée, titres-restaurant, mes lieux ----- */
+    .place-chip { gap: 4px; }
+    .place-chip.is-place { color: var(--accent); border-color: var(--accent-line); }
+    .pc-caret { font-size: 10px; opacity: .7; }
+    .mv-row .mv-ico { flex: none; width: 24px; text-align: center; font-size: 17px; }
+    .pl-mv { margin-top: 12px; }
+    .places-list { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+    .place-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px 6px 6px; border-radius: 16px; background: var(--hover); }
+    .place-pick { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 6px; text-align: left; border-radius: 12px; }
+    .place-ico { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; background: var(--panel-solid); }
+    .place-txt { flex: 1; min-width: 0; display: grid; }
+    .place-txt b { font-weight: 500; font-size: 15px; }
+    .place-txt small { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .place-dot { flex: none; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line-strong); }
+    .place-pick[aria-checked="true"] .place-dot { border: 6px solid var(--accent); }
+    .place-del { width: 34px; height: 34px; font-size: 20px; }
+    .places-edit { margin-top: 14px; }
+    .places-edit[hidden] { display: none; }
+    .places-privacy { margin-top: 14px; }
+    .place-pin { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; font-size: 18px; background: var(--panel-solid); border: 3px solid var(--accent); box-shadow: 0 2px 6px rgba(0, 0, 0, .3); pointer-events: none; }
   </style>
 </head>
 
@@ -2254,9 +2275,14 @@
   <!-- ===================== FILTRES (téléphone : en bas ; ordinateur : déplacés dans le panneau) ===================== -->
   <nav class="filters ui" id="filters" aria-label="Filtrer les commerces">
     <div class="filters-track" id="filters-track">
+      <button class="chip glass place-chip" type="button" id="place-chip" aria-haspopup="dialog"><span id="place-chip-lbl">📍 Ma position</span><span class="pc-caret" aria-hidden="true">▾</span></button>
       <button class="chip glass" type="button" id="open-only" aria-pressed="false"><span class="dot-green" aria-hidden="true"></span>Ouverts</button>
       <button class="chip glass" type="button" id="promo-only" aria-pressed="false">🎁 Promos</button>
       <button class="chip glass" type="button" id="rated-only" aria-pressed="false">⭐ 4 et +</button>
+      <button class="chip glass" type="button" data-when="lunch" aria-pressed="false">☀️ Midi</button>
+      <button class="chip glass" type="button" data-when="evening" aria-pressed="false">🌙 Ce soir</button>
+      <button class="chip glass" type="button" data-when="weekend" aria-pressed="false">🥞 Ce week-end</button>
+      <button class="chip glass" type="button" id="mv-only" aria-pressed="false">🎫 Titres-resto</button>
       <span class="chip-sep" aria-hidden="true"></span>
       <button class="chip glass" type="button" data-cat="all" aria-pressed="true">Tout</button>
       <button class="chip glass" type="button" data-cat="Food-truck" aria-pressed="false">🚚 Food-truck</button>
@@ -2352,6 +2378,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM9 21l2-6 2.5 2.5V21M8 12l2-4.5 3.5 1 2 3.5 2.5 1M10 7.5L7.5 9 7 12"/></svg>
         <span id="shop-distance"></span>
       </li>
+      <li id="shop-mv-row" class="mv-row" hidden><span class="mv-ico" aria-hidden="true">🎫</span><span>Titres-restaurant acceptés</span></li>
       <li id="shop-phone-row" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.4 1.8.7 2.7a2 2 0 01-.5 2.1L8 9.8a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.7.7a2 2 0 011.7 2z"/></svg>
         <a id="shop-phone" href="#"></a>
@@ -2544,6 +2571,9 @@
     <div class="budget offers-kinds" id="offers-kinds" role="group" aria-label="Type d'offre">
       <button class="chip" type="button" data-kind="" aria-pressed="true">Toutes</button>
       <button class="chip" type="button" data-kind="day" aria-pressed="false">⏱️ Du jour</button>
+      <button class="chip" type="button" data-kind="lunch" aria-pressed="false">🍽️ Midi</button>
+      <button class="chip" type="button" data-kind="afterwork" aria-pressed="false">🍻 Afterwork</button>
+      <button class="chip" type="button" data-kind="weekend" aria-pressed="false">🥞 Week-end</button>
       <button class="chip" type="button" data-kind="week" aria-pressed="false">📅 De la semaine</button>
       <button class="chip" type="button" data-kind="student" aria-pressed="false">🎓 Étudiantes</button>
       <button class="chip" type="button" data-kind="other" aria-pressed="false">🎁 Bons plans</button>
@@ -2551,6 +2581,32 @@
     <label class="check offers-open"><input type="checkbox" id="offers-open" /> Restaurants ouverts maintenant</label>
     <ul class="offers-list" id="offers-list"></ul>
     <p class="offers-empty" id="offers-empty" hidden></p>
+  </section>
+
+  <!-- ===================== MES LIEUX : distances depuis ma position, le travail ou l'école ===================== -->
+  <section id="places-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="places-title" aria-hidden="true">
+    <button class="sheet-grab" type="button" data-close aria-label="Fermer"></button>
+    <div class="sheet-head">
+      <div class="sheet-emoji" aria-hidden="true">📍</div>
+      <div class="sheet-title">
+        <h3 id="places-title">Distances depuis…</h3>
+        <p class="eyebrow">Les restaurants et les offres les plus proches de ce lieu d'abord.</p>
+      </div>
+      <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
+    </div>
+    <ul class="places-list" id="places-list" role="radiogroup" aria-label="Point de départ des distances"></ul>
+    <div class="places-edit" id="places-edit" hidden>
+      <label class="field">
+        <span id="places-edit-label">Adresse</span>
+        <div class="addr-wrap">
+          <input id="places-input" type="text" autocomplete="off" placeholder="Ex. : 10 rue de la Poste, ou le nom de l'école" role="combobox" aria-autocomplete="list" aria-controls="places-sugg" aria-expanded="false" />
+          <ul class="addr-list" id="places-sugg" role="listbox" hidden></ul>
+        </div>
+        <small class="addr-status" id="places-status">Tapez au moins 3 lettres.</small>
+      </label>
+      <button class="link-btn" type="button" id="places-cancel">Annuler</button>
+    </div>
+    <p class="hint places-privacy">🔒 Vos lieux sont gardés seulement sur cet appareil : ils ne sont jamais envoyés à FlashMiam.</p>
   </section>
 
   <!-- ===================== NOTIFICATIONS ===================== -->
@@ -2603,6 +2659,7 @@
     <div class="pf-group">
       <div class="pf-row"><span class="pf-ico" aria-hidden="true">📷</span><span class="pf-k">Photo de profil<small id="profile-photo-state"></small></span><button class="pf-link" type="button" id="profile-photo-remove" hidden>Retirer</button><button class="pf-pill" type="button" id="profile-photo-pick">Choisir</button></div>
       <div class="pf-row" id="profile-about-row" hidden><span class="pf-ico" aria-hidden="true">👤</span><span class="pf-k">Vous<small id="profile-about"></small></span><button class="pf-link" type="button" id="profile-about-edit" aria-label="Modifier votre sexe et votre âge">Modifier</button></div>
+      <button class="pf-row" type="button" id="profile-places"><span class="pf-ico" aria-hidden="true">🏢</span><span class="pf-k">Mes lieux (travail, école)<small id="profile-places-sub">Pour voir ce qui est proche du bureau ou de l'école</small></span><span class="pf-chev" aria-hidden="true">›</span></button>
       <div class="pf-row"><span class="pf-ico" aria-hidden="true">📍</span><span class="pf-k">Localisation<small id="profile-geo"></small></span><button class="pf-pill" type="button" id="profile-locate">Activer</button></div>
     </div>
 
@@ -3307,7 +3364,8 @@
           <input id="pl-phone" type="tel" inputmode="tel" maxlength="20" placeholder="02 51 00 00 00" />
           <small class="field-error" id="err-pl-phone" aria-live="polite"></small>
         </label>
-        <p class="hint">Vos promotions (du jour, de la semaine, offre étudiante…) et vos stories se publient ensuite depuis votre espace restaurateur.</p>
+        <label class="check pl-mv"><input type="checkbox" id="pl-mv" /> J'accepte les titres-restaurant (papier ou carte)</label>
+        <p class="hint">Vos promotions (formule midi, afterwork, week-end, offre étudiante…) et vos stories se publient ensuite depuis votre espace restaurateur.</p>
 
         <p class="form-error" id="err-pro-listing" role="alert"></p>
         <button class="btn btn-primary" type="submit"><span data-mode="create">Publier sur la carte</span><span data-mode="edit">Enregistrer les modifications</span></button>
@@ -3583,8 +3641,11 @@
     week:    { icon: '📅', label: 'Promo de la semaine', short: 'De la semaine' },
     student: { icon: '🎓', label: 'Offre étudiante', short: 'Étudiante' },
     other:   { icon: '🎁', label: 'Bon plan', short: 'Bon plan' },
+    lunch:     { icon: '🍽️', label: 'Formule midi', short: 'Midi' },
+    afterwork: { icon: '🍻', label: 'Afterwork / happy hour', short: 'Afterwork' },
+    weekend:   { icon: '🥞', label: 'Ce week-end', short: 'Week-end' },
   };
-  const PROMO_ORDER = ['day', 'week', 'student', 'other'];
+  const PROMO_ORDER = ['day', 'lunch', 'afterwork', 'weekend', 'week', 'student', 'other'];
   const MAX_PROMOS = 6;
   const STORY_TTL = 24 * 3600 * 1000;      // une story reste visible 24 h
   const STORY_DURATION = 6000;             // durée d'affichage d'une story
@@ -3600,7 +3661,7 @@
   /** Fin automatique : ce soir (promo du jour), dimanche soir (promo de la semaine) ; sinon aucune. */
   function promoAutoEnd(kind, now = new Date()) {
     if (kind === 'day') return endOfDay(now);
-    if (kind === 'week') { const e = endOfDay(now); e.setDate(e.getDate() + ((7 - e.getDay()) % 7)); return e; }
+    if (kind === 'week' || kind === 'weekend') { const e = endOfDay(now); e.setDate(e.getDate() + ((7 - e.getDay()) % 7)); return e; }
     return null;
   }
   // Commerces de démonstration : quelques stories et promotions, datées par rapport à maintenant
@@ -3617,7 +3678,7 @@
     add('gaufres-marche',
       [story('gaufres-1', 5, 'berry', 'Nouveau : la gaufre Nutella-banane 🍌')],
       [{ id: 'demo-p3', kind: 'week', title: '2 gaufres = 1 chocolat chaud offert', endsAt: promoAutoEnd('week').toISOString() }]);
-    SHOPS.forEach((sh) => { sh.isDemo = true; });
+    SHOPS.forEach((sh) => { sh.isDemo = true; sh.mealVouchers = ['camion-napoleon', 'kebab-clemenceau', 'burger-halles'].includes(sh.id); });
   })();
 
   /** Codes NAF acceptés pour un restaurateur (nomenclature NAF rév. 2 de l'INSEE). */
@@ -3890,7 +3951,7 @@
       id: m.id, ownerId: m.user_id, name: m.name, category: CAT_FROM_DB[m.category] || 'Autre', description: m.description || '',
       photos: m.photos_urls || [], menu: m.menu_json || [], address: m.address || '', coords: m.lat != null ? [m.lng, m.lat] : null,
       hours: hours.services || [], closedOn: hours.closed_on || [], phone: m.phone || '',
-      status: m.status, isOpen: m.is_open !== false, published: m.status === 'published' && m.is_open && m.lat != null, isTest: !!m.is_test, honorAt: m.honor_at,
+      status: m.status, isOpen: m.is_open !== false, mealVouchers: !!m.accepts_meal_vouchers, published: m.status === 'published' && m.is_open && m.lat != null, isTest: !!m.is_test, honorAt: m.honor_at,
       publishedAt: m.published_at, updatedAt: m.updated_at, promos: promos.map(promoFromRow), stories: stories.map(storyFromRow),
       rating: rating && rating.count ? rating : null,
     };
@@ -5362,7 +5423,7 @@
      ===================================================================== */
 
   const markers = new Map();          // id → { shop, marker, el, status }
-  const filters = { category: 'all', openOnly: false, promoOnly: false, ratedOnly: false, query: '', q: [], max: null };
+  const filters = { category: 'all', openOnly: false, promoOnly: false, ratedOnly: false, when: '', mvOnly: false, query: '', q: [], max: null };
   let selectedId = null;
 
   function createShopMarker(shop) {
@@ -5450,8 +5511,27 @@
     Offers.refresh();
   }
 
+  /** Le restaurant est-il ouvert à un moment entre `from` et `to` (minutes depuis minuit) le jour `day` (0 = dimanche) ? */
+  function openDuring(shop, day, from, to) {
+    if (shop.closedTemporarily || (shop.closedOn || []).includes(day)) return false;
+    return (shop.hours || []).some(([a, b]) => { const s0 = toMin(a); let e0 = toMin(b); if (e0 <= s0) e0 += 1440; return s0 < to && e0 > from; });
+  }
+  /**
+   * Moments de la journée : ouvert ce midi (12 h - 14 h), ce soir (19 h - 22 h), ce week-end (samedi ou dimanche) ; ou une
+   * offre de ce moment (formule midi, afterwork, promo du week-end).
+   */
+  const WHEN = {
+    lunch: { promo: 'lunch', ok: (sh, d) => openDuring(sh, d.getDay(), 720, 840) },
+    evening: { promo: 'afterwork', ok: (sh, d) => openDuring(sh, d.getDay(), 1140, 1320) },
+    weekend: { promo: 'weekend', ok: (sh) => openDuring(sh, 6, 0, 1440) || openDuring(sh, 0, 0, 1440) },
+  };
+  const matchesWhen = (shop) => {
+    const w = WHEN[filters.when];
+    return !w || w.ok(shop, new Date()) || activePromos(shop).some((p) => p.kind === w.promo);
+  };
   const matchesFilters = (m) =>
     (filters.category === 'all' || m.shop.category === filters.category) &&
+    matchesWhen(m.shop) && (!filters.mvOnly || !!m.shop.mealVouchers) &&
     (!filters.openOnly || m.status.open) &&
     (!filters.promoOnly || activePromos(m.shop).length > 0) &&
     (!filters.ratedOnly || !!(m.shop.rating && m.shop.rating.avg >= 4)) &&
@@ -5467,9 +5547,13 @@
   }
 
   let listSignature = '';
+  /** Lieu choisi comme point de départ des distances (travail, école), ou null pour ma position. Voir Places. */
+  let activePlace = null;
+  /** Point de départ des distances : le lieu choisi (travail, école), sinon ma position. */
+  function here() { return activePlace ? activePlace.coords : Geo.position; }
   function renderList() {
     const all = [...markers.values()];
-    const items = all.filter(matchesFilters).map((m) => ({ m, d: Geo.position ? distance(Geo.position, m.shop.coords) : null }));
+    const items = all.filter(matchesFilters).map((m) => ({ m, d: here() ? distance(here(), m.shop.coords) : null }));
     items.sort((a, b) => (a.d !== null ? a.d - b.d : (b.m.status.open - a.m.status.open) || a.m.shop.name.localeCompare(b.m.shop.name)));
 
     if (view) requestAnimationFrame(declutterLabels);
@@ -5555,6 +5639,16 @@
     } else if (chip.id === 'rated-only') {
       filters.ratedOnly = !filters.ratedOnly;
       chip.setAttribute('aria-pressed', String(filters.ratedOnly));
+    } else if (chip.id === 'mv-only') {
+      filters.mvOnly = !filters.mvOnly;
+      chip.setAttribute('aria-pressed', String(filters.mvOnly));
+    } else if (chip.dataset.when) {
+      // Midi, Ce soir, Ce week-end : un seul moment à la fois (toucher le même le retire)
+      filters.when = filters.when === chip.dataset.when ? '' : chip.dataset.when;
+      document.querySelectorAll('.chip[data-when]').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.when === filters.when)));
+    } else if (chip.id === 'place-chip') {
+      Places.open();
+      return;
     } else {
       filters.category = chip.dataset.cat;
       document.querySelectorAll('.chip[data-cat]').forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
@@ -5631,7 +5725,7 @@
     function run(query, max = null) {
       const q = parse(query);
       const all = [...markers.values()];
-      const d = (m) => (Geo.position ? distance(Geo.position, m.shop.coords) : Infinity);
+      const d = (m) => (here() ? distance(here(), m.shop.coords) : Infinity);
       const dishes = [];
       if (q.length || max !== null) all.forEach((m) => dishesOf(m.shop, q, max).forEach((hit) => dishes.push({ ...hit, m })));
       dishes.sort((a, b) => b.score - a.score || (b.m.status.open - a.m.status.open) || (d(a.m) - d(b.m)) || a.item.price - b.item.price);
@@ -5703,7 +5797,7 @@
     const res = Search.run(query, max);
     const title = (text) => { const h = document.createElement('h3'); h.className = 'sr-title'; h.textContent = text; box.appendChild(h); };
     const status = (m) => statusTag(m.status);
-    const dist = (m) => (Geo.position ? ' · ' + formatDistance(distance(Geo.position, m.shop.coords)) : '');
+    const dist = (m) => (here() ? ' · ' + formatDistance(distance(here(), m.shop.coords)) : '');
     if (!res.q.length && max === null) {
       title('Idées');
       const ideas = document.createElement('div');
@@ -6114,13 +6208,152 @@
     return { render, refresh, cache };
   })();
 
+  /* ---------- Mes lieux : distances depuis ma position, le travail ou l'école ---------- */
+  /**
+   * Lieux enregistrés sur l'appareil seulement (jamais envoyés à FlashMiam) : travail et école / études. Le lieu choisi
+   * remplace la position pour les distances, le tri de la liste et des offres, et la fiche (« depuis le travail »).
+   */
+  const PLACE_KINDS = {
+    work: { icon: '🏢', label: 'Travail', from: 'depuis le travail', hint: 'Adresse de votre travail' },
+    school: { icon: '🎓', label: 'École / études', from: 'depuis l\'école', hint: 'Adresse de votre école, fac ou lieu d\'études' },
+  };
+  const Places = (() => {
+    const KEY = 'flashmiam:places';
+    let data = { active: 'here' };
+    try { data = { active: 'here', ...(JSON.parse(localStorage.getItem(KEY)) || {}) }; } catch (e) { /* stockage indisponible */ }
+    let editing = null, seq = 0, timer = 0, marker = null;
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* gardé le temps de la visite */ } };
+    const active = () => (data.active !== 'here' && data[data.active] ? { ...data[data.active], ...PLACE_KINDS[data.active], key: data.active } : null);
+    function drawMarker() {
+      const a = active();
+      if (marker) { marker.remove(); marker = null; }
+      if (!a || !view) return;
+      const el = document.createElement('div');
+      el.className = 'place-pin';
+      el.textContent = a.icon;
+      el.title = a.label;
+      marker = view.addMarker(el, a.coords, 'center', { interactive: false });
+    }
+    function sync() {
+      const a = activePlace = active();
+      $('place-chip-lbl').textContent = a ? a.icon + ' ' + a.label : '📍 Ma position';
+      $('place-chip').classList.toggle('is-place', !!a);
+      $('place-chip').setAttribute('aria-label', 'Distances depuis : ' + (a ? a.label : 'ma position') + ' (changer)');
+      const n = ['work', 'school'].filter((k) => data[k]).length;
+      $('profile-places-sub').textContent = n ? ['work', 'school'].filter((k) => data[k]).map((k) => PLACE_KINDS[k].icon + ' ' + data[k].name).join(' · ') : 'Pour voir ce qui est proche du bureau ou de l\'école';
+      whenMapReady(drawMarker);
+      listSignature = '';
+      renderList();
+      Offers.refresh();
+      if (selectedId && markers.get(selectedId)) renderShop(markers.get(selectedId));
+    }
+    function use(key) {
+      data.active = key;
+      save();
+      sync();
+      render();
+      const a = active();
+      if (a) whenMapReady(() => view.flyTo({ center: a.coords, zoom: Math.max(view.getZoom(), 15.5), duration: 1200 }));
+      else if (Geo.position) whenMapReady(() => view.flyTo({ center: Geo.position, zoom: Math.max(view.getZoom(), 15.5), duration: 1200 }));
+      else requestLocation({ fly: true, fromButton: true });
+    }
+    function render() {
+      const ul = $('places-list');
+      ul.textContent = '';
+      const row = (key, icon, title, sub, { set = true } = {}) => {
+        const li = document.createElement('li');
+        li.className = 'place-row';
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'place-pick';
+        b.setAttribute('role', 'radio');
+        b.setAttribute('aria-checked', String(data.active === key && (key === 'here' || !!data[key])));
+        b.innerHTML = '<span class="place-ico" aria-hidden="true"></span><span class="place-txt"><b></b><small></small></span><span class="place-dot" aria-hidden="true"></span>';
+        b.querySelector('.place-ico').textContent = icon;
+        b.querySelector('b').textContent = title;
+        b.querySelector('small').textContent = sub;
+        b.addEventListener('click', () => (key === 'here' || data[key] ? use(key) : edit(key)));
+        li.appendChild(b);
+        if (key !== 'here' && set) {
+          const e = document.createElement('button');
+          e.type = 'button';
+          e.className = 'pill-btn';
+          e.textContent = data[key] ? 'Modifier' : 'Ajouter';
+          e.setAttribute('aria-label', (data[key] ? 'Modifier ' : 'Ajouter ') + PLACE_KINDS[key].label.toLowerCase());
+          e.addEventListener('click', () => edit(key));
+          li.appendChild(e);
+          if (data[key]) {
+            const x = document.createElement('button');
+            x.type = 'button';
+            x.className = 'icon-btn place-del';
+            x.innerHTML = '&times;';
+            x.setAttribute('aria-label', 'Retirer ' + PLACE_KINDS[key].label.toLowerCase());
+            x.addEventListener('click', () => { delete data[key]; if (data.active === key) data.active = 'here'; save(); sync(); render(); });
+            li.appendChild(x);
+          }
+        }
+        ul.appendChild(li);
+      };
+      row('here', '📍', 'Ma position', Geo.position ? 'Position de votre téléphone' : 'Activez la localisation pour l\'utiliser');
+      Object.entries(PLACE_KINDS).forEach(([k, pk]) => row(k, pk.icon, pk.label, data[k] ? data[k].label : 'Pas encore enregistré'));
+    }
+    function edit(key) {
+      editing = key;
+      $('places-edit').hidden = false;
+      $('places-edit-label').textContent = PLACE_KINDS[key].hint;
+      $('places-input').value = '';
+      $('places-sugg').hidden = true;
+      $('places-status').textContent = 'Tapez au moins 3 lettres.';
+      setTimeout(() => $('places-input').focus(), 60);
+    }
+    function closeEdit() { editing = null; $('places-edit').hidden = true; $('places-sugg').hidden = true; }
+    function choose(item) {
+      data[editing] = { label: item.label, name: item.name, coords: item.coords };
+      const key = editing;
+      closeEdit();
+      use(key);
+      toast(PLACE_KINDS[key].label + ' enregistré sur cet appareil.');
+    }
+    $('places-input').addEventListener('input', () => {
+      clearTimeout(timer);
+      const q = $('places-input').value.trim();
+      if (q.length < 3) { $('places-sugg').hidden = true; $('places-status').textContent = 'Tapez au moins 3 lettres.'; return; }
+      timer = setTimeout(async () => {
+        const mine = ++seq;
+        let items = [];
+        try { items = await geocode(q); } catch (e) { if (mine === seq) $('places-status').textContent = 'Recherche d\'adresse indisponible pour le moment. Réessayez dans un instant.'; return; }
+        if (mine !== seq) return;
+        const list = $('places-sugg');
+        list.textContent = '';
+        items.forEach((item, i) => {
+          const li = document.createElement('li');
+          li.setAttribute('role', 'option');
+          li.id = 'pl-sugg-' + i;
+          li.textContent = item.label;
+          li.addEventListener('click', () => choose(item));
+          list.appendChild(li);
+        });
+        list.hidden = !items.length;
+        $('places-input').setAttribute('aria-expanded', String(!!items.length));
+        $('places-status').textContent = items.length ? 'Choisissez l\'adresse dans la liste.' : 'Aucune adresse trouvée à La Roche-sur-Yon et autour.';
+      }, 250);
+    });
+    $('places-input').addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); const f = $('places-sugg').querySelector('li'); if (f) f.click(); } });
+    $('places-cancel').addEventListener('click', closeEdit);
+    function open() { closeEdit(); render(); openPanel($('places-sheet'), { modal: true }); }
+    $('profile-places').addEventListener('click', () => { closePanel($('profile-sheet'), { silent: true }); open(); });
+    activePlace = active();
+    setTimeout(sync, 0);
+    return { open, active, sync };
+  })();
+
   /* ---------- Offres autour de moi : promotions en cours, de la plus proche à la plus lointaine ---------- */
   const Offers = (() => {
     let kind = '', openOnly = false;
     const isOpen = () => $('offers-sheet').classList.contains('is-open');
     /** Toutes les offres en cours, avec leur restaurant et la distance (depuis ma position, sinon le centre-ville). */
     function list() {
-      const from = Geo.position || CONFIG.center;
+      const from = here() || CONFIG.center;
       const out = [];
       markers.forEach((m) => activePromos(m.shop).forEach((p) => out.push({ p, m, d: distance(from, m.shop.coords) })));
       return out.sort((a, b) => a.d - b.d || PROMO_ORDER.indexOf(a.p.kind) - PROMO_ORDER.indexOf(b.p.kind));
@@ -6134,7 +6367,7 @@
     function render() {
       const all = list();
       const items = all.filter(({ p, m }) => (!kind || p.kind === kind) && (!openOnly || m.status.open));
-      const located = !!Geo.position;
+      const located = !!here();
       $('offers-geo').hidden = located;
       const geoState = locateBtn.dataset.state;
       $('offers-geo-text').textContent = geoState === 'searching' ? 'Recherche de votre position…'
@@ -6843,6 +7076,7 @@
     $('shop-phone-row').hidden = !shop.phone;
     if (shop.phone) { $('shop-phone').textContent = formatPhone(shop.phone); $('shop-phone').href = 'tel:' + compactPhone(shop.phone); }
     $('shop-call').hidden = !shop.phone;
+    $('shop-mv-row').hidden = !shop.mealVouchers;
     if (shop.phone) { $('shop-call').href = 'tel:' + compactPhone(shop.phone); $('shop-call').setAttribute('aria-label', 'Appeler ' + shop.name); }
     renderGallery(shop);
     renderMenu(shop);
@@ -6856,12 +7090,14 @@
     $('shop-hours').textContent = formatHours(shop);
 
     const dist = $('shop-distance');
-    if (Geo.position) {
-      const d = distance(Geo.position, shop.coords);
+    if (here()) {
+      const d = distance(here(), shop.coords);
       dist.innerHTML = '<b></b> · environ <b></b> à pied<span class="travel">🚗 environ <b></b> en voiture</span>';
       const [km, walk, car] = dist.querySelectorAll('b');
       km.textContent = formatDistance(d);
       walk.textContent = formatMinutes(walkMinutes(d));
+      const fromPlace = Places.active();
+      if (fromPlace) km.textContent += ' ' + fromPlace.from;
       car.textContent = formatMinutes(driveMinutes(d));
       // À deux pas (moins de 10 min à pied) : le temps en voiture n'apporte rien (« 1 min en voiture » pour 100 m)
       dist.querySelector('.travel').hidden = walkMinutes(d) < 10;
@@ -7359,8 +7595,8 @@
      * estimé à la vitesse urbaine) ; vide sans position connue.
      */
     function distanceLabel(shop) {
-      if (!Geo.position) return '';
-      const d = distance(Geo.position, shop.coords), walk = walkMinutes(d);
+      if (!here()) return '';
+      const d = distance(here(), shop.coords), walk = walkMinutes(d);
       if (d > 15000) return formatDistance(d);
       return formatDistance(d) + ' · ' + (walk <= 30 ? formatMinutes(walk) + ' à pied' : formatMinutes(driveMinutes(d)) + ' en voiture');
     }
@@ -7620,9 +7856,10 @@
     const auto = promoAutoEnd(kind);
     $('field-pp-end').hidden = !!auto;
     $('pp-end-auto').textContent = kind === 'day' ? 'Affichée aujourd\'hui, retirée automatiquement ce soir à minuit.'
-      : kind === 'week' ? 'Affichée jusqu\'à dimanche soir, puis retirée automatiquement.'
+      : kind === 'week' || kind === 'weekend' ? 'Affichée jusqu\'à dimanche soir, puis retirée automatiquement.'
       : 'Sans date de fin, l\'offre reste affichée jusqu\'à ce que vous la retiriez.';
-    $('pp-title').placeholder = { day: 'Ex. : menu kebab + boisson à 8 €', week: 'Ex. : 2ᵉ burger à -50 %', student: 'Ex. : -15 % sur tout le menu', other: 'Ex. : café offert avant 9 h' }[kind];
+    $('pp-title').placeholder = { day: 'Ex. : menu kebab + boisson à 8 €', week: 'Ex. : 2ᵉ burger à -50 %', student: 'Ex. : -15 % sur tout le menu', other: 'Ex. : café offert avant 9 h',
+      lunch: 'Ex. : plat + dessert + café à 12,90 €', afterwork: 'Ex. : happy hour 18 h - 20 h, -30 % sur les boissons', weekend: 'Ex. : brunch du dimanche à 19 €' }[kind];
   }
   setPromoKind('day');
   $('pp-title').addEventListener('input', () => { setFieldError('pp-title', ''); $('pp-title-count').textContent = $('pp-title').value.length + ' / 60'; });
@@ -9603,6 +9840,7 @@
     const closed = listed ? r.closedOn : [];
     $('pl-closed').querySelectorAll('input').forEach((i) => { i.checked = closed.includes(Number(i.value)); });
     $('pl-phone').value = listed ? r.phone || '' : (me.phone || '');
+    $('pl-mv').checked = !!(listed && r.mealVouchers);
     setMenuScanStatus('', '');
     $('pl-menu').textContent = '';
     ((r && r.menu) || []).forEach((it) => addMenuRow(it));
@@ -10167,6 +10405,7 @@
       name, category: CAT_TO_DB[proDraft.category], description, photos_urls: [...proDraft.photos], menu_json: menu.items,
       address: proDraft.address.label, lng: proDraft.address.coords[0], lat: proDraft.address.coords[1],
       opening_hours: { services: hours, closed_on: closedOn }, phone: phone ? formatPhone(phone) : null, status: 'published',
+      accepts_meal_vouchers: $('pl-mv').checked,
     };
     const submitBtn = ev.submitter || $('form-pro-listing').querySelector('[type=submit]');
     submitBtn.disabled = true;

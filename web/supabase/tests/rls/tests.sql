@@ -188,6 +188,20 @@ select t.fails($$insert into promotions (merchant_id, kind, title, created_at) v
 insert into promotions (merchant_id, kind, title) select 'aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Bon plan ' || g from generate_series(1, 3) g;
 select t.fails($$insert into promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Septième')$$, '7e promotion en cours refusée (6 au maximum)');
 delete from promotions where title like 'Bon plan %';
+-- Nouveaux types (19 novembre 2026) : week-end retiré le dimanche soir ; formule midi et afterwork sans fin imposée
+select t.ok(t.affected($$insert into promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-0000-000000000001', 'weekend', 'Brunch du dimanche')$$) = 1, 'restaurateur : publie une promo du week-end');
+select t.ok((select extract(isodow from (ends_at - interval '1 second') at time zone 'Europe/Paris') = 7 from promotions where kind = 'weekend'), 'promo du week-end : jusqu''à dimanche soir');
+select t.ok(t.affected($$insert into promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-0000-000000000001', 'lunch', 'Formule midi à 11 €')$$) = 1
+  and t.affected($$insert into promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-0000-000000000001', 'afterwork', 'Happy hour 18 h - 20 h')$$) = 1, 'restaurateur : publie une formule midi et un afterwork');
+select t.ok((select count(*) = 2 from promotions where kind in ('lunch', 'afterwork') and ends_at is null), 'formule midi et afterwork : sans fin imposée');
+reset role;
+set role service_role;
+delete from notifications where ref_id in (select id from promotions where kind in ('weekend', 'lunch', 'afterwork'));   -- (sans effet sur la suite)
+delete from promotions where kind in ('weekend', 'lunch', 'afterwork');
+reset role;
+set role authenticated;
+select t.ok(t.affected($$update merchants set accepts_meal_vouchers = true where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 1, 'restaurateur : indique qu''il accepte les titres-restaurant');
+select t.ok(t.affected($$update merchants set accepts_meal_vouchers = true where id = 'aaaaaaaa-0000-0000-0000-000000000002'$$) = 0, 'titres-restaurant : la fiche d''un autre est intouchable');
 select t.ok(t.affected($$insert into stories (merchant_id, background, caption) values ('aaaaaaaa-0000-0000-0000-000000000001', 'ocean', 'Nouveau burger au chèvre ce soir !')$$) = 1, 'restaurateur : publie une story texte');
 select t.ok(t.affected($$insert into stories (merchant_id, image_path, caption) values ('aaaaaaaa-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000001/salle.jpg', 'Notre salle')$$) = 1, 'restaurateur : publie une story photo (dans le dossier de sa fiche)');
 select t.ok((select bool_and(expires_at = created_at + interval '24 hours') from stories), 'story : expire automatiquement au bout de 24 h');
