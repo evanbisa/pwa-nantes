@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-b+0MPG7BRcRVsFV2gy8GM0C7mmkS6URhT/ScqLiDlUc=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-Ft3A8OFYQAEeIyI1p5ejAPmpg4RSf3WJUys4+cdeLlo=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1107,6 +1107,24 @@
     .addr-list li { padding: 10px 12px; border-radius: 8px; font-size: 14px; cursor: pointer; }
     .addr-list li[aria-selected="true"], .addr-list li:hover { background: var(--hover); }
     .addr-list li small { display: block; color: var(--muted); }
+    .addr-list li b { display: block; font-weight: 500; }
+    .places-pin-row { margin: 4px 0 6px; font-size: 13.5px; color: var(--muted); }
+    .places-pin-row .link-btn { font-size: 13.5px; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+    /* Repère à placer soi-même : au milieu de l'écran (centre de la carte), barre de validation en bas */
+    .place-picker { position: fixed; inset: 0; z-index: 95; pointer-events: none; }
+    .place-picker[hidden] { display: none; }
+    .pp-cross { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
+    .pp-cross::before { content: ""; position: absolute; left: -18px; top: -44px; width: 36px; height: 44px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 44'%3E%3Cpath d='M18 43C18 43 33 28 33 17A15 15 0 0 0 3 17C3 28 18 43 18 43Z' fill='%23ff4d2e' stroke='%23fff' stroke-width='3'/%3E%3Ccircle cx='18' cy='17' r='6' fill='%23fff'/%3E%3C/svg%3E") center / contain no-repeat;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .35)); }
+    .pp-cross span { position: absolute; left: -5px; top: -3px; width: 10px; height: 6px; border-radius: 50%; background: rgba(0, 0, 0, .3); }
+    .pp-bar { position: absolute; left: 12px; right: 12px; bottom: calc(var(--safe-bottom) + 12px); max-width: 460px; margin: 0 auto; padding: 14px 16px 16px; border-radius: 20px; pointer-events: auto; background: var(--panel-solid); }
+    .pp-title { margin: 0; font-size: 15px; line-height: 1.4; }
+    .pp-field { margin-top: 10px; }
+    .pp-actions { display: flex; gap: 10px; margin-top: 12px; }
+    .pp-actions .btn { flex: 1; margin: 0; }
+    .pp-actions .btn-primary { flex: 1.6; }
+    body.place-picking .tabbar, body.place-picking .topbar, body.place-picking .scan-fab, body.place-picking #filters, body.place-picking #stories { visibility: hidden; }
     .addr-status { display: block; margin-top: 6px; font-size: 13px; color: var(--green); }
     .addr-status:empty { display: none; }
     .addr-sirene { display: block; margin-top: 6px; font-size: 13px; text-align: left; }
@@ -2819,15 +2837,29 @@
       <label class="field">
         <span id="places-edit-label">Adresse</span>
         <div class="addr-wrap">
-          <input id="places-input" type="text" autocomplete="off" placeholder="Ex. : 10 rue de la Poste, ou le nom de l'école" role="combobox" aria-autocomplete="list" aria-controls="places-sugg" aria-expanded="false" />
+          <input id="places-input" type="text" autocomplete="off" placeholder="Ex. : IUT, lycée Mendès France, Leclerc, 10 rue de la Poste…" role="combobox" aria-autocomplete="list" aria-controls="places-sugg" aria-expanded="false" />
           <ul class="addr-list" id="places-sugg" role="listbox" hidden></ul>
         </div>
         <small class="addr-status" id="places-status">Tapez au moins 3 lettres.</small>
       </label>
+      <p class="places-pin-row">Pas dans la liste ? <button class="link-btn" type="button" id="places-pin">Placer le point moi-même sur la carte</button></p>
       <button class="link-btn" type="button" id="places-cancel">Annuler</button>
     </div>
     <p class="hint places-privacy">🔒 Vos lieux sont gardés seulement sur cet appareil : ils ne sont jamais envoyés à FlashMiam.</p>
   </section>
+
+  <!-- Lieu introuvable : le point est placé à la main, au centre de la carte -->
+  <div class="place-picker" id="place-picker" role="dialog" aria-labelledby="pp-title" hidden>
+    <div class="pp-cross" aria-hidden="true"><span></span></div>
+    <div class="pp-bar glass">
+      <p class="pp-title" id="pp-title">Déplacez la carte pour mettre le repère sur <b id="pp-what">votre école</b>.</p>
+      <label class="field pp-field"><span>Nom du lieu</span><input id="pp-name" type="text" maxlength="60" autocomplete="off" /></label>
+      <div class="pp-actions">
+        <button class="btn btn-ghost" type="button" id="pp-cancel">Annuler</button>
+        <button class="btn btn-primary" type="button" id="pp-ok">Valider ce point</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ===================== NOTIFICATIONS ===================== -->
   <section id="notif-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="notif-title" aria-hidden="true">
@@ -3838,6 +3870,8 @@
     turnstileSiteKey: '',
     // Géocodage des adresses : Géoplateforme de l'IGN (Base Adresse Nationale)
     geocoderApi: 'https://data.geopf.fr/geocodage/search',
+    // Répertoire Sirene (API Recherche d'entreprises) : entreprises, écoles et associations en activité, par nom
+    companiesApi: 'https://recherche-entreprises.api.gouv.fr/search',
     /**
      * Abonnements des restaurateurs, payés sur Whop (whop.com). Prix hors taxes, au mois ou à l'année : ceux de la base
      * (table billing_plans) remplacent ceux-ci dès qu'ils sont lus. Le paiement s'ouvre avec l'interrupteur
@@ -5070,6 +5104,68 @@
         coords: f.geometry && f.geometry.coordinates,
       }))
       .filter((a) => Array.isArray(a.coords) && isInBounds(a.coords));
+  }
+
+  /** Majuscules du répertoire Sirene → « Lycée Pierre Mendès France » (sigles connus gardés en majuscules). */
+  const KEEP_UPPER = new Set(['IUT', 'ICES', 'CCI', 'CFA', 'IFSI', 'IFAS', 'CNAM', 'BTS', 'SNCF', 'EHPAD', 'CHD', 'CHU', 'CAF', 'CPAM', 'URSSAF', 'MFR', 'EDC',
+    'ISEN', 'INSA', 'IAE', 'UFR', 'CNED', 'SAS', 'SASU', 'SARL', 'SA', 'EURL', 'SCI', 'SNC', 'EPF', 'ESEO', 'IFAG', 'AFPA', 'GRETA', 'ECAM', 'CROUS', 'IRSS',
+    'ESSCA', 'ISCOM', 'EFAP', 'ESC', 'IMS', 'ENI', 'IPSSI', 'EPSI', 'IFPS', 'CMA', 'BNP', 'LCL', 'EDF', 'GRDF', 'ENEDIS', 'SDIS', 'ADMR', 'IME', 'ITEP', 'CIO']);
+  const SMALL_WORDS = new Set(['de', 'du', 'des', 'la', 'le', 'les', 'et', 'en', 'sur', 'sous', 'au', 'aux', 'à', 'pour', 'par', 'l', 'd']);
+  function prettyName(text) {
+    const t = String(text || '').trim();
+    if (!t || /[a-zà-ÿ]/.test(t)) return t;   // déjà en minuscules et majuscules : gardé tel quel
+    return t.toLowerCase().replace(/[\p{L}\p{N}]+/gu, (w, i) => {
+      if (KEEP_UPPER.has(w.toUpperCase())) return w.toUpperCase();
+      if (i > 0 && SMALL_WORDS.has(w)) return w;
+      return w.charAt(0).toUpperCase() + w.slice(1);
+    }).replace(/(\d{5} )(\p{L})/u, (m, code, l) => code + l.toUpperCase());   // « 85000 La Roche-sur-Yon »
+  }
+
+  /**
+   * Recherche d'un lieu par son nom ou son adresse, dans trois sources publiques interrogées en même temps :
+   * lieux connus de l'IGN (écoles, collèges, lycées, facs, hôpitaux, mairies…), entreprises et établissements en
+   * activité du répertoire Sirene (tous les employeurs, écoles privées, associations…) et adresses (BAN).
+   * Une source indisponible n'empêche pas les autres de répondre.
+   */
+  async function searchPlaces(query) {
+    const near = { lat: String(CONFIG.center[1]), lon: String(CONFIG.center[0]) };
+    const first = (v) => String((Array.isArray(v) ? v[0] : v) || '').trim();
+    const looksLikeAddress = /^\s*\d/.test(query);
+    const sources = [
+      fetchJson(CONFIG.geocoderApi + '?' + new URLSearchParams({ q: query, index: 'poi', limit: '10', ...near }), 8000).then((d) => (d.features || []).map((f) => {
+        const p = f.properties || {};
+        const name = first(p.toponym) || first(p.name) || first(p.label);
+        const cat = first(p.category);
+        const city = [first(p.postcode), first(p.city)].filter(Boolean).join(' ');
+        return { kind: 'place', name, label: [name, city].filter(Boolean).join(', '), sub: [cat && cat.charAt(0).toUpperCase() + cat.slice(1), city].filter(Boolean).join(' · '), coords: f.geometry && f.geometry.coordinates };
+      })),
+      fetchJson(CONFIG.companiesApi + '?' + new URLSearchParams({
+        q: query, departement: '85', etat_administratif: 'A', per_page: '10', minimal: 'true', include: 'siege,matching_etablissements',
+      }), 8000).then((d) => (d.results || []).flatMap((r) => {
+        const seen = new Set();
+        return [...(r.matching_etablissements || []), r.siege].filter((e) => e && !seen.has(e.siret || e.adresse) && seen.add(e.siret || e.adresse))
+          .filter((e) => e.etat_administratif !== 'F' && e.latitude != null && e.longitude != null)
+          .slice(0, 3)
+          .map((e) => {
+            const name = prettyName(first(e.liste_enseignes) || r.nom_complet || r.nom_raison_sociale);
+            const address = prettyName(e.adresse || [e.code_postal, e.libelle_commune].filter(Boolean).join(' '));
+            return { kind: 'company', name, label: name + (address ? ', ' + address : ''), sub: address, coords: [Number(e.longitude), Number(e.latitude)] };
+          });
+      })),
+      geocode(query).then((items) => items.map((a) => ({ kind: 'address', name: a.name, label: a.label, sub: 'Adresse', coords: a.coords }))),
+    ];
+    const settled = await Promise.allSettled(sources);
+    if (settled.every((r) => r.status === 'rejected')) throw settled[0].reason;
+    const [known, companies, addresses] = settled.map((r) => (r.status === 'fulfilled' ? r.value : []));
+    const ordered = looksLikeAddress ? [...addresses, ...known, ...companies] : [...known, ...companies, ...addresses];
+    const keys = new Set();
+    return ordered.filter((it) => {
+      if (!it.name || !Array.isArray(it.coords) || !it.coords.every(Number.isFinite) || !isInBounds(it.coords)) return false;
+      const key = it.name.toLowerCase() + '|' + it.coords.map((c) => c.toFixed(3)).join(',');
+      if (keys.has(key)) return false;
+      keys.add(key);
+      return true;
+    }).slice(0, 12);
   }
 
   /* ---------- Horaires d'ouverture ---------- */
@@ -6643,8 +6739,8 @@
    * remplace la position pour les distances, le tri de la liste et des offres, et la fiche (« depuis le travail »).
    */
   const PLACE_KINDS = {
-    work: { icon: '🏢', label: 'Travail', from: 'depuis le travail', hint: 'Adresse de votre travail' },
-    school: { icon: '🎓', label: 'École / études', from: 'depuis l\'école', hint: 'Adresse de votre école, fac ou lieu d\'études' },
+    work: { icon: '🏢', label: 'Travail', from: 'depuis le travail', hint: 'Nom de votre entreprise, ou son adresse', mine: 'mon travail' },
+    school: { icon: '🎓', label: 'École / études', from: 'depuis l\'école', hint: 'Nom de votre école, lycée ou fac, ou son adresse', mine: 'mon école' },
   };
   const Places = (() => {
     const KEY = 'flashmiam:places';
@@ -6751,7 +6847,8 @@
       timer = setTimeout(async () => {
         const mine = ++seq;
         let items = [];
-        try { items = await geocode(q); } catch (e) { if (mine === seq) $('places-status').textContent = 'Recherche d\'adresse indisponible pour le moment. Réessayez dans un instant.'; return; }
+        $('places-status').textContent = 'Recherche…';
+        try { items = await searchPlaces(q); } catch (e) { if (mine === seq) $('places-status').textContent = 'Recherche indisponible pour le moment. Réessayez dans un instant, ou placez le point vous-même sur la carte.'; return; }
         if (mine !== seq) return;
         const list = $('places-sugg');
         list.textContent = '';
@@ -6759,17 +6856,62 @@
           const li = document.createElement('li');
           li.setAttribute('role', 'option');
           li.id = 'pl-sugg-' + i;
-          li.textContent = item.label;
+          li.innerHTML = '<b></b><small></small>';
+          li.firstChild.textContent = item.name;
+          li.lastChild.textContent = item.sub || item.label;
           li.addEventListener('click', () => choose(item));
           list.appendChild(li);
         });
         list.hidden = !items.length;
         $('places-input').setAttribute('aria-expanded', String(!!items.length));
-        $('places-status').textContent = items.length ? 'Choisissez l\'adresse dans la liste.' : 'Aucune adresse trouvée à La Roche-sur-Yon et autour.';
-      }, 250);
+        $('places-status').textContent = items.length ? 'Choisissez le lieu dans la liste.' : 'Rien trouvé à La Roche-sur-Yon et autour : essayez un autre nom ou l\'adresse, ou placez le point vous-même sur la carte.';
+      }, 300);
     });
     $('places-input').addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); const f = $('places-sugg').querySelector('li'); if (f) f.click(); } });
     $('places-cancel').addEventListener('click', closeEdit);
+
+    /* Lieu introuvable dans les listes : repère au centre de la carte, que l'on déplace sous le lieu */
+    let picking = null;
+    function startPick() {
+      const key = editing;
+      if (!key) return;
+      picking = key;
+      closeEdit();
+      closePanel($('places-sheet'), { silent: true });
+      $('pp-what').textContent = PLACE_KINDS[key].mine.replace(/^mon /, 'votre ');
+      $('pp-name').value = '';
+      $('pp-name').placeholder = 'Ex. : ' + (key === 'school' ? 'IUT, lycée…' : 'nom de l\'entreprise');
+      $('place-picker').hidden = false;
+      document.body.classList.add('place-picking');
+      // marges de la carte retirées : le centre de la carte est exactement sous le repère (milieu de l'écran)
+      whenMapReady(() => {
+        view.setPadding({ top: 0, bottom: 0, left: 0, right: 0 });
+        const a = data[key] || active();
+        const center = (a && a.coords) || Geo.position || CONFIG.center;
+        view.flyTo({ center, zoom: Math.max(view.getZoom(), 16), duration: 900 });
+      });
+    }
+    function endPick() {
+      picking = null;
+      $('place-picker').hidden = true;
+      document.body.classList.remove('place-picking');
+      whenMapReady(() => view.setPadding(selectedId ? shopPadding() : basePadding()));
+    }
+    $('places-pin').addEventListener('click', startPick);
+    $('pp-cancel').addEventListener('click', () => { endPick(); open(); });
+    $('pp-ok').addEventListener('click', () => whenMapReady(() => {
+      const key = picking;
+      if (!key) return;
+      const coords = view.getCenter();
+      if (!isInBounds(coords)) { toast('Ce point est en dehors de La Roche-sur-Yon et de ses environs.'); return; }
+      const name = $('pp-name').value.trim().replace(/\s+/g, ' ') || PLACE_KINDS[key].mine.charAt(0).toUpperCase() + PLACE_KINDS[key].mine.slice(1);
+      endPick();
+      data[key] = { label: name + ' (point placé sur la carte)', name, coords };
+      use(key);
+      toast(PLACE_KINDS[key].label + ' enregistré sur cet appareil.');
+    }));
+    $('place-picker').addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { ev.preventDefault(); endPick(); open(); } });
+
     function open() { closeEdit(); render(); openPanel($('places-sheet'), { modal: true }); }
     $('profile-places').addEventListener('click', () => { closePanel($('profile-sheet'), { silent: true }); open(); });
     activePlace = active();

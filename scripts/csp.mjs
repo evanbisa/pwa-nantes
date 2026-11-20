@@ -32,7 +32,7 @@ function appPolicy(scriptHashes, mapOrigins = []) {
     `style-src 'self' 'unsafe-inline' ${GOOGLE_SIGN_IN}style`,
     `img-src 'self' data: blob: ${SUPABASE}`,
     "font-src 'self'",
-    `connect-src 'self' ${SUPABASE} ${SUPABASE.replace('https://', 'wss://')} https://tiles.openfreemap.org ${mapOrigins.map((o) => o + ' ').join('')}https://data.geopf.fr ${GOOGLE_SIGN_IN} ${TURNSTILE}`,
+    `connect-src 'self' ${SUPABASE} ${SUPABASE.replace('https://', 'wss://')} https://tiles.openfreemap.org ${mapOrigins.map((o) => o + ' ').join('')}https://data.geopf.fr https://recherche-entreprises.api.gouv.fr ${GOOGLE_SIGN_IN} ${TURNSTILE}`,
     `frame-src ${GOOGLE_SIGN_IN} ${TURNSTILE}`,
     "worker-src 'self' blob:",
     "child-src 'self' blob:",
