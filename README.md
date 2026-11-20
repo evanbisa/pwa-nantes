@@ -29,6 +29,23 @@ https://evanbisa.github.io/pwa-nantes/).
   des vues, à faire, 4 actions rapides, 3 points à retenir) ; statistiques avec un sommaire toujours visible, les
   **visites validées en caisse** (QR codes scannés) et le détail par jour téléchargeable (CSV).
 
+## Moments, titres-restaurant et lieux (novembre 2026)
+
+Pour toucher aussi les jeunes actifs et les trentenaires, pas seulement les étudiants :
+
+- **Types d'offres** : en plus de « du jour », « de la semaine », « étudiante » et « bon plan », le restaurateur peut
+  publier une **formule midi**, un **afterwork / happy hour** et une offre **du week-end** (brunch…), retirée
+  automatiquement le dimanche soir (migration `20261119085900_promo_kinds_meal_vouchers.sql`).
+- **Filtres de la carte** : ☀️ Midi (ouvert entre 12 h et 14 h aujourd'hui, ou formule midi en cours), 🌙 Ce soir
+  (ouvert entre 19 h et 22 h, ou afterwork), 🥞 Ce week-end (ouvert samedi ou dimanche, ou offre du week-end), un seul
+  moment à la fois ; 🎫 Titres-resto (restaurants qui les acceptent).
+- **Titres-restaurant** : case « J'accepte les titres-restaurant » dans la fiche du restaurateur (colonne
+  `merchants.accepts_meal_vouchers`) ; ligne « 🎫 Titres-restaurant acceptés » dans la fiche.
+- **Mes lieux** : le client enregistre son **travail** et son **école / lieu d'études** (adresse cherchée dans la
+  Base Adresse Nationale). Le lieu choisi devient le point de départ des distances (liste, offres, fiche : « 1,5 km
+  depuis l'école »). Puce « 📍 Ma position ▾ » au début des filtres, et « Mes lieux » dans le profil. Les lieux restent
+  **sur l'appareil** (`localStorage`, clé `flashmiam:places`) : rien n'est envoyé au serveur.
+
 ## Visiteurs sans compte
 
 La carte s'ouvre **sans compte** : bouton « Voir la carte → » en haut de l'écran d'accueil (le choix est gardé : les
