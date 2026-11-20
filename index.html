@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-zx/ZVw/wU++SfH/kvwn5bjvMA0mor6Ustq7IYuavwTE=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-HGz4OcOfYt5j2bzZ2nYhC8wQPTLHwxj7D785xnAdE9E=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -285,6 +285,14 @@
     .sb-filters { padding: 0 16px 8px; }
     .sb-filters .filters-track { flex-wrap: wrap; overflow: visible; padding: 0; gap: 6px; }
     .sb-filters .chip { height: 32px; padding: 0 12px; font-size: 13px; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; background: transparent; }
+    .sb-ftoggle { display: flex; align-items: center; gap: 8px; margin: 0 12px 6px; padding: 6px 8px; border-radius: 10px; font: 600 13px var(--font-ui); color: var(--text); text-align: left; min-height: 36px; }
+    .sb-ftoggle:hover { background: var(--hover); }
+    .sb-ftoggle > svg { width: 16px; height: 16px; flex: none; color: var(--muted); }
+    .sb-ft-sum { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; color: var(--accent); }
+    .sb-ft-act { font-weight: 500; color: var(--muted); }
+    .sb-ftoggle .sb-ft-chev { transition: transform .2s; }
+    .sb-ftoggle[aria-expanded="false"] .sb-ft-chev { transform: rotate(180deg); }
+    .sb-filter-box[hidden] { display: none; }
     .sb-count { margin: 6px 20px; font-size: 12px; font-weight: 500; color: var(--muted); }
     .shop-list { list-style: none; margin: 0; padding: 0 8px 12px; overflow-y: auto; flex: 1; scrollbar-width: thin; border-top: 1px solid var(--line); }
     .shop-item { width: 100%; display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 12px; text-align: left; transition: background-color .15s; }
@@ -2394,8 +2402,17 @@
       <input id="search" type="search" placeholder="Un plat, un restaurant…" autocomplete="off" aria-label="Rechercher un plat ou un restaurant" />
       <kbd aria-hidden="true">/</kbd>
     </div>
-    <div class="sb-budget" id="sb-budget-slot"></div>
-    <div class="sb-filters" id="sb-filters-slot"></div>
+    <!-- Filtres repliables : une fois choisis, on les masque pour voir plus de restaurants -->
+    <button class="sb-ftoggle" type="button" id="sb-ftoggle" aria-expanded="true" aria-controls="sb-filter-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>
+      <span class="sb-ft-lbl">Filtres</span><span class="sb-ft-sum" id="sb-ft-sum"></span>
+      <span class="sb-ft-act" id="sb-ft-act">Masquer</span>
+      <svg class="sb-ft-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+    </button>
+    <div class="sb-filter-box" id="sb-filter-box">
+      <div class="sb-budget" id="sb-budget-slot"></div>
+      <div class="sb-filters" id="sb-filters-slot"></div>
+    </div>
     <p class="sb-count" id="shop-count"></p>
     <ul class="shop-list" id="shop-list"></ul>
     <p class="sb-empty" id="shop-empty" hidden>Aucun commerce ne correspond à votre recherche.</p>
@@ -5681,6 +5698,42 @@
   }
   desktopMQ.addEventListener('change', applyLayout);
 
+  /* Panneau (ordinateur) : filtres repliables, avec le rappel des filtres actifs quand ils sont masqués */
+  const FiltersFold = (() => {
+    const KEY = 'flashmiam:filters-folded';
+    const txt = (el) => el.textContent.replace(/\s+/g, ' ').trim();
+    function activeLabels() {
+      const out = [];
+      const b = $('budget').querySelector('[aria-pressed="true"]');
+      if (b && b.dataset.max) out.push(txt(b));
+      const r = $('radius').querySelector('[aria-pressed="true"]');
+      if (r && r.dataset.r) out.push(r.dataset.r === 'custom' ? '≤ ' + $('radius-out').textContent : txt(r));
+      $('filters-track').querySelectorAll('.chip[aria-pressed="true"]').forEach((c) => { if (c.dataset.cat !== 'all' && c.id !== 'place-chip') out.push(txt(c)); });
+      return out;
+    }
+    function render() {
+      const folded = $('sb-ftoggle').getAttribute('aria-expanded') === 'false';
+      const labels = activeLabels();
+      $('sb-ft-sum').textContent = folded ? (labels.length ? '· ' + labels.join(' · ') : '· aucun') : (labels.length ? '· ' + labels.length + ' actif' + (labels.length > 1 ? 's' : '') : '');
+      $('sb-ft-act').textContent = folded ? 'Afficher' : 'Masquer';
+      $('sb-ftoggle').title = folded ? 'Afficher les filtres' : 'Masquer les filtres pour voir plus de restaurants';
+    }
+    function set(folded, remember = true) {
+      $('sb-ftoggle').setAttribute('aria-expanded', String(!folded));
+      $('sb-filter-box').hidden = folded;
+      if (remember) { try { localStorage.setItem(KEY, folded ? '1' : '0'); } catch (e) { /* stockage indisponible */ } }
+      render();
+    }
+    $('sb-ftoggle').addEventListener('click', () => set($('sb-ftoggle').getAttribute('aria-expanded') === 'true'));
+    // Les filtres changent : le rappel suit (après le traitement du clic par les filtres eux-mêmes)
+    ['filters-track', 'budget', 'radius'].forEach((id) => $(id).addEventListener('click', () => setTimeout(render, 0)));
+    $('radius-range').addEventListener('input', render);
+    let saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) { /* stockage indisponible */ }
+    set(saved === '1', false);
+    return { render, set };
+  })();
+
   document.addEventListener('keydown', (ev) => {
     if (ev.key === '/' && isDesktop() && document.activeElement.tagName !== 'INPUT' && document.body.classList.contains('ui-ready')) {
       ev.preventDefault();
@@ -5832,6 +5885,7 @@
     if (view) requestAnimationFrame(declutterLabels);
     const openCount = all.filter((m) => m.status.open).length;
     $('shop-count').textContent = all.length + ' adresses · ' + openCount + ' ouvertes' + (cloud.synced ? '' : ' · mise à jour…');
+    try { FiltersFold.render(); } catch (e) { /* pas encore prêt */ }
     $('shop-empty').hidden = items.length > 0;
 
     const searching = filters.q.length > 0 || filters.max !== null;
