@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-HGz4OcOfYt5j2bzZ2nYhC8wQPTLHwxj7D785xnAdE9E=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-/lkasGoB3VotCoZxuVk2RJD4jZz/RxAasBFqKvIbuow=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -2348,6 +2348,14 @@
     .preview-bar button { flex: none; height: 38px; padding: 0 14px; border-radius: 19px; font-weight: 600; color: var(--accent); background: #fff; }
     body.client-preview { --safe-top: calc(env(safe-area-inset-top, 0px) + 56px); }
     body.client-preview .scan-fab, body.client-preview #profile-btn { display: none !important; }
+
+    /* ----- Recherche (téléphone) : les filtres de la carte au-dessus du budget ----- */
+    .sp-filters:empty { display: none; }
+    .sp-filters .filters-track { padding: 4px 12px 8px; gap: 6px; }
+    .sp-filters .chip { height: 32px; padding: 0 12px; font-size: 13px; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; background: transparent; border: 1px solid var(--line-strong); }
+    .sp-filters .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-line); }
+    body.search-on .backdrop.is-visible { z-index: 70; }
+    body.search-on #places-sheet { z-index: 71; }
   </style>
 </head>
 
@@ -2498,6 +2506,7 @@
         <input id="search-m" type="search" placeholder="Un plat, un restaurant…" autocomplete="off" enterkeyhint="search" aria-label="Rechercher un plat ou un restaurant" aria-controls="search-results" />
       </div>
     </div>
+    <div class="sp-filters" id="sp-filters" role="group" aria-label="Filtres"></div>
     <div class="budget" id="budget" role="group" aria-label="Budget par plat">
       <button class="chip" type="button" data-max="" aria-pressed="true">Tous les prix</button>
       <button class="chip" type="button" data-max="5" aria-pressed="false">≤ 5 €</button>
@@ -2784,7 +2793,7 @@
   </section>
 
   <!-- ===================== MES LIEUX : distances depuis ma position, le travail ou l'école ===================== -->
-  <section id="places-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="places-title" aria-hidden="true">
+  <section id="places-sheet" class="sheet glass" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="places-title" aria-hidden="true">
     <button class="sheet-grab" type="button" data-close aria-label="Fermer"></button>
     <div class="sheet-head">
       <div class="sheet-emoji" aria-hidden="true">📍</div>
@@ -5688,7 +5697,7 @@
     const desktop = isDesktop();
     document.body.classList.toggle('is-desktop', desktop);
     if (desktop) $('sb-brand-slot').prepend($('profile-btn'));
-    (desktop ? $('sb-filters-slot') : $('filters')).appendChild($('filters-track'));
+    (desktop ? $('sb-filters-slot') : !$('search-panel').hidden ? $('sp-filters') : $('filters')).appendChild($('filters-track'));
     (desktop ? $('sb-stories-slot') : $('stories')).appendChild($('stories-track'));
     if (desktop) { $('sb-brand-slot').append($('offers-btn'), $('notif-btn')); $('guest-bar').append($('guest-signup'), $('guest-login')); }
     else $('tabbar').append($('offers-btn'), $('notif-btn'), $('profile-btn'), $('guest-signup'), $('guest-login'));
@@ -5851,17 +5860,46 @@
     evening: { promo: 'afterwork', ok: (sh, d) => openDuring(sh, d.getDay(), 1140, 1320) },
     weekend: { promo: 'weekend', ok: (sh) => openDuring(sh, 6, 0, 1440) || openDuring(sh, 0, 0, 1440) },
   };
+  /**
+   * Filtre Midi / Ce soir / Ce week-end choisi et restaurant fermé maintenant : quand ouvre-t-il pour ce moment ?
+   * Ex. « Fermé · ouvre à 11h30 ce midi », « Fermé · ouvre demain à 12h pour le midi », « Fermé · ouvre samedi à 10h ».
+   * Renvoie l'état tel quel s'il est ouvert, sans filtre de moment, ou sans créneau dans ce moment (offre seule).
+   */
+  function statusForWhen(shop, status, now = new Date()) {
+    const key = filters.when;
+    if (!key || status.open || shop.closedTemporarily) return status;
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const win = key === 'lunch' ? [720, 840] : key === 'evening' ? [1140, 1320] : [0, 1440];
+    for (let off = 0; off < 7; off++) {
+      const day = (now.getDay() + off) % 7;
+      if (key === 'weekend' && day !== 6 && day !== 0) continue;
+      if ((shop.closedOn || []).includes(day)) continue;
+      const starts = (shop.hours || []).map(([a, b]) => { const s0 = toMin(a); let e0 = toMin(b); if (e0 <= s0) e0 += 1440; return [s0, e0]; })
+        .filter(([s0, e0]) => s0 < win[1] && e0 > win[0] && (off > 0 || s0 > nowMin)).map(([s0]) => s0).sort((a, b) => a - b);
+      if (!starts.length) continue;
+      const when = off === 0 ? '' : off === 1 ? 'demain ' : DAYS[day] + ' ';
+      // Ouverture proche du moment : « ouvre à 11h ce midi » ; bien avant (service continu) : « ouvre à 10h (ouvert ce soir) »
+      const name = key === 'lunch' ? (off === 0 ? 'ce midi' : 'le midi') : key === 'evening' ? (off === 0 ? 'ce soir' : 'le soir') : '';
+      const moment = !name ? '' : starts[0] >= win[0] - 90 ? (off === 0 ? ' ' + name : ' pour ' + name) : ' (ouvert ' + name + ')';
+      return { ...status, label: 'Fermé · ouvre ' + when + 'à ' + fmtTime(starts[0]) + moment };
+    }
+    return status;
+  }
   const matchesWhen = (shop) => {
     const w = WHEN[filters.when];
     return !w || w.ok(shop, new Date()) || activePromos(shop).some((p) => p.kind === w.promo);
   };
-  const matchesFilters = (m) =>
+  /** Filtres des puces (catégorie, ouverts, promos, note, moment, titres-resto) et distance : carte, liste et recherche. */
+  const matchesChips = (m) =>
     (filters.category === 'all' || m.shop.category === filters.category) &&
     matchesWhen(m.shop) && (!filters.mvOnly || !!m.shop.mealVouchers) &&
     (!filters.openOnly || m.status.open) &&
     (!filters.promoOnly || activePromos(m.shop).length > 0) &&
     (!filters.ratedOnly || !!(m.shop.rating && m.shop.rating.avg >= 4)) &&
-    withinRadius(m) && Search.shopMatches(m.shop, filters.q, filters.max);
+    withinRadius(m);
+  /** Une puce de filtre est-elle choisie (hors « Tout ») ? */
+  const chipsActive = () => filters.category !== 'all' || !!filters.when || filters.mvOnly || filters.openOnly || filters.promoOnly || filters.ratedOnly;
+  const matchesFilters = (m) => matchesChips(m) && Search.shopMatches(m.shop, filters.q, filters.max);
 
   function applyFilters() {
     markers.forEach((m) => {
@@ -5890,14 +5928,15 @@
 
     const searching = filters.q.length > 0 || filters.max !== null;
     const signature = items.map(({ m, d }) => m.shop.id + m.status.label + (d === null ? '' : formatDistance(d)) + activePromos(m.shop).length + JSON.stringify(m.shop.rating)).join('|')
-      + selectedId + '|' + filters.q.join(' ') + '|' + filters.max + '|' + filters.radius + '|' + Guest.key();
+      + selectedId + '|' + filters.q.join(' ') + '|' + filters.max + '|' + filters.radius + '|' + filters.when + '|' + Guest.key();
     if (signature === listSignature) return;
     listSignature = signature;
 
     const list = $('shop-list');
     list.textContent = '';
     items.forEach(({ m, d }) => {
-      const { shop, status } = m;
+      const { shop } = m;
+      const status = statusForWhen(shop, m.status);
       const li = document.createElement('li');
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -6051,13 +6090,13 @@
     /** Résultats pour le panneau de recherche (téléphone). */
     function run(query, max = null) {
       const q = parse(query);
-      const all = [...markers.values()].filter(withinRadius);
+      const all = [...markers.values()].filter(matchesChips);
       const d = (m) => (here() ? distance(here(), m.shop.coords) : Infinity);
       const dishes = [];
       if (q.length || max !== null) all.forEach((m) => dishesOf(m.shop, q, max).forEach((hit) => dishes.push({ ...hit, m })));
       dishes.sort((a, b) => b.score - a.score || (b.m.status.open - a.m.status.open) || (d(a.m) - d(b.m)) || a.item.price - b.item.price);
-      // Distance choisie sans mot tapé : tous les restaurants à cette distance
-      const shops = !q.length ? (filters.radius !== null && max === null ? all : [])
+      // Distance ou filtre choisi sans mot tapé : tous les restaurants qui y répondent
+      const shops = !q.length ? ((filters.radius !== null || chipsActive()) && max === null ? all : [])
         : all.filter((m) => { const sw = shopWords(m.shop); return q.every((w) => has(sw, w)) && (max === null || dishesOf(m.shop, [], max).length); });
       shops.sort((a, b) => (b.status.open - a.status.open) || (d(a) - d(b)) || a.shop.name.localeCompare(b.shop.name));
       return { q, dishes, shops };
@@ -6107,6 +6146,8 @@
   const SEARCH_IDEAS = ['Burger', 'Kebab', 'Pizza', 'Gaufre', 'Frites', 'Galette', 'Étudiant', 'Boisson'];
   function openSearchPanel() {
     $('search-panel').hidden = false;
+    document.body.classList.add('search-on');
+    if (!isDesktop()) $('sp-filters').appendChild($('filters-track'));
     $('search-m').value = Search.mobile.query;
     hideToast();
     renderSearchPanel();
@@ -6115,6 +6156,8 @@
   function closeSearchPanel({ restoreFocus = true } = {}) {
     if ($('search-panel').hidden) return;
     $('search-panel').hidden = true;
+    document.body.classList.remove('search-on');
+    if (!isDesktop()) $('filters').appendChild($('filters-track'));
     $('search-m').blur();
     if (restoreFocus) $('search-open').focus({ preventScroll: true });
   }
@@ -6125,9 +6168,9 @@
     box.textContent = '';
     const res = Search.run(query, max);
     const title = (text) => { const h = document.createElement('h3'); h.className = 'sr-title'; h.textContent = text; box.appendChild(h); };
-    const status = (m) => statusTag(m.status);
+    const status = (m) => { const st = statusForWhen(m.shop, m.status); if (st === m.status) return statusTag(st); const t = statusTag(st); t.textContent = st.label; return t; };
     const dist = (m) => (here() ? ' · ' + formatDistance(distance(here(), m.shop.coords)) : '');
-    if (!res.q.length && max === null && filters.radius === null) {
+    if (!res.q.length && max === null && filters.radius === null && !chipsActive()) {
       title('Idées');
       const ideas = document.createElement('div');
       ideas.className = 'sr-ideas';
@@ -6151,8 +6194,10 @@
       p.innerHTML = '<b></b><span></span>';
       const near = filters.radius !== null ? ' à moins de ' + formatDistance(filters.radius) : '';
       p.querySelector('b').textContent = (res.q.length ? 'Aucun résultat pour « ' + query.trim() + ' »' : max !== null ? 'Aucun plat dans ce budget' : 'Aucun restaurant') + near;
-      p.querySelector('span').textContent = (res.q.length ? 'Essayez un autre mot (« burger », « kebab »…)' : 'Essayez')
-        + (max !== null ? ' un budget plus large' : '') + (near ? (max !== null ? ' ou' : '') + ' une distance plus grande.' : '.');
+      p.querySelector('span').textContent = chipsActive()
+        ? 'Retirez un filtre (Ouverts, Midi, Titres-resto…) pour voir plus de résultats.'
+        : (res.q.length ? 'Essayez un autre mot (« burger », « kebab »…)' : 'Essayez')
+          + (max !== null ? ' un budget plus large' : '') + (near ? (max !== null ? ' ou' : '') + ' une distance plus grande.' : '.');
       box.appendChild(p);
       $('search-live').textContent = 'Aucun résultat';
       return;
@@ -6208,6 +6253,7 @@
     }
     $('search-live').textContent = [res.dishes.length ? plural(res.dishes.length, 'plat', 'plats') : '', res.shops.length ? plural(res.shops.length, 'restaurant', 'restaurants') : ''].filter(Boolean).join(' et ');
   }
+  $('filters-track').addEventListener('click', () => setTimeout(() => { if (!$('search-panel').hidden) renderSearchPanel(); }, 0));
   $('search-open').addEventListener('click', openSearchPanel);
   $('search-close').addEventListener('click', () => closeSearchPanel());
   const searchMobile = debounce((v) => { Search.mobile.query = v; Search.mobile.limit = 30; renderSearchPanel(); }, 120);
@@ -6215,7 +6261,11 @@
   $('search-m').addEventListener('keydown', (ev) => {
     if (ev.key === 'Enter') { ev.preventDefault(); Search.mobile.query = ev.target.value; renderSearchPanel(); const first = $('search-results').querySelector('.sr-hit'); if (first) first.click(); }
   });
-  $('search-panel').addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { ev.stopPropagation(); closeSearchPanel(); } });
+  $('search-panel').addEventListener('keydown', (ev) => {
+    if (ev.key !== 'Escape') return;
+    if (activePanel) return;   // une fenêtre ouverte par-dessus (« Distances depuis… ») se ferme d'abord
+    ev.stopPropagation(); closeSearchPanel();
+  });
   $('budget').addEventListener('click', (ev) => {
     const chip = ev.target.closest('.chip');
     if (!chip) return;
@@ -6614,6 +6664,7 @@
       renderList();
       Offers.refresh();
       if (selectedId && markers.get(selectedId)) renderShop(markers.get(selectedId));
+      if (!$('search-panel').hidden) renderSearchPanel();
     }
     function use(key) {
       data.active = key;
@@ -7436,7 +7487,7 @@
 
   function renderShop(m) {
     const { shop } = m;
-    const status = m.status || getStatus(shop);
+    const status = statusForWhen(shop, m.status || getStatus(shop));
     $('shop-emoji-in').textContent = catOf(shop).emoji;
     const hasStory = liveStories(shop).length > 0;
     $('shop-emoji').classList.toggle('has-story', hasStory);
