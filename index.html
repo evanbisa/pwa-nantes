@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-/lkasGoB3VotCoZxuVk2RJD4jZz/RxAasBFqKvIbuow=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-b+0MPG7BRcRVsFV2gy8GM0C7mmkS6URhT/ScqLiDlUc=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -254,8 +254,11 @@
        ===================================================================== */
     .filters { position: fixed; z-index: 20; left: 0; right: 0; bottom: calc(var(--safe-bottom) + 14px); transition: opacity .3s var(--ease-out), transform .35s var(--ease-out); }
     body.sheet-open .filters { opacity: 0; transform: translateY(16px); pointer-events: none; }
-    .filters-track { display: flex; gap: 8px; overflow-x: auto; padding: 4px 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; }
-    .filters-track::-webkit-scrollbar { display: none; }
+    /* Deux lignes bien distinctes : les filtres, puis les types de restaurant (chacune défile seule sur téléphone) */
+    .filters-track { display: flex; flex-direction: column; gap: 6px; }
+    .ft-row { display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 4px 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; }
+    .ft-row::-webkit-scrollbar { display: none; }
+    .ft-label { display: none; }
     .chip {
       flex: none; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px;
       border-radius: 999px; font-weight: 500; font-size: 14px; white-space: nowrap; scroll-snap-align: start;
@@ -263,7 +266,6 @@
     }
     .chip[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-line); }
     :root[data-theme="light"] .chip[aria-pressed="true"] { background: #e8f0fe; color: #1967d2; }
-    .chip-sep { flex: none; width: 1px; margin: 6px 2px; background: var(--line-strong); }
     .dot-green { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
 
     /* =====================================================================
@@ -283,7 +285,10 @@
     .sb-search input:focus { border-color: transparent; box-shadow: var(--shadow); }
     .sb-search kbd { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); padding: 1px 7px; border-radius: 6px; font: 500 12px var(--font-ui); color: var(--muted); border: 1px solid var(--line-strong); }
     .sb-filters { padding: 0 16px 8px; }
-    .sb-filters .filters-track { flex-wrap: wrap; overflow: visible; padding: 0; gap: 6px; }
+    .sb-filters .filters-track { gap: 12px; }
+    .sb-filters .ft-row { flex-wrap: wrap; overflow: visible; padding: 0; gap: 6px; }
+    .sb-filters .ft-label { display: block; flex: 0 0 100%; margin: 0 0 2px 2px; font-size: 11.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+    .sb-filters .ft-cats { padding-top: 12px; border-top: 1px solid var(--line); }
     .sb-filters .chip { height: 32px; padding: 0 12px; font-size: 13px; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; background: transparent; }
     .sb-ftoggle { display: flex; align-items: center; gap: 8px; margin: 0 12px 6px; padding: 6px 8px; border-radius: 10px; font: 600 13px var(--font-ui); color: var(--text); text-align: left; min-height: 36px; }
     .sb-ftoggle:hover { background: var(--hover); }
@@ -2130,7 +2135,7 @@
       .so-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .filters { top: calc(var(--safe-top) + 68px); bottom: auto; }
       body.sheet-open .filters, body:not(.ui-ready) .filters { transform: translateY(-8px); }
-      .stories { top: calc(var(--safe-top) + 116px); max-width: calc(100% - 24px); }
+      .stories { top: calc(var(--safe-top) + 160px); max-width: calc(100% - 24px); }
       .stories-track { gap: 8px; padding: 6px 8px 5px; }
       .story-chip { width: 58px; gap: 3px; }
       .story-ring { width: 50px; height: 50px; }
@@ -2351,7 +2356,8 @@
 
     /* ----- Recherche (téléphone) : les filtres de la carte au-dessus du budget ----- */
     .sp-filters:empty { display: none; }
-    .sp-filters .filters-track { padding: 4px 12px 8px; gap: 6px; }
+    .sp-filters .filters-track { padding-bottom: 4px; gap: 2px; }
+    .sp-filters .ft-row { gap: 6px; }
     .sp-filters .chip { height: 32px; padding: 0 12px; font-size: 13px; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; background: transparent; border: 1px solid var(--line-strong); }
     .sp-filters .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-line); }
     body.search-on .backdrop.is-visible { z-index: 70; }
@@ -2467,22 +2473,27 @@
   <!-- ===================== FILTRES (téléphone : en bas ; ordinateur : déplacés dans le panneau) ===================== -->
   <nav class="filters ui" id="filters" aria-label="Filtrer les commerces">
     <div class="filters-track" id="filters-track">
-      <button class="chip glass place-chip" type="button" id="place-chip" aria-haspopup="dialog"><span id="place-chip-lbl">Ma position</span><span class="pc-caret" aria-hidden="true">▾</span></button>
-      <button class="chip glass" type="button" id="open-only" aria-pressed="false"><span class="dot-green" aria-hidden="true"></span>Ouverts</button>
-      <button class="chip glass" type="button" id="promo-only" aria-pressed="false">Promos</button>
-      <button class="chip glass" type="button" id="rated-only" aria-pressed="false">★ 4 et +</button>
-      <button class="chip glass" type="button" data-when="lunch" aria-pressed="false">Midi</button>
-      <button class="chip glass" type="button" data-when="evening" aria-pressed="false">Ce soir</button>
-      <button class="chip glass" type="button" data-when="weekend" aria-pressed="false">Ce week-end</button>
-      <button class="chip glass" type="button" id="mv-only" aria-pressed="false">Titres-resto</button>
-      <span class="chip-sep" aria-hidden="true"></span>
-      <button class="chip glass" type="button" data-cat="all" aria-pressed="true">Tout</button>
-      <button class="chip glass" type="button" data-cat="Food-truck" aria-pressed="false">Food-truck</button>
-      <button class="chip glass" type="button" data-cat="Kebab" aria-pressed="false">Kebab</button>
-      <button class="chip glass" type="button" data-cat="Burger" aria-pressed="false">Burger</button>
-      <button class="chip glass" type="button" data-cat="Sweets" aria-pressed="false">Sweets</button>
-      <button class="chip glass" type="button" data-cat="Pizza" aria-pressed="false">Pizza</button>
-      <button class="chip glass" type="button" data-cat="Autre" aria-pressed="false">Autres</button>
+      <div class="ft-row" role="group" aria-labelledby="ft-l1">
+        <span class="ft-label" id="ft-l1">Critères</span>
+        <button class="chip glass place-chip" type="button" id="place-chip" aria-haspopup="dialog"><span id="place-chip-lbl">Ma position</span><span class="pc-caret" aria-hidden="true">▾</span></button>
+        <button class="chip glass" type="button" id="open-only" aria-pressed="false"><span class="dot-green" aria-hidden="true"></span>Ouverts</button>
+        <button class="chip glass" type="button" id="promo-only" aria-pressed="false">Promos</button>
+        <button class="chip glass" type="button" id="rated-only" aria-pressed="false">★ 4 et +</button>
+        <button class="chip glass" type="button" data-when="lunch" aria-pressed="false">Midi</button>
+        <button class="chip glass" type="button" data-when="evening" aria-pressed="false">Ce soir</button>
+        <button class="chip glass" type="button" data-when="weekend" aria-pressed="false">Ce week-end</button>
+        <button class="chip glass" type="button" id="mv-only" aria-pressed="false">Titres-resto</button>
+      </div>
+      <div class="ft-row ft-cats" role="group" aria-labelledby="ft-l2">
+        <span class="ft-label" id="ft-l2">Type de restaurant</span>
+        <button class="chip glass" type="button" data-cat="all" aria-pressed="true">Tout</button>
+        <button class="chip glass" type="button" data-cat="Food-truck" aria-pressed="false">Food-truck</button>
+        <button class="chip glass" type="button" data-cat="Kebab" aria-pressed="false">Kebab</button>
+        <button class="chip glass" type="button" data-cat="Burger" aria-pressed="false">Burger</button>
+        <button class="chip glass" type="button" data-cat="Sweets" aria-pressed="false">Sweets</button>
+        <button class="chip glass" type="button" data-cat="Pizza" aria-pressed="false">Pizza</button>
+        <button class="chip glass" type="button" data-cat="Autre" aria-pressed="false">Autres</button>
+      </div>
     </div>
   </nav>
 
@@ -5922,7 +5933,7 @@
 
     if (view) requestAnimationFrame(declutterLabels);
     const openCount = all.filter((m) => m.status.open).length;
-    $('shop-count').textContent = all.length + ' adresses · ' + openCount + ' ouvertes' + (cloud.synced ? '' : ' · mise à jour…');
+    $('shop-count').textContent = all.length + (all.length > 1 ? ' adresses' : ' adresse') + ' · ' + openCount + (openCount > 1 ? ' ouvertes' : ' ouverte') + (cloud.synced ? '' : ' · mise à jour…');
     try { FiltersFold.render(); } catch (e) { /* pas encore prêt */ }
     $('shop-empty').hidden = items.length > 0;
 
