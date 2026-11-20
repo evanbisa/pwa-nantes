@@ -1,0 +1,5 @@
+:HL["/pwa-nantes/app/_next/static/chunks/2jyh_vdysvohu.css","style"]
+3:[["children",{"s":"__PAGE__","h":160}]]
+2:[["children",{"s":"confidentialite","h":96,"c":"$Q3"}]]
+1:[["children",{"s":"legal","h":96,"c":"$Q2"}]]
+0:{"b":"o5N8apX6uU0fQksLDtQp4","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
