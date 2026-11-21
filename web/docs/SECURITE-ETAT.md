@@ -337,10 +337,12 @@ publications. Corrigé :
   Supabase (25 $/mois) pour des sauvegardes gérées par Supabase en plus.
 - **Confirmation par e-mail des clients** : une fois Resend (ou un autre SMTP) réglé dans Supabase, me dire de
   l'activer (`app_settings.client_email_confirmation`) : l'inscription d'un client demandera alors le code reçu.
-- **Vérification des restaurateurs** : le SIRET est contrôlé (existe, en activité, restauration), mais rien ne prouve
-  que la personne est bien le gérant ; quelqu'un pourrait inscrire le restaurant d'un autre. Les justificatifs (Kbis)
-  sont déposés mais pas relus : prévoir une relecture avant la mise en ligne (je peux ajouter l'état « en attente de
-  validation » et un écran de modération).
+- ✅ **Vérification des restaurateurs (21 novembre 2026, choix A)** : une fiche complète, abonnée, avec SIRET vérifié et
+  justificatifs déposés passe en « awaiting_review » (invisible) jusqu'à ce que l'équipe relise le Kbis :
+  `team_review_queue()` (fiches à vérifier) et `team_review_merchant(fiche, valider, motif)` (refus = brouillon + motif
+  montré au restaurateur). Le restaurateur ne peut ni se valider ni effacer le motif (colonnes protégées). Testé en
+  ligne dans une transaction annulée. Migrations `20261121100000_awaiting_review_status.sql` et
+  `20261121100100_merchant_review.sql`. Reste : les boutons « Valider / Refuser » dans le tableau de bord de l'équipe.
 - **E-mails des restaurateurs et « mot de passe oublié »** (les clients s'inscrivent sans code depuis le 25 octobre 2026) :
   - Sans serveur SMTP, Supabase **n'écrit qu'aux membres de l'équipe du projet** (erreur `email_address_not_authorized`,
     aucun compte créé) et au plus 2 e-mails par heure : un restaurateur ordinaire ne reçoit pas son code, et personne

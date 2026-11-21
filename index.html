@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-Ft3A8OFYQAEeIyI1p5ejAPmpg4RSf3WJUys4+cdeLlo=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-eOyfxBGzg3iqXQirkuOld8+i3V7Db60G76B4tbWksbI=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -4494,6 +4494,8 @@
     return {
       merchantId: m.id, restaurantId: m.id, siret, company, docs, honorAt: m.honor_at, status, suspended: m.status === 'suspended',
       awaitingDocs: m.status === 'awaiting_docs',
+      // Vérification par l'équipe (Kbis relu) : en attente, ou refusée avec un motif à corriger
+      awaitingReview: m.status === 'awaiting_review', reviewNote: m.status === 'draft' ? (m.review_note || '') : '',
       verifiedAt: priv && priv.siret_verified_at,
       payment: subscribed ? { status: 'paid', mode: sub.mode, paidAt: sub.started_at } : null,
       subscription: sub ? {
@@ -10506,7 +10508,8 @@
     if (!$('pl-menu').childElementCount) addMenuRow();
     syncMenuEditor();
     ['pl-name', 'pl-category', 'pl-desc', 'pl-photos', 'pl-menu', 'pl-address', 'pl-hours', 'pl-phone'].forEach((f) => setFieldError(f, ''));
-    $('err-pro-listing').textContent = '';
+    // Fiche refusée par l'équipe : le motif reste affiché jusqu'à la nouvelle mise en ligne
+    $('err-pro-listing').textContent = pro.reviewNote ? 'À corriger avant validation : ' + pro.reviewNote : '';
     renderPhotos();
   }
 
@@ -11252,7 +11255,14 @@
     await Loader.run(refreshCloud(), 'Mise à jour de la carte…');
     const restaurant = restaurants()[pro.merchantId];
 
-    if (restaurant && restaurant.status === 'awaiting_docs') {
+    if (restaurant && restaurant.status === 'awaiting_review') {
+      // Fiche complète, justificatifs déposés : l'équipe relit le Kbis avant la mise en ligne
+      if (mode === 'edit') hideOnboarding(); else finishAuth({ fresh: true });
+      setTimeout(() => {
+        ProSpace.open('home');
+        toast('Fiche envoyée ! L\'équipe FlashMiam vérifie votre justificatif, en général sous 24 h. Vous serez en ligne juste après.');
+      }, mode === 'edit' ? 0 : 900);
+    } else if (restaurant && restaurant.status === 'awaiting_docs') {
       // Fiche complète et enregistrée, mais justificatifs manquants : invisible sur la carte jusqu'à leur dépôt
       if (mode === 'edit') hideOnboarding(); else finishAuth({ fresh: true });
       setTimeout(() => {
@@ -11336,7 +11346,8 @@
       const r = myRestaurant(account);
       const listed = !!(r && r.status === 'published');
       return { account, pro, r, step: proStepFor(account), suspended: !!pro.suspended, listed, live: !!(r && r.published), hidden: listed && !r.isOpen,
-        awaitingDocs: !!(r && r.status === 'awaiting_docs'), missing: missingDocs(pro) };
+        awaitingDocs: !!(r && r.status === 'awaiting_docs'), awaitingReview: !!(r && r.status === 'awaiting_review'),
+        reviewNote: pro.reviewNote || '', missing: missingDocs(pro) };
     }
 
     function open(t = 'home') {
@@ -11433,6 +11444,8 @@
       if (s.suspended) { dot.className = 'is-off'; dot.textContent = '● Suspendue'; }
       else if (s.live) { dot.className = 'is-on'; dot.textContent = '● En ligne sur la carte'; }
       else if (s.awaitingDocs) { dot.className = 'is-off'; dot.textContent = '● En attente des justificatifs'; }
+      else if (s.awaitingReview) { dot.className = 'is-off'; dot.textContent = '● En cours de vérification'; }
+      else if (s.reviewNote) { dot.className = 'is-off'; dot.textContent = '● À corriger'; }
       else if (s.hidden) { dot.className = 'is-off'; dot.textContent = '● Masquée'; }
       else { dot.className = 'is-off'; dot.textContent = '● Inscription à terminer'; }
       sub.append(dot);
@@ -11482,6 +11495,7 @@
         await Loader.run(refreshCloud(), 'Mise à jour de la carte…');
         const now = myRestaurant();
         if (now && now.published) toast('Bravo ! « ' + now.name + ' » est maintenant visible sur la carte.');
+        else if (now && now.status === 'awaiting_review') toast('Justificatifs reçus ! L\'équipe FlashMiam vérifie votre fiche, en général sous 24 h.');
       }
       render();
     }
@@ -11531,6 +11545,8 @@
       else if (s.step === 'pro-payment' && sub && sub.status === 'canceled') { alert.hidden = false; alert.querySelector('p').textContent = 'Votre abonnement est terminé : votre fiche n\'apparaît plus sur la carte. Vos avis, abonnés et statistiques sont conservés.'; btn.textContent = 'Choisir un abonnement'; btn.onclick = editListing; }
       else if (sub && sub.status === 'past_due') { alert.hidden = false; alert.querySelector('p').textContent = 'Le dernier paiement de votre abonnement a été refusé : mettez à jour votre carte pour garder votre fiche en ligne.'; btn.textContent = 'Voir mon abonnement'; btn.onclick = () => setTab('fiche'); }
       else if (s.awaitingDocs) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche est prête, mais elle n\'apparaît pas encore sur la carte : ' + (s.missing.length ? plural(s.missing.length, 'justificatif obligatoire', 'justificatifs obligatoires') + ' à ajouter.' : 'justificatifs en cours de prise en compte.'); btn.textContent = 'Ajouter mes justificatifs'; btn.onclick = () => setTab('todo'); }
+      else if (s.awaitingReview) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche est complète : l\'équipe FlashMiam vérifie votre justificatif (en général sous 24 h). Elle apparaîtra sur la carte dès qu\'elle sera validée.'; btn.hidden = true; }
+      else if (s.reviewNote) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche n\'a pas pu être validée : ' + s.reviewNote + ' Corrigez-la puis remettez-la en ligne : elle sera revérifiée.'; btn.textContent = 'Corriger ma fiche'; btn.onclick = editListing; }
       else if (s.step || !s.listed) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre inscription n\'est pas terminée : votre restaurant n\'apparaît pas encore sur la carte.'; btn.textContent = 'Terminer mon inscription'; btn.onclick = editListing; }
       else if (s.hidden) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche est masquée : les clients ne la voient plus sur la carte.'; btn.textContent = 'Remettre en ligne'; btn.onclick = () => setVisible(true); }
       $('ps-home-live').hidden = !s.listed;
@@ -12010,6 +12026,7 @@
       sw.setAttribute('aria-checked', String(s.live));
       $('ps-vis-hint').textContent = s.suspended ? 'Fiche suspendue par la modération.'
         : s.awaitingDocs ? 'Disponible une fois vos justificatifs ajoutés (onglet « Compléter »).'
+        : s.awaitingReview ? 'Disponible une fois votre fiche vérifiée par l\'équipe FlashMiam (en général sous 24 h).'
         : !s.listed ? 'Disponible une fois votre fiche publiée.'
         : s.live ? 'Les clients voient votre fiche, vos stories et vos promotions. Masquez-la en cas de fermeture exceptionnelle.'
         : 'Masquée : personne ne la voit. Vos abonnés, vos avis et vos statistiques sont conservés.';
