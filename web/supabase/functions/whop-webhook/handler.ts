@@ -1,5 +1,6 @@
 /**
- * Notifications de Whop (« webhooks ») : paiement confirmé, renouvellement, paiement refusé, résiliation, fin d'abonnement.
+ * Notifications de Whop (« webhooks ») : paiement confirmé, renouvellement, paiement refusé, résiliation, fin d'abonnement,
+ * remboursement. Chaque paiement encaissé est aussi enregistré (billing_payments) pour l'onglet « Revenus » de l'équipe.
  * Adresse à déclarer dans Whop : https://<projet>.supabase.co/functions/v1/whop-webhook
  *
  * Chaque notification est d'abord authentifiée (signature HMAC avec le secret WHOP_WEBHOOK_SECRET, horodatage
@@ -8,7 +9,7 @@
  * pas remettre un ancien état). Une notification déjà traitée est ignorée.
  * Réponses : 200 traitée ou ignorée ; 401 signature invalide ; 5xx erreur passagère (Whop renvoie la notification).
  */
-import { subscriptionPatch, verifyWebhook, WhopError, type SubscriptionPatch, type WhopMembership } from "../_shared/whop.ts";
+import { paymentRow, subscriptionPatch, verifyWebhook, WhopError, type PaymentRow, type SubscriptionPatch, type WhopMembership, type WhopPayment } from "../_shared/whop.ts";
 
 export interface StoredSubscription { merchant_id: string; mode: string; status: string; whop_membership_id: string | null }
 export interface Deps {
@@ -24,17 +25,28 @@ export interface Deps {
   subscriptionOf(merchantId: string): Promise<StoredSubscription | null>;
   subscriptionByMembership(membershipId: string): Promise<StoredSubscription | null>;
   save(merchantId: string, row: SubscriptionPatch & { plan: string; period: string }): Promise<void>;
+  getPayment(id: string): Promise<WhopPayment>;
+  /** Enregistre (ou met à jour, ex. remboursement) un paiement dans billing_payments. */
+  savePayment(row: Omit<PaymentRow, "whop_plan_id"> & { merchant_id: string | null; plan: string | null; period: string | null }): Promise<void>;
   now(): Date;
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const MEMBERSHIP = /^mem_[A-Za-z0-9]{4,60}$/;
+const PAYMENT = /^pay_[A-Za-z0-9]{4,60}$/;
 const MAX_BODY = 256 * 1024;
 
 /** Abonnement concerné par la notification : l'objet lui-même (membership.*) ou celui d'un paiement / d'une facture. */
 function membershipIdOf(type: string, data: Record<string, unknown>): string | null {
   const id = type.startsWith("membership.") ? data.id : data.membership_id ?? (data.membership as { id?: unknown } | null)?.id;
   return typeof id === "string" && MEMBERSHIP.test(id) ? id : null;
+}
+
+/** Paiement concerné : l'objet lui-même (payment.*) ou celui d'un remboursement (refund.*). */
+function paymentIdOf(type: string, data: Record<string, unknown>): string | null {
+  const id = type.startsWith("payment.") ? data.id
+    : type.startsWith("refund.") ? data.payment_id ?? (data.payment as { id?: unknown } | null)?.id : null;
+  return typeof id === "string" && PAYMENT.test(id) ? id : null;
 }
 
 export async function handle(req: Request, deps: Deps): Promise<Response> {
@@ -67,12 +79,15 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
       return reply(200, { ignored: "account" });
     }
     const membershipId = membershipIdOf(type, data);
-    if (!membershipId) {
+    const paymentId = paymentIdOf(type, data);
+    if (!membershipId && !paymentId) {
       await deps.remember(eventId, type || "inconnu");
       return reply(200, { ignored: "type" });
     }
 
-    const result = await sync(membershipId, deps);
+    // Abonnement d'abord (il relie l'abonnement au restaurant), puis le paiement (montant pour les revenus)
+    const result: Record<string, unknown> = membershipId ? await sync(membershipId, deps) : {};
+    if (paymentId) result.payment = await recordPayment(paymentId, deps);
     await deps.remember(eventId, type);
     return reply(200, result);
   } catch (e) {
@@ -81,6 +96,24 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
     if (e instanceof WhopError && e.status === 404) return reply(200, { ignored: "membership" });
     return reply(e instanceof WhopError ? 502 : 500, { error: "retry" });
   }
+}
+
+/** Relit le paiement chez Whop et l'enregistre (revenus du tableau de bord de l'équipe). */
+async function recordPayment(paymentId: string, deps: Deps): Promise<string> {
+  let payment: WhopPayment;
+  try {
+    payment = await deps.getPayment(paymentId);
+  } catch (e) {
+    if (e instanceof WhopError && e.status === 404) return "missing";
+    throw e;
+  }
+  const row = payment.id === paymentId ? paymentRow(payment) : null;
+  if (!row) return "not_paid";
+  const sub = row.membership_id ? await deps.subscriptionByMembership(row.membership_id) : null;
+  const plan = row.whop_plan_id ? await deps.planFor(row.whop_plan_id) : null;
+  const { whop_plan_id: _plan, ...rest } = row;
+  await deps.savePayment({ ...rest, merchant_id: sub?.merchant_id ?? null, plan: plan?.tier ?? null, period: plan?.period ?? null });
+  return "saved";
 }
 
 /** Relit l'abonnement chez Whop et met à jour la fiche du restaurateur correspondant. */

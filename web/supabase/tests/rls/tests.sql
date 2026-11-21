@@ -857,6 +857,27 @@ select t.ok(not exists (select 1 from reviews where id = 'cccccccc-0000-0000-000
 select t.ok((select count(*) = 2 and bool_and(user_id = '66666666-6666-6666-6666-666666666666') from team_actions), 'modération : chaque décision notée (qui, quoi, quel restaurant)');
 delete from reviews where id = 'cccccccc-0000-0000-0000-000000000001';
 delete from storage.objects where bucket_id = 'documents' and name like 'aaaaaaaa-0000-0000-0000-000000000002/%';
+-- ===== Revenus (paiements Whop) =====
+insert into billing_payments (id, merchant_id, membership_id, plan, period, amount_cents, refunded_cents, currency, paid_at) values
+  ('pay_Test0001', 'aaaaaaaa-0000-0000-0000-000000000002', 'mem_Test0001', 'essentiel', 'month', 2900, 0, 'eur', now() - interval '1 hour'),
+  ('pay_Test0002', 'aaaaaaaa-0000-0000-0000-000000000002', 'mem_Test0001', 'premium', 'month', 7900, 7900, 'eur', now() - interval '2 hours'),
+  ('pay_Test0003', null, null, null, null, 5000, 0, 'usd', now() - interval '3 hours'),
+  ('pay_Test0004', null, null, 'essentiel', 'year', 29000, 0, 'eur', now() - interval '400 days');
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.fails($$select public.team_revenue()$$, 'revenus : refusés à une cliente');
+select t.fails($$select * from billing_payments$$, 'paiements : illisibles depuis le site');
+select t.fails($$insert into billing_payments (id, amount_cents, currency, paid_at) values ('pay_Pirate01', 1, 'eur', now())$$, 'paiements : aucune écriture depuis le site');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"66666666-6666-6666-6666-666666666666","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select (r -> 'collected' ->> 'last_7d')::int = 2900 and (r -> 'collected' ->> 'all_time')::int = 31900
+                    and (r -> 'collected' ->> 'refunds_this_month')::int >= 7900 and (r ->> 'other_currencies')::int = 1
+                    and jsonb_array_length(r -> 'daily') = 30 and jsonb_array_length(r -> 'monthly') = 12
+                    and (r -> 'setup' ->> 'payments')::int = 4 and jsonb_array_length(r -> 'prices') = 4
+             from (select public.team_revenue() r) x), 'revenus : encaissé (remboursements déduits, euros seulement), par jour et par mois, pour l''équipe');
+reset role;
+delete from billing_payments;
 delete from team_admins where user_id = '66666666-6666-6666-6666-666666666666';
 delete from client_errors;
 select set_config('request.jwt.claims', '', false);

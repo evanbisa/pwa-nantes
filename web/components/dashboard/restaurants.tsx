@@ -1,16 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
-import { AlertTriangle, ArrowLeft, CheckCircle2, ExternalLink, FileText, Loader2, RefreshCw, Search, XCircle } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { AlertTriangle, ArrowLeft, CheckCircle2, ExternalLink, FileText, Loader2, Search, XCircle } from "lucide-react";
 import { siteClient } from "@/lib/supabase/site-session";
-import { DASHBOARD_URL, MAP_URL, RESTAURANTS_URL, ago, bytes, dateTime, dayLabel, delta, n, restaurantUrl } from "./data";
-import { Bars, Card, Centered, HBars, Kv, Muted, Notice, Pill, Shell, Tile } from "./ui";
+import { ago, bytes, dateTime, dayLabel, delta, n } from "./data";
+import { restaurantHref, sectionHref } from "./nav";
+import { Q, refreshAll, useQuery } from "./store";
+import { Bars, Card, HBars, Kv, Muted, Notice, Pill, SectionError, SectionSkeleton, Tile } from "./ui";
 import { ModerationButtons } from "./moderation";
 
 /**
- * Restaurants, vus par l'équipe FlashMiam (/app/tableau-de-bord/restaurants/) :
- *  - sans paramètre : tous les restaurants inscrits (et les comptes restaurateur sans fiche), avec leurs justificatifs ;
- *  - ?id=… : tout sur une fiche : justificatifs à ouvrir, entreprise, responsable, abonnement, fiche, les mêmes
+ * Fiches des restaurants, vues par l'équipe FlashMiam (section « Fiches restaurants » du tableau de bord) :
+ *  - #fiches : tous les restaurants inscrits (et les comptes restaurateur sans fiche), avec leurs justificatifs ;
+ *  - #fiches/<restaurant> : tout sur une fiche : justificatifs à ouvrir, entreprise, responsable, abonnement, fiche, les mêmes
  *    statistiques que le restaurateur voit dans son espace, visites en caisse, avis (avec modération).
  * Données calculées par la base (team_merchants, team_merchant), réservées aux comptes de l'équipe ; justificatifs
  * ouverts par des liens temporaires (10 minutes).
@@ -35,7 +37,6 @@ const PROMO_KIND: Record<string, string> = {
 };
 const SOURCES: [string, string][] = [["map", "Carte"], ["list", "Liste"], ["search", "Recherche"], ["offers", "Offres autour de moi"], ["story", "Story"], ["notif", "Notification"], ["link", "Lien partagé"]];
 const WEEKDAY = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
-const PERIODS = [7, 30, 90] as const;
 
 const subLabel = (s: Sub | null) => (s ? `${s.plan ? s.plan[0].toUpperCase() + s.plan.slice(1) : "?"}${s.period ? ` · ${s.period === "year" ? "an" : "mois"}` : ""}${s.mode === "demo" ? " (démo)" : ""}` : "—");
 const siret = (v: string | null | undefined) => (v ? v.replace(/^(\d{3})(\d{3})(\d{3})(\d{5})$/, "$1 $2 $3 $4") : "—");
@@ -79,57 +80,10 @@ type Detail = {
   actions: { at: string; action: "review_deleted" | "review_kept"; detail: string | null; who: string }[];
 };
 
-type State<T> = { status: "loading" } | { status: "signed-out" } | { status: "forbidden" } | { status: "missing" } | { status: "error" } | { status: "ready"; data: T };
-
-/** Appel réservé à l'équipe : gère « pas connecté », « pas de l'équipe », « introuvable » et les erreurs. */
-function useTeamCall<T>(call: () => PromiseLike<{ data: unknown; error: { code?: string } | null }>) {
-  const [state, setState] = useState<State<T>>({ status: "loading" });
-  const [refreshing, setRefreshing] = useState(false);
-  const load = useCallback(async () => {
-    const { data: session } = await siteClient().auth.getSession();
-    if (!session.session) return setState({ status: "signed-out" });
-    setRefreshing(true);
-    const { data, error } = await call();
-    setRefreshing(false);
-    if (!error) return setState({ status: "ready", data: data as T });
-    if (error.code === "42501") return setState({ status: "forbidden" });
-    if (error.code === "P0002") return setState({ status: "missing" });
-    setState((s) => (s.status === "ready" ? s : { status: "error" }));
-  }, [call]);
-  useEffect(() => {
-    let alive = true;
-    Promise.resolve().then(() => { if (alive) void load(); });
-    return () => { alive = false; };
-  }, [load]);
-  return { state, load, refreshing };
-}
-
-function Gate({ state, retry }: { state: State<unknown>; retry: () => void }) {
-  if (state.status === "loading") return <Centered><Loader2 className="h-7 w-7 animate-spin text-slate-500" aria-label="Chargement" /></Centered>;
-  if (state.status === "signed-out") return <Notice title="Connectez-vous d'abord" text="Cette page s'ouvre avec le compte FlashMiam d'un membre de l'équipe." action={<a href={MAP_URL} className="btn-dash">Se connecter sur la carte</a>} />;
-  if (state.status === "forbidden") return <Notice title="Accès réservé à l'équipe" text="Ce compte n'a pas accès aux fiches des restaurants." action={<a href={MAP_URL} className="btn-dash">Retour à la carte</a>} />;
-  if (state.status === "missing") return <Notice title="Restaurant introuvable" text="Cette fiche n'existe plus (compte supprimé ?)." action={<a href={RESTAURANTS_URL} className="btn-dash">Tous les restaurants</a>} />;
-  return <Notice title="Oups" text="Données indisponibles pour le moment. Vérifiez votre connexion, puis réessayez." action={<button type="button" className="btn-dash" onClick={retry}>Réessayer</button>} />;
-}
-
-const noSubscribe = () => () => {};
-const useHydrated = () => useSyncExternalStore(noSubscribe, () => true, () => false);
-
-export default function TeamRestaurants() {
-  if (!useHydrated()) return <Shell><Centered><Loader2 className="h-7 w-7 animate-spin text-slate-500" aria-label="Chargement" /></Centered></Shell>;
-  const id = new URLSearchParams(location.search).get("id");
-  return <Shell>{id && /^[0-9a-f-]{36}$/i.test(id) ? <RestaurantDetail id={id} /> : <RestaurantList />}</Shell>;
-}
-
 const BackLink = ({ href, children }: { href: string; children: ReactNode }) => (
   <a href={href} className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white">
     <ArrowLeft className="h-4 w-4" aria-hidden /> {children}
   </a>
-);
-const RefreshButton = ({ onClick, spinning }: { onClick: () => void; spinning: boolean }) => (
-  <button type="button" onClick={onClick} aria-label="Actualiser" className="grid h-9 w-9 place-items-center rounded-full text-slate-600 hover:bg-slate-200/70 dark:text-zinc-400 dark:hover:bg-white/10">
-    <RefreshCw className={`h-4 w-4 ${spinning ? "animate-spin" : ""}`} aria-hidden />
-  </button>
 );
 function DocMark({ ok, required, label }: { ok: boolean; required: boolean; label: string }) {
   if (ok) return <span className="inline-flex items-center gap-1 text-xs text-[#006300] dark:text-[#0ca30c]"><CheckCircle2 className="h-3.5 w-3.5" aria-hidden />{label}</span>;
@@ -148,35 +102,27 @@ const FILTERS: { id: Filter; label: string; test: (r: Row) => boolean }[] = [
   { id: "test", label: "Fiches de test", test: (r) => r.is_test },
 ];
 
-function RestaurantList() {
-  const call = useCallback(() => siteClient().rpc("team_merchants"), []);
-  const { state, load, refreshing } = useTeamCall<Row[]>(call);
+export function RestaurantList() {
+  const { data, error, refresh } = useQuery<Row[]>(Q.merchants<Row[]>());
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
-  const rows = useMemo(() => (state.status === "ready" ? state.data : []), [state]);
+  const rows = data ?? [];
   // Recherche sans tenir compte des majuscules ni des espaces (un SIRET tapé « 123 456 789 00012 » est trouvé)
   const norm = (v: string) => v.toLowerCase().replace(/\s+/g, "");
   const q = norm(query);
   const shown = rows
     .filter(FILTERS.find((f) => f.id === filter)!.test)
     .filter((r) => !q || [r.name, r.owner, r.email, r.legal_name, r.siret, r.phone].some((v) => v && norm(v).includes(q)));
-  if (state.status !== "ready") return <Gate state={state} retry={load} />;
+  if (!data) return error ? <SectionError retry={refresh} /> : <SectionSkeleton />;
   const real = rows.filter((r) => !r.is_test);
   const missing = real.filter((r) => r.id && (!r.docs.kbis || !r.docs.hygiene)).length;
   return (
     <>
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <BackLink href={DASHBOARD_URL}>Tableau de bord</BackLink>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Restaurants inscrits</h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
-            {n(real.length)} compte(s) restaurateur · {n(real.filter((r) => r.status === "published").length)} en ligne · {n(missing)} avec des justificatifs obligatoires manquants
-          </p>
-        </div>
-        <RefreshButton onClick={load} spinning={refreshing} />
-      </header>
+      <p className="text-sm text-slate-600 dark:text-zinc-400">
+        {n(real.length)} compte(s) restaurateur · {n(real.filter((r) => r.status === "published").length)} en ligne · {n(missing)} avec des justificatifs obligatoires manquants
+      </p>
 
-      <div className="mt-5 flex flex-wrap items-center gap-3">
+      <div className="mt-4 flex flex-wrap items-center gap-3">
         <label className="relative min-w-0 flex-1 basis-64">
           <span className="sr-only">Rechercher</span>
           <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
@@ -212,7 +158,7 @@ function RestaurantList() {
                   return (
                     <tr key={r.id ?? r.user_id} className="border-t border-slate-200 align-top dark:border-white/10">
                       <td className="px-4 py-3">
-                        {r.id ? <a href={restaurantUrl(r.id)} className="font-semibold text-[var(--viz-1)] hover:underline">{r.name}</a> : <span className="font-semibold">(fiche pas encore créée)</span>}
+                        {r.id ? <a href={restaurantHref(r.id)} className="font-semibold text-[var(--viz-1)] hover:underline">{r.name}</a> : <span className="font-semibold">(fiche pas encore créée)</span>}
                         {r.is_test && <span className="ml-2"><Pill>test</Pill></span>}
                         <p className="mt-0.5 text-xs text-slate-600 dark:text-zinc-400">{[r.category && CATEGORY[r.category], r.owner, r.email].filter(Boolean).join(" · ")}</p>
                       </td>
@@ -247,37 +193,27 @@ function RestaurantList() {
 
 /* ===================================== Fiche d'un restaurant ===================================== */
 
-function RestaurantDetail({ id }: { id: string }) {
-  const [days, setDays] = useState<number>(30);
-  const call = useCallback(() => siteClient().rpc("team_merchant", { p_merchant_id: id, p_days: days }), [id, days]);
-  const { state, load, refreshing } = useTeamCall<Detail>(call);
-  if (state.status !== "ready") return <><BackLink href={RESTAURANTS_URL}>Tous les restaurants</BackLink><Gate state={state} retry={load} /></>;
-  const d = state.data, m = d.merchant;
+export function RestaurantDetail({ id, days }: { id: string; days: number }) {
+  const { data: d, error, refresh } = useQuery<Detail>(Q.merchant<Detail>(id, Math.min(days, 90)));
+  if (!d) {
+    if (error?.code === "P0002") return <Notice title="Restaurant introuvable" text="Cette fiche n'existe plus (compte supprimé ?)." action={<a href={sectionHref("directory")} className="btn-dash">Toutes les fiches</a>} />;
+    return <><BackLink href={sectionHref("directory")}>Toutes les fiches</BackLink><div className="mt-4">{error ? <SectionError retry={refresh} /> : <SectionSkeleton />}</div></>;
+  }
+  const m = d.merchant;
   const [label, tone] = STATUS[m.status] ?? [m.status, "neutral"];
   const docsMissing = DOCS.filter((t) => t.required && !d.documents.some((f) => docKey(f.path) === t.key));
   return (
     <>
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <BackLink href={RESTAURANTS_URL}>Tous les restaurants</BackLink>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight break-words sm:text-3xl">{m.name}</h1>
+          <BackLink href={sectionHref("directory")}>Toutes les fiches</BackLink>
+          <h2 className="mt-2 text-2xl font-bold tracking-tight break-words sm:text-3xl">{m.name}</h2>
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             <Pill tone={tone}>{label}</Pill>
             {m.is_test && <Pill>fiche de test</Pill>}
             {m.status === "published" && <Pill tone={m.is_open ? "good" : "neutral"}>{m.is_open ? "affichée" : "masquée par le restaurateur"}</Pill>}
             <span className="text-sm text-slate-600 dark:text-zinc-400">{CATEGORY[m.category] ?? m.category} · inscrit le {dateTime(m.created_at)}{m.published_at && ` · en ligne depuis le ${dayLabel(m.published_at)}`}</span>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <div role="radiogroup" aria-label="Période des statistiques" className="flex rounded-full bg-slate-200/70 p-1 dark:bg-white/[0.06]">
-            {PERIODS.map((p) => (
-              <button key={p} type="button" role="radio" aria-checked={days === p} onClick={() => setDays(p)}
-                className="rounded-full px-3.5 py-1.5 text-sm font-medium text-slate-600 transition aria-checked:bg-white aria-checked:text-slate-900 aria-checked:shadow-sm dark:text-zinc-400 dark:aria-checked:bg-white/15 dark:aria-checked:text-white">
-                {p} j
-              </button>
-            ))}
-          </div>
-          <RefreshButton onClick={load} spinning={refreshing} />
         </div>
       </header>
 
@@ -302,7 +238,7 @@ function RestaurantDetail({ id }: { id: string }) {
       </div>
 
       <h2 className="mt-8 text-lg font-bold tracking-tight">Statistiques du restaurant</h2>
-      <p className="text-sm text-slate-600 dark:text-zinc-400">Les mêmes chiffres que dans l&apos;espace du restaurateur, sur {days} jours.</p>
+      <p className="text-sm text-slate-600 dark:text-zinc-400">Les mêmes chiffres que dans l&apos;espace du restaurateur, sur {Math.min(days, 90)} jours.</p>
       {d.analytics ? <Stats a={d.analytics} visits={d.visits} /> : <Muted>Pas encore de statistiques.</Muted>}
 
       <div className="mt-3 grid gap-3 lg:grid-cols-[1.4fr_1fr]">
@@ -317,7 +253,7 @@ function RestaurantDetail({ id }: { id: string }) {
                   </div>
                   <p className="mt-1 break-words">{r.comment || <i className="text-slate-500">(sans commentaire)</i>}</p>
                   {r.reply && <p className="mt-2 border-l-2 border-slate-300 pl-3 text-slate-700 dark:border-white/20 dark:text-zinc-300"><b className="font-medium">Réponse :</b> {r.reply}</p>}
-                  <ModerationButtons reviewId={r.id} reported={!!r.reported_at} onDone={load} />
+                  <ModerationButtons reviewId={r.id} reported={!!r.reported_at} onDone={refreshAll} />
                 </li>
               ))}
             </ul>

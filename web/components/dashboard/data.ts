@@ -73,11 +73,7 @@ export const STORAGE_LIMIT = 1024 ** 3;
 export const SUPABASE_PROJECT = "fnypgfyxbyaqrnklhjxc";
 export const REPO = "https://github.com/evanbisa/pwa-nantes";
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-/** Pages de l'équipe : tableau de bord, liste des restaurants, fiche d'un restaurant. */
-export const DASHBOARD_URL = `${BASE}/tableau-de-bord/`;
-export const RESTAURANTS_URL = `${BASE}/tableau-de-bord/restaurants/`;
-export const restaurantUrl = (id: string) => `${RESTAURANTS_URL}?id=${id}`;
-/** La carte (site principal), et la fiche d'un restaurant sur la carte. */
+/** La carte (site principal). */
 export const MAP_URL = `${BASE}/../`;
 
 const nf = new Intl.NumberFormat("fr-FR");
@@ -116,3 +112,29 @@ export function delta(now: number, before: number) {
   if (!before) return now ? null : 0;
   return Math.round(((now - before) / before) * 100);
 }
+
+/* ---------- Revenus (team_revenue) ---------- */
+
+export type Tier = "essentiel" | "premium" | "sur_devis";
+export type RevenueSub = {
+  merchant_id: string; name: string; status: "active" | "past_due"; mode: "demo" | "whop" | "manual" | "stripe";
+  plan: Tier | null; period: "month" | "year" | null; started_at: string; current_period_end: string | null;
+  cancel_at_period_end: boolean; merchant_status: string;
+};
+export type Revenue = {
+  generated_at: string;
+  setup: { whop_live: boolean; account_set: boolean; plans_total: number; plans_linked: number; last_event: string | null; payments: number; last_payment: string | null };
+  prices: { tier: Tier; period: "month" | "year"; price_cents: number }[];
+  collected: {
+    today: number; last_7d: number; prev_7d: number; this_month: number; last_month: number; last_month_to_date: number;
+    this_year: number; all_time: number; payments_this_month: number; refunds_this_month: number;
+  };
+  other_currencies: number;
+  daily: { day: string; cents: number }[];
+  monthly: { month: string; cents: number }[];
+  subscriptions: RevenueSub[];
+  without_subscription: number;
+  recent_payments: { id: string; paid_at: string; amount_cents: number; refunded_cents: number; currency: string; plan: Tier | null; period: string | null; billing_reason: string | null; merchant: string | null; merchant_id: string | null }[];
+};
+export const euroCents = (cents: number, digits = 0) =>
+  new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: digits, minimumFractionDigits: digits }).format(cents / 100);

@@ -3,11 +3,13 @@
 import type { ReactNode } from "react";
 import { AlertOctagon, AlertTriangle, CheckCircle2, ChevronRight, ExternalLink, Info } from "lucide-react";
 import {
-  DB_LIMIT, REPO, RESTAURANTS_URL, STORAGE_LIMIT, SUPABASE_PROJECT, ago, bytes, dateTime, delta, euros, hoursSince, n, pct, restaurantUrl,
+  DB_LIMIT, REPO, STORAGE_LIMIT, SUPABASE_PROJECT, ago, bytes, dateTime, delta, euros, hoursSince, n, pct,
   type Activity, type Data, type PendingMerchant,
 } from "./data";
 import { ModerationButtons } from "./moderation";
-import type { Alert, Tab } from "./alerts";
+import type { Alert } from "./alerts";
+import { go, restaurantHref, sectionHref } from "./nav";
+import { refreshAll } from "./store";
 import { Bars, Card, Funnel, HBars, Kv, Meter, Muted, Pill, Tile } from "./ui";
 
 const grid2 = "mt-3 grid gap-3 lg:grid-cols-2";
@@ -16,7 +18,7 @@ const rating = (v: number | null) => (v ? `${String(v).replace(".", ",")} / 5` :
 
 /* ===================================== Vue d'ensemble ===================================== */
 
-export function Overview({ d, alerts, go }: { d: Data; alerts: Alert[]; go: (t: Tab) => void }) {
+export function Overview({ d, alerts }: { d: Data; alerts: Alert[] }) {
   const p = d.previous;
   return (
     <>
@@ -40,12 +42,12 @@ export function Overview({ d, alerts, go }: { d: Data; alerts: Alert[]; go: (t: 
       </Card>
 
       <section aria-label="Chiffres clés" className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-        <Tile label={`Visiteurs (${d.days} j)`} value={n(d.visits.visitors)} change={delta(d.visits.visitors, p.visitors)} />
-        <Tile label="Nouveaux comptes" value={n(d.accounts.new_period)} change={delta(d.accounts.new_period, p.clients)} note={`${n(d.accounts.clients)} clients au total`} />
-        <Tile label="Restaurants en ligne" value={n(d.restaurants.published)} note={`${n(d.merchants_pending.length)} en cours d'inscription`} />
-        <Tile label="Revenu mensuel (HT)" value={euros(d.subscriptions.mrr_cents)} note={`${n(d.subscriptions.paid)} payé(s) · ${n(d.subscriptions.demo)} démo`} />
-        <Tile label="Visites en caisse (QR)" value={n(d.content.qr_visits)} change={delta(d.content.qr_visits, p.qr_visits)} />
-        <Tile label="Bugs (occurrences)" value={n(d.errors.occurrences)} change={delta(d.errors.occurrences, p.errors)} upIsGood={false} note={`${n(d.errors.distinct)} bug(s) différent(s)`} />
+        <Tile href={sectionHref("users")} label={`Visiteurs (${d.days} j)`} value={n(d.visits.visitors)} change={delta(d.visits.visitors, p.visitors)} />
+        <Tile href={sectionHref("users")} label="Nouveaux comptes" value={n(d.accounts.new_period)} change={delta(d.accounts.new_period, p.clients)} note={`${n(d.accounts.clients)} clients au total`} />
+        <Tile href={sectionHref("directory")} label="Restaurants en ligne" value={n(d.restaurants.published)} note={`${n(d.merchants_pending.length)} en cours d'inscription`} />
+        <Tile href={sectionHref("revenue")} label="Revenu mensuel (HT)" value={euros(d.subscriptions.mrr_cents)} note={`${n(d.subscriptions.paid)} payé(s) · ${n(d.subscriptions.demo)} démo`} />
+        <Tile href={sectionHref("restaurants")} label="Visites en caisse (QR)" value={n(d.content.qr_visits)} change={delta(d.content.qr_visits, p.qr_visits)} />
+        <Tile href={sectionHref("bugs")} label="Bugs (occurrences)" value={n(d.errors.occurrences)} change={delta(d.errors.occurrences, p.errors)} upIsGood={false} note={`${n(d.errors.distinct)} bug(s) différent(s)`} />
       </section>
 
       <div className={grid2}>
@@ -248,7 +250,7 @@ function nextStep(m: PendingMerchant) {
   return "Compléter et publier la fiche";
 }
 
-export function Restaurants({ d, reload }: { d: Data; reload: () => Promise<void> }) {
+export function Restaurants({ d }: { d: Data }) {
   const f = d.merchant_funnel, s = d.subscriptions_more, c = d.content;
   return (
     <>
@@ -264,7 +266,7 @@ export function Restaurants({ d, reload }: { d: Data; reload: () => Promise<void
           <Funnel steps={[["Comptes restaurateur", f.accounts], ["Fiche créée", f.fiche], ["SIRET vérifié", f.siret], ["Abonnement actif", f.subscribed], ["Justificatifs déposés", f.docs], ["En ligne sur la carte", f.published]]} />
           {f.suspended > 0 && <p className="mt-3 text-xs text-slate-600 dark:text-zinc-400">{n(f.suspended)} fiche(s) suspendue(s).</p>}
         </Card>
-        <Card title="Abonnements">
+        <Card title="Abonnements" action={<a href={sectionHref("revenue")} className="shrink-0 text-sm font-medium text-[var(--viz-1)] hover:underline">Revenus →</a>}>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-3">
             <Kv k="Actifs" v={n(d.subscriptions.active)} />
             <Kv k="Paiement refusé" v={n(s.past_due)} />
@@ -282,7 +284,7 @@ export function Restaurants({ d, reload }: { d: Data; reload: () => Promise<void
       </div>
 
       <Card className="mt-3" title="À relancer" hint="Restaurateurs inscrits pas encore sur la carte, le plus ancien en haut."
-        action={<a href={RESTAURANTS_URL} className="shrink-0 text-sm font-medium text-[var(--viz-1)] hover:underline">Tous les restaurants →</a>}>
+        action={<a href={sectionHref("directory")} className="shrink-0 text-sm font-medium text-[var(--viz-1)] hover:underline">Toutes les fiches →</a>}>
         {d.merchants_pending.length ? (
           <div className="-mx-5 overflow-x-auto px-5">
             <table className="w-full min-w-[640px] text-sm">
@@ -293,7 +295,7 @@ export function Restaurants({ d, reload }: { d: Data; reload: () => Promise<void
               <tbody>
                 {d.merchants_pending.map((m, i) => (
                   <tr key={i} className="border-t border-slate-200 align-top dark:border-white/10">
-                    <td className="py-2 pr-3">{m.id ? <a href={restaurantUrl(m.id)} className="font-medium text-[var(--viz-1)] hover:underline">{m.name}</a> : m.name}</td>
+                    <td className="py-2 pr-3">{m.id ? <a href={restaurantHref(m.id)} className="font-medium text-[var(--viz-1)] hover:underline">{m.name}</a> : m.name}</td>
                     <td className="py-2 pr-3"><Pill tone={m.status === "suspended" ? "critical" : m.status === "awaiting_docs" ? "warning" : "neutral"}>{STATUS_LABEL[m.status] ?? m.status}</Pill></td>
                     <td className="py-2 pr-3">{nextStep(m)}</td>
                     <td className="py-2 pr-3 whitespace-nowrap" title={dateTime(m.created_at)}>{ago(m.created_at)}{hoursSince(m.created_at) > 72 && m.status !== "suspended" && <span className="sr-only"> (plus de 3 jours)</span>}</td>
@@ -323,12 +325,12 @@ export function Restaurants({ d, reload }: { d: Data; reload: () => Promise<void
               {d.reported_reviews.map((r) => (
                 <li key={r.id} className="rounded-xl p-3 text-sm ring-1 ring-slate-200 dark:ring-white/10">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <a href={restaurantUrl(r.merchant_id)} className="font-semibold text-[var(--viz-1)] hover:underline">{r.merchant}</a>
+                    <a href={restaurantHref(r.merchant_id)} className="font-semibold text-[var(--viz-1)] hover:underline">{r.merchant}</a>
                     <span className="text-xs text-slate-600 dark:text-zinc-400">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)} · signalé {ago(r.reported_at)}</span>
                   </div>
                   <p className="mt-1 break-words">{r.comment || <i className="text-slate-500">(sans commentaire)</i>}</p>
                   <p className="mt-1 text-xs text-slate-500 dark:text-zinc-400">{r.author_name} · avis du {dateTime(r.created_at)}</p>
-                  <ModerationButtons reviewId={r.id} reported onDone={reload} />
+                  <ModerationButtons reviewId={r.id} reported onDone={refreshAll} />
                 </li>
               ))}
             </ul>

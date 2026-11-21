@@ -173,6 +173,7 @@ export const confidentialite: LegalDoc = {
             { title: "Fréquentation du site (identifiant d'appareil tiré au hasard)", detail: "13 mois." },
             { title: "Rapports de bugs (sans identifiant)", detail: "90 jours." },
             { title: "Décisions de modération des avis (avis supprimé ou gardé, par qui)", detail: "13 mois." },
+            { title: "Paiements des abonnements (montant, date, formule)", detail: "10 ans (obligation comptable), même après la suppression du compte." },
             { title: "QR codes de visite", detail: "Valables 75 secondes, effacés au bout d'un jour." },
             { title: "Visites validées au restaurant (QR code)", detail: "13 mois." },
             { title: "Tentatives d'inscription (empreinte IP)", detail: "2 jours." },

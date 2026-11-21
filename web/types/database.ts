@@ -795,6 +795,10 @@ export type Database = {
         Args: { p_days?: number }
         Returns: Json
       }
+      team_revenue: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       team_merchants: {
         Args: Record<PropertyKey, never>
         Returns: Json

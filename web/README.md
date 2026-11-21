@@ -121,6 +121,9 @@ Mise en service (une fois) :
    Secrets* : `WHOP_WEBHOOK_SECRET`.
 4. Renseigner les identifiants `plan_…` dans `billing_plans.whop_plan_id` et `biz_…` dans
    `billing_settings.whop_account_id`, puis passer `billing_settings.whop_live` à vrai : le paiement est ouvert.
+5. Republier la fonction `whop-webhook` (elle enregistre aussi chaque paiement dans `billing_payments`, pour l'onglet
+   « Revenus » du tableau de bord), puis faire un paiement test : il doit apparaître dans « Derniers paiements ».
+   L'encart « Whop n'est pas encore branché » de cet onglet coche chaque étape au fur et à mesure.
 
 ### Pages juridiques (`app/legal/`)
 Mentions légales, CGU, CGV et politique de confidentialité, publiées sous `/app/legal/` (le site complet y renvoie).

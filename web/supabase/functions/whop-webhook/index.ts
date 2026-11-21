@@ -6,7 +6,7 @@
  * verify_jwt = false : Whop n'a pas de compte Supabase ; chaque notification est authentifiée par sa signature.
  */
 import { createClient } from "npm:@supabase/supabase-js@2.118.0";
-import { whopRequest, type WhopMembership } from "../_shared/whop.ts";
+import { whopRequest, type WhopMembership, type WhopPayment } from "../_shared/whop.ts";
 import { handle, type Deps } from "./handler.ts";
 
 const url = Deno.env.get("SUPABASE_URL")!;
@@ -62,6 +62,11 @@ const deps: Deps = {
   async save(merchantId, row) {
     const { error } = await admin.from("merchant_subscriptions")
       .upsert({ merchant_id: merchantId, ...row, updated_at: new Date().toISOString() }, { onConflict: "merchant_id" });
+    if (error) throw error;
+  },
+  getPayment: (id) => whopRequest<WhopPayment>(WHOP_API, WHOP_KEY, "GET", `payments/${encodeURIComponent(id)}`),
+  async savePayment(row) {
+    const { error } = await admin.from("billing_payments").upsert({ ...row, updated_at: new Date().toISOString() }, { onConflict: "id" });
     if (error) throw error;
   },
   now: () => new Date(),

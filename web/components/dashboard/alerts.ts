@@ -1,7 +1,7 @@
 import { DB_LIMIT, STORAGE_LIMIT, hoursSince, n, plural, type Data } from "./data";
+import type { Section } from "./nav";
 
-export type Tab = "overview" | "users" | "restaurants" | "bugs" | "server";
-export type Alert = { tone: "critical" | "warning" | "info"; text: string; tab: Tab };
+export type Alert = { tone: "critical" | "warning" | "info"; text: string; tab: Section };
 
 /** « À surveiller » : ce qui demande l'attention de l'équipe, du plus grave au moins grave. */
 export function alerts(d: Data): Alert[] {
@@ -15,7 +15,7 @@ export function alerts(d: Data): Alert[] {
   const cronFailed = (h.cron ?? []).filter((c) => c.last_status === "failed" || c.failures_7d > 0);
   if (cronFailed.length) out.push({ tone: "critical", tab: "server", text: `Tâche planifiée en échec : ${cronFailed.map((c) => c.job).join(", ")}` });
   if (h.maintenance && hoursSince(h.maintenance.purge) > 26) out.push({ tone: "critical", tab: "server", text: "Le ménage nocturne n'a pas tourné depuis plus de 26 h" });
-  if (d.subscriptions_more.past_due) out.push({ tone: "critical", tab: "restaurants", text: `${plural(d.subscriptions_more.past_due, "abonnement", "abonnements")} avec un paiement refusé` });
+  if (d.subscriptions_more.past_due) out.push({ tone: "critical", tab: "revenue", text: `${plural(d.subscriptions_more.past_due, "abonnement", "abonnements")} avec un paiement refusé` });
 
   const dbUse = (h.db_bytes ?? 0) / DB_LIMIT;
   if (dbUse >= 0.7) out.push({ tone: dbUse >= 0.9 ? "critical" : "warning", tab: "server", text: `Base de données remplie à ${Math.round(dbUse * 100)} % (offre gratuite : 500 Mo)` });
@@ -28,7 +28,7 @@ export function alerts(d: Data): Alert[] {
   if (open.length && !d.errors.new_24h) out.push({ tone: "warning", tab: "bugs", text: `${plural(open.length, "bug", "bugs")} à traiter sur la période` });
   const stuck = d.merchants_pending.filter((m) => m.status !== "suspended" && hoursSince(m.created_at) > 72);
   if (stuck.length) out.push({ tone: "info", tab: "restaurants", text: `${plural(stuck.length, "restaurateur inscrit", "restaurateurs inscrits")} depuis plus de 3 jours, pas encore sur la carte` });
-  if (d.subscriptions_more.cancelling) out.push({ tone: "info", tab: "restaurants", text: `${plural(d.subscriptions_more.cancelling, "abonnement résilié", "abonnements résiliés")} à l'échéance` });
-  if (h.whop && !h.whop.live) out.push({ tone: "info", tab: "server", text: "Paiement Whop en mode démonstration (aucun paiement réel)" });
+  if (d.subscriptions_more.cancelling) out.push({ tone: "info", tab: "revenue", text: `${plural(d.subscriptions_more.cancelling, "abonnement résilié", "abonnements résiliés")} à l'échéance` });
+  if (h.whop && !h.whop.live) out.push({ tone: "info", tab: "revenue", text: "Paiement Whop en mode démonstration (aucun paiement réel)" });
   return out;
 }

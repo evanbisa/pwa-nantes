@@ -119,33 +119,28 @@ en plus) :
 ## Tableau de bord de l'équipe
 
 - Adresse : `/app/tableau-de-bord/` (aussi depuis le profil : « 📊 Tableau de bord de l'équipe »), réservé aux comptes
-  de l'équipe. Périodes 7, 30 ou 90 jours, comparées à la période précédente ; actualisé toutes les 5 minutes. Onglets
-  (lien direct : `#users`, `#restaurants`, `#bugs`, `#server`) :
+  de l'équipe. Une seule page, sections dans la barre latérale (onglets sur téléphone) et dans l'adresse :
+  `#revenus`, `#users`, `#restaurants`, `#fiches`, `#fiches/<restaurant>`, `#bugs`, `#server`.
+  - **Fluide** : changer de section ou de période (7 j, 30 j, 90 j, 1 an) ne recharge rien ; les chiffres restent
+    affichés pendant la relecture (barre fine en haut) ; sections voisines lues à l'avance ; « En direct » relit tout
+    chaque minute tant que la page est visible (clic pour mettre en pause).
+  - **Clavier** : `⌘K` / `Ctrl+K` ou `/` (palette : sections, restaurants par nom, responsable, e-mail ou SIRET,
+    actions), `1`–`7` sections, `R` actualiser, `T` mode jour / nuit.
   - **Vue d'ensemble** : « À surveiller » (nouveaux bugs, bug corrigé qui revient, tâche planifiée en échec, ménage
-    en retard, paiement refusé, quotas de l'offre gratuite, avis signalés, restaurateurs à relancer), 6 chiffres clés,
-    visiteurs et comptes par jour, activité récente, restaurants les plus vus.
-  - **Utilisateurs** : visiteurs du jour / 7 j / 30 j, nouveaux et déjà venus, fidélité, comptes et connexions,
-    entonnoir visiteurs → comptes → clients actifs → visite en caisse, appareils, écran d'accueil, jours et heures,
-    sexe et âge, alertes.
-  - **Restaurants** : entonnoir de l'inscription à la carte, restaurateurs à relancer (étape qui manque, e-mail),
-    abonnements et formules, contenu publié, avis signalés, utilisation des fiches.
-  - **Bugs** : erreurs JavaScript de la carte et de l'application, réponses en erreur du serveur (5xx, table ou
-    fonction introuvable), par jour et en liste (fichier, pile d'appels, pages, appareils, navigateurs, version publiée
-    avec lien vers le commit). « Marquer corrigé » (signalé « réapparu » s'il revient), « Ignorer », « Copier le
-    résumé » (à coller dans une demande de correction). Envoyés par `BugReport` (`index.html`) et
-    `web/components/BugReporter.tsx`, sans identifiant ni cookie, nettoyés par la base, gardés 90 jours
-    (migration `20261120090000_team_dashboard_v2.sql`).
-  - **Serveur** : base et stockage face aux limites de l'offre gratuite, plus grosses tables, tâches planifiées, ménage
-    nocturne, Whop, tentatives d'inscription, plafonds du jour, liens vers les journaux Supabase, Vercel et GitHub.
-- **Restaurants** : `/app/tableau-de-bord/restaurants/` (lien « Fiches des restaurants → » en haut du tableau de bord) :
-  tous les comptes restaurateur, avec leurs justificatifs (Kbis et hygiène obligatoires, DDPP et licence facultatifs),
-  SIRET, abonnement, vues, abonnés, avis ; recherche (nom, responsable, e-mail, SIRET) et filtres (en ligne, en
-  préparation, justificatifs manquants, test). `?id=…` ouvre la fiche complète : justificatifs à ouvrir (liens
-  temporaires de 10 minutes, l'espace « documents » reste privé), entreprise (Sirene), responsable, abonnement, fiche
-  publique, **les mêmes statistiques que l'espace du restaurateur** (fonction `merchant_analytics`, commune aux deux),
-  visites en caisse, avis et historique de modération (migration `20261121090000_team_restaurants.sql`).
-- **Modération des avis** : sur les avis signalés (onglet Restaurants) et sur la fiche d'un restaurant, « Garder
-  l'avis » (signalement levé) ou « Supprimer » ; chaque décision est notée (`team_actions`, 13 mois).
+    en retard, paiement refusé, quotas de l'offre gratuite, avis signalés, restaurateurs à relancer), 6 chiffres clés
+    cliquables, visiteurs et comptes par jour, activité récente.
+  - **Revenus** : encaissé (aujourd'hui, 7 derniers jours, ce mois comparé au même moment du mois dernier, mois
+    dernier, année) par jour et par mois ; revenu récurrent HT (formule à l'année ramenée au mois) ; **prévision du
+    mois prochain** : revenu récurrent payé − résiliations qui prennent effet + abonnements gratuits (démonstration)
+    convertis au taux choisi (curseur, scénarios 25 à 100 %), et encaissements attendus (renouvellements + premiers
+    paiements). Encaissé lu dans `billing_payments`, rempli par `whop-webhook` à chaque paiement Whop (relu chez Whop) ;
+    tant que Whop n'est pas branché, un encart liste ce qu'il reste à faire.
+  - **Utilisateurs**, **Restaurants** (entonnoir, à relancer, avis signalés avec « Garder » / « Supprimer »),
+    **Fiches restaurants** (justificatifs à ouvrir, entreprise, responsable, abonnement, statistiques du restaurateur,
+    avis), **Bugs** (erreurs vues sur les appareils, « Marquer corrigé », « Copier le résumé »), **Serveur** (quotas de
+    l'offre gratuite, tâches planifiées, ménage, liens vers les journaux).
+  - Migrations `20261120090000_team_dashboard_v2.sql`, `20261121090000_team_restaurants.sql`,
+    `20261122090000_team_revenue.sql` ; code dans `web/components/dashboard/`.
 - Les visites ne sont comptées qu'avec l'accord « statistiques » des cookies (identifiant d'appareil tiré au hasard,
   13 mois).
 - Ajouter un membre : Supabase › SQL Editor,

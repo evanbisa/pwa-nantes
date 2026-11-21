@@ -5,6 +5,7 @@ import { Check, ClipboardCopy, EyeOff, RotateCcw } from "lucide-react";
 import { siteClient } from "@/lib/supabase/site-session";
 import { REPO, ago, dateTime, delta, n, type Data, type ErrorItem } from "./data";
 import { Bars, Card, Muted, Pill, Spark, Tile } from "./ui";
+import { refreshAll } from "./store";
 
 /**
  * Onglet « Bugs » : erreurs vues sur les appareils (carte et application) et réponses en erreur du serveur.
@@ -35,7 +36,7 @@ function summary(e: ErrorItem) {
   ].filter(Boolean).join("\n");
 }
 
-export function Bugs({ d, reload }: { d: Data; reload: () => Promise<void> }) {
+export function Bugs({ d }: { d: Data }) {
   const [filter, setFilter] = useState<Filter>("open");
   const [busy, setBusy] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
@@ -48,7 +49,7 @@ export function Bugs({ d, reload }: { d: Data; reload: () => Promise<void> }) {
     setFailed(false);
     const { error } = await siteClient().rpc("team_error_triage", { p_fingerprint: fp, p_status: status });
     if (error) setFailed(true);
-    else await reload();
+    else await refreshAll();
     setBusy(null);
   };
 

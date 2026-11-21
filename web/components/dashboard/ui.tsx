@@ -48,10 +48,11 @@ export const Muted = ({ children }: { children: ReactNode }) => <p className="te
  * Chiffre clé, avec son évolution par rapport à la période précédente. upIsGood = false pour les bugs : une hausse
  * s'affiche alors en rouge. Couleur toujours accompagnée d'une flèche et d'un texte.
  */
-export function Tile({ label, value, note, change, upIsGood = true }: { label: string; value: string; note?: ReactNode; change?: number | null; upIsGood?: boolean }) {
+export function Tile({ label, value, note, change, upIsGood = true, href }: { label: string; value: string; note?: ReactNode; change?: number | null; upIsGood?: boolean; href?: string }) {
   const good = change != null && change !== 0 && (change > 0) === upIsGood;
+  const Box = href ? "a" : "div";
   return (
-    <div className="min-w-0 rounded-2xl bg-white p-4 ring-1 ring-slate-200 dark:bg-white/[0.04] dark:ring-white/10">
+    <Box href={href} className={`block min-w-0 rounded-2xl bg-white p-4 ring-1 ring-slate-200 dark:bg-white/[0.04] dark:ring-white/10 ${href ? "transition hover:-translate-y-px hover:ring-slate-300 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-[var(--viz-1)] focus-visible:outline-none dark:hover:ring-white/20" : ""}`}>
       <p className="truncate text-xs font-medium text-slate-600 dark:text-zinc-400">{label}</p>
       <p className="mt-1 text-[28px] leading-tight font-bold tracking-tight tabular-nums">{value}</p>
       {change !== undefined && (
@@ -60,7 +61,7 @@ export function Tile({ label, value, note, change, upIsGood = true }: { label: s
         </p>
       )}
       {note && <p className="mt-1 text-xs text-slate-600 dark:text-zinc-400">{note}</p>}
-    </div>
+    </Box>
   );
 }
 
@@ -97,8 +98,9 @@ function niceMax(v: number) {
  * arrondis en haut. Survol ou toucher : détail. Légende dès 2 séries ; tableau des chiffres repliable.
  * labels : jours (ISO, affichés en date) ou libellés libres (jours de la semaine, heures).
  */
-export function Bars({ labels, series, extra, dates = true, height = "h-40", axis }: {
+export function Bars({ labels, series, extra, dates = true, height = "h-40", axis, format = n, tickFormat }: {
   labels: string[]; series: Series[]; extra?: (i: number) => string; dates?: boolean; height?: string; axis?: [string, string, string];
+  format?: (v: number) => string; tickFormat?: (v: number) => string;
 }) {
   const [active, setActive] = useState<number | null>(null);
   const totals = labels.map((_, i) => series.reduce((s, x) => s + (x.values[i] ?? 0), 0));
@@ -111,13 +113,13 @@ export function Bars({ labels, series, extra, dates = true, height = "h-40", axi
     <div>
       {series.length > 1 ? (
         <ul className="mb-5 flex flex-wrap gap-4 text-xs text-slate-700 dark:text-zinc-300">
-          {series.map((s) => <li key={s.name} className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm" style={{ background: s.color }} />{s.name} · {n(s.values.reduce((a, b) => a + b, 0))}</li>)}
+          {series.map((s) => <li key={s.name} className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm" style={{ background: s.color }} />{s.name} · {format(s.values.reduce((a, b) => a + b, 0))}</li>)}
         </ul>
-      ) : <p className="mb-5 text-xs text-slate-600 dark:text-zinc-400">Total : <b className="font-semibold text-slate-900 dark:text-zinc-50">{n(sum)}</b></p>}
+      ) : <p className="mb-5 text-xs text-slate-600 dark:text-zinc-400">Total : <b className="font-semibold text-slate-900 dark:text-zinc-50">{format(sum)}</b></p>}
       <div className={`relative ${height} pl-8`} onPointerLeave={() => setActive(null)}>
         {ticks.map((t) => (
           <div key={t} className="pointer-events-none absolute inset-x-0 flex h-0 items-center" style={{ bottom: `${(t / top) * 100}%` }}>
-            <span className="w-7 pr-1 text-right text-[10px] tabular-nums text-slate-500 dark:text-zinc-400">{n(t)}</span>
+            <span className="w-7 pr-1 text-right text-[10px] tabular-nums text-slate-500 dark:text-zinc-400">{(tickFormat ?? format)(t)}</span>
             <span className="h-px flex-1 bg-[var(--viz-grid)]" />
           </div>
         ))}
@@ -140,7 +142,7 @@ export function Bars({ labels, series, extra, dates = true, height = "h-40", axi
           <div role="status" className="pointer-events-none absolute -top-2 z-10 -translate-x-1/2 -translate-y-full rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs whitespace-nowrap text-white shadow-lg dark:bg-zinc-100 dark:text-zinc-900"
             style={{ left: `calc(2rem + (100% - 2rem) * ${Math.min(0.85, Math.max(0.15, (active + 0.5) / labels.length))})` }}>
             <p className="font-semibold">{label(active, true)}</p>
-            {series.map((s) => <p key={s.name}>{s.name} : {n(s.values[active])}</p>)}
+            {series.map((s) => <p key={s.name}>{s.name} : {format(s.values[active])}</p>)}
             {extra && <p className="opacity-80">{extra(active)}</p>}
           </div>
         )}
@@ -153,7 +155,7 @@ export function Bars({ labels, series, extra, dates = true, height = "h-40", axi
         <div className="max-h-64 overflow-y-auto">
           <table className="mt-2 w-full">
             <thead><tr className="text-left text-slate-600 dark:text-zinc-400"><th className="py-1 font-medium">{dates ? "Jour" : ""}</th>{series.map((s) => <th key={s.name} className="py-1 text-right font-medium">{s.name}</th>)}</tr></thead>
-            <tbody>{labels.map((key, i) => <tr key={key + i} className="border-t border-slate-200 dark:border-white/10"><td className="py-1">{label(i)}</td>{series.map((s) => <td key={s.name} className="py-1 text-right tabular-nums">{n(s.values[i])}</td>)}</tr>)}</tbody>
+            <tbody>{labels.map((key, i) => <tr key={key + i} className="border-t border-slate-200 dark:border-white/10"><td className="py-1">{label(i)}</td>{series.map((s) => <td key={s.name} className="py-1 text-right tabular-nums">{format(s.values[i])}</td>)}</tr>)}</tbody>
           </table>
         </div>
       </details>
@@ -222,5 +224,34 @@ export function Spark({ values, label }: { values: number[]; label: string }) {
     <span className="inline-flex h-6 items-end gap-px" role="img" aria-label={`${label} : ${values.join(", ")}`}>
       {values.map((v, i) => <span key={i} className="w-1 rounded-t-[1px]" style={{ height: `${v ? Math.max(12, (v / max) * 100) : 4}%`, background: v ? "var(--viz-2)" : "var(--viz-grid)" }} />)}
     </span>
+  );
+}
+
+/* ---------- Chargement ---------- */
+
+/** Bloc gris qui « respire » pendant le premier chargement d'une section. */
+export const Skel = ({ className = "" }: { className?: string }) => <div aria-hidden className={`dash-skel rounded-xl ${className}`} />;
+
+/** Squelette générique d'une section : chiffres clés, deux graphiques, une liste. */
+export function SectionSkeleton() {
+  return (
+    <div role="status" aria-label="Chargement">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{[0, 1, 2, 3].map((i) => <Skel key={i} className="h-28" />)}</div>
+      <div className="mt-3 grid gap-3 lg:grid-cols-2"><Skel className="h-72" /><Skel className="h-72" /></div>
+      <Skel className="mt-3 h-48" />
+    </div>
+  );
+}
+
+/** Erreur de chargement d'une section, avec « Réessayer » (les autres sections restent utilisables). */
+export function SectionError({ retry }: { retry: () => void }) {
+  return (
+    <div className="grid min-h-[40vh] place-items-center text-center">
+      <div>
+        <p className="text-lg font-semibold">Données indisponibles pour le moment</p>
+        <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">Vérifiez votre connexion, puis réessayez.</p>
+        <button type="button" onClick={retry} className="btn-dash mt-4">Réessayer</button>
+      </div>
+    </div>
   );
 }

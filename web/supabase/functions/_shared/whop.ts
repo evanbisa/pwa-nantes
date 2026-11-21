@@ -24,6 +24,65 @@ export interface SubscriptionPatch {
   manage_url: string | null;
 }
 
+/**
+ * Paiement Whop (« payment »), champs utilisés ici. Lecture prudente : montants en unités (29.0 = 29 €), dates en
+ * texte ISO ou en secondes, abonnement et tarif en objet ou en identifiant.
+ */
+export interface WhopPayment {
+  id: string;
+  status?: string | null;
+  total?: number | string | null;
+  currency?: string | null;
+  paid_at?: string | number | null;
+  refunded_amount?: number | string | null;
+  billing_reason?: string | null;
+  membership?: { id?: string | null } | null;
+  membership_id?: string | null;
+  plan?: { id?: string | null } | null;
+  plan_id?: string | null;
+}
+
+/** Paiement à enregistrer dans billing_payments (sans le restaurant ni la formule, déduits ensuite). */
+export interface PaymentRow {
+  id: string;
+  membership_id: string | null;
+  whop_plan_id: string | null;
+  amount_cents: number;
+  refunded_cents: number;
+  currency: string;
+  paid_at: string;
+  billing_reason: string | null;
+}
+
+const cents = (v: unknown) => {
+  const x = typeof v === "string" ? Number(v) : v;
+  return typeof x === "number" && Number.isFinite(x) && x >= 0 ? Math.round(x * 100) : null;
+};
+const isoDate = (v: unknown) => {
+  const t = typeof v === "number" ? (v < 1e12 ? v * 1000 : v) : typeof v === "string" ? Date.parse(v) : NaN;
+  return Number.isFinite(t) ? new Date(t).toISOString() : null;
+};
+
+/** Paiement encaissé → ligne à enregistrer ; null s'il n'est pas (encore) payé ou s'il est illisible. */
+export function paymentRow(p: WhopPayment): PaymentRow | null {
+  if (!/^pay_[A-Za-z0-9]{4,60}$/.test(p.id)) return null;
+  const paidAt = isoDate(p.paid_at);
+  const amount = cents(p.total);
+  if (!paidAt || amount === null || ["draft", "open", "pending", "failed", "void", "uncollectible"].includes(p.status ?? "")) return null;
+  const membership = p.membership?.id ?? p.membership_id ?? null;
+  const plan = p.plan?.id ?? p.plan_id ?? null;
+  return {
+    id: p.id,
+    membership_id: membership && /^mem_[A-Za-z0-9]{4,60}$/.test(membership) ? membership : null,
+    whop_plan_id: plan && /^plan_[A-Za-z0-9]{4,60}$/.test(plan) ? plan : null,
+    amount_cents: amount,
+    refunded_cents: Math.min(amount, cents(p.refunded_amount) ?? 0),
+    currency: (typeof p.currency === "string" && /^[a-zA-Z]{3}$/.test(p.currency) ? p.currency : "eur").toLowerCase(),
+    paid_at: paidAt,
+    billing_reason: typeof p.billing_reason === "string" ? p.billing_reason.slice(0, 40) : null,
+  };
+}
+
 export class WhopError extends Error {
   constructor(readonly status: number, message: string) {
     super(message);
