@@ -114,7 +114,7 @@ function PaletteDialog({ onClose, night, toggleTheme, live, setLive }: {
           })}
         </ul>
         <p className="border-t border-slate-200 px-4 py-2 text-[11px] text-slate-500 dark:border-white/10 dark:text-zinc-400">
-          ↑ ↓ pour choisir · Entrée pour ouvrir · ⌘K ou / pour rouvrir · 1–7 sections · R actualiser · T thème
+          ↑ ↓ pour choisir · Entrée pour ouvrir · ⌘K ou / pour rouvrir · 1–8 sections · R actualiser · T thème
         </p>
       </div>
     </div>

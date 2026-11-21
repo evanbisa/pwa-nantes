@@ -7,6 +7,7 @@ import { ago, bytes, dateTime, dayLabel, delta, n } from "./data";
 import { restaurantHref, sectionHref } from "./nav";
 import { Q, refreshAll, useQuery } from "./store";
 import { Bars, Card, HBars, Kv, Muted, Notice, Pill, SectionError, SectionSkeleton, Tile } from "./ui";
+import { ReviewActions } from "./review";
 import { ModerationButtons } from "./moderation";
 
 /**
@@ -20,12 +21,13 @@ import { ModerationButtons } from "./moderation";
 
 /* ---------- Libellés ---------- */
 
-const CATEGORY: Record<string, string> = { food_truck: "Food-truck", kebab: "Kebab", burger: "Burger", sweets: "Douceurs", pizza: "Pizza", other: "Autre" };
-const STATUS: Record<string, [string, "good" | "warning" | "critical" | "neutral"]> = {
+export const CATEGORY: Record<string, string> = { food_truck: "Food-truck", kebab: "Kebab", burger: "Burger", sweets: "Douceurs", pizza: "Pizza", other: "Autre" };
+export const STATUS: Record<string, [string, "good" | "warning" | "critical" | "neutral"]> = {
   published: ["En ligne", "good"], draft: ["Brouillon", "neutral"], awaiting_docs: ["Attend ses justificatifs", "warning"],
+  awaiting_review: ["À vérifier par l'équipe", "warning"],
   suspended: ["Suspendue", "critical"], no_fiche: ["Pas de fiche", "neutral"],
 };
-const DOCS: { key: "kbis" | "hygiene" | "ddpp" | "licence"; label: string; short: string; required: boolean }[] = [
+export const DOCS: { key: "kbis" | "hygiene" | "ddpp" | "licence"; label: string; short: string; required: boolean }[] = [
   { key: "kbis", label: "Extrait Kbis, avis de situation Sirene ou extrait D1 (moins de 3 mois)", short: "Kbis", required: true },
   { key: "hygiene", label: "Attestation de formation à l'hygiène alimentaire (HACCP)", short: "Hygiène", required: true },
   { key: "ddpp", label: "Récépissé de déclaration DDPP (Cerfa n° 13984)", short: "DDPP", required: false },
@@ -39,7 +41,7 @@ const SOURCES: [string, string][] = [["map", "Carte"], ["list", "Liste"], ["sear
 const WEEKDAY = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
 
 const subLabel = (s: Sub | null) => (s ? `${s.plan ? s.plan[0].toUpperCase() + s.plan.slice(1) : "?"}${s.period ? ` · ${s.period === "year" ? "an" : "mois"}` : ""}${s.mode === "demo" ? " (démo)" : ""}` : "—");
-const siret = (v: string | null | undefined) => (v ? v.replace(/^(\d{3})(\d{3})(\d{3})(\d{5})$/, "$1 $2 $3 $4") : "—");
+export const siret = (v: string | null | undefined) => (v ? v.replace(/^(\d{3})(\d{3})(\d{3})(\d{5})$/, "$1 $2 $3 $4") : "—");
 
 /* ---------- Données ---------- */
 
@@ -68,6 +70,7 @@ type Detail = {
     id: string; name: string; category: string; description: string | null; address: string | null; phone: string | null; status: string; is_test: boolean; is_open: boolean;
     opening_hours: { services?: [string, string][]; closed_on?: number[] } | null; menu_json: { name: string; price?: number; section?: string }[] | null;
     photos_urls: string[] | null; created_at: string; published_at: string | null; honor_at: string | null; accepts_meal_vouchers: boolean;
+    approved_at: string | null; review_note: string | null;
   };
   docs_ok: boolean;
   legal: null | { siret: string; verified_at: string | null; legal_name: string | null; naf_code: string | null; sirene: Record<string, unknown> | null };
@@ -217,6 +220,8 @@ export function RestaurantDetail({ id, days }: { id: string; days: number }) {
         </div>
       </header>
 
+      <ReviewState m={m} />
+
       {docsMissing.length > 0 && (
         <p role="status" className="mt-5 flex items-start gap-2 rounded-xl bg-[#fab219]/15 px-4 py-3 text-sm text-[#7a5200] dark:text-[#ffd27a]">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
@@ -279,8 +284,8 @@ export function RestaurantDetail({ id, days }: { id: string; days: number }) {
 /* ---------- Justificatifs ---------- */
 
 /** « <fiche>/kbis--1700000000000--Mon Kbis.pdf » → « kbis » ; date d'envoi ; nom d'origine. */
-const docKey = (path: string) => path.split("/").pop()!.split("--")[0];
-const docName = (path: string) => path.split("/").pop()!.split("--").slice(2).join("--") || path.split("/").pop()!;
+export const docKey = (path: string) => path.split("/").pop()!.split("--")[0];
+export const docName = (path: string) => path.split("/").pop()!.split("--").slice(2).join("--") || path.split("/").pop()!;
 
 function Documents({ docs }: { docs: Detail["documents"] }) {
   const [links, setLinks] = useState<Record<string, string>>({});
@@ -528,4 +533,33 @@ function Stats({ a, visits }: { a: Analytics; visits: Detail["visits"] }) {
       </div>
     </>
   );
+}
+
+/* ---------- Vérification par l'équipe ---------- */
+
+/**
+ * État de la vérification (Kbis relu par l'équipe) : en attente (avec Valider / Refuser), refusée (motif montré au
+ * restaurateur), ou validée. Les fiches de test n'en ont pas besoin.
+ */
+function ReviewState({ m }: { m: Detail["merchant"] }) {
+  if (m.is_test) return null;
+  if (m.status === "awaiting_review") return (
+    <div className="mt-5 rounded-2xl bg-[#fab219]/12 p-4 ring-1 ring-[#fab219]/40">
+      <p className="flex items-start gap-2 text-sm font-semibold text-[#7a5200] dark:text-[#ffd27a]">
+        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /> En attente de votre vérification : relisez le Kbis ci-dessous avant de valider.
+      </p>
+      <div className="mt-3"><ReviewActions id={m.id} name={m.name} /></div>
+    </div>
+  );
+  if (m.review_note) return (
+    <p className="mt-5 flex items-start gap-2 rounded-xl bg-[#d03b3b]/10 px-4 py-3 text-sm text-[#a82626] dark:text-[#ff9b9b]">
+      <XCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /> Refusée par l&apos;équipe, motif envoyé au restaurateur : « {m.review_note} ». Elle reviendra dans « À vérifier » une fois corrigée.
+    </p>
+  );
+  if (m.approved_at) return (
+    <p className="mt-5 flex items-center gap-2 text-sm text-[#006300] dark:text-[#0ca30c]">
+      <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden /> Vérifiée par l&apos;équipe le {dateTime(m.approved_at)}.
+    </p>
+  );
+  return null;
 }

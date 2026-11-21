@@ -12,7 +12,7 @@ export type ErrorItem = {
 };
 
 export type PendingMerchant = {
-  id: string | null; name: string; status: "no_fiche" | "draft" | "awaiting_docs" | "suspended"; created_at: string; email: string | null;
+  id: string | null; name: string; status: "no_fiche" | "draft" | "awaiting_docs" | "awaiting_review" | "suspended"; created_at: string; email: string | null;
   siret: boolean; docs: boolean; honor: boolean; subscription: string | null;
 };
 

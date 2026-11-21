@@ -12,6 +12,7 @@ import { Centered, Notice, SectionError, SectionSkeleton } from "./ui";
 import { Overview, Restaurants, Server, Users } from "./panels";
 import { Bugs } from "./bugs";
 import { RevenuePanel } from "./revenue";
+import { ReviewPanel } from "./review";
 import { RestaurantDetail, RestaurantList } from "./restaurants";
 import { Palette } from "./palette";
 
@@ -21,7 +22,7 @@ import { Palette } from "./palette";
  *  - instantané : changer de section ou de période ne recharge pas la page ; les chiffres déjà lus restent affichés
  *    pendant que la base est relue (barre fine en haut de l'écran) ; sections voisines lues à l'avance ;
  *  - en direct : relecture toutes les minutes tant que la page est visible (« En direct », pause possible) ;
- *  - clavier : ⌘K / Ctrl+K ou / (palette : sections, restaurants, actions), 1 à 7 (sections), R (actualiser), T (thème).
+ *  - clavier : ⌘K / Ctrl+K ou / (palette : sections, restaurants, actions), 1 à 8 (sections), R (actualiser), T (thème).
  * Tout est calculé par la base et réservé aux comptes de l'équipe.
  */
 
@@ -75,6 +76,8 @@ function Dashboard() {
   const night = useNight();
 
   const dash = useQuery<Data>(Q.dashboard<Data>(days));
+  // Fiches à vérifier : toujours suivies (pastille de la barre latérale), quelle que soit la section affichée
+  const queue = useQuery<unknown[]>(Q.reviewQueue<unknown[]>(), 30_000);
   const d = dash.data;
   const section = SECTIONS.find((s) => s.id === route.section)!;
 
@@ -105,7 +108,7 @@ function Dashboard() {
       const t = e.target as HTMLElement;
       if (e.metaKey || e.ctrlKey || e.altKey || t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
       if (e.key === "/") { e.preventDefault(); setPalette(true); }
-      else if (/^[1-7]$/.test(e.key)) go(SECTIONS[Number(e.key) - 1].id);
+      else if (/^[1-8]$/.test(e.key)) go(SECTIONS[Number(e.key) - 1].id);
       else if (e.key === "r" || e.key === "R") void refreshActive();
       else if (e.key === "t" || e.key === "T") toggleTheme();
     };
@@ -120,12 +123,14 @@ function Dashboard() {
   const list = d ? alerts(d) : [];
   const badges: Partial<Record<Section, [number, "critical" | "neutral"]>> = d ? {
     overview: [list.filter((a) => a.tone === "critical").length, "critical"],
+    review: [queue.data?.length ?? d.merchants_pending.filter((m) => m.status === "awaiting_review").length, "critical"],
     bugs: [d.error_list.filter((e) => e.open).length, "critical"],
     restaurants: [d.reported_reviews.length, "neutral"],
   } : {};
 
   let body: ReactNode;
-  if (route.section === "revenue") body = <RevenuePanel />;
+  if (route.section === "review") body = <ReviewPanel />;
+  else if (route.section === "revenue") body = <RevenuePanel />;
   else if (route.section === "directory") body = route.id ? <RestaurantDetail id={route.id} days={days} /> : <RestaurantList />;
   else if (!d) body = dash.error ? <SectionError retry={() => fetchQuery(Q.dashboard(days).key)} /> : <SectionSkeleton />;
   else if (route.section === "overview") body = <Overview d={d} alerts={list} />;
@@ -220,7 +225,7 @@ function Dashboard() {
           <div key={`${route.section}/${route.id ?? ""}`} className="dash-enter">{body}</div>
           <p className="mt-8 text-center text-xs leading-relaxed text-slate-500 dark:text-zinc-500">
             Visites comptées avec l&apos;accord « statistiques » (identifiant d&apos;appareil tiré au hasard, 13 mois) · bugs sans identifiant (90 jours) ·
-            raccourcis : <kbd>⌘K</kbd> recherche, <kbd>1</kbd>–<kbd>7</kbd> sections, <kbd>R</kbd> actualiser, <kbd>T</kbd> thème
+            raccourcis : <kbd>⌘K</kbd> recherche, <kbd>1</kbd>–<kbd>8</kbd> sections, <kbd>R</kbd> actualiser, <kbd>T</kbd> thème
           </p>
         </main>
       </div>

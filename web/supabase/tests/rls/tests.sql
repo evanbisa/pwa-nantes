@@ -87,7 +87,38 @@ select t.ok(t.affected($$update merchants set status = 'published' where id = 'a
   and (select status = 'awaiting_docs' from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'Kbis seul : la fiche attend encore l''attestation d''hygiène');
 select t.ok(t.affected($$insert into storage.objects (bucket_id, name) values ('documents', 'aaaaaaaa-0000-0000-0000-000000000001/hygiene--1--haccp.pdf')$$) = 1, 'attestation d''hygiène déposée');
 select t.ok(t.affected($$update merchants set status = 'published' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 1, 'publication acceptée : SIRET vérifié, attestation, abonnement, justificatifs et fiche complète');
-select t.ok((select status = 'published' from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001') and private.merchant_is_live('aaaaaaaa-0000-0000-0000-000000000001'), 'justificatifs déposés : fiche en ligne');
+-- Vérification par l'équipe (Kbis relu) avant la carte
+select t.ok((select status = 'awaiting_review' and published_at is null from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001')
+            and not private.merchant_is_live('aaaaaaaa-0000-0000-0000-000000000001'), 'justificatifs déposés : fiche en vérification par l''équipe, pas encore en ligne');
+select t.fails($$update merchants set approved_at = now(), review_note = null where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$, 'restaurateur : ne peut pas valider sa propre fiche');
+select t.ok((select approved_at is null and status = 'awaiting_review' from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'restaurateur : fiche toujours en vérification');
+select t.fails($$select public.team_review_merchant('aaaaaaaa-0000-0000-0000-000000000001', true)$$, 'restaurateur : validation par l''équipe refusée');
+select t.fails($$select public.team_review_queue()$$, 'restaurateur : liste des fiches à vérifier refusée');
+reset role;
+insert into team_admins (user_id) values ('33333333-3333-3333-3333-333333333333');
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select jsonb_array_length(q) = 1 and q -> 0 ->> 'siret' = '12345678900017' and jsonb_array_length(q -> 0 -> 'documents') = 2
+             from (select public.team_review_queue() q) x), 'équipe : fiche à vérifier listée avec SIRET et justificatifs');
+select t.fails($$select public.team_review_merchant('aaaaaaaa-0000-0000-0000-000000000001', false, 'non')$$, 'équipe : refus sans motif (5 caractères) impossible');
+select t.ok(public.team_review_merchant('aaaaaaaa-0000-0000-0000-000000000001', false, 'Kbis illisible, merci de le renvoyer') = 'draft', 'équipe : refus avec motif, la fiche repasse en brouillon');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select review_note = 'Kbis illisible, merci de le renvoyer' from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'restaurateur : voit le motif du refus');
+select t.ok(t.affected($$update merchants set status = 'published' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 1, 'restaurateur : remet sa fiche en ligne après correction');
+select t.ok((select status = 'awaiting_review' from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'restaurateur : après correction, la fiche repart en vérification');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok(public.team_review_merchant('aaaaaaaa-0000-0000-0000-000000000001', true) = 'published', 'équipe : fiche validée, mise en ligne');
+select t.ok(jsonb_array_length(public.team_review_queue()) = 0, 'équipe : plus rien à vérifier');
+reset role;
+delete from team_admins where user_id = '33333333-3333-3333-3333-333333333333';
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select status = 'published' and approved_at is not null and review_note is null from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001')
+            and private.merchant_is_live('aaaaaaaa-0000-0000-0000-000000000001'), 'fiche validée : en ligne, motif effacé');
 select t.ok((select published_at is not null from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'date de publication renseignée automatiquement');
 select t.fails($$update merchants set photos_urls = '{}' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$, 'fiche publiée : impossible de retirer toutes les photos');
 reset role;

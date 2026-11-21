@@ -36,6 +36,7 @@ export const Q = {
   dashboard: <T>(days: number) => query<T>(`dash:${days}`, () => siteClient().rpc("team_dashboard", { p_days: days })),
   revenue: <T>() => query<T>("revenue", () => siteClient().rpc("team_revenue")),
   merchants: <T>() => query<T>("merchants", () => siteClient().rpc("team_merchants")),
+  reviewQueue: <T>() => query<T>("review-queue", () => siteClient().rpc("team_review_queue")),
   merchant: <T>(id: string, days: number) => query<T>(`merchant:${id}:${days}`, () => siteClient().rpc("team_merchant", { p_merchant_id: id, p_days: days })),
 };
 

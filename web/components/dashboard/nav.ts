@@ -1,17 +1,18 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { Bug, Euro, LayoutDashboard, Notebook, Server, Store, Users, type LucideIcon } from "lucide-react";
+import { Bug, Euro, LayoutDashboard, Notebook, Server, ShieldCheck, Store, Users, type LucideIcon } from "lucide-react";
 
 /**
- * Sections du tableau de bord, adressées par l'ancre de l'adresse : #revenus, #bugs, #fiches/<restaurant>…
+ * Sections du tableau de bord, adressées par l'ancre de l'adresse : #verifier, #revenus, #bugs, #fiches/<restaurant>…
  * Changer de section ne recharge rien ; le bouton « précédent » du navigateur et les liens partagés fonctionnent.
  */
-export type Section = "overview" | "revenue" | "users" | "restaurants" | "directory" | "bugs" | "server";
+export type Section = "overview" | "review" | "revenue" | "users" | "restaurants" | "directory" | "bugs" | "server";
 export type Route = { section: Section; id: string | null };
 
 export const SECTIONS: { id: Section; hash: string; label: string; icon: LucideIcon; usesPeriod: boolean }[] = [
   { id: "overview", hash: "", label: "Vue d'ensemble", icon: LayoutDashboard, usesPeriod: true },
+  { id: "review", hash: "verifier", label: "À vérifier", icon: ShieldCheck, usesPeriod: false },
   { id: "revenue", hash: "revenus", label: "Revenus", icon: Euro, usesPeriod: false },
   { id: "users", hash: "users", label: "Utilisateurs", icon: Users, usesPeriod: true },
   { id: "restaurants", hash: "restaurants", label: "Restaurants", icon: Store, usesPeriod: true },

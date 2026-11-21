@@ -120,15 +120,21 @@ en plus) :
 
 - Adresse : `/app/tableau-de-bord/` (aussi depuis le profil : « 📊 Tableau de bord de l'équipe »), réservé aux comptes
   de l'équipe. Une seule page, sections dans la barre latérale (onglets sur téléphone) et dans l'adresse :
-  `#revenus`, `#users`, `#restaurants`, `#fiches`, `#fiches/<restaurant>`, `#bugs`, `#server`.
+  `#verifier`, `#revenus`, `#users`, `#restaurants`, `#fiches`, `#fiches/<restaurant>`, `#bugs`, `#server`.
   - **Fluide** : changer de section ou de période (7 j, 30 j, 90 j, 1 an) ne recharge rien ; les chiffres restent
     affichés pendant la relecture (barre fine en haut) ; sections voisines lues à l'avance ; « En direct » relit tout
     chaque minute tant que la page est visible (clic pour mettre en pause).
   - **Clavier** : `⌘K` / `Ctrl+K` ou `/` (palette : sections, restaurants par nom, responsable, e-mail ou SIRET,
-    actions), `1`–`7` sections, `R` actualiser, `T` mode jour / nuit.
+    actions), `1`–`8` sections, `R` actualiser, `T` mode jour / nuit.
   - **Vue d'ensemble** : « À surveiller » (nouveaux bugs, bug corrigé qui revient, tâche planifiée en échec, ménage
     en retard, paiement refusé, quotas de l'offre gratuite, avis signalés, restaurateurs à relancer), 6 chiffres clés
     cliquables, visiteurs et comptes par jour, activité récente.
+  - **À vérifier** : fiches complètes (SIRET vérifié, abonnement, justificatifs) qui attendent la relecture du Kbis
+    avant la carte (`team_review_queue()`), la plus ancienne en haut : SIRET, raison sociale, NAF, lien vers l'Annuaire
+    des entreprises, justificatifs à ouvrir (liens de 10 minutes). **Valider** (après confirmation : la fiche part sur
+    la carte) ou **Refuser** avec un motif de 5 à 300 caractères, montré au restaurateur (motifs fréquents en un clic) ;
+    `team_review_merchant(fiche, valider, motif)`. Mêmes boutons sur la fiche d'un restaurant en attente ; pastille
+    dans la barre latérale et alerte dans « À surveiller ».
   - **Revenus** : encaissé (aujourd'hui, 7 derniers jours, ce mois comparé au même moment du mois dernier, mois
     dernier, année) par jour et par mois ; revenu récurrent HT (formule à l'année ramenée au mois) ; **prévision du
     mois prochain** : revenu récurrent payé − résiliations qui prennent effet + abonnements gratuits (démonstration)

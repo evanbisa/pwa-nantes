@@ -24,9 +24,12 @@ export function alerts(d: Data): Alert[] {
   const q = h.quota_today;
   if (q && q.site_events >= q.site_events_max * 0.8) out.push({ tone: "warning", tab: "server", text: `Visites du jour proches du plafond de comptage (${n(q.site_events)} / ${n(q.site_events_max)})` });
 
+  const toReview = d.merchants_pending.filter((m) => m.status === "awaiting_review").length;
+  if (toReview) out.push({ tone: "warning", tab: "review", text: `${plural(toReview, "fiche attend", "fiches attendent")} votre vérification (Kbis à relire)` });
   if (d.reported_reviews.length) out.push({ tone: "warning", tab: "restaurants", text: `${plural(d.reported_reviews.length, "avis signalé", "avis signalés")} à vérifier` });
   if (open.length && !d.errors.new_24h) out.push({ tone: "warning", tab: "bugs", text: `${plural(open.length, "bug", "bugs")} à traiter sur la période` });
-  const stuck = d.merchants_pending.filter((m) => m.status !== "suspended" && hoursSince(m.created_at) > 72);
+  // Restaurateurs qui n'avancent plus de leur côté (les fiches à vérifier attendent l'équipe, pas eux)
+  const stuck = d.merchants_pending.filter((m) => m.status !== "suspended" && m.status !== "awaiting_review" && hoursSince(m.created_at) > 72);
   if (stuck.length) out.push({ tone: "info", tab: "restaurants", text: `${plural(stuck.length, "restaurateur inscrit", "restaurateurs inscrits")} depuis plus de 3 jours, pas encore sur la carte` });
   if (d.subscriptions_more.cancelling) out.push({ tone: "info", tab: "revenue", text: `${plural(d.subscriptions_more.cancelling, "abonnement résilié", "abonnements résiliés")} à l'échéance` });
   if (h.whop && !h.whop.live) out.push({ tone: "info", tab: "revenue", text: "Paiement Whop en mode démonstration (aucun paiement réel)" });

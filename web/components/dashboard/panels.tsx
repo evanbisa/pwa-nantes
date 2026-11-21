@@ -237,11 +237,12 @@ export function Users({ d }: { d: Data }) {
 /* ===================================== Restaurants ===================================== */
 
 const STATUS_LABEL: Record<PendingMerchant["status"], string> = {
-  no_fiche: "Pas de fiche", draft: "Brouillon", awaiting_docs: "Attend ses justificatifs", suspended: "Suspendue",
+  no_fiche: "Pas de fiche", draft: "Brouillon", awaiting_docs: "Attend ses justificatifs", awaiting_review: "À vérifier par l'équipe", suspended: "Suspendue",
 };
 /** Prochaine étape qui manque à un restaurateur pour apparaître sur la carte. */
 function nextStep(m: PendingMerchant) {
   if (m.status === "suspended") return "Fiche suspendue (modération)";
+  if (m.status === "awaiting_review") return "Nous : relire le Kbis (À vérifier)";
   if (m.status === "no_fiche") return "Créer sa fiche (SIRET)";
   if (!m.siret) return "Vérifier son SIRET";
   if (m.subscription !== "active" && m.subscription !== "past_due") return "Choisir un abonnement";
@@ -296,7 +297,7 @@ export function Restaurants({ d }: { d: Data }) {
                 {d.merchants_pending.map((m, i) => (
                   <tr key={i} className="border-t border-slate-200 align-top dark:border-white/10">
                     <td className="py-2 pr-3">{m.id ? <a href={restaurantHref(m.id)} className="font-medium text-[var(--viz-1)] hover:underline">{m.name}</a> : m.name}</td>
-                    <td className="py-2 pr-3"><Pill tone={m.status === "suspended" ? "critical" : m.status === "awaiting_docs" ? "warning" : "neutral"}>{STATUS_LABEL[m.status] ?? m.status}</Pill></td>
+                    <td className="py-2 pr-3"><Pill tone={m.status === "suspended" ? "critical" : m.status === "awaiting_docs" || m.status === "awaiting_review" ? "warning" : "neutral"}>{STATUS_LABEL[m.status] ?? m.status}</Pill></td>
                     <td className="py-2 pr-3">{nextStep(m)}</td>
                     <td className="py-2 pr-3 whitespace-nowrap" title={dateTime(m.created_at)}>{ago(m.created_at)}{hoursSince(m.created_at) > 72 && m.status !== "suspended" && <span className="sr-only"> (plus de 3 jours)</span>}</td>
                     <td className="py-2">{m.email ? <a className="text-[var(--viz-1)] underline-offset-2 hover:underline" href={`mailto:${m.email}`}>{m.email}</a> : "—"}</td>

@@ -795,6 +795,14 @@ export type Database = {
         Args: { p_days?: number }
         Returns: Json
       }
+      team_review_queue: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      team_review_merchant: {
+        Args: { p_merchant_id: string; p_approve: boolean; p_note?: string | null }
+        Returns: string
+      }
       team_revenue: {
         Args: Record<PropertyKey, never>
         Returns: Json
