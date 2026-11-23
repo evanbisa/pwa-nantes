@@ -68,10 +68,13 @@ const deps: Deps = {
     settingsCache = { at: Date.now(), value };
     return value;
   },
-  async sendCode(email) {
-    // Avec la clé secrète : Supabase n'exige pas d'anti-robots (le jeton du visiteur a déjà été vérifié ici) et
-    // n'envoie le code (modèle « Confirm signup ») qu'à une adresse qui attend encore sa confirmation.
-    const { error } = await admin.auth.resend({ type: "signup", email });
+  async sendCode(email, existing) {
+    // Avec la clé secrète : Supabase n'exige pas d'anti-robots (le jeton du visiteur a déjà été vérifié ici).
+    // Nouveau compte : code de confirmation (modèle « Confirm signup »). Adresse déjà inscrite : code de connexion
+    // (modèle « Magic link » ; Supabase envoie la confirmation à la place si l'adresse n'a jamais été confirmée).
+    const { error } = existing
+      ? await admin.auth.signInWithOtp({ email, options: { shouldCreateUser: false } })
+      : await admin.auth.resend({ type: "signup", email });
     if (error) throw error;
   },
   verifyCaptcha(token, ip) {
