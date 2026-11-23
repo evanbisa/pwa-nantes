@@ -224,6 +224,8 @@ insert into promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-00
 select t.ok((select extract(isodow from (ends_at - interval '1 second') at time zone 'Europe/Paris') = 7 from promotions where kind = 'week'), 'promo de la semaine : jusqu''à dimanche soir');
 select t.fails($$insert into promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-0000-000000000002', 'other', 'Pirate')$$, 'restaurateur : promotion sur la fiche d''un autre refusée');
 select t.fails($$insert into promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'x')$$, 'promotion : titre trop court refusé');
+select t.fails($$insert into promotions (merchant_id, kind, title, photo_path) values ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Photo volée', 'aaaaaaaa-0000-0000-0000-000000000002/promo-abcdef.jpg')$$, 'promotion : photo prise dans le dossier d''une autre fiche refusée');
+select t.fails($$insert into promotions (merchant_id, kind, title, photo_path) values ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Photo externe', 'https://pirate.example/x.jpg')$$, 'promotion : photo hors du stockage refusée');
 select t.fails($$insert into promotions (merchant_id, kind, title, created_at) values ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Antidatée', now() - interval '1 year')$$, 'promotion : date de création non modifiable');
 insert into promotions (merchant_id, kind, title) select 'aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Bon plan ' || g from generate_series(1, 3) g;
 select t.fails($$insert into promotions (merchant_id, kind, title) values ('aaaaaaaa-0000-0000-0000-000000000001', 'other', 'Septième')$$, '7e promotion en cours refusée (6 au maximum)');
@@ -277,6 +279,7 @@ reset role;
 set role anon;
 select t.ok((select count(*) = 5 from guest_promotions()) and (select count(*) = 3 from guest_promotions() where not locked)
   and (select count(*) = 2 from guest_promotions() where locked and title is null and details is null), 'visiteur sans compte : 5 offres en cours, texte de 3 seulement, les 2 autres verrouillées sans titre ni détail');
+select t.ok(not exists (select 1 from guest_promotions() where locked and photo_path is not null), 'visiteur sans compte : aucune photo pour les offres verrouillées');
 reset role;
 set role service_role;
 delete from notifications where ref_id in (select id from promotions where title like 'Offre cachée %');   -- (abonnés prévenus : sans effet sur la suite)
