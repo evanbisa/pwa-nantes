@@ -834,6 +834,12 @@ set role authenticated;
 select t.ok((select d ? 'errors' and d ? 'error_list' and d ? 'health' and d ? 'merchant_funnel' and d ? 'activity' and d ? 'visits' and d ? 'accounts'
              and (d -> 'errors' ->> 'occurrences')::int = 4 and jsonb_array_length(d -> 'error_list') = 3 and jsonb_array_length(d -> 'errors_daily') = 30
              from (select public.team_dashboard(30) d) x), 'tableau de bord : chiffres existants et nouveaux (bugs, santé, entonnoirs, activité) pour l''équipe');
+select t.ok((select bool_or(a ->> 'email' = 'nina@resto.fr' and a ->> 'restaurant' = 'Chez Nina' and a ->> 'owner' = 'Nina')
+                    and bool_and(a ? 'email')
+             from jsonb_array_elements(public.team_dashboard(30) -> 'merchant_accounts') a), 'tableau de bord : restaurateurs inscrits avec e-mail, responsable et restaurant');
+select t.ok((select bool_or(a ->> 'type' = 'merchant_signup' and a ->> 'detail' = 'nina@resto.fr' and a ->> 'label' = 'Chez Nina')
+                    and not bool_or(a ->> 'type' = 'client_signup' and a ->> 'detail' is not null)
+             from jsonb_array_elements(public.team_dashboard(30) -> 'activity') a), 'activité : nouveau restaurateur avec e-mail et restaurant (rien pour un client)');
 select public.team_error_triage(current_setting('test.bug'), 'resolved');
 select t.ok((select count(*) = 1 from (select jsonb_array_elements(public.team_dashboard(30) -> 'error_list') b) x where (b ->> 'open')::boolean = false),
   'suivi des bugs : marqué corrigé par l''équipe');

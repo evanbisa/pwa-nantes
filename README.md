@@ -128,7 +128,9 @@ en plus) :
     actions), `1`–`8` sections, `R` actualiser, `T` mode jour / nuit.
   - **Vue d'ensemble** : « À surveiller » (nouveaux bugs, bug corrigé qui revient, tâche planifiée en échec, ménage
     en retard, paiement refusé, quotas de l'offre gratuite, avis signalés, restaurateurs à relancer), 6 chiffres clés
-    cliquables, visiteurs et comptes par jour, activité récente.
+    cliquables, visiteurs et comptes par jour, **restaurateurs inscrits** (e-mail, responsable, téléphone, restaurant ou
+    « fiche pas encore créée », état ; liste complète et « Copier les e-mails » dans l'onglet Restaurants), activité
+    récente (un nouveau restaurateur y apparaît avec son e-mail et son restaurant).
   - **À vérifier** : fiches complètes (SIRET vérifié, abonnement, justificatifs) qui attendent la relecture du Kbis
     avant la carte (`team_review_queue()`), la plus ancienne en haut : SIRET, raison sociale, NAF, lien vers l'Annuaire
     des entreprises, justificatifs à ouvrir (liens de 10 minutes). **Valider** (après confirmation : la fiche part sur
@@ -146,7 +148,8 @@ en plus) :
     avis), **Bugs** (erreurs vues sur les appareils, « Marquer corrigé », « Copier le résumé »), **Serveur** (quotas de
     l'offre gratuite, tâches planifiées, ménage, liens vers les journaux).
   - Migrations `20261120090000_team_dashboard_v2.sql`, `20261121090000_team_restaurants.sql`,
-    `20261122090000_team_revenue.sql` ; code dans `web/components/dashboard/`.
+    `20261122090000_team_revenue.sql`, `20261123100000_team_merchant_accounts.sql` ; code dans
+    `web/components/dashboard/`.
 - Les visites ne sont comptées qu'avec l'accord « statistiques » des cookies (identifiant d'appareil tiré au hasard,
   13 mois).
 - Ajouter un membre : Supabase › SQL Editor,

@@ -16,6 +16,12 @@ export type PendingMerchant = {
   siret: boolean; docs: boolean; honor: boolean; subscription: string | null;
 };
 
+/** Compte restaurateur (le plus récent d'abord) : e-mail, responsable, restaurant, où il en est. */
+export type MerchantAccount = {
+  created_at: string; email: string | null; confirmed: boolean; last_sign_in_at: string | null; owner: string | null; phone: string | null;
+  merchant_id: string | null; restaurant: string | null; legal_name: string | null; status: string; is_test: boolean; new_in_period: boolean;
+};
+
 export type Activity = {
   at: string; label: string | null; detail: string | null;
   type: "client_signup" | "merchant_signup" | "published" | "review" | "promo" | "story" | "qr_visit" | "subscription" | "new_bug";
@@ -65,6 +71,7 @@ export type Data = {
   errors_daily: (Day & { js: number; server: number })[];
   error_list: ErrorItem[];
   activity: Activity[];
+  merchant_accounts: MerchantAccount[];
 };
 
 /** Offre gratuite de Supabase : base 500 Mo, stockage 1 Go. */

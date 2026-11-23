@@ -1,12 +1,13 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { AlertOctagon, AlertTriangle, CheckCircle2, ChevronRight, ExternalLink, Info } from "lucide-react";
 import {
   DB_LIMIT, REPO, STORAGE_LIMIT, SUPABASE_PROJECT, ago, bytes, dateTime, delta, euros, hoursSince, n, pct,
   type Activity, type Data, type PendingMerchant,
 } from "./data";
 import { ModerationButtons } from "./moderation";
+import { STATUS } from "./restaurants";
 import type { Alert } from "./alerts";
 import { go, restaurantHref, sectionHref } from "./nav";
 import { refreshAll } from "./store";
@@ -65,6 +66,8 @@ export function Overview({ d, alerts }: { d: Data; alerts: Alert[] }) {
         </Card>
       </div>
 
+      <MerchantAccounts d={d} limit={6} />
+
       <div className={grid2}>
         <Card title="Activité récente" hint="30 derniers jours, la plus récente en haut.">
           <ActivityFeed items={d.activity} />
@@ -107,7 +110,7 @@ function VisitorsChart({ d }: { d: Data }) {
 
 const ACTIVITY: Record<Activity["type"], (a: Activity) => [string, string]> = {
   client_signup: () => ["👤", "Nouveau compte client"],
-  merchant_signup: () => ["🧑‍🍳", "Nouveau compte restaurateur"],
+  merchant_signup: (a) => ["🧑‍🍳", `Nouveau restaurateur : ${a.detail ?? "e-mail inconnu"} · ${a.label ?? "fiche pas encore créée"}`],
   published: (a) => ["🟢", `Mise en ligne : ${a.label}`],
   review: (a) => ["⭐", `Avis ${a.detail}★ sur ${a.label}`],
   promo: (a) => ["🏷️", `Offre « ${a.detail} » · ${a.label}`],
@@ -284,6 +287,8 @@ export function Restaurants({ d }: { d: Data }) {
         </Card>
       </div>
 
+      <MerchantAccounts d={d} />
+
       <Card className="mt-3" title="À relancer" hint="Restaurateurs inscrits pas encore sur la carte, le plus ancien en haut."
         action={<a href={sectionHref("directory")} className="shrink-0 text-sm font-medium text-[var(--viz-1)] hover:underline">Toutes les fiches →</a>}>
         {d.merchants_pending.length ? (
@@ -454,3 +459,63 @@ export const ExtLink = ({ href, children }: { href: string; children: ReactNode 
     {children} <ExternalLink className="h-3.5 w-3.5" aria-hidden />
   </a>
 );
+
+/* ---------- Restaurateurs inscrits ---------- */
+
+/**
+ * Comptes restaurateur, le plus récent en haut : date d'inscription, e-mail (cliquable), responsable et téléphone,
+ * restaurant (nom de la fiche, sinon raison sociale Sirene, sinon « fiche pas encore créée »), état.
+ * limit : aperçu (vue d'ensemble) avec un lien vers la liste complète (onglet Restaurants).
+ */
+function MerchantAccounts({ d, limit }: { d: Data; limit?: number }) {
+  const all = d.merchant_accounts ?? [];
+  const shown = limit ? all.slice(0, limit) : all;
+  const fresh = all.filter((a) => a.new_in_period && !a.is_test).length;
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    const emails = all.filter((a) => a.email && !a.is_test).map((a) => a.email).join(", ");
+    try { await navigator.clipboard.writeText(emails); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { /* presse-papiers refusé */ }
+  };
+  return (
+    <Card className="mt-3" title="Restaurateurs inscrits"
+      hint={`${n(all.filter((a) => !a.is_test).length)} compte(s) restaurateur · ${n(fresh)} nouveau(x) sur ${d.days} j · le plus récent en haut`}
+      action={limit && all.length > limit
+        ? <a href={sectionHref("restaurants")} className="shrink-0 text-sm font-medium text-[var(--viz-1)] hover:underline">Tous ({n(all.length)}) →</a>
+        : all.length > 0 ? <button type="button" onClick={copy} className="shrink-0 text-sm font-medium text-[var(--viz-1)] hover:underline">{copied ? "E-mails copiés !" : "Copier les e-mails"}</button> : undefined}>
+      {shown.length ? (
+        <div className="-mx-5 overflow-x-auto px-5">
+          <table className="w-full min-w-[720px] text-sm">
+            <thead><tr className="text-left text-xs text-slate-600 dark:text-zinc-400">
+              <th className="py-1.5 pr-3 font-medium">Inscrit</th><th className="py-1.5 pr-3 font-medium">E-mail</th>
+              <th className="py-1.5 pr-3 font-medium">Responsable</th><th className="py-1.5 pr-3 font-medium">Restaurant</th><th className="py-1.5 font-medium">État</th>
+            </tr></thead>
+            <tbody>
+              {shown.map((a, i) => {
+                const [label, tone] = STATUS[a.status] ?? [a.status, "neutral" as const];
+                return (
+                  <tr key={`${a.email}-${i}`} className="border-t border-slate-200 align-top dark:border-white/10">
+                    <td className="py-2 pr-3 whitespace-nowrap" title={dateTime(a.created_at)}>
+                      {dateTime(a.created_at)}{a.new_in_period && !a.is_test && <span className="ml-1.5"><Pill tone="info">nouveau</Pill></span>}
+                    </td>
+                    <td className="py-2 pr-3 break-all">
+                      {a.email ? <a href={`mailto:${a.email}`} className="text-[var(--viz-1)] hover:underline">{a.email}</a> : "—"}
+                      {!a.confirmed && <span className="ml-1.5"><Pill tone="warning">non confirmé</Pill></span>}
+                    </td>
+                    <td className="py-2 pr-3">{a.owner ?? "—"}{a.phone && <span className="block text-xs text-slate-600 dark:text-zinc-400">{a.phone}</span>}</td>
+                    <td className="py-2 pr-3">
+                      {a.merchant_id ? <a href={restaurantHref(a.merchant_id)} className="font-medium text-[var(--viz-1)] hover:underline">{a.restaurant ?? a.legal_name ?? "(sans nom)"}</a>
+                        : <span className="text-slate-500 dark:text-zinc-400">Fiche pas encore créée</span>}
+                      {a.is_test && <span className="ml-1.5"><Pill>test</Pill></span>}
+                      {a.legal_name && a.restaurant && a.legal_name.toLowerCase() !== a.restaurant.toLowerCase() && <span className="block text-xs text-slate-600 dark:text-zinc-400">{a.legal_name}</span>}
+                    </td>
+                    <td className="py-2"><Pill tone={tone}>{label}</Pill></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : <Muted>Aucun restaurateur inscrit pour l&apos;instant.</Muted>}
+    </Card>
+  );
+}
