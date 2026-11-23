@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { OG_IMAGE } from "@/lib/seo";
+import BugReporter from "@/components/BugReporter";
 import "./globals.css";
 
 /** Adresse principale du site (aperçu des liens partagés) : flashmiam.fr, ou NEXT_PUBLIC_SITE_URL pour une autre adresse. */
@@ -25,7 +26,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     // suppressHydrationWarning : le thème des pages juridiques est posé sur <html> avant React (app/legal/layout.tsx)
     <html lang="fr" className="h-full antialiased" suppressHydrationWarning>
-      <body className="h-full">{children}</body>
+      <body className="h-full">{children}<BugReporter /></body>
     </html>
   );
 }

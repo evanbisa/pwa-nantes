@@ -173,6 +173,18 @@ html[data-theme="night"]:has(.legal-root) body { background: #020617; }
 /* Couleurs des graphiques : bleu puis orange (lisibles par les daltoniens, jour et nuit), grille discrète */
 .dash { --viz-1: #2a78d6; --viz-2: #eb6834; --viz-grid: rgb(15 23 42 / 0.08); --dash-surface: #ffffff; }
 [data-theme="night"] .dash { --viz-1: #3987e5; --viz-2: #d95926; --viz-grid: rgb(255 255 255 / 0.09); --dash-surface: #1a1a1d; }
+/* Tableau de bord : entrée des sections, barre de chargement, squelettes (désactivés si « réduire les animations ») */
+@keyframes dash-enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.dash-enter { animation: dash-enter 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes dash-progress { from { transform: translateX(-100%); } to { transform: translateX(400%); } }
+.dash-progress { animation: dash-progress 1.1s ease-in-out infinite; }
+@keyframes dash-breathe { 50% { opacity: 0.45; } }
+.dash-skel { background: var(--viz-grid); animation: dash-breathe 1.4s ease-in-out infinite; }
+@keyframes dash-pop { from { opacity: 0; transform: translateY(-4px) scale(0.98); } to { opacity: 1; transform: none; } }
+.dash-pop { animation: dash-pop 0.16s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .dash-enter, .dash-progress, .dash-skel, .dash-pop { animation: none; }
+}
 .btn-dash {
   display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border-radius: 999px;
   font-weight: 600; color: #fff; background: var(--color-brand); text-decoration: none;

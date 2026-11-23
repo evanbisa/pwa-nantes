@@ -1,6 +1,6 @@
 // Tests de la fonction whop-webhook, sans réseau : deno test supabase/functions/
 import { assertEquals } from "jsr:@std/assert@1";
-import { signWebhook, WhopError, type WhopMembership } from "../_shared/whop.ts";
+import { paymentRow, signWebhook, WhopError, type WhopMembership, type WhopPayment } from "../_shared/whop.ts";
 import { handle, type Deps, type StoredSubscription } from "./handler.ts";
 
 const SECRET = "ws_secret_de_test_123";
@@ -12,8 +12,14 @@ const MEMBERSHIP: WhopMembership = {
   current_period_end: "2027-10-26T12:00:00Z", manage_url: "https://whop.com/billing/manage/abc", metadata: { merchant_id: MERCHANT },
 };
 
-function fakeDeps(over: Partial<Deps> = {}, { membership = MEMBERSHIP, subs = [] as StoredSubscription[] } = {}) {
-  const calls = { saved: [] as { merchantId: string; row: Record<string, unknown> }[], remembered: [] as string[], fetched: [] as string[] };
+const PAYMENT: WhopPayment = {
+  id: "pay_Xyz98765", status: "paid", total: 790, currency: "EUR", paid_at: "2026-10-26T11:59:00Z", refunded_amount: 0,
+  billing_reason: "subscription_create", membership: { id: "mem_Abc12345" }, plan: { id: "plan_PremYear1234" },
+};
+
+function fakeDeps(over: Partial<Deps> = {}, { membership = MEMBERSHIP, subs = [] as StoredSubscription[], payment = PAYMENT } = {}) {
+  const calls = { saved: [] as { merchantId: string; row: Record<string, unknown> }[], remembered: [] as string[], fetched: [] as string[],
+    payments: [] as Record<string, unknown>[] };
   const seen = new Set<string>();
   const deps: Deps = {
     secret: SECRET,
@@ -25,7 +31,13 @@ function fakeDeps(over: Partial<Deps> = {}, { membership = MEMBERSHIP, subs = []
     merchantExists: (id) => Promise.resolve(id === MERCHANT || id === OTHER),
     subscriptionOf: (m) => Promise.resolve(subs.find((s) => s.merchant_id === m) ?? null),
     subscriptionByMembership: (id) => Promise.resolve(subs.find((s) => s.whop_membership_id === id) ?? null),
-    save: (merchantId, row) => { calls.saved.push({ merchantId, row: { ...row } }); return Promise.resolve(); },
+    save: (merchantId, row) => {
+      calls.saved.push({ merchantId, row: { ...row } });
+      if (!subs.some((s) => s.whop_membership_id === row.whop_membership_id)) subs.push({ merchant_id: merchantId, mode: "whop", status: row.status, whop_membership_id: row.whop_membership_id });
+      return Promise.resolve();
+    },
+    getPayment: (id) => { calls.fetched.push(id); return Promise.resolve(payment); },
+    savePayment: (row) => { calls.payments.push({ ...row }); return Promise.resolve(); },
     now: () => NOW,
     ...over,
   };
@@ -82,9 +94,10 @@ Deno.test("paiement refusé, résiliation programmée, fin d'abonnement", async 
   }
 });
 Deno.test("paiement (payment.*) : l'abonnement concerné est resynchronisé ; autres notifications ignorées", async () => {
-  const { deps, calls } = fakeDeps();
-  await notify(deps, { type: "payment.failed", data: { id: "pay_1", membership_id: "mem_Abc12345" } });
-  assertEquals(calls.fetched, ["mem_Abc12345"]);
+  const { deps, calls } = fakeDeps({}, { payment: { ...PAYMENT, id: "pay_Fail0001", status: "failed", paid_at: null } });
+  const { body } = await notify(deps, { type: "payment.failed", data: { id: "pay_Fail0001", membership_id: "mem_Abc12345" } });
+  assertEquals(calls.fetched, ["mem_Abc12345", "pay_Fail0001"]);
+  assertEquals([body.payment, calls.payments.length], ["not_paid", 0]);
   const other = await notify(deps, { type: "refund.created", data: { id: "rfd_1" } });
   assertEquals(other.body, { ignored: "type" });
 });
@@ -123,4 +136,36 @@ Deno.test("secret absent : 503 (rien n'est accepté sans signature)", async () =
   const { deps } = fakeDeps({ secret: "" });
   assertEquals((await notify(deps, activated)).status, 503);
   assertEquals((await handle(new Request("https://x/", { method: "GET" }), deps)).status, 405);
+});
+
+Deno.test("paiement encaissé : relu chez Whop puis enregistré (montant en centimes, restaurant et formule déduits)", async () => {
+  const { deps, calls } = fakeDeps();
+  const { status, body } = await notify(deps, { type: "payment.succeeded", data: { id: "pay_Xyz98765", membership_id: "mem_Abc12345", total: 1 } });
+  assertEquals([status, body.payment], [200, "saved"]);
+  assertEquals(calls.payments, [{
+    id: "pay_Xyz98765", membership_id: "mem_Abc12345", amount_cents: 79000, refunded_cents: 0, currency: "eur",
+    paid_at: "2026-10-26T11:59:00.000Z", billing_reason: "subscription_create", merchant_id: MERCHANT, plan: "premium", period: "year",
+  }]);
+});
+Deno.test("remboursement (refund.*) : le paiement est relu et mis à jour (montant remboursé)", async () => {
+  const { deps, calls } = fakeDeps({}, { payment: { ...PAYMENT, refunded_amount: "790.00" } });
+  const { body } = await notify(deps, { type: "refund.created", data: { id: "rfd_1", payment_id: "pay_Xyz98765" } });
+  assertEquals(body, { payment: "saved" });
+  assertEquals(calls.payments[0].refunded_cents, 79000);
+});
+Deno.test("paiement introuvable chez Whop : ignoré ; Whop indisponible : notification renvoyée", async () => {
+  const gone = fakeDeps({ getPayment: () => Promise.reject(new WhopError(404, "introuvable")) });
+  assertEquals((await notify(gone.deps, { type: "payment.succeeded", data: { id: "pay_Xyz98765" } })).body, { payment: "missing" });
+  const down = fakeDeps({ getPayment: () => Promise.reject(new WhopError(503, "indisponible")) });
+  assertEquals((await notify(down.deps, { type: "payment.succeeded", data: { id: "pay_Xyz98765" } })).status, 502);
+  assertEquals(down.calls.remembered.length, 0);
+});
+Deno.test("lecture d'un paiement Whop : montants, dates et identifiants vérifiés", () => {
+  assertEquals(paymentRow({ ...PAYMENT, total: "29.9", paid_at: 1761480000, membership: null, membership_id: "mem_Abc12345", plan: null, plan_id: "x" })?.amount_cents, 2990);
+  assertEquals(paymentRow({ ...PAYMENT, paid_at: 1761480000 })?.paid_at, "2025-10-26T12:00:00.000Z");
+  assertEquals(paymentRow({ ...PAYMENT, total: -5 }), null);
+  assertEquals(paymentRow({ ...PAYMENT, status: "open" }), null);
+  assertEquals(paymentRow({ ...PAYMENT, id: "pay_'; drop" }), null);
+  assertEquals(paymentRow({ ...PAYMENT, refunded_amount: 9999 })?.refunded_cents, 79000);
+  assertEquals(paymentRow({ ...PAYMENT, membership: { id: "pirate" } })?.membership_id, null);
 });

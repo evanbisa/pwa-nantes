@@ -87,7 +87,38 @@ select t.ok(t.affected($$update merchants set status = 'published' where id = 'a
   and (select status = 'awaiting_docs' from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'Kbis seul : la fiche attend encore l''attestation d''hygiène');
 select t.ok(t.affected($$insert into storage.objects (bucket_id, name) values ('documents', 'aaaaaaaa-0000-0000-0000-000000000001/hygiene--1--haccp.pdf')$$) = 1, 'attestation d''hygiène déposée');
 select t.ok(t.affected($$update merchants set status = 'published' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 1, 'publication acceptée : SIRET vérifié, attestation, abonnement, justificatifs et fiche complète');
-select t.ok((select status = 'published' from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001') and private.merchant_is_live('aaaaaaaa-0000-0000-0000-000000000001'), 'justificatifs déposés : fiche en ligne');
+-- Vérification par l'équipe (Kbis relu) avant la carte
+select t.ok((select status = 'awaiting_review' and published_at is null from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001')
+            and not private.merchant_is_live('aaaaaaaa-0000-0000-0000-000000000001'), 'justificatifs déposés : fiche en vérification par l''équipe, pas encore en ligne');
+select t.fails($$update merchants set approved_at = now(), review_note = null where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$, 'restaurateur : ne peut pas valider sa propre fiche');
+select t.ok((select approved_at is null and status = 'awaiting_review' from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'restaurateur : fiche toujours en vérification');
+select t.fails($$select public.team_review_merchant('aaaaaaaa-0000-0000-0000-000000000001', true)$$, 'restaurateur : validation par l''équipe refusée');
+select t.fails($$select public.team_review_queue()$$, 'restaurateur : liste des fiches à vérifier refusée');
+reset role;
+insert into team_admins (user_id) values ('33333333-3333-3333-3333-333333333333');
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select jsonb_array_length(q) = 1 and q -> 0 ->> 'siret' = '12345678900017' and jsonb_array_length(q -> 0 -> 'documents') = 2
+             from (select public.team_review_queue() q) x), 'équipe : fiche à vérifier listée avec SIRET et justificatifs');
+select t.fails($$select public.team_review_merchant('aaaaaaaa-0000-0000-0000-000000000001', false, 'non')$$, 'équipe : refus sans motif (5 caractères) impossible');
+select t.ok(public.team_review_merchant('aaaaaaaa-0000-0000-0000-000000000001', false, 'Kbis illisible, merci de le renvoyer') = 'draft', 'équipe : refus avec motif, la fiche repasse en brouillon');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select review_note = 'Kbis illisible, merci de le renvoyer' from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'restaurateur : voit le motif du refus');
+select t.ok(t.affected($$update merchants set status = 'published' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 1, 'restaurateur : remet sa fiche en ligne après correction');
+select t.ok((select status = 'awaiting_review' from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'restaurateur : après correction, la fiche repart en vérification');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.ok(public.team_review_merchant('aaaaaaaa-0000-0000-0000-000000000001', true) = 'published', 'équipe : fiche validée, mise en ligne');
+select t.ok(jsonb_array_length(public.team_review_queue()) = 0, 'équipe : plus rien à vérifier');
+reset role;
+delete from team_admins where user_id = '33333333-3333-3333-3333-333333333333';
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select status = 'published' and approved_at is not null and review_note is null from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001')
+            and private.merchant_is_live('aaaaaaaa-0000-0000-0000-000000000001'), 'fiche validée : en ligne, motif effacé');
 select t.ok((select published_at is not null from merchants where id = 'aaaaaaaa-0000-0000-0000-000000000001'), 'date de publication renseignée automatiquement');
 select t.fails($$update merchants set photos_urls = '{}' where id = 'aaaaaaaa-0000-0000-0000-000000000001'$$, 'fiche publiée : impossible de retirer toutes les photos');
 reset role;
@@ -768,6 +799,127 @@ select t.ok(not public.is_team_admin(), 'membre de l''équipe : contrôle toujou
 select t.fails($$select public.team_dashboard(30)$$, 'tableau de bord de l''équipe : refusé à une cliente');
 reset role;
 select t.ok((select terms_version = '2026-10-29' and terms_accepted_at is not null from profiles where id = '66666666-6666-6666-6666-666666666666'), 'acceptation des conditions : toujours enregistrée via le relais public');
+select set_config('request.jwt.claims', '', false);
+
+-- ===== Bugs vus sur les appareils (tableau de bord de l'équipe) =====
+set role anon;
+select public.report_client_error('js', 'carte', 'TypeError: x is null pour lea@exemple.fr, id 3f2b1c4d-1111-2222-3333-444455556666, jeton eyJhbGciOiJIUzI1NiJ9.abc.def',
+  'https://flashmiam.fr/?r=abc&token=secret:4521:13', 'at f (https://flashmiam.fr/?r=abc:4521:13)', '/?r=secret#x', 'ios', 'Safari 18', 'e485bcb0123');
+select public.report_client_error('js', 'carte', 'TypeError: x is null pour lea@exemple.fr, id 3f2b1c4d-1111-2222-3333-444455556666, jeton eyJhbGciOiJIUzI1NiJ9.abc.def',
+  'https://flashmiam.fr/:4600:2', null, '/', 'android', 'Chrome 131', 'zzz');
+select public.report_client_error('server', 'carte', 'POST /functions/v1/menu-scan → 502 · numéro 0612345678', null, null, '/', 'desktop', 'Firefox 133', null);
+select public.report_client_error('nimporte', 'carte', 'ignoré');
+select public.report_client_error('js', 'carte', '   ');
+select t.fails($$select * from client_errors$$, 'bugs : illisibles pour un visiteur');
+reset role;
+select t.ok((select count(*) = 2 from client_errors), 'bugs : un même bug (même message, même fichier, autre ligne) compté sur une seule ligne ; entrées invalides ignorées');
+select t.ok((select occurrences = 2 and platforms = '{"ios": 1, "android": 1}'::jsonb and releases = '{"e485bcb": 1, "inconnue": 1}'::jsonb and pages = '{"/": 2}'::jsonb
+             from client_errors where kind = 'js'), 'bugs : appareils, versions et pages comptés, sans paramètres d''adresse');
+select t.ok((select message !~ 'lea@exemple|3f2b1c4d|eyJhbG' and message ~ '\[e-mail\]' and message ~ '\[id\]' and message ~ '\[jeton\]'
+             and source !~ 'secret|token' and stack !~ 'abc' from client_errors where kind = 'js'), 'bugs : e-mail, identifiant, jeton et paramètres d''adresse effacés par la base');
+select t.ok((select message !~ '0612345678' and message ~ '502' from client_errors where kind = 'server'), 'bugs : numéros longs effacés, codes d''erreur gardés');
+select t.ok((select signed_in = 0 from client_errors where kind = 'server'), 'bugs : aucun compte relié (seulement « connecté ou non »)');
+select set_config('request.jwt.claims', '{"sub":"66666666-6666-6666-6666-666666666666","role":"authenticated"}', false);
+set role authenticated;
+select public.report_client_error('promise', 'app', 'Erreur de l''inscription', null, null, '/app/inscription/', 'android', 'Chrome 131', null);
+select t.fails($$select * from client_errors$$, 'bugs : illisibles pour une personne connectée');
+select t.fails($$select public.team_error_triage((select md5('x')), 'resolved')$$, 'suivi des bugs : refusé à une cliente');
+select t.fails($$insert into error_triage (fingerprint, status) values (md5('x'), 'ignored')$$, 'suivi des bugs : aucune écriture directe');
+reset role;
+select t.ok((select signed_in = 1 from client_errors where kind = 'promise'), 'bugs : « avec un compte connecté » compté');
+-- Membre de l'équipe : tableau de bord complet et suivi des bugs
+insert into team_admins (user_id) values ('66666666-6666-6666-6666-666666666666');
+select set_config('test.bug', (select fingerprint from client_errors where kind = 'server'), false);
+set role authenticated;
+select t.ok((select d ? 'errors' and d ? 'error_list' and d ? 'health' and d ? 'merchant_funnel' and d ? 'activity' and d ? 'visits' and d ? 'accounts'
+             and (d -> 'errors' ->> 'occurrences')::int = 4 and jsonb_array_length(d -> 'error_list') = 3 and jsonb_array_length(d -> 'errors_daily') = 30
+             from (select public.team_dashboard(30) d) x), 'tableau de bord : chiffres existants et nouveaux (bugs, santé, entonnoirs, activité) pour l''équipe');
+select t.ok((select bool_or(a ->> 'email' = 'nina@resto.fr' and a ->> 'restaurant' = 'Chez Nina' and a ->> 'owner' = 'Nina')
+                    and bool_and(a ? 'email')
+             from jsonb_array_elements(public.team_dashboard(30) -> 'merchant_accounts') a), 'tableau de bord : restaurateurs inscrits avec e-mail, responsable et restaurant');
+select t.ok((select bool_or(a ->> 'type' = 'merchant_signup' and a ->> 'detail' = 'nina@resto.fr' and a ->> 'label' = 'Chez Nina')
+                    and not bool_or(a ->> 'type' = 'client_signup' and a ->> 'detail' is not null)
+             from jsonb_array_elements(public.team_dashboard(30) -> 'activity') a), 'activité : nouveau restaurateur avec e-mail et restaurant (rien pour un client)');
+select public.team_error_triage(current_setting('test.bug'), 'resolved');
+select t.ok((select count(*) = 1 from (select jsonb_array_elements(public.team_dashboard(30) -> 'error_list') b) x where (b ->> 'open')::boolean = false),
+  'suivi des bugs : marqué corrigé par l''équipe');
+select t.fails($$select public.team_error_triage('pas-une-empreinte', 'resolved')$$, 'suivi des bugs : empreinte invalide refusée');
+select t.fails($$select public.team_error_triage(md5('x'), 'supprimé')$$, 'suivi des bugs : état inconnu refusé');
+reset role;
+update error_triage set updated_at = now() - interval '1 hour';
+set role anon;
+select public.report_client_error('server', 'carte', 'POST /functions/v1/menu-scan → 500 · numéro 0699999999', null, null, '/', 'desktop', 'Firefox 133', null);
+reset role;
+set role authenticated;
+select t.ok((select (b ->> 'reappeared')::boolean and (b ->> 'open')::boolean from (select jsonb_array_elements(public.team_dashboard(30) -> 'error_list') b) x where b ->> 'kind' = 'server'),
+  'suivi des bugs : un bug corrigé qui revient est signalé « réapparu »');
+select public.team_error_triage(current_setting('test.bug'), null);
+reset role;
+select t.ok(not exists (select 1 from error_triage), 'suivi des bugs : bug rouvert');
+-- ===== Restaurants vus par l'équipe (fiche complète, justificatifs) et modération des avis =====
+insert into reviews (id, merchant_id, user_id, rating, comment) values
+  ('cccccccc-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000002', '66666666-6666-6666-6666-666666666666', 1, 'Avis à modérer'),
+  ('cccccccc-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000002', '33333333-3333-3333-3333-333333333333', 2, 'Avis à supprimer');
+update reviews set reported_at = now() where id in ('cccccccc-0000-0000-0000-000000000001', 'cccccccc-0000-0000-0000-000000000002');
+insert into storage.objects (bucket_id, name, metadata) values
+  ('documents', 'aaaaaaaa-0000-0000-0000-000000000002/kbis--1700000000000--kbis.pdf', '{"size": 1234, "mimetype": "application/pdf"}');
+-- Chiffres du restaurateur, vus par lui-même (pour comparer)
+select set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}', false);
+set role authenticated;
+select set_config('test.nina_analytics', public.my_merchant_analytics(30)::text, false);
+select t.fails($$select public.team_merchants()$$, 'restaurants (équipe) : liste refusée à un restaurateur');
+select t.fails($$select public.team_merchant('aaaaaaaa-0000-0000-0000-000000000002', 30)$$, 'restaurants (équipe) : fiche complète refusée à un restaurateur');
+select t.ok((select count(*) = 1 from storage.objects where bucket_id = 'documents' and name like 'aaaaaaaa-0000-0000-0000-000000000002/%'), 'justificatifs : toujours visibles par leur restaurateur');
+reset role;
+select t.ok(current_setting('test.nina_analytics') <> '' and (current_setting('test.nina_analytics')::jsonb -> 'totals') is not null, 'restaurateur : ses statistiques toujours disponibles (même calcul pour l''équipe)');
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.fails($$select public.team_moderate_review('cccccccc-0000-0000-0000-000000000002', 'delete')$$, 'modération : refusée à une cliente');
+select t.ok((select count(*) = 0 from storage.objects where bucket_id = 'documents'), 'justificatifs : invisibles pour une cliente');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"66666666-6666-6666-6666-666666666666","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select bool_or(x ->> 'id' = 'aaaaaaaa-0000-0000-0000-000000000002' and (x -> 'docs' ->> 'kbis')::boolean and not (x -> 'docs' ->> 'hygiene')::boolean and (x ->> 'reported')::int = 2)
+             from jsonb_array_elements(public.team_merchants()) x), 'restaurants (équipe) : liste avec justificatifs déposés et avis signalés');
+select t.ok((select d -> 'analytics' = current_setting('test.nina_analytics')::jsonb and jsonb_array_length(d -> 'documents') = 1
+                    and d -> 'owner' ? 'email' and d -> 'legal' ->> 'siret' = '98765432100019' and not (d ->> 'docs_ok')::boolean
+             from (select public.team_merchant('aaaaaaaa-0000-0000-0000-000000000002', 30) d) x),
+  'restaurants (équipe) : fiche complète, mêmes statistiques que le restaurateur, justificatifs, SIRET');
+select t.ok((select count(*) = 1 from storage.objects where bucket_id = 'documents' and name like 'aaaaaaaa-0000-0000-0000-000000000002/kbis--%'), 'justificatifs : lisibles par l''équipe (pour les ouvrir)');
+select t.fails($$select public.team_merchant('aaaaaaaa-0000-0000-0000-0000000000ff', 30)$$, 'restaurants (équipe) : fiche inconnue');
+select public.team_moderate_review('cccccccc-0000-0000-0000-000000000001', 'keep');
+select public.team_moderate_review('cccccccc-0000-0000-0000-000000000002', 'delete');
+select t.fails($$select public.team_moderate_review('cccccccc-0000-0000-0000-000000000001', 'cacher')$$, 'modération : action inconnue refusée');
+select t.fails($$select * from team_actions$$, 'journal de modération : illisible depuis le site');
+reset role;
+select t.ok((select reported_at is null from reviews where id = 'cccccccc-0000-0000-0000-000000000001'), 'modération : avis gardé, signalement levé');
+select t.ok(not exists (select 1 from reviews where id = 'cccccccc-0000-0000-0000-000000000002'), 'modération : avis supprimé');
+select t.ok((select count(*) = 2 and bool_and(user_id = '66666666-6666-6666-6666-666666666666') from team_actions), 'modération : chaque décision notée (qui, quoi, quel restaurant)');
+delete from reviews where id = 'cccccccc-0000-0000-0000-000000000001';
+delete from storage.objects where bucket_id = 'documents' and name like 'aaaaaaaa-0000-0000-0000-000000000002/%';
+-- ===== Revenus (paiements Whop) =====
+insert into billing_payments (id, merchant_id, membership_id, plan, period, amount_cents, refunded_cents, currency, paid_at) values
+  ('pay_Test0001', 'aaaaaaaa-0000-0000-0000-000000000002', 'mem_Test0001', 'essentiel', 'month', 2900, 0, 'eur', now() - interval '1 hour'),
+  ('pay_Test0002', 'aaaaaaaa-0000-0000-0000-000000000002', 'mem_Test0001', 'premium', 'month', 7900, 7900, 'eur', now() - interval '2 hours'),
+  ('pay_Test0003', null, null, null, null, 5000, 0, 'usd', now() - interval '3 hours'),
+  ('pay_Test0004', null, null, 'essentiel', 'year', 29000, 0, 'eur', now() - interval '400 days');
+select set_config('request.jwt.claims', '{"sub":"33333333-3333-3333-3333-333333333333","role":"authenticated"}', false);
+set role authenticated;
+select t.fails($$select public.team_revenue()$$, 'revenus : refusés à une cliente');
+select t.fails($$select * from billing_payments$$, 'paiements : illisibles depuis le site');
+select t.fails($$insert into billing_payments (id, amount_cents, currency, paid_at) values ('pay_Pirate01', 1, 'eur', now())$$, 'paiements : aucune écriture depuis le site');
+reset role;
+select set_config('request.jwt.claims', '{"sub":"66666666-6666-6666-6666-666666666666","role":"authenticated"}', false);
+set role authenticated;
+select t.ok((select (r -> 'collected' ->> 'last_7d')::int = 2900 and (r -> 'collected' ->> 'all_time')::int = 31900
+                    and (r -> 'collected' ->> 'refunds_this_month')::int >= 7900 and (r ->> 'other_currencies')::int = 1
+                    and jsonb_array_length(r -> 'daily') = 30 and jsonb_array_length(r -> 'monthly') = 12
+                    and (r -> 'setup' ->> 'payments')::int = 4 and jsonb_array_length(r -> 'prices') = 4
+             from (select public.team_revenue() r) x), 'revenus : encaissé (remboursements déduits, euros seulement), par jour et par mois, pour l''équipe');
+reset role;
+delete from billing_payments;
+delete from team_admins where user_id = '66666666-6666-6666-6666-666666666666';
+delete from client_errors;
 select set_config('request.jwt.claims', '', false);
 
 -- ===== QR code de visite (usage unique, validé par le restaurateur) =====

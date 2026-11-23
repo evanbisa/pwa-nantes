@@ -1,330 +1,278 @@
 "use client";
 
 import { useCallback, useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
-import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
+import { ArrowLeft, Command, Loader2, Moon, Pause, Play, RefreshCw, Search, Sun } from "lucide-react";
 import { siteClient } from "@/lib/supabase/site-session";
+import { THEME_KEY } from "@/lib/legal/theme";
+import { MAP_URL, dayLabel, type Data } from "./data";
+import { alerts } from "./alerts";
+import { SECTIONS, go, sectionHref, useRoute, type Section } from "./nav";
+import { Q, fetchQuery, prefetch, refreshActive, useBusy, useOldestActive, useQuery } from "./store";
+import { Centered, Notice, SectionError, SectionSkeleton } from "./ui";
+import { Overview, Restaurants, Server, Users } from "./panels";
+import { Bugs } from "./bugs";
+import { RevenuePanel } from "./revenue";
+import { ReviewPanel } from "./review";
+import { RestaurantDetail, RestaurantList } from "./restaurants";
+import { Palette } from "./palette";
 
 /**
- * Tableau de bord de l'équipe FlashMiam : comptes, visites du site (avec accord), écran d'accueil, restaurants,
- * abonnements, utilisation des fiches, audience. Chiffres calculés par la base (team_dashboard), réservés aux
- * comptes de l'équipe : la page n'affiche rien d'autre que ce que la base accepte de donner.
+ * Tableau de bord de l'équipe FlashMiam : une seule page, plusieurs sections (barre latérale sur ordinateur, onglets
+ * sur téléphone), adressées par l'ancre de l'adresse (#revenus, #bugs, #fiches/<restaurant>…).
+ *  - instantané : changer de section ou de période ne recharge pas la page ; les chiffres déjà lus restent affichés
+ *    pendant que la base est relue (barre fine en haut de l'écran) ; sections voisines lues à l'avance ;
+ *  - en direct : relecture toutes les minutes tant que la page est visible (« En direct », pause possible) ;
+ *  - clavier : ⌘K / Ctrl+K ou / (palette : sections, restaurants, actions), 1 à 8 (sections), R (actualiser), T (thème).
+ * Tout est calculé par la base et réservé aux comptes de l'équipe.
  */
 
-type Day = { day: string };
-type Data = {
-  generated_at: string; days: number; since: string;
-  accounts: { clients: number; merchants: number; new_period: number; new_7d: number; google: number; push_devices: number };
-  signups_daily: (Day & { clients: number; merchants: number })[];
-  visits_daily: (Day & { visitors: number; app: number })[];
-  visits: { visitors: number; visits: number; signed_in: number; app: number; ios: number; android: number; desktop: number };
-  install: { shown: number; accepted: number; installed: number };
-  restaurants: { published: number; other: number; test: number };
-  subscriptions: { active: number; paid: number; demo: number; mrr_cents: number };
-  engagement: { views: number; directions: number; calls: number; menus: number; stories: number; follows: number; reviews: number; rating: number | null; promo_clicks: number };
-  top_merchants: { name: string; is_test: boolean; views: number; followers: number }[];
-  audience: { female: number; male: number; other: number; unknown: number; ages: Record<string, number> };
+const PERIODS = [[7, "7 j"], [30, "30 j"], [90, "90 j"], [365, "1 an"]] as const;
+const DAYS_KEY = "flashmiam:dash-days";
+const LIVE_KEY = "flashmiam:dash-live";
+const LIVE_EVERY = 60_000;
+
+const store = {
+  get(k: string) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k: string, v: string) { try { localStorage.setItem(k, v); } catch { /* préférence non gardée */ } },
 };
-type State = { status: "loading" } | { status: "signed-out" } | { status: "forbidden" } | { status: "error"; message: string } | { status: "ready"; data: Data };
-
-const PERIODS = [7, 30, 90] as const;
-const MAP = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/../`;
-const nf = new Intl.NumberFormat("fr-FR");
-const n = (v: number | null | undefined) => nf.format(v ?? 0);
-const euros = (cents: number) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(cents / 100);
-const pct = (part: number, total: number) => (total ? Math.round((part / total) * 100) : 0);
-const dayLabel = (iso: string, long = false) =>
-  new Date(iso + "T12:00:00").toLocaleDateString("fr-FR", long ? { weekday: "long", day: "numeric", month: "long" } : { day: "numeric", month: "short" });
-
 const noSubscribe = () => () => {};
 const useHydrated = () => useSyncExternalStore(noSubscribe, () => true, () => false);
 
 export default function TeamDashboard() {
-  return useHydrated() ? <Dashboard /> : <Shell><Centered><Loader2 className="h-7 w-7 animate-spin text-slate-500" aria-label="Chargement" /></Centered></Shell>;
+  return useHydrated() ? <App /> : <Splash />;
 }
-
-function Dashboard() {
-  const [days, setDays] = useState<number>(30);
-  const [state, setState] = useState<State>({ status: "loading" });
-  const [refreshing, setRefreshing] = useState(false);
-
-  const load = useCallback(async (period: number) => {
-    const sb = siteClient();
-    const { data: session } = await sb.auth.getSession();
-    if (!session.session) return setState({ status: "signed-out" });
-    setRefreshing(true);
-    const { data, error } = await sb.rpc("team_dashboard", { p_days: period });
-    setRefreshing(false);
-    if (error) {
-      if (error.code === "42501") return setState({ status: "forbidden" });
-      return setState({ status: "error", message: "Chiffres indisponibles pour le moment. Vérifiez votre connexion, puis réessayez." });
-    }
-    setState({ status: "ready", data: data as unknown as Data });
-  }, []);
-
-  // Chargement au changement de période (les mises à jour d'état arrivent après la réponse du serveur)
-  useEffect(() => {
-    let alive = true;
-    Promise.resolve().then(() => { if (alive) void load(days); });
-    return () => { alive = false; };
-  }, [days, load]);
-
-  if (state.status === "loading") return <Shell><Centered><Loader2 className="h-7 w-7 animate-spin text-slate-500" aria-label="Chargement" /></Centered></Shell>;
-  if (state.status === "signed-out") return (
-    <Shell><Notice title="Connectez-vous d'abord" text="Le tableau de bord s'ouvre avec le compte FlashMiam d'un membre de l'équipe." action={<a href={MAP} className="btn-dash">Se connecter sur la carte</a>} /></Shell>
-  );
-  if (state.status === "forbidden") return (
-    <Shell><Notice title="Accès réservé à l'équipe" text="Ce compte n'a pas accès au tableau de bord de FlashMiam." action={<a href={MAP} className="btn-dash">Retour à la carte</a>} /></Shell>
-  );
-  if (state.status === "error") return (
-    <Shell><Notice title="Oups" text={state.message} action={<button type="button" className="btn-dash" onClick={() => load(days)}>Réessayer</button>} /></Shell>
-  );
-
-  const d = state.data;
-  const v = d.visits;
-  const platformTotal = v.ios + v.android + v.desktop;
-  return (
-    <Shell>
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <a href={MAP} className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white">
-            <ArrowLeft className="h-4 w-4" aria-hidden /> Carte
-          </a>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">Tableau de bord</h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
-            Du {dayLabel(d.since)} à aujourd&apos;hui · mis à jour à {new Date(d.generated_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-          </p>
-        </div>
-        {/* Filtres : une seule rangée, au-dessus de tous les graphiques */}
-        <div className="flex items-center gap-2">
-          <div role="radiogroup" aria-label="Période" className="flex rounded-full bg-slate-200/70 p-1 dark:bg-white/[0.06]">
-            {PERIODS.map((p) => (
-              <button
-                key={p} type="button" role="radio" aria-checked={days === p} onClick={() => setDays(p)}
-                className="rounded-full px-3.5 py-1.5 text-sm font-medium text-slate-600 transition aria-checked:bg-white aria-checked:text-slate-900 aria-checked:shadow-sm dark:text-zinc-400 dark:aria-checked:bg-white/15 dark:aria-checked:text-white"
-              >
-                {p} j
-              </button>
-            ))}
-          </div>
-          <button type="button" onClick={() => load(days)} aria-label="Actualiser" className="grid h-9 w-9 place-items-center rounded-full text-slate-600 hover:bg-slate-200/70 dark:text-zinc-400 dark:hover:bg-white/10">
-            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} aria-hidden />
-          </button>
-        </div>
-      </header>
-
-      {/* Chiffres clés */}
-      <section aria-label="Chiffres clés" className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Tile label={`Visiteurs (${d.days} j)`} value={n(v.visitors)} note={`${n(v.visits)} visites · ${n(v.signed_in)} connectés`} />
-        <Tile label="Comptes clients" value={n(d.accounts.clients)} note={`+${n(d.accounts.new_7d)} cette semaine · ${n(d.accounts.google)} avec Google`} />
-        <Tile label="Restaurants en ligne" value={n(d.restaurants.published)} note={`${n(d.accounts.merchants)} compte(s) restaurateur · ${n(d.restaurants.other)} en préparation`} />
-        <Tile label="Revenu mensuel (HT)" value={euros(d.subscriptions.mrr_cents)} note={`${n(d.subscriptions.paid)} abonnement(s) payé(s) · ${n(d.subscriptions.demo)} en démo`} />
-      </section>
-
-      <div className="mt-3 grid gap-3 lg:grid-cols-2">
-        <Card title="Visiteurs par jour" hint="Appareils différents, avec l'accord « statistiques » des cookies.">
-          <Bars
-            days={d.visits_daily.map((x) => x.day)}
-            series={[{ name: "Visiteurs", color: "var(--viz-1)", values: d.visits_daily.map((x) => x.visitors) }]}
-            extra={(i) => `dont ${n(d.visits_daily[i].app)} depuis l'icône`}
-          />
-        </Card>
-        <Card title="Nouveaux comptes par jour">
-          <Bars
-            days={d.signups_daily.map((x) => x.day)}
-            series={[
-              { name: "Clients", color: "var(--viz-1)", values: d.signups_daily.map((x) => x.clients) },
-              { name: "Restaurateurs", color: "var(--viz-2)", values: d.signups_daily.map((x) => x.merchants) },
-            ]}
-          />
-        </Card>
-      </div>
-
-      <div className="mt-3 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-        <Card title="Appareils" hint={`${n(platformTotal)} visiteurs sur la période`}>
-          <HBars total={platformTotal} rows={[["iPhone, iPad", v.ios], ["Android", v.android], ["Ordinateur", v.desktop]]} />
-        </Card>
-        <Card title="Écran d'accueil" hint={`${n(v.app)} visiteur(s) ont ouvert FlashMiam depuis l'icône`}>
-          <HBars total={Math.max(d.install.shown, 1)} rows={[["Proposé", d.install.shown], ["Accepté (Android)", d.install.accepted], ["Installé", d.install.installed]]} />
-        </Card>
-        <Card title="Alertes et avis">
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-            <Kv k="Appareils avec alertes" v={n(d.accounts.push_devices)} />
-            <Kv k="Avis publiés" v={n(d.engagement.reviews)} />
-            <Kv k="Note moyenne" v={d.engagement.rating ? `${String(d.engagement.rating).replace(".", ",")} / 5` : "—"} />
-            <Kv k="Abonnés (suivis)" v={n(d.engagement.follows)} />
-          </dl>
-        </Card>
-      </div>
-
-      <div className="mt-3 grid gap-3 lg:grid-cols-[1.4fr_1fr]">
-        <Card title={`Utilisation des fiches (${d.days} j)`}>
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-3">
-            <Kv k="Fiches vues" v={n(d.engagement.views)} />
-            <Kv k="Itinéraires" v={n(d.engagement.directions)} />
-            <Kv k="Appels" v={n(d.engagement.calls)} />
-            <Kv k="Menus ouverts" v={n(d.engagement.menus)} />
-            <Kv k="Stories vues" v={n(d.engagement.stories)} />
-            <Kv k="Offres ouvertes" v={n(d.engagement.promo_clicks)} />
-          </dl>
-          <h3 className="mt-6 text-sm font-semibold">Restaurants les plus vus</h3>
-          {d.top_merchants.length ? (
-            <table className="mt-2 w-full text-sm">
-              <thead><tr className="text-left text-xs text-slate-600 dark:text-zinc-400"><th className="py-1.5 font-medium">Restaurant</th><th className="py-1.5 text-right font-medium">Vues</th><th className="py-1.5 text-right font-medium">Abonnés</th></tr></thead>
-              <tbody>
-                {d.top_merchants.map((m) => (
-                  <tr key={m.name} className="border-t border-slate-200 dark:border-white/10">
-                    <td className="py-2">{m.name}{m.is_test && <span className="ml-2 rounded-full bg-slate-200 px-2 py-0.5 text-[11px] text-slate-700 dark:bg-white/10 dark:text-zinc-300">test</span>}</td>
-                    <td className="py-2 text-right tabular-nums">{n(m.views)}</td>
-                    <td className="py-2 text-right tabular-nums">{n(m.followers)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">Aucun restaurant en ligne pour l&apos;instant.</p>}
-        </Card>
-        <Card title="Clients" hint="Réponses facultatives à l'inscription.">
-          <h3 className="text-xs font-medium text-slate-600 dark:text-zinc-400">Sexe</h3>
-          <HBars total={d.accounts.clients} rows={[["Femmes", d.audience.female], ["Hommes", d.audience.male], ["Autre", d.audience.other], ["Non précisé", d.audience.unknown]]} />
-          <h3 className="mt-5 text-xs font-medium text-slate-600 dark:text-zinc-400">Âge</h3>
-          <HBars total={d.accounts.clients} rows={[["15-17 ans", d.audience.ages["15-17"]], ["18-24 ans", d.audience.ages["18-24"]], ["25-34 ans", d.audience.ages["25-34"]], ["35 ans et plus", d.audience.ages["35+"]], ["Non précisé", d.audience.ages.unknown]]} />
-        </Card>
-      </div>
-
-      <p className="mt-6 pb-4 text-center text-xs leading-relaxed text-slate-600 dark:text-zinc-400">
-        Visites comptées seulement avec l&apos;accord « statistiques » (identifiant d&apos;appareil tiré au hasard, gardé 13 mois). Les restaurateurs ne voient que leurs propres totaux.
-      </p>
-    </Shell>
-  );
-}
-
-/* ---------- Mise en page ---------- */
-
-function Shell({ children }: { children: ReactNode }) {
-  return (
-    <div className="dash min-h-full bg-slate-50 text-slate-900 antialiased dark:bg-night dark:text-zinc-50 dark:[color-scheme:dark]">
-      <main className="mx-auto w-full max-w-6xl px-4 pt-[max(20px,env(safe-area-inset-top))] pb-[max(20px,env(safe-area-inset-bottom))] sm:px-6">{children}</main>
-    </div>
-  );
-}
-const Centered = ({ children }: { children: ReactNode }) => <div className="grid min-h-[60vh] place-items-center">{children}</div>;
-function Notice({ title, text, action }: { title: string; text: string; action: ReactNode }) {
-  return (
-    <Centered>
-      <div className="max-w-sm text-center">
-        <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-        <p className="mt-2 text-slate-600 dark:text-zinc-400">{text}</p>
-        <div className="mt-6">{action}</div>
-      </div>
-    </Centered>
-  );
-}
-function Card({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
-  return (
-    <section className="rounded-2xl bg-white p-5 ring-1 ring-slate-200 dark:bg-white/[0.04] dark:ring-white/10">
-      <h2 className="text-[15px] font-semibold">{title}</h2>
-      {hint && <p className="mt-0.5 text-xs text-slate-600 dark:text-zinc-400">{hint}</p>}
-      <div className="mt-4">{children}</div>
-    </section>
-  );
-}
-function Tile({ label, value, note }: { label: string; value: string; note: string }) {
-  return (
-    <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200 dark:bg-white/[0.04] dark:ring-white/10">
-      <p className="text-xs font-medium text-slate-600 dark:text-zinc-400">{label}</p>
-      <p className="mt-1 text-[28px] leading-tight font-bold tracking-tight tabular-nums">{value}</p>
-      <p className="mt-1 text-xs text-slate-600 dark:text-zinc-400">{note}</p>
-    </div>
-  );
-}
-const Kv = ({ k, v }: { k: string; v: string }) => (
-  <div><dt className="text-xs text-slate-600 dark:text-zinc-400">{k}</dt><dd className="mt-0.5 text-lg font-semibold tabular-nums">{v}</dd></div>
+const Splash = () => (
+  <div className="dash min-h-full bg-slate-50 dark:bg-night"><Centered><Loader2 className="h-7 w-7 animate-spin text-slate-500" aria-label="Chargement" /></Centered></div>
 );
 
-/* ---------- Graphiques ---------- */
+function App() {
+  const [session, setSession] = useState<"checking" | "in" | "out">("checking");
+  useEffect(() => {
+    let alive = true;
+    siteClient().auth.getSession().then(({ data }) => { if (alive) setSession(data.session ? "in" : "out"); }, () => { if (alive) setSession("out"); });
+    return () => { alive = false; };
+  }, []);
+  if (session === "checking") return <Splash />;
+  if (session === "out") return (
+    <Plain><Notice title="Connectez-vous d'abord" text="Le tableau de bord s'ouvre avec le compte FlashMiam d'un membre de l'équipe." action={<a href={MAP_URL} className="btn-dash">Se connecter sur la carte</a>} /></Plain>
+  );
+  return <Dashboard />;
+}
 
-type Series = { name: string; color: string; values: number[] };
+const Plain = ({ children }: { children: ReactNode }) => (
+  <div className="dash min-h-full bg-slate-50 px-4 text-slate-900 dark:bg-night dark:text-zinc-50">{children}</div>
+);
 
-/**
- * Barres par jour (empilées s'il y a plusieurs séries) : une seule échelle, grille discrète, barres fines aux coins
- * arrondis côté valeur, 2 px d'écart. Survol ou toucher : détail du jour. Légende dès 2 séries ; tableau des chiffres.
- */
-function Bars({ days, series, extra }: { days: string[]; series: Series[]; extra?: (i: number) => string }) {
-  const [active, setActive] = useState<number | null>(null);
-  const totals = days.map((_, i) => series.reduce((s, x) => s + x.values[i], 0));
-  const max = Math.max(1, ...totals);
-  const top = Math.max(2, niceMax(max));
-  const ticks = top % 2 === 0 ? [0, top / 2, top] : [0, top];
-  const sum = totals.reduce((a, b) => a + b, 0);
+function Dashboard() {
+  const route = useRoute();
+  const [days, setDaysState] = useState<number>(() => {
+    const v = Number(store.get(DAYS_KEY));
+    return PERIODS.some(([p]) => p === v) ? v : 30;
+  });
+  const setDays = (v: number) => { setDaysState(v); store.set(DAYS_KEY, String(v)); };
+  const [live, setLiveState] = useState(() => store.get(LIVE_KEY) !== "0");
+  const setLive = (v: boolean) => { setLiveState(v); store.set(LIVE_KEY, v ? "1" : "0"); };
+  const [palette, setPalette] = useState(false);
+  const night = useNight();
+
+  const dash = useQuery<Data>(Q.dashboard<Data>(days));
+  // Fiches à vérifier : toujours suivies (pastille de la barre latérale), quelle que soit la section affichée
+  const queue = useQuery<unknown[]>(Q.reviewQueue<unknown[]>(), 30_000);
+  const d = dash.data;
+  const section = SECTIONS.find((s) => s.id === route.section)!;
+
+  // Sections voisines lues à l'avance (changement de section instantané)
+  useEffect(() => {
+    if (!d) return;
+    const t = setTimeout(() => { prefetch(Q.revenue()); prefetch(Q.merchants()); }, 800);
+    return () => clearTimeout(t);
+  }, [d]);
+
+  // En direct : relecture toutes les minutes tant que la page est visible, et au retour sur l'onglet
+  useEffect(() => {
+    if (!live) return;
+    const tick = () => { if (document.visibilityState === "visible") void refreshActive(); };
+    const timer = setInterval(tick, LIVE_EVERY);
+    document.addEventListener("visibilitychange", tick);
+    return () => { clearInterval(timer); document.removeEventListener("visibilitychange", tick); };
+  }, [live]);
+
+  // Haut de page à chaque changement de section
+  useEffect(() => { window.scrollTo({ top: 0 }); }, [route.section, route.id]);
+
+  // Raccourcis clavier (jamais pendant la saisie d'un texte)
+  const toggleTheme = useCallback(() => setNight(!night), [night]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setPalette((p) => !p); return; }
+      const t = e.target as HTMLElement;
+      if (e.metaKey || e.ctrlKey || e.altKey || t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+      if (e.key === "/") { e.preventDefault(); setPalette(true); }
+      else if (/^[1-8]$/.test(e.key)) go(SECTIONS[Number(e.key) - 1].id);
+      else if (e.key === "r" || e.key === "R") void refreshActive();
+      else if (e.key === "t" || e.key === "T") toggleTheme();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [toggleTheme]);
+
+  if (dash.error?.code === "42501") return (
+    <Plain><Notice title="Accès réservé à l'équipe" text="Ce compte n'a pas accès au tableau de bord de FlashMiam." action={<a href={MAP_URL} className="btn-dash">Retour à la carte</a>} /></Plain>
+  );
+
+  const list = d ? alerts(d) : [];
+  const badges: Partial<Record<Section, [number, "critical" | "neutral"]>> = d ? {
+    overview: [list.filter((a) => a.tone === "critical").length, "critical"],
+    review: [queue.data?.length ?? d.merchants_pending.filter((m) => m.status === "awaiting_review").length, "critical"],
+    bugs: [d.error_list.filter((e) => e.open).length, "critical"],
+    restaurants: [d.reported_reviews.length, "neutral"],
+  } : {};
+
+  let body: ReactNode;
+  if (route.section === "review") body = <ReviewPanel />;
+  else if (route.section === "revenue") body = <RevenuePanel />;
+  else if (route.section === "directory") body = route.id ? <RestaurantDetail id={route.id} days={days} /> : <RestaurantList />;
+  else if (!d) body = dash.error ? <SectionError retry={() => fetchQuery(Q.dashboard(days).key)} /> : <SectionSkeleton />;
+  else if (route.section === "overview") body = <Overview d={d} alerts={list} />;
+  else if (route.section === "users") body = <Users d={d} />;
+  else if (route.section === "restaurants") body = <Restaurants d={d} />;
+  else if (route.section === "bugs") body = <Bugs d={d} />;
+  else body = <Server d={d} />;
+
   return (
-    <div>
-      {series.length > 1 && (
-        <ul className="mb-5 flex flex-wrap gap-4 text-xs text-slate-700 dark:text-zinc-300">
-          {series.map((s) => <li key={s.name} className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm" style={{ background: s.color }} />{s.name} · {n(s.values.reduce((a, b) => a + b, 0))}</li>)}
-        </ul>
-      )}
-      {series.length === 1 && <p className="mb-5 text-xs text-slate-600 dark:text-zinc-400">Total : <b className="font-semibold text-slate-900 dark:text-zinc-50">{n(sum)}</b></p>}
-      <div className="relative h-40 pl-8" onPointerLeave={() => setActive(null)}>
-        {ticks.map((t) => (
-          <div key={t} className="pointer-events-none absolute inset-x-0 flex h-0 items-center" style={{ bottom: `${(t / top) * 100}%` }}>
-            <span className="w-7 pr-1 text-right text-[10px] tabular-nums text-slate-500 dark:text-zinc-400">{n(t)}</span>
-            <span className="h-px flex-1 bg-[var(--viz-grid)]" />
-          </div>
-        ))}
-        <div className="absolute inset-y-0 right-0 left-8 flex items-end gap-[2px]">
-          {days.map((day, i) => (
-            <button
-              key={day} type="button" aria-label={`${dayLabel(day, true)} : ${series.map((s) => `${s.name} ${s.values[i]}`).join(", ")}`}
-              onPointerEnter={() => setActive(i)} onFocus={() => setActive(i)} onClick={() => setActive(i)}
-              className="relative flex h-full min-w-0 flex-1 flex-col-reverse justify-start rounded-t outline-none focus-visible:ring-2 focus-visible:ring-[var(--viz-1)]"
-            >
-              {/* Segments du bas vers le haut ; 2 px de fond entre deux segments ; coins arrondis seulement en haut */}
-              {series.map((s, k) => {
-                const h = (s.values[i] / top) * 100;
-                const last = series.slice(k + 1).every((o) => !o.values[i]);
-                return h > 0 ? <span key={s.name} className={`block w-full ${last ? "rounded-t" : ""} ${k > 0 ? "border-b-2 border-[var(--dash-surface)]" : ""} ${active === null || active === i ? "" : "opacity-60"}`} style={{ height: `${h}%`, background: s.color }} /> : null;
-              })}
-            </button>
-          ))}
+    <div className="dash min-h-full bg-slate-50 text-slate-900 antialiased dark:bg-night dark:text-zinc-50 dark:[color-scheme:dark]">
+      <TopProgress />
+
+      {/* Barre latérale (ordinateur) */}
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-slate-200 bg-white/70 px-3 pt-[max(16px,env(safe-area-inset-top))] pb-4 backdrop-blur lg:flex dark:border-white/10 dark:bg-white/[0.02]">
+        <a href={sectionHref("overview")} className="flex items-center gap-2 px-2 py-1">
+          <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#ff5a1f] text-sm font-black text-white" aria-hidden>F</span>
+          <span className="leading-tight"><b className="block text-sm">FlashMiam</b><span className="text-xs text-slate-500 dark:text-zinc-400">Console de l&apos;équipe</span></span>
+        </a>
+        <button type="button" onClick={() => setPalette(true)} className="mt-4 flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-slate-500 ring-1 ring-slate-200 hover:bg-slate-50 dark:text-zinc-400 dark:ring-white/10 dark:hover:bg-white/5">
+          <Search className="h-4 w-4" aria-hidden /> Rechercher…
+          <kbd className="ml-auto rounded bg-slate-100 px-1.5 font-sans text-[11px] dark:bg-white/10">⌘K</kbd>
+        </button>
+        <nav aria-label="Sections" className="mt-4 grid gap-0.5">
+          {SECTIONS.map((s, i) => {
+            const active = route.section === s.id;
+            const b = badges[s.id];
+            return (
+              <a key={s.id} href={sectionHref(s.id)} aria-current={active ? "page" : undefined}
+                className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 aria-[current=page]:bg-slate-900 aria-[current=page]:text-white dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white dark:aria-[current=page]:bg-white dark:aria-[current=page]:text-slate-900">
+                <s.icon className="h-4 w-4" aria-hidden />
+                <span className="flex-1">{s.label}</span>
+                {b && b[0] > 0 && <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums ${b[1] === "critical" ? "bg-[#d03b3b] text-white" : "bg-slate-200 text-slate-700 dark:bg-white/15 dark:text-zinc-200"}`}>{b[0]}</span>}
+                <kbd className="hidden font-sans text-[10px] text-slate-400 group-hover:inline">{i + 1}</kbd>
+              </a>
+            );
+          })}
+        </nav>
+        <div className="mt-auto grid gap-1 text-sm">
+          <button type="button" onClick={toggleTheme} className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-slate-600 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-white/5">
+            {night ? <Sun className="h-4 w-4" aria-hidden /> : <Moon className="h-4 w-4" aria-hidden />} {night ? "Mode jour" : "Mode nuit"}
+            <kbd className="ml-auto font-sans text-[10px] text-slate-400">T</kbd>
+          </button>
+          <a href={MAP_URL} className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-slate-600 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-white/5">
+            <ArrowLeft className="h-4 w-4" aria-hidden /> Retour à la carte
+          </a>
         </div>
-        {active !== null && (
-          <div role="status" className="pointer-events-none absolute -top-2 z-10 -translate-x-1/2 -translate-y-full rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs whitespace-nowrap text-white shadow-lg dark:bg-zinc-100 dark:text-zinc-900"
-            style={{ left: `calc(2rem + (100% - 2rem) * ${(active + 0.5) / days.length})` }}>
-            <p className="font-semibold">{dayLabel(days[active], true)}</p>
-            {series.map((s) => <p key={s.name}>{s.name} : {n(s.values[active])}</p>)}
-            {extra && <p className="opacity-80">{extra(active)}</p>}
+      </aside>
+
+      <div className="lg:pl-60">
+        {/* Barre du haut : section, période, état « en direct », actualiser, palette */}
+        <header className="sticky top-0 z-30 border-b border-slate-200 bg-slate-50/85 pt-[env(safe-area-inset-top)] backdrop-blur-md dark:border-white/10 dark:bg-night/85">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 sm:px-6">
+            <div className="min-w-0 flex-1">
+              <h1 className="truncate text-lg font-bold tracking-tight sm:text-xl">{route.section === "directory" && route.id ? "Fiche du restaurant" : section.label}</h1>
+              {d && section.usesPeriod && <p className="text-xs text-slate-600 dark:text-zinc-400">Du {dayLabel(d.since)} à aujourd&apos;hui</p>}
+            </div>
+            {(section.usesPeriod || route.id) && (
+              <div role="radiogroup" aria-label="Période" className="flex rounded-full bg-slate-200/70 p-0.5 dark:bg-white/[0.06]">
+                {PERIODS.map(([p, label]) => (
+                  <button key={p} type="button" role="radio" aria-checked={days === p} onClick={() => setDays(p)}
+                    className="rounded-full px-3 py-1 text-xs font-medium text-slate-600 transition aria-checked:bg-white aria-checked:text-slate-900 aria-checked:shadow-sm sm:text-sm dark:text-zinc-400 dark:aria-checked:bg-white/15 dark:aria-checked:text-white">
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+            <LiveStatus live={live} setLive={setLive} />
+            <button type="button" onClick={() => void refreshActive()} aria-label="Actualiser (R)" title="Actualiser (R)" className="grid h-8 w-8 place-items-center rounded-full text-slate-600 hover:bg-slate-200/70 dark:text-zinc-400 dark:hover:bg-white/10">
+              <RefreshCw className={`h-4 w-4 ${dash.loading ? "animate-spin" : ""}`} aria-hidden />
+            </button>
+            <button type="button" onClick={() => setPalette(true)} aria-label="Rechercher (⌘K)" title="Rechercher (⌘K)" className="grid h-8 w-8 place-items-center rounded-full text-slate-600 hover:bg-slate-200/70 lg:hidden dark:text-zinc-400 dark:hover:bg-white/10">
+              <Command className="h-4 w-4" aria-hidden />
+            </button>
           </div>
-        )}
+          {/* Onglets (téléphone, tablette) */}
+          <nav aria-label="Sections" className="flex gap-1 overflow-x-auto px-3 lg:hidden">
+            {SECTIONS.map((s) => {
+              const b = badges[s.id];
+              return (
+                <a key={s.id} href={sectionHref(s.id)} aria-current={route.section === s.id ? "page" : undefined}
+                  className="relative flex shrink-0 items-center gap-1.5 px-2.5 py-2.5 text-sm font-medium whitespace-nowrap text-slate-600 aria-[current=page]:text-slate-900 dark:text-zinc-400 dark:aria-[current=page]:text-white">
+                  {s.label}
+                  {b && b[0] > 0 && <span className={`rounded-full px-1.5 text-[10px] font-semibold ${b[1] === "critical" ? "bg-[#d03b3b] text-white" : "bg-slate-200 text-slate-700 dark:bg-white/15 dark:text-zinc-200"}`}>{b[0]}</span>}
+                  {route.section === s.id && <span className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-slate-900 dark:bg-white" />}
+                </a>
+              );
+            })}
+          </nav>
+        </header>
+
+        <main className="mx-auto w-full max-w-6xl px-4 pt-5 pb-[max(24px,env(safe-area-inset-bottom))] sm:px-6">
+          <div key={`${route.section}/${route.id ?? ""}`} className="dash-enter">{body}</div>
+          <p className="mt-8 text-center text-xs leading-relaxed text-slate-500 dark:text-zinc-500">
+            Visites comptées avec l&apos;accord « statistiques » (identifiant d&apos;appareil tiré au hasard, 13 mois) · bugs sans identifiant (90 jours) ·
+            raccourcis : <kbd>⌘K</kbd> recherche, <kbd>1</kbd>–<kbd>8</kbd> sections, <kbd>R</kbd> actualiser, <kbd>T</kbd> thème
+          </p>
+        </main>
       </div>
-      <div className="mt-1.5 flex justify-between pl-8 text-[10px] text-slate-500 dark:text-zinc-400">
-        <span>{dayLabel(days[0])}</span><span>{dayLabel(days[Math.floor(days.length / 2)])}</span><span>{dayLabel(days[days.length - 1])}</span>
-      </div>
-      <details className="mt-3 text-xs">
-        <summary className="cursor-pointer text-slate-600 dark:text-zinc-400">Voir les chiffres</summary>
-        <table className="mt-2 w-full">
-          <thead><tr className="text-left text-slate-600 dark:text-zinc-400"><th className="py-1 font-medium">Jour</th>{series.map((s) => <th key={s.name} className="py-1 text-right font-medium">{s.name}</th>)}</tr></thead>
-          <tbody>{days.map((day, i) => <tr key={day} className="border-t border-slate-200 dark:border-white/10"><td className="py-1">{dayLabel(day)}</td>{series.map((s) => <td key={s.name} className="py-1 text-right tabular-nums">{n(s.values[i])}</td>)}</tr>)}</tbody>
-        </table>
-      </details>
+
+      <Palette open={palette} onClose={() => setPalette(false)} night={night} toggleTheme={toggleTheme} live={live} setLive={setLive} />
     </div>
   );
 }
 
-/** Barres horizontales d'une seule série : part de chaque ligne dans le total, valeur et pourcentage écrits. */
-function HBars({ rows, total }: { rows: [string, number][]; total: number }) {
+/** Barre fine en haut de l'écran pendant une lecture (les chiffres affichés restent en place). */
+function TopProgress() {
+  const busy = useBusy();
   return (
-    <ul className="mt-2 grid gap-2.5">
-      {rows.map(([label, value]) => (
-        <li key={label} className="text-sm">
-          <div className="flex justify-between gap-3"><span>{label}</span><span className="tabular-nums text-slate-600 dark:text-zinc-400">{n(value)} · {pct(value, total)} %</span></div>
-          <div className="mt-1 h-2 rounded-full bg-[var(--viz-grid)]"><div className="h-full rounded-full" style={{ width: `${pct(value, total)}%`, background: "var(--viz-1)" }} /></div>
-        </li>
-      ))}
-    </ul>
+    <div aria-hidden className={`fixed inset-x-0 top-0 z-50 h-0.5 overflow-hidden transition-opacity duration-300 ${busy ? "opacity-100" : "opacity-0"}`}>
+      <span className="dash-progress block h-full w-1/4 bg-[var(--viz-1)]" />
+    </div>
   );
 }
 
-/** Haut de l'échelle : arrondi lisible (1, 2, 5 × 10ⁿ). */
-function niceMax(v: number) {
-  const p = 10 ** Math.floor(Math.log10(v));
-  return [1, 2, 5, 10].map((m) => m * p).find((m) => m >= v) ?? v;
+/** « En direct · il y a 12 s » : un clic met en pause (ou reprend) l'actualisation automatique. */
+function LiveStatus({ live, setLive }: { live: boolean; setLive: (v: boolean) => void }) {
+  const oldest = useOldestActive();
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 5000); return () => clearInterval(t); }, []);
+  const s = oldest ? Math.max(0, Math.round((now - oldest) / 1000)) : null;
+  const age = s === null ? "…" : s < 10 ? "à l'instant" : s < 60 ? `il y a ${s} s` : `il y a ${Math.floor(s / 60)} min`;
+  return (
+    <button type="button" onClick={() => setLive(!live)} aria-pressed={live}
+      title={live ? "Actualisation automatique chaque minute (cliquer pour mettre en pause)" : "Actualisation automatique en pause (cliquer pour reprendre)"}
+      className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs text-slate-600 ring-1 ring-slate-200 hover:bg-white dark:text-zinc-400 dark:ring-white/10 dark:hover:bg-white/5">
+      {live ? <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#0ca30c] opacity-60 motion-reduce:animate-none" /><span className="relative inline-flex h-2 w-2 rounded-full bg-[#0ca30c]" /></span>
+        : <Pause className="h-3 w-3" aria-hidden />}
+      <span className="hidden sm:inline">{live ? "En direct" : "En pause"} ·</span> {age}
+      {!live && <Play className="h-3 w-3" aria-hidden />}
+    </button>
+  );
+}
+
+/* ---------- Thème jour / nuit (le même que la carte) ---------- */
+
+const subscribeTheme = (l: () => void) => {
+  const o = new MutationObserver(l);
+  o.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  return () => o.disconnect();
+};
+const useNight = () => useSyncExternalStore(subscribeTheme, () => document.documentElement.dataset.theme === "night", () => false);
+function setNight(on: boolean) {
+  document.documentElement.setAttribute("data-theme", on ? "night" : "day");
+  store.set(THEME_KEY, on ? "dark" : "light");
 }

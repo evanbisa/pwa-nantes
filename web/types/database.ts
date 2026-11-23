@@ -795,6 +795,41 @@ export type Database = {
         Args: { p_days?: number }
         Returns: Json
       }
+      team_review_queue: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      team_review_merchant: {
+        Args: { p_merchant_id: string; p_approve: boolean; p_note?: string | null }
+        Returns: string
+      }
+      team_revenue: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      team_merchants: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      team_merchant: {
+        Args: { p_merchant_id: string; p_days?: number }
+        Returns: Json
+      }
+      team_moderate_review: {
+        Args: { p_review_id: string; p_action: string }
+        Returns: undefined
+      }
+      team_error_triage: {
+        Args: { p_fingerprint: string; p_status?: string | null }
+        Returns: undefined
+      }
+      report_client_error: {
+        Args: {
+          p_kind: string; p_app: string; p_message: string; p_source?: string | null; p_stack?: string | null
+          p_page?: string | null; p_platform?: string | null; p_browser?: string | null; p_release?: string | null
+        }
+        Returns: undefined
+      }
       track_site_event: {
         Args: { p_event: string; p_visitor: string; p_platform: string; p_standalone?: boolean }
         Returns: undefined
