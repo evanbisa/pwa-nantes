@@ -36,11 +36,11 @@ const RESEND_DELAY = 60;
 const FLOW: Step[] = ["name", "gender", "age", "email", "confirm", "password"];
 /** Questions comptées dans la barre de progression (la relecture fait partie de la question de l'e-mail). */
 const QUESTIONS: Step[] = ["name", "gender", "age", "email", "password"];
-const GENDERS: { value: Gender; label: string; emoji: string }[] = [
-  { value: "female", label: "Une femme", emoji: "👩" },
-  { value: "male", label: "Un homme", emoji: "👨" },
-  { value: "other", label: "Autre", emoji: "🌈" },
-  { value: "", label: "Je préfère ne pas le dire", emoji: "🤐" },
+const GENDERS: { value: Gender; label: string }[] = [
+  { value: "female", label: "Une femme" },
+  { value: "male", label: "Un homme" },
+  { value: "other", label: "Autre" },
+  { value: "", label: "Je préfère ne pas le dire" },
 ];
 const STRENGTH = ["", "Trop faible", "Trop faible", "Moyen", "Presque !", "Solide"];
 /** Carte (site principal), un niveau au-dessus de l'application : « /app/../ » → « / ». */
@@ -450,11 +450,10 @@ function Wizard() {
                     <button
                       key={g.label} id={`su-gender-${i}`} type="button" role="radio" aria-checked={checked}
                       onClick={() => pickGender(g.value)}
-                      className={`flex min-h-32 flex-col items-center justify-center gap-2 rounded-2xl border-2 px-3 py-4 text-center text-[15px] leading-snug font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 dark:ring-offset-night dark:focus-visible:ring-brand-night ${checked
+                      className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-2xl border-2 px-3 py-4 text-center text-base leading-snug font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 dark:ring-offset-night dark:focus-visible:ring-brand-night ${checked
                         ? "su-picked border-brand bg-brand/10 text-brand dark:text-white"
                         : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-white/[0.04] dark:backdrop-blur-xl dark:hover:border-white/20 dark:hover:bg-white/[0.07]"}`}
                     >
-                      <span aria-hidden className="text-4xl leading-none">{g.emoji}</span>
                       {g.label}
                     </button>
                   );

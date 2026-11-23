@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-+isZ/4F3DqQsL89dxjWu/0seSs2nTJjEnQnGTPbF6mE=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-An/mieQ3RaR/eGD7LIFMKGYIydRD66RH8vIT7mkr0/k=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1614,8 +1614,15 @@
     #profile-btn { position: relative; }
     .notif-badge.pro-badge { top: 0; right: auto; left: 30px; }
     .notif-badge.pro-badge[hidden] { display: none; }
-    .docs-later { margin: 4px 0 8px; }
-    .docs-later b { display: block; margin-bottom: 2px; }
+    /* Justificatifs repliés à l'inscription (facultatifs) */
+    .pv-more { margin: 14px 0 4px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel-solid); }
+    .pv-more > summary { display: flex; align-items: center; gap: 8px; padding: 13px 14px; cursor: pointer; list-style: none; font-size: 14.5px; font-weight: 600; }
+    .pv-more > summary::-webkit-details-marker { display: none; }
+    .pv-more > summary::after { content: ""; margin-left: auto; width: 8px; height: 8px; border: solid currentColor; border-width: 0 2px 2px 0; transform: rotate(45deg); transition: transform .2s; opacity: .6; }
+    .pv-more[open] > summary::after { transform: rotate(-135deg); }
+    .pv-more > summary small { font-weight: 500; color: var(--muted); font-size: 12.5px; }
+    .pv-more > :not(summary) { margin-left: 14px; margin-right: 14px; }
+    .pv-more > .docs { margin-bottom: 12px; }
     .ps-tabs button[hidden] { display: none; }
     /* Onglet « Compléter » : où en est la fiche, puis les justificatifs à déposer */
     .todo-state { display: flex; flex-direction: column; gap: 3px; margin: 10px 0 14px; padding: 12px 14px; border-radius: 12px; font-size: 14px; line-height: 1.45; }
@@ -3402,28 +3409,15 @@
       <!-- Inscription d'un restaurateur (formulaire complet : nom, téléphone professionnel…) -->
       <form id="form-signup" class="ob-step" novalidate data-step="signup" data-only="pro" hidden>
         <h1 id="auth-title">Inscrivez votre <em>restaurant</em></h1>
-        <p class="lead">Restaurateur à La Roche-sur-Yon ? Rejoignez la carte en 4 étapes : compte, vérification de votre établissement, abonnement, fiche restaurant.</p>
-        <div class="field-row">
-          <label class="field" id="field-su-name">
-            <span>Prénom</span>
-            <input id="su-name" type="text" autocomplete="given-name" autocapitalize="words" maxlength="40" placeholder="Camille" required />
-            <small class="field-error" id="err-su-name" aria-live="polite"></small>
-          </label>
-          <label class="field" id="field-su-lastname">
-            <span>Nom</span>
-            <input id="su-lastname" type="text" autocomplete="family-name" autocapitalize="words" maxlength="60" placeholder="Martin" />
-            <small class="field-error" id="err-su-lastname" aria-live="polite"></small>
-          </label>
-        </div>
+        <label class="field" id="field-su-name">
+          <span>Prénom</span>
+          <input id="su-name" type="text" autocomplete="given-name" autocapitalize="words" maxlength="40" placeholder="Camille" required />
+          <small class="field-error" id="err-su-name" aria-live="polite"></small>
+        </label>
         <label class="field" id="field-su-email">
-          <span>E-mail professionnel</span>
+          <span>E-mail</span>
           <input id="su-email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" maxlength="120" placeholder="camille@exemple.fr" required />
           <small class="field-error" id="err-su-email" aria-live="polite"></small>
-        </label>
-        <label class="field" id="field-su-phone">
-          <span>Téléphone professionnel</span>
-          <input id="su-phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="06 12 34 56 78" />
-          <small class="field-error" id="err-su-phone" aria-live="polite"></small>
         </label>
         <label class="field" id="field-su-password">
           <span>Mot de passe</span>
@@ -3440,20 +3434,11 @@
           </ul>
           <small class="field-error" id="err-su-password" aria-live="polite"></small>
         </label>
-        <label class="field" id="field-su-password2">
-          <span>Confirmer le mot de passe</span>
-          <span class="pw-wrap">
-            <input id="su-password2" type="password" autocomplete="new-password" maxlength="128" required aria-describedby="pw-match" />
-            <button class="pw-toggle" type="button" data-toggle-pw="su-password2">Afficher</button>
-          </span>
-          <p class="pw-match" id="pw-match" aria-live="polite"></p>
-          <small class="field-error" id="err-su-password2" aria-live="polite"></small>
-        </label>
         <label class="check"><input type="checkbox" id="su-remember" /> Rester connecté sur cet appareil</label>
         <label class="check terms-check" id="field-su-terms"><input type="checkbox" id="su-terms" /> <span>J'accepte les <a href="app/legal/cgu/" target="_blank" rel="noopener">conditions d'utilisation</a>, les <a href="app/legal/cgv/" target="_blank" rel="noopener">conditions de vente</a> des abonnements et la <a href="app/legal/confidentialite/" target="_blank" rel="noopener">politique de confidentialité</a>.</span></label>
         <small class="field-error" id="err-su-terms" aria-live="polite"></small>
         <p class="form-error" id="err-signup" role="alert"></p>
-        <button class="btn btn-primary" type="submit">Continuer : vérification</button>
+        <button class="btn btn-primary" type="submit">Créer mon compte</button>
         <p class="ob-switch">Déjà un compte ? <button class="link-btn" type="button" data-goto="login">Se connecter</button></p>
       </form>
 
@@ -3582,34 +3567,33 @@
 
       <!-- Restaurateur — étape 2 : vérification de l'établissement -->
       <form id="form-pro-verify" class="ob-step" novalidate data-step="pro-verify" hidden aria-labelledby="pv-title">
-        <h2 id="pv-title">Vérification de votre <em>établissement</em></h2>
-        <p class="lead">Votre numéro SIRET est contrôlé auprès du répertoire officiel Sirene de l'INSEE : l'établissement doit être en activité et exercer une activité de restauration.</p>
+        <h2 id="pv-title">Votre <em>établissement</em></h2>
         <label class="field" id="field-pv-siret">
-          <span>Numéro SIRET (14 chiffres)</span>
+          <span>Numéro SIRET</span>
           <span class="input-action">
             <input id="pv-siret" type="text" inputmode="numeric" autocomplete="off" maxlength="17" placeholder="123 456 789 00012" />
             <button class="btn-inline" type="button" id="pv-check">Vérifier</button>
           </span>
           <small class="field-error" id="err-pv-siret" aria-live="polite"></small>
         </label>
-        <p class="hint" id="pv-test-hint">Pour essayer sans établissement réel : <button type="button" class="link-btn" id="pv-test">utiliser le SIRET de test <b>999 999 999 00009</b></button></p>
         <div class="verify-card" id="pv-result" hidden aria-live="polite"></div>
 
-        <h3 class="ob-sub">Justificatifs</h3>
-        <p class="notice docs-later"><b>Pas vos documents sous la main ?</b> Continuez : vous pourrez les ajouter plus tard depuis votre espace restaurateur (onglet « Compléter »). Votre fiche n'apparaîtra sur la carte qu'une fois les justificatifs obligatoires ajoutés.</p>
-        <p class="hint">PDF, JPG ou PNG · 10 Mo maximum par fichier.</p>
-        <div class="docs" id="pv-docs"></div>
-
         <label class="check check-block"><input type="checkbox" id="pv-honor" /> Je certifie sur l'honneur l'exactitude de ces informations et être habilité(e) à représenter cet établissement.</label>
+        <!-- Justificatifs : facultatifs à l'inscription, ajoutés plus tard depuis l'onglet « Compléter » de l'espace -->
+        <details class="pv-more" id="pv-more">
+          <summary>Ajouter mes justificatifs maintenant <small>facultatif</small></summary>
+          <p class="hint">PDF, JPG ou PNG · 10 Mo maximum par fichier.</p>
+          <div class="docs" id="pv-docs"></div>
+        </details>
         <p class="form-error" id="err-pro-verify" role="alert"></p>
-        <button class="btn btn-primary" type="submit">Continuer vers le paiement</button>
-        <button class="link-btn later-btn" type="button" data-pro-later>Terminer plus tard</button>
+        <button class="btn btn-primary" type="submit">Continuer</button>
+        <button class="link-btn later-btn" type="button" data-pro-later>Continuer plus tard</button>
       </form>
 
       <!-- Restaurateur — étape 3 : paiement de l'abonnement -->
       <section id="pro-payment" class="ob-step" data-step="pro-payment" hidden aria-labelledby="pp-title">
         <h2 id="pp-title">Choisissez votre <em>abonnement</em></h2>
-        <p class="lead" id="pp-lead">Votre établissement est vérifié. L'abonnement permet d'apparaître sur la carte de La Roche-sur-Yon. Sans engagement : résiliable en un clic.</p>
+        <p class="lead" id="pp-lead">Sans engagement, résiliable en un clic.</p>
         <div class="trial" id="trial-banner">
           <span class="trial-ico" aria-hidden="true">🎁</span>
           <div><b>Le premier mois est offert</b><span>Testez FlashMiam 30 jours. Des clients en plus ? Vous continuez. Sinon, résiliez avant la fin : vous ne payez rien.</span></div>
@@ -3623,16 +3607,15 @@
         <p class="notice" id="pay-notice"></p>
         <p class="form-error" id="err-pro-payment" role="alert"></p>
         <button class="btn btn-primary" type="button" id="pay-btn"></button>
-        <button class="btn btn-ghost" type="button" data-pro-back="pro-verify">Retour à la vérification</button>
-        <button class="link-btn later-btn" type="button" data-pro-later>Terminer plus tard</button>
+        <button class="btn btn-ghost" type="button" data-pro-back="pro-verify">Retour</button>
+        <button class="link-btn later-btn" type="button" data-pro-later>Continuer plus tard</button>
       </section>
 
       <!-- Restaurateur — étape 4 : fiche du restaurant -->
       <form id="form-pro-listing" class="ob-step" novalidate data-step="pro-listing" hidden aria-labelledby="pl-title">
         <h2 id="pl-title"><span data-mode="create">Votre <em>restaurant</em> sur la carte</span><span data-mode="edit">Modifier ma <em>fiche</em></span></h2>
-        <p class="lead" data-mode="create">Dernière étape : présentez votre établissement. Ces informations seront visibles par tous les utilisateurs.</p>
-        <!-- Accès direct à chaque rubrique (le formulaire est long) -->
-        <nav class="pl-jump" id="pl-jump" aria-label="Aller à une rubrique de la fiche">
+        <!-- Accès direct à chaque rubrique (le formulaire est long) : en modification seulement -->
+        <nav class="pl-jump" id="pl-jump" aria-label="Aller à une rubrique de la fiche" data-mode="edit">
           <button type="button" data-jump="field-pl-name">Infos</button>
           <button type="button" data-jump="field-pl-photos">Photos</button>
           <button type="button" data-jump="field-pl-menu">Carte</button>
@@ -3672,7 +3655,7 @@
           <p class="visually-hidden" id="pl-photos-live" aria-live="polite"></p>
         </div>
 
-        <div class="field" id="field-pl-menu">
+        <div class="field" id="field-pl-menu" data-mode="edit">
           <span>La carte (facultatif) <small class="counter" id="pl-menu-count"></small></span>
           <p class="hint menu-hint">Vos plats et leurs prix, classés par rubrique (Entrées, Plats, Desserts, Boissons…).</p>
           <div class="menu-scan" id="pl-menu-scan">
@@ -3711,13 +3694,13 @@
           <small class="field-error" id="err-pl-hours" aria-live="polite"></small>
         </div>
 
-        <label class="field" id="field-pl-phone">
+        <label class="field" id="field-pl-phone" data-mode="edit">
           <span>Téléphone (facultatif)</span>
           <input id="pl-phone" type="tel" inputmode="tel" maxlength="20" placeholder="02 51 00 00 00" />
           <small class="field-error" id="err-pl-phone" aria-live="polite"></small>
         </label>
-        <label class="check pl-mv"><input type="checkbox" id="pl-mv" /> J'accepte les titres-restaurant (papier ou carte)</label>
-        <p class="hint">Vos promotions (formule midi, afterwork, week-end, offre étudiante…) et vos stories se publient ensuite depuis votre espace restaurateur.</p>
+        <label class="check pl-mv" data-mode="edit"><input type="checkbox" id="pl-mv" /> J'accepte les titres-restaurant (papier ou carte)</label>
+        <p class="hint" data-mode="edit">Vos promotions (formule midi, afterwork, week-end, offre étudiante…) et vos stories se publient ensuite depuis votre espace restaurateur.</p>
 
         <p class="form-error" id="err-pro-listing" role="alert"></p>
         <!-- Barre collée en bas de l'écran : enregistrer sans avoir à descendre tout en bas du formulaire -->
@@ -3725,7 +3708,7 @@
           <button class="btn btn-ghost" type="button" id="pl-cancel" data-mode="edit">Annuler</button>
           <button class="btn btn-primary" type="submit"><span data-mode="create">Publier sur la carte</span><span data-mode="edit">Enregistrer</span></button>
         </div>
-        <button class="link-btn later-btn" type="button" data-pro-later data-mode="create">Terminer plus tard</button>
+        <button class="link-btn later-btn" type="button" data-pro-later data-mode="create">Continuer plus tard</button>
       </form>
 
     </div>
@@ -9428,7 +9411,7 @@
     const p = $('su-password').value;
     PASSWORD_RULES.forEach((r) => $('pw-rules').querySelector('[data-rule="' + r.id + '"]').classList.toggle('is-ok', r.test(p)));
   }
-  $('su-password').addEventListener('input', () => { renderPasswordRules(); renderPasswordMatch(); });
+  $('su-password').addEventListener('input', renderPasswordRules);
 
   /** Indique en direct si la confirmation correspond (une fois qu'on a commencé à la saisir). */
   function showPasswordMatch(a, b, box) {
@@ -9437,28 +9420,23 @@
     box.textContent = same ? '✓ Les mots de passe correspondent' : (a.startsWith(b) ? 'Continuez la saisie…' : '✗ Les mots de passe ne correspondent pas');
     box.className = 'pw-match ' + (same ? 'is-ok' : a.startsWith(b) ? '' : 'is-ko');
   }
-  function renderPasswordMatch() { showPasswordMatch($('su-password').value, $('su-password2').value, $('pw-match')); }
-  $('su-password2').addEventListener('input', renderPasswordMatch);
 
-  /** Inscription d'un restaurateur (le client passe par les questions une par une, plus bas). */
+  /**
+   * Inscription d'un restaurateur (le client passe par les questions une par une, plus bas) : prénom, e-mail et mot de
+   * passe seulement, pour un compte créé en deux minutes. Nom et téléphone ne sont plus demandés ici (le téléphone du
+   * restaurant se renseigne sur la fiche).
+   */
   $('form-signup').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const name = $('su-name').value.trim().replace(/\s+/g, ' ');
-    const lastName = $('su-lastname').value.trim().replace(/\s+/g, ' ');
     const email = $('su-email').value.trim().toLowerCase();
-    const phone = $('su-phone').value.trim();
     const password = $('su-password').value;
     let firstInvalid = null;
     const fail = (field, msg) => { setFieldError(field, msg); firstInvalid = firstInvalid || field; };
     if (name.length < 2) fail('su-name', 'Indiquez votre prénom (2 caractères minimum).');
-    if (lastName.length < 2) fail('su-lastname', 'Indiquez votre nom.');
     if (!EMAIL_RE.test(email)) fail('su-email', 'Adresse e-mail invalide.');
-    if (!PHONE_RE.test(compactPhone(phone))) fail('su-phone', 'Numéro de téléphone invalide (ex. : 06 12 34 56 78).');
     const missing = missingPasswordRules(password);
     if (missing.length) fail('su-password', 'Mot de passe trop faible : il manque ' + listFr(missing.map((r) => r.label)) + '.');
-    const confirmation = $('su-password2').value;
-    if (!confirmation) fail('su-password2', 'Confirmez votre mot de passe.');
-    else if (confirmation !== password) fail('su-password2', 'Les deux mots de passe ne sont pas identiques.');
     $('err-su-terms').textContent = '';
     if (!$('su-terms').checked) { $('err-su-terms').textContent = 'Cochez la case pour accepter les conditions.'; firstInvalid = firstInvalid || 'su-terms'; }
     if (firstInvalid) { $(firstInvalid).focus(); return; }
@@ -9472,7 +9450,7 @@
     $('err-signup').textContent = '';
     const captchaToken = await Captcha.token().catch(() => null);
     if (captchaToken === null) { btn.disabled = false; $('err-signup').textContent = Captcha.failMessage; return; }
-    const meta = { role: 'merchant', first_name: name, last_name: lastName, phone: formatPhone(phone), terms_version: TERMS_VERSION };
+    const meta = { role: 'merchant', first_name: name, terms_version: TERMS_VERSION };
     const { data, error } = await Loader.run(
       sb.auth.signUp({ email, password, options: { data: meta, emailRedirectTo: location.origin + location.pathname, captchaToken } }),
       'Création de votre compte…');
@@ -9488,9 +9466,7 @@
     // Adresse déjà inscrite et confirmée : Supabase répond sans erreur et n'envoie rien (protection de la vie privée).
     // La page fait de même : même écran « code envoyé », avec l'indication pour se connecter (aucune fuite).
     $('su-password').value = '';
-    $('su-password2').value = '';
     renderPasswordRules();
-    renderPasswordMatch();
     const opened = async (session) => {
       const user = await Loader.run(loadUser(session.user), 'Ouverture de votre compte…');
       applySession(user);
@@ -10203,10 +10179,10 @@
     setTimeout(() => { if (ob.classList.contains('is-leaving')) ob.hidden = true; }, 750);
   }
 
-  /** Restaurateur : « Terminer plus tard » → déconnexion, reprise à la prochaine connexion. */
+  /** Restaurateur : « Continuer plus tard » → déconnexion, reprise à la prochaine connexion (le compte est créé). */
   document.querySelectorAll('[data-pro-later]').forEach((btn) => btn.addEventListener('click', async () => {
     await discardDraftPhotos();
-    store.write({ lastRole: 'pro' });
+    store.write({ lastRole: 'pro', proLater: true });
     await sb.auth.signOut().catch(() => {});
     location.reload();
   }));
@@ -10343,11 +10319,12 @@
       proDraft.company = null;
       $('pv-result').hidden = true;
     }
+    // 14 chiffres valides : vérification lancée tout de suite, sans bouton à toucher
+    const digits = onlyDigits(input.value);
+    if (digits.length === 14 && isValidSiret(digits) && !$('pv-check').disabled && !(proDraft.company && proDraft.company.siret === digits)) runSiretCheck();
   });
   $('pv-siret').addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); runSiretCheck(); } });
   $('pv-check').addEventListener('click', () => runSiretCheck());
-  $('pv-test-hint').hidden = !CONFIG.testSiret;
-  $('pv-test').addEventListener('click', () => { $('pv-siret').value = formatSiret(CONFIG.testSiret); runSiretCheck(); });
 
   async function runSiretCheck() {
     const me = currentUser();
@@ -10430,8 +10407,10 @@
     const pro = me.pro || {};
     const errors = [];
     const siret = onlyDigits($('pv-siret').value);
+    // Numéro saisi mais pas encore vérifié : vérification lancée ici, puis on continue si elle réussit
+    if ((!proDraft.company || proDraft.company.siret !== siret) && siret.length === 14 && !$('pv-check').disabled) await runSiretCheck();
     if (!proDraft.company || proDraft.company.siret !== siret) {
-      errors.push('Faites vérifier votre numéro SIRET (bouton « Vérifier »).');
+      errors.push('Indiquez le numéro SIRET de votre établissement.');
       if (!$('err-pv-siret').textContent) setFieldError('pv-siret', 'SIRET non vérifié.');
     }
     // Justificatifs facultatifs à cette étape (inscription faite avec le restaurateur, documents envoyés plus tard)
@@ -10557,7 +10536,7 @@
     const ended = !!(old && old.status === 'canceled');
     $('pp-lead').textContent = ended
       ? 'Votre abonnement est terminé : votre fiche n\'apparaît plus sur la carte. Vos avis, abonnés et statistiques sont conservés. Choisissez une formule pour la remettre en ligne.'
-      : 'Votre établissement est vérifié. L\'abonnement permet d\'apparaître sur la carte de La Roche-sur-Yon. Sans engagement : résiliable en un clic.';
+      : 'Sans engagement, résiliable en un clic.';
     if (ended && !Billing.picked && old.plan && planDef(old.plan) && !planDef(old.plan).quote) { Billing.plan = old.plan; Billing.period = old.period || 'month'; }
     renderPlan();
     loadBilling().then(() => { if (currentStep === 'pro-payment') renderPlan(); });
@@ -10700,6 +10679,8 @@
     $('pl-address').value = listed ? r.address : '';
     $('pl-address-status').textContent = listed ? 'Adresse localisée sur la carte' : '';
     $('pl-use-sirene').hidden = !company.address || !!listed;
+    // Création : l'adresse enregistrée au répertoire Sirene est proposée d'office (modifiable)
+    if (!listed && company.address) $('pl-use-sirene').click();
     const [s1, s2] = listed && r.hours.length ? r.hours : [['11:30', '14:30'], ['18:30', '22:30']];
     $('pl-h1-on').checked = !!s1; if (s1) { $('pl-h1-from').value = s1[0]; $('pl-h1-to').value = s1[1]; }
     $('pl-h2-on').checked = !!s2; if (s2) { $('pl-h2-from').value = s2[0]; $('pl-h2-to').value = s2[1]; }
@@ -13462,6 +13443,10 @@
           setAuthRole(store.read().lastRole || 'client');
           $('li-email').value = store.read().lastEmail || '';
           showAuthStep('login');
+          if (store.read().proLater) {
+            store.write({ proLater: false });
+            setTimeout(() => toast('Votre compte est créé. Connectez-vous quand vous voulez pour reprendre là où vous en étiez.'), 600);
+          }
         } else if (pendingLink || store.read().guest) {
           finishAuth({ fresh: false });
         } else {
