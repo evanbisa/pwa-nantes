@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-rMMshB/7OopQtwlfoTMVk95P4yEwKlCuz5CwFSD4vf0=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-h/j9G5A0fWMIzlnk8Yf8fbECaycI+X8sf7ReMpwN6uo=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1768,6 +1768,23 @@
     .offers-kinds { margin-top: 12px; padding: 0; flex-wrap: wrap; row-gap: 8px; overflow: visible; }
     .offers-open { margin-top: 8px; }
     .offers-list { list-style: none; margin: 8px 0 0; padding: 0; }
+    /* Une offre : titre, restaurant et distance ; photo à droite ; détails repliés derrière la flèche */
+    .offer-row { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 2px; }
+    .offer-row .offer-hit { align-items: center; }
+    .offer-row .offer-details { grid-column: 1 / -1; padding: 0 6px 12px; font-size: 13px; color: var(--muted); }
+    .offer-details p { margin: 0 0 4px; overflow-wrap: anywhere; }
+    .offer-details .offer-use { margin: 6px 0 0; }
+    .offer-photo, .promo-photo { flex: none; width: 56px; height: 56px; border-radius: 10px; object-fit: cover; background: var(--line); }
+    .offer-more { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 18px; color: var(--muted); }
+    .offer-more::before { content: ""; width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform .2s; }
+    .offer-more[aria-expanded="true"]::before { transform: translateY(2px) rotate(-135deg); }
+    .offer-more:hover { background: var(--hover); }
+    .offer-more:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .promo .promo-main { flex: 1; min-width: 0; display: grid; gap: 2px; }
+    .promo .promo-main small { font-size: 12.5px; color: var(--muted); }
+    .promo .promo-more { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+    .pp-photo-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    #pp-photo-preview { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; }
     .offers-list li + li { border-top: 1px solid var(--line); }
     .offer-hit { width: 100%; display: flex; gap: 12px; align-items: flex-start; padding: 12px 4px; text-align: left; border-radius: 12px; }
     .offer-hit:hover { background: var(--hover); }
@@ -1781,7 +1798,7 @@
     .offer-shop .is-soon { color: var(--amber); font-weight: 500; }
     .offer-dist { flex: none; text-align: right; font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; }
     .offer-dist small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
-    .offer-use { display: block; height: 32px; margin: -6px 0 12px 58px; padding: 0 14px; border-radius: 16px; font-size: 13px; font-weight: 600; color: var(--on-accent); background: var(--accent); }
+    .offer-use { display: block; height: 32px; margin: -6px 0 12px 0; padding: 0 14px; border-radius: 16px; font-size: 13px; font-weight: 600; color: var(--on-accent); background: var(--accent); }
     .offers-empty { margin: 22px 6px 6px; text-align: center; font-size: 14px; color: var(--muted); }
 
     /* =====================================================================
@@ -3186,7 +3203,6 @@
           </section>
           <section class="pd-block" id="pd-promos" aria-labelledby="pd-promos-title" hidden>
             <h3 id="pd-promos-title">Mes promotions</h3>
-            <p class="hint">Affichées sur votre fiche, dans « Offres autour de moi » et avec le filtre « Promos ». Vos abonnés sont prévenus.</p>
             <ul class="promo-admin" id="pd-promo-list"></ul>
             <form class="promo-form" id="pd-promo-form" novalidate>
               <div class="kind-pick" id="pp-kind" role="radiogroup" aria-label="Type de promotion"></div>
@@ -3199,6 +3215,16 @@
                 <span>Détails (facultatif)</span>
                 <input id="pp-details" type="text" maxlength="140" placeholder="Ex. : sur présentation de la carte étudiante" />
               </label>
+              <div class="field pp-photo" id="field-pp-photo">
+                <span>Photo (facultatif)</span>
+                <div class="pp-photo-row">
+                  <img id="pp-photo-preview" alt="Photo de l'offre" hidden />
+                  <label class="pill-btn" for="pp-photo-input" id="pp-photo-btn">Ajouter une photo</label>
+                  <button class="link-btn" type="button" id="pp-photo-remove" hidden>Retirer</button>
+                  <input id="pp-photo-input" type="file" accept="image/*" hidden />
+                </div>
+                <small class="field-error" id="err-pp-photo" aria-live="polite"></small>
+              </div>
               <label class="field" id="field-pp-end">
                 <span>Jusqu'au (facultatif)</span>
                 <input id="pp-end" type="date" />
@@ -3827,7 +3853,7 @@
      * 'on' = toujours ; 'off' = jamais. Pour une démonstration (démarchage) : ajouter ?demo=1 à l'adresse
      * (restaurants d'exemple ET fiches de test visibles) ; ?demo=0 les masque.
      */
-    demoShops: 'auto',
+    demoShops: 'off',
     demoUntil: 3,
     /**
      * Fiches de test montrées à TOUT le monde comme exemple (démarchage des restaurateurs) : identifiants de fiches.
@@ -4269,7 +4295,8 @@
     imagePath: st.image_path, imageUrl: st.image_path ? publicUrl('stories', st.image_path) : null,
     createdAt: st.created_at, expiresAt: st.expires_at,
   });
-  const promoFromRow = (pr) => ({ id: pr.id, kind: pr.kind, title: pr.title || '', details: pr.details || '', createdAt: pr.created_at, endsAt: pr.ends_at, locked: !!pr.locked });
+  const promoFromRow = (pr) => ({ id: pr.id, kind: pr.kind, title: pr.title || '', details: pr.details || '', createdAt: pr.created_at, endsAt: pr.ends_at, locked: !!pr.locked,
+    photoPath: pr.photo_path || null, photoUrl: pr.photo_path ? publicUrl('photos', pr.photo_path) : null });
   function restaurantFromRow(m, promos = [], stories = [], rating = null) {
     const hours = m.opening_hours || {};
     return {
@@ -6952,7 +6979,7 @@
         : 'Activez la localisation pour voir les offres les plus proches de vous en premier.';
       $('offers-locate').hidden = geoState === 'searching' || geoState === 'unavailable';
       $('offers-sub').textContent = all.length
-        ? plural(items.length, 'offre', 'offres') + (located ? ' · les plus proches d\'abord' : ' · depuis le centre-ville')
+        ? plural(items.length, 'offre', 'offres')
         : 'Aucune offre en cours';
       document.querySelectorAll('#offers-kinds .chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.kind === kind)));
       const ul = $('offers-list');
@@ -6961,22 +6988,19 @@
       const visible = items.filter(({ p, m }) => Guest.canSee(p, m.shop)), locked = items.filter(({ p, m }) => !Guest.canSee(p, m.shop));
       visible.forEach(({ p, m, d }) => {
         const li = document.createElement('li');
+        li.className = 'offer-row';
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'offer-hit';
         b.dataset.id = m.shop.id;
-        b.innerHTML = '<span class="offer-ico" aria-hidden="true"></span><span class="offer-body"><b></b><small></small><span class="offer-shop"></span></span><span class="offer-dist"></span>';
-        b.querySelector('.offer-ico').textContent = PROMO_KINDS[p.kind].icon;
+        b.innerHTML = '<span class="offer-body"><b></b><span class="offer-shop"></span></span>';
         b.querySelector('b').textContent = p.title;
-        const small = b.querySelector('small');
-        const until = promoUntil(p);
-        small.textContent = [PROMO_KINDS[p.kind].label, p.details, until].filter(Boolean).join(' · ');
-        b.querySelector('.offer-shop').append(catOf(m.shop).emoji + ' ' + m.shop.name + ' · ', statusTag(m.status));
+        b.querySelector('.offer-shop').textContent = m.shop.name + (located ? ' · ' + formatDistance(d) : '');
         if (m.shop.isDemo || isShowcase(m.shop)) b.querySelector('.offer-shop').append(' ', demoTag());
-        const dist = b.querySelector('.offer-dist');
-        if (located) {
-          dist.append(formatDistance(d));
-          const w = document.createElement('small'); w.textContent = formatMinutes(walkMinutes(d)) + ' à pied'; dist.appendChild(w);
+        if (p.photoUrl) {
+          const img = document.createElement('img');
+          img.className = 'offer-photo'; img.src = p.photoUrl; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
+          b.appendChild(img);
         }
         b.addEventListener('click', () => {
           closePanel($('offers-sheet'));
@@ -6984,6 +7008,22 @@
           whenMapReady(() => openShop(m.shop.id, { source: 'offers' }));
         });
         li.appendChild(b);
+        // Détails (type, conditions, fin, ouverture, temps à pied) : repliés, derrière la petite flèche
+        const more = document.createElement('button');
+        more.type = 'button';
+        more.className = 'offer-more';
+        more.setAttribute('aria-expanded', 'false');
+        more.setAttribute('aria-label', 'Détails de l\'offre « ' + p.title + ' »');
+        const box = document.createElement('div');
+        box.className = 'offer-details';
+        box.hidden = true;
+        const line = document.createElement('p');
+        line.append([PROMO_KINDS[p.kind].label, p.details, promoUntil(p)].filter(Boolean).join(' · '));
+        box.appendChild(line);
+        const st = document.createElement('p');
+        st.append(statusTag(m.status));
+        if (located) st.append(' · ' + formatMinutes(walkMinutes(d)) + ' à pied');
+        box.appendChild(st);
         // Comptes clients : « En profiter » ouvre directement le QR code de l'offre (la fiche s'ouvre derrière)
         if (UUID_RE.test(p.id) && VisitPass.canUse(m.shop) && VisitFeature.check()) {
           const use = document.createElement('button');
@@ -6996,8 +7036,14 @@
             Stats.track(m.shop.id, 'offer', { ref: p.id });
             whenMapReady(() => { openShop(m.shop.id, { source: 'offers' }); VisitPass.open(m.shop.id, p); });
           });
-          li.appendChild(use);
+          box.appendChild(use);
         }
+        more.addEventListener('click', () => {
+          const openNow = box.hidden;
+          box.hidden = !openNow;
+          more.setAttribute('aria-expanded', String(openNow));
+        });
+        li.append(more, box);
         ul.appendChild(li);
       });
       if (locked.length) ul.appendChild(Guest.lockedBlock(locked.length, locked.map(({ p }) => p.kind), { others: visible.length > 0 }));
@@ -8035,13 +8081,29 @@
     promos.filter((p) => Guest.canSee(p, shop)).forEach((p) => {
       const card = document.createElement('div');
       card.className = 'promo is-' + p.kind;
-      card.innerHTML = '<span class="promo-ico" aria-hidden="true"></span><div><small></small><strong></strong><span class="promo-more"></span></div>';
-      card.querySelector('.promo-ico').textContent = PROMO_KINDS[p.kind].icon;
-      const until = promoUntil(p);
-      card.querySelector('small').textContent = PROMO_KINDS[p.kind].label + (until ? ' · ' + until : '');
+      card.innerHTML = '<div class="promo-main"><strong></strong><small></small></div>';
       card.querySelector('strong').textContent = p.title;
-      const more = card.querySelector('.promo-more');
-      if (p.details) more.textContent = p.details; else more.remove();
+      const until = promoUntil(p);
+      card.querySelector('small').textContent = until || PROMO_KINDS[p.kind].label;
+      if (p.photoUrl) {
+        const img = document.createElement('img');
+        img.className = 'promo-photo'; img.src = p.photoUrl; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
+        card.appendChild(img);
+      }
+      if (p.details) {
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'offer-more';
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', 'Conditions de l\'offre « ' + p.title + ' »');
+        const more = document.createElement('p');
+        more.className = 'promo-more';
+        more.textContent = p.details;
+        more.hidden = true;
+        toggle.addEventListener('click', () => { more.hidden = !more.hidden; toggle.setAttribute('aria-expanded', String(!more.hidden)); });
+        card.querySelector('.promo-main').appendChild(more);
+        card.appendChild(toggle);
+      }
       // Comptes clients : « Utiliser » affiche le QR code de visite avec cette offre (validé par le restaurateur)
       if (UUID_RE.test(p.id) && VisitPass.canUse(shop) && VisitFeature.check()) {
         const use = document.createElement('button');
@@ -8488,6 +8550,7 @@
       li.querySelector('button').addEventListener('click', async () => {
         const { error } = await sb.from('promotions').delete().eq('id', p.id);
         if (error) { toast(cloudError(error)); return; }
+        if (p.photoPath) removeFiles('photos', [p.photoPath]);
         await refreshCloud();
         renderPromoAdmin(currentUser());
         toast('Promotion retirée.');
@@ -8498,6 +8561,34 @@
     $('pp-submit').disabled = full;
     $('pp-submit').textContent = full ? MAX_PROMOS + ' promotions au maximum' : 'Publier la promotion';
   }
+  /* Photo d'une offre : recadrée en carré comme celles de la fiche, envoyée à la publication */
+  let promoPhoto = null, promoPhotoUrl = null;
+  function setPromoPhoto(blob) {
+    if (promoPhotoUrl) URL.revokeObjectURL(promoPhotoUrl);
+    promoPhoto = blob; promoPhotoUrl = blob ? URL.createObjectURL(blob) : null;
+    $('pp-photo-preview').hidden = !blob;
+    if (blob) $('pp-photo-preview').src = promoPhotoUrl; else $('pp-photo-preview').removeAttribute('src');
+    $('pp-photo-remove').hidden = !blob;
+    $('pp-photo-btn').textContent = blob ? 'Changer' : 'Ajouter une photo';
+  }
+  $('pp-photo-remove').addEventListener('click', () => setPromoPhoto(null));
+  $('pp-photo-input').addEventListener('change', async (ev) => {
+    const file = ev.target.files[0];
+    ev.target.value = '';
+    setFieldError('pp-photo', '');
+    if (!file) return;
+    if (!/^image\//.test(file.type)) { setFieldError('pp-photo', 'Choisissez une image (JPG ou PNG).'); return; }
+    let bitmap;
+    try {
+      bitmap = await decodeImage(file);
+      const crop = isPhotoRatio(bitmap.width, bitmap.height) ? fullCrop(bitmap.width, bitmap.height) : await cropPhoto(bitmap, { index: 1, total: 1 });
+      if (crop) setPromoPhoto(await exportCrop(bitmap, crop));
+    } catch (e) {
+      setFieldError('pp-photo', 'Format d\'image non pris en charge (utilisez JPG ou PNG).');
+    } finally {
+      if (bitmap && bitmap.close) bitmap.close();
+    }
+  });
   $('pd-promo-form').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const r = myRestaurant();
@@ -8513,12 +8604,20 @@
     // Fin des promos du jour et de la semaine : fixée par la base (heure de Paris)
     const row = { merchant_id: r.id, kind: promoKind, title, details: details || null, ends_at: endsAt ? endsAt.toISOString() : null };
     $('pp-submit').disabled = true;
+    if (promoPhoto) {
+      const path = r.id + '/promo-' + uid().replace(/[^A-Za-z0-9_-]/g, '') + '.' + photoExt(promoPhoto);
+      const up = await Loader.run(sb.storage.from('photos').upload(path, promoPhoto, { contentType: promoPhoto.type, cacheControl: '31536000' }), 'Envoi de la photo…');
+      if (up.error) { $('pp-submit').disabled = false; setFieldError('pp-photo', 'La photo n\'a pas pu être envoyée. ' + cloudError(up.error)); return; }
+      row.photo_path = path;
+    }
     const { error } = await Loader.run(sb.from('promotions').insert(row), 'Publication de la promotion…');
     $('pp-submit').disabled = false;
+    if (error && row.photo_path) removeFiles('photos', [row.photo_path]);
     if (error) { setFieldError('pp-title', /Six promotions/.test(error.message || '') ? MAX_PROMOS + ' promotions en cours au maximum.' : cloudError(error)); return; }
     Push.send(r.id);
     await refreshCloud();
     $('pp-title').value = ''; $('pp-details').value = ''; $('pp-end').value = ''; $('pp-title-count').textContent = '0 / 60';
+    setPromoPhoto(null);
     renderPromoAdmin(currentUser());
     toast('Promotion publiée : elle apparaît sur votre fiche et vos abonnés sont prévenus.');
   });
