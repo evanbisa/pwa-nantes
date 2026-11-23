@@ -44,7 +44,7 @@ export const cgv: LegalDoc = {
         `La formule **${premium.name}** comprend tout le contenu de la formule ${essentiel.name}, et en plus :`,
         {
           list: [
-            "la publication de stories (24 heures), mises en avant en haut de la carte ;",
+            "la publication de stories (de 1 heure à 1 semaine, au choix), mises en avant en haut de la carte ;",
             "la mise en avant d'une promotion sous forme de bannière, une fois par semaine ;",
             "les données analytiques de la fiche, en totaux anonymes (visites, heures de pointe, provenance, interactions, public).",
           ],

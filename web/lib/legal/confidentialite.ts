@@ -169,7 +169,7 @@ export const confidentialite: LegalDoc = {
             { title: "Notifications", detail: "60 jours au maximum." },
             { title: "Statistiques liées à une personne", detail: "90 jours au maximum (fiche consultée, provenance, action, story vue, offre ouverte)." },
             { title: "Totaux quotidiens des restaurants", detail: "6 mois ; ils ne contiennent aucune donnée personnelle." },
-            { title: "Stories", detail: "Publiques 24 heures, puis visibles par leur seul restaurateur ; supprimées avec leur photo 30 jours après leur fin." },
+            { title: "Stories", detail: "Publiques pendant la durée choisie par le restaurateur (1 heure à 1 semaine), puis visibles par leur seul restaurateur ; supprimées avec leur photo 30 jours après leur fin." },
             { title: "Fréquentation du site (identifiant d'appareil tiré au hasard)", detail: "13 mois." },
             { title: "Rapports de bugs (sans identifiant)", detail: "90 jours." },
             { title: "Décisions de modération des avis (avis supprimé ou gardé, par qui)", detail: "13 mois." },
