@@ -246,8 +246,14 @@ select t.ok(t.affected($$update merchants set accepts_meal_vouchers = true where
 select t.ok(t.affected($$update merchants set accepts_meal_vouchers = true where id = 'aaaaaaaa-0000-0000-0000-000000000002'$$) = 0, 'titres-restaurant : la fiche d''un autre est intouchable');
 select t.ok(t.affected($$insert into stories (merchant_id, background, caption) values ('aaaaaaaa-0000-0000-0000-000000000001', 'ocean', 'Nouveau burger au chèvre ce soir !')$$) = 1, 'restaurateur : publie une story texte');
 select t.ok(t.affected($$insert into stories (merchant_id, image_path, caption) values ('aaaaaaaa-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000001/salle.jpg', 'Notre salle')$$) = 1, 'restaurateur : publie une story photo (dans le dossier de sa fiche)');
-select t.ok((select bool_and(expires_at = created_at + interval '24 hours') from stories), 'story : expire automatiquement au bout de 24 h');
-select t.fails($$insert into stories (merchant_id, background, caption, expires_at) values ('aaaaaaaa-0000-0000-0000-000000000001', 'ocean', 'Éternelle', now() + interval '1 year')$$, 'story : durée de vie non modifiable');
+select t.ok((select bool_and(expires_at = created_at + interval '24 hours') from stories), 'story : 24 h par défaut');
+insert into stories (merchant_id, background, caption, expires_at) values ('aaaaaaaa-0000-0000-0000-000000000001', 'ocean', 'Toute la semaine', now() + interval '72 hours');
+select t.ok((select expires_at = created_at + interval '72 hours' from stories where caption = 'Toute la semaine'), 'story : durée choisie (72 h)');
+insert into stories (merchant_id, background, caption, expires_at) values ('aaaaaaaa-0000-0000-0000-000000000001', 'ocean', 'Éternelle', now() + interval '1 year');
+select t.ok((select expires_at = created_at + interval '7 days' from stories where caption = 'Éternelle'), 'story : durée ramenée à 1 semaine au maximum');
+insert into stories (merchant_id, background, caption, expires_at) values ('aaaaaaaa-0000-0000-0000-000000000001', 'ocean', 'Déjà finie', now() - interval '1 day');
+select t.ok((select expires_at = created_at + interval '1 hour' from stories where caption = 'Déjà finie'), 'story : fin dans le passé ramenée à 1 heure');
+delete from stories where caption in ('Toute la semaine', 'Éternelle', 'Déjà finie');
 select t.fails($$insert into stories (merchant_id, image_path) values ('aaaaaaaa-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000002/vol.jpg')$$, 'story : photo prise dans le dossier d''un autre refusée');
 select t.fails($$insert into stories (merchant_id, image_path) values ('aaaaaaaa-0000-0000-0000-000000000001', '../../etc/passwd')$$, 'story : chemin de fichier invalide refusé');
 select t.fails($$insert into stories (merchant_id, background) values ('aaaaaaaa-0000-0000-0000-000000000001', 'ocean')$$, 'story texte sans message refusée');
