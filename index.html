@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-JW07e7OtugyaZRtnYMQ0dGf/Px87SXC5pJtOsAMLjQk=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-ik7cCW/X2b3zs3LKcjoGTw5ZC/xsTMSGtOUB/CybMvU=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -3494,7 +3494,7 @@
           <input id="ec-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="––––––––" aria-describedby="ec-lead" />
           <small class="field-error" id="err-ec-code" aria-live="polite"></small>
         </label>
-        <p class="hint" id="ec-exists" hidden>Vous avez déjà un compte avec cette adresse ? Aucun code n'est envoyé dans ce cas : <button class="link-btn" type="button" id="ec-to-login">connectez-vous</button> (ou utilisez « Mot de passe oublié »).</p>
+        <p class="hint" id="ec-exists" hidden>Vous avez déjà un compte avec cette adresse ? Le code reçu vous connecte directement, ou <button class="link-btn" type="button" id="ec-to-login">connectez-vous avec votre mot de passe</button>.</p>
         <p class="form-error" id="err-email-code" role="alert"></p>
         <button class="btn btn-primary" type="submit" id="ec-submit">Valider le code</button>
         <p class="ob-switch">Pas reçu ? <button class="link-btn" type="button" id="ec-resend">Renvoyer le code</button></p>
@@ -9302,7 +9302,9 @@
     $('err-email-code').textContent = '';
     const captchaToken = await Captcha.token().catch(() => null);
     const { error } = captchaToken === null ? { error: { code: 'captcha_failed' } }
-      : await sb.auth.resend({ type: 'signup', email: check.email, options: { emailRedirectTo: location.origin + location.pathname, captchaToken } });
+      // Code de connexion : Supabase envoie la confirmation à une adresse pas encore confirmée, et un code de connexion
+      // à une adresse déjà inscrite ; un e-mail part dans les deux cas, et cet écran accepte les deux codes.
+      : await sb.auth.signInWithOtp({ email: check.email, options: { shouldCreateUser: false, emailRedirectTo: location.origin + location.pathname, captchaToken } });
     if (check !== emailCheck) return;
     // Seules les erreurs utiles sont montrées (réseau, trop de demandes, envoi impossible, anti-robots) : une réponse
     // du type « adresse déjà confirmée » trahirait l'existence d'un compte, elle est traitée comme un envoi normal.
@@ -9312,7 +9314,7 @@
       btn.textContent = 'Renvoyer le code';
       return;
     }
-    if (!silent) toast('Si cette adresse attend sa confirmation, un nouveau code y a été envoyé.');
+    if (!silent) toast('Un nouveau code vient d\'être envoyé.');
     startResendCooldown(RESEND_DELAY);
   }
 
@@ -9463,10 +9465,17 @@
     const opened = async (session) => {
       const user = await Loader.run(loadUser(session.user), 'Ouverture de votre compte…');
       applySession(user);
-      showAuthStep('pro-verify');
+      setAuthRole(user.role);
+      // Adresse déjà inscrite : le code reçu ouvre le compte existant, là où il en était
+      if (user.role !== 'pro') { finishAuth({ fresh: false }); toast('Cette adresse est celle d\'un compte client : vous y êtes connecté.'); return; }
+      const step = proStepFor(user);
+      if (step) showAuthStep(step); else finishAuth({ fresh: false });
     };
     if (data.session) { await opened(data.session); return; }   // confirmation de l'e-mail désactivée
-    startEmailVerification({ email, back: 'signup', onSuccess: opened, fromSignup: true });
+    // Adresse déjà inscrite (Supabase répond sans erreur et n'envoie rien) : un code de connexion part à la place,
+    // accepté par le même écran. Même affichage dans les deux cas : rien ne révèle qu'un compte existe.
+    const existing = !!(data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0);
+    startEmailVerification({ email, back: 'signup', onSuccess: opened, fromSignup: true, sent: !existing });
   });
   /* ---------- Inscription d'un client : accueil (la suite dans l'application), questions sexe et âge seules ---------- */
   /* ---------- Inscription d'un client : e-mail et mot de passe, puis une question par écran (prénom, sexe, âge) ---------- */
