@@ -738,9 +738,7 @@
       border: 1px solid var(--accent-line); overflow: hidden; }
     .radar::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, var(--accent-line), transparent 25%); animation: spin 2.6s linear infinite; }
     .radar::after { content: ""; position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: var(--blue); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, .35); }
-    .perks { margin: 16px 0 4px; padding: 0; list-style: none; display: grid; gap: 10px; }
-    .perks li { display: flex; gap: 12px; align-items: center; font-size: 14px; color: var(--muted); }
-    .perks li span { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--accent-soft); font-size: 16px; }
+    #ob-location h2 { margin-bottom: 22px; }
 
     /* ---------- Code de vérification e-mail ---------- */
     .mail-badge { display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%; font-size: 30px; background: var(--accent-soft); }
@@ -3338,11 +3336,10 @@
         <section class="jn-screen" data-q="hello" aria-labelledby="jn-title">
           <div class="jn-hero" aria-hidden="true"><span>🍔</span><span>🌯</span><span>🍕</span><span>🧁</span><span>🚚</span><span>🍟</span></div>
           <h1 id="jn-title">Les restaurants de <span class="nw">La Roche-sur-Yon</span>, <em>à deux pas</em></h1>
-          <p class="lead">Promos du jour, stories des food-trucks, avis des étudiants… Votre compte est prêt en une minute.</p>
           <ul class="jn-perks" aria-label="Avec FlashMiam">
             <li>Les bons plans autour de vous</li>
-            <li>Prévenu des promos de vos restos préférés</li>
-            <li>Les vrais avis, sans pub</li>
+            <li>Les promos de vos restos préférés</li>
+            <li>Compte prêt en 1 minute</li>
           </ul>
           <button class="btn btn-primary jn-go" type="button" id="jn-start">C'est parti</button>
           <p class="ob-switch">Déjà un compte ? <button class="link-btn" type="button" data-goto="login">Se connecter</button></p>
@@ -3551,11 +3548,6 @@
         <p class="ob-welcome" id="ob-welcome" role="status" hidden></p>
         <div class="radar" aria-hidden="true"></div>
         <h2 id="ob-loc-title">Activez votre <em>localisation</em></h2>
-        <ul class="perks">
-          <li>Voir les commerces les plus proches de vous</li>
-          <li>Connaître la distance et le temps de marche</li>
-          <li>Votre position n'est jamais partagée</li>
-        </ul>
         <button class="btn btn-primary" type="button" id="ob-allow">Autoriser la localisation</button>
         <button class="link-btn ob-address-toggle" type="button" id="ob-address-toggle" aria-expanded="false" aria-controls="ob-address">Ou tapez une adresse à la place</button>
         <div class="field ob-address" id="ob-address" hidden>
@@ -3564,7 +3556,7 @@
             <input id="ob-address-input" type="text" autocomplete="off" placeholder="Ex. : 12 place Napoléon" role="combobox" aria-autocomplete="list" aria-controls="ob-address-list" aria-expanded="false" />
             <ul class="addr-list" id="ob-address-list" role="listbox" hidden></ul>
           </div>
-          <small class="addr-status" id="ob-address-status">Elle sert seulement à calculer les distances sur cet appareil : elle n'est jamais enregistrée.</small>
+          <small class="addr-status" id="ob-address-status">Jamais enregistrée.</small>
         </div>
         <button class="btn btn-ghost" type="button" id="ob-later">Plus tard</button>
       </section>
