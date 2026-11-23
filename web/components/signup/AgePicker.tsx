@@ -5,52 +5,52 @@ import { Minus, Plus } from "lucide-react";
 import { AGE_MAX, AGE_MIN } from "@/lib/signup/validation";
 
 /**
- * Choix de l'âge : grand compteur, boutons − / + et curseur, comme sur la carte (index.html).
- * Curseur : on glisse le doigt n'importe où sur la barre, sans saut au premier contact. La vitesse du geste règle la
- * précision : lentement, une année tous les 18 px (facile de viser son âge exact) ; plus vite, tous les 9 puis 4 px.
- * Simple toucher : une année vers le côté touché. − et + : un appui = une année, appui maintenu = défilement accéléré.
+ * Choix de l'âge : grand compteur, boutons − / + et curseur.
+ * Curseur : le pouce suit le doigt (ou se place là où l'on touche). Échelle non linéaire, pensée pour un public jeune :
+ * les deux premiers tiers de la barre couvrent 13 à 40 ans (une année tous les 8-9 px environ sur téléphone), le dernier
+ * tiers 40 à 99 ans. − et + : un appui = une année, appui maintenu = défilement accéléré.
  */
 const clamp = (v: number) => Math.max(AGE_MIN, Math.min(AGE_MAX, Math.round(v)));
-
-type Drag = { id: number; x: number; t: number; x0: number; t0: number; acc: number; moved: boolean };
+const PIVOT_AGE = 40, PIVOT_POS = 2 / 3;
+/** Position sur la barre (0 à 1) → âge. */
+const ageAt = (p: number) => {
+  const x = Math.max(0, Math.min(1, p));
+  return clamp(x <= PIVOT_POS
+    ? AGE_MIN + (x / PIVOT_POS) * (PIVOT_AGE - AGE_MIN)
+    : PIVOT_AGE + ((x - PIVOT_POS) / (1 - PIVOT_POS)) * (AGE_MAX - PIVOT_AGE));
+};
+/** Âge → position sur la barre (0 à 1). */
+const posOf = (age: number) => age <= PIVOT_AGE
+  ? ((age - AGE_MIN) / (PIVOT_AGE - AGE_MIN)) * PIVOT_POS
+  : PIVOT_POS + ((age - PIVOT_AGE) / (AGE_MAX - PIVOT_AGE)) * (1 - PIVOT_POS);
 
 export default function AgePicker({ value, onChange, labelledBy, onEnter }: {
   value: number; onChange: (age: number) => void; labelledBy: string; onEnter: () => void;
 }) {
   const current = useRef(value);
-  const drag = useRef<Drag | null>(null);
+  const dragging = useRef<number | null>(null);
   const bar = useRef<HTMLDivElement>(null);
   useEffect(() => { current.current = value; }, [value]);
   const set = (v: number) => { const next = clamp(v); if (next !== current.current) { current.current = next; onChange(next); } };
-  const pct = ((value - AGE_MIN) / (AGE_MAX - AGE_MIN)) * 100;
+  const pct = posOf(value) * 100;
+  /** Âge sous le doigt (la barre a une marge de la moitié du pouce de chaque côté). */
+  const follow = (clientX: number) => {
+    const r = bar.current?.getBoundingClientRect();
+    if (r && r.width > 0) set(ageAt((clientX - r.left) / r.width));
+  };
 
   function down(ev: PointerEvent<HTMLDivElement>) {
     if (ev.button !== 0) return;
-    drag.current = { id: ev.pointerId, x: ev.clientX, t: ev.timeStamp, x0: ev.clientX, t0: ev.timeStamp, acc: 0, moved: false };
+    dragging.current = ev.pointerId;
     ev.currentTarget.setPointerCapture(ev.pointerId);
     ev.currentTarget.focus({ preventScroll: true });
+    follow(ev.clientX);
   }
   function move(ev: PointerEvent<HTMLDivElement>) {
-    const d = drag.current;
-    if (!d || ev.pointerId !== d.id) return;
-    const dx = ev.clientX - d.x, dt = Math.max(1, ev.timeStamp - d.t);
-    if (!d.moved && Math.abs(ev.clientX - d.x0) < 4) return;
-    d.moved = true;
-    const speed = Math.abs(dx) / dt;                         // pixels par milliseconde
-    d.acc += dx / (speed < 0.35 ? 18 : speed < 1 ? 9 : 4);
-    d.x = ev.clientX; d.t = ev.timeStamp;
-    const years = d.acc > 0 ? Math.floor(d.acc + 1e-6) : Math.ceil(d.acc - 1e-6);   // (54 / 18 = 2,9999… sans la marge)
-    if (years) { d.acc -= years; set(current.current + years); }
+    if (dragging.current === ev.pointerId) follow(ev.clientX);
   }
   function up(ev: PointerEvent<HTMLDivElement>) {
-    const d = drag.current;
-    if (!d || ev.pointerId !== d.id) return;
-    if (!d.moved && ev.type === "pointerup" && ev.timeStamp - d.t0 < 400 && bar.current) {
-      const r = bar.current.getBoundingClientRect();
-      const thumbX = r.left + r.width * ((current.current - AGE_MIN) / (AGE_MAX - AGE_MIN));
-      if (Math.abs(ev.clientX - thumbX) > 16) set(current.current + (ev.clientX > thumbX ? 1 : -1));
-    }
-    drag.current = null;
+    if (dragging.current === ev.pointerId) dragging.current = null;
   }
   function key(ev: KeyboardEvent<HTMLDivElement>) {
     const step = ({ ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 5, PageDown: -5 } as Record<string, number>)[ev.key];
@@ -73,7 +73,7 @@ export default function AgePicker({ value, onChange, labelledBy, onEnter }: {
         id="su-age" ref={bar} role="slider" tabIndex={0} aria-labelledby={labelledBy}
         aria-valuemin={AGE_MIN} aria-valuemax={AGE_MAX} aria-valuenow={value} aria-valuetext={`${value} ans`}
         onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onKeyDown={key}
-        className="group relative mt-8 h-11 cursor-grab touch-none select-none rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-4 active:cursor-grabbing dark:ring-offset-night dark:focus-visible:ring-brand-night"
+        className="group relative mx-4 mt-8 h-12 cursor-grab touch-none select-none rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-4 active:cursor-grabbing dark:ring-offset-night dark:focus-visible:ring-brand-night"
       >
         <span aria-hidden className="absolute inset-x-0 top-1/2 h-2 -translate-y-1/2 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
           <span className="su-gradient block h-full bg-brand" style={{ width: `${pct}%` }} />
@@ -84,7 +84,6 @@ export default function AgePicker({ value, onChange, labelledBy, onEnter }: {
           style={{ left: `${pct}%` }}
         />
       </div>
-      <p aria-hidden className="mt-2 text-center text-xs text-slate-500 dark:text-zinc-400">Glissez doucement pour ajuster année par année</p>
     </>
   );
 }

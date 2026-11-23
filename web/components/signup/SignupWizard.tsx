@@ -15,8 +15,8 @@ import {
 
 /**
  * Inscription d'un client, une question par écran : prénom, sexe (facultatif) et âge (15 ans au moins), e-mail (ou Google), relecture de
- * l'adresse, mot de passe. « S'inscrire avec Google » est aussi proposé dès le premier écran : le compte est créé par
- * Google, puis seules les questions du sexe et de l'âge restent. Le compte est créé par la fonction serveur client-signup (adresse vérifiée, plafond
+ * l'adresse, mot de passe. « S'inscrire avec Google » est proposé à l'écran de l'e-mail seulement : le compte est créé
+ * par Google, avec le prénom, le sexe et l'âge déjà répondus. Le compte est créé par la fonction serveur client-signup (adresse vérifiée, plafond
  * anti-robots), puis la session est ouverte avec le mot de passe choisi, dans le stockage de la carte : la personne
  * arrive ensuite sur la carte déjà connectée (?bienvenue=1 : accueil et localisation).
  * Si la confirmation par e-mail est activée (réglage du serveur), un code à 6 chiffres est envoyé à l'adresse : la
@@ -36,8 +36,6 @@ const RESEND_DELAY = 60;
 const FLOW: Step[] = ["name", "gender", "age", "email", "confirm", "password"];
 /** Questions comptées dans la barre de progression (la relecture fait partie de la question de l'e-mail). */
 const QUESTIONS: Step[] = ["name", "gender", "age", "email", "password"];
-/** Compte créé avec Google dès le premier écran : il ne reste que le sexe et l'âge. */
-const GOOGLE_FLOW: Step[] = ["name", "gender", "age"];
 const GENDERS: { value: Gender; label: string }[] = [
   { value: "female", label: "Une femme" },
   { value: "male", label: "Un homme" },
@@ -114,8 +112,8 @@ function Wizard() {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRememberChoice] = useState(isPersonalDevice);
   const [busy, setBusy] = useState(false);
-  const [viaGoogle, setViaGoogle] = useState(false);
   const [terms, setTerms] = useState(false);   // « J'accepte les conditions d'utilisation »
+  const [termsError, setTermsError] = useState(false);   // case pas cochée : la case est encadrée en rouge
   const [code, setCode] = useState("");
   const [resendIn, setResendIn] = useState(0);   // secondes avant de pouvoir redemander un code
   const [errors, setErrors] = useState<Partial<Record<Step, ReactNode>>>({});
@@ -132,8 +130,8 @@ function Wizard() {
   const cleanEmail = email.trim().toLowerCase();
   const emailValid = EMAIL_RE.test(cleanEmail);
   const score = passwordScore(password);
-  const flow = viaGoogle ? GOOGLE_FLOW : FLOW;
-  const questions = viaGoogle ? GOOGLE_FLOW : QUESTIONS;
+  const flow = FLOW;
+  const questions = QUESTIONS;
   const question = questions.indexOf(step === "confirm" ? "email" : step === "code" ? "password" : step) + 1;
 
   // Arrivée sur un écran : focus sur sa réponse (sans faire défiler pendant le glissement)
@@ -176,11 +174,11 @@ function Wizard() {
   const back = () => {
     const i = flow.indexOf(step);
     if (i > 0) go(flow[i - 1], "prev");
-    else if (i === 0 && !viaGoogle) openMap();
+    else if (i === 0) openMap();
   };
   const atStart = flow.indexOf(step) === 0;
-  /** Compte pas encore créé : « J'ai déjà un compte » reste proposé (pas après Google, ni pendant le code e-mail). */
-  const canSwitchToLogin = !viaGoogle && step !== "code" && step !== "done";
+  /** Compte pas encore créé : « J'ai déjà un compte » reste proposé (pas pendant le code e-mail). */
+  const canSwitchToLogin = step !== "code" && step !== "done";
 
   /* ---------- Réponses ---------- */
   function submitName(ev: FormEvent) {
@@ -192,10 +190,13 @@ function Wizard() {
     setError("name", null);
     go("gender");
   }
-  /** Case des conditions pas cochée : on le dit et on l'amène sous les yeux. */
+  /** Case des conditions pas cochée : la case est encadrée en rouge, le message est dessous, et on l'amène sous les yeux. */
   function termsMissing() {
-    setError("name", TERMS_MISSING);
-    document.getElementById("su-terms")?.focus();
+    setError("name", null);
+    setTermsError(true);
+    const box = document.getElementById("su-terms");
+    box?.focus({ preventScroll: true });
+    box?.scrollIntoView({ block: "center", behavior: "smooth" });
   }
   function pickGender(value: Gender) {
     setGender(value);
@@ -206,13 +207,12 @@ function Wizard() {
     ev.preventDefault();
     answerAge();
   }
-  /** Âge donné (obligatoire, 15 ans au moins) : question suivante, ou fin de l'inscription avec Google. */
+  /** Âge donné (obligatoire, 15 ans au moins) : question suivante. */
   function answerAge() {
     if (age < MIN_AGE) return setError("age", TOO_YOUNG);
     setError("age", null);
     setAgeSet(true);
-    if (viaGoogle) { askInstall(); finishGoogle(true); }
-    else go("email");
+    go("email");
   }
   async function submitEmail(ev: FormEvent) {
     ev.preventDefault();
@@ -265,7 +265,7 @@ function Wizard() {
       }
       if (res.code === "email_domain" || res.code === "email_invalid") { go("email", "prev"); return setError("email", res.message); }
       if (res.code === "invalid_age") { go("age", "prev"); return setError("age", TOO_YOUNG); }
-      if (res.code === "terms") { setTerms(false); go("name", "prev"); return setError("name", TERMS_MISSING); }
+      if (res.code === "terms") { setTerms(false); go("name", "prev"); return termsMissing(); }
       if (res.code === "invalid_name") { go("name", "prev"); return setError("name", res.message); }
       return setError("password", res.message);
     }
@@ -328,7 +328,7 @@ function Wizard() {
    * neuf : le prénom, le sexe et l'âge déjà répondus sont enregistrés. Un compte restaurateur ne passe pas par Google.
    */
   async function googleSignIn(credential: string, nonce?: string) {
-    const at: Step = step === "name" ? "name" : "email";   // écran où le bouton a été touché
+    const at: Step = "email";   // le bouton n'est proposé qu'à l'écran de l'e-mail
     setBusy(true);
     setError(at, null);
     const sb = siteClient();
@@ -345,14 +345,6 @@ function Wizard() {
     const fresh = !!profile && isFresh(profile.created_at);
     // Compte créé à l'instant par Google : l'acceptation des conditions (case cochée) est enregistrée sur le compte
     if (fresh) await sb.rpc("accept_terms", { p_version: TERMS_VERSION });
-    if (fresh && at === "name") {
-      // Compte créé par Google : prénom tapé, sinon celui de Google ; puis le sexe et l'âge
-      setName(name.trim().length >= 2 ? capitalize(name.trim().replace(/\s+/g, " ")) : profile.first_name ?? "");
-      setError("name", null);
-      setViaGoogle(true);
-      setBusy(false);
-      return go("gender");
-    }
     if (fresh) {
       await sb.from("profiles").update({
         first_name: name.trim() || undefined,
@@ -363,21 +355,6 @@ function Wizard() {
     setBusy(false);
     if (fresh) go("done");
     else openMap();   // compte déjà existant : directement la carte
-  }
-  /** Fin de l'inscription avec Google : prénom, sexe et âge enregistrés sur le compte (sexe facultatif). */
-  async function finishGoogle(withAge: boolean) {
-    setBusy(true);
-    const sb = siteClient();
-    const { data } = await sb.auth.getUser();
-    if (data.user) {
-      await sb.from("profiles").update({
-        first_name: name.trim() || undefined,
-        gender: gender || null,
-        birth_year: withAge ? new Date().getFullYear() - age : null,
-      }).eq("id", data.user.id);
-    }
-    setBusy(false);
-    go("done");
   }
 
   /* ---------- Rendu ---------- */
@@ -395,7 +372,7 @@ function Wizard() {
           type="button"
           onClick={back}
           aria-label={atStart ? "Retour à l'accueil" : "Question précédente"}
-          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:bg-white/[0.05] dark:text-zinc-200 dark:ring-white/10 dark:backdrop-blur-xl dark:hover:bg-white/10 dark:focus-visible:ring-brand-night ${(flow.indexOf(step) > 0 || (atStart && !viaGoogle)) && step !== "done" ? "" : "invisible"}`}
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:bg-white/[0.05] dark:text-zinc-200 dark:ring-white/10 dark:backdrop-blur-xl dark:hover:bg-white/10 dark:focus-visible:ring-brand-night ${(flow.indexOf(step) > 0 || atStart) && step !== "done" ? "" : "invisible"}`}
         >
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </button>
@@ -429,7 +406,6 @@ function Wizard() {
           {step === "name" && (
             <form onSubmit={submitName} noValidate className="flex flex-1 flex-col">
               <Title id="q-name">Comment vous <Em>appelez-vous</Em> ?</Title>
-              <Hint>C&apos;est le nom que verront les restaurants quand vous laissez un avis.</Hint>
               <Field label="Prénom" errorId="err-name" error={errors.name}>
                 <input
                   id="su-name" value={name} onChange={(e) => { setName(e.target.value); setError("name", null); }}
@@ -440,9 +416,10 @@ function Wizard() {
               <p className="mt-3 min-h-6 text-base font-medium text-brand-strong" aria-live="polite">
                 {firstName.length >= 2 && <><span className="su-em">Bienvenue, {firstName} !</span></>}
               </p>
-              <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-[15px] leading-relaxed text-slate-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300">
+              <label className={`mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border-2 bg-white p-4 text-[15px] leading-relaxed text-slate-700 transition-colors dark:bg-white/[0.04] dark:text-zinc-300 ${termsError ? "border-red-500" : "border-slate-200 dark:border-white/10"}`}>
                 <input
-                  id="su-terms" type="checkbox" checked={terms} onChange={(e) => { setTerms(e.target.checked); setError("name", null); }}
+                  id="su-terms" type="checkbox" checked={terms} aria-invalid={termsError || undefined} aria-describedby="err-terms"
+                  onChange={(e) => { setTerms(e.target.checked); if (e.target.checked) setTermsError(false); }}
                   // Entrée sur la case passe à la suite, comme dans les champs (sinon il faut traverser les deux liens)
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); e.currentTarget.form?.requestSubmit(); } }}
                   className="mt-0.5 h-5 w-5 flex-none rounded accent-brand dark:accent-brand-night"
@@ -453,8 +430,8 @@ function Wizard() {
                   et la <a className="font-medium underline" href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/legal/confidentialite/`} target="_blank" rel="noopener">politique de confidentialité</a>.
                 </span>
               </label>
+              <p id="err-terms" aria-live="polite" className="mt-2 min-h-5 text-sm font-medium text-red-600 dark:text-red-400">{termsError ? TERMS_MISSING : null}</p>
               <Primary className="mt-auto">Continuer</Primary>
-              {!viaGoogle && <GoogleSignup onCredential={googleSignIn} locked={!terms} onLocked={termsMissing} />}
             </form>
           )}
 
@@ -463,7 +440,6 @@ function Wizard() {
               <Title id="q-gender">
                 {firstName ? `${firstName}, vous êtes…` : "Vous êtes…"}
               </Title>
-              <Hint>Facultatif. Les restaurants voient seulement des statistiques globales, jamais votre réponse.</Hint>
               <div role="radiogroup" aria-labelledby="q-gender" className="mt-6 grid grid-cols-2 gap-3">
                 {GENDERS.map((g, i) => {
                   const checked = gender === g.value;
@@ -486,20 +462,17 @@ function Wizard() {
           {step === "age" && (
             <form onSubmit={submitAge} noValidate className="flex flex-1 flex-col">
               <Title id="q-age">Quel âge <Em>avez-vous</Em> ?</Title>
-              <Hint>FlashMiam est réservé aux {MIN_AGE} ans et plus. Les restaurants voient seulement des tranches d&apos;âge (18-24 ans…), jamais le vôtre.</Hint>
               <AgePicker value={age} onChange={(v) => { setAge(v); setError("age", null); }} labelledBy="q-age" onEnter={answerAge} />
               <p role={errors.age ? "alert" : undefined} className={`mt-3 min-h-6 text-sm ${errors.age ? "font-medium text-red-600 dark:text-red-400" : "text-slate-500"}`} aria-live="polite">
                 {errors.age}
               </p>
-              {viaGoogle && homeOffer && <div className="mt-auto pt-4 pb-4"><HomeShortcut checked={addToHome} onChange={setAddToHome} /></div>}
-              <Primary busy={busy} className={viaGoogle && homeOffer ? "mt-0" : "mt-auto"}>{age < MIN_AGE ? "Continuer" : `J'ai ${age} ans`}</Primary>
+              <Primary busy={busy}>{age < MIN_AGE ? "Continuer" : `J'ai ${age} ans`}</Primary>
             </form>
           )}
 
           {step === "email" && (
             <form onSubmit={submitEmail} noValidate className="flex flex-1 flex-col">
               <Title id="q-email">Votre adresse <Em>e-mail</Em> ?</Title>
-              <Hint>Elle vous servira à vous connecter, et à retrouver votre compte si vous oubliez votre mot de passe.</Hint>
               <Field label="Adresse e-mail" errorId="err-email" error={errors.email}>
                 <div className="relative">
                   <input
@@ -541,7 +514,6 @@ function Wizard() {
                 <span className="text-slate-400">@</span>
                 <span className="su-em text-brand">{cleanEmail.slice(cleanEmail.lastIndexOf("@") + 1)}</span>
               </p>
-              <Hint>Relisez-la lettre par lettre : sans elle, impossible de retrouver votre compte si vous oubliez votre mot de passe.</Hint>
               <div className="mt-auto flex flex-col gap-3 pt-8">
                 <button id="su-confirm-yes" type="button" onClick={() => go("password")} className={primaryClass}>Oui, c&apos;est la bonne</button>
                 <button type="button" onClick={() => go("email", "prev")} className="h-14 rounded-full text-base font-medium text-slate-700 ring-1 ring-slate-300 transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-zinc-200 dark:ring-white/15 dark:hover:bg-white/[0.06] dark:focus-visible:ring-brand-night">
@@ -602,22 +574,13 @@ function Wizard() {
                 </label>
               </div>
               <Primary busy={busy} disabled={score < PASSWORD_RULES.length} className="mt-0">{busy ? "Création du compte…" : "Créer mon compte"}</Primary>
-              <p className="mt-4 text-center text-xs leading-relaxed text-slate-500 dark:text-zinc-400">
-                En créant un compte, vous acceptez les{" "}
-                <a className="underline" href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/legal/cgu/`}>conditions d&apos;utilisation</a> et la{" "}
-                <a className="underline" href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/legal/confidentialite/`}>politique de confidentialité</a>.
-              </p>
             </form>
           )}
 
           {step === "code" && (
             <form onSubmit={verifyCode} noValidate className="flex flex-1 flex-col">
               <Title id="q-code">Vérifiez votre <Em>adresse e-mail</Em></Title>
-              <Hint>
-                Un code vient d&apos;être envoyé à <strong className="break-all text-slate-900 dark:text-zinc-50">{cleanEmail}</strong>.
-                Saisissez-le pour activer votre compte (pensez à regarder dans les courriers indésirables).
-              </Hint>
-              <Field label="Code reçu par e-mail" errorId="err-code" error={errors.code}>
+              <Field label={`Code envoyé à ${cleanEmail}`} errorId="err-code" error={errors.code}>
                 <input
                   id="su-code" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={8} enterKeyHint="go"
                   placeholder="––––––––" value={code} aria-describedby="err-code"
@@ -630,10 +593,6 @@ function Wizard() {
                   className={`${inputClass(!!errors.code)} text-center text-2xl tracking-[0.5em] tabular-nums`}
                 />
               </Field>
-              <p className="text-sm leading-relaxed text-slate-500 dark:text-zinc-400">
-                Vous avez déjà un compte avec cette adresse ? Le code reçu vous connecte directement, ou{" "}
-                <button type="button" className={linkClass} onClick={() => openLogin(cleanEmail)}>connectez-vous avec votre mot de passe</button>.
-              </p>
               <Primary busy={busy} disabled={code.length < 6}>{busy ? "Vérification…" : "Valider le code"}</Primary>
               <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
                 <button id="su-resend" type="button" disabled={resendIn > 0 || busy} onClick={resendCode}
@@ -644,6 +603,10 @@ function Wizard() {
                   className="rounded-full px-3 py-2 font-medium text-slate-500 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-zinc-400">
                   Modifier l&apos;adresse
                 </button>
+                <button type="button" onClick={() => openLogin(cleanEmail)}
+                  className="rounded-full px-3 py-2 font-medium text-slate-500 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-zinc-400">
+                  Se connecter avec mon mot de passe
+                </button>
               </div>
             </form>
           )}
@@ -653,7 +616,6 @@ function Wizard() {
               <h1 id="su-done" tabIndex={-1} className="text-3xl font-bold tracking-tight text-balance focus:outline-none">
                 Bienvenue sur <Em>FlashMiam</Em>, {firstName} !
               </h1>
-              <p className="mt-3 text-slate-600 dark:text-zinc-400">Votre compte est prêt. Les bons plans food de La Roche-sur-Yon vous attendent.</p>
               <p className="mt-10 inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-zinc-400" aria-live="polite">
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Ouverture de la carte…
               </p>
@@ -698,7 +660,6 @@ function HomeShortcut({ checked, onChange }: { checked: boolean; onChange: (v: b
       <input id="su-home" type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-0.5 h-5 w-5 flex-none rounded accent-brand dark:accent-brand-night" />
       <span>
         <span className="font-medium text-slate-900 dark:text-zinc-50">Ajouter FlashMiam à mon écran d&apos;accueil</span>
-        <span className="mt-0.5 block text-sm text-slate-500 dark:text-zinc-400">L&apos;appli en un geste, comme les autres. Votre téléphone vous demandera de confirmer.</span>
       </span>
     </label>
   );
@@ -708,13 +669,12 @@ function Title({ id, children }: { id: string; children: ReactNode }) {
   return <h1 id={id} className="text-[28px] leading-tight font-bold tracking-tight text-balance">{children}</h1>;
 }
 const Em = ({ children }: { children: ReactNode }) => <span className="su-em text-brand">{children}</span>;
-const Hint = ({ children }: { children: ReactNode }) => <p className="mt-3 text-[15px] leading-relaxed text-slate-600 dark:text-zinc-400">{children}</p>;
 
 function Field({ label, errorId, error, children }: { label: string; errorId: string; error?: ReactNode; children: ReactNode }) {
   return (
     <div className="mt-6">
       <label className="block text-sm font-medium text-slate-600 dark:text-zinc-400">
-        <span className="mb-2 block">{label}</span>
+        <span className="mb-2 block [overflow-wrap:anywhere]">{label}</span>
         {children}
       </label>
       <p id={errorId} aria-live="polite" className="mt-2 min-h-5 text-sm font-medium text-red-600 dark:text-red-400">{error}</p>
