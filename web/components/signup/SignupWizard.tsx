@@ -312,7 +312,9 @@ function Wizard() {
     setError("code", null);
     let token: string | undefined;
     try { token = await captchaToken(); } catch { return setError("code", CAPTCHA_FAILED); }
-    const { error } = await siteClient().auth.resend({ type: "signup", email: cleanEmail, options: { captchaToken: token } });
+    // Code de connexion par e-mail : Supabase envoie la confirmation à une adresse pas encore confirmée, et un code de
+    // connexion à une adresse déjà inscrite ; dans les deux cas un e-mail part, et ce même écran accepte le code.
+    const { error } = await siteClient().auth.signInWithOtp({ email: cleanEmail, options: { shouldCreateUser: false, captchaToken: token } });
     if (error && (captchaRefused(error) || error.status === 429 || !error.status || error.status >= 500)) {
       return setError("code", captchaRefused(error) ? CAPTCHA_FAILED : error.status === 429
         ? "Trop de demandes en peu de temps. Patientez quelques minutes, puis réessayez."
@@ -629,8 +631,8 @@ function Wizard() {
                 />
               </Field>
               <p className="text-sm leading-relaxed text-slate-500 dark:text-zinc-400">
-                Vous avez déjà un compte avec cette adresse ? Aucun code n&apos;est envoyé dans ce cas :{" "}
-                <button type="button" className={linkClass} onClick={() => openLogin(cleanEmail)}>connectez-vous</button>.
+                Vous avez déjà un compte avec cette adresse ? Le code reçu vous connecte directement, ou{" "}
+                <button type="button" className={linkClass} onClick={() => openLogin(cleanEmail)}>connectez-vous avec votre mot de passe</button>.
               </p>
               <Primary busy={busy} disabled={code.length < 6}>{busy ? "Vérification…" : "Valider le code"}</Primary>
               <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">

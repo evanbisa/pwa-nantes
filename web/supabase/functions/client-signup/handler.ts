@@ -13,7 +13,8 @@
  * Confirmation par e-mail (réglage app_settings.client_email_confirmation, à activer une fois l'envoi d'e-mails réglé) :
  * le compte est créé NON confirmé, le code part par e-mail (un compte créé par le serveur ne déclenche aucun envoi de
  * lui-même) et confirm = true : le site demande alors ce code. Dans ce mode, une adresse déjà inscrite reçoit exactement
- * la même réponse, sans rien créer (et aucun code si elle est déjà confirmée) : impossible de savoir qui a un compte.
+ * la même réponse, sans rien créer : impossible de savoir qui a un compte. Un e-mail part dans TOUS les cas : code de
+ * confirmation pour un nouveau compte, code de connexion pour une adresse déjà inscrite (le même écran l'accepte).
  * Sans confirmation : compte créé déjà confirmé ; adresse déjà inscrite → 409.
  * Refus : { error, message } (400 données ou anti-robots, 409 compte existant, 422 adresse ou mot de passe, 429 trop d'essais).
  */
@@ -28,8 +29,11 @@ export interface Deps {
   createUser(u: { email: string; password: string; metadata: Record<string, string>; confirmed: boolean }): Promise<"created" | "exists" | "weak">;
   /** Réglages du serveur : confirmation par e-mail des clients exigée ? */
   settings(): Promise<{ confirmEmail: boolean }>;
-  /** Envoie le code de confirmation à une adresse qui attend sa confirmation (rien si elle est déjà confirmée). */
-  sendCode(email: string): Promise<void>;
+  /**
+   * Envoie un code par e-mail : confirmation d'un compte tout juste créé (existing = false), ou code de connexion pour
+   * une adresse déjà inscrite (existing = true ; confirmation si elle ne l'a jamais été).
+   */
+  sendCode(email: string, existing: boolean): Promise<void>;
   /** Vérifie un jeton anti-robots ; null = anti-robots non configuré (pas de clé secrète). */
   verifyCaptcha(token: string, ip: string): Promise<boolean> | null;
   now(): Date;
@@ -135,9 +139,9 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
     const { confirmEmail } = await deps.settings();
     const result = await deps.createUser({ email, ...fields, confirmed: !confirmEmail });
     if (confirmEmail && result !== "weak") {
-      // Code envoyé (compte créé, ou déjà inscrit mais jamais confirmé) ; adresse déjà confirmée : rien ne part. Dans
-      // tous les cas la même réponse, même si l'envoi échoue (le site propose « Renvoyer le code ») : aucune fuite.
-      await deps.sendCode(email).catch((e) => console.error("client-signup : envoi du code impossible", e instanceof Error ? e.message : e));
+      // Un code part toujours (confirmation, ou connexion si l'adresse a déjà un compte). Dans tous les cas la même
+      // réponse, même si l'envoi échoue (le site propose « Renvoyer le code ») : aucune fuite.
+      await deps.sendCode(email, result === "exists").catch((e) => console.error("client-signup : envoi du code impossible", e instanceof Error ? e.message : e));
       return json(200, { created: true, confirm: true });
     }
     if (result === "exists") return refuse(409, "exists", "Un compte existe déjà avec cet e-mail.");

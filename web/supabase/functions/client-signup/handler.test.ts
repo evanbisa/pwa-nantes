@@ -11,7 +11,7 @@ function fakeDeps(over: Partial<Deps> = {}) {
     hashIp: (ip) => Promise.resolve("empreinte-" + ip.padEnd(8, "-")),
     createUser: (u) => { calls.created.push(u); return Promise.resolve("created"); },
     settings: () => Promise.resolve({ confirmEmail: false }),
-    sendCode: (email) => { calls.codes.push(email); return Promise.resolve(); },
+    sendCode: (email, existing) => { calls.codes.push(email + (existing ? " (déjà inscrite)" : "")); return Promise.resolve(); },
     verifyCaptcha: () => null,
     now: () => NOW,
     ...over,
@@ -154,8 +154,9 @@ Deno.test("confirmation par e-mail activée : adresse déjà inscrite → exacte
   const fresh = fakeDeps({ settings: () => Promise.resolve({ confirmEmail: true }) });
   const a = await call(SIGNUP, exists.deps), b = await call(SIGNUP, fresh.deps);
   assertEquals([a.status, a.body], [b.status, b.body]);
-  // Le code est demandé dans les deux cas : Supabase n'envoie rien à une adresse déjà confirmée (même délai, même réponse)
+  // Un e-mail part dans les deux cas : code de confirmation (nouveau compte) ou code de connexion (adresse déjà inscrite)
   assertEquals([exists.calls.codes.length, fresh.calls.codes.length], [1, 1]);
+  assertEquals([exists.calls.codes[0].endsWith("(déjà inscrite)"), fresh.calls.codes[0].endsWith("(déjà inscrite)")], [true, false]);
   // Sans confirmation (envoi d'e-mails pas encore réglé) : impossible de répondre pareil, l'adresse prise est signalée
   assertEquals((await call(SIGNUP, fakeDeps({ createUser: () => Promise.resolve("exists") }).deps)).status, 409);
 });
