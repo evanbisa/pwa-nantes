@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent, type ReactNode } from "react";
 import { FunctionsHttpError } from "@supabase/supabase-js";
-import { ArrowLeft, Check, Eye, EyeOff, Loader2 } from "lucide-react";
+import { ArrowLeft, Cake, Check, Eye, EyeOff, Inbox, Loader2, LockKeyhole, Mail, MailCheck, Smile, Sparkles, type LucideIcon } from "lucide-react";
 import { setRemember, siteClient } from "@/lib/supabase/site-session";
 import { CAPTCHA_FAILED, captchaRefused, captchaToken } from "@/lib/captcha";
 import AgePicker from "@/components/signup/AgePicker";
@@ -36,11 +36,11 @@ const RESEND_DELAY = 60;
 const FLOW: Step[] = ["name", "gender", "age", "email", "confirm", "password"];
 /** Questions comptées dans la barre de progression (la relecture fait partie de la question de l'e-mail). */
 const QUESTIONS: Step[] = ["name", "gender", "age", "email", "password"];
-const GENDERS: { value: Gender; label: string }[] = [
-  { value: "female", label: "Une femme" },
-  { value: "male", label: "Un homme" },
-  { value: "other", label: "Autre" },
-  { value: "", label: "Je préfère ne pas le dire" },
+const GENDERS: { value: Gender; label: string; emoji: string }[] = [
+  { value: "female", label: "Une femme", emoji: "👩" },
+  { value: "male", label: "Un homme", emoji: "👨" },
+  { value: "other", label: "Autre", emoji: "🌈" },
+  { value: "", label: "Je préfère ne pas le dire", emoji: "🤐" },
 ];
 const STRENGTH = ["", "Trop faible", "Trop faible", "Moyen", "Presque !", "Solide"];
 /** Carte (site principal), un niveau au-dessus de l'application : « /app/../ » → « / ». */
@@ -405,7 +405,8 @@ function Wizard() {
         <div key={step} className={`su-cascade flex flex-1 flex-col ${dir === "next" ? "motion-safe:animate-step-next" : "motion-safe:animate-step-prev"}`}>
           {step === "name" && (
             <form onSubmit={submitName} noValidate className="flex flex-1 flex-col">
-              <Title id="q-name">Comment vous <Em>appelez-vous</Em> ?</Title>
+              <Body>
+              <Head icon={Smile} id="q-name">Comment vous <Em>appelez-vous</Em> ?</Head>
               <Field label="Prénom" errorId="err-name" error={errors.name}>
                 <input
                   id="su-name" value={name} onChange={(e) => { setName(e.target.value); setError("name", null); }}
@@ -416,7 +417,7 @@ function Wizard() {
               <p className="mt-3 min-h-6 text-base font-medium text-brand-strong" aria-live="polite">
                 {firstName.length >= 2 && <><span className="su-em">Bienvenue, {firstName} !</span></>}
               </p>
-              <label className={`mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border-2 bg-white p-4 text-[15px] leading-relaxed text-slate-700 transition-colors dark:bg-white/[0.04] dark:text-zinc-300 ${termsError ? "border-red-500" : "border-slate-200 dark:border-white/10"}`}>
+              <label className={`mt-2 flex cursor-pointer items-start gap-3 rounded-2xl border-2 bg-white p-4 text-[15px] leading-relaxed text-slate-700 transition-colors dark:bg-white/[0.04] dark:text-zinc-300 ${termsError ? "border-red-500" : "border-slate-200 dark:border-white/10"}`}>
                 <input
                   id="su-terms" type="checkbox" checked={terms} aria-invalid={termsError || undefined} aria-describedby="err-terms"
                   onChange={(e) => { setTerms(e.target.checked); if (e.target.checked) setTermsError(false); }}
@@ -431,48 +432,55 @@ function Wizard() {
                 </span>
               </label>
               <p id="err-terms" aria-live="polite" className="mt-2 min-h-5 text-sm font-medium text-red-600 dark:text-red-400">{termsError ? TERMS_MISSING : null}</p>
+              </Body>
               <Primary className="mt-auto">Continuer</Primary>
             </form>
           )}
 
           {step === "gender" && (
             <div className="flex flex-1 flex-col">
-              <Title id="q-gender">
+              <Body>
+              <Head icon={Sparkles} id="q-gender">
                 {firstName ? `${firstName}, vous êtes…` : "Vous êtes…"}
-              </Title>
-              <div role="radiogroup" aria-labelledby="q-gender" className="mt-6 grid grid-cols-2 gap-3">
+              </Head>
+              <div role="radiogroup" aria-labelledby="q-gender" className="mt-8 grid grid-cols-2 gap-3">
                 {GENDERS.map((g, i) => {
                   const checked = gender === g.value;
                   return (
                     <button
                       key={g.label} id={`su-gender-${i}`} type="button" role="radio" aria-checked={checked}
                       onClick={() => pickGender(g.value)}
-                      className={`flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border-2 px-3 py-4 text-center text-[15px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 dark:ring-offset-night dark:focus-visible:ring-brand-night ${checked
+                      className={`flex min-h-32 flex-col items-center justify-center gap-2 rounded-2xl border-2 px-3 py-4 text-center text-[15px] leading-snug font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 dark:ring-offset-night dark:focus-visible:ring-brand-night ${checked
                         ? "su-picked border-brand bg-brand/10 text-brand dark:text-white"
                         : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-white/[0.04] dark:backdrop-blur-xl dark:hover:border-white/20 dark:hover:bg-white/[0.07]"}`}
                     >
+                      <span aria-hidden className="text-4xl leading-none">{g.emoji}</span>
                       {g.label}
                     </button>
                   );
                 })}
               </div>
+              </Body>
             </div>
           )}
 
           {step === "age" && (
             <form onSubmit={submitAge} noValidate className="flex flex-1 flex-col">
-              <Title id="q-age">Quel âge <Em>avez-vous</Em> ?</Title>
+              <Body>
+              <Head icon={Cake} id="q-age">Quel âge <Em>avez-vous</Em> ?</Head>
               <AgePicker value={age} onChange={(v) => { setAge(v); setError("age", null); }} labelledBy="q-age" onEnter={answerAge} />
               <p role={errors.age ? "alert" : undefined} className={`mt-3 min-h-6 text-sm ${errors.age ? "font-medium text-red-600 dark:text-red-400" : "text-slate-500"}`} aria-live="polite">
                 {errors.age}
               </p>
+              </Body>
               <Primary busy={busy}>{age < MIN_AGE ? "Continuer" : `J'ai ${age} ans`}</Primary>
             </form>
           )}
 
           {step === "email" && (
             <form onSubmit={submitEmail} noValidate className="flex flex-1 flex-col">
-              <Title id="q-email">Votre adresse <Em>e-mail</Em> ?</Title>
+              <Body>
+              <Head icon={Mail} id="q-email">Votre adresse <Em>e-mail</Em> ?</Head>
               <Field label="Adresse e-mail" errorId="err-email" error={errors.email}>
                 <div className="relative">
                   <input
@@ -501,6 +509,7 @@ function Wizard() {
                   </div>
                 </div>
               )}
+              </Body>
               <Primary busy={busy}>{busy ? "Vérification…" : "Continuer"}</Primary>
               <GoogleSignup onCredential={googleSignIn} />
             </form>
@@ -508,12 +517,14 @@ function Wizard() {
 
           {step === "confirm" && (
             <div className="flex flex-1 flex-col">
-              <Title id="q-confirm">Confirmez votre <Em>adresse</Em></Title>
+              <Body>
+              <Head icon={MailCheck} id="q-confirm">Confirmez votre <Em>adresse</Em></Head>
               <p className="mt-6 rounded-2xl bg-white px-5 py-6 text-center text-2xl font-semibold break-all shadow-sm ring-1 ring-slate-200 dark:bg-white/[0.04] dark:ring-white/10 dark:backdrop-blur-xl">
                 {cleanEmail.slice(0, cleanEmail.lastIndexOf("@"))}
                 <span className="text-slate-400">@</span>
                 <span className="su-em text-brand">{cleanEmail.slice(cleanEmail.lastIndexOf("@") + 1)}</span>
               </p>
+              </Body>
               <div className="mt-auto flex flex-col gap-3 pt-8">
                 <button id="su-confirm-yes" type="button" onClick={() => go("password")} className={primaryClass}>Oui, c&apos;est la bonne</button>
                 <button type="button" onClick={() => go("email", "prev")} className="h-14 rounded-full text-base font-medium text-slate-700 ring-1 ring-slate-300 transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-zinc-200 dark:ring-white/15 dark:hover:bg-white/[0.06] dark:focus-visible:ring-brand-night">
@@ -525,7 +536,8 @@ function Wizard() {
 
           {step === "password" && (
             <form onSubmit={createAccount} noValidate className="flex flex-1 flex-col">
-              <Title id="q-password">Choisissez un <Em>mot de passe</Em></Title>
+              <Body>
+              <Head icon={LockKeyhole} id="q-password">Choisissez un <Em>mot de passe</Em></Head>
               {/* Identifiant caché : les gestionnaires de mots de passe l'associent à la bonne adresse */}
               <input type="email" autoComplete="username" value={cleanEmail} readOnly hidden />
               <Field label="Mot de passe" errorId="err-password" error={errors.password}>
@@ -566,6 +578,7 @@ function Wizard() {
                   );
                 })}
               </ul>
+              </Body>
               <div className="mt-auto flex flex-col gap-3 pt-6 pb-4">
                 {homeOffer && <HomeShortcut checked={addToHome} onChange={setAddToHome} />}
                 <label className="flex items-center gap-3 text-[15px] text-slate-700 dark:text-zinc-300">
@@ -579,7 +592,8 @@ function Wizard() {
 
           {step === "code" && (
             <form onSubmit={verifyCode} noValidate className="flex flex-1 flex-col">
-              <Title id="q-code">Vérifiez votre <Em>adresse e-mail</Em></Title>
+              <Body>
+              <Head icon={Inbox} id="q-code">Vérifiez votre <Em>adresse e-mail</Em></Head>
               <Field label={`Code envoyé à ${cleanEmail}`} errorId="err-code" error={errors.code}>
                 <input
                   id="su-code" type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={8} enterKeyHint="go"
@@ -593,6 +607,7 @@ function Wizard() {
                   className={`${inputClass(!!errors.code)} text-center text-2xl tracking-[0.5em] tabular-nums`}
                 />
               </Field>
+              </Body>
               <Primary busy={busy} disabled={code.length < 6}>{busy ? "Vérification…" : "Valider le code"}</Primary>
               <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
                 <button id="su-resend" type="button" disabled={resendIn > 0 || busy} onClick={resendCode}
@@ -667,6 +682,19 @@ function HomeShortcut({ checked, onChange }: { checked: boolean; onChange: (v: b
 
 function Title({ id, children }: { id: string; children: ReactNode }) {
   return <h1 id={id} className="text-[28px] leading-tight font-bold tracking-tight text-balance">{children}</h1>;
+}
+/** Contenu d'une étape, centré verticalement entre l'en-tête et le bouton : l'écran paraît moins vide. */
+const Body = ({ children }: { children: ReactNode }) => <div className="flex flex-1 flex-col justify-center py-4 [@media(max-height:760px)]:py-0">{children}</div>;
+/** Titre d'une étape, centré, sous une pastille avec l'icône de la question. */
+function Head({ icon: Icon, id, children }: { icon: LucideIcon; id: string; children: ReactNode }) {
+  return (
+    <div className="flex flex-col items-center text-center">
+      <span aria-hidden className="mb-4 grid h-16 w-16 place-items-center rounded-[22px] [@media(max-height:760px)]:mb-2.5 [@media(max-height:760px)]:h-11 [@media(max-height:760px)]:w-11 [@media(max-height:760px)]:rounded-2xl [@media(max-height:620px)]:hidden bg-gradient-to-br from-orange-400 to-brand text-white shadow-lg shadow-brand/25 motion-safe:animate-pop dark:shadow-brand-night/30">
+        <Icon className="h-8 w-8 [@media(max-height:760px)]:h-6 [@media(max-height:760px)]:w-6" strokeWidth={2.2} />
+      </span>
+      <Title id={id}>{children}</Title>
+    </div>
+  );
 }
 const Em = ({ children }: { children: ReactNode }) => <span className="su-em text-brand">{children}</span>;
 
