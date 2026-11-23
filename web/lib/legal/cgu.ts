@@ -101,7 +101,7 @@ export const cgu: LegalDoc = {
       title: "Contenus des restaurateurs : fiches, photos, stories",
       icon: Camera,
       blocks: [
-        "Le restaurateur est **seul responsable** des contenus qu'il publie : nom, description, menu, prix, horaires, photos, stories (publiées 24 heures) et promotions. Il garantit qu'ils sont exacts, qu'il en détient les droits (ou les autorisations nécessaires, notamment des personnes photographiées) et qu'ils respectent la loi.",
+        "Le restaurateur est **seul responsable** des contenus qu'il publie : nom, description, menu, prix, horaires, photos, stories (publiées pour la durée choisie, de 1 heure à 1 semaine) et promotions. Il garantit qu'ils sont exacts, qu'il en détient les droits (ou les autorisations nécessaires, notamment des personnes photographiées) et qu'ils respectent la loi.",
         "Les promotions affichées doivent être réellement proposées dans l'établissement, aux conditions et pendant la durée indiquées.",
         "Le restaurateur concède à l'éditeur, pour la durée de publication, le droit gratuit et non exclusif de reproduire et d'afficher ces contenus sur FlashMiam (carte, fiche, notifications, partages), dans le seul but de faire fonctionner le service.",
         "Seules les photos envoyées depuis FlashMiam sont acceptées ; elles peuvent être recadrées ou compressées pour l'affichage.",

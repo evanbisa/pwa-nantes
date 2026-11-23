@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-TgOjnePZ66h/qiTBLYszK4c5y397U1/ofqPIC9UrBeY=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-An/mieQ3RaR/eGD7LIFMKGYIydRD66RH8vIT7mkr0/k=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1362,6 +1362,13 @@
     .sc-bgs button { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--panel-solid); box-shadow: 0 0 0 1px var(--line-strong); }
     .sc-bgs button[aria-checked="true"] { box-shadow: 0 0 0 2px var(--accent); }
     .sc-file { margin-top: 12px; }
+    .sc-dur { margin-top: 14px; }
+    .sc-dur > span b { color: var(--text); }
+    .sc-dur-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .sc-dur-chips .chip { height: 34px; padding: 0 14px; font-size: 13.5px; border: 1px solid var(--line-strong); background: transparent; }
+    .sc-dur-chips .chip[aria-pressed="true"] { color: var(--accent-strong); background: var(--accent-soft); border-color: var(--accent-line); }
+    .sc-dur input[type=range] { width: 100%; margin-top: 12px; accent-color: var(--accent); }
+    .sc-dur-scale { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
     .sc-file input { position: absolute; width: 1px; height: 1px; opacity: 0; }
     .sc-file .btn { margin-top: 0; cursor: pointer; }
     .sc-file:focus-within .btn { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -2740,7 +2747,19 @@
           </label>
         </div>
       </div>
-      <p class="hint">Visible par tous les utilisateurs pendant 24 h, puis retirée automatiquement.</p>
+      <!-- Durée d'affichage : choix rapides ou curseur, de 1 heure à 1 semaine -->
+      <div class="field sc-dur" id="field-sc-dur">
+        <span id="sc-dur-label">Durée d'affichage : <b id="sc-dur-value">24 h</b></span>
+        <div class="sc-dur-chips" id="sc-dur-chips" role="group" aria-labelledby="sc-dur-label">
+          <button type="button" class="chip" data-h="24">24 h</button>
+          <button type="button" class="chip" data-h="48">48 h</button>
+          <button type="button" class="chip" data-h="72">72 h</button>
+          <button type="button" class="chip" data-h="168">1 semaine</button>
+        </div>
+        <input type="range" id="sc-dur" min="1" max="168" step="1" value="24" aria-labelledby="sc-dur-label" />
+        <div class="sc-dur-scale" aria-hidden="true"><span>1 h</span><span>1 semaine</span></div>
+      </div>
+      <p class="hint" id="sc-dur-hint">Visible par tous les utilisateurs pendant 24 h, puis retirée automatiquement.</p>
       <p class="form-error" id="err-sc" role="alert"></p>
       <button class="btn btn-primary" type="submit" id="sc-publish">Publier la story</button>
     </form>
@@ -3085,7 +3104,7 @@
               <span class="ps-scan-today"><b id="ps-scan-n">–</b><small>aujourd'hui</small></span>
             </button>
             <div class="ps-tiles ps-wide" id="ps-tiles" role="group" aria-label="Accès rapides">
-              <button class="ps-tile" type="button" data-act="story"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></i><strong>Publier une story</strong><small>Photo ou texte, 24 h</small></button>
+              <button class="ps-tile" type="button" data-act="story"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></i><strong>Publier une story</strong><small>Photo ou texte, jusqu'à 1 semaine</small></button>
               <button class="ps-tile" type="button" data-act="promo"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0L2 12V2h10l8.6 8.6a2 2 0 010 2.8zM7 7h.01"/></svg></i><strong>Créer une offre</strong><small>Promo pour attirer du monde</small></button>
               <button class="ps-tile" type="button" data-act="menu"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg></i><strong>Ma carte</strong><small>Plats et prix</small></button>
               <button class="ps-tile" type="button" data-act="hours"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v5l3 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></i><strong>Horaires</strong><small>Ouverture et fermeture</small></button>
@@ -3203,7 +3222,7 @@
               <h3 id="pd-stories-title">Mes stories</h3>
               <button class="pill-btn" type="button" id="pd-story-new">＋ Publier une story</button>
             </div>
-            <p class="hint">Photo ou message affiché en haut de la carte pour tout le monde pendant 24 h. Vos abonnés sont prévenus. Sous chaque story : combien l'ont vue et aimée (♥).</p>
+            <p class="hint">Photo ou message affiché en haut de la carte pour tout le monde pendant la durée choisie (1 heure à 1 semaine). Vos abonnés sont prévenus. Sous chaque story : combien l'ont vue et aimée (♥).</p>
             <ul class="story-admin" id="pd-story-list"></ul>
           </section>
           <section class="pd-block" id="pd-promos" aria-labelledby="pd-promos-title" hidden>
@@ -3971,7 +3990,15 @@
   };
   const PROMO_ORDER = ['day', 'lunch', 'afterwork', 'weekend', 'week', 'student', 'other'];
   const MAX_PROMOS = 6;
-  const STORY_TTL = 24 * 3600 * 1000;      // une story reste visible 24 h
+  const STORY_TTL = 24 * 3600 * 1000;      // durée par défaut d'une story (24 h) ; le restaurateur choisit de 1 h à 1 semaine
+  /** « 5 h », « 1 jour », « 2 jours 6 h », « 1 semaine ». */
+  function durationLabel(hours) {
+    const h = Math.max(1, Math.round(hours));
+    if (h < 24) return h + ' h';
+    if (h === 168) return '1 semaine';
+    const d = Math.floor(h / 24), r = h % 24;
+    return d + (d > 1 ? ' jours' : ' jour') + (r ? ' ' + r + ' h' : '');
+  }
   const STORY_DURATION = 6000;             // durée d'affichage d'une story
   const MAX_STORIES = 10;                  // stories en ligne en même temps, par restaurant
   const STORY_BGS = {
@@ -8292,7 +8319,7 @@
       url = u;
       // Vue comptée (une fois par story et par appareil pour « vue », à chaque affichage pour les statistiques)
       const seen = readJson(SEEN_KEY);
-      if (!seen[st.id]) { seen[st.id] = Date.now(); Object.keys(seen).forEach((k) => { if (Date.now() - seen[k] > 2 * STORY_TTL) delete seen[k]; }); writeJson(SEEN_KEY, seen); }
+      if (!seen[st.id]) { seen[st.id] = Date.now(); Object.keys(seen).forEach((k) => { if (Date.now() - seen[k] > 14 * STORY_TTL) delete seen[k]; }); writeJson(SEEN_KEY, seen); }
       if (!isOwnShop(g.shop.id)) Stats.track(g.shop.id, 'stories', { ref: st.id });
       StoryLikes.paint(g.shop, st);
       elapsed = 0; start = performance.now();
@@ -8393,7 +8420,16 @@
   /* ---------- Espace restaurateur : publier une story ---------- */
   const StoryComposer = (() => {
     const root = $('story-composer');
-    let mode = 'photo', bg = 'sunset', blob = null, previewUrl = null, returnFocus = null;
+    let mode = 'photo', bg = 'sunset', blob = null, previewUrl = null, returnFocus = null, hours = 24;
+    function syncDuration() {
+      $('sc-dur').value = String(hours);
+      $('sc-dur-value').textContent = durationLabel(hours);
+      $('sc-dur').setAttribute('aria-valuetext', durationLabel(hours));
+      $('sc-dur-chips').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.h) === hours)));
+      $('sc-dur-hint').textContent = 'Visible par tous les utilisateurs pendant ' + durationLabel(hours) + ', puis retirée automatiquement.';
+    }
+    $('sc-dur').addEventListener('input', () => { hours = Number($('sc-dur').value) || 24; syncDuration(); });
+    $('sc-dur-chips').addEventListener('click', (ev) => { const b = ev.target.closest('[data-h]'); if (b) { hours = Number(b.dataset.h); syncDuration(); } });
     Object.entries(STORY_BGS).forEach(([key, css]) => {
       const b = document.createElement('button');
       b.type = 'button'; b.dataset.bg = key; b.setAttribute('role', 'radio'); b.style.background = css;
@@ -8426,7 +8462,7 @@
       if (!r) return;
       if (liveStories(r).length >= MAX_STORIES) { toast('Vous avez déjà ' + MAX_STORIES + ' stories en ligne : supprimez-en une pour en publier une nouvelle.'); return; }
       returnFocus = document.activeElement;
-      mode = 'photo'; blob = null; bg = 'sunset';
+      mode = 'photo'; blob = null; bg = 'sunset'; hours = 24; syncDuration();
       if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
       $('sc-text').value = ''; $('sc-file').value = '';
       setFieldError('sc-text', ''); $('err-sc').textContent = '';
@@ -8488,6 +8524,7 @@
         }
       }
       const row = mode === 'photo' ? { merchant_id: r.id, image_path: imagePath, caption: text || null } : { merchant_id: r.id, background: bg, caption: text };
+      row.expires_at = new Date(Date.now() + hours * 3600e3).toISOString();   // la base la ramène entre 1 h et 1 semaine
       const { error } = await Loader.run(sb.from('stories').insert(row), 'Publication de la story…');
       btn.disabled = false;
       if (error) {
@@ -8499,7 +8536,7 @@
       await refreshCloud();
       close();
       renderStoryAdmin(currentUser());
-      toast('Story publiée : elle est visible par tous pendant 24 h.');
+      toast('Story publiée : elle est visible par tous pendant ' + durationLabel(hours) + '.');
     });
     return { open, close };
   })();
@@ -8521,7 +8558,7 @@
       li.innerHTML = '<span class="sa-thumb"></span><small></small><button class="sa-del" type="button">&times;</button>';
       await fillStory(li.querySelector('.sa-thumb'), st, { blur: false });
       const left = Math.max(1, Math.round((new Date(st.expiresAt) - Date.now()) / 3600e3));
-      li.querySelector('small').textContent = 'encore ' + left + ' h\npubliée ' + timeAgo(st.createdAt);
+      li.querySelector('small').textContent = 'encore ' + durationLabel(left) + '\npubliée ' + timeAgo(st.createdAt);
       const stat = ProSpace.storyStats(st.id);
       if (stat) { const n = document.createElement('small'); n.className = 'sa-stats'; n.textContent = plural(stat.views, 'vue', 'vues') + ' · ♥ ' + stat.likes; n.setAttribute('aria-label', plural(stat.views, 'vue', 'vues') + ', ' + plural(stat.likes, 'j\'aime', 'j\'aime')); li.appendChild(n); }
       li.querySelector('.sa-del').setAttribute('aria-label', 'Supprimer la story publiée ' + timeAgo(st.createdAt));
@@ -11762,7 +11799,7 @@
       const items = [];
       if (s.missing.length) items.push({ ico: '📄', title: plural(s.missing.length, 'justificatif à ajouter', 'justificatifs à ajouter'), sub: s.awaitingDocs ? 'Votre fiche n\'apparaît pas sur la carte tant qu\'ils manquent.' : 'Nécessaires pour apparaître sur la carte.', go: 'Compléter', run: () => setTab('todo') });
       if (T && T.unanswered) items.push({ ico: '💬', title: plural(T.unanswered, 'avis attend', 'avis attendent') + ' votre réponse', sub: 'Répondre montre que vous êtes à l\'écoute.', go: 'Répondre', run: () => setTab('reviews') });
-      if (s.live && !liveStories(r).length) items.push({ ico: '📸', title: 'Aucune story en ligne', sub: 'Plat du jour, nouveauté, coulisses : visible par tous pendant 24 h.', go: 'Publier', run: () => StoryComposer.open() });
+      if (s.live && !liveStories(r).length) items.push({ ico: '📸', title: 'Aucune story en ligne', sub: 'Plat du jour, nouveauté, coulisses : visible par tous, de 1 heure à 1 semaine.', go: 'Publier', run: () => StoryComposer.open() });
       if (s.live && !activePromos({ promos: r.promos }).length) items.push({ ico: '🎁', title: 'Aucune promotion en cours', sub: 'Elle apparaît dans « Offres autour de moi » et vos abonnés sont prévenus.', go: 'Créer', run: goPromo });
       if (!r.photos.length) items.push({ ico: '🖼️', title: 'Ajoutez des photos', sub: 'Les fiches avec photos sont plus consultées.', go: 'Ajouter', run: editListing });
       if (!r.menu.length) items.push({ ico: '📖', title: 'Ajoutez votre carte', sub: 'Vos plats deviennent trouvables dans la recherche et les clients peuvent les aimer.', go: 'Ajouter', run: editListing });
