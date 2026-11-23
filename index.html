@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-QGbMB0vQw3/K1eN4GPrS9mBtCG/mHhRJLDft2YhexO8=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-5/24olpXQVpa3elxSls3NscHx2jwhkzUQwB3M1lm+LM=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-wNunsuiuKegUTEZdYROoSV5SPE8/H/fwz+Dt0otPYZk=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -3738,9 +3738,7 @@
   <div id="consent" class="consent" role="dialog" aria-modal="true" aria-labelledby="cs-title" aria-describedby="cs-intro" hidden>
     <div class="cs-panel">
       <h2 id="cs-title">Vos choix de cookies</h2>
-      <p id="cs-intro">FlashMiam garde dans votre navigateur votre session et vos préférences : c'est indispensable au fonctionnement du site.
-        Avec votre accord, nous utilisons aussi des <b>statistiques de fréquentation</b> et les <b>services Google</b>.
-        Vous pouvez changer d'avis à tout moment (Profil › Cookies).</p>
+      <p id="cs-intro">Vous pouvez changer d'avis à tout moment (Profil › Cookies).</p>
       <div class="cs-choices" id="cs-choices" hidden>
         <div class="cs-row">
           <div><b id="cs-l-need">Indispensables</b><small>Connexion, préférences (thème, localisation, alertes), sécurité. Toujours actifs.</small></div>
@@ -12941,17 +12939,17 @@
     function stepsFor(r) {
       if (r === 'pro') {
         return [
-          { el: () => $('scan-fab'), title: 'Scannez vos clients', text: 'Un client vous montre son QR code : touchez « Scanner » et visez. La visite, ou l\'offre, est validée toute seule.' },
-          { el: () => $('profile-btn'), title: 'Votre espace restaurateur', text: 'Touchez votre avatar : statistiques, stories, promos, avis et fiche. Le bouton « Scanner » y est aussi.' },
-          { el: () => $('notif-btn'), title: 'Restez informé', text: 'Nouveaux avis et nouveaux abonnés arrivent ici.' },
+          { el: () => $('scan-fab'), title: 'Scannez le QR code de vos clients pour valider leur visite' },
+          { el: () => $('profile-btn'), title: 'Votre espace : stats, stories, promos et avis' },
+          { el: () => $('notif-btn'), title: 'Vos nouveaux avis et abonnés arrivent ici' },
         ].filter((st) => visible(st.el()));
       }
       return [
-        { el: centralPin, title: 'Bienvenue sur FlashMiam', text: 'Chaque pastille est un restaurant : touchez-en une pour voir le menu, les photos, les horaires et les avis.', round: true },
-        { el: () => $('offers-btn'), title: 'Les bons plans autour de vous', text: 'Promos du jour, offres étudiantes… les plus proches d\'abord.' },
-        { el: null, demo: true, title: 'Profitez-en en caisse', text: 'Dans la fiche, « Profiter de l\'offre » affiche un QR code : montrez-le au restaurateur, il le scanne et c\'est validé.' },
-        { el: () => (desktop() ? $('search') : $('search-open')), title: 'Une envie précise ?', text: 'Cherchez un plat (« tacos », « crêpe »…) ou un restaurant.' },
-        { el: () => $('profile-btn'), title: 'Votre profil', text: 'Restaurants suivis, notifications et réglages. Vous y retrouverez ce guide.' },
+        { el: centralPin, title: 'Bienvenue sur FlashMiam ! Chaque point est un restaurant', round: true },
+        { el: () => $('offers-btn'), title: 'Les bons plans autour de vous !' },
+        { el: null, demo: true, title: 'Montrez le QR code en caisse pour profiter de l\'offre' },
+        { el: () => (desktop() ? $('search') : $('search-open')), title: 'Cherchez un plat ou un restaurant' },
+        { el: () => $('profile-btn'), title: 'Votre profil et vos réglages, avec ce guide' },
       ];
     }
     function place() {
@@ -12993,7 +12991,8 @@
       const fill = () => {
         $('tour-step').textContent = (i + 1) + ' / ' + steps.length;
         $('tour-title').textContent = st.title;
-        $('tour-text').textContent = st.text;
+        $('tour-text').textContent = st.text || '';
+        $('tour-text').hidden = !st.text;   // une seule phrase par étape
         $('tour-demo').hidden = !st.demo;
         $('tour-next').textContent = i === steps.length - 1 ? 'C\'est parti !' : 'Suivant';
         $('tour-dots').innerHTML = steps.map((_, k) => '<i' + (k === i ? ' class="is-on"' : '') + '></i>').join('');
