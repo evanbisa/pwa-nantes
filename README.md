@@ -172,6 +172,14 @@ en plus) :
 - Après la mise en ligne : déclarer le sitemap dans Google Search Console (`https://…/sitemap.xml`) et tester
   l'aperçu d'un lien sur https://www.opengraph.xyz.
 
+## Simulateur de téléphone
+
+`https://flashmiam.fr/simulateur/` affiche le vrai site dans un cadre à la taille d'un écran de téléphone (iPhone 14,
+iPhone 15 Pro Max, iPhone SE, Android), pour tout essayer depuis un ordinateur : c'est le site en ligne, avec ses
+vrais comptes et ses vraies données. Pour cela, le site accepte d'être affiché dans un cadre **par lui-même
+seulement** (`X-Frame-Options: SAMEORIGIN`, `frame-ancestors 'self'`) ; un autre site ne peut toujours pas
+l'afficher. Le modèle choisi indique au site s'il est sur iPhone ou Android (`FLASHMIAM_SIM.platform`).
+
 ## Tester en local
 
 La géolocalisation et la connexion exigent HTTPS ou `localhost` :

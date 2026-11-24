@@ -29,9 +29,10 @@ const SECRETS = [
 ];
 const HEADERS = [
   ["strict-transport-security", /max-age=\d{7,}/],
-  ["x-frame-options", /^DENY$/i],
+  // Cadres : le site lui-même seulement (simulateur de téléphone /simulateur/), jamais un autre site
+  ["x-frame-options", /^SAMEORIGIN$/i],
   ["x-content-type-options", /^nosniff$/i],
-  ["content-security-policy", /frame-ancestors 'none'/],
+  ["content-security-policy", /frame-ancestors 'self'/],
   ["content-security-policy", /upgrade-insecure-requests/],
   ["cross-origin-opener-policy", /same-origin/],
   ["referrer-policy", /strict-origin/],
