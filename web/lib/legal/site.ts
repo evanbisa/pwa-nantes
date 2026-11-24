@@ -1,27 +1,37 @@
 /**
- * Informations à compléter pour les pages juridiques — un seul endroit à modifier.
- * Toute valeur encore entre crochets [AINSI] reste surlignée en orange sur les pages, pour ne pas l'oublier.
- * Une fois une valeur renseignée, retirez les crochets : elle s'affiche alors normalement partout.
+ * Informations des pages juridiques — un seul endroit à modifier.
+ * `null` : information pas encore disponible (entreprise en cours de création). La ligne ou la phrase concernée
+ * n'est alors pas affichée, sans champ vide ni mention « à compléter » : les pages restent propres pour les
+ * restaurateurs qui les lisent. Dès que l'information existe, remplacez `null` par sa valeur : elle apparaît partout.
+ * Une valeur encore entre crochets [AINSI] serait surlignée en orange sur les pages (à éviter en ligne).
  */
-export const LEGAL = {
+export const LEGAL: {
+  editorName: string; legalForm: string | null; shareCapital: string | null; address: string | null;
+  siren: string | null; siret: string | null; registration: string | null; vatNumber: string | null;
+  phone: string | null; email: string; instagram: string; publicationDirector: string;
+  plans: { essentiel: { name: string }; premium: { name: string } };
+  paymentProvider: string; vatMention: string | null; cgvEffectiveDate: string | null;
+  courtCity: string | null; consumerMediator: string | null; updated: string;
+} = {
   // ----- Éditeur du site (mentions légales, loi pour la confiance dans l'économie numérique) -----
   /** Nom et prénom (entrepreneur individuel) ou raison sociale (société) */
-  editorName: "[NOM_PRÉNOM_OU_RAISON_SOCIALE]",
+  editorName: "Evan BIHAN SANZ",
   /** Ex. « Entrepreneur individuel (micro-entreprise) », « SAS », « SASU », « EURL » */
-  legalForm: "[FORME_JURIDIQUE]",
+  legalForm: null,
   /** Société : « 1 000 € » ; entrepreneur individuel : « Sans objet » */
-  shareCapital: "[CAPITAL_SOCIAL]",
-  address: "[ADRESSE_DU_SIÈGE]",
-  siren: "[SIREN]",
-  siret: "[SIRET]",
+  shareCapital: null,
+  /** Adresse du siège (domicile de l'entrepreneur, ou adresse d'une société de domiciliation) */
+  address: null,
+  siren: null,
+  siret: null,
   /** Ex. « RCS La Roche-sur-Yon 123 456 789 » ou « Registre national des entreprises (RNE) » */
-  registration: "[IMMATRICULATION_RCS_OU_RNE]",
-  vatNumber: "[NUMÉRO_TVA_INTRACOMMUNAUTAIRE]",
-  phone: "[TÉLÉPHONE]",
-  email: "flashmiampro@gmail.com",
+  registration: null,
+  vatNumber: null,
+  phone: null,
+  email: "contact@flashmiam.fr",
   /** Compte Instagram (sans @) */
   instagram: "flashmiam85",
-  publicationDirector: "[DIRECTEUR_DE_LA_PUBLICATION]",
+  publicationDirector: "Evan BIHAN SANZ",
 
   // ----- Abonnements restaurateurs (CGV) : noms des formules. Les prix ne figurent pas dans les CGV (encore à
   // fixer) : ils sont affichés sur la page de souscription avant tout paiement.
@@ -32,19 +42,19 @@ export const LEGAL = {
   /** Plateforme de paiement des abonnements (raison sociale et pays à vérifier dans les conditions signées avec Whop) */
   paymentProvider: "Whop, Inc. (États-Unis)",
   /** Ex. « TVA à 20 % en sus, soit 34,80 € TTC par mois » ou « TVA non applicable, article 293 B du CGI » */
-  vatMention: "[MENTION_TVA]",
+  vatMention: null,
   /** Date d'ouverture des abonnements payants (les CGV s'appliquent à partir de cette date) */
-  cgvEffectiveDate: "[DATE_D'ENTRÉE_EN_VIGUEUR_DES_CGV]",
+  cgvEffectiveDate: null,
 
   // ----- Litiges -----
   /** Tribunal compétent entre professionnels (CGV), ex. « La Roche-sur-Yon » */
-  courtCity: "[VILLE_DU_TRIBUNAL]",
+  courtCity: null,
   /** Médiateur de la consommation (clients) : nom et site internet */
-  consumerMediator: "[MÉDIATEUR_DE_LA_CONSOMMATION]",
+  consumerMediator: null,
 
   /** Date de la dernière mise à jour des documents */
   updated: "24 novembre 2026",
-} as const;
+};
 
 /** Une information reste-t-elle à compléter ? (valeur encore entre crochets) */
 export const isPlaceholder = (value: string) => /^\[.*\]$/.test(value);

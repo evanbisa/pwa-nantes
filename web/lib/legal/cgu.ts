@@ -172,7 +172,9 @@ export const cgu: LegalDoc = {
       icon: Gavel,
       blocks: [
         `Les présentes CGU sont soumises au droit français. En cas de difficulté, contactez d'abord l'éditeur à ${mail} pour rechercher une solution amiable.`,
-        `Si vous êtes consommateur, vous pouvez recourir gratuitement au médiateur de la consommation : ${LEGAL.consumerMediator}. À défaut d'accord, le litige est porté devant les tribunaux compétents selon les règles de droit commun.`,
+        LEGAL.consumerMediator
+          ? `Si vous êtes consommateur, vous pouvez recourir gratuitement au médiateur de la consommation : ${LEGAL.consumerMediator}. À défaut d'accord, le litige est porté devant les tribunaux compétents selon les règles de droit commun.`
+          : "À défaut d'accord, le litige est porté devant les tribunaux compétents selon les règles de droit commun.",
       ],
     },
   ],

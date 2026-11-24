@@ -22,7 +22,7 @@ export const confidentialite: LegalDoc = {
       title: "Responsable du traitement",
       icon: UserCheck,
       blocks: [
-        `Le responsable du traitement de vos données est **${LEGAL.editorName}**, ${LEGAL.address} (voir les {{mentions légales|/legal/mentions-legales}}).`,
+        `Le responsable du traitement de vos données est **${LEGAL.editorName}**${LEGAL.address ? ", " + LEGAL.address : ""} (voir les {{mentions légales|/legal/mentions-legales}}).`,
         `Pour toute question sur vos données ou pour exercer vos droits : ${mail}.`,
         "FlashMiam applique un principe simple : **ne collecter que le nécessaire**. Pas de publicité, pas de revente de données, et les restaurateurs ne voient jamais qui consulte leur fiche.",
       ],

@@ -18,7 +18,8 @@ export const mentionsLegales: LegalDoc = {
       blocks: [
         "Le site et l'application **FlashMiam** sont édités par :",
         {
-          facts: [
+          // Les informations pas encore disponibles (null dans site.ts) ne sont pas affichées
+          facts: ([
             ["Éditeur", LEGAL.editorName],
             ["Forme juridique", LEGAL.legalForm],
             ["Capital social", LEGAL.shareCapital],
@@ -30,7 +31,7 @@ export const mentionsLegales: LegalDoc = {
             ["Téléphone", LEGAL.phone],
             ["E-mail", `{{${LEGAL.email}|mailto:${LEGAL.email}}}`],
             ["Instagram", `{{@${LEGAL.instagram}|https://www.instagram.com/${LEGAL.instagram}/}}`],
-          ],
+          ] as [string, string | null][]).filter((row): row is [string, string] => row[1] !== null),
         },
       ],
     },
