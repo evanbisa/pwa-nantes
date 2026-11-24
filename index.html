@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-eNSwuGq5XYvziwsfpNFSxbD5UUJz8ECi1ySSr3hhXxY=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-JGq8Pchae6PPMykIU2dAaCBEZBULW6rao3+Mp56yH4c=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1875,6 +1875,7 @@
     .net.is-slow .net-dot { border: 2px solid var(--amber); border-right-color: transparent; background: none; width: 12px; height: 12px; animation: spin .8s linear infinite; }
     .net.is-offline .net-dot { background: var(--gray); }
     .net.is-down .net-dot { background: var(--danger); }
+    .net.is-unstable .net-dot { background: var(--amber); }
     .net.is-back .net-dot { background: var(--green); }
     #net-text { min-width: 0; line-height: 1.3; }
     #net-retry { flex: none; pointer-events: auto; margin-left: 2px; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); }
@@ -2229,7 +2230,19 @@
       .filters .ft-row { padding: 4px 28px 4px 0; scroll-padding-inline: 0;
         -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
       body.sheet-open .filters, body:not(.ui-ready) .filters { transform: translateY(-8px); }
-      .stories { top: calc(var(--safe-top) + 160px); max-width: calc(100% - 24px); }
+      .stories { top: calc(var(--safe-top) + 116px); max-width: calc(100% - 24px); }
+      /* Une seule rangée : bouton « Filtres » puis le rappel des filtres actifs (qui défile) */
+      .fbar { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+      .fbar-btn { flex: none; gap: 6px; font-weight: 600; }
+      .fbar-btn svg { width: 17px; height: 17px; }
+      .fbar-count { display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; font-size: 12px; color: var(--on-accent); background: var(--accent); }
+      .fbar-count[hidden] { display: none; }
+      .fbar-sum { flex: 1; min-width: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 0; text-align: left;
+        -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); }
+      .fbar-sum::-webkit-scrollbar { display: none; }
+      .fbar-sum[hidden] { display: none; }
+      .fbar-tag { flex: none; padding: 6px 11px; border-radius: 16px; font-size: 13px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); border: 1px solid var(--accent-line); white-space: nowrap; }
+      #filters .filters-track { display: none; }
       .stories-track { gap: 8px; padding: 6px 8px 5px; }
       .story-chip { width: 58px; gap: 3px; }
       .story-ring { width: 50px; height: 50px; }
@@ -2451,6 +2464,13 @@
 
     /* ----- Recherche (téléphone) : les filtres de la carte au-dessus du budget ----- */
     .sp-filters:empty { display: none; }
+    #filters-sheet .sp-filters .filters-track { padding: 4px 0 2px; }
+    #filters-sheet .range-filters { padding: 12px 0 2px; }
+    /* Boutons collés en bas, jusque derrière la barre d'onglets (rien ne défile en dessous) */
+    #filters-sheet { padding-bottom: 0; }
+    .fs-actions { display: flex; gap: 10px; margin: 16px -20px 0; padding: 10px 20px calc(var(--safe-bottom) + var(--nav-h, 0px) + 12px); position: sticky; bottom: 0; z-index: 2; background: var(--panel-solid); border-top: 1px solid var(--line); }
+    .fs-actions .btn { margin: 0; flex: 1; }
+    .fs-actions .btn-primary { flex: 1.8; }
     .sp-filters .filters-track { padding: 2px 16px 2px; gap: 10px; }
     .sp-filters .ft-row { gap: 6px; flex-wrap: wrap; overflow: visible; padding: 0; }
     .sp-filters .ft-label { display: block; flex: 0 0 100%; margin: 0 0 2px 2px; font-size: 11.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
@@ -2574,6 +2594,11 @@
 
   <!-- ===================== FILTRES (téléphone : en bas ; ordinateur : déplacés dans le panneau) ===================== -->
   <nav class="filters ui" id="filters" aria-label="Filtrer les commerces">
+    <!-- Téléphone : un seul bouton « Filtres » (avec le nombre de filtres actifs et leur rappel) ; les filtres sont dans un panneau -->
+    <div class="fbar" id="fbar">
+      <button class="chip glass fbar-btn" type="button" id="filters-open" aria-haspopup="dialog" aria-controls="filters-sheet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg><span>Filtres</span><b class="fbar-count" id="filters-count" hidden></b></button>
+      <button class="fbar-sum" type="button" id="filters-sum" tabindex="-1" aria-hidden="true"></button>
+    </div>
     <div class="filters-track" id="filters-track">
       <!-- Sur la carte (téléphone) : une rangée qui défile ; dans la recherche et le panneau : des sections titrées -->
       <div class="ft-row ft-crit" role="group" aria-label="Critères">
@@ -2966,6 +2991,21 @@
       </div>
     </div>
   </div>
+
+  <!-- ===================== FILTRES (téléphone) : panneau ouvert par le bouton « Filtres » ===================== -->
+  <section id="filters-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="fs-title" aria-hidden="true">
+    <button class="sheet-grab" type="button" data-close aria-label="Fermer"></button>
+    <div class="sheet-head">
+      <div class="sheet-title"><h3 id="fs-title">Filtres</h3><p class="eyebrow" id="fs-sub"></p></div>
+      <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
+    </div>
+    <div class="sp-filters fs-filters" id="fs-filters" role="group" aria-label="Filtres"></div>
+    <div id="fs-range-slot"></div>
+    <div class="fs-actions">
+      <button class="btn btn-ghost" type="button" id="fs-reset">Tout effacer</button>
+      <button class="btn btn-primary" type="button" id="fs-apply" data-close>Voir les restaurants</button>
+    </div>
+  </section>
 
   <!-- ===================== NOTIFICATIONS ===================== -->
   <section id="notif-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="notif-title" aria-hidden="true">
@@ -4246,9 +4286,14 @@
   const Net = (() => {
     const RETRY_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
     const READ_RPC = /\/rest\/v1\/rpc\/(merchant_ratings|dish_like_counts|my_merchant_analytics|merchant_follower_count|my_merchant_stats|my_merchant_totals)(\?|$)/;
-    const ATTEMPTS = 4, READ_TIMEOUT = 15000, WRITE_TIMEOUT = 30000, FUNCTION_TIMEOUT = 60000;
+    // Coupures du réseau (téléphone qui sort de veille, 4G qui change d'antenne) : plus de tentatives, en silence.
+    // Le serveur n'est jugé « très demandé » que s'il répond vraiment en erreur (429, 5xx) après toutes les tentatives.
+    const ATTEMPTS = 6, READ_TIMEOUT = 15000, WRITE_TIMEOUT = 30000, FUNCTION_TIMEOUT = 60000, WAKE_GRACE = 6000;
     const listeners = [];
-    let state = 'ok', backTimer = null, troubleAt = 0, onlineAt = 0, failureHook = null;
+    let state = 'ok', backTimer = null, troubleAt = 0, onlineAt = 0, failureHook = null, shownAt = Date.now();
+    // Page cachée puis rouverte : le réseau met quelques secondes à se réveiller ; les échecs de ce moment ne comptent pas
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) shownAt = Date.now(); });
+    const waking = () => document.hidden || Date.now() - shownAt < WAKE_GRACE;
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     function delay(i, res) {
       const after = res && Number(res.headers.get('retry-after'));
@@ -4258,12 +4303,13 @@
     function paint() {
       const el = $('net');
       const text = { slow: 'Connexion difficile, nouvelle tentative…', offline: 'Hors connexion : données de votre dernière visite',
+        unstable: 'Connexion internet instable, réessayez dans un instant',
         down: 'FlashMiam est très demandé, réessayez dans un instant', back: 'Connexion rétablie' }[state];
       el.hidden = !text;
       if (!text) return;
       el.className = 'net is-' + state;
       $('net-text').textContent = text;
-      $('net-retry').hidden = state !== 'down' && state !== 'offline';
+      $('net-retry').hidden = state !== 'down' && state !== 'offline' && state !== 'unstable';
     }
     function set(next) {
       if (next !== 'ok') troubleAt = Date.now();
@@ -4271,7 +4317,7 @@
       const was = state;
       state = next;
       clearTimeout(backTimer);
-      if (next === 'ok' && (was === 'down' || was === 'offline')) {
+      if (next === 'ok' && (was === 'down' || was === 'offline' || was === 'unstable')) {
         state = 'back';
         backTimer = setTimeout(() => { if (state === 'back') { state = 'ok'; paint(); } }, 2500);
         listeners.forEach((fn) => fn('back'));
@@ -4298,22 +4344,23 @@
           const res = await fetch(input, { ...init, signal: ctrl.signal });
           if (RETRY_STATUS.has(res.status) && i < tries - 1) {
             if (res.body) res.body.cancel().catch(() => {});  // réponse abandonnée : connexion libérée tout de suite
-            set(navigator.onLine === false ? 'offline' : 'slow');
+            if (i >= 1) set(navigator.onLine === false ? 'offline' : 'slow');   // un seul raté : rien d'affiché
             await wait(delay(i, res));
             continue;
           }
           if (RETRY_STATUS.has(res.status)) set(read ? 'down' : 'slow');
-          else if (state === 'down' || state === 'offline') set('ok');   // « connexion difficile » : s'efface tout seul (settle)
+          else if (state === 'down' || state === 'offline' || state === 'unstable') set('ok');   // « connexion difficile » : s'efface tout seul (settle)
           // Panne du serveur (5xx) ou table / fonction introuvable : signalée au tableau de bord de l'équipe
           if (failureHook && (res.status >= 500 || (res.status === 404 && url.includes('/rest/v1/')))) failureHook(method, url, res);
           return res;
         } catch (e) {
           if (outer && outer.aborted) throw e;                // abandon voulu par l'appelant
           const offline = navigator.onLine === false;
-          const leftover = startedAt < onlineAt;               // partie pendant la coupure : pas un signe de lenteur
-          if (i >= tries - 1) { if (!leftover) set(offline ? 'offline' : 'down'); throw e; }
-          if (!leftover) set(offline ? 'offline' : 'slow');
-          await wait(delay(i));
+          // partie pendant la coupure, ou au réveil de la page : pas un signe de lenteur
+          const leftover = startedAt < onlineAt || waking() || startedAt < shownAt;
+          if (i >= tries - 1) { if (!leftover) set(offline ? 'offline' : 'unstable'); throw e; }
+          if (!leftover && i >= 1) set(offline ? 'offline' : 'slow');   // premier raté (souvent une connexion endormie) : en silence
+          await wait(i === 0 ? 300 + Math.random() * 400 : delay(i));
         } finally {
           clearTimeout(timer);
           if (outer) outer.removeEventListener('abort', onAbort);
@@ -4331,7 +4378,7 @@
       /** Rappel quand la connexion revient (« back ») ou que la personne demande de réessayer (« retry »). */
       onRecover: (fn) => listeners.push(fn),
       /** Problème signalé par le reste du site (ex. : chargement initial impossible). */
-      trouble: (kind = 'down') => set(navigator.onLine === false ? 'offline' : kind),
+      trouble: (kind = 'down') => { if (!waking()) set(navigator.onLine === false ? 'offline' : kind); },
       /** Rappel sur une réponse en erreur du serveur (après les nouvelles tentatives) : voir BugReport. */
       onServerFailure: (fn) => { failureHook = fn; },
     };
@@ -4723,8 +4770,11 @@
         if (sessionRejected(e)) throw e;
         if (round < 2) { await new Promise((r) => setTimeout(r, 1500 * (round + 1) * (0.7 + Math.random() * 0.6))); continue; }
         Loader.endBoot();
+        const busy = e && e.status >= 500;
         await new Promise((resolve) => {
-          fatal('FlashMiam est très demandé', 'Le serveur met trop de temps à répondre. Vous restez connecté : réessayez dans un instant.', { retry: resolve });
+          fatal(busy ? 'FlashMiam est très demandé' : 'Connexion difficile',
+            busy ? 'Le serveur met trop de temps à répondre. Vous restez connecté : réessayez dans un instant.'
+              : 'Votre connexion internet ne répond pas bien. Vous restez connecté : réessayez dans un instant.', { retry: resolve });
         });
         round = -1;
       }
@@ -4745,8 +4795,9 @@
     if (code === 'email_address_invalid') return 'Cette adresse e-mail n\'est pas acceptée. Utilisez votre adresse habituelle.';
     if (mailUndeliverable(e)) return 'Le code de confirmation n\'a pas pu être envoyé à cette adresse pour le moment. Réessayez un peu plus tard.';
     const text = String((e && (e.message || e.name)) || '');
-    if (/TimeoutError|Délai dépassé|AbortError|Failed to fetch|NetworkError|Load failed/i.test(text) || (e && e.status >= 500))
-      return 'FlashMiam est très demandé en ce moment : le serveur n\'a pas répondu à temps. Réessayez dans un instant.';
+    if (e && e.status >= 500) return 'FlashMiam est très demandé en ce moment : le serveur n\'a pas répondu à temps. Réessayez dans un instant.';
+    if (/TimeoutError|Délai dépassé|AbortError|Failed to fetch|NetworkError|Load failed|network connection was lost/i.test(text))
+      return 'La connexion internet ne répond pas bien. Réessayez dans un instant.';
     // Message d'une règle de FlashMiam (écrit en français pour l'utilisateur) : affiché tel quel. Tout message technique
     // (anglais, contrainte, colonne, détail de la base) reste dans la console : jamais montré à l'écran.
     const msg = e && typeof e.message === 'string' ? e.message.trim() : '';
@@ -4982,7 +5033,8 @@
       const away = Date.now() - hiddenAt;
       connect();
       Notifs.connect();
-      if (hiddenAt && away > 60e3) touch('*');                 // retour après une absence : données remises à jour
+      // retour après une absence : données remises à jour, une seconde après (le temps que le réseau se réveille)
+      if (hiddenAt && away > 60e3) setTimeout(() => { if (!document.hidden) touch('*'); }, 1200);
       schedule();
     });
     // Connexion revenue, ou « Réessayer » : tout relire
@@ -6008,11 +6060,11 @@
     const desktop = isDesktop();
     document.body.classList.toggle('is-desktop', desktop);
     if (desktop) $('sb-brand-slot').prepend($('profile-btn'));
-    (desktop ? $('sb-filters-slot') : !$('search-panel').hidden ? $('sp-filters') : $('filters')).appendChild($('filters-track'));
+    (desktop ? $('sb-filters-slot') : !$('search-panel').hidden ? $('sp-filters') : $('fs-filters')).appendChild($('filters-track'));
     (desktop ? $('sb-stories-slot') : $('stories')).appendChild($('stories-track'));
     if (desktop) { $('sb-brand-slot').append($('offers-btn'), $('notif-btn')); $('guest-bar').append($('guest-signup'), $('guest-login')); }
     else $('tabbar').append($('offers-btn'), $('notif-btn'), $('profile-btn'), $('guest-signup'), $('guest-login'));
-    (desktop ? $('sb-budget-slot') : $('sp-range-slot')).appendChild($('range-filters'));
+    (desktop ? $('sb-budget-slot') : !$('search-panel').hidden ? $('sp-range-slot') : $('fs-range-slot')).appendChild($('range-filters'));
     whenMapReady(() => view.setPadding(selectedId ? shopPadding() : basePadding()));
   }
   desktopMQ.addEventListener('change', applyLayout);
@@ -6049,6 +6101,45 @@
     try { saved = localStorage.getItem(KEY); } catch (e) { /* stockage indisponible */ }
     set(saved === '1', false);
     return { render, set, activeLabels };
+  })();
+
+  /* Téléphone : bouton « Filtres » (nombre et rappel des filtres actifs) et panneau des filtres */
+  const FilterBar = (() => {
+    function render() {
+      const labels = FiltersFold.activeLabels();
+      const place = activePlace ? activePlace.label : null;
+      $('filters-count').hidden = !labels.length;
+      $('filters-count').textContent = String(labels.length);
+      $('filters-open').setAttribute('aria-label', 'Filtres' + (labels.length ? ', ' + labels.length + ' actif' + (labels.length > 1 ? 's' : '') : ''));
+      const sum = $('filters-sum');
+      sum.textContent = '';
+      [...(place ? [place] : []), ...labels].forEach((t) => { const c = document.createElement('span'); c.className = 'fbar-tag'; c.textContent = t; sum.appendChild(c); });
+      sum.hidden = !sum.childElementCount;
+      const shown = [...markers.values()].filter(matchesFilters).length;
+      $('fs-sub').textContent = labels.length ? plural(labels.length, 'filtre actif', 'filtres actifs') : 'Aucun filtre';
+      $('fs-apply').textContent = 'Voir ' + (shown ? plural(shown, 'restaurant', 'restaurants') : 'la carte');
+      $('fs-reset').disabled = !labels.length;
+    }
+    const open = () => { render(); openPanel($('filters-sheet'), { modal: true }); };
+    $('filters-open').addEventListener('click', open);
+    $('filters-sum').addEventListener('click', open);
+    /** « Tout effacer » : chaque filtre revient à sa position de départ (le lieu choisi est gardé). */
+    $('fs-reset').addEventListener('click', () => {
+      $('filters-track').querySelectorAll('.chip[aria-pressed="true"]').forEach((c) => { if (!c.dataset.cat && c.id !== 'place-chip') c.click(); });
+      const all = $('filters-track').querySelector('.chip[data-cat="all"]');
+      if (all && all.getAttribute('aria-pressed') !== 'true') all.click();
+      [['radius-range', 9], ['budget-range', 10], ['rating-range', 0]].forEach(([id, v]) => {
+        const el = $(id);
+        if (Number(el.value) === v) return;
+        el.value = String(v);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      setTimeout(render, 0);
+    });
+    $('filters-track').addEventListener('click', () => setTimeout(render, 0));
+    ['input', 'change'].forEach((t) => $('range-filters').addEventListener(t, () => setTimeout(render, 0)));
+    return { render };
   })();
 
   document.addEventListener('keydown', (ev) => {
@@ -6231,7 +6322,7 @@
     if (view) requestAnimationFrame(declutterLabels);
     const openCount = all.filter((m) => m.status.open).length;
     $('shop-count').textContent = all.length + (all.length > 1 ? ' adresses' : ' adresse') + ' · ' + openCount + (openCount > 1 ? ' ouvertes' : ' ouverte') + (cloud.synced ? '' : ' · mise à jour…');
-    try { FiltersFold.render(); } catch (e) { /* pas encore prêt */ }
+    try { FiltersFold.render(); FilterBar.render(); } catch (e) { /* pas encore prêt */ }
     $('shop-empty').hidden = items.length > 0;
 
     const searching = filters.q.length > 0 || filters.max !== null;
@@ -6452,7 +6543,7 @@
   function openSearchPanel() {
     $('search-panel').hidden = false;
     document.body.classList.add('search-on');
-    if (!isDesktop()) $('sp-filters').appendChild($('filters-track'));
+    if (!isDesktop()) { $('sp-filters').appendChild($('filters-track')); $('sp-range-slot').appendChild($('range-filters')); }
     $('search-m').value = Search.mobile.query;
     SearchFold.reset();
     hideToast();
@@ -6463,7 +6554,7 @@
     if ($('search-panel').hidden) return;
     $('search-panel').hidden = true;
     document.body.classList.remove('search-on');
-    if (!isDesktop()) $('filters').appendChild($('filters-track'));
+    if (!isDesktop()) { $('fs-filters').appendChild($('filters-track')); $('fs-range-slot').appendChild($('range-filters')); }
     $('search-m').blur();
     if (restoreFocus) $('search-open').focus({ preventScroll: true });
   }
@@ -6775,7 +6866,7 @@
       if (!list && failed.has(shop.id)) {
         const li = document.createElement('li');
         li.className = 'rv-empty load-failed';
-        li.innerHTML = '<span>Les avis n\'ont pas pu être chargés : le serveur est très demandé.</span><button class="pill-btn" type="button">Réessayer</button>';
+        li.innerHTML = '<span>Les avis n\'ont pas pu être chargés.</span><button class="pill-btn" type="button">Réessayer</button>';
         li.querySelector('button').addEventListener('click', () => { failed.delete(shop.id); draw(shop); refresh(shop.id); });
         ul.appendChild(li);
         return;
@@ -11993,7 +12084,7 @@
       ul.textContent = '';
       const add = (ico, html) => { const li = document.createElement('li'); li.innerHTML = '<span aria-hidden="true"></span><span></span>'; li.firstChild.textContent = ico; li.lastChild.append(...html); ul.appendChild(li); };
       const b = (t) => { const e = document.createElement('b'); e.textContent = t; return e; };
-      if (!data && failed) { const li = document.createElement('li'); li.className = 'ps-retry'; li.appendChild(retryBox('Les statistiques n\'ont pas pu être chargées : le serveur est très demandé.')); ul.appendChild(li); return; }
+      if (!data && failed) { const li = document.createElement('li'); li.className = 'ps-retry'; li.appendChild(retryBox('Les statistiques n\'ont pas pu être chargées.')); ul.appendChild(li); return; }
       if (!data) { add('⏳', ['Chargement des statistiques…']); return; }
       const T = data.totals;
       if (!T.views && !T.followers && !T.story_views) {
@@ -12093,7 +12184,7 @@
         $('ps-period-sub').textContent = !stateOf().listed ? 'Les statistiques apparaîtront quand votre fiche sera en ligne.' : failed ? '' : 'Chargement…';
         const k = $('ps-kpis');
         k.textContent = '';
-        if (failed) { k.appendChild(retryBox('Les statistiques n\'ont pas pu être chargées : le serveur est très demandé.')); return; }
+        if (failed) { k.appendChild(retryBox('Les statistiques n\'ont pas pu être chargées.')); return; }
         if (stateOf().listed) for (let i = 0; i < 8; i++) { const d = document.createElement('div'); d.className = 'kpi'; d.innerHTML = '<i class="skel" style="width:60%"></i><i class="skel" style="height:26px;width:40%"></i>'; k.appendChild(d); }
         return;
       }
@@ -13570,8 +13661,8 @@
         try { await loadRestaurants(); applyCloud(); return; }
         catch (e) {
           console.warn('Chargement des restaurants', e);
-          Net.trouble('down');
-          if (i === 1 && !cached) toast('Le serveur est très demandé : les restaurants arrivent dans un instant.');
+          Net.trouble(e && e.status >= 500 ? 'down' : 'unstable');
+          if (i === 1 && !cached) toast('Connexion lente : les restaurants arrivent dans un instant.');
           await new Promise((r) => setTimeout(r, Math.min(30000, 2000 * 2 ** i) * (0.7 + Math.random() * 0.6)));
         }
       }
