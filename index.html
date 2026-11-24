@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-JGq8Pchae6PPMykIU2dAaCBEZBULW6rao3+Mp56yH4c=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-GsYctyTBAYISKfchCR2GGmgcURGPldozRct1pi22TMM=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -2175,6 +2175,11 @@
     .tour-card.is-swap { opacity: 0; transform: translateY(8px); }
     .tour-step { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); }
     .tour-card h2 { margin: 4px 0 6px; font-size: 19px; font-weight: 600; }
+    /* Première étape du guide : l'icône de l'appli, titre centré */
+    .tour-hello { display: block; width: 64px; height: 64px; margin: 2px auto 10px; border-radius: 16px; box-shadow: 0 4px 14px rgba(0, 0, 0, .18); }
+    .tour-hello[hidden] { display: none; }
+    .tour-card.is-hello h2 { text-align: center; font-size: 22px; }
+    .tour-card.is-hello .tour-step { text-align: center; }
     .tour-text { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--muted); }
     .tour-demo { margin: 0 0 14px; pointer-events: none; }
     .tour-demo[hidden] { display: none; }
@@ -3096,6 +3101,7 @@
       <div class="tour-demo" id="tour-demo" aria-hidden="true" hidden>
         <div class="visit-cta"><span class="visit-cta-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17.5 20.5h3v-3"/></svg></span><span class="visit-cta-txt"><strong>Profiter de l'offre</strong><small>-20 % étudiant</small></span></div>
       </div>
+      <img class="tour-hello" id="tour-hello" src="icon-192.png" alt="" width="64" height="64" hidden />
       <p class="tour-step" id="tour-step"></p>
       <h2 id="tour-title"></h2>
       <p class="tour-text" id="tour-text"></p>
@@ -13309,6 +13315,15 @@
       });
       return best;
     }
+    /** Restaurant à montrer dans le guide : le restaurant d'exemple (vitrine) s'il est sur la carte. */
+    function exampleShop() {
+      const ids = CONFIG.showcaseIds || [];
+      let found = null;
+      markers.forEach((m) => { if (!found && (ids.includes(m.shop.id) || m.shop.isDemo) && !m.el.classList.contains('is-filtered')) found = m; });
+      return found;
+    }
+    /** Repère montré à l'étape « chaque point est un restaurant » : l'exemple, sinon le plus proche du centre. */
+    const examplePin = () => { const m = exampleShop(); return m ? m.el.querySelector('.pin-badge') : centralPin(); };
     const desktop = () => matchMedia(CONFIG.desktopQuery).matches;
     function stepsFor(r) {
       if (r === 'pro') {
@@ -13319,7 +13334,8 @@
         ].filter((st) => visible(st.el()));
       }
       return [
-        { el: centralPin, title: 'Bienvenue sur FlashMiam ! Chaque point est un restaurant', round: true },
+        { el: null, title: 'Bienvenue sur FlashMiam !', hello: true },
+        { el: examplePin, title: 'Chaque point est un restaurant', round: true, example: true },
         { el: () => $('offers-btn'), title: 'Les bons plans autour de vous !' },
         { el: null, demo: true, title: 'Montrez le QR code en caisse pour profiter de l\'offre' },
         { el: () => (desktop() ? $('search') : $('search-open')), title: 'Cherchez un plat ou un restaurant' },
@@ -13341,7 +13357,7 @@
       let top;
       if (!r) top = (innerHeight - ch) / 2;
       else if (r.top + r.height / 2 > innerHeight / 2) top = r.top - pad - margin - ch;
-      else top = r.bottom + pad + margin;
+      else top = r.bottom + pad + margin + (st.round ? 26 : 0);   // repère : son nom reste visible sous lui
       card.style.top = Math.max(12, Math.min(innerHeight - ch - 12, top)) + 'px';
     }
     /** Étape montrant la carte : le projecteur suit le restaurant tant que la carte bouge (arrivée, glissement). */
@@ -13358,9 +13374,21 @@
         follow = requestAnimationFrame(tick);
       }, 480);
     }
+    /** Étape du restaurant d'exemple : la carte vient se centrer dessus et son nom s'affiche. */
+    let shown = null;
+    function focusExample(on) {
+      if (shown) { shown.el.classList.remove('is-hover'); shown = null; }
+      if (!on) return;
+      const m = exampleShop();
+      if (!m) return;
+      shown = m;
+      m.el.classList.add('is-hover');
+      whenMapReady(() => view.flyTo({ center: m.shop.coords, zoom: Math.max(view.getZoom(), 16), duration: 900 }));
+    }
     function show(n, { animate = true } = {}) {
       i = n;
       const st = steps[i];
+      focusExample(!!st.example);
       trackMap(!!st.round);
       const fill = () => {
         $('tour-step').textContent = (i + 1) + ' / ' + steps.length;
@@ -13368,6 +13396,8 @@
         $('tour-text').textContent = st.text || '';
         $('tour-text').hidden = !st.text;   // une seule phrase par étape
         $('tour-demo').hidden = !st.demo;
+        $('tour-hello').hidden = !st.hello;
+        card.classList.toggle('is-hello', !!st.hello);
         $('tour-next').textContent = i === steps.length - 1 ? 'C\'est parti !' : 'Suivant';
         $('tour-dots').innerHTML = steps.map((_, k) => '<i' + (k === i ? ' class="is-on"' : '') + '></i>').join('');
         place();
@@ -13394,6 +13424,7 @@
       if (!isOpen()) return;
       markSeen();
       trackMap(false);
+      focusExample(false);
       root.hidden = true;
       document.body.classList.remove('tour-open');
       if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
