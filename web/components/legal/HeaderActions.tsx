@@ -2,13 +2,11 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 import { Moon, Printer, Sun } from "lucide-react";
-import { THEME_KEY } from "@/lib/legal/theme";
+import { THEME_KEY, storedNight } from "@/lib/legal/theme";
 
 /** Même règle que THEME_SCRIPT, pour une arrivée par navigation interne (le script du layout n'a alors pas tourné). */
 function storedTheme(): "night" | "day" {
-  let t: string | null = null;
-  try { t = localStorage.getItem(THEME_KEY); } catch { /* navigation privée */ }
-  return t === "dark" ? "night" : "day";   // par défaut : mode jour
+  return storedNight() ? "night" : "day";
 }
 
 /** Thème lu directement sur <html> (posé par le script du layout ou par le bouton), suivi à chaque changement. */

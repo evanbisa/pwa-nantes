@@ -13,9 +13,11 @@ export const cgv: LegalDoc = {
   title: "Conditions générales de vente",
   short: "CGV",
   icon: Receipt,
-  summary: `Les abonnements des restaurateurs : ${essentiel.name} (${essentiel.month} par mois), ${premium.name} (${premium.month} par mois) ou sur devis, au mois ou à l'année, sans engagement.`,
+  summary: `Les abonnements des restaurateurs : ${essentiel.name}, ${premium.name} ou sur devis, au mois ou à l'année, sans engagement.`,
   updated: LEGAL.updated,
-  notice: `Ces conditions s'appliquent aux abonnements souscrits à compter du ${LEGAL.cgvEffectiveDate}, date d'ouverture des abonnements payants.`,
+  notice: LEGAL.cgvEffectiveDate
+    ? `Ces conditions s'appliquent aux abonnements souscrits à compter du ${LEGAL.cgvEffectiveDate}, date d'ouverture des abonnements payants.`
+    : "Les abonnements payants ouvriront prochainement : ces conditions s'appliqueront aux abonnements souscrits à partir de leur ouverture. D'ici là, l'inscription et la fiche sur la carte ne sont pas facturées.",
   sections: [
     {
       id: "champ",
@@ -60,10 +62,9 @@ export const cgv: LegalDoc = {
       blocks: [
         {
           facts: [
-            [essentiel.name, `**${essentiel.month} par mois**, ou **${essentiel.year} par an**`],
-            [premium.name, `**${premium.month} par mois**, ou **${premium.year} par an**`],
+            [`${essentiel.name} et ${premium.name}`, "Prix hors taxes indiqué sur la page de souscription, au mois ou à l'année, avant toute validation du paiement"],
             ["Sur devis", "Prix fixé par le devis accepté"],
-            ["TVA", LEGAL.vatMention],
+            ...(LEGAL.vatMention ? [["TVA", LEGAL.vatMention] as [string, string]] : []),
             ["Premier mois offert", "À la première souscription : aucun prélèvement pendant 30 jours ; résiliation sans frais avant la fin de cette période"],
             ["Engagement", "Aucun : abonnement au mois ou à l'année, résiliable à tout moment (effet à la fin de la période payée)"],
           ],
@@ -154,7 +155,7 @@ export const cgv: LegalDoc = {
       icon: Gavel,
       blocks: [
         "L'Éditeur peut modifier les CGV ; la nouvelle version est communiquée par e-mail au moins 30 jours avant son entrée en vigueur, le Client pouvant résilier sans frais avant cette date.",
-        `Les CGV sont soumises au droit français. Les parties recherchent d'abord une solution amiable (${mail}). À défaut, tout litige relatif à leur formation, leur exécution ou leur interprétation relève de la compétence exclusive du **tribunal de commerce de ${LEGAL.courtCity}**, y compris en cas de pluralité de défendeurs ou d'appel en garantie.`,
+        `Les CGV sont soumises au droit français. Les parties recherchent d'abord une solution amiable (${mail}). À défaut, tout litige relatif à leur formation, leur exécution ou leur interprétation relève de la compétence exclusive du **tribunal de commerce ${LEGAL.courtCity ? "de " + LEGAL.courtCity : "du ressort du siège de l'Éditeur"}**, y compris en cas de pluralité de défendeurs ou d'appel en garantie.`,
       ],
     },
   ],
