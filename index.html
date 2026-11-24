@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-C7F36OPdi7UAb2Z6DK6xj8gcOI5EWBBEC+JdON5A/Rg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-InVDHZevBHqCapphZ03ozWSEC+b7CjFqu2m5VrqXQPU=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-zVBDUzNd4T8UC+4YwtgIowJDT66vlZupcobAiLnkRho=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -55,7 +55,9 @@
       }
       var t = null;
       try { t = localStorage.getItem('roche-street-food:theme'); } catch (e) {}
-      if (t !== 'light' && t !== 'dark') t = 'light';   // par défaut : mode jour (le mode nuit se choisit dans le profil)
+      // « system » : suit le réglage du téléphone (mode sombre ou clair)
+      if (t === 'system') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      if (t !== 'light' && t !== 'dark') t = 'light';   // par défaut : mode jour (jour, nuit ou système se choisit dans le profil)
       document.documentElement.setAttribute('data-theme', t);
       document.getElementById('meta-theme').setAttribute('content', t === 'dark' ? '#242f3e' : '#f1f3f4');
       // Feuille de style de la carte chargée sans bloquer l'affichage (l'écran de chargement peut apparaître tout de suite)
@@ -264,6 +266,7 @@
     .ft-row { display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 4px 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; }
     .ft-row::-webkit-scrollbar { display: none; }
     .ft-label { display: none; }
+    .ft-group { display: contents; }   /* carte : les boutons de chaque section à la suite, sur une rangée */
     .chip {
       flex: none; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px;
       border-radius: 999px; font-weight: 500; font-size: 14px; white-space: nowrap; scroll-snap-align: start;
@@ -292,6 +295,8 @@
     .sb-filters { padding: 0 16px 8px; }
     .sb-filters .filters-track { gap: 12px; }
     .sb-filters .ft-row { flex-wrap: wrap; overflow: visible; padding: 0; gap: 6px; }
+    .sb-filters .ft-crit, .sp-filters .ft-crit { flex-direction: column; align-items: stretch; gap: 10px; }
+    .sb-filters .ft-group, .sp-filters .ft-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
     .sb-filters .ft-label { display: block; flex: 0 0 100%; margin: 0 0 2px 2px; font-size: 11.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
     .sb-filters .ft-cats { padding-top: 12px; border-top: 1px solid var(--line); }
     .sb-filters .chip { height: 32px; padding: 0 12px; font-size: 13px; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; background: transparent; }
@@ -325,12 +330,14 @@
        6. MARQUEURS (commerces & position de l'utilisateur)
        ===================================================================== */
     .gm-overlay { position: absolute; }          /* positionnement des marqueurs sur Google Maps */
-    .pin { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+    /* Le bas du marqueur est la pointe du repère (ancre « bottom ») : c'est elle qui touche l'adresse exacte, à tous
+       les niveaux de zoom. Le nom est posé en dessous, hors du calcul de la taille du marqueur. */
+    .pin { position: relative; display: flex; flex-direction: column; align-items: center; padding-bottom: 10px; cursor: pointer; }
     .pin-badge {
       position: relative; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
       font-size: 21px; line-height: 1; background: var(--panel-solid);
       border: 3px solid var(--gray); box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
-      transform-origin: 50% 100%; transition: transform .2s var(--ease-out), scale .3s var(--ease-out), background-color .4s;
+      transform-origin: 50% calc(100% + 10px); transition: transform .2s var(--ease-out), scale .3s var(--ease-out), background-color .4s;
     }
     .pin-badge::after { content: ""; position: absolute; bottom: -8px; left: 50%; width: 12px; height: 12px; background: inherit; border-right: inherit; border-bottom: inherit; transform: translateX(-50%) rotate(45deg); border-radius: 0 0 3px 0; }
     .pin.is-open .pin-badge { border-color: var(--green); }
@@ -343,11 +350,11 @@
     .pin.is-selected.is-closed .pin-badge { filter: none; }
     @keyframes ripple { 0% { opacity: .8; transform: scale(.9); } 100% { opacity: 0; transform: scale(1.6); } }
     .pin-label {
-      margin-top: 12px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; white-space: nowrap;
+      position: absolute; top: calc(100% + 2px); left: 50%; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; white-space: nowrap;
       background: var(--panel); color: var(--text); box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
-      opacity: 0; transform: translateY(-4px); transition: opacity .25s, transform .25s; pointer-events: none;
+      opacity: 0; transform: translate(-50%, -4px); transition: opacity .25s, transform .25s; pointer-events: none;
     }
-    #map.show-labels .pin-label, .pin.is-selected .pin-label, .pin.is-hover .pin-label { opacity: 1; transform: none; }
+    #map.show-labels .pin-label, .pin.is-selected .pin-label, .pin.is-hover .pin-label { opacity: 1; transform: translate(-50%, 0); }
     #map.show-labels .pin.label-hidden:not(.is-selected):not(.is-hover) .pin-label { opacity: 0; }
     .pin.is-filtered { display: none; }
     .pin.is-demo .pin-label::after { content: " · exemple"; font-weight: 400; color: var(--amber); }
@@ -1233,6 +1240,11 @@
     .stats-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
     .stats-head h4 { margin: 0; font-size: 15px; font-weight: 500; }
     .seg { display: inline-flex; padding: 3px; border-radius: 18px; background: var(--hover); }
+    /* Profil : choix du thème (jour, nuit, système) ; sur un écran étroit, les trois boutons passent sous le titre */
+    .pf-theme { flex-wrap: wrap; row-gap: 8px; }
+    .pf-theme .pf-k { flex: 1 1 auto; min-width: 0; }
+    .pf-theme .seg { flex: none; margin-left: auto; }
+    @media (max-width: 360px) { .pf-theme .seg { margin-left: 40px; } }
     .seg button { height: 30px; padding: 0 12px; border-radius: 15px; font-size: 13px; font-weight: 500; color: var(--muted); }
     .seg button[aria-pressed="true"] { color: var(--text); background: var(--panel-solid); box-shadow: 0 1px 2px rgba(0, 0, 0, .15); }
     .kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
@@ -1682,11 +1694,23 @@
     .sb-budget .budget { padding: 0; flex-wrap: wrap; overflow: visible; }
     .sb-budget .radius { margin-top: 6px; }
     /* Distance personnalisée : curseur de 200 m à 10 km */
-    .radius-custom { display: flex; align-items: center; gap: 10px; padding: 0 12px 8px; font-size: 13px; color: var(--muted); }
-    .radius-custom[hidden] { display: none; }
-    .radius-custom input { flex: 1; min-width: 0; accent-color: var(--accent); }
-    .radius-custom output { flex: none; min-width: 4.5em; text-align: right; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
-    .sb-budget .radius-custom { padding: 6px 0 0; }
+    /* Curseurs (distance, budget, note) : titre à gauche, valeur choisie à droite, piste remplie jusqu'au choix */
+    .range-filters { display: grid; gap: 8px; padding: 10px 16px 2px; }
+    .sb-budget .range-filters { padding: 14px 0 2px; }
+    .rf-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 2px; }
+    .rf-head label { font-size: 11.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+    .rf-head output { font-size: 14px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+    .rf.is-set .rf-head output { color: var(--accent); }
+    .rf input[type="range"] {
+      --p: 100%; width: 100%; height: 26px; margin: 0; background: transparent; -webkit-appearance: none; appearance: none; cursor: pointer; touch-action: pan-y;
+    }
+    .rf input[type="range"]::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: linear-gradient(to right, var(--accent) var(--p), var(--line-strong) var(--p)); }
+    .rf input[type="range"]::-moz-range-track { height: 6px; border-radius: 3px; background: var(--line-strong); }
+    .rf input[type="range"]::-moz-range-progress { height: 6px; border-radius: 3px; background: var(--accent); }
+    .rf input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; margin-top: -9px; border-radius: 50%; background: #fff; border: 3px solid var(--accent); box-shadow: 0 1px 4px rgba(0, 0, 0, .25); }
+    .rf input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 3px solid var(--accent); box-shadow: 0 1px 4px rgba(0, 0, 0, .25); }
+    .rf input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 6px; }
+    .rf.is-reversed input[type="range"]::-webkit-slider-runnable-track { background: linear-gradient(to right, var(--accent) var(--p), var(--line-strong) var(--p)); }
     .si-dishes { display: grid; gap: 1px; margin-top: 3px; }
     .si-dishes span { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--text); }
     .si-dishes span i { font-style: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -2337,7 +2361,8 @@
     .shop-actions { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; margin: 14px 0 0; padding: 0; overflow: visible; }
     .shop-actions .act { flex-direction: column; justify-content: flex-start; gap: 6px; height: auto; padding: 2px 0; border: 0; border-radius: 14px; background: none;
       font-size: 12.5px; font-weight: 500; color: var(--text); white-space: nowrap; }
-    .shop-actions .act svg { width: 46px; height: 46px; padding: 12px; border-radius: 50%; color: var(--accent); background: var(--accent-soft); transition: background-color .2s, color .2s, transform .15s var(--ease-out); }
+    /* overflow visible : Safari rogne sinon le dessin au ras de la marge intérieure (combiné du bouton « Appeler ») */
+    .shop-actions .act svg { width: 46px; height: 46px; padding: 12px; overflow: visible; border-radius: 50%; color: var(--accent); background: var(--accent-soft); transition: background-color .2s, color .2s, transform .15s var(--ease-out); }
     .shop-actions .act:hover svg { transform: translateY(-1px); }
     .shop-actions .act-primary { color: var(--text); background: none; }
     .shop-actions .act-primary svg { color: var(--on-accent); background: var(--accent); box-shadow: 0 3px 10px rgba(26, 115, 232, .35); }
@@ -2412,8 +2437,15 @@
 
     /* ----- Recherche (téléphone) : les filtres de la carte au-dessus du budget ----- */
     .sp-filters:empty { display: none; }
-    .sp-filters .filters-track { padding-bottom: 4px; gap: 2px; }
-    .sp-filters .ft-row { gap: 6px; }
+    .sp-filters .filters-track { padding: 2px 16px 2px; gap: 10px; }
+    .sp-filters .ft-row { gap: 6px; flex-wrap: wrap; overflow: visible; padding: 0; }
+    .sp-filters .ft-label { display: block; flex: 0 0 100%; margin: 0 0 2px 2px; font-size: 11.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+    .sp-ftoggle { display: flex; align-items: center; gap: 8px; width: calc(100% - 24px); margin: 0 12px 4px; padding: 8px 6px; border-radius: 10px; font: 600 14px var(--font-ui); color: var(--text); text-align: left; }
+    .sp-ftoggle > svg { width: 17px; height: 17px; flex: none; color: var(--muted); }
+    .sp-ft-sum { flex: 1; min-width: 0; font-weight: 500; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sp-ft-act { flex: none; font-weight: 600; color: var(--accent); }
+    .sp-filter-box[hidden] { display: none; }
+    .sp-filter-box { max-height: 72vh; overflow-y: auto; overscroll-behavior: contain; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
     .sp-filters .chip { height: 32px; padding: 0 12px; font-size: 13px; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; background: transparent; border: 1px solid var(--line-strong); }
     .sp-filters .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-line); }
     body.search-on .backdrop.is-visible { z-index: 70; }
@@ -2480,8 +2512,8 @@
       <svg class="sb-ft-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
     </button>
     <div class="sb-filter-box" id="sb-filter-box">
-      <div class="sb-budget" id="sb-budget-slot"></div>
       <div class="sb-filters" id="sb-filters-slot"></div>
+      <div class="sb-budget" id="sb-budget-slot"></div>
     </div>
     <p class="sb-count" id="shop-count"></p>
     <ul class="shop-list" id="shop-list"></ul>
@@ -2529,16 +2561,21 @@
   <!-- ===================== FILTRES (téléphone : en bas ; ordinateur : déplacés dans le panneau) ===================== -->
   <nav class="filters ui" id="filters" aria-label="Filtrer les commerces">
     <div class="filters-track" id="filters-track">
-      <div class="ft-row" role="group" aria-labelledby="ft-l1">
-        <span class="ft-label" id="ft-l1">Critères</span>
-        <button class="chip glass place-chip" type="button" id="place-chip" aria-haspopup="dialog"><span id="place-chip-lbl">Ma position</span><span class="pc-caret" aria-hidden="true">▾</span></button>
-        <button class="chip glass" type="button" id="open-only" aria-pressed="false"><span class="dot-green" aria-hidden="true"></span>Ouverts</button>
-        <button class="chip glass" type="button" id="promo-only" aria-pressed="false">Promos</button>
-        <button class="chip glass" type="button" id="rated-only" aria-pressed="false">★ 4 et +</button>
-        <button class="chip glass" type="button" data-when="lunch" aria-pressed="false">Midi</button>
-        <button class="chip glass" type="button" data-when="evening" aria-pressed="false">Ce soir</button>
-        <button class="chip glass" type="button" data-when="weekend" aria-pressed="false">Ce week-end</button>
-        <button class="chip glass" type="button" id="mv-only" aria-pressed="false">Titres-resto</button>
+      <!-- Sur la carte (téléphone) : une rangée qui défile ; dans la recherche et le panneau : des sections titrées -->
+      <div class="ft-row ft-crit" role="group" aria-label="Critères">
+        <div class="ft-group ft-place"><span class="ft-label">Autour de</span>
+          <button class="chip glass place-chip" type="button" id="place-chip" aria-haspopup="dialog"><span id="place-chip-lbl">Ma position</span><span class="pc-caret" aria-hidden="true">▾</span></button>
+        </div>
+        <div class="ft-group" role="group" aria-labelledby="ft-l-when"><span class="ft-label" id="ft-l-when">Quand</span>
+          <button class="chip glass" type="button" id="open-only" aria-pressed="false"><span class="dot-green" aria-hidden="true"></span>Ouverts</button>
+          <button class="chip glass" type="button" data-when="lunch" aria-pressed="false">Midi</button>
+          <button class="chip glass" type="button" data-when="evening" aria-pressed="false">Ce soir</button>
+          <button class="chip glass" type="button" data-when="weekend" aria-pressed="false">Ce week-end</button>
+        </div>
+        <div class="ft-group" role="group" aria-labelledby="ft-l-deals"><span class="ft-label" id="ft-l-deals">Bons plans</span>
+          <button class="chip glass" type="button" id="promo-only" aria-pressed="false">Promos</button>
+          <button class="chip glass" type="button" id="mv-only" aria-pressed="false">Titres-resto</button>
+        </div>
       </div>
       <div class="ft-row ft-cats" role="group" aria-labelledby="ft-l2">
         <span class="ft-label" id="ft-l2">Type de restaurant</span>
@@ -2573,25 +2610,30 @@
         <input id="search-m" type="search" placeholder="Un plat, un restaurant…" autocomplete="off" enterkeyhint="search" aria-label="Rechercher un plat ou un restaurant" aria-controls="search-results" />
       </div>
     </div>
-    <div class="sp-filters" id="sp-filters" role="group" aria-label="Filtres"></div>
-    <div class="budget" id="budget" role="group" aria-label="Budget par plat">
-      <button class="chip" type="button" data-max="" aria-pressed="true">Tous les prix</button>
-      <button class="chip" type="button" data-max="5" aria-pressed="false">≤ 5 €</button>
-      <button class="chip" type="button" data-max="10" aria-pressed="false">≤ 10 €</button>
-      <button class="chip" type="button" data-max="15" aria-pressed="false">≤ 15 €</button>
+    <!-- Filtres de la recherche : repliés automatiquement dès qu'on tape, pour laisser la place aux résultats -->
+    <button class="sp-ftoggle" type="button" id="sp-ftoggle" aria-expanded="true" aria-controls="sp-filter-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>
+      <span class="sp-ft-lbl">Filtres</span><span class="sp-ft-sum" id="sp-ft-sum"></span>
+      <span class="sp-ft-act" id="sp-ft-act">Masquer</span>
+    </button>
+    <div class="sp-filter-box" id="sp-filter-box">
+      <div class="sp-filters" id="sp-filters" role="group" aria-label="Filtres"></div>
+      <div id="sp-range-slot"></div>
     </div>
-    <div class="budget radius" id="radius" role="group" aria-label="Distance">
-      <button class="chip" type="button" data-r="" aria-pressed="true">Partout</button>
-      <button class="chip" type="button" data-r="500" aria-pressed="false">500 m</button>
-      <button class="chip" type="button" data-r="1000" aria-pressed="false">1 km</button>
-      <button class="chip" type="button" data-r="2000" aria-pressed="false">2 km</button>
-      <button class="chip" type="button" data-r="5000" aria-pressed="false">5 km</button>
-      <button class="chip" type="button" data-r="custom" aria-pressed="false" aria-expanded="false" aria-controls="radius-custom">Autre…</button>
-    </div>
-    <div class="radius-custom" id="radius-custom" hidden>
-      <label for="radius-range">Distance maximale</label>
-      <input type="range" id="radius-range" min="200" max="10000" step="100" value="1500" />
-      <output id="radius-out" for="radius-range">1,5 km</output>
+    <!-- Curseurs : distance, budget par plat, note minimale (tout à droite ou tout à gauche : sans limite) -->
+    <div class="range-filters" id="range-filters">
+      <div class="rf" id="radius">
+        <div class="rf-head"><label for="radius-range">Distance</label><output id="radius-out" for="radius-range">Partout</output></div>
+        <input type="range" id="radius-range" min="0" max="9" step="1" value="9" />
+      </div>
+      <div class="rf" id="budget">
+        <div class="rf-head"><label for="budget-range">Budget par plat</label><output id="budget-out" for="budget-range">Tous les prix</output></div>
+        <input type="range" id="budget-range" min="0" max="10" step="1" value="10" />
+      </div>
+      <div class="rf" id="rating-f">
+        <div class="rf-head"><label for="rating-range">Note minimale</label><output id="rating-out" for="rating-range">Toutes</output></div>
+        <input type="range" id="rating-range" min="0" max="4" step="1" value="0" />
+      </div>
     </div>
     <div class="sp-body" id="search-results"></div>
     <p class="visually-hidden" id="search-live" aria-live="polite"></p>
@@ -2972,7 +3014,11 @@
 
     <p class="pf-label">Affichage</p>
     <div class="pf-group">
-      <button class="pf-row" type="button" id="profile-theme-row"><span class="pf-ico" aria-hidden="true">🌗</span><span class="pf-k">Thème<small id="profile-theme"></small></span><span class="pf-link" aria-hidden="true">Changer</span></button>
+      <div class="pf-row pf-theme" id="profile-theme-row"><span class="pf-ico" aria-hidden="true">🌗</span><span class="pf-k" id="profile-theme-k">Thème<small id="profile-theme"></small></span>
+        <div class="seg" id="profile-theme-seg" role="group" aria-labelledby="profile-theme-k">
+          <button type="button" data-theme-pref="light" aria-pressed="false">Jour</button><button type="button" data-theme-pref="dark" aria-pressed="false">Nuit</button><button type="button" data-theme-pref="system" aria-pressed="false">Système</button>
+        </div>
+      </div>
       <div class="pf-row"><span class="pf-ico" aria-hidden="true">🗺️</span><span class="pf-k">Carte<small id="profile-engine"></small></span></div>
     </div>
 
@@ -5883,18 +5929,38 @@
   $('zoom-out').addEventListener('click', () => whenMapReady(() => view.zoomBy(-1)));
 
   /* =====================================================================
-     5. MODE JOUR / NUIT
-     Par défaut : mode jour, quel que soit le réglage du téléphone. Le choix du mode nuit est mémorisé.
+     5. MODE JOUR / NUIT / SYSTÈME
+     Par défaut : mode jour. Le choix (jour, nuit, ou système : suit le réglage du téléphone) est mémorisé.
      ===================================================================== */
 
   function currentTheme() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
+  const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  /** Choix enregistré : 'light', 'dark' ou 'system'. */
+  function themePref() {
+    let t = null;
+    try { t = localStorage.getItem(CONFIG.themeKey); } catch (e) { /* stockage indisponible */ }
+    return t === 'dark' || t === 'system' ? t : 'light';
+  }
+  const resolveTheme = (pref) => (pref === 'system' ? (darkQuery && darkQuery.matches ? 'dark' : 'light') : pref);
+  /** Applique et mémorise un choix du profil (jour, nuit, système). */
+  function setThemePref(pref) {
+    try { localStorage.setItem(CONFIG.themeKey, pref); } catch (e) { /* ignore */ }
+    setTheme(resolveTheme(pref));
+  }
+  // Mode système : le site change avec le téléphone (passage automatique au mode sombre le soir, par exemple)
+  if (darkQuery) {
+    const follow = () => { if (themePref() === 'system') setTheme(resolveTheme('system')); };
+    if (darkQuery.addEventListener) darkQuery.addEventListener('change', follow); else if (darkQuery.addListener) darkQuery.addListener(follow);
+  }
 
   function setTheme(theme, { persist = false } = {}) {
     document.documentElement.setAttribute('data-theme', theme);
     $('meta-theme').setAttribute('content', palette(theme).background);
     $('theme-btn').setAttribute('aria-label', theme === 'dark' ? 'Passer en mode jour' : 'Passer en mode nuit');
     if (persist) { try { localStorage.setItem(CONFIG.themeKey, theme); } catch (e) { /* ignore */ } }
-    $('profile-theme').textContent = theme === 'dark' ? 'Mode nuit' : 'Mode jour';
+    const pref = themePref();
+    $('profile-theme').textContent = pref === 'system' ? 'Comme le téléphone (' + (theme === 'dark' ? 'nuit' : 'jour') + ')' : theme === 'dark' ? 'Mode nuit' : 'Mode jour';
+    document.querySelectorAll('#profile-theme-seg [data-theme-pref]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.themePref === pref)));
     whenMapReady(() => view.setTheme(theme));
   }
 
@@ -5917,8 +5983,7 @@
     (desktop ? $('sb-stories-slot') : $('stories')).appendChild($('stories-track'));
     if (desktop) { $('sb-brand-slot').append($('offers-btn'), $('notif-btn')); $('guest-bar').append($('guest-signup'), $('guest-login')); }
     else $('tabbar').append($('offers-btn'), $('notif-btn'), $('profile-btn'), $('guest-signup'), $('guest-login'));
-    if (desktop) $('sb-budget-slot').append($('budget'), $('radius'), $('radius-custom'));
-    else $('search-results').before($('budget'), $('radius'), $('radius-custom'));
+    (desktop ? $('sb-budget-slot') : $('sp-range-slot')).appendChild($('range-filters'));
     whenMapReady(() => view.setPadding(selectedId ? shopPadding() : basePadding()));
   }
   desktopMQ.addEventListener('change', applyLayout);
@@ -5929,11 +5994,8 @@
     const txt = (el) => el.textContent.replace(/\s+/g, ' ').trim();
     function activeLabels() {
       const out = [];
-      const b = $('budget').querySelector('[aria-pressed="true"]');
-      if (b && b.dataset.max) out.push(txt(b));
-      const r = $('radius').querySelector('[aria-pressed="true"]');
-      if (r && r.dataset.r) out.push(r.dataset.r === 'custom' ? '≤ ' + $('radius-out').textContent : txt(r));
       $('filters-track').querySelectorAll('.chip[aria-pressed="true"]').forEach((c) => { if (c.dataset.cat !== 'all' && c.id !== 'place-chip') out.push(txt(c)); });
+      ['radius', 'budget', 'rating-f'].forEach((id) => { if ($(id).classList.contains('is-set')) out.push(txt($(id).querySelector('output'))); });
       return out;
     }
     function render() {
@@ -5951,12 +6013,13 @@
     }
     $('sb-ftoggle').addEventListener('click', () => set($('sb-ftoggle').getAttribute('aria-expanded') === 'true'));
     // Les filtres changent : le rappel suit (après le traitement du clic par les filtres eux-mêmes)
-    ['filters-track', 'budget', 'radius'].forEach((id) => $(id).addEventListener('click', () => setTimeout(render, 0)));
-    $('radius-range').addEventListener('input', render);
+    $('filters-track').addEventListener('click', () => setTimeout(render, 0));
+    $('range-filters').addEventListener('input', () => setTimeout(render, 0));
+    $('range-filters').addEventListener('change', () => setTimeout(render, 0));
     let saved = null;
     try { saved = localStorage.getItem(KEY); } catch (e) { /* stockage indisponible */ }
     set(saved === '1', false);
-    return { render, set };
+    return { render, set, activeLabels };
   })();
 
   document.addEventListener('keydown', (ev) => {
@@ -5971,7 +6034,7 @@
      ===================================================================== */
 
   const markers = new Map();          // id → { shop, marker, el, status }
-  const filters = { category: 'all', openOnly: false, promoOnly: false, ratedOnly: false, query: '', q: [], max: null, radius: null, when: '', mvOnly: false };
+  const filters = { category: 'all', openOnly: false, promoOnly: false, minRating: 0, query: '', q: [], max: null, radius: null, when: '', mvOnly: false };
   /** Distance maximale choisie (mètres, null = partout) : sans position connue, le filtre ne retire rien. */
   const withinRadius = (m) => filters.radius === null || !here() || distance(here(), m.shop.coords) <= filters.radius;
   let selectedId = null;
@@ -6111,10 +6174,10 @@
     matchesWhen(m.shop) && (!filters.mvOnly || !!m.shop.mealVouchers) &&
     (!filters.openOnly || m.status.open) &&
     (!filters.promoOnly || activePromos(m.shop).length > 0) &&
-    (!filters.ratedOnly || !!(m.shop.rating && m.shop.rating.avg >= 4)) &&
+    (!filters.minRating || !!(m.shop.rating && m.shop.rating.avg >= filters.minRating)) &&
     withinRadius(m);
   /** Une puce de filtre est-elle choisie (hors « Tout ») ? */
-  const chipsActive = () => filters.category !== 'all' || !!filters.when || filters.mvOnly || filters.openOnly || filters.promoOnly || filters.ratedOnly;
+  const chipsActive = () => filters.category !== 'all' || !!filters.when || filters.mvOnly || filters.openOnly || filters.promoOnly || filters.minRating > 0;
   const matchesFilters = (m) => matchesChips(m) && Search.shopMatches(m.shop, filters.q, filters.max);
 
   function applyFilters() {
@@ -6218,9 +6281,6 @@
     } else if (chip.id === 'promo-only') {
       filters.promoOnly = !filters.promoOnly;
       chip.setAttribute('aria-pressed', String(filters.promoOnly));
-    } else if (chip.id === 'rated-only') {
-      filters.ratedOnly = !filters.ratedOnly;
-      chip.setAttribute('aria-pressed', String(filters.ratedOnly));
     } else if (chip.id === 'mv-only') {
       filters.mvOnly = !filters.mvOnly;
       chip.setAttribute('aria-pressed', String(filters.mvOnly));
@@ -6365,6 +6425,7 @@
     document.body.classList.add('search-on');
     if (!isDesktop()) $('sp-filters').appendChild($('filters-track'));
     $('search-m').value = Search.mobile.query;
+    SearchFold.reset();
     hideToast();
     renderSearchPanel();
     setTimeout(() => $('search-m').focus(), 60);
@@ -6380,7 +6441,7 @@
   function renderSearchPanel() {
     const box = $('search-results');
     const { query, max } = Search.mobile;
-    document.querySelectorAll('#budget .chip').forEach((c) => c.setAttribute('aria-pressed', String((c.dataset.max ? Number(c.dataset.max) : null) === (isDesktop() ? filters.max : max))));
+    Ranges.syncBudget(isDesktop() ? filters.max : max);
     box.textContent = '';
     const res = Search.run(query, max);
     const title = (text) => { const h = document.createElement('h3'); h.className = 'sr-title'; h.textContent = text; box.appendChild(h); };
@@ -6482,51 +6543,75 @@
     if (activePanel) return;   // une fenêtre ouverte par-dessus (« Distances depuis… ») se ferme d'abord
     ev.stopPropagation(); closeSearchPanel();
   });
-  $('budget').addEventListener('click', (ev) => {
-    const chip = ev.target.closest('.chip');
-    if (!chip) return;
-    const max = chip.dataset.max ? Number(chip.dataset.max) : null;
-    document.querySelectorAll('#budget .chip').forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
-    if (isDesktop()) { filters.max = max; applyFilters(); }
-    else { Search.mobile.max = max; Search.mobile.limit = 30; renderSearchPanel(); }
-  });
+  /* Curseurs : distance (position demandée si elle manque), budget par plat, note minimale */
+  const Ranges = (() => {
+    const RADIUS = [200, 300, 500, 750, 1000, 1500, 2000, 3000, 5000, null];   // null : partout
+    const BUDGET = [3, 4, 5, 6, 7, 8, 10, 12, 15, 20, null];                  // null : tous les prix
+    const RATING = [0, 3, 3.5, 4, 4.5];                                       // 0 : toutes les notes
+    const labels = {
+      radius: (r) => (r === null ? 'Partout' : 'À moins de ' + formatDistance(r)),
+      budget: (v) => (v === null ? 'Tous les prix' : 'Jusqu\'à ' + v + ' €'),
+      rating: (v) => (!v ? 'Toutes' : String(v).replace('.', ',') + ' ★ et plus'),
+    };
+    function paint(inputId, boxId, value, label, isSet) {
+      const input = $(inputId), max = Number(input.max);
+      input.style.setProperty('--p', (Number(input.value) / max) * 100 + '%');
+      input.setAttribute('aria-valuetext', label);
+      $(boxId).querySelector('output').textContent = label;
+      $(boxId).classList.toggle('is-set', isSet);
+    }
+    function syncRadius(r) { $('radius-range').value = RADIUS.indexOf(r) >= 0 ? RADIUS.indexOf(r) : RADIUS.length - 1; paint('radius-range', 'radius', r, labels.radius(r), r !== null); }
+    function syncBudget(v) { $('budget-range').value = BUDGET.indexOf(v) >= 0 ? BUDGET.indexOf(v) : BUDGET.length - 1; paint('budget-range', 'budget', v, labels.budget(v), v !== null); }
+    function syncRating(v) { $('rating-range').value = Math.max(0, RATING.indexOf(v)); paint('rating-range', 'rating-f', v, labels.rating(v), v > 0); }
+    function rerender() { if (!$('search-panel').hidden) { Search.mobile.limit = 30; renderSearchPanel(); } }
+    function setRadius(r) { filters.radius = r; syncRadius(r); applyFilters(); rerender(); }
 
-  /* Distance : boutons (500 m à 5 km) ou curseur « Autre… » ; la position est demandée si elle manque */
-  function setRadius(r) {
-    filters.radius = r;
-    const preset = [...document.querySelectorAll('#radius .chip')].find((c) => c.dataset.r !== 'custom' && (c.dataset.r ? Number(c.dataset.r) : null) === r);
-    document.querySelectorAll('#radius .chip').forEach((c) => c.setAttribute('aria-pressed', String(preset ? c === preset : c.dataset.r === 'custom')));
-    const custom = document.querySelector('#radius [data-r="custom"]');
-    custom.textContent = preset || r === null ? 'Autre…' : 'Autre : ' + formatDistance(r);
-    applyFilters();
-    if (!$('search-panel').hidden) { Search.mobile.limit = 30; renderSearchPanel(); }
-  }
+    // Distance : pendant le glissement, la valeur suit ; au lâcher, la position est demandée si elle manque
+    $('radius-range').addEventListener('input', () => {
+      const r = RADIUS[Number($('radius-range').value)];
+      if (r === null || Geo.position) setRadius(r); else syncRadius(r);
+    });
+    $('radius-range').addEventListener('change', async () => {
+      const r = RADIUS[Number($('radius-range').value)];
+      if (r !== null && !(await needPosition())) { setRadius(null); return; }
+      setRadius(r);
+    });
+    $('budget-range').addEventListener('input', () => {
+      const v = BUDGET[Number($('budget-range').value)];
+      syncBudget(v);
+      if (isDesktop()) { filters.max = v; applyFilters(); }
+      else { Search.mobile.max = v; Search.mobile.limit = 30; renderSearchPanel(); }
+    });
+    $('rating-range').addEventListener('input', () => {
+      const v = RATING[Number($('rating-range').value)];
+      filters.minRating = v; syncRating(v); applyFilters(); rerender();
+    });
+    syncRadius(null); syncBudget(null); syncRating(0);
+    return { syncBudget, setRadius };
+  })();
   async function needPosition() {
     if (Geo.position) return true;
     const result = await requestLocation({ fromButton: true });
     if (result === 'granted') return true;
-    toast('Activez la localisation pour trier par distance.');
+    toast('Activez la localisation pour filtrer par distance.');
     return false;
   }
-  $('radius').addEventListener('click', async (ev) => {
-    const chip = ev.target.closest('.chip');
-    if (!chip) return;
-    if (chip.dataset.r === 'custom') {
-      const box = $('radius-custom'), open = box.hidden;
-      box.hidden = !open;
-      chip.setAttribute('aria-expanded', String(open));
-      if (open && await needPosition()) setRadius(Number($('radius-range').value));
-      return;
+
+  /* Recherche (téléphone) : filtres repliables ; repliés dès qu'on tape, sauf si on les a rouverts soi-même */
+  const SearchFold = (() => {
+    let userChoice = false;
+    function render() {
+      const open = !$('sp-filter-box').hidden, n = FiltersFold.activeLabels().length;
+      $('sp-ft-sum').textContent = n ? '· ' + n + ' actif' + (n > 1 ? 's' : '') : '';
+      $('sp-ft-act').textContent = open ? 'Masquer' : 'Afficher';
     }
-    const r = chip.dataset.r ? Number(chip.dataset.r) : null;
-    $('radius-custom').hidden = true;
-    document.querySelector('#radius [data-r="custom"]').setAttribute('aria-expanded', 'false');
-    if (r !== null && !(await needPosition())) return;
-    setRadius(r);
-  });
-  const radiusLabel = () => { $('radius-out').textContent = formatDistance(Number($('radius-range').value)); };
-  $('radius-range').addEventListener('input', () => { radiusLabel(); if (Geo.position) setRadius(Number($('radius-range').value)); });
-  radiusLabel();
+    function set(open) { $('sp-filter-box').hidden = !open; $('sp-ftoggle').setAttribute('aria-expanded', String(open)); render(); }
+    $('sp-ftoggle').addEventListener('click', () => { userChoice = true; set($('sp-filter-box').hidden); });
+    $('search-m').addEventListener('input', (ev) => { if (!userChoice) set(!ev.target.value.trim()); });
+    $('filters-track').addEventListener('click', () => setTimeout(render, 0));
+    $('range-filters').addEventListener('input', () => setTimeout(render, 0));
+    return { reset() { userChoice = false; set(!$('search-m').value.trim()); } };
+  })();
 
   /* ---------- Avis : note sur 5, commentaire, réponse du restaurateur ---------- */
   // Colonnes lisibles des avis : l'identifiant du compte de l'auteur n'est jamais transmis (avis non reliables entre eux)
@@ -13244,7 +13329,7 @@
   });
   $('profile-pro').addEventListener('click', () => ProSpace.open());
   $('profile-cookies').addEventListener('click', () => Consent.open({ details: true }));
-  $('profile-theme-row').addEventListener('click', () => { $('theme-btn').click(); });
+  document.querySelectorAll('#profile-theme-seg [data-theme-pref]').forEach((b) => b.addEventListener('click', () => setThemePref(b.dataset.themePref)));
 
   /*
    * Photo de profil (clients et restaurateurs) : photothèque ou appareil photo (le téléphone propose les deux),

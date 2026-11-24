@@ -13,7 +13,7 @@ export const cgv: LegalDoc = {
   title: "Conditions générales de vente",
   short: "CGV",
   icon: Receipt,
-  summary: `Les abonnements des restaurateurs : ${essentiel.name} (${essentiel.month} par mois), ${premium.name} (${premium.month} par mois) ou sur devis, au mois ou à l'année, sans engagement.`,
+  summary: `Les abonnements des restaurateurs : ${essentiel.name}, ${premium.name} ou sur devis, au mois ou à l'année, sans engagement.`,
   updated: LEGAL.updated,
   notice: `Ces conditions s'appliquent aux abonnements souscrits à compter du ${LEGAL.cgvEffectiveDate}, date d'ouverture des abonnements payants.`,
   sections: [
@@ -60,8 +60,7 @@ export const cgv: LegalDoc = {
       blocks: [
         {
           facts: [
-            [essentiel.name, `**${essentiel.month} par mois**, ou **${essentiel.year} par an**`],
-            [premium.name, `**${premium.month} par mois**, ou **${premium.year} par an**`],
+            [`${essentiel.name} et ${premium.name}`, "Prix hors taxes indiqué sur la page de souscription, au mois ou à l'année, avant toute validation du paiement"],
             ["Sur devis", "Prix fixé par le devis accepté"],
             ["TVA", LEGAL.vatMention],
             ["Premier mois offert", "À la première souscription : aucun prélèvement pendant 30 jours ; résiliation sans frais avant la fin de cette période"],

@@ -23,10 +23,11 @@ export const LEGAL = {
   instagram: "flashmiam85",
   publicationDirector: "[DIRECTEUR_DE_LA_PUBLICATION]",
 
-  // ----- Abonnements restaurateurs (CGV) : mêmes prix que la table billing_plans de la base et que le site -----
+  // ----- Abonnements restaurateurs (CGV) : noms des formules. Les prix ne figurent pas dans les CGV (encore à
+  // fixer) : ils sont affichés sur la page de souscription avant tout paiement.
   plans: {
-    essentiel: { name: "Essentiel", month: "29 € HT", year: "290 € HT" },
-    premium: { name: "Premium", month: "79 € HT", year: "790 € HT" },
+    essentiel: { name: "Essentiel" },
+    premium: { name: "Premium" },
   },
   /** Plateforme de paiement des abonnements (raison sociale et pays à vérifier dans les conditions signées avec Whop) */
   paymentProvider: "Whop, Inc. (États-Unis)",
@@ -42,7 +43,7 @@ export const LEGAL = {
   consumerMediator: "[MÉDIATEUR_DE_LA_CONSOMMATION]",
 
   /** Date de la dernière mise à jour des documents */
-  updated: "20 novembre 2026",
+  updated: "24 novembre 2026",
 } as const;
 
 /** Une information reste-t-elle à compléter ? (valeur encore entre crochets) */
