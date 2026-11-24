@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Pas de script écrit dans la page : seul simulateur.js (même site) s'exécute ; le cadre n'affiche que le site -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+  <meta name="robots" content="noindex" />
+  <title>Simulateur FlashMiam</title>
+  <link rel="icon" href="/favicon.ico" />
+  <style>
+    /* Simulateur de téléphone : le vrai site, dans un cadre à la taille d'un écran de téléphone */
+    :root {
+      --bg: #eceae8; --panel: #ffffff; --ink: #1c1a19; --muted: #6d6662; --line: #dcd7d3;
+      --accent: #f0531f; --accent-ink: #b8380c; --bezel: #141212;
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #121110; --panel: #1f1c1a; --ink: #f4efeb; --muted: #a79e98; --line: #34302d; --accent: #ff6a35; --accent-ink: #ff9b70; --bezel: #000; color-scheme: dark; }
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body { background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; overflow: hidden; }
+    .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--line); }
+    .bar h1 { margin: 0 8px 0 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .bar h1 img { width: 26px; height: 26px; border-radius: 7px; }
+    .group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .group > span { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-right: 2px; }
+    button, a.btn { font: inherit; font-weight: 600; font-size: 13px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; text-decoration: none; }
+    button:hover, a.btn:hover { border-color: var(--accent); }
+    button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    button:focus-visible, a.btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+    .stage { flex: 1; min-height: 0; display: grid; place-items: center; padding: 16px; }
+    .holder { position: relative; }
+    .phone { position: absolute; top: 0; left: 0; transform-origin: 0 0; padding: 14px; border-radius: 56px; background: var(--bezel); box-shadow: 0 0 0 2px #3b3634 inset, 0 30px 70px -20px rgb(0 0 0 / .5); }
+    .phone.android { border-radius: 40px; }
+    .phone.small { border-radius: 44px; }
+    .screen { position: relative; overflow: hidden; border-radius: 44px; background: #fff; }
+    .phone.android .screen { border-radius: 28px; }
+    .phone.small .screen { border-radius: 10px; }
+    iframe { display: block; border: 0; width: 100%; height: 100%; background: #fff; }
+    .note { margin: 0; padding: 0 16px 12px; text-align: center; font-size: 12.5px; color: var(--muted); }
+  </style>
+  <script src="simulateur.js" defer></script>
+</head>
+<body>
+  <header class="bar">
+    <h1><img src="/icon-192.png" alt="" /> Simulateur FlashMiam</h1>
+    <div class="group" role="group" aria-label="Modèle de téléphone" id="devices"></div>
+    <div class="group" role="group" aria-label="Aller à">
+      <span>Aller à</span>
+      <button type="button" data-go="/">Accueil</button>
+      <button type="button" data-go="/app/inscription/">Inscription</button>
+      <button type="button" id="reload">Recharger</button>
+      <a class="btn" href="/" target="_blank" rel="noopener">Ouvrir le site</a>
+    </div>
+  </header>
+  <main class="stage" id="stage">
+    <div class="holder" id="holder">
+      <div class="phone" id="phone">
+        <div class="screen" id="screen">
+          <iframe id="app" src="/" title="FlashMiam sur un téléphone" allow="geolocation; camera; clipboard-write"></iframe>
+        </div>
+      </div>
+    </div>
+  </main>
+  <p class="note">C'est le vrai site : comptes, avis et offres créés ici sont réels. Cliquez pour toucher, glissez pour faire défiler ou déplacer la carte.</p>
+</body>
+</html>

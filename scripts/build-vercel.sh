@@ -16,6 +16,7 @@ node scripts/config.mjs dist/index.html
 node scripts/minify.mjs dist/index.html   # page allégée (esbuild) : environ 25 % de moins à télécharger
 node scripts/csp.mjs dist/index.html dist/confidentialite.html dist/conditions.html
 cp -r vendor dist/   # bibliothèque Supabase (servie par le site lui-même)
+cp -r simulateur dist/   # simulateur de téléphone (/simulateur/) : le site dans un cadre à la taille d'un écran
 cp -r web/out dist/app
 # Référencement : adresse principale (SITE_URL) dans les balises de partage, robots.txt, sitemap.xml, page 404
 node scripts/seo.mjs dist
