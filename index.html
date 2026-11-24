@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-PpqioxK4Cfcv6Et0b3XJ2TuryALhiNX6wimKpJc1oFg=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-JGq8Pchae6PPMykIU2dAaCBEZBULW6rao3+Mp56yH4c=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -2230,7 +2230,19 @@
       .filters .ft-row { padding: 4px 28px 4px 0; scroll-padding-inline: 0;
         -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
       body.sheet-open .filters, body:not(.ui-ready) .filters { transform: translateY(-8px); }
-      .stories { top: calc(var(--safe-top) + 160px); max-width: calc(100% - 24px); }
+      .stories { top: calc(var(--safe-top) + 116px); max-width: calc(100% - 24px); }
+      /* Une seule rangée : bouton « Filtres » puis le rappel des filtres actifs (qui défile) */
+      .fbar { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+      .fbar-btn { flex: none; gap: 6px; font-weight: 600; }
+      .fbar-btn svg { width: 17px; height: 17px; }
+      .fbar-count { display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; font-size: 12px; color: var(--on-accent); background: var(--accent); }
+      .fbar-count[hidden] { display: none; }
+      .fbar-sum { flex: 1; min-width: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 0; text-align: left;
+        -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); }
+      .fbar-sum::-webkit-scrollbar { display: none; }
+      .fbar-sum[hidden] { display: none; }
+      .fbar-tag { flex: none; padding: 6px 11px; border-radius: 16px; font-size: 13px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); border: 1px solid var(--accent-line); white-space: nowrap; }
+      #filters .filters-track { display: none; }
       .stories-track { gap: 8px; padding: 6px 8px 5px; }
       .story-chip { width: 58px; gap: 3px; }
       .story-ring { width: 50px; height: 50px; }
@@ -2452,6 +2464,13 @@
 
     /* ----- Recherche (téléphone) : les filtres de la carte au-dessus du budget ----- */
     .sp-filters:empty { display: none; }
+    #filters-sheet .sp-filters .filters-track { padding: 4px 0 2px; }
+    #filters-sheet .range-filters { padding: 12px 0 2px; }
+    /* Boutons collés en bas, jusque derrière la barre d'onglets (rien ne défile en dessous) */
+    #filters-sheet { padding-bottom: 0; }
+    .fs-actions { display: flex; gap: 10px; margin: 16px -20px 0; padding: 10px 20px calc(var(--safe-bottom) + var(--nav-h, 0px) + 12px); position: sticky; bottom: 0; z-index: 2; background: var(--panel-solid); border-top: 1px solid var(--line); }
+    .fs-actions .btn { margin: 0; flex: 1; }
+    .fs-actions .btn-primary { flex: 1.8; }
     .sp-filters .filters-track { padding: 2px 16px 2px; gap: 10px; }
     .sp-filters .ft-row { gap: 6px; flex-wrap: wrap; overflow: visible; padding: 0; }
     .sp-filters .ft-label { display: block; flex: 0 0 100%; margin: 0 0 2px 2px; font-size: 11.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
@@ -2575,6 +2594,11 @@
 
   <!-- ===================== FILTRES (téléphone : en bas ; ordinateur : déplacés dans le panneau) ===================== -->
   <nav class="filters ui" id="filters" aria-label="Filtrer les commerces">
+    <!-- Téléphone : un seul bouton « Filtres » (avec le nombre de filtres actifs et leur rappel) ; les filtres sont dans un panneau -->
+    <div class="fbar" id="fbar">
+      <button class="chip glass fbar-btn" type="button" id="filters-open" aria-haspopup="dialog" aria-controls="filters-sheet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg><span>Filtres</span><b class="fbar-count" id="filters-count" hidden></b></button>
+      <button class="fbar-sum" type="button" id="filters-sum" tabindex="-1" aria-hidden="true"></button>
+    </div>
     <div class="filters-track" id="filters-track">
       <!-- Sur la carte (téléphone) : une rangée qui défile ; dans la recherche et le panneau : des sections titrées -->
       <div class="ft-row ft-crit" role="group" aria-label="Critères">
@@ -2967,6 +2991,21 @@
       </div>
     </div>
   </div>
+
+  <!-- ===================== FILTRES (téléphone) : panneau ouvert par le bouton « Filtres » ===================== -->
+  <section id="filters-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="fs-title" aria-hidden="true">
+    <button class="sheet-grab" type="button" data-close aria-label="Fermer"></button>
+    <div class="sheet-head">
+      <div class="sheet-title"><h3 id="fs-title">Filtres</h3><p class="eyebrow" id="fs-sub"></p></div>
+      <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
+    </div>
+    <div class="sp-filters fs-filters" id="fs-filters" role="group" aria-label="Filtres"></div>
+    <div id="fs-range-slot"></div>
+    <div class="fs-actions">
+      <button class="btn btn-ghost" type="button" id="fs-reset">Tout effacer</button>
+      <button class="btn btn-primary" type="button" id="fs-apply" data-close>Voir les restaurants</button>
+    </div>
+  </section>
 
   <!-- ===================== NOTIFICATIONS ===================== -->
   <section id="notif-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="notif-title" aria-hidden="true">
@@ -6021,11 +6060,11 @@
     const desktop = isDesktop();
     document.body.classList.toggle('is-desktop', desktop);
     if (desktop) $('sb-brand-slot').prepend($('profile-btn'));
-    (desktop ? $('sb-filters-slot') : !$('search-panel').hidden ? $('sp-filters') : $('filters')).appendChild($('filters-track'));
+    (desktop ? $('sb-filters-slot') : !$('search-panel').hidden ? $('sp-filters') : $('fs-filters')).appendChild($('filters-track'));
     (desktop ? $('sb-stories-slot') : $('stories')).appendChild($('stories-track'));
     if (desktop) { $('sb-brand-slot').append($('offers-btn'), $('notif-btn')); $('guest-bar').append($('guest-signup'), $('guest-login')); }
     else $('tabbar').append($('offers-btn'), $('notif-btn'), $('profile-btn'), $('guest-signup'), $('guest-login'));
-    (desktop ? $('sb-budget-slot') : $('sp-range-slot')).appendChild($('range-filters'));
+    (desktop ? $('sb-budget-slot') : !$('search-panel').hidden ? $('sp-range-slot') : $('fs-range-slot')).appendChild($('range-filters'));
     whenMapReady(() => view.setPadding(selectedId ? shopPadding() : basePadding()));
   }
   desktopMQ.addEventListener('change', applyLayout);
@@ -6062,6 +6101,45 @@
     try { saved = localStorage.getItem(KEY); } catch (e) { /* stockage indisponible */ }
     set(saved === '1', false);
     return { render, set, activeLabels };
+  })();
+
+  /* Téléphone : bouton « Filtres » (nombre et rappel des filtres actifs) et panneau des filtres */
+  const FilterBar = (() => {
+    function render() {
+      const labels = FiltersFold.activeLabels();
+      const place = activePlace ? activePlace.label : null;
+      $('filters-count').hidden = !labels.length;
+      $('filters-count').textContent = String(labels.length);
+      $('filters-open').setAttribute('aria-label', 'Filtres' + (labels.length ? ', ' + labels.length + ' actif' + (labels.length > 1 ? 's' : '') : ''));
+      const sum = $('filters-sum');
+      sum.textContent = '';
+      [...(place ? [place] : []), ...labels].forEach((t) => { const c = document.createElement('span'); c.className = 'fbar-tag'; c.textContent = t; sum.appendChild(c); });
+      sum.hidden = !sum.childElementCount;
+      const shown = [...markers.values()].filter(matchesFilters).length;
+      $('fs-sub').textContent = labels.length ? plural(labels.length, 'filtre actif', 'filtres actifs') : 'Aucun filtre';
+      $('fs-apply').textContent = 'Voir ' + (shown ? plural(shown, 'restaurant', 'restaurants') : 'la carte');
+      $('fs-reset').disabled = !labels.length;
+    }
+    const open = () => { render(); openPanel($('filters-sheet'), { modal: true }); };
+    $('filters-open').addEventListener('click', open);
+    $('filters-sum').addEventListener('click', open);
+    /** « Tout effacer » : chaque filtre revient à sa position de départ (le lieu choisi est gardé). */
+    $('fs-reset').addEventListener('click', () => {
+      $('filters-track').querySelectorAll('.chip[aria-pressed="true"]').forEach((c) => { if (!c.dataset.cat && c.id !== 'place-chip') c.click(); });
+      const all = $('filters-track').querySelector('.chip[data-cat="all"]');
+      if (all && all.getAttribute('aria-pressed') !== 'true') all.click();
+      [['radius-range', 9], ['budget-range', 10], ['rating-range', 0]].forEach(([id, v]) => {
+        const el = $(id);
+        if (Number(el.value) === v) return;
+        el.value = String(v);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      setTimeout(render, 0);
+    });
+    $('filters-track').addEventListener('click', () => setTimeout(render, 0));
+    ['input', 'change'].forEach((t) => $('range-filters').addEventListener(t, () => setTimeout(render, 0)));
+    return { render };
   })();
 
   document.addEventListener('keydown', (ev) => {
@@ -6244,7 +6322,7 @@
     if (view) requestAnimationFrame(declutterLabels);
     const openCount = all.filter((m) => m.status.open).length;
     $('shop-count').textContent = all.length + (all.length > 1 ? ' adresses' : ' adresse') + ' · ' + openCount + (openCount > 1 ? ' ouvertes' : ' ouverte') + (cloud.synced ? '' : ' · mise à jour…');
-    try { FiltersFold.render(); } catch (e) { /* pas encore prêt */ }
+    try { FiltersFold.render(); FilterBar.render(); } catch (e) { /* pas encore prêt */ }
     $('shop-empty').hidden = items.length > 0;
 
     const searching = filters.q.length > 0 || filters.max !== null;
@@ -6465,7 +6543,7 @@
   function openSearchPanel() {
     $('search-panel').hidden = false;
     document.body.classList.add('search-on');
-    if (!isDesktop()) $('sp-filters').appendChild($('filters-track'));
+    if (!isDesktop()) { $('sp-filters').appendChild($('filters-track')); $('sp-range-slot').appendChild($('range-filters')); }
     $('search-m').value = Search.mobile.query;
     SearchFold.reset();
     hideToast();
@@ -6476,7 +6554,7 @@
     if ($('search-panel').hidden) return;
     $('search-panel').hidden = true;
     document.body.classList.remove('search-on');
-    if (!isDesktop()) $('filters').appendChild($('filters-track'));
+    if (!isDesktop()) { $('fs-filters').appendChild($('filters-track')); $('fs-range-slot').appendChild($('range-filters')); }
     $('search-m').blur();
     if (restoreFocus) $('search-open').focus({ preventScroll: true });
   }
