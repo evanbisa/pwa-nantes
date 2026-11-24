@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-U6WQwmK2Vbfj8Jis4S39kjdYbKHOlIB1qXz0T34b+sk=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-eNSwuGq5XYvziwsfpNFSxbD5UUJz8ECi1ySSr3hhXxY=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1646,6 +1646,16 @@
     .todo-state b { font-size: 15px; }
     .todo-state.is-warn { color: var(--text); background: color-mix(in srgb, #ff8a3d 14%, transparent); border: 1px solid color-mix(in srgb, #ff8a3d 40%, transparent); }
     .todo-state.is-ok { color: var(--text); background: var(--green-soft); border: 1px solid color-mix(in srgb, var(--green) 35%, transparent); }
+    .todo-steps { margin: 0 0 16px; padding: 0; list-style: none; display: grid; gap: 8px; }
+    .todo-steps[hidden] { display: none; }
+    .todo-steps li { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); font-size: 14.5px; }
+    .todo-steps li.is-current { border-color: var(--accent-line); background: var(--accent-soft); font-weight: 600; }
+    .todo-steps li.is-next { color: var(--muted); }
+    .todo-steps .ts-num { flex: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-size: 13px; font-weight: 700; color: var(--on-accent); background: var(--accent); }
+    .todo-steps li.is-next .ts-num { color: var(--muted); background: transparent; border: 1.5px solid var(--line-strong); }
+    .todo-steps .ts-txt { flex: 1; min-width: 0; }
+    .todo-steps .ts-go { flex: none; width: auto; min-height: 38px; margin: 0; padding: 0 16px; font-size: 14px; }
+    .todo-sub { margin: 4px 0 8px; font-size: 15px; font-weight: 600; }
     #notif-btn.ring svg { animation: ring 1s var(--ease-out); transform-origin: 50% 10%; }
     @keyframes ring { 0%, 100% { transform: none; } 20% { transform: rotate(14deg); } 40% { transform: rotate(-12deg); } 60% { transform: rotate(8deg); } 80% { transform: rotate(-4deg); } }
     .sb-brand { display: flex; align-items: center; gap: 4px; }
@@ -3329,10 +3339,13 @@
         <!-- Compléter mon profil : justificatifs ajoutés après l'inscription -->
         <section class="ps-pane" id="psp-todo" role="tabpanel" aria-labelledby="pst-todo" hidden>
           <section class="ps-card" aria-labelledby="ps-todo-h">
-            <h4 id="ps-todo-h">Compléter mon profil</h4>
+            <h4 id="ps-todo-h">Compléter mon compte</h4>
             <div class="todo-state" id="ps-todo-state" role="status"></div>
+            <ol class="todo-steps" id="ps-todo-steps"></ol>
+            <h5 class="todo-sub" id="ps-docs-title">Justificatifs</h5>
+            <p class="hint" id="ps-docs-wait" hidden>À ajouter une fois votre établissement vérifié (étape 1).</p>
             <div class="docs" id="ps-docs"></div>
-            <p class="hint">PDF, JPG ou PNG · 10 Mo maximum par fichier. Une photo nette du document suffit.</p>
+            <p class="hint" id="ps-docs-hint">PDF, JPG ou PNG · 10 Mo maximum par fichier. Une photo nette du document suffit.</p>
             <p class="form-error" id="err-ps-docs" role="alert"></p>
           </section>
         </section>
@@ -4105,6 +4118,18 @@
   ];
   /** Justificatifs obligatoires encore manquants. Facultatifs pour s'inscrire, ils sont nécessaires pour apparaître sur la carte. */
   const missingDocs = (pro) => (pro && pro.merchantId ? DOC_TYPES.filter((t) => t.required && !(pro.docs || {})[t.key]) : []);
+  /** Étapes d'inscription restant à faire (dans l'ordre), selon l'avancement du restaurateur. */
+  const PRO_STEPS = [
+    { key: 'verification', step: 'pro-verify', label: 'Votre établissement (SIRET)' },
+    { key: 'payment', step: 'pro-payment', label: 'Votre abonnement' },
+    { key: 'listing', step: 'pro-listing', label: 'La fiche de votre restaurant' },
+  ];
+  function missingSteps(pro) {
+    const i = PRO_STEPS.findIndex((st) => st.key === (pro && pro.status));
+    return i < 0 ? [] : PRO_STEPS.slice(i);
+  }
+  /** Nombre d'éléments à compléter : étapes restantes + justificatifs obligatoires manquants. */
+  const proTodoCount = (account) => (account && account.role === 'pro' ? missingSteps(account.pro).length + missingDocs(account.pro).length : 0);
   const MAX_DOC_SIZE = 10 * 1024 * 1024;
   const MAX_PHOTOS = 10;
   const MAX_MENU_ITEMS = 80;
@@ -10061,12 +10086,14 @@
     then();
   }
 
-  /** Après connexion : inscription restaurateur à reprendre, sinon la carte. */
+  /**
+   * Après connexion : toujours la carte. Un restaurateur dont le compte n'est pas complet n'est plus bloqué sur l'étape
+   * à reprendre : un rappel et la pastille du profil l'y mènent quand il veut.
+   */
   function routeAfterLogin(account, { boot = false } = {}) {
-    const step = proStepFor(account);
-    if (step) showAuthStep(step);
-    else if (boot) { startApp(); resumeLocation(); }
+    if (boot) { startApp(); resumeLocation(); }
     else finishAuth({ fresh: false });
+    if (proTodoCount(account)) setTimeout(remindIncomplete, boot ? 1800 : 1200);
   }
 
   /** Supprime définitivement le compte connecté et tout ce qui lui appartient (fonction serveur « delete-account »). */
@@ -10271,13 +10298,24 @@
     setTimeout(() => { if (ob.classList.contains('is-leaving')) ob.hidden = true; }, 750);
   }
 
-  /** Restaurateur : « Continuer plus tard » → déconnexion, reprise à la prochaine connexion (le compte est créé). */
+  /**
+   * Restaurateur : « Continuer plus tard » → le compte est créé et reste connecté ; direction la carte. Le reste se
+   * complète depuis le profil (pastille et onglet « Compléter » de l'espace restaurateur).
+   */
   document.querySelectorAll('[data-pro-later]').forEach((btn) => btn.addEventListener('click', async () => {
     await discardDraftPhotos();
-    store.write({ lastRole: 'pro', proLater: true });
-    await sb.auth.signOut().catch(() => {});
-    location.reload();
+    store.write({ lastRole: 'pro' });
+    finishAuth({ fresh: false });
+    syncProfileBadge();
+    setTimeout(remindIncomplete, 900);
   }));
+  /** Rappel discret : compte restaurateur pas encore complet, avec un raccourci vers l'onglet « Compléter ». */
+  function remindIncomplete() {
+    const me = currentUser();
+    const n = proTodoCount(me);
+    if (!n) return;
+    toast('Votre compte n\'est pas complet : ' + plural(n, 'élément', 'éléments') + ' à compléter.', { label: 'Compléter', run: () => ProSpace.open('todo') });
+  }
   document.querySelectorAll('[data-pro-back]').forEach((btn) => btn.addEventListener('click', () => showAuthStep(btn.dataset.proBack)));
 
   /** Utilisateur connecté qui avait déjà accepté la localisation : on la reprend sans redemander. */
@@ -11571,9 +11609,9 @@
     el.style.backgroundImage = url ? 'url("' + url + '")' : '';
   }
 
-  /** Pastille du bouton du profil : justificatifs encore à ajouter (restaurateur). */
+  /** Pastille du bouton du profil : étapes et justificatifs encore à compléter (restaurateur). */
   function syncProfileBadge(account = currentUser()) {
-    const n = account && account.role === 'pro' ? missingDocs(account.pro).length : 0;
+    const n = proTodoCount(account);
     $('profile-badge').hidden = !n;
     $('profile-badge').textContent = String(n);
     if (account) $('profile-btn').setAttribute('aria-label', 'Profil de ' + account.name + (n ? ' : ' + plural(n, 'élément', 'éléments') + ' à compléter' : ''));
@@ -11726,7 +11764,7 @@
       else if (s.awaitingReview) { dot.className = 'is-off'; dot.textContent = '● En cours de vérification'; }
       else if (s.reviewNote) { dot.className = 'is-off'; dot.textContent = '● À corriger'; }
       else if (s.hidden) { dot.className = 'is-off'; dot.textContent = '● Masquée'; }
-      else { dot.className = 'is-off'; dot.textContent = '● Inscription à terminer'; }
+      else { dot.className = 'is-off'; dot.textContent = '● Compte à compléter'; }
       sub.append(dot);
       if (r && r.status !== 'draft') sub.append(' · ' + catOf(r).label);
       renderHome();
@@ -11737,23 +11775,54 @@
       syncTodo(s);
     }
 
-    /** Onglet « Compléter » : affiché tant qu'il manque des justificatifs, avec leur nombre. */
+    /** Onglet « Compléter » : affiché tant qu'il manque une étape ou un justificatif, avec leur nombre. */
     function syncTodo(s = stateOf()) {
-      const n = s.missing.length;
+      const n = proTodoCount(s.account);
       const b = $('pst-todo');
       b.hidden = !n && tab !== 'todo';
       $('ps-todo-badge').hidden = !n;
       $('ps-todo-badge').textContent = String(n);
-      b.setAttribute('aria-label', 'Compléter mon profil' + (n ? ', ' + plural(n, 'justificatif', 'justificatifs') + ' à ajouter' : ''));
+      b.setAttribute('aria-label', 'Compléter mon compte' + (n ? ', ' + plural(n, 'élément', 'éléments') + ' à compléter' : ''));
       if (tab === 'todo') renderTodoTab(s);
       syncProfileBadge(s.account);
     }
     function renderTodoTab(s = stateOf()) {
       const n = s.missing.length;
+      const steps = missingSteps(s.pro);
       const box = $('ps-todo-state');
-      box.className = 'todo-state ' + (n ? 'is-warn' : 'is-ok');
+      box.className = 'todo-state ' + (n || steps.length ? 'is-warn' : 'is-ok');
       box.innerHTML = '<b></b><span></span>';
       const [title, text] = box.children;
+      // Étapes d'inscription restantes : la première se reprend tout de suite, les suivantes viennent après
+      const ol = $('ps-todo-steps');
+      ol.textContent = '';
+      ol.hidden = !steps.length;
+      steps.forEach((st, i) => {
+        const li = document.createElement('li');
+        li.className = i ? 'is-next' : 'is-current';
+        li.innerHTML = '<span class="ts-num" aria-hidden="true"></span><span class="ts-txt"></span>';
+        li.querySelector('.ts-num').textContent = String(PRO_STEPS.indexOf(st) + 1);
+        li.querySelector('.ts-txt').textContent = st.label;
+        if (!i) {
+          const go = document.createElement('button');
+          go.type = 'button';
+          go.className = 'btn btn-primary ts-go';
+          go.textContent = 'Continuer';
+          go.addEventListener('click', () => { close(); showAuthStep(st.step); });
+          li.appendChild(go);
+        }
+        ol.appendChild(li);
+      });
+      const hasMerchant = !!s.pro.merchantId;
+      $('ps-docs-wait').hidden = hasMerchant;
+      $('ps-docs').hidden = !hasMerchant;
+      $('ps-docs-hint').hidden = !hasMerchant;
+      if (steps.length) {
+        title.textContent = 'Votre compte n\'est pas complet';
+        text.textContent = 'Encore ' + plural(steps.length + n, 'élément', 'éléments') + ' avant d\'apparaître sur la carte. Reprenez où vous en étiez, à votre rythme.';
+        if (hasMerchant) renderDocs(s.pro.docs || {}, $('ps-docs'), 'err-ps-docs', afterDocSaved);
+        return;
+      }
       if (n) {
         title.textContent = s.awaitingDocs ? 'Votre fiche n\'est pas encore visible sur la carte' : plural(n, 'justificatif obligatoire', 'justificatifs obligatoires') + ' à ajouter';
         text.textContent = (n > 1 ? 'Ajoutez les ' + n + ' justificatifs marqués « Obligatoire »' : 'Ajoutez le justificatif marqué « Obligatoire »')
@@ -11826,7 +11895,7 @@
       else if (s.awaitingDocs) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche est prête, mais elle n\'apparaît pas encore sur la carte : ' + (s.missing.length ? plural(s.missing.length, 'justificatif obligatoire', 'justificatifs obligatoires') + ' à ajouter.' : 'justificatifs en cours de prise en compte.'); btn.textContent = 'Ajouter mes justificatifs'; btn.onclick = () => setTab('todo'); }
       else if (s.awaitingReview) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche est complète : l\'équipe FlashMiam vérifie votre justificatif (en général sous 24 h). Elle apparaîtra sur la carte dès qu\'elle sera validée.'; btn.hidden = true; }
       else if (s.reviewNote) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche n\'a pas pu être validée : ' + s.reviewNote + ' Corrigez-la puis remettez-la en ligne : elle sera revérifiée.'; btn.textContent = 'Corriger ma fiche'; btn.onclick = editListing; }
-      else if (s.step || !s.listed) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre inscription n\'est pas terminée : votre restaurant n\'apparaît pas encore sur la carte.'; btn.textContent = 'Terminer mon inscription'; btn.onclick = editListing; }
+      else if (s.step || !s.listed) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre compte n\'est pas complet : votre restaurant n\'apparaît pas encore sur la carte.'; btn.textContent = 'Compléter mon compte'; btn.onclick = () => setTab('todo'); }
       else if (s.hidden) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche est masquée : les clients ne la voient plus sur la carte.'; btn.textContent = 'Remettre en ligne'; btn.onclick = () => setVisible(true); }
       $('ps-home-live').hidden = !s.listed;
       if (!s.listed) return;
@@ -13324,7 +13393,7 @@
   $('profile-btn').addEventListener('click', () => {
     const account = currentUser();
     if (!account) { if (Guest.on()) Guest.ask(); return; }
-    if (account.role === 'pro') ProSpace.open(missingDocs(account.pro).length && !proStepFor(account) ? 'todo' : 'home');
+    if (account.role === 'pro') ProSpace.open(proTodoCount(account) ? 'todo' : 'home');
     else openProfileSheet();
   });
   $('profile-pro').addEventListener('click', () => ProSpace.open());
@@ -13535,10 +13604,6 @@
           setAuthRole(store.read().lastRole || 'client');
           $('li-email').value = store.read().lastEmail || '';
           showAuthStep('login');
-          if (store.read().proLater) {
-            store.write({ proLater: false });
-            setTimeout(() => toast('Votre compte est créé. Connectez-vous quand vous voulez pour reprendre là où vous en étiez.'), 600);
-          }
         } else if (pendingLink || store.read().guest) {
           finishAuth({ fresh: false });
         } else {
