@@ -3,6 +3,7 @@
 #   /      → site complet (index.html)
 #   /app/  → nouvelle application Next.js (dossier web/, export statique)
 set -e
+node scripts/check-ids.mjs index.html   # un identifiant en double casse un formulaire sans erreur visible
 cd web
 npm run lint
 NEXT_PUBLIC_BASE_PATH=/app npm run build   # inclut la vérification des types
