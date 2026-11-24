@@ -362,6 +362,10 @@
     #map.zoom-far .pin.is-open .pin-badge::before { animation: none; opacity: 0; }
 
     .me { position: relative; width: 22px; height: 22px; pointer-events: none; }
+    /* Marqueurs MapLibre : toujours positionnés en absolu par le moteur. « position: relative » (.pin, .me, déclarées
+       après la feuille de MapLibre) les remettait dans le flux : chacun était décalé de la hauteur des précédents
+       (point bleu à côté de son cercle de précision, repères à côté de leur adresse). */
+    .maplibregl-marker.pin, .maplibregl-marker.me { position: absolute; }
     .me-dot { position: absolute; inset: 0; border-radius: 50%; background: var(--blue); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, .35); }
     .me-pulse { position: absolute; inset: 0; border-radius: 50%; background: rgba(26, 115, 232, .4); animation: me-pulse 2s ease-out infinite; }
     @keyframes me-pulse { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(3.6); opacity: 0; } }
