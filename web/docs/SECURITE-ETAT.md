@@ -305,12 +305,20 @@ publications. Corrigé :
   both exist or not » (Google ajoute parfois un nonce au jeton, FedCM) : le site tire désormais son propre nonce, le
   donne haché à Google et en clair à Supabase (`index.html` › `GoogleAuth`, `web/components/signup/GoogleSignup.tsx`).
 - **Pages juridiques** (`/app/legal/` : mentions légales, CGU, CGV, confidentialité ; anciennes adresses
-  `conditions.html` et `confidentialite.html` redirigées) : compléter les informations entre crochets dans
-  `web/lib/legal/site.ts` (éditeur, SIREN/SIRET, adresse, directeur de la publication, TVA, tribunal, médiateur de la
-  consommation, date d'ouverture des abonnements). Tant qu'elles manquent, elles restent surlignées en orange sur les pages.
-  Les CGV décrivent les trois formules, le paiement par Whop et la résiliation en un clic (en place) ; vérifier la
-  raison sociale de Whop (`paymentProvider`) et qui émet les factures (Whop ou vous). Une relecture par un juriste reste
-  conseillée avant le lancement commercial.
+  `conditions.html` et `confidentialite.html` redirigées). **Vérifié le 25 novembre 2026** : aucune mention « à
+  compléter », aucun crochet ni champ vide sur les 4 pages publiées ; une information absente (`null` dans
+  `web/lib/legal/site.ts`) n'est simplement pas affichée. **À compléter à la création de l'entreprise** (un seul fichier,
+  `web/lib/legal/site.ts`, puis tout se met à jour) :
+  - forme juridique (micro-entreprise, SAS…), capital social, adresse du siège, SIREN, SIRET, immatriculation (RNE/RCS),
+    numéro de TVA intracommunautaire ;
+  - mention de TVA des abonnements (ex. « TVA non applicable, article 293 B du CGI » en micro-entreprise) ;
+  - téléphone de contact (facultatif) ;
+  - tribunal compétent entre professionnels (CGV) et médiateur de la consommation (nom + site, obligatoire pour les
+    clients consommateurs) ;
+  - date d'ouverture des abonnements payants (`cgvEffectiveDate`) et prix des formules (affichés à la souscription) ;
+  - vérifier la raison sociale de Whop (`paymentProvider`) et qui émet les factures ; boîte `contact@flashmiam.fr`
+    réellement reçue (sinon changer `email`) ;
+  - puis changer `updated` (date de mise à jour) et faire relire par un juriste avant le lancement commercial.
 - **Paiement Whop** (voir `web/README.md`, « Paiement des abonnements ») : créer les 4 tarifs, la clé d'API et le webhook
   sur Whop ; secrets `WHOP_API_KEY` et `WHOP_WEBHOOK_SECRET` dans Supabase ; me transmettre les identifiants `plan_…` et
   `biz_…` (publics) : je les enregistre et j'ouvre le paiement.

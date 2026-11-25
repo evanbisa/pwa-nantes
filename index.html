@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-7QeTtCyCeX3KNaLuylRFqIxNuXew9+5TEOBKYhhBpfo=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-zPZ7yDhmSA/BSs2WBQjvHJmzZErPOPYHC/lM1+wpsSk=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1390,6 +1390,8 @@
     .sc-dur-chips .chip[aria-pressed="true"] { color: var(--accent-strong); background: var(--accent-soft); border-color: var(--accent-line); }
     .sc-dur input[type=range] { width: 100%; margin-top: 12px; accent-color: var(--accent); }
     .sc-dur-scale { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+    .sc-end { display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: 14px; color: var(--muted); }
+    .sc-end input { flex: 1; min-width: 0; height: 42px; padding: 0 10px; border-radius: 10px; font: inherit; font-size: 15px; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); }
     .sc-file input { position: absolute; width: 1px; height: 1px; opacity: 0; }
     .sc-file .btn { margin-top: 0; cursor: pointer; }
     .sc-file:focus-within .btn { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -1839,6 +1841,17 @@
     .promo .promo-main small { font-size: 12.5px; color: var(--muted); }
     .promo .promo-more { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
     .pp-photo-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .promo.is-later { opacity: .78; }
+    .pp-slot-box { margin-top: 10px; }
+    .pp-slot-box[hidden] { display: none; }
+    .pp-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .pp-days button { height: 38px; border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--text); border: 1px solid var(--line-strong); background: transparent; }
+    .pp-days button[aria-pressed="true"] { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
+    .pp-hours { display: flex; gap: 12px; margin-top: 10px; }
+    .pp-hours label { flex: 1; display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
+    .pp-hours input, .pp-end-row input { flex: 1; min-width: 0; height: 44px; padding: 0 10px; border-radius: 10px; font: inherit; font-size: 15px; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); }
+    .pp-end-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .pp-end-row .link-btn { flex: none; font-size: 13.5px; }
     #pp-photo-preview { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; }
     .offers-list li + li { border-top: 1px solid var(--line); }
     .offer-hit { width: 100%; display: flex; gap: 12px; align-items: flex-start; padding: 12px 4px; text-align: left; border-radius: 12px; }
@@ -2855,6 +2868,7 @@
         </div>
         <input type="range" id="sc-dur" min="1" max="168" step="1" value="24" aria-labelledby="sc-dur-label" />
         <div class="sc-dur-scale" aria-hidden="true"><span>1 h</span><span>1 semaine</span></div>
+        <label class="sc-end"><span>Ou jusqu'au</span><input type="datetime-local" id="sc-end" /></label>
       </div>
       <p class="hint" id="sc-dur-hint">Visible par tous les utilisateurs pendant 24 h, puis retirée automatiquement.</p>
       <p class="form-error" id="err-sc" role="alert"></p>
@@ -2991,14 +3005,14 @@
   </section>
 
   <!-- Lieu introuvable : le point est placé à la main, au centre de la carte -->
-  <div class="place-picker" id="place-picker" role="dialog" aria-labelledby="pp-title" hidden>
+  <div class="place-picker" id="place-picker" role="dialog" aria-labelledby="pk-title" hidden>
     <div class="pp-cross" aria-hidden="true"><span></span></div>
     <div class="pp-bar glass">
-      <p class="pp-title" id="pp-title">Déplacez la carte pour mettre le repère sur <b id="pp-what">votre école</b>.</p>
-      <label class="field pp-field"><span>Nom du lieu</span><input id="pp-name" type="text" maxlength="60" autocomplete="off" /></label>
+      <p class="pp-title" id="pk-title">Déplacez la carte pour mettre le repère sur <b id="pk-what">votre école</b>.</p>
+      <label class="field pp-field"><span>Nom du lieu</span><input id="pk-name" type="text" maxlength="60" autocomplete="off" /></label>
       <div class="pp-actions">
-        <button class="btn btn-ghost" type="button" id="pp-cancel">Annuler</button>
-        <button class="btn btn-primary" type="button" id="pp-ok">Valider ce point</button>
+        <button class="btn btn-ghost" type="button" id="pk-cancel">Annuler</button>
+        <button class="btn btn-primary" type="button" id="pk-ok">Valider ce point</button>
       </div>
     </div>
   </div>
@@ -3366,11 +3380,28 @@
                 </div>
                 <small class="field-error" id="err-pp-photo" aria-live="polite"></small>
               </div>
-              <label class="field" id="field-pp-end">
-                <span>Jusqu'au (facultatif)</span>
-                <input id="pp-end" type="date" />
+              <!-- Créneau de validité : certains jours, certaines heures (ex. : mardi de 12 h à 14 h) -->
+              <div class="field pp-slot" id="field-pp-slot">
+                <label class="check"><input type="checkbox" id="pp-slot-on" /> Seulement certains jours ou à certaines heures</label>
+                <div class="pp-slot-box" id="pp-slot-box" hidden>
+                  <div class="pp-days" id="pp-days" role="group" aria-label="Jours où l'offre est valable"><button type="button" data-d="1" aria-pressed="false" aria-label="lundi">Lun</button><button type="button" data-d="2" aria-pressed="false" aria-label="mardi">Mar</button><button type="button" data-d="3" aria-pressed="false" aria-label="mercredi">Mer</button><button type="button" data-d="4" aria-pressed="false" aria-label="jeudi">Jeu</button><button type="button" data-d="5" aria-pressed="false" aria-label="vendredi">Ven</button><button type="button" data-d="6" aria-pressed="false" aria-label="samedi">Sam</button><button type="button" data-d="0" aria-pressed="false" aria-label="dimanche">Dim</button></div>
+                  <div class="pp-hours">
+                    <label><span>De</span><input type="time" id="pp-from" value="12:00" /></label>
+                    <label><span>à</span><input type="time" id="pp-to" value="14:00" /></label>
+                  </div>
+                  <p class="hint" id="pp-slot-sum"></p>
+                  <small class="field-error" id="err-pp-slot" aria-live="polite"></small>
+                </div>
+              </div>
+              <!-- Fin de l'offre : date et heure au choix -->
+              <div class="field" id="field-pp-end">
+                <label for="pp-end"><span>Fin de l'offre</span></label>
+                <div class="pp-end-row">
+                  <input id="pp-end" type="datetime-local" />
+                  <button class="link-btn" type="button" id="pp-end-clear">Sans date de fin</button>
+                </div>
                 <small class="field-error" id="err-pp-end" aria-live="polite"></small>
-              </label>
+              </div>
               <p class="hint" id="pp-end-auto"></p>
               <button class="btn btn-primary" type="submit" id="pp-submit">Publier la promotion</button>
             </form>
@@ -3711,8 +3742,8 @@
       </form>
 
       <!-- Restaurateur — étape 3 : paiement de l'abonnement -->
-      <section id="pro-payment" class="ob-step" data-step="pro-payment" hidden aria-labelledby="pp-title">
-        <h2 id="pp-title">Choisissez votre <em>abonnement</em></h2>
+      <section id="pro-payment" class="ob-step" data-step="pro-payment" hidden aria-labelledby="pay-title">
+        <h2 id="pay-title">Choisissez votre <em>abonnement</em></h2>
         <p class="lead" id="pp-lead">Sans engagement, résiliable en un clic.</p>
         <div class="trial" id="trial-banner">
           <span class="trial-ico" aria-hidden="true">🎁</span>
@@ -4508,7 +4539,9 @@
     createdAt: st.created_at, expiresAt: st.expires_at,
   });
   const promoFromRow = (pr) => ({ id: pr.id, kind: pr.kind, title: pr.title || '', details: pr.details || '', createdAt: pr.created_at, endsAt: pr.ends_at, locked: !!pr.locked,
-    photoPath: pr.photo_path || null, photoUrl: pr.photo_path ? publicUrl('photos', pr.photo_path) : null });
+    photoPath: pr.photo_path || null, photoUrl: pr.photo_path ? publicUrl('photos', pr.photo_path) : null,
+    validDays: Array.isArray(pr.valid_days) && pr.valid_days.length ? pr.valid_days.map(Number) : null,
+    validFrom: pr.valid_from ? String(pr.valid_from).slice(0, 5) : null, validTo: pr.valid_to ? String(pr.valid_to).slice(0, 5) : null });
   function restaurantFromRow(m, promos = [], stories = [], rating = null) {
     const hours = m.opening_hours || {};
     return {
@@ -7204,9 +7237,9 @@
       picking = key;
       closeEdit();
       closePanel($('places-sheet'), { silent: true });
-      $('pp-what').textContent = PLACE_KINDS[key].mine.replace(/^mon /, 'votre ');
-      $('pp-name').value = '';
-      $('pp-name').placeholder = 'Ex. : ' + (key === 'school' ? 'IUT, lycée…' : 'nom de l\'entreprise');
+      $('pk-what').textContent = PLACE_KINDS[key].mine.replace(/^mon /, 'votre ');
+      $('pk-name').value = '';
+      $('pk-name').placeholder = 'Ex. : ' + (key === 'school' ? 'IUT, lycée…' : 'nom de l\'entreprise');
       $('place-picker').hidden = false;
       document.body.classList.add('place-picking');
       // marges de la carte retirées : le centre de la carte est exactement sous le repère (milieu de l'écran)
@@ -7224,13 +7257,13 @@
       whenMapReady(() => view.setPadding(selectedId ? shopPadding() : basePadding()));
     }
     $('places-pin').addEventListener('click', startPick);
-    $('pp-cancel').addEventListener('click', () => { endPick(); open(); });
-    $('pp-ok').addEventListener('click', () => whenMapReady(() => {
+    $('pk-cancel').addEventListener('click', () => { endPick(); open(); });
+    $('pk-ok').addEventListener('click', () => whenMapReady(() => {
       const key = picking;
       if (!key) return;
       const coords = view.getCenter();
       if (!isInBounds(coords)) { toast('Ce point est en dehors de La Roche-sur-Yon et de ses environs.'); return; }
-      const name = $('pp-name').value.trim().replace(/\s+/g, ' ') || PLACE_KINDS[key].mine.charAt(0).toUpperCase() + PLACE_KINDS[key].mine.slice(1);
+      const name = $('pk-name').value.trim().replace(/\s+/g, ' ') || PLACE_KINDS[key].mine.charAt(0).toUpperCase() + PLACE_KINDS[key].mine.slice(1);
       endPick();
       data[key] = { label: name + ' (point placé sur la carte)', name, coords };
       use(key);
@@ -7290,7 +7323,7 @@
         b.dataset.id = m.shop.id;
         b.innerHTML = '<span class="offer-body"><b></b><span class="offer-shop"></span></span>';
         b.querySelector('b').textContent = p.title;
-        b.querySelector('.offer-shop').textContent = m.shop.name + (located ? ' · ' + formatDistance(d) : '');
+        b.querySelector('.offer-shop').textContent = m.shop.name + (located ? ' · ' + formatDistance(d) : '') + (promoSlot(p) ? ' · ' + promoSlot(p) : '');
         if (m.shop.isDemo || isShowcase(m.shop)) b.querySelector('.offer-shop').append(' ', demoTag());
         if (p.photoUrl) {
           const img = document.createElement('img');
@@ -7313,7 +7346,7 @@
         box.className = 'offer-details';
         box.hidden = true;
         const line = document.createElement('p');
-        line.append([PROMO_KINDS[p.kind].label, p.details, promoUntil(p)].filter(Boolean).join(' · '));
+        line.append([PROMO_KINDS[p.kind].label, p.details, promoWhen(p)].filter(Boolean).join(' · '));
         box.appendChild(line);
         const st = document.createElement('p');
         st.append(statusTag(m.status));
@@ -8368,15 +8401,52 @@
     return list.sort((a, b) => PROMO_ORDER.indexOf(a.kind) - PROMO_ORDER.indexOf(b.kind));
   }
   const promoLine = (p) => p.title;
-  /** « Jusqu'à ce soir », « Jusqu'à dimanche soir », « Jusqu'au 12 novembre » */
+  const DAY_NAMES = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+  const hourText = (hhmm) => { const [h, m] = hhmm.split(':').map(Number); return h + 'h' + (m ? String(m).padStart(2, '0') : ''); };
+  /** Jours de validité en clair : « le mardi », « du lundi au vendredi », « le week-end », « lundi, mercredi et vendredi ». */
+  function daysText(days) {
+    if (!days || days.length >= 7) return '';
+    const order = [1, 2, 3, 4, 5, 6, 0].filter((d) => days.includes(d));
+    if (order.length === 1) return 'le ' + DAY_NAMES[order[0]];
+    if (order.length === 2 && order.includes(6) && order.includes(0)) return 'le week-end';
+    const idx = order.map((d) => (d + 6) % 7);   // lundi = 0 … dimanche = 6
+    const consecutive = idx.every((v, i) => !i || v === idx[i - 1] + 1);
+    if (consecutive && order.length >= 3) return 'du ' + DAY_NAMES[order[0]] + ' au ' + DAY_NAMES[order[order.length - 1]];
+    return order.slice(0, -1).map((d) => DAY_NAMES[d]).join(', ') + ' et ' + DAY_NAMES[order[order.length - 1]];
+  }
+  /** Créneau de l'offre : « le mardi de 12h à 14h », « tous les jours de 18h à 20h », « du lundi au vendredi » ; '' si toujours. */
+  function promoSlot(p) {
+    const days = daysText(p.validDays), hours = p.validFrom && p.validTo ? 'de ' + hourText(p.validFrom) + ' à ' + hourText(p.validTo) : '';
+    if (!days && !hours) return '';
+    return (days || 'tous les jours') + (hours ? ' ' + hours : '');
+  }
+  /** L'offre vaut-elle en ce moment (jour et heure de son créneau) ? */
+  function promoNow(p, now = new Date()) {
+    if (p.validDays && !p.validDays.includes(now.getDay())) return false;
+    if (p.validFrom && p.validTo) {
+      const t = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+      if (t < p.validFrom || t >= p.validTo) return false;
+    }
+    return true;
+  }
+  /** « jusqu'à ce soir », « jusqu'à dimanche soir », « jusqu'à demain 18h », « jusqu'au 12 décembre 14h » */
   function promoUntil(p, now = new Date()) {
     if (!p.endsAt) return '';
-    const end = new Date(p.endsAt);
+    let end = new Date(p.endsAt);
+    // Fin à minuit pile : c'est la fin de la veille (« ce soir »)
+    if (end.getHours() === 0 && end.getMinutes() === 0) end = new Date(end.getTime() - 1);
+    const evening = end.getHours() === 23 && end.getMinutes() === 59;
+    const at = evening ? ' soir' : ' ' + hourText(String(end.getHours()) + ':' + String(end.getMinutes()).padStart(2, '0'));
     const days = Math.round((endOfDay(end) - endOfDay(now)) / 864e5);
-    if (days <= 0) return 'jusqu\'à ce soir';
-    if (days === 1) return 'jusqu\'à demain soir';
-    if (days < 7) return 'jusqu\'à ' + end.toLocaleDateString('fr-FR', { weekday: 'long' }) + ' soir';
-    return 'jusqu\'au ' + end.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+    if (days <= 0) return 'jusqu\'à ' + (evening ? 'ce soir' : 'aujourd\'hui' + at);
+    if (days === 1) return 'jusqu\'à demain' + at;
+    if (days < 7) return 'jusqu\'à ' + end.toLocaleDateString('fr-FR', { weekday: 'long' }) + at;
+    return 'jusqu\'au ' + end.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) + (evening ? '' : at);
+  }
+  /** Quand l'offre vaut : « Valable le mardi de 12h à 14h · jusqu'au 12 décembre » (ou seulement la fin). */
+  function promoWhen(p) {
+    const slot = promoSlot(p);
+    return [slot ? 'Valable ' + slot : '', promoUntil(p)].filter(Boolean).join(' · ');
   }
   function renderShopPromos(shop) {
     const box = $('shop-promos');
@@ -8389,8 +8459,9 @@
       card.className = 'promo is-' + p.kind;
       card.innerHTML = '<div class="promo-main"><strong></strong><small></small></div>';
       card.querySelector('strong').textContent = p.title;
-      const until = promoUntil(p);
-      card.querySelector('small').textContent = until || PROMO_KINDS[p.kind].label;
+      const when = promoWhen(p);
+      card.querySelector('small').textContent = when || PROMO_KINDS[p.kind].label;
+      if (promoSlot(p)) card.classList.toggle('is-later', !promoNow(p));
       if (p.photoUrl) {
         const img = document.createElement('img');
         img.className = 'promo-photo'; img.src = p.photoUrl; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
@@ -8653,16 +8724,37 @@
   /* ---------- Espace restaurateur : publier une story ---------- */
   const StoryComposer = (() => {
     const root = $('story-composer');
-    let mode = 'photo', bg = 'sunset', blob = null, previewUrl = null, returnFocus = null, hours = 24;
+    let mode = 'photo', bg = 'sunset', blob = null, previewUrl = null, returnFocus = null, hours = 24, endAt = null;
+    const z2 = (n) => String(n).padStart(2, '0');
+    const asInput = (d) => d.getFullYear() + '-' + z2(d.getMonth() + 1) + '-' + z2(d.getDate()) + 'T' + z2(d.getHours()) + ':' + z2(d.getMinutes());
+    /** Fin exacte : la date et l'heure choisies, sinon maintenant + la durée du curseur. */
+    const storyEnd = () => endAt || new Date(Date.now() + hours * 3600e3);
+    /** « pendant 3 jours » ou « jusqu'à vendredi 18h » */
+    const storyFor = () => (endAt ? promoUntil({ endsAt: endAt.toISOString() }).replace(/^jusqu'/, 'jusqu\'') : 'pendant ' + durationLabel(hours));
     function syncDuration() {
       $('sc-dur').value = String(hours);
-      $('sc-dur-value').textContent = durationLabel(hours);
+      $('sc-end').min = asInput(new Date(Date.now() + 3600e3));
+      $('sc-end').max = asInput(new Date(Date.now() + 168 * 3600e3));
+      if (!endAt) $('sc-end').value = asInput(storyEnd());
+      $('sc-dur-value').textContent = endAt
+        ? endAt.toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).replace(':', 'h')
+        : durationLabel(hours);
       $('sc-dur').setAttribute('aria-valuetext', durationLabel(hours));
       $('sc-dur-chips').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.h) === hours)));
-      $('sc-dur-hint').textContent = 'Visible par tous les utilisateurs pendant ' + durationLabel(hours) + ', puis retirée automatiquement.';
+      $('sc-dur-hint').textContent = 'Visible par tous les utilisateurs ' + storyFor() + ', puis retirée automatiquement.';
     }
-    $('sc-dur').addEventListener('input', () => { hours = Number($('sc-dur').value) || 24; syncDuration(); });
-    $('sc-dur-chips').addEventListener('click', (ev) => { const b = ev.target.closest('[data-h]'); if (b) { hours = Number(b.dataset.h); syncDuration(); } });
+    $('sc-dur').addEventListener('input', () => { hours = Number($('sc-dur').value) || 24; endAt = null; syncDuration(); });
+    $('sc-dur-chips').addEventListener('click', (ev) => { const b = ev.target.closest('[data-h]'); if (b) { hours = Number(b.dataset.h); endAt = null; syncDuration(); } });
+    // Date et heure précises (1 heure à 1 semaine) : le curseur suit
+    $('sc-end').addEventListener('change', () => {
+      const d = new Date($('sc-end').value);
+      if (Number.isNaN(d.getTime())) return;
+      const h = (d - Date.now()) / 3600e3;
+      if (h < 1 || h > 168) { $('err-sc').textContent = 'Choisissez une fin entre dans 1 heure et dans 1 semaine.'; endAt = null; syncDuration(); return; }
+      $('err-sc').textContent = '';
+      endAt = d; hours = Math.max(1, Math.min(168, Math.round(h)));
+      syncDuration();
+    });
     Object.entries(STORY_BGS).forEach(([key, css]) => {
       const b = document.createElement('button');
       b.type = 'button'; b.dataset.bg = key; b.setAttribute('role', 'radio'); b.style.background = css;
@@ -8695,7 +8787,7 @@
       if (!r) return;
       if (liveStories(r).length >= MAX_STORIES) { toast('Vous avez déjà ' + MAX_STORIES + ' stories en ligne : supprimez-en une pour en publier une nouvelle.'); return; }
       returnFocus = document.activeElement;
-      mode = 'photo'; blob = null; bg = 'sunset'; hours = 24; syncDuration();
+      mode = 'photo'; blob = null; bg = 'sunset'; hours = 24; endAt = null; syncDuration();
       if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
       $('sc-text').value = ''; $('sc-file').value = '';
       setFieldError('sc-text', ''); $('err-sc').textContent = '';
@@ -8757,7 +8849,7 @@
         }
       }
       const row = mode === 'photo' ? { merchant_id: r.id, image_path: imagePath, caption: text || null } : { merchant_id: r.id, background: bg, caption: text };
-      row.expires_at = new Date(Date.now() + hours * 3600e3).toISOString();   // la base la ramène entre 1 h et 1 semaine
+      row.expires_at = storyEnd().toISOString();   // la base la ramène entre 1 h et 1 semaine
       const { error } = await Loader.run(sb.from('stories').insert(row), 'Publication de la story…');
       btn.disabled = false;
       if (error) {
@@ -8769,7 +8861,7 @@
       await refreshCloud();
       close();
       renderStoryAdmin(currentUser());
-      toast('Story publiée : elle est visible par tous pendant ' + durationLabel(hours) + '.');
+      toast('Story publiée : elle est visible par tous ' + storyFor() + '.');
     });
     return { open, close };
   })();
@@ -8832,20 +8924,59 @@
     b.addEventListener('click', () => setPromoKind(key));
     $('pp-kind').appendChild(b);
   });
+  /** Date au format d'un champ « datetime-local » (heure de l'appareil). */
+  const localInput = (d) => { const z = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + 'T' + z(d.getHours()) + ':' + z(d.getMinutes()); };
+  let promoEndTouched = false;
+  function syncPromoEnd() {
+    const v = $('pp-end').value;
+    $('pp-end-clear').hidden = !v;
+    $('pp-end-auto').textContent = v ? 'Affichée ' + promoUntil({ endsAt: new Date(v).toISOString() }) + ', puis retirée automatiquement.'
+      : 'Sans date de fin, l\'offre reste affichée jusqu\'à ce que vous la retiriez.';
+  }
   function setPromoKind(kind) {
     promoKind = kind;
     $('pp-kind').querySelectorAll('button').forEach((b) => { b.setAttribute('aria-checked', String(b.dataset.kind === kind)); b.tabIndex = b.dataset.kind === kind ? 0 : -1; });
+    // Fin proposée selon le type (ce soir minuit, dimanche soir…), modifiable au jour et à l'heure près
     const auto = promoAutoEnd(kind);
-    $('field-pp-end').hidden = !!auto;
-    $('pp-end-auto').textContent = kind === 'day' ? 'Affichée aujourd\'hui, retirée automatiquement ce soir à minuit.'
-      : kind === 'week' || kind === 'weekend' ? 'Affichée jusqu\'à dimanche soir, puis retirée automatiquement.'
-      : 'Sans date de fin, l\'offre reste affichée jusqu\'à ce que vous la retiriez.';
+    if (!promoEndTouched) $('pp-end').value = auto ? localInput(auto) : '';
+    $('pp-end').min = localInput(new Date(Date.now() + 5 * 60e3));
+    // Créneau habituel proposé pour la formule midi et l'afterwork
+    if (!$('pp-slot-on').checked) {
+      const [from, to] = { lunch: ['11:30', '14:00'], afterwork: ['17:00', '20:00'] }[kind] || ['12:00', '14:00'];
+      $('pp-from').value = from; $('pp-to').value = to;
+    }
+    syncPromoEnd();
     $('pp-title').placeholder = { day: 'Ex. : menu kebab + boisson à 8 €', week: 'Ex. : 2ᵉ burger à -50 %', student: 'Ex. : -15 % sur tout le menu', other: 'Ex. : café offert avant 9 h',
       lunch: 'Ex. : plat + dessert + café à 12,90 €', afterwork: 'Ex. : happy hour 18 h - 20 h, -30 % sur les boissons', weekend: 'Ex. : brunch du dimanche à 19 €' }[kind];
   }
   setPromoKind('day');
   $('pp-title').addEventListener('input', () => { setFieldError('pp-title', ''); $('pp-title-count').textContent = $('pp-title').value.length + ' / 60'; });
-  $('pp-end').addEventListener('input', () => setFieldError('pp-end', ''));
+  $('pp-end').addEventListener('input', () => { setFieldError('pp-end', ''); promoEndTouched = true; syncPromoEnd(); });
+  $('pp-end-clear').addEventListener('click', () => { $('pp-end').value = ''; promoEndTouched = true; syncPromoEnd(); });
+  /* Créneau de validité */
+  const slotDays = () => [...$('pp-days').querySelectorAll('[aria-pressed="true"]')].map((b) => Number(b.dataset.d));
+  function syncSlot() {
+    const on = $('pp-slot-on').checked;
+    $('pp-slot-box').hidden = !on;
+    setFieldError('pp-slot', '');
+    const from = $('pp-from').value, to = $('pp-to').value;
+    const days = slotDays();
+    const text = promoSlot({ validDays: days.length && days.length < 7 ? days : null, validFrom: from && to ? from : null, validTo: from && to ? to : null });
+    $('pp-slot-sum').textContent = text ? 'Les clients verront : « Valable ' + text + ' ».' : 'Choisissez des jours et/ou des horaires.';
+  }
+  $('pp-slot-on').addEventListener('change', syncSlot);
+  $('pp-days').addEventListener('click', (ev) => { const b = ev.target.closest('[data-d]'); if (!b) return; b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true')); syncSlot(); });
+  ['pp-from', 'pp-to'].forEach((id) => $(id).addEventListener('input', syncSlot));
+  /** Créneau saisi : { valid_days, valid_from, valid_to } ou { error }. */
+  function readSlot() {
+    if (!$('pp-slot-on').checked) return {};
+    const days = slotDays(), from = $('pp-from').value, to = $('pp-to').value;
+    if ((from && !to) || (!from && to)) return { error: 'Indiquez l\'heure de début et l\'heure de fin.' };
+    if (from && to && from >= to) return { error: 'L\'heure de fin doit être après l\'heure de début.' };
+    if (!days.length && !from) return { error: 'Choisissez au moins un jour ou des horaires.' };
+    return { valid_days: days.length && days.length < 7 ? days : null, valid_from: from || null, valid_to: to || null };
+  }
+  syncSlot();
   function renderPromoAdmin(account) {
     const r = myRestaurant(account);
     $('pd-promos').hidden = !(r && r.published);
@@ -8859,9 +8990,9 @@
       li.innerHTML = '<span class="pa-ico" aria-hidden="true"></span><div><strong></strong><small></small></div><button class="icon-btn" type="button">&times;</button>';
       li.querySelector('.pa-ico').textContent = PROMO_KINDS[p.kind].icon;
       li.querySelector('strong').textContent = p.title;
-      const until = promoUntil(p);
+      const until = promoUntil(p), slot = promoSlot(p);
       const stat = ProSpace.promoStats(p.id);
-      li.querySelector('small').textContent = PROMO_KINDS[p.kind].label + (until ? ' · ' + until : ' · sans date de fin') + (p.details ? ' · ' + p.details : '') + (stat ? ' · ' + plural(stat.clicks, 'clic', 'clics') : '');
+      li.querySelector('small').textContent = PROMO_KINDS[p.kind].label + (slot ? ' · ' + slot : '') + (until ? ' · ' + until : ' · sans date de fin') + (p.details ? ' · ' + p.details : '') + (stat ? ' · ' + plural(stat.clicks, 'clic', 'clics') : '');
       li.querySelector('button').setAttribute('aria-label', 'Retirer la promotion « ' + p.title + ' »');
       li.querySelector('button').addEventListener('click', async () => {
         const { error } = await sb.from('promotions').delete().eq('id', p.id);
@@ -8912,13 +9043,16 @@
     const title = $('pp-title').value.trim().replace(/\s+/g, ' ');
     const details = $('pp-details').value.trim().replace(/\s+/g, ' ');
     if (title.length < 3) { setFieldError('pp-title', 'Décrivez votre offre (3 caractères minimum).'); $('pp-title').focus(); return; }
-    let endsAt = promoAutoEnd(promoKind);
-    if (!endsAt && $('pp-end').value) {
-      endsAt = endOfDay(new Date($('pp-end').value + 'T12:00:00'));
-      if (endsAt < Date.now()) { setFieldError('pp-end', 'Choisissez une date à venir.'); $('pp-end').focus(); return; }
+    // Fin choisie (date et heure) ; vide : la base fixe la fin des promos du jour / de la semaine (heure de Paris)
+    let endsAt = null;
+    if ($('pp-end').value) {
+      endsAt = new Date($('pp-end').value);
+      if (!(endsAt > Date.now())) { setFieldError('pp-end', 'Choisissez une date et une heure à venir.'); $('pp-end').focus(); return; }
+      if (endsAt - Date.now() > 365 * 864e5) { setFieldError('pp-end', 'Une offre dure un an au plus.'); $('pp-end').focus(); return; }
     }
-    // Fin des promos du jour et de la semaine : fixée par la base (heure de Paris)
-    const row = { merchant_id: r.id, kind: promoKind, title, details: details || null, ends_at: endsAt ? endsAt.toISOString() : null };
+    const slot = readSlot();
+    if (slot.error) { setFieldError('pp-slot', slot.error); return; }
+    const row = { merchant_id: r.id, kind: promoKind, title, details: details || null, ends_at: endsAt ? endsAt.toISOString() : null, ...slot };
     $('pp-submit').disabled = true;
     if (promoPhoto) {
       const path = r.id + '/promo-' + uid().replace(/[^A-Za-z0-9_-]/g, '') + '.' + photoExt(promoPhoto);
@@ -8932,7 +9066,9 @@
     if (error) { setFieldError('pp-title', /Six promotions/.test(error.message || '') ? MAX_PROMOS + ' promotions en cours au maximum.' : cloudError(error)); return; }
     Push.send(r.id);
     await refreshCloud();
-    $('pp-title').value = ''; $('pp-details').value = ''; $('pp-end').value = ''; $('pp-title-count').textContent = '0 / 60';
+    $('pp-title').value = ''; $('pp-details').value = ''; $('pp-title-count').textContent = '0 / 60';
+    promoEndTouched = false; $('pp-slot-on').checked = false; $('pp-days').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    setPromoKind(promoKind); syncSlot();
     setPromoPhoto(null);
     renderPromoAdmin(currentUser());
     toast('Promotion publiée : elle apparaît sur votre fiche et vos abonnés sont prévenus.');
@@ -9451,7 +9587,7 @@
   });
 
   const PRO_STEP_INDEX = { 'pro-verify': 2, 'pro-payment': 3, 'pro-listing': 4 };
-  const STEP_TITLES = { signup: 'auth-title', about: 'jq-gender', login: 'login-title', 'verify-email': 'ec-title', 'reset-password': 'rs-title', location: 'ob-loc-title', 'pro-verify': 'pv-title', 'pro-payment': 'pp-title', 'pro-listing': 'pl-title' };
+  const STEP_TITLES = { signup: 'auth-title', about: 'jq-gender', login: 'login-title', 'verify-email': 'ec-title', 'reset-password': 'rs-title', location: 'ob-loc-title', 'pro-verify': 'pv-title', 'pro-payment': 'pay-title', 'pro-listing': 'pl-title' };
 
   /** Progression : 2 points (client) ou frise en 4 étapes (restaurateur). */
   function updateProgress(step, mode) {
