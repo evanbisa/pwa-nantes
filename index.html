@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-GsYctyTBAYISKfchCR2GGmgcURGPldozRct1pi22TMM=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-7QeTtCyCeX3KNaLuylRFqIxNuXew9+5TEOBKYhhBpfo=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -2068,7 +2068,9 @@
     .ps-panel { position: relative; }
     .ps-scan-fab { position: absolute; z-index: 3; right: 14px; bottom: calc(var(--safe-bottom) + 72px); }
     #pro-space .ps-body { padding-bottom: 92px; }
-    #pro-space[data-tab="home"] .ps-scan-fab { display: none; }
+    /* Bouton « Scanner » flottant : pas sur l'accueil (grande carte « Scanner un client »), ni sur « Ma fiche » et
+       « Compléter » où il recouvrait des réglages (interrupteur de visibilité, boutons « Ajouter ») */
+    #pro-space[data-tab="home"] .ps-scan-fab, #pro-space[data-tab="fiche"] .ps-scan-fab, #pro-space[data-tab="todo"] .ps-scan-fab { display: none; }
     .ps-scan[hidden] { display: none; }
 
     /* Carte « Scanner un client » en tête de l'espace restaurateur */
@@ -2376,6 +2378,10 @@
     .shop-tabs button[aria-selected="true"] { color: var(--text); background: var(--panel-solid); box-shadow: 0 1px 3px rgba(60, 64, 67, .18); }
     .shop-tabs button[aria-selected="true"]::after { display: none; }
     .tab-panel:not([hidden]) { animation: tab-in .25s var(--ease-out) both; }
+    /* Fiche : les onglets restent en haut pendant le défilement ; un contenu court (menu de 3 plats) laisse quand même
+       les onglets remonter en haut quand on en touche un */
+    #shop-sheet .shop-tabs { position: sticky; top: 4px; z-index: 3; background: linear-gradient(var(--hover), var(--hover)), var(--panel-solid); box-shadow: 0 -6px 0 2px var(--panel-solid); }
+    #shop-sheet .tab-panel { min-height: 55vh; }
     @keyframes tab-in { from { opacity: 0; transform: translateY(4px); } }
     .menu-list { padding-top: 6px; }
     .menu-list h4 { margin: 18px 0 4px; font-size: 16px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--text); }
@@ -2474,7 +2480,7 @@
     /* Boutons collés en bas, jusque derrière la barre d'onglets (rien ne défile en dessous) */
     #filters-sheet { padding-bottom: 0; }
     .fs-actions { display: flex; gap: 10px; margin: 16px -20px 0; padding: 10px 20px calc(var(--safe-bottom) + var(--nav-h, 0px) + 12px); position: sticky; bottom: 0; z-index: 2; background: var(--panel-solid); border-top: 1px solid var(--line); }
-    .fs-actions .btn { margin: 0; flex: 1; }
+    .fs-actions .btn { margin: 0; flex: 1; white-space: nowrap; padding-left: 12px; padding-right: 12px; }
     .fs-actions .btn-primary { flex: 1.8; }
     .sp-filters .filters-track { padding: 2px 16px 2px; gap: 10px; }
     .sp-filters .ft-row { gap: 6px; flex-wrap: wrap; overflow: visible; padding: 0; }
@@ -6105,7 +6111,7 @@
     $('range-filters').addEventListener('change', () => setTimeout(render, 0));
     let saved = null;
     try { saved = localStorage.getItem(KEY); } catch (e) { /* stockage indisponible */ }
-    set(saved === '1', false);
+    set(saved !== '0', false);   // repliés par défaut : la liste des restaurants d'abord (le rappel montre les filtres actifs)
     return { render, set, activeLabels };
   })();
 
@@ -8109,8 +8115,19 @@
   }
   $('shop-tabs').addEventListener('click', (ev) => {
     const tab = ev.target.closest('[role="tab"]');
-    if (tab) setShopTab(tab.dataset.tab);
+    if (!tab) return;
+    setShopTab(tab.dataset.tab);
+    revealShopTabs();
   });
+  /** Onglet touché : la fiche défile pour montrer son contenu (les onglets remontent en haut de la fiche). */
+  function revealShopTabs() {
+    const tabs = $('shop-tabs');
+    let box = tabs.parentElement;
+    while (box && box !== document.body && !(box.scrollHeight > box.clientHeight + 4 && /auto|scroll/.test(getComputedStyle(box).overflowY))) box = box.parentElement;
+    if (!box || box === document.body) return;
+    const offset = tabs.getBoundingClientRect().top - box.getBoundingClientRect().top - 8;
+    if (offset > box.clientHeight * 0.25) box.scrollTo({ top: box.scrollTop + offset, behavior: reduceMotion ? 'auto' : 'smooth' });
+  }
   $('shop-tabs').addEventListener('keydown', (ev) => {
     if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return;
     const tabs = [...document.querySelectorAll('#shop-tabs [role="tab"]')].filter((t) => !t.hidden);
@@ -10389,7 +10406,7 @@
     }
     hideOnboarding();
     startApp({ focus, intro: true });
-    if (fresh && !located && !focus) setTimeout(() => toast('Activez la localisation à tout moment avec le bouton en haut à droite.'), 2200);
+    if (fresh && !located && !focus) setTimeout(() => toast('Activez la localisation à tout moment avec le bouton ' + (isDesktop() ? 'en haut à droite.' : 'en bas à droite de la carte.')), 2200);
     if (!fresh) resumeLocation();
   }
   function hideOnboarding() {
