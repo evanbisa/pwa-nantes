@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-FG64/egmfeVa+d9F0+i53Um1eE+4lbVkURlL2PvsUNA=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-No0STuRsT/vvJDfa1aKVKDKnuvWTBup25iAs6STCHsU=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -2198,7 +2198,7 @@
     .tour-spot.is-glued { transition: none; }
     @keyframes tour-pulse { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.18); } }
     .tour-card { position: absolute; left: 16px; right: 16px; top: 50%; max-width: 380px; margin: 0 auto; padding: 18px 18px 14px; border-radius: 22px; color: var(--text); background: var(--panel-solid);
-      box-shadow: 0 18px 50px rgba(0, 0, 0, .35); transition: top .45s var(--ease-out), opacity .22s, transform .22s; animation: rise .35s var(--ease-out) both; }
+      box-shadow: 0 18px 50px rgba(0, 0, 0, .35); transition: opacity .22s, transform .22s; animation: rise .35s var(--ease-out) both; }
     .tour-card.is-swap { opacity: 0; transform: translateY(8px); }
     .tour-step { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); }
     .tour-card h2 { margin: 4px 0 6px; font-size: 19px; font-weight: 600; }
@@ -5936,9 +5936,9 @@
         getZoom: () => map.getZoom(),
         getCenter: () => { const c = map.getCenter(); return [c.lng, c.lat]; },
         getPadding: () => padding,
-        flyTo({ center, zoom, padding: p, duration = 1400 }) {
+        flyTo({ center, zoom, padding: p, duration = 1400, offset = [0, 0] }) {
           if (p) padding = p;
-          map.flyTo({ center, zoom: zoom == null ? map.getZoom() : zoom, padding, duration: ms(duration), curve: 1.3 });
+          map.flyTo({ center, zoom: zoom == null ? map.getZoom() : zoom, padding, offset, duration: ms(duration), curve: 1.3 });
         },
         panTo(center) { map.easeTo({ center, duration: ms(800) }); },
         /** Arrivée sur la carte après la connexion : un seul mouvement continu, qui ralentit en douceur. */
@@ -9124,7 +9124,7 @@
   }
 
   /** Ouvre la fiche ; `source` : d'où vient la visite (carte, liste, recherche, offres, story, notification, lien partagé). */
-  function openShop(id, { source = null } = {}) {
+  function openShop(id, { source = null, fly = true } = {}) {
     const m = markers.get(id);
     if (!m) return;
     if (selectedId && selectedId !== id) markers.get(selectedId).el.classList.remove('is-selected');
@@ -9136,7 +9136,7 @@
     renderList();
     openPanel($('shop-sheet'));
     setFollow(false);
-    view.flyTo({ center: m.shop.coords, zoom: Math.max(view.getZoom(), 16), padding: shopPadding(), duration: 900 });
+    if (fly) view.flyTo({ center: m.shop.coords, zoom: Math.max(view.getZoom(), 16), padding: shopPadding(), duration: 900 });
   }
 
   function deselectShop() {
@@ -9277,8 +9277,9 @@
       if (fly) whenMapReady(flyToCity);
       return;
     }
-    if (fly) whenMapReady(flyToUser);
-    else if (Geo.follow && view && !view.isMoving()) view.panTo(Geo.position);
+    const touring = document.body.classList.contains('tour-open');   // pendant le guide, la carte ne bouge pas
+    if (fly && !touring) whenMapReady(flyToUser);
+    else if (Geo.follow && !touring && view && !view.isMoving()) view.panTo(Geo.position);
     if (selectedId) renderShop(markers.get(selectedId));
   }
 
@@ -13550,13 +13551,14 @@
         const w = r.width + pad * 2, h = r.height + pad * 2;
         Object.assign(spot.style, { left: r.left - pad + 'px', top: r.top - pad + 'px', width: w + 'px', height: h + 'px', borderRadius: st.round ? '50%' : Math.min(h / 2, 26) + 'px' });
       } else Object.assign(spot.style, { left: innerWidth / 2 + 'px', top: innerHeight * 0.42 + 'px', width: '0px', height: '0px' });
-      // Bulle au-dessus ou au-dessous du bouton montré, sans jamais le cacher
-      const ch = card.offsetHeight, margin = 18;
-      let top;
-      if (!r) top = (innerHeight - ch) / 2;
-      else if (r.top + r.height / 2 > innerHeight / 2) top = r.top - pad - margin - ch;
-      else top = r.bottom + pad + margin + (st.round ? 26 : 0);   // repère : son nom reste visible sous lui
-      card.style.top = Math.max(12, Math.min(innerHeight - ch - 12, top)) + 'px';
+      // Bulle toujours au même endroit : en bas, au-dessus de la barre d'onglets ; en haut seulement si elle cachait l'élément montré
+      const nav = desktop() ? null : visible($('tabbar'));
+      const bottom = (nav ? innerHeight - nav.top : 0) + 16;
+      const cardTop = innerHeight - bottom - card.offsetHeight;
+      const covers = r && r.bottom + pad + (st.round ? 26 : 0) > cardTop && r.top - pad < innerHeight - bottom;
+      card.classList.toggle('is-top', !!covers);
+      card.style.top = covers ? 'calc(var(--safe-top) + 12px)' : 'auto';
+      card.style.bottom = covers ? 'auto' : bottom + 'px';
     }
     /** Étape montrant la carte : le projecteur suit le restaurant tant que la carte bouge (arrivée, glissement). */
     function trackMap(on) {
@@ -13581,7 +13583,13 @@
       if (!m) return;
       shown = m;
       m.el.classList.add('is-hover');
-      whenMapReady(() => view.flyTo({ center: m.shop.coords, zoom: Math.max(view.getZoom(), 16), duration: 900 }));
+    }
+    /** Au début du guide, un seul mouvement : le restaurant d'exemple vient dans le haut de l'écran, au-dessus de la bulle. Ensuite la carte ne bouge plus. */
+    function frameExample() {
+      const m = exampleShop();
+      if (!m) return;
+      setFollow(false);
+      whenMapReady(() => view.flyTo({ center: m.shop.coords, zoom: Math.max(view.getZoom(), 16), duration: 900, offset: [0, -Math.round(innerHeight * 0.18)] }));
     }
     function show(n, { animate = true } = {}) {
       i = n;
@@ -13614,6 +13622,7 @@
       lastFocus = document.activeElement;
       root.hidden = false;
       document.body.classList.add('tour-open');
+      if (role === 'client') frameExample();
       show(0, { animate: false });
       return true;
     }
@@ -13634,7 +13643,7 @@
       const m = exampleShop() || [...markers.values()].find((x) => pin && x.el.contains(pin));
       if (!m) { show(i + 1); return; }
       opening = true;
-      openShop(m.shop.id);
+      openShop(m.shop.id, { fly: false });   // la carte reste où elle est
       setTimeout(() => { opening = false; if (isOpen()) show(i + 1); }, 650);   // le temps que la fiche s'ouvre
     }
     const next = () => (steps[i].tap ? openFromTour() : i < steps.length - 1 ? show(i + 1) : end());
