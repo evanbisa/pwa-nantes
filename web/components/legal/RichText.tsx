@@ -12,7 +12,7 @@ function internalHref(href: string) {
 }
 
 const linkClass =
-  "font-medium text-blue-700 underline decoration-blue-700/30 underline-offset-2 transition-colors hover:decoration-blue-700 dark:text-blue-300 dark:decoration-blue-300/30 dark:hover:decoration-blue-300";
+  "font-medium text-orange-700 underline decoration-orange-700/30 underline-offset-2 transition-colors hover:decoration-orange-700 dark:text-orange-300 dark:decoration-orange-300/30 dark:hover:decoration-orange-300";
 
 /** Texte des documents juridiques, avec mise en forme légère et informations à compléter surlignées. */
 export default function RichText({ text }: { text: Rich }): ReactNode {

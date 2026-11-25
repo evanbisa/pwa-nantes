@@ -136,7 +136,7 @@ body {
 .food-orbit-item:nth-child(1) svg { --base: 0deg; }
 .food-orbit-item:nth-child(2) svg { --base: -120deg; }
 .food-orbit-item:nth-child(3) svg { --base: -240deg; }
-.food-orbit-center { position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #1a73e8; animation: food-pulse 1.3s ease-in-out infinite; }
+.food-orbit-center { position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #e8501c; animation: food-pulse 1.3s ease-in-out infinite; }
 @keyframes food-spin { to { transform: rotate(360deg); } }
 @keyframes food-self { from { transform: rotate(var(--base)); } to { transform: rotate(calc(var(--base) + 90deg)); } }
 @keyframes food-pulse { 50% { transform: scale(0.6); opacity: 0.5; } }
