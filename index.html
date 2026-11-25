@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-MhdiOhJk0otyio4ldOoLrbmJiBZdSY3YUCcV/+TYyzg=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-DWKEeokSFqJh8EFVhL4GTLg8sa8KEXTMZGfXrUirifU=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -411,6 +411,14 @@
     .promo strong { font-size: 16px; font-weight: 500; }
     .meta { display: grid; gap: 12px; margin: 16px 0 0; padding: 16px 0 0; list-style: none; color: var(--text); font-size: 14px; border-top: 1px solid var(--line); }
     .meta li { display: flex; gap: 14px; align-items: flex-start; }
+    #shop-hours { white-space: pre-line; }
+    .ps-close-today { margin: 4px 0 10px; }
+    .ps-close-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .ps-close-form .field, #field-ps-close-note { margin-bottom: 8px; }
+    .ps-close-actions { display: grid; gap: 8px; margin-top: 4px; }
+    .ps-close-actions .btn { margin: 0; }   /* horaires par jour : une ligne par groupe de jours */
+    .closure-note { margin: 0 0 12px; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.45; font-weight: 500; color: #7a3d00; background: #fff3dc; border: 1px solid #f3d59b; }
+    :root[data-theme="dark"] .closure-note { color: #ffd59a; background: rgba(244, 178, 92, .12); border-color: rgba(244, 178, 92, .3); }
     .meta svg { flex: none; width: 20px; height: 20px; color: var(--accent); }
     .meta b { font-weight: 500; }
 
@@ -621,7 +629,7 @@
     /* Champ actif : contour orange et halo doux (le rouge reste réservé aux erreurs) */
     :root[data-theme="light"] .onboarding .field input:focus { border-color: #ea580c; box-shadow: 0 0 0 4px rgb(234 88 12 / .14); }
     :root[data-theme="dark"] .onboarding .field input:focus { border-color: #ff9a5c; box-shadow: 0 0 0 4px rgb(255 138 76 / .16); }
-    :root .onboarding .field.has-error input, :root .onboarding .field.has-error input:focus { border-color: var(--danger); box-shadow: 0 0 0 4px rgb(217 48 37 / .12); }   /* l'erreur l'emporte sur le contour orange du champ actif */
+    :root .onboarding .field.has-error input:not([type="checkbox"]):not([type="radio"]), :root .onboarding .field.has-error input:not([type="checkbox"]):not([type="radio"]):focus { border-color: var(--danger); box-shadow: 0 0 0 4px rgb(217 48 37 / .12); }   /* l'erreur l'emporte sur le contour orange du champ actif */
     :root[data-theme="light"] .onboarding .role-check { background: rgb(255 255 255 / .85); border-color: rgb(255 120 60 / .16); }
     :root[data-theme="light"] .onboarding .role-check:has(input:checked) { background: rgb(255 138 61 / .08); border-color: rgb(255 77 46 / .35); }
     :root[data-theme="dark"] .onboarding .role-check { background: rgb(255 255 255 / .04); border-color: rgb(255 255 255 / .1); }
@@ -641,7 +649,7 @@
     }
     .field input::placeholder { color: var(--muted); opacity: .7; }
     .field input:focus { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-    .field.has-error input, .field.has-error input:focus { border-color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
+    .field.has-error input:not([type="checkbox"]):not([type="radio"]), .field.has-error input:not([type="checkbox"]):not([type="radio"]):focus { border-color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
     .field-error { display: block; min-height: 16px; margin-top: 4px; font-size: 12px; color: var(--danger); }
     .pw-wrap { position: relative; }
     .pw-wrap input { padding-right: 84px; }
@@ -1154,6 +1162,20 @@
     .hours-row .check { margin: 0; white-space: nowrap; }
     .hours-row input[type="time"] { width: 100%; min-width: 0; height: 40px; padding: 0 6px; border-radius: 8px; font: inherit; font-size: 14px; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); }
     .hours-row input[type="time"]:disabled { opacity: .45; }
+    .hours-mode { margin: 6px 0 12px; }
+    .hd-row { display: grid; gap: 6px; padding: 10px 0; border-top: 1px solid var(--line); }
+    .hd-row:first-child { border-top: 0; }
+    .hd-day { display: flex; align-items: center; gap: 10px; min-height: 36px; font-size: 14.5px; font-weight: 600; cursor: pointer; }
+    .hd-day input { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }
+    .hd-closed { margin-left: auto; font-weight: 400; font-size: 13.5px; color: var(--muted); }
+    .hd-body { display: grid; gap: 6px; padding-left: 30px; min-width: 0; }
+    .hd-slots { display: grid; gap: 6px; min-width: 0; }
+    .hd-slot { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) 32px; align-items: center; gap: 6px; }
+    .hd-slot input[type="time"] { width: 100%; min-width: 0; height: 40px; padding: 0 6px; border-radius: 8px; font: inherit; font-size: 14px; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); }
+    .hd-del { width: 32px; height: 32px; border-radius: 50%; font-size: 18px; line-height: 1; color: var(--muted); }
+    .hd-del:hover { background: var(--hover); color: var(--text); }
+    .hd-add { justify-self: start; font-size: 13.5px; }
+    .hd-copy { margin-top: 6px; font-size: 13.5px; }
     .days { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; }
     .days-label { font-size: 13px; color: var(--muted); margin-right: 2px; }
     .days label { cursor: pointer; }
@@ -2754,6 +2776,7 @@
       <button type="button" role="tab" id="tab-reviews" aria-controls="panel-reviews" aria-selected="false" tabindex="-1" data-tab="reviews" hidden>Avis</button>
     </div>
     <div class="tab-panel" id="panel-infos" role="tabpanel" aria-labelledby="tab-infos">
+    <p class="closure-note" id="shop-closure" role="status" hidden></p>
     <p class="demo-note" id="shop-demo-note" hidden>Restaurant imaginaire, pour découvrir FlashMiam en attendant les premiers restaurants partenaires de La Roche-sur-Yon : ses offres ne sont pas réelles.</p>
     <!-- Comptes clients : « Profiter de l'offre » (ou « Valider ma visite ») → QR code à montrer en caisse -->
     <div class="visit-box" id="shop-visit-box" hidden>
@@ -3477,6 +3500,22 @@
               <button class="switch" type="button" role="switch" id="ps-visible" aria-checked="true" aria-labelledby="ps-vis-label"><i></i></button>
             </div>
           </section>
+          <!-- Fermeture exceptionnelle : la fiche reste sur la carte avec la date de réouverture -->
+          <section class="ps-card ps-block" id="ps-close-card" aria-labelledby="ps-close-title" hidden>
+            <h4 id="ps-close-title">Fermeture exceptionnelle</h4>
+            <p class="hint">Congés, travaux, imprévu : votre fiche reste sur la carte avec « Fermé jusqu'au … », et vos clients savent quand vous rouvrez.</p>
+            <p class="closure-note" id="ps-close-state" role="status" hidden></p>
+            <button class="pill-btn ps-close-today" type="button" id="ps-close-today">Fermé aujourd'hui seulement</button>
+            <div class="ps-close-form">
+              <label class="field" id="field-ps-close-from"><span>Du</span><input type="date" id="ps-close-from" /><small class="field-error" id="err-ps-close-from" aria-live="polite"></small></label>
+              <label class="field" id="field-ps-close-until"><span>Au (inclus)</span><input type="date" id="ps-close-until" /><small class="field-error" id="err-ps-close-until" aria-live="polite"></small></label>
+            </div>
+            <label class="field" id="field-ps-close-note"><span>Raison, affichée sur la fiche (facultatif) <small class="counter" id="ps-close-count">0 / 80</small></span><input type="text" id="ps-close-note" maxlength="80" placeholder="Ex. : congés annuels" /></label>
+            <div class="ps-close-actions">
+              <button class="btn btn-primary" type="button" id="ps-close-save">Enregistrer la fermeture</button>
+              <button class="btn btn-ghost" type="button" id="ps-close-cancel" hidden>Annuler la fermeture</button>
+            </div>
+          </section>
           <section class="ps-card ps-block" aria-labelledby="ps-sub-title">
             <h4 id="ps-sub-title">Abonnement</h4>
             <p class="ps-sub-plan" id="ps-sub-plan"></p>
@@ -3873,9 +3912,19 @@
 
         <div class="field" id="field-pl-hours">
           <span>Horaires d'ouverture</span>
+          <div class="seg hours-mode" id="pl-hours-mode" role="group" aria-label="Type d'horaires">
+            <button type="button" data-hmode="same" aria-pressed="true">Pareil tous les jours</button><button type="button" data-hmode="days" aria-pressed="false">Selon les jours</button>
+          </div>
+          <div id="pl-hours-same">
           <div class="hours-row"><label class="check"><input type="checkbox" id="pl-h1-on" checked /> Service 1</label><input type="time" id="pl-h1-from" value="11:30" aria-label="Service 1 : ouverture" /><span>–</span><input type="time" id="pl-h1-to" value="14:30" aria-label="Service 1 : fermeture" /></div>
           <div class="hours-row"><label class="check"><input type="checkbox" id="pl-h2-on" checked /> Service 2</label><input type="time" id="pl-h2-from" value="18:30" aria-label="Service 2 : ouverture" /><span>–</span><input type="time" id="pl-h2-to" value="22:30" aria-label="Service 2 : fermeture" /></div>
           <div class="days" id="pl-closed" aria-label="Jours de fermeture"><span class="days-label">Fermé le :</span></div>
+          </div>
+          <!-- Horaires différents selon les jours : jusqu'à 3 créneaux par jour, ou fermé -->
+          <div class="hours-days" id="pl-hours-days" hidden>
+            <div id="pl-days-list"></div>
+            <button class="link-btn hd-copy" type="button" id="pl-days-copy">Copier les horaires du lundi sur les autres jours ouverts</button>
+          </div>
           <small class="field-error" id="err-pl-hours" aria-live="polite"></small>
         </div>
 
@@ -4576,12 +4625,18 @@
     photoPath: pr.photo_path || null, photoUrl: pr.photo_path ? publicUrl('photos', pr.photo_path) : null,
     validDays: Array.isArray(pr.valid_days) && pr.valid_days.length ? pr.valid_days.map(Number) : null,
     validFrom: pr.valid_from ? String(pr.valid_from).slice(0, 5) : null, validTo: pr.valid_to ? String(pr.valid_to).slice(0, 5) : null });
+  /** Horaires par jour enregistrés ({ "0": [...], …, "6": [...] }) → tableau de 7 jours ; null : mêmes horaires chaque jour. */
+  function daysFromRow(days) {
+    if (!days || typeof days !== 'object') return null;
+    return [0, 1, 2, 3, 4, 5, 6].map((d) => (Array.isArray(days[d]) ? days[d].filter((sl) => Array.isArray(sl) && sl.length === 2) : []));
+  }
   function restaurantFromRow(m, promos = [], stories = [], rating = null) {
     const hours = m.opening_hours || {};
     return {
       id: m.id, ownerId: m.user_id, name: m.name, category: CAT_FROM_DB[m.category] || 'Autre', description: m.description || '',
       photos: m.photos_urls || [], menu: m.menu_json || [], address: m.address || '', coords: m.lat != null ? [m.lng, m.lat] : null,
-      hours: hours.services || [], closedOn: hours.closed_on || [], phone: m.phone || '',
+      hours: hours.services || [], closedOn: hours.closed_on || [], days: daysFromRow(hours.days), phone: m.phone || '',
+      closure: m.closed_from && m.closed_until ? { from: m.closed_from, until: m.closed_until, note: m.closure_note || '' } : null,
       status: m.status, isOpen: m.is_open !== false, mealVouchers: !!m.accepts_meal_vouchers, published: m.status === 'published' && m.is_open && m.lat != null, isTest: !!m.is_test, honorAt: m.honor_at,
       publishedAt: m.published_at, updatedAt: m.updated_at, promos: promos.map(promoFromRow), stories: stories.map(storyFromRow),
       rating: rating && rating.count ? rating : null,
@@ -5489,30 +5544,43 @@
   const toMin = (hhmm) => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
   const fmtTime = (min) => { const h = Math.floor(min / 60) % 24, m = min % 60; return h + 'h' + (m ? String(m).padStart(2, '0') : ''); };
 
+  /** Créneaux de chaque jour (0 = dimanche … 6 = samedi) : horaires par jour s'il y en a, sinon les mêmes chaque jour ouvert. */
+  function weekSlots(shop) {
+    if (Array.isArray(shop.days) && shop.days.length === 7) return shop.days;
+    return [0, 1, 2, 3, 4, 5, 6].map((d) => ((shop.closedOn || []).includes(d) ? [] : (shop.hours || [])));
+  }
+  /** Date du jour de l'appareil au format 2026-12-24 (les fermetures exceptionnelles sont des dates). */
+  const dateKey = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  /** Fermeture exceptionnelle (congés, travaux…) ce jour-là ? */
+  const closedOnDate = (shop, d) => !!(shop.closure && dateKey(d) >= shop.closure.from && dateKey(d) <= shop.closure.until);
+  const fmtDay = (key) => new Date(key + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+  /** Créneaux du jour `off` (0 = aujourd'hui) en minutes depuis minuit aujourd'hui ; [] s'il est fermé (jour ou congés). */
+  function slotsOn(shop, base, off) {
+    const d = new Date(base); d.setDate(d.getDate() + off);
+    if (closedOnDate(shop, d)) return [];
+    return weekSlots(shop)[d.getDay()].map(([s, e]) => {
+      const a = off * 1440 + toMin(s);
+      let b = off * 1440 + toMin(e);
+      if (b <= a) b += 1440;   // fermeture après minuit
+      return [a, b];
+    });
+  }
+
   /**
-   * Calcule le statut d'un commerce à l'instant `now`.
-   * Les créneaux sont projetés sur une semaine en minutes (gère les ouvertures après minuit).
+   * Calcule le statut d'un commerce à l'instant `now` : horaires de chaque jour, fermetures exceptionnelles, services
+   * qui finissent après minuit ou qui s'enchaînent.
    */
   function getStatus(shop, now = new Date()) {
     if (shop.closedTemporarily) return { open: false, label: 'Fermé temporairement' };
-    const WEEK = 7 * 1440;
-    const nowMin = now.getDay() * 1440 + now.getHours() * 60 + now.getMinutes();
-    const slots = [];
-    for (let d = 0; d < 7; d++) {
-      if (shop.closedOn.includes(d)) continue;
-      for (const [s, e] of shop.hours) {
-        const start = d * 1440 + toMin(s);
-        let end = d * 1440 + toMin(e);
-        if (end <= start) end += 1440;
-        slots.push([start, end], [start - WEEK, end - WEEK]); // copie décalée : gère la nuit de samedi à dimanche
-      }
-    }
-    const current = slots.find(([s, e]) => nowMin >= s && nowMin < e);
+    const base = new Date(now); base.setHours(0, 0, 0, 0);
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const near = [-1, 0, 1, 2].flatMap((off) => slotsOn(shop, base, off));
+    const current = near.find(([a, b]) => nowMin >= a && nowMin < b);
     if (current) {
       // créneaux qui s'enchaînent (ex. jusqu'à 23h59 puis dès minuit) : vraie heure de fermeture
       let end = current[1];
       for (let i = 0; i < 14; i++) {
-        const next = slots.find(([s, e]) => s >= current[0] && s <= end + 1 && e > end);
+        const next = near.find(([a, b]) => a >= current[0] && a <= end + 1 && b > end);
         if (!next) break;
         end = next[1];
       }
@@ -5520,23 +5588,59 @@
       if (left <= CONFIG.closingSoonMin) return { open: true, soon: true, minutesLeft: left, label: 'Ouvert · ferme dans ' + left + ' min' };
       return { open: true, label: 'Ouvert · ferme à ' + fmtTime(end % 1440) };
     }
-
-    let next = Infinity;
-    for (const [s] of slots) {
-      const delta = ((s - nowMin) % WEEK + WEEK) % WEEK;
-      if (delta > 0 && delta < next) next = delta;
+    // Prochaine ouverture (jusqu'à un peu plus d'un an : une fermeture exceptionnelle dure un an au plus)
+    let at = null;
+    for (let off = 0; off <= 400 && at === null; off++) {
+      const starts = slotsOn(shop, base, off).map(([a]) => a).filter((a) => a > nowMin).sort((x, y) => x - y);
+      if (starts.length) at = starts[0];
     }
-    if (next === Infinity) return { open: false, label: 'Fermé' };
-    const at = nowMin + next;
-    const dayDiff = Math.floor(at / 1440) - Math.floor(nowMin / 1440);
-    const when = dayDiff === 0 ? '' : dayDiff === 1 ? 'demain ' : DAYS[Math.floor(at / 1440) % 7] + ' ';
+    const closure = closedOnDate(shop, now);
+    if (at === null) return { open: false, closure, label: closure ? 'Fermé exceptionnellement' : 'Fermé' };
+    const dayDiff = Math.floor(at / 1440);
+    const atDay = new Date(base); atDay.setDate(atDay.getDate() + dayDiff);
+    const when = dayDiff === 0 ? '' : dayDiff === 1 ? 'demain ' : dayDiff < 7 ? DAYS[atDay.getDay()] + ' ' : 'le ' + fmtDay(dateKey(atDay)) + ' ';
+    if (closure) return { open: false, closure: true, label: 'Fermé exceptionnellement · rouvre ' + when + 'à ' + fmtTime(at % 1440) };
     return { open: false, label: 'Fermé · ouvre ' + when + 'à ' + fmtTime(at % 1440) };
   }
 
+  const DAYS_SHORT = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+  const slotsText = (slots) => slots.map(([s, e]) => fmtTime(toMin(s)) + ' – ' + fmtTime(toMin(e))).join(' · ');
+  /**
+   * Horaires lisibles. Mêmes créneaux chaque jour ouvert : « 11h – 14h30 · 18h – 22h30 (fermé le dimanche) ».
+   * Horaires par jour : une ligne par groupe de jours qui se suivent avec les mêmes créneaux (« lun. – ven. : 11h30 – 14h30 »).
+   */
   function formatHours(shop) {
-    const slots = shop.hours.map(([s, e]) => fmtTime(toMin(s)) + ' – ' + fmtTime(toMin(e))).join(' · ');
-    const closed = shop.closedOn.length ? ' (fermé le ' + shop.closedOn.map((d) => DAYS[d]).join(', ') + ')' : ' (7j/7)';
-    return slots + closed;
+    const week = weekSlots(shop);
+    const key = (d) => JSON.stringify(week[d]);
+    const open = [1, 2, 3, 4, 5, 6, 0].filter((d) => week[d].length);
+    if (!open.length) return 'Horaires non renseignés';
+    if (open.every((d) => key(d) === key(open[0]))) {
+      const closed = [1, 2, 3, 4, 5, 6, 0].filter((d) => !week[d].length);
+      return slotsText(week[open[0]]) + (closed.length ? ' (fermé le ' + closed.map((d) => DAYS[d]).join(', ') + ')' : ' (7j/7)');
+    }
+    const lines = [];
+    const order = [1, 2, 3, 4, 5, 6, 0];
+    for (let i = 0; i < 7;) {
+      let j = i;
+      while (j + 1 < 7 && key(order[j + 1]) === key(order[i])) j++;
+      const days = i === j ? DAYS_SHORT[order[i]] : DAYS_SHORT[order[i]] + ' – ' + DAYS_SHORT[order[j]];
+      lines.push(days + ' : ' + (week[order[i]].length ? slotsText(week[order[i]]) : 'fermé'));
+      i = j + 1;
+    }
+    return lines.join('\n');
+  }
+  /** Fermeture exceptionnelle en cours ou à venir (dans les 30 jours) : phrase pour la fiche, sinon ''. */
+  function closureText(shop, now = new Date()) {
+    const c = shop.closure;
+    if (!c) return '';
+    const today = dateKey(now);
+    if (c.until < today) return '';
+    const soon = new Date(now); soon.setDate(soon.getDate() + 30);
+    if (c.from > dateKey(soon)) return '';
+    const span = c.from === c.until ? 'le ' + fmtDay(c.from) : 'du ' + fmtDay(c.from) + ' au ' + fmtDay(c.until);
+    const head = c.from <= today ? (c.from === c.until ? 'Fermé exceptionnellement aujourd\'hui' : 'Fermé exceptionnellement jusqu\'au ' + fmtDay(c.until))
+      : 'Fermeture exceptionnelle ' + span;
+    return head + (c.note ? ' : ' + c.note : '') + '.';
   }
 
   /* ---------- Toast ---------- */
@@ -6325,18 +6429,20 @@
   }
 
   /** Le restaurant est-il ouvert à un moment entre `from` et `to` (minutes depuis minuit) le jour `day` (0 = dimanche) ? */
-  function openDuring(shop, day, from, to) {
-    if (shop.closedTemporarily || (shop.closedOn || []).includes(day)) return false;
-    return (shop.hours || []).some(([a, b]) => { const s0 = toMin(a); let e0 = toMin(b); if (e0 <= s0) e0 += 1440; return s0 < to && e0 > from; });
+  function openDuring(shop, date, from, to) {
+    if (shop.closedTemporarily || closedOnDate(shop, date)) return false;
+    return weekSlots(shop)[date.getDay()].some(([a, b]) => { const s0 = toMin(a); let e0 = toMin(b); if (e0 <= s0) e0 += 1440; return s0 < to && e0 > from; });
   }
+  /** Prochain jour de la semaine `dow` (aujourd'hui compris). */
+  const nextDow = (d, dow) => { const x = new Date(d); x.setDate(x.getDate() + ((dow - d.getDay() + 7) % 7)); return x; };
   /**
    * Moments de la journée : ouvert ce midi (12 h - 14 h), ce soir (19 h - 22 h), ce week-end (samedi ou dimanche) ; ou une
    * offre de ce moment (formule midi, afterwork, promo du week-end).
    */
   const WHEN = {
-    lunch: { promo: 'lunch', ok: (sh, d) => openDuring(sh, d.getDay(), 720, 840) },
-    evening: { promo: 'afterwork', ok: (sh, d) => openDuring(sh, d.getDay(), 1140, 1320) },
-    weekend: { promo: 'weekend', ok: (sh) => openDuring(sh, 6, 0, 1440) || openDuring(sh, 0, 0, 1440) },
+    lunch: { promo: 'lunch', ok: (sh, d) => openDuring(sh, d, 720, 840) },
+    evening: { promo: 'afterwork', ok: (sh, d) => openDuring(sh, d, 1140, 1320) },
+    weekend: { promo: 'weekend', ok: (sh, d) => openDuring(sh, nextDow(d, 6), 0, 1440) || openDuring(sh, nextDow(d, 0), 0, 1440) },
   };
   /**
    * Filtre Midi / Ce soir / Ce week-end choisi et restaurant fermé maintenant : quand ouvre-t-il pour ce moment ?
@@ -6345,14 +6451,15 @@
    */
   function statusForWhen(shop, status, now = new Date()) {
     const key = filters.when;
-    if (!key || status.open || shop.closedTemporarily) return status;
+    if (!key || status.open || status.closure || shop.closedTemporarily) return status;
     const nowMin = now.getHours() * 60 + now.getMinutes();
     const win = key === 'lunch' ? [720, 840] : key === 'evening' ? [1140, 1320] : [0, 1440];
     for (let off = 0; off < 7; off++) {
       const day = (now.getDay() + off) % 7;
       if (key === 'weekend' && day !== 6 && day !== 0) continue;
-      if ((shop.closedOn || []).includes(day)) continue;
-      const starts = (shop.hours || []).map(([a, b]) => { const s0 = toMin(a); let e0 = toMin(b); if (e0 <= s0) e0 += 1440; return [s0, e0]; })
+      const date = new Date(now); date.setDate(date.getDate() + off);
+      if (closedOnDate(shop, date)) continue;
+      const starts = weekSlots(shop)[day].map(([a, b]) => { const s0 = toMin(a); let e0 = toMin(b); if (e0 <= s0) e0 += 1440; return [s0, e0]; })
         .filter(([s0, e0]) => s0 < win[1] && e0 > win[0] && (off > 0 || s0 > nowMin)).map(([s0]) => s0).sort((a, b) => a - b);
       if (!starts.length) continue;
       const when = off === 0 ? '' : off === 1 ? 'demain ' : DAYS[day] + ' ';
@@ -8109,6 +8216,9 @@
     $('shop-status').className = 'status ' + (status.soon ? 'is-soon' : status.open ? 'is-open' : 'is-closed');
     $('shop-address').textContent = fullAddress(shop);
     $('shop-hours').textContent = formatHours(shop);
+    const closure = closureText(shop);
+    $('shop-closure').hidden = !closure;
+    $('shop-closure').textContent = closure;
 
     const dist = $('shop-distance');
     if (here()) {
@@ -11162,6 +11272,146 @@
   }
   $('pl-desc').addEventListener('input', () => { $('pl-desc-count').textContent = $('pl-desc').value.length + ' / 600'; });
 
+  /**
+   * Horaires de la fiche : « Pareil tous les jours » (2 services + jours de fermeture) ou « Selon les jours » (jusqu'à
+   * 3 créneaux par jour). Contrôle : heures différentes, créneaux qui ne se chevauchent pas, au moins un jour ouvert.
+   */
+  const HoursEditor = (() => {
+    let mode = 'same';
+    const DAY_NAMES = { 0: 'Dimanche', 1: 'Lundi', 2: 'Mardi', 3: 'Mercredi', 4: 'Jeudi', 5: 'Vendredi', 6: 'Samedi' };
+    const list = $('pl-days-list');
+    function slotEl(from = '11:30', to = '14:30') {
+      const d = document.createElement('div');
+      d.className = 'hd-slot';
+      d.innerHTML = '<input type="time" class="hd-from" /><span>–</span><input type="time" class="hd-to" /><button class="hd-del" type="button">×</button>';
+      d.querySelector('.hd-from').value = from; d.querySelector('.hd-to').value = to;
+      return d;
+    }
+    function syncRow(row) {
+      const name = DAY_NAMES[row.dataset.d].toLowerCase();
+      const open = row.querySelector('.hd-open').checked;
+      const slots = row.querySelector('.hd-slots');
+      if (open && !slots.childElementCount) slots.appendChild(slotEl());
+      row.querySelector('.hd-body').hidden = !open;
+      row.querySelector('.hd-closed').hidden = open;
+      const n = slots.childElementCount;
+      row.querySelector('.hd-add').hidden = !open || n >= 3;
+      [...slots.children].forEach((sl, i) => {
+        sl.querySelector('.hd-from').setAttribute('aria-label', name + ', créneau ' + (i + 1) + ' : ouverture');
+        sl.querySelector('.hd-to').setAttribute('aria-label', name + ', créneau ' + (i + 1) + ' : fermeture');
+        sl.querySelector('.hd-del').setAttribute('aria-label', 'Retirer le créneau ' + (i + 1) + ' du ' + name);
+      });
+    }
+    DAY_ORDER.forEach((d) => {
+      const row = document.createElement('div');
+      row.className = 'hd-row'; row.dataset.d = String(d);
+      row.innerHTML = '<label class="hd-day"><input type="checkbox" class="hd-open" /><span class="hd-name"></span><span class="hd-closed">Fermé</span></label>'
+        + '<div class="hd-body"><div class="hd-slots"></div><button class="link-btn hd-add" type="button">+ Ajouter un créneau</button></div>';
+      row.querySelector('.hd-name').textContent = DAY_NAMES[d];
+      row.querySelector('.hd-open').setAttribute('aria-label', DAY_NAMES[d] + ' : ouvert');
+      list.appendChild(row);
+    });
+    list.addEventListener('change', (ev) => { const row = ev.target.closest('.hd-row'); if (row && ev.target.classList.contains('hd-open')) syncRow(row); setFieldError('pl-hours', ''); });
+    list.addEventListener('click', (ev) => {
+      const row = ev.target.closest('.hd-row');
+      if (!row) return;
+      const slots = row.querySelector('.hd-slots');
+      if (ev.target.closest('.hd-add')) {
+        const last = slots.lastElementChild;
+        slots.appendChild(last ? slotEl('18:30', '22:30') : slotEl());
+        syncRow(row);
+        slots.lastElementChild.querySelector('.hd-from').focus();
+      } else if (ev.target.closest('.hd-del')) {
+        ev.target.closest('.hd-slot').remove();
+        if (!slots.childElementCount) row.querySelector('.hd-open').checked = false;
+        syncRow(row);
+      }
+      setFieldError('pl-hours', '');
+    });
+    $('pl-days-copy').addEventListener('click', () => {
+      const monday = list.querySelector('[data-d="1"]');
+      if (!monday.querySelector('.hd-open').checked) { setFieldError('pl-hours', 'Le lundi est fermé : ouvrez-le d\'abord, ou réglez chaque jour.'); return; }
+      const slots = readRow(monday);
+      list.querySelectorAll('.hd-row').forEach((row) => {
+        if (row === monday || !row.querySelector('.hd-open').checked) return;
+        setRow(row, slots);
+      });
+      toast('Horaires du lundi copiés sur les autres jours ouverts.');
+    });
+    const readRow = (row) => [...row.querySelectorAll('.hd-slot')].map((sl) => [sl.querySelector('.hd-from').value, sl.querySelector('.hd-to').value]);
+    function setRow(row, slots) {
+      row.querySelector('.hd-open').checked = slots.length > 0;
+      const box = row.querySelector('.hd-slots');
+      box.textContent = '';
+      slots.forEach(([a, b]) => box.appendChild(slotEl(a, b)));
+      syncRow(row);
+    }
+    function setMode(m) {
+      mode = m;
+      $('pl-hours-mode').querySelectorAll('[data-hmode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.hmode === m)));
+      $('pl-hours-same').hidden = m !== 'same';
+      $('pl-hours-days').hidden = m !== 'days';
+      setFieldError('pl-hours', '');
+    }
+    /** Créneaux du mode « Pareil tous les jours », tels que saisis. */
+    function readSame() {
+      const services = [];
+      ['1', '2'].forEach((n) => { if ($('pl-h' + n + '-on').checked) services.push([$('pl-h' + n + '-from').value, $('pl-h' + n + '-to').value]); });
+      const closedOn = [...$('pl-closed').querySelectorAll('input:checked')].map((i) => Number(i.value));
+      return { services, closedOn };
+    }
+    $('pl-hours-mode').addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-hmode]');
+      if (!b || b.dataset.hmode === mode) return;
+      // Passage à « Selon les jours » : on part des horaires communs déjà saisis
+      if (b.dataset.hmode === 'days') {
+        const { services, closedOn } = readSame();
+        list.querySelectorAll('.hd-row').forEach((row) => setRow(row, closedOn.includes(Number(row.dataset.d)) ? [] : services.filter(([x, y]) => x && y)));
+      }
+      setMode(b.dataset.hmode);
+    });
+    /** Erreur d'une liste de créneaux d'un jour (heures vides ou identiques, chevauchement), sinon ''. */
+    function slotsError(slots, dayLabel) {
+      if (slots.some(([a, b]) => !a || !b || a === b)) return 'Indiquez une heure d\'ouverture et de fermeture différentes' + (dayLabel ? ' (' + dayLabel + ')' : '') + '.';
+      const mins = slots.map(([a, b]) => { const x = toMin(a); let y = toMin(b); if (y <= x) y += 1440; return [x, y]; }).sort((p, q) => p[0] - q[0]);
+      for (let i = 1; i < mins.length; i++) {
+        if (mins[i][0] < mins[i - 1][1]) return 'Deux créneaux se chevauchent' + (dayLabel ? ' le ' + dayLabel : '') + ' : le suivant doit commencer après la fin du précédent.';
+      }
+      return '';
+    }
+    return {
+      /** Remplit l'éditeur avec la fiche (ou des horaires par défaut). */
+      fill(r) {
+        const week = r ? weekSlots(r) : null;
+        list.querySelectorAll('.hd-row').forEach((row) => setRow(row, week ? week[Number(row.dataset.d)] : [['11:30', '14:30'], ['18:30', '22:30']]));
+        setMode(r && Array.isArray(r.days) ? 'days' : 'same');
+      },
+      /** { value: opening_hours à enregistrer } ou { error } */
+      read() {
+        if (mode === 'same') {
+          const { services, closedOn } = readSame();
+          if (!services.length) return { error: 'Activez au moins un service.' };
+          const err = slotsError(services, '');
+          if (err) return { error: err };
+          if (closedOn.length === 7) return { error: 'Votre restaurant ne peut pas être fermé tous les jours.' };
+          return { value: { services, closed_on: closedOn } };
+        }
+        const days = {};
+        for (const row of list.querySelectorAll('.hd-row')) {
+          const d = Number(row.dataset.d);
+          const slots = row.querySelector('.hd-open').checked ? readRow(row) : [];
+          const err = slotsError(slots, DAYS[d]);
+          if (err) return { error: err };
+          days[d] = slots;
+        }
+        const firstOpen = DAY_ORDER.find((d) => days[d].length);
+        if (firstOpen === undefined) return { error: 'Votre restaurant ne peut pas être fermé tous les jours.' };
+        // Résumé gardé pour les anciennes versions du site : créneaux du premier jour ouvert, jours fermés
+        return { value: { services: days[firstOpen], closed_on: DAY_ORDER.filter((d) => !days[d].length), days } };
+      },
+    };
+  })();
+
   const myRestaurant = (account = currentUser()) => (account && account.pro && account.pro.merchantId ? restaurants()[account.pro.merchantId] || null : null);
 
   /** Préremplit le formulaire : fiche existante, sinon données Sirene. */
@@ -11190,6 +11440,7 @@
     syncHoursInputs();
     const closed = listed ? r.closedOn : [];
     $('pl-closed').querySelectorAll('input').forEach((i) => { i.checked = closed.includes(Number(i.value)); });
+    HoursEditor.fill(listed && r.hours.length ? r : null);
     $('pl-phone').value = listed ? r.phone || '' : (me.phone || '');
     $('pl-mv').checked = !!(listed && r.mealVouchers);
     setMenuScanStatus('', '');
@@ -11906,16 +12157,8 @@
     if (!proDraft.address) fail('pl-address', 'Choisissez l\'adresse de votre restaurant dans la liste des suggestions (La Roche-sur-Yon).');
     else if (!isInBounds(proDraft.address.coords)) fail('pl-address', 'L\'adresse doit se situer à La Roche-sur-Yon.');
 
-    const hours = [];
-    ['1', '2'].forEach((n) => {
-      if (!$('pl-h' + n + '-on').checked) return;
-      const from = $('pl-h' + n + '-from').value, to = $('pl-h' + n + '-to').value;
-      if (!from || !to || from === to) fail('pl-hours', 'Indiquez une heure d\'ouverture et de fermeture différentes.');
-      else hours.push([from, to]);
-    });
-    const closedOn = [...$('pl-closed').querySelectorAll('input:checked')].map((i) => Number(i.value));
-    if (!hours.length && !firstInvalid) fail('pl-hours', 'Activez au moins un service.');
-    if (closedOn.length === 7) fail('pl-hours', 'Votre restaurant ne peut pas être fermé tous les jours.');
+    const hoursRead = HoursEditor.read();
+    if (hoursRead.error) fail('pl-hours', hoursRead.error);
     if (phone && !PHONE_RE.test(compactPhone(phone))) fail('pl-phone', 'Numéro de téléphone invalide.');
     if (firstInvalid) {
       $('err-pro-listing').textContent = 'Certaines informations sont à compléter.';
@@ -11928,7 +12171,7 @@
     const update = {
       name, category: CAT_TO_DB[proDraft.category], description, photos_urls: [...proDraft.photos], menu_json: menu.items,
       address: proDraft.address.label, lng: proDraft.address.coords[0], lat: proDraft.address.coords[1],
-      opening_hours: { services: hours, closed_on: closedOn }, phone: phone ? formatPhone(phone) : null, status: 'published',
+      opening_hours: hoursRead.value, phone: phone ? formatPhone(phone) : null, status: 'published',
       accepts_meal_vouchers: $('pl-mv').checked,
     };
     const submitBtn = ev.submitter || $('form-pro-listing').querySelector('[type=submit]');
@@ -12721,7 +12964,7 @@
         ['Description', (r.description || '').length >= 30, (r.description || '').length ? plural(r.description.length, 'caractère', 'caractères') : 'à écrire', 'field-pl-desc'],
         ['Photos', r.photos.length > 0, r.photos.length ? plural(r.photos.length, 'photo', 'photos') : 'aucune', 'field-pl-photos'],
         ['Carte (menu)', r.menu.length > 0, r.menu.length ? plural(r.menu.length, 'plat', 'plats') : 'vide', 'field-pl-menu'],
-        ['Horaires d\'ouverture', r.hours.length > 0, r.hours.length ? plural(r.hours.length, 'service', 'services') : 'non renseignés', 'field-pl-hours'],
+        ['Horaires d\'ouverture', r.hours.length > 0, !r.hours.length ? 'non renseignés' : r.days ? 'selon les jours' : plural(r.hours.length, 'service', 'services'), 'field-pl-hours'],
         ['Téléphone', !!r.phone, r.phone ? formatPhone(r.phone) : 'non renseigné', 'field-pl-phone'],
         ['Justificatifs (Kbis, hygiène)', !s.missing.length, s.missing.length ? plural(s.missing.length, 'à ajouter', 'à ajouter') : 'déposés', 'todo'],
       ] : [];
@@ -12751,8 +12994,9 @@
         : s.awaitingDocs ? 'Disponible une fois vos justificatifs ajoutés (onglet « Compléter »).'
         : s.awaitingReview ? 'Disponible une fois votre fiche vérifiée par l\'équipe FlashMiam (en général sous 24 h).'
         : !s.listed ? 'Disponible une fois votre fiche publiée.'
-        : s.live ? 'Les clients voient votre fiche, vos stories et vos promotions. Masquez-la en cas de fermeture exceptionnelle.'
+        : s.live ? 'Les clients voient votre fiche, vos stories et vos promotions. Pour des congés, préférez « Fermeture exceptionnelle » ci-dessous.'
         : 'Masquée : personne ne la voit. Vos abonnés, vos avis et vos statistiques sont conservés.';
+      Closure.render(s);
     }
     /** Carte « Abonnement » : formule, échéance, paiement refusé, résiliation et reprise. */
     function renderSubscription(pro, date) {
@@ -12813,10 +13057,61 @@
     });
     $('ps-sub-choose').addEventListener('click', () => editListing());
 
+    /** Fermeture exceptionnelle (congés, travaux…) : dates du … au … inclus et raison, ou « Fermé aujourd'hui seulement ». */
+    const Closure = (() => {
+      const today = () => dateKey(new Date());
+      $('ps-close-note').addEventListener('input', () => { $('ps-close-count').textContent = $('ps-close-note').value.length + ' / 80'; });
+      ['ps-close-from', 'ps-close-until'].forEach((f) => $(f).addEventListener('input', () => setFieldError(f, '')));
+      async function save(fields, message) {
+        const { r } = stateOf();
+        if (!r) return;
+        const { error } = await Loader.run(sb.from('merchants').update(fields).eq('id', r.id), 'Enregistrement…');
+        if (error) { toast(cloudError(error)); return; }
+        await refreshCloud();
+        render();
+        toast(message);
+      }
+      $('ps-close-today').addEventListener('click', () => save({ closed_from: today(), closed_until: today(), closure_note: $('ps-close-note').value.trim() || null },
+        'Fermeture enregistrée : votre fiche indique « Fermé exceptionnellement aujourd\'hui ».'));
+      $('ps-close-save').addEventListener('click', () => {
+        const from = $('ps-close-from').value, until = $('ps-close-until').value;
+        let bad = false;
+        if (!from) { setFieldError('ps-close-from', 'Choisissez le premier jour de fermeture.'); bad = true; }
+        if (!until) { setFieldError('ps-close-until', 'Choisissez le dernier jour de fermeture.'); bad = true; }
+        if (!bad && until < today()) { setFieldError('ps-close-until', 'Cette date est déjà passée.'); bad = true; }
+        if (!bad && until < from) { setFieldError('ps-close-until', 'Le dernier jour doit venir après le premier.'); bad = true; }
+        if (!bad && (new Date(until) - new Date(from)) / 864e5 > 366) { setFieldError('ps-close-until', 'Une fermeture dure un an au plus.'); bad = true; }
+        if (bad) return;
+        save({ closed_from: from, closed_until: until, closure_note: $('ps-close-note').value.trim() || null },
+          'Fermeture enregistrée du ' + fmtDay(from) + ' au ' + fmtDay(until) + '.');
+      });
+      $('ps-close-cancel').addEventListener('click', () => save({ closed_from: null, closed_until: null, closure_note: null }, 'Fermeture annulée : vos horaires habituels s\'affichent de nouveau.'));
+      return {
+        render(s) {
+          const r = s.r;
+          $('ps-close-card').hidden = !(r && s.listed);
+          if (!r || !s.listed) return;
+          const c = r.closure && r.closure.until >= today() ? r.closure : null;
+          $('ps-close-state').hidden = !c;
+          $('ps-close-state').textContent = c ? closureText(r, new Date()) || ('Fermeture prévue du ' + fmtDay(c.from) + ' au ' + fmtDay(c.until) + (c.note ? ' : ' + c.note : '') + '.') : '';
+          $('ps-close-cancel').hidden = !c;
+          $('ps-close-save').textContent = c ? 'Modifier la fermeture' : 'Enregistrer la fermeture';
+          $('ps-close-from').min = today(); $('ps-close-until').min = today();
+          // Champs : la fermeture en cours, sinon vides (pas de valeur qui écraserait une saisie en cours)
+          const typing = document.activeElement && document.activeElement.matches && document.activeElement.matches('#ps-close-card input');
+          if (typing) return;
+          $('ps-close-from').value = c ? c.from : '';
+          $('ps-close-until').value = c ? c.until : '';
+          $('ps-close-note').value = c ? c.note : '';
+          $('ps-close-count').textContent = $('ps-close-note').value.length + ' / 80';
+        },
+      };
+    })();
+
     async function setVisible(on) {
       const { r, listed } = stateOf();
       if (!r || !listed) return;
-      if (!on && !window.confirm('Masquer votre fiche ?\n\nElle n\'apparaîtra plus sur la carte, dans la recherche ni dans les offres, jusqu\'à ce que vous la remettiez en ligne.')) return;
+      if (!on && !window.confirm('Masquer votre fiche ?\n\nElle n\'apparaîtra plus sur la carte, dans la recherche ni dans les offres, jusqu\'à ce que vous la remettiez en ligne.\n\nPour des congés, utilisez plutôt « Fermeture exceptionnelle » : votre fiche reste visible avec la date de réouverture.')) return;
       $('ps-visible').disabled = true;
       const { error } = await Loader.run(sb.from('merchants').update({ is_open: on }).eq('id', r.id), on ? 'Remise en ligne…' : 'Masquage de la fiche…');
       $('ps-visible').disabled = false;
