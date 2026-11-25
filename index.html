@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-+5BIYDqBlcHf+VqjcH+eXte/K3Z+N0Ar+dI3lEOfVpo=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
-  <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-MhdiOhJk0otyio4ldOoLrbmJiBZdSY3YUCcV/+TYyzg=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
   <meta name="color-scheme" content="light dark" />
   <meta name="theme-color" content="#f1f3f4" id="meta-theme" />
@@ -55,9 +55,8 @@
       }
       var t = null;
       try { t = localStorage.getItem('roche-street-food:theme'); } catch (e) {}
-      // « system » : suit le réglage du téléphone (mode sombre ou clair)
-      if (t === 'system') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      if (t !== 'light' && t !== 'dark') t = 'light';   // par défaut : mode jour (jour, nuit ou système se choisit dans le profil)
+      // Par défaut (« system ») : suit le réglage du téléphone (mode sombre ou clair) ; jour ou nuit se choisit dans le profil
+      if (t !== 'light' && t !== 'dark') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', t);
       document.getElementById('meta-theme').setAttribute('content', t === 'dark' ? '#242f3e' : '#f1f3f4');
       // Feuille de style de la carte chargée sans bloquer l'affichage (l'écran de chargement peut apparaître tout de suite)
@@ -91,7 +90,7 @@
        1. DESIGN TOKENS — mode jour (défaut) et mode nuit, palette Google
        ===================================================================== */
     :root {
-      --chart: #1a73e8;                 /* couleur des graphiques (validée sur fond clair) */
+      --chart: #c2410c;                 /* couleur des graphiques : orange FlashMiam (validée sur fond clair) */
       --sidebar-w: 372px;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -108,10 +107,13 @@
       --line-strong: rgba(60, 64, 67, 0.24);
       --text: #202124;
       --muted: #5f6368;
-      --accent: #1a73e8;
-      --accent-strong: #1558b0;
-      --accent-soft: rgba(26, 115, 232, 0.1);
-      --accent-line: rgba(26, 115, 232, 0.35);
+      /* Couleur principale : orange du logo, assez foncé pour le texte (contraste 5,2:1 sur blanc) ; le bleu reste
+         réservé à « ma position » (--blue), comme sur les cartes habituelles */
+      --accent: #c2410c;
+      --accent-strong: #9a3412;
+      --accent-soft: rgba(234, 88, 12, 0.1);
+      --accent-line: rgba(234, 88, 12, 0.38);
+      --focus-ring: rgba(234, 88, 12, 0.22);
       --on-accent: #ffffff;
       --green: #188038;
       --green-soft: rgba(24, 128, 56, 0.1);
@@ -125,7 +127,7 @@
       --backdrop: rgba(32, 33, 36, 0.32);
     }
     :root[data-theme="dark"] {
-      --chart: #4c8df6;                 /* validée sur fond sombre */
+      --chart: #ff8a4c;                 /* validée sur fond sombre */
       --bg: #242f3e;
       --panel: rgba(32, 33, 36, 0.95);
       --panel-solid: #202124;
@@ -134,10 +136,11 @@
       --line-strong: rgba(232, 234, 237, 0.24);
       --text: #e8eaed;
       --muted: #9aa0a6;
-      --accent: #8ab4f8;
-      --accent-strong: #aecbfa;
-      --accent-soft: rgba(138, 180, 248, 0.14);
-      --accent-line: rgba(138, 180, 248, 0.4);
+      --accent: #ff8a4c;
+      --accent-strong: #ffab80;
+      --accent-soft: rgba(255, 138, 76, 0.14);
+      --accent-line: rgba(255, 138, 76, 0.42);
+      --focus-ring: rgba(255, 138, 76, 0.24);
       --on-accent: #202124;
       --green: #81c995;
       --green-soft: rgba(129, 201, 149, 0.14);
@@ -176,6 +179,10 @@
     button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
     a { color: inherit; }
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    /* iPhone : un champ en dessous de 16 px fait zoomer Safari quand on le touche (le zoom de page est autorisé) */
+    @supports (-webkit-touch-callout: none) {
+      input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not(.code-input):not(#scan-code), textarea, select { font-size: 16px !important; }
+    }
 
     #map { position: fixed; inset: 0; width: 100%; height: 100vh; height: 100dvh; background: var(--bg); }
 
@@ -208,7 +215,7 @@
     .brand { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 16px 6px 6px; border-radius: 999px; text-align: left; }
     .avatar {
       flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
-      font-weight: 500; font-size: 18px; color: #fff; background: #1a73e8;
+      font-weight: 500; font-size: 18px; color: #fff; background: linear-gradient(135deg, #f2610c, #d9301a);
     }
     .brand-text { display: flex; flex-direction: column; min-width: 0; }
     .brand-text strong { font-weight: 500; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -273,7 +280,7 @@
       transition: background-color .2s, color .2s, border-color .2s;
     }
     .chip[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-line); }
-    :root[data-theme="light"] .chip[aria-pressed="true"] { background: #e8f0fe; color: #1967d2; }
+    :root[data-theme="light"] .chip[aria-pressed="true"] { background: #fff1e8; color: #9a3412; }
     .dot-green { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
 
     /* =====================================================================
@@ -346,7 +353,7 @@
     .pin.is-soon .pin-badge, .pin.is-soon .pin-badge::before { border-color: #f29900; }
     .pin.is-closed .pin-badge { filter: grayscale(.9) opacity(.85); }
     .pin:hover .pin-badge, .pin.is-hover .pin-badge { transform: translateY(-3px); }
-    .pin.is-selected .pin-badge { transform: translateY(-6px) scale(1.15); border-color: var(--blue); }
+    .pin.is-selected .pin-badge { transform: translateY(-6px) scale(1.15); border-color: var(--accent); }
     .pin.is-selected.is-closed .pin-badge { filter: none; }
     @keyframes ripple { 0% { opacity: .8; transform: scale(.9); } 100% { opacity: 0; transform: scale(1.6); } }
     .pin-label {
@@ -456,7 +463,7 @@
     .pf-cam { position: absolute; right: -4px; bottom: -4px; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; color: #fff; background: var(--accent-strong); box-shadow: 0 0 0 3px var(--panel-solid); }
     .pf-cam svg { width: 15px; height: 15px; }
     .avatar.has-photo { color: transparent; background-size: cover; background-position: center; }
-    .pf-avatar { width: 64px; height: 64px; font-size: 28px; font-weight: 600; background: linear-gradient(135deg, #1a73e8, #8b5cf6); box-shadow: 0 0 0 3px var(--panel-solid), 0 0 0 5px var(--accent-line); }
+    .pf-avatar { width: 64px; height: 64px; font-size: 28px; font-weight: 600; background: linear-gradient(135deg, #ff8a3d, #d9301a); box-shadow: 0 0 0 3px var(--panel-solid), 0 0 0 5px var(--accent-line); }
     .pf-id { min-width: 0; padding-right: 34px; }
     .pf-id h3 { margin: 0; font-size: 22px; font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
     .pf-email { margin: 4px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--muted); overflow-wrap: anywhere; }
@@ -559,7 +566,7 @@
      * --ob-grad : dégradé décoratif ; --ob-text : mots clés ; --ob-btn : fond du bouton principal (jour).
      */
     :root[data-theme="light"] .onboarding {
-      --accent: #d9381e; --accent-strong: #b93815; --accent-soft: rgb(255 77 46 / .08); --accent-line: rgb(255 77 46 / .3); --on-accent: #fff;
+      --accent: #c2410c; --accent-strong: #9a3412; --accent-soft: rgb(234 88 12 / .08); --accent-line: rgb(234 88 12 / .3); --on-accent: #fff;
       --ob-grad: linear-gradient(100deg, #ffc233, #ff8a3d 50%, #ff4d2e);
       --ob-text: linear-gradient(90deg, #e67700, #f0501f 50%, #d9301a);
       --ob-btn: linear-gradient(100deg, #f2610c, #e8401c 55%, #d9301a);
@@ -611,9 +618,10 @@
       background: rgb(255 255 255 / .04); border-color: rgb(255 255 255 / .1);
     }
     :root[data-theme="light"] .onboarding .field input { background: #fff; border-color: #efe5dc; }
-    :root[data-theme="light"] .onboarding .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgb(255 77 46 / .14); }
-    :root[data-theme="dark"] .onboarding .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgb(255 122 69 / .16); }
-    .onboarding .field.has-error input { border-color: var(--danger); box-shadow: none; }
+    /* Champ actif : contour orange et halo doux (le rouge reste réservé aux erreurs) */
+    :root[data-theme="light"] .onboarding .field input:focus { border-color: #ea580c; box-shadow: 0 0 0 4px rgb(234 88 12 / .14); }
+    :root[data-theme="dark"] .onboarding .field input:focus { border-color: #ff9a5c; box-shadow: 0 0 0 4px rgb(255 138 76 / .16); }
+    :root .onboarding .field.has-error input, :root .onboarding .field.has-error input:focus { border-color: var(--danger); box-shadow: 0 0 0 4px rgb(217 48 37 / .12); }   /* l'erreur l'emporte sur le contour orange du champ actif */
     :root[data-theme="light"] .onboarding .role-check { background: rgb(255 255 255 / .85); border-color: rgb(255 120 60 / .16); }
     :root[data-theme="light"] .onboarding .role-check:has(input:checked) { background: rgb(255 138 61 / .08); border-color: rgb(255 77 46 / .35); }
     :root[data-theme="dark"] .onboarding .role-check { background: rgb(255 255 255 / .04); border-color: rgb(255 255 255 / .1); }
@@ -633,7 +641,7 @@
     }
     .field input::placeholder { color: var(--muted); opacity: .7; }
     .field input:focus { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-    .field.has-error input { border-color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
+    .field.has-error input, .field.has-error input:focus { border-color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
     .field-error { display: block; min-height: 16px; margin-top: 4px; font-size: 12px; color: var(--danger); }
     .pw-wrap { position: relative; }
     .pw-wrap input { padding-right: 84px; }
@@ -1016,7 +1024,7 @@
     .counter { float: right; font-weight: 400; }
     .cat-picker { display: flex; flex-wrap: wrap; gap: 6px; }
     .cat-picker button { height: 36px; padding: 0 12px; border-radius: 18px; font-size: 14px; border: 1px solid var(--line-strong); }
-    .cat-picker button[aria-checked="true"] { background: #e8f0fe; color: #1967d2; border-color: var(--accent-line); }
+    .cat-picker button[aria-checked="true"] { background: #fff1e8; color: #9a3412; border-color: var(--accent-line); }
     :root[data-theme="dark"] .cat-picker button[aria-checked="true"] { background: var(--accent-soft); color: var(--accent); }
     .photo-grid { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .photo-item, .photo-add { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; }
@@ -1574,7 +1582,8 @@
     #psp-publish .pd-block:first-of-type { margin-top: 0; }
     #psp-publish .ps-alert + .pd-block { margin-top: 16px; }
     .story-admin .sa-stats { color: var(--text); }
-    @media (max-width: 380px) { .ps-tabs .ps-lbl { font-size: 0; } .ps-tabs .ps-lbl::after { content: attr(data-short); font-size: 11.5px; } }
+    /* « Statistiques » ne tient pas sous l'icône sur les téléphones courants (390 à 430 px) : « Stats » */
+    @media (max-width: 440px) { .ps-tabs .ps-lbl { font-size: 0; } .ps-tabs .ps-lbl::after { content: attr(data-short); font-size: 11.5px; } }
     @media (max-width: 360px) { .ps-quick { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ps-tabs .ps-ico { width: 44px; } }
     /* Ordinateur : tableau de bord sur tout l'écran, menu à gauche, contenu sur plusieurs colonnes */
     @media (min-width: 900px) {
@@ -1885,12 +1894,15 @@
        9. TOAST, ÉCRAN D'ERREUR, ATTRIBUTION
        ===================================================================== */
     .toast {
-      position: fixed; z-index: 120; left: 12px; right: 72px; top: calc(var(--safe-top) + 76px);
+      /* Téléphone : en bas, au-dessus de la barre d'onglets et à gauche du bouton « me localiser » (en haut, il
+         cachait les stories des restaurants) */
+      position: fixed; z-index: 120; left: 12px; right: 72px; bottom: calc(var(--safe-bottom) + 84px);
       width: fit-content; max-width: 480px; margin: 0 auto; display: flex; align-items: center; gap: 12px; padding: 12px 16px;
       border-radius: 8px; font-size: 14px; color: #e8eaed; background: #323232; border: 0;
-      transform: translateY(-12px); opacity: 0; pointer-events: none; transition: opacity .25s, transform .3s var(--ease-out);
+      transform: translateY(12px); opacity: 0; pointer-events: none; transition: opacity .25s, transform .3s var(--ease-out);
     }
     .toast.is-visible { opacity: 1; transform: none; pointer-events: auto; }
+    html.kb-open .toast { bottom: auto; top: calc(var(--safe-top) + 12px); }   /* clavier ouvert : le bas de l'écran est caché */
     /* État de la connexion : discret, en bas de l'écran (téléphone) ou en haut de la carte (ordinateur) */
     .net { position: fixed; z-index: 125; left: 12px; right: 12px; bottom: calc(var(--safe-bottom) + 76px); width: fit-content; max-width: min(480px, calc(100% - 24px)); margin: 0 auto; display: flex; align-items: center; gap: 8px;
       padding: 8px 14px; border-radius: 18px; font-size: 13px; font-weight: 500; color: var(--text); background: var(--panel-solid);
@@ -1905,7 +1917,7 @@
     #net-text { min-width: 0; line-height: 1.3; }
     #net-retry { flex: none; pointer-events: auto; margin-left: 2px; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); }
     @media (prefers-reduced-motion: reduce) { .net.is-slow .net-dot { animation: none; } }
-    .toast button { flex: none; color: #8ab4f8; font-weight: 500; }
+    .toast button { flex: none; color: #ffab80; font-weight: 500; }
     /* Rappel « écran d'accueil » : sous la barre du haut, sous les messages (toast) s'il y en a un */
     .install-nudge { position: fixed; z-index: 119; left: 12px; right: 12px; top: calc(var(--safe-top) + 76px); max-width: 480px; margin: 0 auto;
       display: flex; align-items: center; gap: 12px; padding: 10px 8px 10px 12px; border-radius: 16px; color: var(--text); background: var(--panel-solid);
@@ -2122,8 +2134,8 @@
     .scan-frame i:nth-child(2) { top: -2px; right: -2px; border-left: 0; border-bottom: 0; border-top-right-radius: 26px; }
     .scan-frame i:nth-child(3) { bottom: -2px; left: -2px; border-right: 0; border-top: 0; border-bottom-left-radius: 26px; }
     .scan-frame i:nth-child(4) { bottom: -2px; right: -2px; border-left: 0; border-top: 0; border-bottom-right-radius: 26px; }
-    .scan-line { position: absolute; left: 10%; right: 10%; top: 12%; height: 2px; border-radius: 1px; background: linear-gradient(90deg, transparent, #8ab4f8, transparent);
-      box-shadow: 0 0 12px 2px rgba(138, 180, 248, .7); animation: scan-sweep 2.2s ease-in-out infinite alternate; }
+    .scan-line { position: absolute; left: 10%; right: 10%; top: 12%; height: 2px; border-radius: 1px; background: linear-gradient(90deg, transparent, #ff9a5c, transparent);
+      box-shadow: 0 0 12px 2px rgba(255, 138, 76, .7); animation: scan-sweep 2.2s ease-in-out infinite alternate; }
     @keyframes scan-sweep { to { top: 88%; } }
     .scan.is-busy .scan-line, .scan.is-off .scan-line { display: none; }
     .scan.is-busy .scan-frame i { border-color: #81c995; }
@@ -2150,7 +2162,7 @@
     .scan-manual input { flex: 1; min-width: 0; height: 50px; padding: 0 16px; border: 1px solid rgba(255, 255, 255, .3); border-radius: 25px; color: #fff; background: rgba(255, 255, 255, .14);
       font: 600 19px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .08em; text-transform: uppercase; backdrop-filter: blur(8px); }
     .scan-manual input::placeholder { color: rgba(255, 255, 255, .45); }
-    .scan-manual input:focus { outline: 2px solid #8ab4f8; outline-offset: 1px; }
+    .scan-manual input:focus { outline: 2px solid #ff9a5c; outline-offset: 1px; }
     .scan-manual button { flex: none; height: 50px; padding: 0 20px; border-radius: 25px; font-size: 15px; font-weight: 600; color: #202124; background: #fff; }
     .scan-manual button[disabled] { opacity: .5; }
     .scan-type { height: 44px; padding: 0 18px; border-radius: 22px; font-size: 14.5px; font-weight: 500; color: #fff; background: rgba(255, 255, 255, .16); backdrop-filter: blur(8px); }
@@ -2320,7 +2332,7 @@
       body.is-guest .tabbar #notif-btn, body.is-guest .tabbar #profile-btn { display: none; }
       body.is-guest .tabbar #guest-login { display: flex; }
       body.is-guest .tabbar #guest-signup { display: flex; flex: 0 0 auto; flex-direction: row; gap: 6px; align-self: center; height: 48px; padding: 0 16px; border-radius: 24px;
-        font-size: 14.5px; white-space: nowrap; color: var(--on-accent); background: var(--accent); box-shadow: 0 2px 8px rgba(26, 115, 232, .35); }
+        font-size: 14.5px; white-space: nowrap; color: var(--on-accent); background: var(--accent); box-shadow: 0 2px 8px rgba(194, 65, 12, .35); }
       body.is-guest .tabbar #guest-signup::before { display: none; }
       body.is-guest .tabbar > .tab, body.is-guest .tabbar #offers-btn, body.is-guest .tabbar #guest-login { flex: 1 1 0; max-width: 76px; }
       body.is-guest .tabbar { justify-content: space-between; }
@@ -2428,7 +2440,7 @@
     .shop-actions .act svg { width: 46px; height: 46px; padding: 12px; overflow: visible; border-radius: 50%; color: var(--accent); background: var(--accent-soft); transition: background-color .2s, color .2s, transform .15s var(--ease-out); }
     .shop-actions .act:hover svg { transform: translateY(-1px); }
     .shop-actions .act-primary { color: var(--text); background: none; }
-    .shop-actions .act-primary svg { color: var(--on-accent); background: var(--accent); box-shadow: 0 3px 10px rgba(26, 115, 232, .35); }
+    .shop-actions .act-primary svg { color: var(--on-accent); background: var(--accent); box-shadow: 0 3px 10px rgba(194, 65, 12, .35); }
     .shop-actions .act[aria-pressed="true"] { color: var(--accent); background: none; }
     .shop-actions .act[aria-pressed="true"] svg { color: var(--on-accent); background: var(--accent); }
     .shop-actions .act:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -3670,6 +3682,15 @@
       <form id="ob-reset" class="ob-step" novalidate data-step="reset-password" hidden aria-labelledby="rs-title">
         <div class="mail-badge" aria-hidden="true">🔑</div>
         <h2 id="rs-title">Mot de passe <em>oublié</em></h2>
+        <!-- Étape 0 (adresse pas encore saisie sur l'écran de connexion) : l'adresse du compte -->
+        <div id="rs-phase-email" hidden>
+          <p class="lead">Indiquez l'adresse e-mail de votre compte : nous vous envoyons un code pour choisir un nouveau mot de passe.</p>
+          <label class="field" id="field-rs-mail">
+            <span>Adresse e-mail</span>
+            <input id="rs-mail" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" maxlength="254" placeholder="camille@exemple.fr" />
+            <small class="field-error" id="err-rs-mail" aria-live="polite"></small>
+          </label>
+        </div>
         <div id="rs-phase-code">
           <p class="lead" id="rs-lead">Si un compte FlashMiam existe avec l'adresse <b id="rs-email"></b>, un code vient d'y être envoyé. Saisissez-le pour choisir un nouveau mot de passe.</p>
           <label class="field" id="field-rs-code">
@@ -5629,7 +5650,7 @@
   };
   const URBAIN = {
     background: '#fff7ee', landuseBusy: '#ffe4c4', hospital: '#ffd3d8', education: '#d9e3ff',
-    landcover: '#e2f4d2', wood: '#9fdb84', park: '#86d06f', water: '#0a4fa0', waterway: '#0a4fa0',
+    landcover: '#e2f4d2', wood: '#9fdb84', park: '#86d06f', water: '#a9d6ec', waterway: '#8cc6e3',   // eau claire : les bassins ne dominent pas la carte
     building: '#f6e2cf', buildingLine: '#e8c9ab',
     motorway: '#ff3b2f', motorwayCase: '#b5221a', trunk: '#ff6338', trunkCase: '#c44522',
     primary: '#ff7f50', primaryCase: '#d4572c', secondary: '#ffb340', secondaryCase: '#d68d1c',
@@ -6078,7 +6099,7 @@
   function themePref() {
     let t = null;
     try { t = localStorage.getItem(CONFIG.themeKey); } catch (e) { /* stockage indisponible */ }
-    return t === 'dark' || t === 'system' ? t : 'light';
+    return t === 'dark' || t === 'light' ? t : 'system';   // par défaut : comme le téléphone
   }
   const resolveTheme = (pref) => (pref === 'system' ? (darkQuery && darkQuery.matches ? 'dark' : 'light') : pref);
   /** Applique et mémorise un choix du profil (jour, nuit, système). */
@@ -6633,7 +6654,7 @@
       SEARCH_IDEAS.filter((w) => Search.run(w).dishes.length || Search.run(w).shops.length).forEach((w) => {
         const b = document.createElement('button');
         b.type = 'button'; b.className = 'chip'; b.textContent = w;
-        b.addEventListener('click', () => { $('search-m').value = w; Search.mobile.query = w; Search.mobile.limit = 30; renderSearchPanel(); });
+        b.addEventListener('click', () => { $('search-m').value = w; Search.mobile.query = w; Search.mobile.limit = 30; SearchFold.collapse(); renderSearchPanel(); });
         ideas.appendChild(b);
       });
       box.appendChild(ideas);
@@ -6804,7 +6825,11 @@
     $('search-m').addEventListener('input', (ev) => { if (!userChoice) set(!ev.target.value.trim()); });
     $('filters-track').addEventListener('click', () => setTimeout(render, 0));
     $('range-filters').addEventListener('input', () => setTimeout(render, 0));
-    return { reset() { userChoice = false; set(!$('search-m').value.trim()); } };
+    return {
+      reset() { userChoice = false; set(!$('search-m').value.trim()); },
+      /** Recherche lancée autrement qu'au clavier (idée, suggestion) : les résultats d'abord. */
+      collapse() { if (!userChoice) set(false); },
+    };
   })();
 
   /* ---------- Avis : note sur 5, commentaire, réponse du restaurateur ---------- */
@@ -8067,6 +8092,9 @@
     renderShopPromos(shop);
     VisitPass.renderEntry(shop);
     $('shop-phone-row').hidden = !shop.phone;
+    // Fiches d'exemple et de test : numéro fictif, jamais composé (le bouton explique à quoi il sert)
+    const fakePhone = !!(shop.isDemo || isShowcase(shop) || shop.isTest);
+    $('shop-call').dataset.example = $('shop-phone').dataset.example = fakePhone ? '1' : '';
     if (shop.phone) { $('shop-phone').textContent = formatPhone(shop.phone); $('shop-phone').href = 'tel:' + compactPhone(shop.phone); }
     $('shop-call').hidden = !shop.phone;
     $('shop-mv-row').hidden = !shop.mealVouchers;
@@ -8419,8 +8447,14 @@
 
   $('shop-go').addEventListener('click', () => selectedId && Stats.track(selectedId, 'walk'));
   $('shop-go-car').addEventListener('click', () => selectedId && Stats.track(selectedId, 'car'));
-  $('shop-phone').addEventListener('click', () => selectedId && Stats.track(selectedId, 'phone'));
-  $('shop-call').addEventListener('click', () => selectedId && Stats.track(selectedId, 'phone'));
+  const exampleCall = (ev) => {
+    if (ev.currentTarget.dataset.example !== '1') return false;
+    ev.preventDefault();
+    toast('Fiche d\'exemple : sur la fiche d\'un vrai restaurant, ce bouton l\'appelle directement.');
+    return true;
+  };
+  $('shop-call').addEventListener('click', (ev) => { if (!exampleCall(ev) && selectedId) Stats.track(selectedId, 'phone'); });
+  $('shop-phone').addEventListener('click', (ev) => { if (!exampleCall(ev) && selectedId) Stats.track(selectedId, 'phone'); });
 
   /* ---------- Promotions ---------- */
   /** Promotions en cours d'un commerce (l'ancienne « offre du moment » compte comme un bon plan), les plus urgentes d'abord. */
@@ -10435,22 +10469,24 @@
   /** Étape affichée : « code » (saisie du code reçu) ou « password » (nouveau mot de passe + confirmation). */
   function setResetPhase(phase) {
     resetPhase = phase;
+    $('rs-phase-email').hidden = phase !== 'email';
     $('rs-phase-code').hidden = phase !== 'code';
     $('rs-phase-password').hidden = phase !== 'password';
     $('rs-resend-row').hidden = phase !== 'code';
-    $('rs-title').innerHTML = phase === 'code' ? 'Mot de passe <em>oublié</em>' : 'Nouveau <em>mot de passe</em>';
-    $('rs-submit').textContent = phase === 'code' ? 'Valider le code' : 'Changer mon mot de passe';
+    $('rs-title').innerHTML = phase === 'password' ? 'Nouveau <em>mot de passe</em>' : 'Mot de passe <em>oublié</em>';
+    $('rs-submit').textContent = phase === 'email' ? 'Recevoir un code' : phase === 'code' ? 'Valider le code' : 'Changer mon mot de passe';
     $('err-reset').textContent = '';
-    setTimeout(() => { const f = $(phase === 'code' ? 'rs-code' : 'rs-password'); if (f && !f.closest('[hidden]')) f.focus(); }, 60);
+    setTimeout(() => { const f = $(phase === 'email' ? 'rs-mail' : phase === 'code' ? 'rs-code' : 'rs-password'); if (f && !f.closest('[hidden]')) f.focus(); }, 60);
   }
   function showReset(email, { byLink = false } = {}) {
     resetEmail = email; resetByLink = byLink;
     $('rs-email').textContent = email || '';
     $('rs-code').value = ''; $('rs-password').value = ''; $('rs-password2').value = '';
-    ['rs-code', 'rs-password', 'rs-password2'].forEach((f) => setFieldError(f, ''));
+    ['rs-mail', 'rs-code', 'rs-password', 'rs-password2'].forEach((f) => setFieldError(f, ''));
     renderResetPassword();
     showAuthStep('reset-password');
-    setResetPhase(byLink ? 'password' : 'code');   // lien de l'e-mail : déjà vérifié, directement le mot de passe
+    // lien de l'e-mail : déjà vérifié, directement le mot de passe ; sans adresse : on la demande d'abord
+    setResetPhase(byLink ? 'password' : email ? 'code' : 'email');
   }
   async function sendResetCode(email) {
     const captchaToken = await Captcha.token().catch(() => null);
@@ -10459,7 +10495,9 @@
   }
   $('forgot-btn').addEventListener('click', async () => {
     const email = $('li-email').value.trim().toLowerCase();
-    if (!EMAIL_RE.test(email)) { setFieldError('li-email', 'Saisissez d\'abord l\'adresse e-mail de votre compte.'); $('li-email').focus(); return; }
+    setFieldError('li-email', '');
+    // Adresse pas (ou mal) saisie : l'écran « Mot de passe oublié » la demande lui-même
+    if (!EMAIL_RE.test(email)) { $('rs-mail').value = email; showReset(null); return; }
     const { error } = await sendResetCode(email);
     if (error) { $('err-login').textContent = error.captcha || captchaRefused(error) ? Captcha.failMessage : cloudError(error); return; }
     showReset(email);
@@ -10488,6 +10526,18 @@
   $('ob-reset').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     if (resetBusy) return;
+    if (resetPhase === 'email') {
+      const email = $('rs-mail').value.trim().toLowerCase();
+      if (!EMAIL_RE.test(email)) { setFieldError('rs-mail', 'Saisissez une adresse e-mail valide, par exemple camille@exemple.fr.'); $('rs-mail').focus(); return; }
+      resetBusy = true;
+      const { error } = await sendResetCode(email).finally(() => { resetBusy = false; });
+      if (error) { $('err-reset').textContent = error.captcha || captchaRefused(error) ? Captcha.failMessage : cloudError(error); return; }
+      resetEmail = email;
+      $('rs-email').textContent = email;
+      $('li-email').value = email;
+      setResetPhase('code');
+      return;
+    }
     if (resetPhase === 'code') {
       const code = onlyDigits($('rs-code').value);
       if (code.length < 6 || code.length > 8) { setFieldError('rs-code', 'Saisissez le code reçu par e-mail (6 à 8 chiffres).'); return; }
@@ -10635,7 +10685,8 @@
   function remindIncomplete() {
     const me = currentUser();
     const n = proTodoCount(me);
-    if (!n) return;
+    // Espace restaurateur ouvert : son bandeau « Compléter » le dit déjà, pas de message en double par-dessus
+    if (!n || !$('pro-space').hidden) return;
     toast('Votre compte n\'est pas complet : ' + plural(n, 'élément', 'éléments') + ' à compléter.', { label: 'Compléter', run: () => ProSpace.open('todo') });
   }
   document.querySelectorAll('[data-pro-back]').forEach((btn) => btn.addEventListener('click', () => showAuthStep(btn.dataset.proBack)));
@@ -11996,6 +12047,8 @@
       if (activePanel) closePanel(activePanel);
       root.hidden = false;
       document.body.classList.add('pro-open');
+      // Le rappel « compte pas complet » de la carte ferait doublon avec le bandeau de l'espace
+      if (/pas complet/.test($('toast-text').textContent)) hideToast();
       setTab(t, { focus: true });
       $('ps-close').setAttribute('aria-label', ProHome.canScanHome() ? 'Retour au scanner' : 'Fermer l\'espace restaurateur');
       render();
@@ -13126,8 +13179,9 @@
       const pro = !!(me && me.role === 'pro');
       const ok = pro && VisitFeature.check(renderEntry);
       $('scan-fab').hidden = !(ok && listed());
-      $('ps-scan').hidden = !ok;
-      $('ps-scan-fab').hidden = !ok;
+      // Tant que la fiche n'est pas en ligne, aucun client ne peut montrer de QR code : pas de bouton « Scanner »
+      $('ps-scan').hidden = !(ok && listed());
+      $('ps-scan-fab').hidden = !(ok && listed());
       // Lecteur préparé à l'avance (sans ouvrir la caméra) : le scanner s'ouvre et lit tout de suite
       if (ok && listed() && !detectorPrep) (window.requestIdleCallback || setTimeout)(() => { if (!detectorPrep) detectorPrep = prepareDetector().catch(() => { detectorPrep = null; }); });
     }
