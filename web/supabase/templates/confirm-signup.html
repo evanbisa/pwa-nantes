@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="supported-color-schemes" content="light" />
+  <title>Vérifiez votre adresse e-mail</title>
+</head>
+<body style="margin:0;padding:0;background:#f3eee9;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f3eee9;">
+    <tr>
+      <td align="center" style="padding:32px 14px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
+          <!-- En-tête : icône et nom -->
+          <tr>
+            <td align="center" style="padding:0 0 18px;">
+              <img src="https://flashmiam.fr/icon-192.png" width="56" height="56" alt="FlashMiam" style="display:block;width:56px;height:56px;border:0;border-radius:14px;" />
+              <p style="margin:10px 0 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:20px;font-weight:800;letter-spacing:-.01em;color:#1c1a19;">FlashMiam</p>
+            </td>
+          </tr>
+          <!-- Carte -->
+          <tr>
+            <td style="background:#ffffff;border:1px solid #ece4dd;border-radius:22px;padding:40px 36px 34px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td>
+                  <h1 style="margin:0;font-size:28px;line-height:1.2;font-weight:800;letter-spacing:-.02em;color:#1c1a19;">Vérifiez votre adresse e-mail</h1>
+                  <p style="margin:16px 0 0;font-size:17px;line-height:1.65;color:#6d6662;">Bienvenue sur FlashMiam ! Pour terminer la création de votre compte, saisissez ce code dans l'application.</p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:28px 0 6px;">
+                  <p style="margin:0 0 10px;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#9a6a52;">Votre code</p>
+                  <div style="padding:18px 12px;border-radius:14px;background:#fff4ec;border:1px dashed #f3a37a;text-align:center;font-size:34px;line-height:1.1;font-weight:800;letter-spacing:.32em;color:#1c1a19;font-family:'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;">{{ .Token }}</div>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:20px 0 6px;">
+                  <p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#6d6662;">Ou en un geste :</p>
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td align="center" bgcolor="#e8481f" style="border-radius:14px;background:#e8481f;background-image:linear-gradient(135deg,#ff8a3d,#e8401c);">
+                        <a href="{{ .ConfirmationURL }}" target="_blank" style="display:block;padding:18px 24px;font-size:18px;line-height:1.3;font-weight:700;color:#ffffff;text-decoration:none;border-radius:14px;">Confirmer mon adresse</a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:28px 0 0;">
+                  <p style="margin:0;font-size:14px;line-height:1.7;color:#a39b95;">Ce code expire dans 1 heure. Si vous n'avez pas créé de compte FlashMiam, ignorez cet e-mail.<br />Besoin d'aide ? <a href="mailto:contact@flashmiam.fr" style="color:#c2410c;text-decoration:underline;">contact@flashmiam.fr</a></p>
+                </td>
+              </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Pied -->
+          <tr>
+            <td align="center" style="padding:20px 10px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12.5px;line-height:1.6;color:#a39b95;">
+              FlashMiam · les restaurants de La Roche-sur-Yon, à deux pas<br />
+              <a href="https://flashmiam.fr" style="color:#a39b95;text-decoration:underline;">flashmiam.fr</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
