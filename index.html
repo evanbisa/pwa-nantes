@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-G0i93wtX9p+dcW5APNtq9x7Js/9iJi6/g6XOKd/wdG8=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-FG64/egmfeVa+d9F0+i53Um1eE+4lbVkURlL2PvsUNA=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -13532,9 +13532,11 @@
         { el: null, title: 'Bienvenue sur FlashMiam !', hello: true },
         { el: examplePin, title: 'Chaque point est un restaurant', round: true, example: true },
         { el: () => $('offers-btn'), title: 'Les bons plans autour de vous !' },
-        { el: null, demo: true, title: 'Montrez le QR code en caisse pour profiter de l\'offre' },
         { el: () => (desktop() ? $('search') : $('search-open')), title: 'Cherchez un plat ou un restaurant' },
         { el: () => $('profile-btn'), title: 'Votre profil et vos réglages, avec ce guide' },
+        // Pour finir : le client ouvre lui-même une fiche, puis on lui montre où est son QR code
+        { el: examplePin, title: 'Touchez un restaurant pour ouvrir sa fiche', round: true, example: true, tap: true },
+        { el: () => $('shop-visit'), title: 'Votre QR code est ici : montrez-le en caisse pour profiter de l\'offre', demo: true, follow: true },
       ];
     }
     function place() {
@@ -13543,6 +13545,7 @@
       const r = visible(el);
       const pad = st && st.round ? 10 : 6;
       spot.classList.toggle('is-none', !r);
+      $('tour-demo').hidden = !(st && st.demo && !r);   // bouton de la fiche introuvable : exemple dessiné dans la bulle
       if (r) {
         const w = r.width + pad * 2, h = r.height + pad * 2;
         Object.assign(spot.style, { left: r.left - pad + 'px', top: r.top - pad + 'px', width: w + 'px', height: h + 'px', borderRadius: st.round ? '50%' : Math.min(h / 2, 26) + 'px' });
@@ -13565,7 +13568,7 @@
       // Le projecteur glisse jusqu'au restaurant, puis s'y colle à chaque image tant que la carte bouge
       glueTimer = setTimeout(() => {
         spot.classList.add('is-glued');
-        const tick = () => { if (!isOpen() || !steps[i] || !steps[i].round) return; place(); follow = requestAnimationFrame(tick); };
+        const tick = () => { if (!isOpen() || !steps[i] || !(steps[i].round || steps[i].follow)) return; place(); follow = requestAnimationFrame(tick); };
         follow = requestAnimationFrame(tick);
       }, 480);
     }
@@ -13584,16 +13587,15 @@
       i = n;
       const st = steps[i];
       focusExample(!!st.example);
-      trackMap(!!st.round);
+      trackMap(!!(st.round || st.follow));
       const fill = () => {
         $('tour-step').textContent = (i + 1) + ' / ' + steps.length;
         $('tour-title').textContent = st.title;
         $('tour-text').textContent = st.text || '';
         $('tour-text').hidden = !st.text;   // une seule phrase par étape
-        $('tour-demo').hidden = !st.demo;
         $('tour-hello').hidden = !st.hello;
         card.classList.toggle('is-hello', !!st.hello);
-        $('tour-next').textContent = i === steps.length - 1 ? 'C\'est parti !' : 'Suivant';
+        $('tour-next').textContent = i === steps.length - 1 ? 'C\'est parti !' : st.tap ? 'Ouvrir la fiche' : 'Suivant';
         $('tour-dots').innerHTML = steps.map((_, k) => '<i' + (k === i ? ' class="is-on"' : '') + '></i>').join('');
         place();
         card.classList.remove('is-swap');
@@ -13624,8 +13626,26 @@
       document.body.classList.remove('tour-open');
       if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
     }
-    const next = () => (i < steps.length - 1 ? show(i + 1) : end());
-    const prev = () => { if (i > 0) show(i - 1); };
+    /** Étape « touchez un restaurant » : la fiche s'ouvre, puis le guide montre le bouton du QR code. */
+    let opening = false;
+    function openFromTour() {
+      if (opening) return;
+      const pin = steps[i].el && steps[i].el();
+      const m = exampleShop() || [...markers.values()].find((x) => pin && x.el.contains(pin));
+      if (!m) { show(i + 1); return; }
+      opening = true;
+      openShop(m.shop.id);
+      setTimeout(() => { opening = false; if (isOpen()) show(i + 1); }, 650);   // le temps que la fiche s'ouvre
+    }
+    const next = () => (steps[i].tap ? openFromTour() : i < steps.length - 1 ? show(i + 1) : end());
+    const prev = () => { if (i > 0) { if (steps[i - 1].tap && $('shop-sheet').classList.contains('is-open')) closeShop(); show(i - 1); } };
+    // Le repère éclairé se touche à travers le voile du guide
+    root.addEventListener('click', (ev) => {
+      const st = steps[i];
+      if (!st || !st.tap || card.contains(ev.target)) return;
+      const r = spot.getBoundingClientRect();
+      if (ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom) openFromTour();
+    });
     /** Premier passage sur la carte : guide montré dès que rien d'autre n'est ouvert (2 minutes au plus). */
     function maybeStart(delay = CONFIG.tourDelay) {
       if (delay < 0) return;
