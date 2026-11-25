@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-RJ8Lis17fn9K4e2H62Eb7NjPw6yQlVZjXu+bvZ2dfeE=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-G0i93wtX9p+dcW5APNtq9x7Js/9iJi6/g6XOKd/wdG8=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1698,6 +1698,18 @@
     .sr-body .is-open { color: var(--green); font-weight: 500; }
     .sr-body .is-closed { color: var(--danger); font-weight: 500; }
     .sr-price { flex: none; font-weight: 500; font-variant-numeric: tabular-nums; }
+    .sr-line { display: flex; align-items: center; min-width: 0; }
+    .sr-line b { min-width: 0; }
+    .sr-toggle { display: flex; align-items: center; gap: 4px; margin: -4px 0 4px 62px; padding: 4px 8px; border-radius: 10px; font-size: 13px; font-weight: 500; color: var(--accent); }
+    .sr-toggle:hover, .sr-toggle:focus-visible { background: var(--hover); }
+    .sr-toggle svg { width: 16px; height: 16px; flex: none; transition: transform .2s; }
+    .sr-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+    .sr-sub { list-style: none; margin: 0 0 6px 62px; padding: 0 0 0 10px; border-left: 2px solid var(--line); }
+    .sr-sub[hidden] { display: none; }
+    .sr-dish { width: 100%; display: flex; gap: 10px; align-items: center; padding: 7px 8px; border-radius: 10px; text-align: left; }
+    .sr-dish:hover, .sr-dish:focus-visible { background: var(--hover); }
+    .sr-dish .sr-body b { font-size: 14px; }
+    .sr-dish .sr-body small { font-size: 12px; }
     .sr-more { display: block; margin: 6px auto 0; padding: 8px 14px; font-size: 14px; font-weight: 500; color: var(--accent); }
     .sr-empty { margin: 28px 16px; text-align: center; color: var(--muted); font-size: 14px; }
     .sr-empty b { display: block; color: var(--text); font-weight: 500; font-size: 15px; margin-bottom: 4px; }
@@ -6567,7 +6579,7 @@
         i = j;
       }
     }
-    return { parse, dishesOf, shopMatches, run, highlight, mobile: { query: '', max: null, limit: 30 } };
+    return { parse, dishesOf, shopMatches, run, highlight, mobile: { query: '', max: null, limit: 30, open: new Set() } };
   })();
 
   /** Ouvre la fiche d'un restaurant sur sa carte, plats trouvés mis en avant. */
@@ -6586,6 +6598,7 @@
   /* Panneau de recherche plein écran (téléphone) */
   const SEARCH_IDEAS = ['Burger', 'Kebab', 'Pizza', 'Gaufre', 'Frites', 'Galette', 'Étudiant', 'Boisson'];
   function openSearchPanel() {
+    Search.mobile.open.clear();   // plats repliés à chaque ouverture
     $('search-panel').hidden = false;
     document.body.classList.add('search-on');
     if (!isDesktop()) { $('sp-filters').appendChild($('filters-track')); $('sp-range-slot').appendChild($('range-filters')); }
@@ -6644,56 +6657,71 @@
       $('search-live').textContent = 'Aucun résultat';
       return;
     }
-    if (res.dishes.length) {
-      title(plural(res.dishes.length, 'plat', 'plats'));
-      const ul = document.createElement('ul');
-      ul.className = 'sr-list';
-      res.dishes.slice(0, Search.mobile.limit).forEach(({ item, idx, m }) => {
-        const li = document.createElement('li');
-        const b = document.createElement('button');
-        b.type = 'button'; b.className = 'sr-hit';
-        b.innerHTML = '<span class="sr-emoji" aria-hidden="true"></span><span class="sr-body"><b></b><small></small></span><span class="sr-price"></span>';
-        b.querySelector('.sr-emoji').textContent = catOf(m.shop).emoji;
-        Search.highlight(b.querySelector('b'), item.name, res.q);
-        const small = b.querySelector('small');
-        small.append(m.shop.name + (m.shop.isDemo ? ' (exemple)' : '') + ' · ', status(m), dist(m));
-        b.querySelector('.sr-price').textContent = formatPrice(item.price);
-        b.addEventListener('click', () => { closeSearchPanel({ restoreFocus: false }); openDish(m.shop.id, [idx]); });
-        li.appendChild(b);
-        ul.appendChild(li);
-      });
-      box.appendChild(ul);
-      if (res.dishes.length > Search.mobile.limit) {
-        const more = document.createElement('button');
-        more.type = 'button'; more.className = 'sr-more';
-        more.textContent = 'Voir ' + Math.min(30, res.dishes.length - Search.mobile.limit) + ' plats de plus';
-        more.addEventListener('click', () => { Search.mobile.limit += 30; renderSearchPanel(); });
-        box.appendChild(more);
+    // Restaurants d'abord (trouvés par leur nom ou leur fiche, puis ceux qui ont un plat correspondant) ;
+    // les plats trouvés se déroulent sous chaque restaurant.
+    const byShop = new Map();
+    res.dishes.forEach((hit) => { if (!byShop.has(hit.m.shop.id)) byShop.set(hit.m.shop.id, []); byShop.get(hit.m.shop.id).push(hit); });
+    const rows = res.shops.map((m) => ({ m, hits: byShop.get(m.shop.id) || [] }));
+    const listed = new Set(res.shops.map((m) => m.shop.id));
+    byShop.forEach((hits, id) => { if (!listed.has(id)) rows.push({ m: hits[0].m, hits }); });
+    const open = Search.mobile.open;
+    title(plural(rows.length, 'restaurant', 'restaurants'));
+    const ul = document.createElement('ul');
+    ul.className = 'sr-list';
+    rows.slice(0, Search.mobile.limit).forEach(({ m, hits }) => {
+      const li = document.createElement('li');
+      li.className = 'sr-shop';
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'sr-hit';
+      b.innerHTML = '<span class="sr-emoji" aria-hidden="true"></span><span class="sr-body"><span class="sr-line"><b></b></span><small></small></span>';
+      b.querySelector('.sr-emoji').textContent = catOf(m.shop).emoji;
+      Search.highlight(b.querySelector('b'), m.shop.name, res.q);
+      if (m.shop.isDemo || isShowcase(m.shop)) b.querySelector('.sr-line').appendChild(demoTag());
+      const small = b.querySelector('small');
+      small.append(status(m));
+      if (m.shop.rating) { const r = document.createElement('span'); r.className = 'sr-rating'; r.textContent = ' · ★ ' + formatRating(m.shop.rating.avg); small.append(r); }
+      small.append(' · ' + catOf(m.shop).label + dist(m));
+      b.addEventListener('click', () => { closeSearchPanel({ restoreFocus: false }); whenMapReady(() => openShop(m.shop.id, { source: 'search' })); });
+      li.appendChild(b);
+      if (hits.length) {
+        const id = m.shop.id, from = Math.min(...hits.map((h) => Number(h.item.price)).filter((x) => x >= 0));
+        const tg = document.createElement('button');
+        tg.type = 'button'; tg.className = 'sr-toggle';
+        tg.innerHTML = '<span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+        tg.querySelector('span').textContent = plural(hits.length, 'plat correspondant', 'plats correspondants') + (Number.isFinite(from) ? ' · dès ' + formatPrice(from) : '');
+        const sub = document.createElement('ul');
+        sub.className = 'sr-sub';
+        sub.id = 'sr-sub-' + id;
+        tg.setAttribute('aria-controls', sub.id);
+        hits.slice(0, 60).forEach(({ item, idx }) => {
+          const dl = document.createElement('li');
+          const d = document.createElement('button');
+          d.type = 'button'; d.className = 'sr-dish';
+          d.innerHTML = '<span class="sr-body"><b></b><small></small></span><span class="sr-price"></span>';
+          Search.highlight(d.querySelector('b'), item.name, res.q);
+          const info = item.desc || item.section || '';
+          if (info) d.querySelector('small').textContent = info; else d.querySelector('small').remove();
+          d.querySelector('.sr-price').textContent = formatPrice(item.price);
+          d.addEventListener('click', () => { closeSearchPanel({ restoreFocus: false }); openDish(id, [idx]); });
+          dl.appendChild(d);
+          sub.appendChild(dl);
+        });
+        const set = (on) => { tg.setAttribute('aria-expanded', String(on)); sub.hidden = !on; };
+        set(open.has(id));
+        tg.addEventListener('click', () => { const on = sub.hidden; if (on) open.add(id); else open.delete(id); set(on); });
+        li.append(tg, sub);
       }
+      ul.appendChild(li);
+    });
+    box.appendChild(ul);
+    if (rows.length > Search.mobile.limit) {
+      const more = document.createElement('button');
+      more.type = 'button'; more.className = 'sr-more';
+      more.textContent = 'Voir ' + Math.min(30, rows.length - Search.mobile.limit) + ' restaurants de plus';
+      more.addEventListener('click', () => { Search.mobile.limit += 30; renderSearchPanel(); });
+      box.appendChild(more);
     }
-    if (res.shops.length) {
-      title(plural(res.shops.length, 'restaurant', 'restaurants'));
-      const ul = document.createElement('ul');
-      ul.className = 'sr-list';
-      res.shops.slice(0, 20).forEach((m) => {
-        const li = document.createElement('li');
-        const b = document.createElement('button');
-        b.type = 'button'; b.className = 'sr-hit';
-        b.innerHTML = '<span class="sr-emoji" aria-hidden="true"></span><span class="sr-body"><b></b><small></small></span>';
-        b.querySelector('.sr-emoji').textContent = catOf(m.shop).emoji;
-        Search.highlight(b.querySelector('b'), m.shop.name, res.q);
-        if (m.shop.isDemo || isShowcase(m.shop)) b.querySelector('b').after(demoTag());
-        const small = b.querySelector('small');
-        small.append(status(m));
-        if (m.shop.rating) { const r = document.createElement('span'); r.className = 'sr-rating'; r.textContent = ' · ★ ' + formatRating(m.shop.rating.avg); small.append(r); }
-        small.append(' · ' + catOf(m.shop).label + dist(m));
-        b.addEventListener('click', () => { closeSearchPanel({ restoreFocus: false }); whenMapReady(() => openShop(m.shop.id, { source: 'search' })); });
-        li.appendChild(b);
-        ul.appendChild(li);
-      });
-      box.appendChild(ul);
-    }
-    $('search-live').textContent = [res.dishes.length ? plural(res.dishes.length, 'plat', 'plats') : '', res.shops.length ? plural(res.shops.length, 'restaurant', 'restaurants') : ''].filter(Boolean).join(' et ');
+    $('search-live').textContent = [plural(rows.length, 'restaurant', 'restaurants'), res.dishes.length ? plural(res.dishes.length, 'plat', 'plats') : ''].filter(Boolean).join(' et ');
   }
   $('filters-track').addEventListener('click', () => setTimeout(() => { if (!$('search-panel').hidden) renderSearchPanel(); }, 0));
   $('search-open').addEventListener('click', openSearchPanel);
