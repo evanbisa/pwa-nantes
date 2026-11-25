@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-d1uGcekKCWw3WPdyyE5T5/Bk+DntD4EGEgms7+fabpk=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-+5BIYDqBlcHf+VqjcH+eXte/K3Z+N0Ar+dI3lEOfVpo=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
@@ -3658,6 +3658,7 @@
           <input id="ec-code" class="code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="––––––––" aria-describedby="ec-lead" />
           <small class="field-error" id="err-ec-code" aria-live="polite"></small>
         </label>
+        <p class="hint" id="ec-idle" hidden>Vous ne vous êtes pas connecté depuis plus de 2 semaines : par sécurité, confirmez que c'est bien vous avec ce code.</p>
         <p class="hint" id="ec-exists" hidden>Vous avez déjà un compte avec cette adresse ? Le code reçu vous connecte directement, ou <button class="link-btn" type="button" id="ec-to-login">connectez-vous avec votre mot de passe</button>.</p>
         <p class="form-error" id="err-email-code" role="alert"></p>
         <button class="btn btn-primary" type="submit" id="ec-submit">Valider le code</button>
@@ -9693,9 +9694,30 @@
     cloud.user = user;
     store.write({ lastEmail: user.email, lastRole: user.role });
     applyAccount(user);
+    IdleCheck.touch();
     Guest.leave();
     whenMapReady(syncShopMarkers);   // fiche de test : visible de son seul propriétaire
   }
+
+  /**
+   * Compte inutilisé depuis 14 jours : la connexion par mot de passe (ou une session restée ouverte sans servir) demande
+   * en plus le code envoyé par e-mail. Le serveur tient le compte des jours (public.login_needs_code / touch_activity)
+   * et refuse de remettre le compteur à zéro sans ce code. En cas de panne réseau, la connexion n'est pas bloquée.
+   */
+  const IdleCheck = {
+    async needsCode() {
+      try { const { data, error } = await sb.rpc('login_needs_code'); return !error && data === true; }
+      catch (e) { return false; }
+    },
+    touch() { try { sb.rpc('touch_activity').then(() => {}, () => {}); } catch (e) { /* hors ligne */ } },
+    /** Ferme la session (cet appareil seulement) et demande le code envoyé à l'adresse du compte. */
+    async ask(email) {
+      await sb.auth.signOut({ scope: 'local' }).catch(() => {});
+      cloud.user = null;
+      $('li-email').value = email;
+      startEmailVerification({ email, back: 'login', sent: false, idle: true, onSuccess: (session) => openAfterLogin(session.user, { anyRole: true }) });
+    },
+  };
 
   /* ---------- Vérification de l'adresse e-mail : code à 6 chiffres envoyé par Supabase ---------- */
 
@@ -9707,11 +9729,12 @@
    * Écran « Vérifiez votre adresse e-mail ». sent = un code vient d'être envoyé (inscription) ;
    * sinon on en demande un (connexion d'un compte pas encore confirmé).
    */
-  function startEmailVerification({ email, onSuccess, back, sent = true, fromSignup = false }) {
+  function startEmailVerification({ email, onSuccess, back, sent = true, fromSignup = false, idle = false }) {
     clearInterval(resendTimer);
     emailCheck = { email, onSuccess, back };
     $('ec-email').textContent = email;
     $('ec-exists').hidden = !fromSignup;
+    $('ec-idle').hidden = !idle;
     $('ec-code').value = '';
     setFieldError('ec-code', '');
     $('err-email-code').textContent = '';
@@ -10240,15 +10263,17 @@
       return;
     }
     LoginGuard.succeeded();
+    if (await Loader.run(IdleCheck.needsCode(), 'Connexion…')) { IdleCheck.ask(email); return; }
     openAfterLogin(data.user);
   });
   LoginGuard.render();
 
   /** Compte ouvert après une connexion : vérifie le type de compte choisi, puis reprend là où il en était. */
-  async function openAfterLogin(authUser) {
+  async function openAfterLogin(authUser, { anyRole = false } = {}) {
     let user;
     try { user = await Loader.run(loadUser(authUser), 'Ouverture de votre compte…'); }
     catch (e) { await sb.auth.signOut().catch(() => {}); $('err-login').textContent = cloudError(e); showAuthStep('login'); return; }
+    if (anyRole) setAuthRole(user.role);
     if (user.role !== authRole) {
       await sb.auth.signOut().catch(() => {});
       cloud.user = null;
@@ -13929,12 +13954,18 @@
       if (event === 'PASSWORD_RECOVERY') setTimeout(() => showReset(session && session.user && session.user.email, { byLink: true }), 0);
     });
     (async () => {
-      let user = null;
+      let user = null, idleEmail = null;
       try {
         const { data } = await sb.auth.getSession();
-        if (data.session) user = await bootUser(data.session.user);
+        if (data.session && await IdleCheck.needsCode()) idleEmail = data.session.user.email;
+        else if (data.session) user = await bootUser(data.session.user);
       } catch (e) { await sb.auth.signOut().catch(() => {}); }
       if (currentStep === 'reset-password') { /* lien de réinitialisation : déjà affiché */ }
+      else if (idleEmail) {
+        Guest.enter();
+        setAuthRole(store.read().lastRole || 'client');
+        await IdleCheck.ask(idleEmail);
+      }
       else if (user) {
         applySession(user);
         setAuthRole(user.role);
