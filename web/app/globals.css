@@ -94,7 +94,7 @@ body {
 
 /* Titres : la voix « étiquette » d'Archivo, étroite (la graisse reste celle de chaque page) */
 h1, h2 { font-stretch: 78%; letter-spacing: -0.005em; text-wrap: balance; }
-::selection { background: #ffe13a; color: #16213a; }
+::selection { background: rgb(255 77 46 / 0.16); color: #16213a; }
 
 /* ---------- Animation de chargement : burger, sushi et pizza en orbite ---------- */
 .food-loader {
