@@ -21,5 +21,7 @@ cp -r simulateur dist/   # simulateur de téléphone (/simulateur/) : le site da
 cp -r web/out dist/app
 # Référencement : adresse principale (SITE_URL) dans les balises de partage, robots.txt, sitemap.xml, page 404
 node scripts/seo.mjs dist
+# Une page par restaurant en ligne (Google, aperçus des liens partagés) et le plan du site à jour
+node scripts/restaurant-pages.mjs dist
 # Version publiée (numéro du commit, fourni par Vercel) : les vérifications en ligne attendent qu'elle soit arrivée
 printf '%s\n' "${VERCEL_GIT_COMMIT_SHA:-${GITHUB_SHA:-}}" > dist/version.txt

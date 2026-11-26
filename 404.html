@@ -2,7 +2,9 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-SEJkAVQ1SCfdJJ8R0QVy8bpmll2i9NkEbJJ/O7nbU+M='; style-src 'unsafe-inline'; img-src 'self' data:; base-uri 'none'; form-action 'none'" />
+  <!-- Page d'un restaurant inscrit depuis la dernière publication (/restaurants/<nom>-<8 caractères>/) : la fiche sur la carte -->
+  <script>(function(){var m=location.pathname.match(/\/restaurants\/(?:[a-z0-9-]*-)?([0-9a-f]{8})\/?$/);if(m)location.replace(location.pathname.replace(/restaurants\/.*$/,'')+'?rs='+m[1]);})();</script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="robots" content="noindex" />
   <meta name="color-scheme" content="light dark" />
@@ -13,10 +15,10 @@
   <link rel="icon" href="{{BASE}}favicon-96.png?v=2" type="image/png" sizes="96x96" />
   <link rel="apple-touch-icon" href="{{BASE}}apple-touch-icon.png?v=2" sizes="180x180" />
   <style>
-    :root { --bg: #f8fafc; --text: #0f172a; --muted: #475569; --card: #fff; --line: #e2e8f0; --accent: #d9381e; --on-accent: #fff; }
+    :root { --bg: #f8fafc; --text: #0f172a; --muted: #475569; --card: #fff; --line: #e2e8f0; --accent: #c2410c; --on-accent: #fff; }
     em { background: linear-gradient(90deg, #e67700, #f0501f 50%, #d9301a); -webkit-background-clip: text; background-clip: text; color: transparent; }
     @media (prefers-color-scheme: dark) {
-      :root { --bg: #111113; --text: #fafafa; --muted: #a1a1aa; --card: rgb(255 255 255 / .05); --line: rgb(255 255 255 / .1); --accent: #ff8a5c; --on-accent: #1a0d07; }
+      :root { --bg: #111113; --text: #fafafa; --muted: #a1a1aa; --card: rgb(255 255 255 / .05); --line: rgb(255 255 255 / .1); --accent: #ff8a4c; --on-accent: #1a0d07; }
       body { background: radial-gradient(38rem 26rem at 50% 10%, rgb(255 138 61 / .14), transparent 70%) no-repeat fixed, var(--bg); }
       em { background: linear-gradient(90deg, #ffd25e, #ff9a4d 50%, #ff6a4a); -webkit-background-clip: text; background-clip: text; color: transparent; }
     }

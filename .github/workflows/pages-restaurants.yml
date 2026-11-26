@@ -1,0 +1,32 @@
+# Pages publiques des restaurants (/restaurants/…, scripts/restaurant-pages.mjs) : générées à chaque publication du
+# site. Pour qu'un restaurant inscrit ou modifié ait sa page à jour sans attendre la prochaine modification du code,
+# le site est republié chaque matin par un « Deploy Hook » de Vercel.
+# Prérequis (une seule fois) : Vercel › projet pwa-nantes › Settings › Git › Deploy Hooks › créer un hook sur la branche
+# claude/street-food-map-pwa-lr1xu2, puis copier son adresse dans le secret VERCEL_DEPLOY_HOOK du dépôt GitHub.
+# Sans ce secret, rien ne se passe (simple avertissement).
+name: Pages des restaurants
+
+on:
+  schedule:
+    - cron: '23 5 * * *'   # chaque matin (6 h 23 en hiver à Paris)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  republier:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Republication du site (Vercel)
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::warning::Secret VERCEL_DEPLOY_HOOK absent : pages des restaurants mises à jour seulement à la prochaine publication."
+            exit 0
+          fi
+          case "$HOOK" in https://api.vercel.com/v1/integrations/deploy/*) ;; *) echo "::error::VERCEL_DEPLOY_HOOK n'est pas une adresse de Deploy Hook Vercel"; exit 1 ;; esac
+          curl -fsS -X POST "$HOOK" > /dev/null
+          echo "Republication demandée."

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-5aLsaXETEzUS5bqCp70qcNxirpwAt88dzplZjBenSiA=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-8qMq5Zi1kdFv2WS9RnuYwDW8lsowuoAwOy+mpGkr3t8=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -7960,10 +7960,20 @@
 
   /* ---------- Partage d'une fiche : lien direct ---------- */
   const shopLink = (id, tab) => location.origin + location.pathname + '?r=' + encodeURIComponent(id) + (tab ? '&t=' + tab : '');
+  /** Adresse de la page publique d'un restaurant : même calcul que scripts/restaurant-pages.mjs (slugOf). */
+  const restaurantSlug = (shop) => ((shop.name || 'restaurant').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'restaurant') + '-' + String(shop.id).slice(0, 8);
+  /**
+   * Lien à partager : la page publique du restaurant (aperçu avec son nom et sa photo dans WhatsApp, Instagram…), qui
+   * ouvre aussitôt la fiche sur la carte (?go=1). Fiches d'exemple et de test : le lien direct de la carte.
+   */
+  const shareLink = (shop) => (shop.isPro && !shop.isTest && !shop.isDemo
+    ? location.origin + location.pathname.replace(/[^/]*$/, '') + 'restaurants/' + restaurantSlug(shop) + '/?go=1'
+    : shopLink(shop.id));
   $('shop-share').addEventListener('click', async () => {
     const m = markers.get(selectedId);
     if (!m) return;
-    const url = shopLink(m.shop.id);
+    const url = shareLink(m.shop);
     Stats.track(m.shop.id, 'share');
     const best = activePromos(m.shop)[0];
     const text = m.shop.name + ' sur FlashMiam' + (best ? ' : ' + best.title : '');
@@ -7980,7 +7990,8 @@
   function openLink(link) {
     cloud.ready.then(() => whenMapReady(() => {
       syncShopMarkers();
-      const m = markers.get(link.id);
+      if (link.prefix && !link.id) link = { ...link, id: [...markers.keys()].find((id) => String(id).startsWith(link.prefix)) || null };
+      const m = link.id ? markers.get(link.id) : null;
       if (!m && cloud.fromCache) { cloud.loaded.then(() => { if (!cloud.fromCache) openLink(link); }); return; }   // pas encore dans les données de la dernière visite
       if (!m) { toast('Ce restaurant n\'est plus visible sur la carte.'); return; }
       if (link.tab === 'story' && liveStories(m.shop).length) { StoryViewer.open(m.shop.id, { only: true }); return; }
@@ -13546,7 +13557,7 @@
     async function shareListing() {
       const r = myRestaurant();
       if (!r || !r.published) return;
-      const url = shopLink(r.id);
+      const url = shareLink(r);
       if (navigator.share) {
         try { await navigator.share({ title: r.name, text: r.name + ' sur FlashMiam', url }); return; }
         catch (e) { if (e && e.name === 'AbortError') return; }
@@ -14857,6 +14868,10 @@
   // Lien direct vers une fiche (?r=…&t=reviews|menu|story) : ouverte après la connexion
   if (params.get('r')) {
     pendingLink = { id: params.get('r'), tab: params.get('t'), source: params.get('s') === 'notif' ? 'notif' : 'link' };
+    history.replaceState(null, '', location.pathname + location.hash);
+  } else if (/^[0-9a-f]{8}$/.test(params.get('rs') || '')) {
+    // Page publique d'un restaurant inscrit depuis la dernière publication (renvoyée ici par la page 404)
+    pendingLink = { prefix: params.get('rs'), source: 'link' };
     history.replaceState(null, '', location.pathname + location.hash);
   }
   // QR code de visite lu par l'appareil photo (#visite=…) : ouvert dans le scanner du restaurateur une fois connecté
