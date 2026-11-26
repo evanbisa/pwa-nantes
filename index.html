@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-bU7odU+tZNFO4czc4h3H8/lGQ08q12fZ709tTjMi0bg=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-NTsLcSyZ25zMA567ppqaSzrXVJ8KYuUNjlffMUVxtM8=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -2309,14 +2309,19 @@
     .tour { position: fixed; inset: 0; z-index: 130; }
     .tour[hidden] { display: none; }
     .tour-spot { position: absolute; left: 50%; top: 45%; width: 0; height: 0; border-radius: 18px; box-shadow: 0 0 0 200vmax rgba(10, 12, 16, .62); pointer-events: none;
-      transition: left .45s var(--ease-out), top .45s var(--ease-out), width .45s var(--ease-out), height .45s var(--ease-out), border-radius .45s; }
+      --tour-ease: cubic-bezier(.65, 0, .35, 1);   /* démarre et s'arrête en douceur (même courbe que la bulle) */
+      transition: left .65s var(--tour-ease), top .65s var(--tour-ease), width .65s var(--tour-ease), height .65s var(--tour-ease), border-radius .65s var(--tour-ease), opacity .3s; }
     .tour-spot::after { content: ''; position: absolute; inset: -5px; border-radius: inherit; border: 2px solid rgba(255, 255, 255, .9); animation: tour-pulse 1.8s ease-out infinite; }
     .tour-spot.is-none::after { display: none; }
     .tour-spot.is-glued { transition: none; }
     @keyframes tour-pulse { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.18); } }
     .tour-card { position: absolute; left: 16px; right: 16px; top: 50%; max-width: 380px; margin: 0 auto; padding: 18px 18px 14px; border-radius: 22px; color: var(--text); background: var(--panel-solid);
-      box-shadow: 0 18px 50px rgba(0, 0, 0, .35); transition: top .5s var(--ease-out), opacity .22s, transform .22s; animation: rise .35s var(--ease-out) both; }
-    .tour-card.is-swap { opacity: 0; transform: translateY(8px); }
+      box-shadow: 0 18px 50px rgba(0, 0, 0, .35); overflow: hidden;
+      transition: top .65s cubic-bezier(.65, 0, .35, 1), height .65s cubic-bezier(.65, 0, .35, 1); animation: rise .35s var(--ease-out) both; }
+    /* Changement d'étape : la bulle reste visible, glisse et change de taille ; seul son contenu fait un fondu */
+    .tour-card > * { transition: opacity .22s ease, transform .35s cubic-bezier(.22, 1, .36, 1); }
+    .tour-card.is-swap > * { opacity: 0; transform: translateY(6px); }
+    @media (prefers-reduced-motion: reduce) { .tour-card, .tour-card > *, .tour-spot { transition: none !important; } }
     .tour-step { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); }
     .tour-card h2 { margin: 4px 0 6px; font-size: 19px; font-weight: 600; }
     /* Première étape du guide : l'icône de l'appli, titre centré */
@@ -14861,10 +14866,13 @@
         { el: () => $('vp-stage'), title: 'Montrez ce QR code en caisse pour profiter de l\'offre', follow: true, qr: true },
       ];
     }
-    function place() {
+    let cardH = 0;          // hauteur visée de la bulle (pendant qu'elle change de taille)
+    const safeTop = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-top')) || 0;
+    let safeTopPx = 0;
+    /** Projecteur sur l'élément montré (ou replié au centre s'il n'y a rien à montrer). */
+    function placeSpot() {
       const st = steps[i];
-      const el = st && st.el ? st.el() : null;
-      const r = visible(el);
+      const r = visible(st && st.el ? st.el() : null);
       const pad = st && st.round ? 10 : 6;
       spot.classList.toggle('is-none', !r);
       $('tour-demo').hidden = !(st && st.demo && !r);   // bouton de la fiche introuvable : exemple dessiné dans la bulle
@@ -14872,12 +14880,16 @@
         const w = r.width + pad * 2, h = r.height + pad * 2;
         Object.assign(spot.style, { left: r.left - pad + 'px', top: r.top - pad + 'px', width: w + 'px', height: h + 'px', borderRadius: st.round ? '50%' : Math.min(h / 2, 26) + 'px' });
       } else Object.assign(spot.style, { left: innerWidth / 2 + 'px', top: innerHeight * 0.42 + 'px', width: '0px', height: '0px' });
-      // Bulle à côté de ce qu'on montre : dessous s'il y a la place, sinon dessus (sans jamais le cacher), au centre
-      // quand il n'y a rien à montrer. Elle glisse d'une place à l'autre (transition sur « top »).
-      const ch = card.offsetHeight, gap = 16, margin = 12;
+      return { r, pad };
+    }
+    /** Bulle à côté de ce qu'on montre : dessous s'il y a la place, sinon dessus (sans jamais le cacher), au centre
+     *  quand il n'y a rien à montrer. Elle glisse d'une place à l'autre (transition sur « top »). */
+    function placeCard({ r, pad }) {
+      const st = steps[i];
+      const ch = cardH || card.offsetHeight, gap = 16, margin = 12;
       const nav = desktop() ? null : visible($('tabbar'));
       const floor = (nav && !(r && r.top >= nav.top - 2) ? nav.top : innerHeight) - margin;   // la barre d'onglets reste visible
-      const ceil = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-top')) || 0) + margin;
+      const ceil = safeTopPx + margin;
       let top;
       if (!r) top = (innerHeight - ch) / 2;
       else {
@@ -14888,21 +14900,20 @@
         else top = (floor - below) >= (r.top - ceil) ? below : above;
       }
       card.style.bottom = 'auto';
-      card.style.top = Math.round(Math.max(ceil, Math.min(Math.max(ceil, floor - ch), top))) + 'px';
+      const px = Math.round(Math.max(ceil, Math.min(Math.max(ceil, floor - ch), top))) + 'px';
+      if (card.style.top !== px) card.style.top = px;
     }
-    /** Étape montrant la carte : le projecteur suit le restaurant tant que la carte bouge (arrivée, glissement). */
+    function place() { placeCard(placeSpot()); }
+    /** Étapes dont la cible bouge (fiche qui défile, QR code qui s'ouvre) : projecteur et bulle la suivent à chaque image,
+     *  en gardant leurs transitions (ils rattrapent la cible en douceur au lieu de sauter dessus). */
     function trackMap(on) {
       cancelAnimationFrame(follow);
       clearTimeout(glueTimer);
-      spot.classList.remove('is-glued');
       follow = null;
       if (!on) return;
-      // Le projecteur glisse jusqu'au restaurant, puis s'y colle à chaque image tant que la carte bouge
-      glueTimer = setTimeout(() => {
-        spot.classList.add('is-glued');
-        const tick = () => { if (!isOpen() || !steps[i] || !(steps[i].round || steps[i].follow)) return; place(); follow = requestAnimationFrame(tick); };
-        follow = requestAnimationFrame(tick);
-      }, 480);
+      const until = performance.now() + 2500;   // la cible se pose en moins de 2,5 s
+      const tick = (now) => { if (!isOpen() || !steps[i] || !(steps[i].round || steps[i].follow)) return; place(); if (now < until) follow = requestAnimationFrame(tick); };
+      follow = requestAnimationFrame(tick);
     }
     /** Étape du restaurant d'exemple : la carte vient se centrer dessus et son nom s'affiche. */
     let shown = null;
@@ -14928,13 +14939,18 @@
       const top = sheet.scrollTop + btn.getBoundingClientRect().top - sheet.getBoundingClientRect().top - sheet.clientHeight * 0.3;
       sheet.scrollTo({ top: Math.max(0, top), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     }
+    let swapTimer = 0;
     function show(n, { animate = true } = {}) {
       i = n;
       const st = steps[i];
       focusExample(!!st.example);
-      trackMap(!!(st.round || st.follow));
       if (st.reveal) st.reveal();
+      safeTopPx = safeTop();
+      clearTimeout(swapTimer);
+      // 1. Le projecteur part tout de suite vers la nouvelle cible ; le contenu de la bulle s'efface
+      const target = placeSpot();
       const fill = () => {
+        const h0 = card.offsetHeight;
         $('tour-step').textContent = (i + 1) + ' / ' + steps.length;
         $('tour-title').textContent = st.title;
         $('tour-text').textContent = st.text || '';
@@ -14946,11 +14962,22 @@
         $('tour-next').hidden = mustTap;
         $('tour-next').textContent = i === steps.length - 1 || (st.tap === 'qr' && !mustTap) ? 'C\'est parti !' : st.tap === 'shop' ? 'Ouvrir la fiche' : 'Suivant';
         $('tour-dots').innerHTML = steps.map((_, k) => '<i' + (k === i ? ' class="is-on"' : '') + '></i>').join('');
-        place();
-        card.classList.remove('is-swap');
+        // 2. La bulle prend sa nouvelle taille en douceur (de l'ancienne hauteur à la nouvelle) en glissant vers sa place
+        card.style.height = 'auto';
+        cardH = card.offsetHeight;
+        if (animate && h0 && h0 !== cardH) {
+          card.style.height = h0 + 'px';
+          void card.offsetHeight;
+          card.style.height = cardH + 'px';
+          swapTimer = setTimeout(() => { card.style.height = 'auto'; }, 700);
+        }
+        placeCard(placeSpot());
+        trackMap(!!(st.round || st.follow));
+        // 3. Le nouveau texte apparaît pendant le glissement
+        requestAnimationFrame(() => card.classList.remove('is-swap'));
         if (mustTap) { card.tabIndex = -1; card.focus({ preventScroll: true }); } else $('tour-next').focus({ preventScroll: true });   // geste attendu : le focus reste dans la bulle, sans cadre sur « Passer »
       };
-      if (animate) { card.classList.add('is-swap'); setTimeout(fill, 180); } else fill();
+      if (animate) { card.classList.add('is-swap'); placeCard(target); swapTimer = setTimeout(fill, 170); } else fill();
     }
     function start({ force = false } = {}) {
       const me = currentUser();
@@ -14985,8 +15012,9 @@
       const m = exampleShop() || [...markers.values()].find((x) => pin && x.el.contains(pin));
       if (!m) { show(i + 1); return; }
       opening = true;
+      card.classList.add('is-swap');
       openShop(m.shop.id, { fly: false });   // la carte reste où elle est
-      setTimeout(() => { opening = false; if (isOpen()) show(i + 1); }, 650);   // le temps que la fiche s'ouvre
+      setTimeout(() => { opening = false; if (isOpen()) show(i + 1); }, 420);   // le temps que la fiche s'ouvre (0,35 s)
     }
     /** Étape « touchez ce bouton » : le QR code s'ouvre (comme hors du guide), puis le guide le montre. */
     function openQrFromTour() {
@@ -14994,8 +15022,9 @@
       const btn = $('shop-visit');
       if (!visible(btn)) { end(); return; }   // pas de bouton (restaurant fictif…) : le guide se termine sur l'exemple dessiné
       opening = true;
+      card.classList.add('is-swap');
       btn.click();
-      setTimeout(() => { opening = false; if (!isOpen()) return; if (VisitPass.isOpen()) show(i + 1); else end(); }, 700);
+      setTimeout(() => { opening = false; if (!isOpen()) return; if (VisitPass.isOpen()) show(i + 1); else end(); }, 520);
     }
     const act = () => (steps[i].tap === 'qr' ? openQrFromTour() : openFromTour());
     const next = () => (steps[i].tap ? act() : i < steps.length - 1 ? show(i + 1) : end());
