@@ -46,6 +46,27 @@ Pour toucher aussi les jeunes actifs et les trentenaires, pas seulement les étu
   depuis l'école »). Puce « 📍 Ma position ▾ » au début des filtres, et « Mes lieux » dans le profil. Les lieux restent
   **sur l'appareil** (`localStorage`, clé `flashmiam:places`) : rien n'est envoyé au serveur.
 
+## Audit du 25 novembre 2026 : ce qui a changé
+
+- **Couleur** : orange du logo partout (carte, espace restaurateur, pages `/app/`) ; le bleu ne sert plus qu'à « ma
+  position ». Champ actif orange vif, rouge réservé aux erreurs. Thème par défaut : comme le téléphone.
+- **Horaires par jour** (`opening_hours.days`, jusqu'à 3 créneaux par jour, chevauchements refusés) et **fermeture
+  exceptionnelle** (`closed_from` / `closed_until` / `closure_note`) : la fiche reste visible avec « Fermé jusqu'au … ».
+- **Catégories** : Asiatique, Tacos, Crêperie, Boulangerie, Café, Bar, Cuisine du monde, Traditionnel ; « Sucré ».
+  **Infos pratiques** (`amenities` : sur place, terrasse, végétarien, halal…) avec filtres « Pratique » ; **liens**
+  Instagram, site, commande (`links`, clics dans les statistiques) ; gamme de prix calculée d'après la carte.
+- **Avis vérifiés** (`reviews.verified`, badge « ✓ Visite vérifiée », explication du contrôle des avis) ; option
+  « avis réservés aux visites validées » (`reviews_verified_only`).
+- **Offres** : modifier, prolonger de 7 jours, republier une offre terminée ; liste client avec ouvert / fermé et fin.
+- **Compte client** : prénom et nom, e-mail, mot de passe, « Mes avis », « Mes visites » ; inscription : prénom,
+  e-mail, mot de passe, puis sexe et âge.
+- **Visiteur** : « Voir la carte » ouvre la carte directement (plus d'écran de localisation).
+- **Pages publiques des restaurants** (`scripts/restaurant-pages.mjs`, `/restaurants/<nom>-<id>/`) : Google et
+  aperçus des liens partagés. Republication quotidienne si le secret `VERCEL_DEPLOY_HOOK` est enregistré
+  (`.github/workflows/pages-restaurants.yml`).
+- **Carte de fidélité** (`loyalty_goal`, `loyalty_reward`, table `loyalty_rewards`), **équipiers** qui scannent
+  (`merchant_staff`, 5 au plus), **plats** avec étiquettes, photo et « épuisé aujourd'hui » (`menu_json`).
+
 ## Visiteurs sans compte
 
 La carte s'ouvre **sans compte** : bouton « Voir la carte → » en haut de l'écran d'accueil (le choix est gardé : les
