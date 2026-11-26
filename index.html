@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-YE7bstBMv+yOmyd5fne779LR56oZ5+vcujqsKl5TeVg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-hufsfB0J0d3ZAqtkhlcyDjs82ZiwrNhhdZUOxOitvIk=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-YE7bstBMv+yOmyd5fne779LR56oZ5+vcujqsKl5TeVg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-GkDyhjuOE9H3zwpYXwlCC4xSNI+iw34bXeuBFzgc33I=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1285,7 +1285,10 @@
     /* Visionneuse plein écran */
     .lightbox { position: fixed; inset: 0; z-index: 112; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, .92); touch-action: pan-y; }
     .lightbox[hidden] { display: none; }
-    .lightbox img { max-width: 100%; max-height: calc(100dvh - 120px); aspect-ratio: 1; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+    .lb-stage { position: relative; width: min(100vw, calc(100dvh - 140px), 720px); aspect-ratio: 1; overflow: hidden; border-radius: 4px; background: #111; }
+    .lb-stage::before { content: ""; position: absolute; inset: -40px; background: var(--lb-bg, none) center / cover no-repeat; filter: blur(28px) brightness(.55) saturate(1.1); }
+    .lightbox .lb-stage img { position: relative; display: block; width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+    @media (min-width: 560px) { .lb-stage { border-radius: 14px; } }
     .lb-btn { position: absolute; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: #fff; background: rgba(255, 255, 255, .14); font-size: 26px; line-height: 1; }
     .lb-btn:hover { background: rgba(255, 255, 255, .24); }
     .lb-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
@@ -2944,7 +2947,8 @@
 
   <!-- ===================== VISIONNEUSE DE PHOTOS ===================== -->
   <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Photos du restaurant" hidden>
-    <img id="lb-img" alt="" />
+    <!-- Cadre carré : la photo entière (jamais recadrée) sur un fond flouté tiré d'elle-même -->
+    <div class="lb-stage" id="lb-stage"><img id="lb-img" alt="" /></div>
     <button class="lb-btn lb-close" type="button" id="lb-close" aria-label="Fermer">&times;</button>
     <button class="lb-btn lb-prev" type="button" id="lb-prev" aria-label="Photo précédente">‹</button>
     <button class="lb-btn lb-next" type="button" id="lb-next" aria-label="Photo suivante">›</button>
@@ -8590,6 +8594,8 @@
       const n = galleryUrls.length;
       index = (i + n) % n;
       img.src = galleryUrls[index];
+      // Fond du cadre carré : la même photo, floutée (CSS : .lb-stage::before)
+      $('lb-stage').style.setProperty('--lb-bg', 'url("' + String(galleryUrls[index]).replace(/["\\\n]/g, '') + '")');
       img.alt = ($('shop-name').textContent || 'Restaurant') + ' — photo ' + (index + 1) + ' sur ' + n;
       $('lb-count').textContent = (index + 1) + ' / ' + n;
       $('lb-prev').hidden = $('lb-next').hidden = n < 2;
