@@ -38,7 +38,7 @@ export default function TableOfContents({ items, variant }: { items: TocItem[]; 
           <a
             href={`#${item.id}`}
             aria-current={variant === "aside" && active === item.id ? "location" : undefined}
-            className="flex gap-2.5 rounded-lg border-l-2 border-transparent py-1.5 pr-2 pl-3 text-sm leading-5 text-slate-500 transition-colors hover:text-slate-900 aria-[current=location]:border-orange-600 aria-[current=location]:font-medium aria-[current=location]:text-orange-700 dark:text-slate-400 dark:hover:text-white dark:aria-[current=location]:border-orange-400 dark:aria-[current=location]:text-orange-300"
+            className="flex gap-2.5 rounded-lg py-1.5 pr-2 pl-3 text-sm leading-5 text-slate-500 transition-colors hover:text-slate-900 aria-[current=location]:bg-orange-50 aria-[current=location]:font-medium aria-[current=location]:text-orange-700 dark:text-slate-400 dark:hover:text-white dark:aria-[current=location]:bg-orange-400/10 dark:aria-[current=location]:text-orange-300"
           >
             <span className="w-5 flex-none text-xs leading-5 tabular-nums text-slate-500 dark:text-slate-400">{n + 1}.</span>
             <span>{item.title}</span>

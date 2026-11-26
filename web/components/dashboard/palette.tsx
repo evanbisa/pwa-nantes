@@ -80,7 +80,7 @@ function PaletteDialog({ onClose, night, toggleTheme, live, setLive }: {
   return (
     <div className="fixed inset-0 z-[60] flex items-start justify-center bg-slate-900/40 px-4 pt-[12vh] backdrop-blur-sm dark:bg-black/60" onMouseDown={onClose}>
       <div role="dialog" aria-modal="true" aria-label="Rechercher" onMouseDown={(e) => e.stopPropagation()} onKeyDown={onKey}
-        className="dash-pop w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200 dark:bg-[#1a1a1d] dark:ring-white/10">
+        className="dash-pop w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200 dark:bg-[#16223a] dark:ring-white/10">
         <div className="flex items-center gap-3 border-b border-slate-200 px-4 dark:border-white/10">
           <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
           <input

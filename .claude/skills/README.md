@@ -14,6 +14,7 @@ données ailleurs.
 | `react-best-practices` | Performance de la partie Next.js (`web/` : pages juridiques, espace web) | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) (`5a37a63`) | MIT |
 | `webapp-testing` | Tester le site dans un navigateur automatique (Playwright) | [anthropics/skills](https://github.com/anthropics/skills) (`e4bb5d9`) | Apache 2.0 |
 | `frontend-design` | Nouveaux écrans : choix visuels assumés, textes clairs | [anthropics/skills](https://github.com/anthropics/skills) (`e4bb5d9`) | Apache 2.0 |
+| `impeccable` | Design « comme un vrai designer » : refonte, critique, finitions ; a servi à la refonte du 26/11/2026 (voir `DESIGN.md`) | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) (`2fc5e14`) — **guides seulement** : son programme (`scripts/`, qui télécharge un binaire) n'est pas installé, le skill lit alors directement `PRODUCT.md` et `DESIGN.md` | Apache 2.0 |
 
 ## Ce qui prime sur les skills
 

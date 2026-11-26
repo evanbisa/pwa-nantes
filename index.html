@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-YE7bstBMv+yOmyd5fne779LR56oZ5+vcujqsKl5TeVg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-ajNYnZ7zR7BKnXHkD0YQrusv0YeQnH6fUANZHyTA2H4=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-lNu7d5CcbKusUzg9jJVMxwGOAebnsr/9h1apBz78ZPs=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
   <meta name="color-scheme" content="light dark" />
-  <meta name="theme-color" content="#f1f3f4" id="meta-theme" />
+  <meta name="theme-color" content="#eef0f4" id="meta-theme" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <!-- Barre d'état de l'appli iPhone (écran d'accueil) : posée par le script ci-dessous selon le thème (claire le jour,
@@ -59,7 +59,7 @@
       // Par défaut (« system ») : suit le réglage du téléphone (mode sombre ou clair) ; jour ou nuit se choisit dans le profil
       if (t !== 'light' && t !== 'dark') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', t);
-      document.getElementById('meta-theme').setAttribute('content', t === 'dark' ? '#0a0b17' : '#f1f3f4');
+      document.getElementById('meta-theme').setAttribute('content', t === 'dark' ? '#0e1626' : '#eef0f4');
       var bar = document.createElement('meta');
       bar.name = 'apple-mobile-web-app-status-bar-style';
       bar.id = 'meta-statusbar';
@@ -85,81 +85,97 @@
 
   <style>
     /* Typographie : Roboto (police de Google Maps), servie par le site lui-même : aucun appel à Google (licence OFL, vendor/fonts) */
-    @font-face { font-family: 'Roboto'; font-style: normal; font-weight: 400; font-display: swap; src: url(vendor/fonts/roboto-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
-    @font-face { font-family: 'Roboto'; font-style: normal; font-weight: 400; font-display: swap; src: url(vendor/fonts/roboto-latin-400-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
-    @font-face { font-family: 'Roboto'; font-style: normal; font-weight: 500; font-display: swap; src: url(vendor/fonts/roboto-latin-ext-500-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
-    @font-face { font-family: 'Roboto'; font-style: normal; font-weight: 500; font-display: swap; src: url(vendor/fonts/roboto-latin-500-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
-    @font-face { font-family: 'Roboto'; font-style: normal; font-weight: 700; font-display: swap; src: url(vendor/fonts/roboto-latin-ext-700-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
-    @font-face { font-family: 'Roboto'; font-style: normal; font-weight: 700; font-display: swap; src: url(vendor/fonts/roboto-latin-700-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+    /* Archivo (Omnibus-Type, licence OFL) : une seule famille, deux voix — largeur normale pour l'interface,
+       étroite et grasse pour les titres, les prix et les étiquettes. Police variable : graisse 100–900, largeur 62–125 %. */
+    @font-face { font-family: 'Archivo'; font-style: normal; font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; src: url(vendor/fonts/archivo-latin-ext-wdth-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+    @font-face { font-family: 'Archivo'; font-style: normal; font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; src: url(vendor/fonts/archivo-latin-wdth-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
 
     /* =====================================================================
        1. DESIGN TOKENS — mode jour (défaut) et mode nuit, palette Google
        ===================================================================== */
     :root {
-      --chart: #c2410c;                 /* couleur des graphiques : orange FlashMiam (validée sur fond clair) */
+      --chart: #d9361a;                 /* couleur des graphiques : orange FlashMiam (validée sur fond clair) */
       --sidebar-w: 372px;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --font-ui: "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --font-ui: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --font-tag: "Archivo", system-ui, sans-serif;   /* titres, prix, étiquettes : même famille, étroite et grasse (font-stretch) */
       --ease-out: cubic-bezier(.2, .8, .2, 1);
       --blue: #1a73e8;
     }
+    /*
+     * Monde « étiquette du marché » : encre bleu marine au lieu du gris, orange du logo (#ff4d2e) pour ce qui se
+     * touche et les restaurants, jaune fluo réservé aux bons plans (étiquettes flash), papier blanc pour les panneaux.
+     * Contrastes vérifiés : encre sur orange 4,8:1 ; orange texte sur blanc 4,7:1 ; secondaire sur blanc 6,3:1.
+     */
     :root[data-theme="light"] {
-      --bg: #f1f3f4;
-      --panel: rgba(255, 255, 255, 0.96);
+      --bg: #eef0f4;
+      --panel: rgba(255, 255, 255, 0.97);
       --panel-solid: #ffffff;
-      --hover: rgba(60, 64, 67, 0.06);
-      --line: rgba(60, 64, 67, 0.12);
-      --line-strong: rgba(60, 64, 67, 0.24);
-      --text: #202124;
-      --muted: #5f6368;
-      /* Couleur principale : orange du logo, assez foncé pour le texte (contraste 5,2:1 sur blanc) ; le bleu reste
-         réservé à « ma position » (--blue), comme sur les cartes habituelles */
-      --accent: #c2410c;
-      --accent-strong: #9a3412;
-      --accent-soft: rgba(234, 88, 12, 0.1);
-      --accent-line: rgba(234, 88, 12, 0.38);
-      --focus-ring: rgba(234, 88, 12, 0.22);
-      --focus-border: #ea580c;   /* champ actif : orange vif, bien distinct du rouge des erreurs */
+      --hover: rgba(22, 33, 58, 0.05);
+      --line: rgba(22, 33, 58, 0.1);
+      --line-strong: rgba(22, 33, 58, 0.22);
+      --text: #16213a;
+      --muted: #55607a;
+      --brand: #ff4d2e;                 /* orange du logo : boutons principaux, repères, coches (texte encre dessus) */
+      --on-brand: #16213a;
+      --accent: #d9361a;                /* orange lisible en texte et en liseré sur blanc */
+      --accent-strong: #b02a10;
+      --accent-soft: rgba(255, 77, 46, 0.1);
+      --accent-line: rgba(255, 77, 46, 0.4);
+      --focus-ring: rgba(255, 77, 46, 0.24);
+      --focus-border: #ff4d2e;
       --on-accent: #ffffff;
-      --green: #188038;
-      --green-soft: rgba(24, 128, 56, 0.1);
-      --gray: #9aa0a6;
-      --amber: #b06000;
-      --danger: #d93025;
+      --flash: #ffe13a;                 /* jaune fluo des étiquettes de bons plans */
+      --on-flash: #16213a;
+      --shell: #16213a;                 /* barre d'onglets : encre pleine */
+      --on-shell: #f2f4f8;
+      --green: #0e7c45;
+      --green-soft: rgba(14, 124, 69, 0.1);
+      --gray: #9aa3b5;
+      --amber: #a85a00;
+      --danger: #d1301f;
       --input-bg: #ffffff;
-      --shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
-      --scrim: rgba(241, 243, 244, 0.95);
-      --scrim-soft: rgba(241, 243, 244, 0.3);
-      --backdrop: rgba(32, 33, 36, 0.32);
+      --shadow: 0 1px 2px rgba(22, 33, 58, 0.1), 0 8px 22px -8px rgba(22, 33, 58, 0.22);
+      --shadow-lift: 0 2px 4px rgba(22, 33, 58, 0.08), 0 18px 40px -14px rgba(22, 33, 58, 0.32);
+      --scrim: rgba(238, 240, 244, 0.96);
+      --scrim-soft: rgba(238, 240, 244, 0.35);
+      --backdrop: rgba(22, 33, 58, 0.36);
     }
     :root[data-theme="dark"] {
-      --chart: #ff8a4c;                 /* validée sur fond sombre */
-      --bg: #242f3e;
-      --panel: rgba(32, 33, 36, 0.95);
-      --panel-solid: #202124;
-      --hover: rgba(232, 234, 237, 0.06);
-      --line: rgba(232, 234, 237, 0.12);
-      --line-strong: rgba(232, 234, 237, 0.24);
-      --text: #e8eaed;
-      --muted: #9aa0a6;
-      --accent: #ff8a4c;
-      --accent-strong: #ffab80;
-      --accent-soft: rgba(255, 138, 76, 0.14);
-      --accent-line: rgba(255, 138, 76, 0.42);
-      --focus-ring: rgba(255, 138, 76, 0.24);
-      --focus-border: #ff9a5c;
-      --on-accent: #202124;
-      --green: #81c995;
-      --green-soft: rgba(129, 201, 149, 0.14);
-      --gray: #5f6368;
-      --amber: #fdd663;
-      --danger: #f28b82;
-      --input-bg: rgba(0, 0, 0, 0.2);
-      --shadow: 0 1px 3px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.35);
-      --scrim: rgba(32, 33, 36, 0.95);
-      --scrim-soft: rgba(32, 33, 36, 0.25);
-      --backdrop: rgba(0, 0, 0, 0.55);
+      --chart: #ff8a73;                 /* validée sur fond sombre */
+      --bg: #0e1626;
+      --panel: rgba(22, 34, 58, 0.97);
+      --panel-solid: #16223a;
+      --hover: rgba(242, 244, 248, 0.06);
+      --line: rgba(242, 244, 248, 0.1);
+      --line-strong: rgba(242, 244, 248, 0.22);
+      --text: #f2f4f8;
+      --muted: #a3aec6;
+      --brand: #ff6a45;
+      --on-brand: #0e1626;
+      --accent: #ff8a73;
+      --accent-strong: #ffb19f;
+      --accent-soft: rgba(255, 106, 69, 0.16);
+      --accent-line: rgba(255, 106, 69, 0.45);
+      --focus-ring: rgba(255, 106, 69, 0.28);
+      --focus-border: #ff6a45;
+      --on-accent: #0e1626;
+      --flash: #ffe13a;
+      --on-flash: #16213a;
+      --shell: #0a111e;
+      --on-shell: #f2f4f8;
+      --green: #5fd39a;
+      --green-soft: rgba(95, 211, 154, 0.14);
+      --gray: #5b6680;
+      --amber: #ffc861;
+      --danger: #ff8a7a;
+      --input-bg: rgba(0, 0, 0, 0.22);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 26px -8px rgba(0, 0, 0, 0.55);
+      --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.35), 0 20px 44px -14px rgba(0, 0, 0, 0.7);
+      --scrim: rgba(14, 22, 38, 0.96);
+      --scrim-soft: rgba(14, 22, 38, 0.3);
+      --backdrop: rgba(5, 9, 18, 0.6);
     }
 
     /* =====================================================================
@@ -2624,6 +2640,172 @@
     .sp-filters .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-line); }
     body.search-on .backdrop.is-visible { z-index: 70; }
     body.search-on #places-sheet { z-index: 71; }
+    /* =====================================================================
+       REFONTE « ÉTIQUETTE DU MARCHÉ » (novembre 2026) — voir DESIGN.md
+       Couche placée en dernier : elle l'emporte sur les styles plus anciens à spécificité égale.
+       Trois idées : l'encre bleu marine remplace le gris Google ; l'orange du logo sert à ce qui se touche ;
+       le jaune fluo est réservé aux bons plans, posés comme des étiquettes de prix de marchand.
+       ===================================================================== */
+
+    /* --- Surfaces du navigateur et texte --- */
+    html, body { font-synthesis: none; text-rendering: optimizeLegibility; }
+    ::selection { background: var(--flash); color: var(--on-flash); }
+    input, textarea { caret-color: var(--brand); }
+    html { scrollbar-color: var(--line-strong) transparent; }
+    :focus-visible { outline: 2px solid var(--focus-border); outline-offset: 2px; }
+    .sr-price, .offers-badge, .notif-badge, .fbar-count, .pin-flag, .kpi strong, .ps-cards strong, .menu-list .price { font-variant-numeric: tabular-nums; }
+    .onboarding { font-family: var(--font-ui); }
+
+    /* --- Voix « étiquette » : Archivo étroite et grasse pour les titres, les prix et les bons plans --- */
+    .sheet h2 { font-family: var(--font-tag); font-stretch: 74%; font-weight: 800; font-size: 28px; line-height: 1.04; letter-spacing: -.005em; text-wrap: balance; }
+    .sheet h3 { font-stretch: 88%; font-weight: 700; font-size: 19px; line-height: 1.2; }
+    .tour-card h2 { font-family: var(--font-tag); font-stretch: 76%; font-weight: 800; font-size: 25px; line-height: 1.04; text-wrap: balance; }
+    .ob-step h1, .ob-step h2 { font-family: var(--font-tag); font-stretch: 70%; font-weight: 850; letter-spacing: -.01em; line-height: 1; text-wrap: balance; }
+    .ob-step h1 { font-size: 40px; }
+    .ob-step h2 { font-size: 32px; }
+    .sr-title { margin: 18px 8px 6px; font-family: var(--font-tag); font-stretch: 80%; font-weight: 800; font-size: 17px; letter-spacing: 0; text-transform: none; color: var(--text); }
+    .sr-price, .menu-list .price { font-family: var(--font-tag); font-stretch: 82%; font-weight: 800; font-size: 17px; }
+
+    /* --- Boutons, puces, champs : coins nets (12 px), plus de pilules partout --- */
+    .btn { border-radius: 12px; font-weight: 700; font-size: 16px; }
+    .btn-primary { color: var(--on-brand); background: var(--brand); }
+    .btn-primary:hover { background: color-mix(in oklab, var(--brand) 86%, #000); box-shadow: none; }
+    .btn-ghost, .btn-danger { border-width: 1.5px; }
+    .btn-ghost { color: var(--text); }
+    .btn-ghost:hover { background: var(--hover); }
+    .btn-inline { border-radius: 10px; font-weight: 700; color: var(--on-brand); background: var(--brand); }
+    .pill-btn { border-radius: 10px; font-weight: 650; color: var(--on-brand); background: var(--brand); }
+    .ob-skip { border-radius: 10px; font-weight: 600; }
+    .link-btn { color: var(--accent); font-weight: 600; text-underline-offset: 3px; }
+    .chip { border-radius: 10px; font-weight: 600; }
+    .chip[aria-pressed="true"], :root[data-theme="light"] .chip[aria-pressed="true"] { color: var(--panel-solid); background: var(--text); border-color: var(--text); }
+    .field input, .field textarea, .field select { border-radius: 10px; }
+    .field input:focus, .field textarea:focus { border-color: var(--focus-border); box-shadow: 0 0 0 3px var(--focus-ring); }
+    .field > span { color: var(--text); font-weight: 600; }
+
+    /* --- Panneaux flottants : papier blanc net, ombre portée vers le bas (pas de verre dépoli) --- */
+    .glass { background: var(--panel-solid); -webkit-backdrop-filter: none; backdrop-filter: none; border-color: var(--line); box-shadow: var(--shadow); }
+    .sheet { border-radius: 22px 22px 0 0; }
+    .sheet-grab::before { width: 40px; height: 5px; border-radius: 3px; }
+    .icon-btn { color: var(--text); }
+    .sheet-emoji { border-radius: 16px; background: var(--accent-soft); }
+    .status { font-weight: 650; }
+    .avatar { color: var(--on-brand); background: var(--brand); font-weight: 750; }
+    .ob-logo .avatar { color: var(--on-brand); background: var(--brand); }
+    .verified { border-radius: 6px; font-weight: 650; }
+    .demo-tag { border-radius: 5px; font-weight: 650; }
+    .amen-list li { border-radius: 8px; }
+    .pill-link { border-radius: 10px; color: var(--accent-strong); }
+
+    /* --- Étiquette flash : le signe des bons plans (jaune fluo, trou de perforation, lettres étroites et grasses) --- */
+    .promo, .promo.is-student, .promo.is-day, .promo.is-week {
+      position: relative; padding: 14px 16px 14px 34px; border-radius: 8px; color: var(--on-flash); background: var(--flash);
+      box-shadow: 0 1px 0 rgba(22, 33, 58, .12), 0 8px 18px -10px rgba(22, 33, 58, .45);
+    }
+    .promo::before { content: ""; position: absolute; left: 13px; top: 50%; width: 9px; height: 9px; margin-top: -4.5px; border-radius: 50%; background: var(--panel-solid); }
+    .promo small, .promo.is-student small, .promo.is-day small, .promo.is-week small { color: var(--on-flash); opacity: .78; font-weight: 650; }
+    .promo strong { font-family: var(--font-tag); font-stretch: 80%; font-weight: 800; font-size: 19px; line-height: 1.1; }
+    .promo .promo-more, .promo-when { color: var(--on-flash); opacity: .78; }
+    .promo-use, .promo.is-student .promo-use, .promo.is-day .promo-use, .promo.is-week .promo-use,
+    :root[data-theme="dark"] .promo.is-student .promo-use, :root[data-theme="dark"] .promo.is-day .promo-use, :root[data-theme="dark"] .promo.is-week .promo-use {
+      border-radius: 8px; color: var(--flash); background: var(--on-flash); }
+    .pin-flag {
+      top: -6px; right: -9px; min-width: 22px; height: 20px; padding: 0 5px; border-radius: 4px; border: 0;
+      font-family: var(--font-tag); font-stretch: 80%; font-weight: 850; font-size: 12.5px; color: var(--on-flash); background: var(--flash);
+      box-shadow: 0 1px 2px rgba(22, 33, 58, .45); transform: rotate(9deg);
+    }
+    .offers-badge { color: var(--on-flash); background: var(--flash); font-weight: 800; }
+
+    /* --- Bouton « Valider ma visite / Profiter de l'offre » : orange plein, lettres encre --- */
+    .visit-cta { border-radius: 14px; color: var(--on-brand); background: var(--brand); box-shadow: 0 10px 22px -12px var(--brand); }
+    .visit-cta-ico { background: rgba(22, 33, 58, .12); }
+    .visit-cta-txt strong { font-family: var(--font-tag); font-stretch: 82%; font-weight: 800; font-size: 18px; }
+    .visit-cta-txt small { opacity: .82; font-weight: 500; }
+
+    /* --- Carte : repères nets, étiquettes de nom à l'encre --- */
+    .pin-badge { box-shadow: 0 1px 0 rgba(22, 33, 58, .2), 0 6px 14px -5px rgba(22, 33, 58, .55); }
+    .pin.is-selected .pin-badge { border-color: var(--brand); }
+    .pin-label { padding: 3px 8px; border-radius: 6px; font-weight: 650; font-size: 12.5px; color: var(--text); background: var(--panel-solid); box-shadow: 0 1px 3px rgba(22, 33, 58, .3); }
+    .pin.is-demo .pin-label::after { color: var(--muted); }
+
+    /* --- Stories : anneau orange plein (plus le dégradé d'Instagram) --- */
+    .story-ring { background: var(--brand); }
+    .story-chip.is-seen .story-ring { background: var(--line-strong); }
+    .story-name { font-weight: 600; }
+    .stories { border-radius: 14px; }
+
+    /* --- Carte du restaurant (menu) : prix à l'encre, en lettres d'étiquette, sans pastille --- */
+    .menu-list h4 { font-family: var(--font-tag); font-stretch: 80%; font-weight: 800; font-size: 19px; }
+    .menu-list b { font-weight: 600; }
+    .menu-list .price, :root[data-theme="dark"] .menu-list .price { padding: 0; border-radius: 0; color: var(--text); background: none; }
+    /* --- Panneau des filtres : intitulés de rubrique en minuscules, lettres d'étiquette --- */
+    .sp-filters .ft-label, .sb-filters .ft-label { margin: 8px 0 2px; font-family: var(--font-tag); font-stretch: 82%; font-weight: 800; font-size: 15.5px; letter-spacing: 0; text-transform: none; color: var(--text); }
+
+    /* --- Résultats et listes --- */
+    .offer-body b { font-weight: 650; font-size: 15.5px; }
+    .offer-hit, .sr-hit, .shop-item { border-radius: 10px; }
+    .fbar-tag { border-radius: 8px; font-weight: 600; color: var(--panel-solid); background: var(--text); border-color: var(--text); }
+    .fbar-count { border-radius: 6px; font-weight: 800; color: var(--on-brand); background: var(--brand); }
+
+    /* --- Guide --- */
+    .tour-card { border-radius: 18px; }
+    .tour-step { letter-spacing: 0; text-transform: none; font-variant-numeric: tabular-nums; }
+    /* --- Intitulés de rubrique : plus de petites capitales espacées, la voix d'étiquette suffit --- */
+    .pf-label, .rf-head label { font-family: var(--font-tag); font-stretch: 82%; font-weight: 800; font-size: 15.5px; letter-spacing: 0; text-transform: none; color: var(--text); }
+
+    /* --- Accueil, inscription et connexion : même monde (remplace le fond crème et l'orange terre cuite) --- */
+    :root[data-theme="light"] .onboarding { --accent: #d9361a; --accent-strong: #b02a10; --accent-soft: rgba(255, 77, 46, .1); --accent-line: rgba(255, 77, 46, .4); --on-accent: #fff; --ob-grad: var(--brand); --ob-btn: var(--brand); }
+    :root[data-theme="dark"] .onboarding { --accent: #ff8a73; --accent-strong: #ffb19f; --accent-soft: rgba(255, 106, 69, .16); --accent-line: rgba(255, 106, 69, .45); --on-accent: #0e1626; --ob-grad: var(--brand); --ob-btn: var(--brand); }
+    :root[data-theme="light"] .ob-panel, :root[data-theme="dark"] .ob-panel { border-color: var(--line); background: var(--panel-solid); box-shadow: var(--shadow-lift); }
+    .ob-panel { border-radius: 22px; }
+    .onboarding .btn { border-radius: 14px; font-size: 17px; font-weight: 750; }
+    .onboarding .btn-primary { color: var(--on-brand); background: var(--brand); }
+    :root[data-theme="light"] .onboarding .btn-primary:hover, :root[data-theme="dark"] .onboarding .btn-primary:hover { background: color-mix(in oklab, var(--brand) 86%, #000); }
+    :root[data-theme="light"] .onboarding .field input, :root[data-theme="dark"] .onboarding .field input { border-radius: 12px; border-color: var(--line-strong); }
+    :root[data-theme="light"] .onboarding .field input:focus, :root[data-theme="dark"] .onboarding .field input:focus { border-color: var(--focus-border); box-shadow: 0 0 0 4px var(--focus-ring); }
+    :root[data-theme="light"] .onboarding .role-check, :root[data-theme="dark"] .onboarding .role-check { border-radius: 14px; background: var(--hover); border-color: var(--line); }
+    :root[data-theme="light"] .onboarding .role-check:has(input:checked), :root[data-theme="dark"] .onboarding .role-check:has(input:checked) { background: var(--accent-soft); border-color: var(--brand); }
+    /* Avantages de l'accueil : trois étiquettes de marché, posées un peu de travers comme sur un étal */
+    .onboarding .jn-perks { display: flex; flex-wrap: wrap; gap: 8px 10px; margin: 18px 0 22px; }
+    :root[data-theme="light"] .onboarding .jn-perks li, :root[data-theme="dark"] .onboarding .jn-perks li {
+      position: relative; padding: 8px 13px 8px 27px; border: 0; border-radius: 6px; color: var(--on-flash); background: var(--flash);
+      font-family: var(--font-tag); font-stretch: 84%; font-weight: 750; font-size: 15.5px; line-height: 1.15;
+      box-shadow: 0 1px 0 rgba(22, 33, 58, .14), 0 8px 16px -10px rgba(22, 33, 58, .5);
+    }
+    .onboarding .jn-perks li::before {
+      position: absolute; left: 10px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%;
+      background: var(--panel-solid); -webkit-mask: none; mask: none;
+    }
+    .onboarding .jn-perks li:nth-child(1) { transform: rotate(-1.2deg); }
+    .onboarding .jn-perks li:nth-child(2) { transform: rotate(.9deg); }
+    .onboarding .jn-perks li:nth-child(3) { transform: rotate(-.6deg); }
+    @media (prefers-reduced-motion: reduce) { .onboarding .jn-perks li { animation: none; } }
+
+    /* --- Ordinateur : la barre « Créer mon compte » prend l'encre, comme la barre d'onglets du téléphone --- */
+    .guest-bar { background: var(--shell); border-top: 0; }
+    .guest-cta { border-radius: 12px; }
+    .guest-login { border-radius: 12px; color: var(--on-shell); background: rgba(242, 244, 248, .12); }
+    .guest-login:hover { background: rgba(242, 244, 248, .2); }
+    .guest-login:focus-visible { outline-color: var(--flash); }
+    .sb-search input { border-radius: 12px; }
+    .sb-search input:focus { border-color: var(--focus-border); box-shadow: 0 0 0 3px var(--focus-ring); }
+
+    @media (max-width: 899.98px) {
+      /* Recherche du haut : bloc net, coins de 14 px */
+      #search-open { border-radius: 14px; height: 52px; font-weight: 500; }
+      #search-open svg { color: var(--text); }
+      /* Barre d'onglets à l'encre pleine : la couleur de la marque tient le bas de l'écran */
+      .tabbar { background: var(--shell); border-top: 0; box-shadow: 0 -8px 24px -16px rgba(22, 33, 58, .6); }
+      .tabbar > button { color: rgba(242, 244, 248, .66); font-weight: 600; }
+      .tabbar > button::before { background: rgba(242, 244, 248, .12); }
+      body:not([data-panel]) #nav-map, body[data-panel="shop-sheet"] #nav-map, body[data-panel="offers-sheet"] .tabbar #offers-btn,
+      body[data-panel="notif-sheet"] .tabbar #notif-btn, body[data-panel="profile-sheet"] .tabbar #profile-btn { color: var(--on-shell); }
+      body:not([data-panel]) #nav-map > svg, body[data-panel="shop-sheet"] #nav-map > svg, body[data-panel="offers-sheet"] .tabbar #offers-btn > svg,
+      body[data-panel="notif-sheet"] .tabbar #notif-btn > svg { color: var(--brand); }
+      .tabbar > button:focus-visible { outline-color: var(--flash); }
+      .tabbar .offers-badge, .tabbar .notif-badge { box-shadow: 0 0 0 2px var(--shell); }
+      body.is-guest .tabbar #guest-signup { border-radius: 12px; font-weight: 750; color: var(--on-brand); background: var(--brand); box-shadow: none; }
+    }
   </style>
 </head>
 
@@ -4247,7 +4429,7 @@
     tileJson: 'https://tiles.openfreemap.org/planet',
     glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
     /**
-     * Style de la carte (MapLibre) : 'flashmiam' (Urbain énergique en mode jour, Nuit néon en mode nuit),
+     * Style de la carte (MapLibre) : 'flashmiam' (plan « marché » : encre, jaune paille, jour et nuit),
      * 'google' (rendu Google Maps), 'neon', 'pastel' (Minimaliste pastel), 'urbain', ou l'adresse https d'un style
      * MapLibre (style.json). Réglé à la publication par la variable d'environnement MAP_STYLE (scripts/config.mjs).
      * Pour essayer sans republier : ajouter ?carte=neon (ou pastel, urbain, google, flashmiam) à l'adresse du site.
@@ -5966,8 +6148,30 @@
     tertiary: '#ffffff', tertiaryCase: '#e2cbb4', minor: '#ffffff', minorCase: '#e8d7c6', path: '#c7a687',
     rail: '#5b4a6e', label: '#3b322c', labelMajor: '#7d2a10', halo: '#ffffff', place: '#0a4fa0',
   };
+  /*
+   * Style FlashMiam « marché » : un plan calme à l'encre bleu marine, pour que l'orange des restaurants et le jaune des
+   * bons plans soient les seules couleurs vives de l'écran. Grands axes en jaune paille, parcs verts, eau bleue.
+   */
+  const MARCHE = {
+    background: '#f3f4f1', landuseBusy: '#ecebe4', hospital: '#f6e3e4', education: '#e5e9f4',
+    landcover: '#e3efd9', wood: '#c4e2b4', park: '#b9e0a8', water: '#a7d0ee', waterway: '#8fc2e6',
+    building: '#e4e6ea', buildingLine: '#d3d7de',
+    motorway: '#ffd75e', motorwayCase: '#d9a826', trunk: '#ffe27e', trunkCase: '#dcb447',
+    primary: '#fff0a8', primaryCase: '#e0c770', secondary: '#ffffff', secondaryCase: '#cfd4dd',
+    tertiary: '#ffffff', tertiaryCase: '#d8dce3', minor: '#ffffff', minorCase: '#e1e4ea', path: '#b9c0cc',
+    rail: '#8d96a8', label: '#3a4560', labelMajor: '#16213a', halo: '#ffffff', place: '#16213a',
+  };
+  const MARCHE_NUIT = {
+    background: '#0e1626', landuseBusy: '#121c2f', hospital: '#1d1a2c', education: '#121d33',
+    landcover: '#0f1c25', wood: '#12271f', park: '#133024', water: '#081221', waterway: '#16305a',
+    building: '#18233a', buildingLine: '#212f4b',
+    motorway: '#7a6a2c', motorwayCase: '#0e1626', trunk: '#6a5d2c', trunkCase: '#0e1626',
+    primary: '#3d4a68', primaryCase: '#0e1626', secondary: '#2f3b57', secondaryCase: '#0e1626',
+    tertiary: '#28344f', tertiaryCase: '#0e1626', minor: '#1f2a42', minorCase: '#0e1626', path: '#2a3754',
+    rail: '#36435f', label: '#9aa7c2', labelMajor: '#e8ecf4', halo: '#0e1626', place: '#ffe8a8',
+  };
   const MAP_STYLES = {
-    flashmiam: { label: 'Style FlashMiam', palettes: { light: URBAIN, dark: NEON } },
+    flashmiam: { label: 'Style FlashMiam', palettes: { light: MARCHE, dark: MARCHE_NUIT } },
     google: { label: 'Style Google Maps', palettes: PALETTES },
     neon: { label: 'Nuit néon', palettes: { light: NEON, dark: NEON } },
     pastel: { label: 'Minimaliste pastel', palettes: { light: PASTEL, dark: PASTEL } },

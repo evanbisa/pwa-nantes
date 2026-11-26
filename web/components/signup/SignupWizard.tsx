@@ -382,7 +382,7 @@ function Wizard() {
     >
       <MapBackdrop />
       {/* Carte de l'inscription posée sur la carte de la ville, comme l'écran d'accueil */}
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col relative isolate overflow-hidden rounded-[28px] bg-white shadow-xl ring-1 ring-black/5 dark:bg-[#1c1917] dark:ring-white/10">
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col relative isolate overflow-hidden rounded-[22px] bg-white shadow-xl ring-1 ring-black/5 dark:bg-[#16223a] dark:ring-white/10">
       <div aria-hidden className="su-glow pointer-events-none absolute inset-0 -z-10" />
       <header className="flex w-full items-center gap-3 px-5 pt-4 pb-2">
         <button

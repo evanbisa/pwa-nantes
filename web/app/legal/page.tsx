@@ -7,7 +7,6 @@ export default function LegalHome() {
   return (
     <div className="space-y-8">
       <header className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-10 dark:border-slate-800 dark:bg-slate-900">
-        <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-gradient-to-br from-orange-500/15 to-amber-500/10 blur-3xl" />
         <span className="relative grid h-12 w-12 place-items-center rounded-2xl bg-orange-600 text-white shadow-lg shadow-orange-600/25 dark:bg-orange-500">
           <Scale aria-hidden className="h-6 w-6" />
         </span>
