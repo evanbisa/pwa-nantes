@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-NfB1+hP43xT2d1xXZiUfLFYqJcpes8Qvcnuy61SJSnw=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-GYc3dsZIZ/AjD4dEskxtP3gdqLHzmPLs8FaB2ddQmoI=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1824,6 +1824,10 @@
     .rv-item.is-mine { margin: 4px 0; padding: 12px; border: 0; border-radius: 12px; background: var(--accent-soft); }
     .rv-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 14px; }
     .rv-head b { font-weight: 500; }
+    .rv-verified { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; font-size: 11.5px; font-weight: 600; color: var(--green); background: var(--green-soft); vertical-align: 1px; }
+    .rv-how { margin: 4px 0 12px; font-size: 13.5px; color: var(--muted); }
+    .rv-how summary { cursor: pointer; color: var(--accent-strong); font-weight: 500; }
+    .rv-how p { margin: 6px 0 0; line-height: 1.5; }
     .rv-head small { flex: none; font-size: 12.5px; color: var(--muted); }
     .rv-text { margin: 4px 0 0; font-size: 14.5px; white-space: pre-line; overflow-wrap: anywhere; -webkit-user-select: text; user-select: text; }
     .rv-reply { margin: 8px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--hover); font-size: 14px; white-space: pre-line; overflow-wrap: anywhere; }
@@ -2853,6 +2857,11 @@
     </div>
     <div class="tab-panel" id="panel-reviews" role="tabpanel" aria-labelledby="tab-reviews" hidden>
       <div class="rv-summary" id="rv-summary"></div>
+      <!-- Information obligatoire sur le contrôle des avis (article L111-7-2 du Code de la consommation) -->
+      <details class="rv-how">
+        <summary>Comment les avis sont-ils contrôlés ?</summary>
+        <p>Les avis sont publiés par des clients inscrits sur FlashMiam, sans relecture préalable, ni contrepartie. Le badge <b>✓ Visite vérifiée</b> indique un client dont la visite a été validée en caisse par le restaurant (QR code FlashMiam). Un restaurateur ne peut ni modifier ni supprimer un avis : il peut y répondre ou le signaler à l'équipe FlashMiam, qui retire les avis contraires aux <a href="app/legal/cgu/#avis" target="_blank" rel="noopener">règles des avis</a>. Les avis sont classés du plus récent au plus ancien.</p>
+      </details>
       <a class="btn btn-ghost rv-google" id="rv-google" target="_blank" rel="noopener" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 1114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
         Voir les avis sur Google Maps<span class="rv-ext" aria-hidden="true">↗</span>
@@ -3498,7 +3507,11 @@
           </div>
           <div class="ps-rv-summary" id="ps-rv-summary"></div>
           <ul class="rv-list ps-rv-list" id="ps-rv-list"></ul>
-          <p class="hint">Votre réponse s'affiche sous l'avis, et le client est prévenu. Un avis abusif ? Signalez-le depuis votre fiche.</p>
+          <p class="hint">Votre réponse s'affiche sous l'avis, et le client est prévenu. Un avis abusif ? Signalez-le depuis votre fiche. <b>✓ Visite vérifiée</b> : client dont vous avez scanné le QR code.</p>
+          <div class="ps-switch-row ps-rv-only">
+            <div><b id="ps-rv-only-label">Avis réservés aux clients venus sur place</b><small>Seuls les clients dont vous avez scanné le QR code FlashMiam peuvent donner un avis.</small></div>
+            <button class="switch" type="button" role="switch" id="ps-rv-only" aria-checked="false" aria-labelledby="ps-rv-only-label"><i></i></button>
+          </div>
           <button class="btn btn-ghost" type="button" id="pd-reviews">Voir les avis sur ma fiche</button>
         </section>
 
@@ -4701,6 +4714,7 @@
       id: m.id, ownerId: m.user_id, name: m.name, category: CAT_FROM_DB[m.category] || 'Autre', description: m.description || '',
       photos: m.photos_urls || [], menu: m.menu_json || [], address: m.address || '', coords: m.lat != null ? [m.lng, m.lat] : null,
       hours: hours.services || [], closedOn: hours.closed_on || [], days: daysFromRow(hours.days), phone: m.phone || '',
+      reviewsVerifiedOnly: !!m.reviews_verified_only,
       amenities: Array.isArray(m.amenities) ? m.amenities.filter((a) => AMENITIES[a]) : [],
       links: m.links && typeof m.links === 'object' ? Object.fromEntries(Object.entries(m.links).filter(([k, v]) => LINKS[k] && /^https:\/\//.test(v))) : {},
       closure: m.closed_from && m.closed_until ? { from: m.closed_from, until: m.closed_until, note: m.closure_note || '' } : null,
@@ -7012,8 +7026,16 @@
   })();
 
   /* ---------- Avis : note sur 5, commentaire, réponse du restaurateur ---------- */
+  /** Badge « Visite vérifiée » : l'auteur a une visite validée en caisse chez ce restaurant (tenu à jour par la base). */
+  function verifiedTag() {
+    const t = document.createElement('span');
+    t.className = 'rv-verified';
+    t.textContent = '✓ Visite vérifiée';
+    t.title = 'Visite de ce client validée en caisse par le QR code FlashMiam';
+    return t;
+  }
   // Colonnes lisibles des avis : l'identifiant du compte de l'auteur n'est jamais transmis (avis non reliables entre eux)
-  const REVIEW_COLS = 'id, merchant_id, rating, comment, author_name, created_at, updated_at, reply, replied_at, reported_at';
+  const REVIEW_COLS = 'id, merchant_id, rating, comment, author_name, created_at, updated_at, reply, replied_at, reported_at, verified';
   const Reviews = (() => {
     const cache = new Map();                 // id de la fiche → { list, at }
     let shopId = null, pick = 0, editing = false, replyFor = null;
@@ -7124,7 +7146,8 @@
       }
       const note = $('rv-note');
       note.hidden = false;
-      if (own) note.textContent = 'Répondez à vos clients : votre réponse s\'affiche sous leur avis. Un avis abusif ? Signalez-le.';
+      if (showForm && shop.reviewsVerifiedOnly && !editing) note.textContent = 'Ce restaurant n\'accepte que les avis des clients dont la visite a été validée en caisse (QR code FlashMiam).';
+      else if (own) note.textContent = 'Répondez à vos clients : votre réponse s\'affiche sous leur avis. Un avis abusif ? Signalez-le.';
       else if (me && me.role === 'pro') note.textContent = 'Les avis sont réservés aux comptes clients.';
       else if (!me && shop.isPro && Guest.on()) {
         note.textContent = 'Vous y avez mangé ? ';
@@ -7169,6 +7192,7 @@
       li.querySelector('.stars').textContent = starText(r.rating);
       li.querySelector('.stars').setAttribute('aria-label', r.rating + ' sur 5');
       li.querySelector('b').textContent = mine ? 'Votre avis' : r.author_name;
+      if (r.verified) li.querySelector('b').after(verifiedTag());
       li.querySelector('small').textContent = timeAgo(r.created_at) + (r.updated_at && new Date(r.updated_at) - new Date(r.created_at) > 60000 ? ' · modifié' : '');
       if (r.comment) { const p = document.createElement('p'); p.className = 'rv-text'; p.textContent = r.comment; li.appendChild(p); }
       if (r.reply && replyFor !== r.id) {
@@ -7306,7 +7330,9 @@
         : await Loader.run(sb.from('reviews').insert({ merchant_id: m.shop.id, ...row }).select('id').single(), 'Publication de votre avis…');
       btn.disabled = false;
       if (error) {
-        $('err-rv').textContent = error.code === '23505' ? 'Vous avez déjà donné votre avis sur ce restaurant.' : cloudError(error);
+        $('err-rv').textContent = error.code === '23505' ? 'Vous avez déjà donné votre avis sur ce restaurant.'
+          : error.code === '42501' && m.shop.reviewsVerifiedOnly ? 'Ce restaurant n\'accepte que les avis des clients dont la visite a été validée en caisse : montrez votre QR code FlashMiam lors de votre prochaine visite.'
+          : cloudError(error);
         if (error.code === '23505') myReviewIds = null;   // avis donné depuis un autre appareil : relu
         refresh(m.shop.id);
         return;
@@ -13044,6 +13070,7 @@
       li.querySelector('.stars').textContent = starText(x.rating);
       li.querySelector('.stars').setAttribute('aria-label', x.rating + ' sur 5');
       li.querySelector('b').textContent = x.author_name;
+      if (x.verified) li.querySelector('b').after(verifiedTag());
       li.querySelector('small').textContent = timeAgo(x.created_at);
       if (x.comment) { const p = document.createElement('p'); p.className = 'rv-text'; p.textContent = x.comment; li.appendChild(p); }
       if (x.reply && replyFor !== x.id) {
@@ -13145,6 +13172,9 @@
         : s.live ? 'Les clients voient votre fiche, vos stories et vos promotions. Pour des congés, préférez « Fermeture exceptionnelle » ci-dessous.'
         : 'Masquée : personne ne la voit. Vos abonnés, vos avis et vos statistiques sont conservés.';
       Closure.render(s);
+      // Avis réservés aux visites validées (onglet « Avis »)
+      $('ps-rv-only').setAttribute('aria-checked', String(!!(s.r && s.r.reviewsVerifiedOnly)));
+      $('ps-rv-only').disabled = !s.listed;
     }
     /** Carte « Abonnement » : formule, échéance, paiement refusé, résiliation et reprise. */
     function renderSubscription(pro, date) {
@@ -13270,6 +13300,18 @@
       toast(on ? 'Votre fiche est de nouveau visible sur la carte.' : 'Votre fiche est masquée. Remettez-la en ligne quand vous voulez.');
     }
     $('ps-visible').addEventListener('click', () => setVisible($('ps-visible').getAttribute('aria-checked') !== 'true'));
+    $('ps-rv-only').addEventListener('click', async () => {
+      const { r, listed } = stateOf();
+      if (!r || !listed) return;
+      const on = $('ps-rv-only').getAttribute('aria-checked') !== 'true';
+      $('ps-rv-only').disabled = true;
+      const { error } = await Loader.run(sb.from('merchants').update({ reviews_verified_only: on }).eq('id', r.id), 'Enregistrement…');
+      $('ps-rv-only').disabled = false;
+      if (error) { toast(cloudError(error)); return; }
+      await refreshCloud();
+      render();
+      toast(on ? 'Seuls les clients dont vous avez scanné le QR code peuvent maintenant donner un avis.' : 'Tous les clients peuvent de nouveau donner un avis.');
+    });
 
     /* ----- Actions ----- */
     /** Formulaire de la fiche ; field : rubrique à montrer directement (carte, horaires). */
