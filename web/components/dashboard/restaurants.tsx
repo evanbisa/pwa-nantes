@@ -21,7 +21,7 @@ import { ModerationButtons } from "./moderation";
 
 /* ---------- Libellés ---------- */
 
-export const CATEGORY: Record<string, string> = { food_truck: "Food-truck", kebab: "Kebab", burger: "Burger", sweets: "Douceurs", pizza: "Pizza", other: "Autre" };
+export const CATEGORY: Record<string, string> = { food_truck: "Food-truck", kebab: "Kebab", burger: "Burger", sweets: "Sucré", pizza: "Pizza", asian: "Asiatique", tacos: "Tacos", creperie: "Crêperie", bakery: "Boulangerie, snack", cafe: "Café", bar: "Bar", world: "Cuisine du monde", traditional: "Traditionnel", other: "Autre" };
 export const STATUS: Record<string, [string, "good" | "warning" | "critical" | "neutral"]> = {
   published: ["En ligne", "good"], draft: ["Brouillon", "neutral"], awaiting_docs: ["Attend ses justificatifs", "warning"],
   awaiting_review: ["À vérifier par l'équipe", "warning"],
@@ -68,7 +68,7 @@ type Analytics = {
 type Detail = {
   merchant: {
     id: string; name: string; category: string; description: string | null; address: string | null; phone: string | null; status: string; is_test: boolean; is_open: boolean;
-    opening_hours: { services?: [string, string][]; closed_on?: number[] } | null; menu_json: { name: string; price?: number; section?: string }[] | null;
+    opening_hours: { services?: [string, string][]; closed_on?: number[]; days?: Record<string, [string, string][]> } | null; menu_json: { name: string; price?: number; section?: string }[] | null;
     photos_urls: string[] | null; created_at: string; published_at: string | null; honor_at: string | null; accepts_meal_vouchers: boolean;
     approved_at: string | null; review_note: string | null;
   };
@@ -411,6 +411,15 @@ function Subscription({ sub }: { sub: Sub | null }) {
   );
 }
 
+/** Horaires lisibles : mêmes créneaux chaque jour, ou un jour par jour (« lun 11:30–14:30 · mar fermé… »). */
+function hoursLabel(h: NonNullable<Detail["merchant"]["opening_hours"]>): string {
+  const slots = (list: [string, string][] | undefined) => (list ?? []).map(([a, b]) => `${a}–${b}`).join(", ");
+  if (h.days) {
+    return [1, 2, 3, 4, 5, 6, 0].map((d) => `${WEEKDAY[d]} ${slots(h.days?.[d]) || "fermé"}`).join(" · ");
+  }
+  return `${slots(h.services) || "—"}${h.closed_on?.length ? ` · fermé le ${h.closed_on.map((x) => WEEKDAY[x]).join(", ")}` : ""}`;
+}
+
 function Fiche({ m }: { m: Detail["merchant"] }) {
   const h = m.opening_hours ?? {};
   const menu = m.menu_json ?? [];
@@ -421,7 +430,7 @@ function Fiche({ m }: { m: Detail["merchant"] }) {
         <div className="col-span-2"><Kv k="Adresse" v={m.address || "—"} /></div>
         <Kv k="Téléphone" v={m.phone || "—"} />
         <Kv k="Titres-restaurant" v={m.accepts_meal_vouchers ? "acceptés" : "non"} />
-        <div className="col-span-2"><Kv k="Horaires" v={`${(h.services ?? []).map(([a, b]) => `${a}–${b}`).join(", ") || "—"}${h.closed_on?.length ? ` · fermé le ${h.closed_on.map((x) => WEEKDAY[x]).join(", ")}` : ""}`} /></div>
+        <div className="col-span-2"><Kv k="Horaires" v={hoursLabel(h)} /></div>
         <Kv k="Carte" v={`${n(menu.length)} plat(s)`} sub={sections.size ? `${n(sections.size)} rubrique(s)` : undefined} />
         <Kv k="Attestation sur l'honneur" v={m.honor_at ? dayLabel(m.honor_at) : "non donnée"} />
       </dl>

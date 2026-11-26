@@ -73,7 +73,7 @@ export const mentionsLegales: LegalDoc = {
       title: "Propriété intellectuelle",
       icon: Copyright,
       blocks: [
-        "La marque FlashMiam, le logo, la présentation du site et son code sont protégés par le droit de la propriété intellectuelle. Toute reproduction ou réutilisation sans autorisation écrite de l'éditeur est interdite.",
+        "Le nom FlashMiam, le logo, les textes, la présentation du site et son code sont protégés par le droit d'auteur. Toute reproduction ou réutilisation sans autorisation écrite de l'éditeur est interdite.",
         "Les fonds de carte proviennent d'**OpenStreetMap** et de ses contributeurs (licence ODbL), via OpenFreeMap. Les contenus publiés par les restaurateurs (photos, menus, stories) restent leur propriété.",
       ],
     },

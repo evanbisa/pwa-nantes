@@ -18,7 +18,7 @@ function subscribe(onChange: () => void) {
 const isNight = () => document.documentElement.getAttribute("data-theme") === "night";
 
 const buttonClass =
-  "grid h-10 w-10 place-items-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white";
+  "grid h-10 w-10 place-items-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white";
 
 /** Boutons de l'en-tête : imprimer le document, mode jour / nuit. */
 export default function HeaderActions() {

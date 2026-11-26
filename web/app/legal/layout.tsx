@@ -32,7 +32,9 @@ export default function LegalLayout({ children }: { children: ReactNode }) {
               <span className="sm:hidden">Retour</span>
             </a>
             <div className="mx-auto flex items-center gap-2.5 sm:mx-0 sm:ml-2">
-              <span aria-hidden className="grid h-8 w-8 place-items-center rounded-full bg-blue-600 text-sm font-semibold text-white">F</span>
+              {/* Logo du site (servi à la racine, comme sur la carte) */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/icon-192.png?v=2" alt="" width={32} height={32} className="h-8 w-8 rounded-lg" />
               <span className="text-sm font-semibold text-slate-900 dark:text-white">
                 FlashMiam <span className="hidden font-normal text-slate-500 sm:inline dark:text-slate-400">· Informations légales</span>
               </span>
@@ -50,7 +52,7 @@ export default function LegalLayout({ children }: { children: ReactNode }) {
               <LegalNav variant="side" />
               <div className="rounded-2xl border border-slate-200/80 bg-white p-4 text-sm dark:border-slate-800 dark:bg-slate-900">
                 <p className="flex items-center gap-2 font-medium text-slate-900 dark:text-white">
-                  <Mail aria-hidden className="h-4 w-4 text-blue-600 dark:text-blue-400" /> Une question ?
+                  <Mail aria-hidden className="h-4 w-4 text-orange-600 dark:text-orange-400" /> Une question ?
                 </p>
                 <p className="mt-1.5 leading-6 text-slate-500 dark:text-slate-400">
                   Écrivez-nous : <RichText text={`{{${LEGAL.email}|mailto:${LEGAL.email}}}`} />

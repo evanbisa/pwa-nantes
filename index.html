@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-hvnfRibrXOOIQ3VJVf8t3oBz4BrEI/GyEhHe9dAQpGA=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-+5BIYDqBlcHf+VqjcH+eXte/K3Z+N0Ar+dI3lEOfVpo=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
-  <!-- Mobile-first : plein écran, zoom de page désactivé (la carte gère son propre zoom) -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-  <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-jBFWngpiSg2bnow4sy1huDjVSqxs3M8aPigwnDbpKjA=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
   <meta name="color-scheme" content="light dark" />
   <meta name="theme-color" content="#f1f3f4" id="meta-theme" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="FlashMiam" />
-  <title>FlashMiam · Le street food de La Roche-sur-Yon sur une carte</title>
+  <title>FlashMiam · Les restaurants et le street food de La Roche-sur-Yon</title>
   <!-- Adresse principale et aperçu des liens partagés (réseaux sociaux, messageries) : l'adresse est remplacée à la
        publication par SITE_URL (scripts/seo.mjs) -->
   <link rel="canonical" href="https://flashmiam.fr/" />
@@ -21,12 +21,12 @@
   <meta property="og:site_name" content="FlashMiam" />
   <meta property="og:locale" content="fr_FR" />
   <meta property="og:url" content="https://flashmiam.fr/" />
-  <meta property="og:title" content="FlashMiam · Le street food de La Roche-sur-Yon" />
-  <meta property="og:description" content="Food-trucks, kebabs, burgers et douceurs sur une carte, avec les bons plans du moment." />
+  <meta property="og:title" content="FlashMiam · Les restaurants de La Roche-sur-Yon" />
+  <meta property="og:description" content="Restaurants, food-trucks et street food sur une carte, avec les bons plans du moment." />
   <meta property="og:image" content="https://flashmiam.fr/og-image.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="FlashMiam : le street food de La Roche-sur-Yon sur une carte" />
+  <meta property="og:image:alt" content="FlashMiam : les restaurants de La Roche-sur-Yon sur une carte" />
   <meta name="twitter:card" content="summary_large_image" />
   <!-- Nom du site et logo dans les résultats Google (au lieu du nom de domaine et d'un globe) -->
   <script type="application/ld+json">
@@ -55,9 +55,8 @@
       }
       var t = null;
       try { t = localStorage.getItem('roche-street-food:theme'); } catch (e) {}
-      // « system » : suit le réglage du téléphone (mode sombre ou clair)
-      if (t === 'system') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      if (t !== 'light' && t !== 'dark') t = 'light';   // par défaut : mode jour (jour, nuit ou système se choisit dans le profil)
+      // Par défaut (« system ») : suit le réglage du téléphone (mode sombre ou clair) ; jour ou nuit se choisit dans le profil
+      if (t !== 'light' && t !== 'dark') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', t);
       document.getElementById('meta-theme').setAttribute('content', t === 'dark' ? '#242f3e' : '#f1f3f4');
       // Feuille de style de la carte chargée sans bloquer l'affichage (l'écran de chargement peut apparaître tout de suite)
@@ -91,7 +90,7 @@
        1. DESIGN TOKENS — mode jour (défaut) et mode nuit, palette Google
        ===================================================================== */
     :root {
-      --chart: #1a73e8;                 /* couleur des graphiques (validée sur fond clair) */
+      --chart: #c2410c;                 /* couleur des graphiques : orange FlashMiam (validée sur fond clair) */
       --sidebar-w: 372px;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -108,10 +107,14 @@
       --line-strong: rgba(60, 64, 67, 0.24);
       --text: #202124;
       --muted: #5f6368;
-      --accent: #1a73e8;
-      --accent-strong: #1558b0;
-      --accent-soft: rgba(26, 115, 232, 0.1);
-      --accent-line: rgba(26, 115, 232, 0.35);
+      /* Couleur principale : orange du logo, assez foncé pour le texte (contraste 5,2:1 sur blanc) ; le bleu reste
+         réservé à « ma position » (--blue), comme sur les cartes habituelles */
+      --accent: #c2410c;
+      --accent-strong: #9a3412;
+      --accent-soft: rgba(234, 88, 12, 0.1);
+      --accent-line: rgba(234, 88, 12, 0.38);
+      --focus-ring: rgba(234, 88, 12, 0.22);
+      --focus-border: #ea580c;   /* champ actif : orange vif, bien distinct du rouge des erreurs */
       --on-accent: #ffffff;
       --green: #188038;
       --green-soft: rgba(24, 128, 56, 0.1);
@@ -125,7 +128,7 @@
       --backdrop: rgba(32, 33, 36, 0.32);
     }
     :root[data-theme="dark"] {
-      --chart: #4c8df6;                 /* validée sur fond sombre */
+      --chart: #ff8a4c;                 /* validée sur fond sombre */
       --bg: #242f3e;
       --panel: rgba(32, 33, 36, 0.95);
       --panel-solid: #202124;
@@ -134,10 +137,12 @@
       --line-strong: rgba(232, 234, 237, 0.24);
       --text: #e8eaed;
       --muted: #9aa0a6;
-      --accent: #8ab4f8;
-      --accent-strong: #aecbfa;
-      --accent-soft: rgba(138, 180, 248, 0.14);
-      --accent-line: rgba(138, 180, 248, 0.4);
+      --accent: #ff8a4c;
+      --accent-strong: #ffab80;
+      --accent-soft: rgba(255, 138, 76, 0.14);
+      --accent-line: rgba(255, 138, 76, 0.42);
+      --focus-ring: rgba(255, 138, 76, 0.24);
+      --focus-border: #ff9a5c;
       --on-accent: #202124;
       --green: #81c995;
       --green-soft: rgba(129, 201, 149, 0.14);
@@ -176,6 +181,10 @@
     button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
     a { color: inherit; }
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    /* iPhone : un champ en dessous de 16 px fait zoomer Safari quand on le touche (le zoom de page est autorisé) */
+    @supports (-webkit-touch-callout: none) {
+      input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not(.code-input):not(#scan-code), textarea, select { font-size: 16px !important; }
+    }
 
     #map { position: fixed; inset: 0; width: 100%; height: 100vh; height: 100dvh; background: var(--bg); }
 
@@ -208,7 +217,7 @@
     .brand { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 16px 6px 6px; border-radius: 999px; text-align: left; }
     .avatar {
       flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
-      font-weight: 500; font-size: 18px; color: #fff; background: #1a73e8;
+      font-weight: 500; font-size: 18px; color: #fff; background: linear-gradient(135deg, #f2610c, #d9301a);
     }
     .brand-text { display: flex; flex-direction: column; min-width: 0; }
     .brand-text strong { font-weight: 500; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -273,7 +282,7 @@
       transition: background-color .2s, color .2s, border-color .2s;
     }
     .chip[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-line); }
-    :root[data-theme="light"] .chip[aria-pressed="true"] { background: #e8f0fe; color: #1967d2; }
+    :root[data-theme="light"] .chip[aria-pressed="true"] { background: #fff1e8; color: #9a3412; }
     .dot-green { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
 
     /* =====================================================================
@@ -346,7 +355,7 @@
     .pin.is-soon .pin-badge, .pin.is-soon .pin-badge::before { border-color: #f29900; }
     .pin.is-closed .pin-badge { filter: grayscale(.9) opacity(.85); }
     .pin:hover .pin-badge, .pin.is-hover .pin-badge { transform: translateY(-3px); }
-    .pin.is-selected .pin-badge { transform: translateY(-6px) scale(1.15); border-color: var(--blue); }
+    .pin.is-selected .pin-badge { transform: translateY(-6px) scale(1.15); border-color: var(--accent); }
     .pin.is-selected.is-closed .pin-badge { filter: none; }
     @keyframes ripple { 0% { opacity: .8; transform: scale(.9); } 100% { opacity: 0; transform: scale(1.6); } }
     .pin-label {
@@ -404,6 +413,47 @@
     .promo strong { font-size: 16px; font-weight: 500; }
     .meta { display: grid; gap: 12px; margin: 16px 0 0; padding: 16px 0 0; list-style: none; color: var(--text); font-size: 14px; border-top: 1px solid var(--line); }
     .meta li { display: flex; gap: 14px; align-items: flex-start; }
+    .amen-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .amen-list li { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 13px; background: var(--hover); border: 1px solid var(--line); }
+    .amen-list b { font-weight: 500; }
+    .shop-links { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill-link { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border-radius: 18px; font-size: 14px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); border: 1px solid var(--accent-line); text-decoration: none; }
+    .pill-link:hover { background: var(--accent-line); }
+    #shop-hours { white-space: pre-line; }
+    .loyal-box { margin: 0 0 12px; padding: 12px 14px; border-radius: 14px; background: var(--accent-soft); border: 1px solid var(--accent-line); }
+    .loyal-head { margin: 0; font-size: 14.5px; }
+    .loyal-head b { font-weight: 600; }
+    .loyal-dots { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+    .loyal-dots[hidden] { display: none; }
+    .loyal-dots i { width: 20px; height: 20px; border-radius: 50%; border: 2px dashed var(--accent-line); }
+    .loyal-dots i.is-on { border: 0; background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4L18 8.5'/%3E%3C/svg%3E") center / 13px no-repeat; }
+    .loyal-sub { margin: 6px 0 0; font-size: 13.5px; color: var(--muted); }
+    .acc-back { font-size: 26px; line-height: 1; }
+    .acc-body form { display: grid; gap: 4px; margin-top: 8px; }
+    .acc-body .btn { margin-top: 8px; }
+    .acc-list { margin: 8px 0 0; padding: 0; list-style: none; }
+    .acc-list li { padding: 12px 2px; border-bottom: 1px solid var(--line); }
+    .acc-list li:last-child { border-bottom: 0; }
+    .acc-list .acc-l1 { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+    .acc-list b { font-weight: 600; }
+    .acc-list small { color: var(--muted); font-size: 12.5px; flex: none; }
+    .acc-list p { margin: 4px 0 0; font-size: 14px; }
+    .acc-list .link-btn { margin-top: 6px; font-size: 13.5px; }
+    .acc-empty { margin: 16px 0; text-align: center; color: var(--muted); font-size: 14px; }
+    .ps-close-today { margin: 4px 0 10px; }
+    .ps-loyal-form { margin-top: 12px; }
+    .ps-loyal-form select { width: 100%; height: 46px; padding: 0 12px; border-radius: 8px; font: inherit; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); }
+    .ps-staff { margin: 8px 0 4px; padding: 0; list-style: none; }
+    .ps-staff li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+    .ps-staff li span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+    .ps-staff li small { color: var(--muted); }
+    .ps-staff-add .btn { margin-top: 0; }
+    .ps-close-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .ps-close-form .field, #field-ps-close-note { margin-bottom: 8px; }
+    .ps-close-actions { display: grid; gap: 8px; margin-top: 4px; }
+    .ps-close-actions .btn { margin: 0; }   /* horaires par jour : une ligne par groupe de jours */
+    .closure-note { margin: 0 0 12px; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.45; font-weight: 500; color: #7a3d00; background: #fff3dc; border: 1px solid #f3d59b; }
+    :root[data-theme="dark"] .closure-note { color: #ffd59a; background: rgba(244, 178, 92, .12); border-color: rgba(244, 178, 92, .3); }
     .meta svg { flex: none; width: 20px; height: 20px; color: var(--accent); }
     .meta b { font-weight: 500; }
 
@@ -456,7 +506,7 @@
     .pf-cam { position: absolute; right: -4px; bottom: -4px; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; color: #fff; background: var(--accent-strong); box-shadow: 0 0 0 3px var(--panel-solid); }
     .pf-cam svg { width: 15px; height: 15px; }
     .avatar.has-photo { color: transparent; background-size: cover; background-position: center; }
-    .pf-avatar { width: 64px; height: 64px; font-size: 28px; font-weight: 600; background: linear-gradient(135deg, #1a73e8, #8b5cf6); box-shadow: 0 0 0 3px var(--panel-solid), 0 0 0 5px var(--accent-line); }
+    .pf-avatar { width: 64px; height: 64px; font-size: 28px; font-weight: 600; background: linear-gradient(135deg, #ff8a3d, #d9301a); box-shadow: 0 0 0 3px var(--panel-solid), 0 0 0 5px var(--accent-line); }
     .pf-id { min-width: 0; padding-right: 34px; }
     .pf-id h3 { margin: 0; font-size: 22px; font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
     .pf-email { margin: 4px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--muted); overflow-wrap: anywhere; }
@@ -559,7 +609,7 @@
      * --ob-grad : dégradé décoratif ; --ob-text : mots clés ; --ob-btn : fond du bouton principal (jour).
      */
     :root[data-theme="light"] .onboarding {
-      --accent: #d9381e; --accent-strong: #b93815; --accent-soft: rgb(255 77 46 / .08); --accent-line: rgb(255 77 46 / .3); --on-accent: #fff;
+      --accent: #c2410c; --accent-strong: #9a3412; --accent-soft: rgb(234 88 12 / .08); --accent-line: rgb(234 88 12 / .3); --on-accent: #fff;
       --ob-grad: linear-gradient(100deg, #ffc233, #ff8a3d 50%, #ff4d2e);
       --ob-text: linear-gradient(90deg, #e67700, #f0501f 50%, #d9301a);
       --ob-btn: linear-gradient(100deg, #f2610c, #e8401c 55%, #d9301a);
@@ -611,9 +661,10 @@
       background: rgb(255 255 255 / .04); border-color: rgb(255 255 255 / .1);
     }
     :root[data-theme="light"] .onboarding .field input { background: #fff; border-color: #efe5dc; }
-    :root[data-theme="light"] .onboarding .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgb(255 77 46 / .14); }
-    :root[data-theme="dark"] .onboarding .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgb(255 122 69 / .16); }
-    .onboarding .field.has-error input { border-color: var(--danger); box-shadow: none; }
+    /* Champ actif : contour orange et halo doux (le rouge reste réservé aux erreurs) */
+    :root[data-theme="light"] .onboarding .field input:focus { border-color: #ea580c; box-shadow: 0 0 0 4px rgb(234 88 12 / .14); }
+    :root[data-theme="dark"] .onboarding .field input:focus { border-color: #ff9a5c; box-shadow: 0 0 0 4px rgb(255 138 76 / .16); }
+    :root .onboarding .field.has-error input:not([type="checkbox"]):not([type="radio"]), :root .onboarding .field.has-error input:not([type="checkbox"]):not([type="radio"]):focus { border-color: var(--danger); box-shadow: 0 0 0 4px rgb(217 48 37 / .12); }   /* l'erreur l'emporte sur le contour orange du champ actif */
     :root[data-theme="light"] .onboarding .role-check { background: rgb(255 255 255 / .85); border-color: rgb(255 120 60 / .16); }
     :root[data-theme="light"] .onboarding .role-check:has(input:checked) { background: rgb(255 138 61 / .08); border-color: rgb(255 77 46 / .35); }
     :root[data-theme="dark"] .onboarding .role-check { background: rgb(255 255 255 / .04); border-color: rgb(255 255 255 / .1); }
@@ -632,8 +683,8 @@
       background: var(--input-bg); border: 1px solid var(--line-strong); outline: none; transition: border-color .2s, box-shadow .2s;
     }
     .field input::placeholder { color: var(--muted); opacity: .7; }
-    .field input:focus { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-    .field.has-error input { border-color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
+    .field input:focus { border-color: var(--focus-border); box-shadow: 0 0 0 3px var(--focus-ring); }
+    .field.has-error input:not([type="checkbox"]):not([type="radio"]), .field.has-error input:not([type="checkbox"]):not([type="radio"]):focus { border-color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
     .field-error { display: block; min-height: 16px; margin-top: 4px; font-size: 12px; color: var(--danger); }
     .pw-wrap { position: relative; }
     .pw-wrap input { padding-right: 84px; }
@@ -1011,12 +1062,12 @@
 
     /* Fiche restaurant : catégories, photos, adresse, horaires */
     .field textarea { width: 100%; padding: 12px 16px; border-radius: 8px; font: inherit; font-size: 15px; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); outline: none; resize: vertical; min-height: 96px; }
-    .field textarea:focus { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    .field textarea:focus { border-color: var(--focus-border); box-shadow: 0 0 0 3px var(--focus-ring); }
     .field.has-error textarea { border-color: var(--danger); }
     .counter { float: right; font-weight: 400; }
     .cat-picker { display: flex; flex-wrap: wrap; gap: 6px; }
     .cat-picker button { height: 36px; padding: 0 12px; border-radius: 18px; font-size: 14px; border: 1px solid var(--line-strong); }
-    .cat-picker button[aria-checked="true"] { background: #e8f0fe; color: #1967d2; border-color: var(--accent-line); }
+    .cat-picker button[aria-checked="true"] { background: #fff1e8; color: #9a3412; border-color: var(--accent-line); }
     :root[data-theme="dark"] .cat-picker button[aria-checked="true"] { background: var(--accent-soft); color: var(--accent); }
     .photo-grid { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .photo-item, .photo-add { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; }
@@ -1071,6 +1122,20 @@
     .menu-row .m-name { grid-column: 1; }
     .menu-row .m-price { grid-column: 2 / 4; text-align: right; font-variant-numeric: tabular-nums; }
     .menu-row .m-desc { grid-column: 1 / 4; }
+    .menu-row .m-extra { grid-column: 1 / 4; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .m-tag { height: 28px; padding: 0 10px; border-radius: 14px; font-size: 12.5px; border: 1px solid var(--line-strong); color: var(--muted); }
+    .m-tag[aria-pressed="true"] { color: var(--accent-strong); background: var(--accent-soft); border-color: var(--accent-line); }
+    .m-out { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 0 auto; font-size: 13px; }
+    .field .menu-row .m-out input { flex: none; width: 18px; height: 18px; margin: 0; padding: 0; accent-color: var(--accent); }
+    .m-photo { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 14px; font-size: 12.5px; border: 1px dashed var(--line-strong); cursor: pointer; }
+    .m-photo img { width: 22px; height: 22px; border-radius: 5px; object-fit: cover; }
+    .m-photo-x { font-size: 12.5px; }
+    .menu-list .dish-img { flex: none; width: 52px; height: 52px; border-radius: 10px; object-fit: cover; align-self: center; }
+    .menu-list .dish-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+    .menu-list .dish-tags span { padding: 0 7px; border-radius: 9px; font-size: 11.5px; line-height: 18px; color: var(--muted); background: var(--hover); }
+    .menu-list li.is-out b, .menu-list li.is-out .price { opacity: .55; }
+    .menu-list li.is-out .price { text-decoration: line-through; }
+    .menu-list .dish-out { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 9px; font-size: 11.5px; font-weight: 600; line-height: 18px; color: var(--danger); background: rgba(217, 48, 37, .1); }
     .field .menu-row input.is-invalid { border-color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
     .menu-add { margin-top: 8px; min-height: 42px; }
     .menu-scan { margin: 8px 0 12px; padding: 12px; border-radius: 12px; border: 1px dashed var(--line); background: var(--panel-solid); }
@@ -1115,7 +1180,7 @@
     .ob-address-toggle { display: block; margin: 12px auto 0; font-size: 14.5px; }
     .ob-address { margin-top: 10px; margin-bottom: 14px; text-align: left; }
     .addr-wrap input { width: 100%; height: 50px; padding: 0 16px; border-radius: 8px; font: inherit; font-size: 16px; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); outline: none; }
-    .addr-wrap input:focus { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    .addr-wrap input:focus { border-color: var(--focus-border); box-shadow: 0 0 0 3px var(--focus-ring); }
     .field.has-error .addr-wrap input { border-color: var(--danger); }
     .addr-list { position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px; list-style: none; border-radius: 10px; background: var(--panel-solid); box-shadow: var(--shadow); max-height: 240px; overflow-y: auto; }
     .addr-list li { padding: 10px 12px; border-radius: 8px; font-size: 14px; cursor: pointer; }
@@ -1146,6 +1211,24 @@
     .hours-row .check { margin: 0; white-space: nowrap; }
     .hours-row input[type="time"] { width: 100%; min-width: 0; height: 40px; padding: 0 6px; border-radius: 8px; font: inherit; font-size: 14px; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); }
     .hours-row input[type="time"]:disabled { opacity: .45; }
+    .hours-mode { margin: 6px 0 12px; }
+    .pl-amen, .pl-links { border: 0; padding: 0; margin: 18px 0 0; min-width: 0; }
+    .pl-amen legend, .pl-links legend { padding: 0; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+    .pl-amen-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 12px; }
+    .pl-amen-grid .check { margin: 0; }
+    .hd-row { display: grid; gap: 6px; padding: 10px 0; border-top: 1px solid var(--line); }
+    .hd-row:first-child { border-top: 0; }
+    .hd-day { display: flex; align-items: center; gap: 10px; min-height: 36px; font-size: 14.5px; font-weight: 600; cursor: pointer; }
+    .hd-day input { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }
+    .hd-closed { margin-left: auto; font-weight: 400; font-size: 13.5px; color: var(--muted); }
+    .hd-body { display: grid; gap: 6px; padding-left: 30px; min-width: 0; }
+    .hd-slots { display: grid; gap: 6px; min-width: 0; }
+    .hd-slot { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) 32px; align-items: center; gap: 6px; }
+    .hd-slot input[type="time"] { width: 100%; min-width: 0; height: 40px; padding: 0 6px; border-radius: 8px; font: inherit; font-size: 14px; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); }
+    .hd-del { width: 32px; height: 32px; border-radius: 50%; font-size: 18px; line-height: 1; color: var(--muted); }
+    .hd-del:hover { background: var(--hover); color: var(--text); }
+    .hd-add { justify-self: start; font-size: 13.5px; }
+    .hd-copy { margin-top: 6px; font-size: 13.5px; }
     .days { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; }
     .days-label { font-size: 13px; color: var(--muted); margin-right: 2px; }
     .days label { cursor: pointer; }
@@ -1414,6 +1497,13 @@
     .story-admin .sa-empty, .promo-admin .pa-empty { width: auto; flex: 1; padding: 12px 0; font-size: 13.5px; color: var(--muted); }
     .promo-admin { margin: 10px 0 0; padding: 0; list-style: none; }
     .promo-admin li { display: flex; align-items: center; gap: 12px; padding: 10px 2px; border-bottom: 1px solid var(--line); }
+    .promo-admin li { flex-wrap: wrap; }
+    .promo-admin li > div { flex: 1 1 55%; min-width: 0; }
+    .pa-acts { display: flex; flex: none; align-items: center; gap: 6px; margin-left: auto; }
+    .pa-acts .pill-btn { height: 32px; padding: 0 12px; font-size: 13px; }
+    .pa-sub { margin: 16px 0 0; font-size: 14px; color: var(--muted); font-weight: 600; }
+    .promo-old li { opacity: .85; }
+    .pp-editing { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 14px 0 4px; padding: 10px 12px; border-radius: 12px; font-size: 14px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); border: 1px solid var(--accent-line); }
     .promo-admin .pa-ico { font-size: 22px; }
     .promo-admin div { flex: 1; min-width: 0; }
     .promo-admin strong { display: block; font-size: 14.5px; font-weight: 500; }
@@ -1574,7 +1664,8 @@
     #psp-publish .pd-block:first-of-type { margin-top: 0; }
     #psp-publish .ps-alert + .pd-block { margin-top: 16px; }
     .story-admin .sa-stats { color: var(--text); }
-    @media (max-width: 380px) { .ps-tabs .ps-lbl { font-size: 0; } .ps-tabs .ps-lbl::after { content: attr(data-short); font-size: 11.5px; } }
+    /* « Statistiques » ne tient pas sous l'icône sur les téléphones courants (390 à 430 px) : « Stats » */
+    @media (max-width: 440px) { .ps-tabs .ps-lbl { font-size: 0; } .ps-tabs .ps-lbl::after { content: attr(data-short); font-size: 11.5px; } }
     @media (max-width: 360px) { .ps-quick { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ps-tabs .ps-ico { width: 44px; } }
     /* Ordinateur : tableau de bord sur tout l'écran, menu à gauche, contenu sur plusieurs colonnes */
     @media (min-width: 900px) {
@@ -1660,6 +1751,13 @@
     .todo-steps .ts-num { flex: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-size: 13px; font-weight: 700; color: var(--on-accent); background: var(--accent); }
     .todo-steps li.is-next .ts-num { color: var(--muted); background: transparent; border: 1.5px solid var(--line-strong); }
     .todo-steps .ts-txt { flex: 1; min-width: 0; }
+    .todo-steps .ts-txt small { display: block; margin-top: 2px; font-size: 12.5px; font-weight: 400; color: var(--muted); }
+    .todo-steps li.is-done { color: var(--muted); }
+    .todo-steps li.is-done .ts-num { color: #fff; background: var(--green); }
+    .ps-setup { margin: 4px 0 16px; }
+    .ps-off-go { display: block; margin-top: 10px; }
+    .ps-setup h3 { margin: 0; font-size: 18px; }
+    .ps-setup > .hint { margin: 4px 0 12px; }
     .todo-steps .ts-go { flex: none; width: auto; min-height: 38px; margin: 0; padding: 0 16px; font-size: 14px; }
     .todo-sub { margin: 4px 0 8px; font-size: 15px; font-weight: 600; }
     #notif-btn.ring svg { animation: ring 1s var(--ease-out); transform-origin: 50% 10%; }
@@ -1783,6 +1881,10 @@
     .rv-item.is-mine { margin: 4px 0; padding: 12px; border: 0; border-radius: 12px; background: var(--accent-soft); }
     .rv-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 14px; }
     .rv-head b { font-weight: 500; }
+    .rv-verified { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; font-size: 11.5px; font-weight: 600; color: var(--green); background: var(--green-soft); vertical-align: 1px; }
+    .rv-how { margin: 4px 0 12px; font-size: 13.5px; color: var(--muted); }
+    .rv-how summary { cursor: pointer; color: var(--accent-strong); font-weight: 500; }
+    .rv-how p { margin: 6px 0 0; line-height: 1.5; }
     .rv-head small { flex: none; font-size: 12.5px; color: var(--muted); }
     .rv-text { margin: 4px 0 0; font-size: 14.5px; white-space: pre-line; overflow-wrap: anywhere; -webkit-user-select: text; user-select: text; }
     .rv-reply { margin: 8px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--hover); font-size: 14px; white-space: pre-line; overflow-wrap: anywhere; }
@@ -1880,17 +1982,24 @@
     .offer-dist small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
     .offer-use { display: block; height: 32px; margin: -6px 0 12px 0; padding: 0 14px; border-radius: 16px; font-size: 13px; font-weight: 600; color: var(--on-accent); background: var(--accent); }
     .offers-empty { margin: 22px 6px 6px; text-align: center; font-size: 14px; color: var(--muted); }
+    .offer-meta { display: block; margin-top: 2px; font-size: 12.5px; color: var(--muted); }
+    .offer-meta .is-open { color: var(--green); font-weight: 500; } .offer-meta .is-closed { color: var(--danger); font-weight: 500; } .offer-meta .is-soon { color: var(--amber); font-weight: 500; }
 
     /* =====================================================================
        9. TOAST, ÉCRAN D'ERREUR, ATTRIBUTION
        ===================================================================== */
     .toast {
-      position: fixed; z-index: 120; left: 12px; right: 72px; top: calc(var(--safe-top) + 76px);
+      /* Téléphone : en bas, au-dessus de la barre d'onglets et à gauche du bouton « me localiser » (en haut, il
+         cachait les stories des restaurants) */
+      position: fixed; z-index: 120; left: 12px; right: 72px; bottom: calc(var(--safe-bottom) + 84px);
       width: fit-content; max-width: 480px; margin: 0 auto; display: flex; align-items: center; gap: 12px; padding: 12px 16px;
       border-radius: 8px; font-size: 14px; color: #e8eaed; background: #323232; border: 0;
-      transform: translateY(-12px); opacity: 0; pointer-events: none; transition: opacity .25s, transform .3s var(--ease-out);
+      transform: translateY(12px); opacity: 0; pointer-events: none; transition: opacity .25s, transform .3s var(--ease-out);
     }
     .toast.is-visible { opacity: 1; transform: none; pointer-events: auto; }
+    html.kb-open .toast { bottom: auto; top: calc(var(--safe-top) + 12px); }   /* clavier ouvert : le bas de l'écran est caché */
+    /* Téléphone, fiche ou panneau ouvert en bas : le message passe en haut pour ne pas cacher ses boutons */
+    @media (max-width: 899px) { body.sheet-open .toast, body.pro-open .toast, body.scan-open .toast { bottom: auto; top: calc(var(--safe-top) + 12px); right: 12px; transform: translateY(-12px); } body.sheet-open .toast.is-visible, body.pro-open .toast.is-visible, body.scan-open .toast.is-visible { transform: none; } }
     /* État de la connexion : discret, en bas de l'écran (téléphone) ou en haut de la carte (ordinateur) */
     .net { position: fixed; z-index: 125; left: 12px; right: 12px; bottom: calc(var(--safe-bottom) + 76px); width: fit-content; max-width: min(480px, calc(100% - 24px)); margin: 0 auto; display: flex; align-items: center; gap: 8px;
       padding: 8px 14px; border-radius: 18px; font-size: 13px; font-weight: 500; color: var(--text); background: var(--panel-solid);
@@ -1905,7 +2014,7 @@
     #net-text { min-width: 0; line-height: 1.3; }
     #net-retry { flex: none; pointer-events: auto; margin-left: 2px; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); }
     @media (prefers-reduced-motion: reduce) { .net.is-slow .net-dot { animation: none; } }
-    .toast button { flex: none; color: #8ab4f8; font-weight: 500; }
+    .toast button { flex: none; color: #ffab80; font-weight: 500; }
     /* Rappel « écran d'accueil » : sous la barre du haut, sous les messages (toast) s'il y en a un */
     .install-nudge { position: fixed; z-index: 119; left: 12px; right: 12px; top: calc(var(--safe-top) + 76px); max-width: 480px; margin: 0 auto;
       display: flex; align-items: center; gap: 12px; padding: 10px 8px 10px 12px; border-radius: 16px; color: var(--text); background: var(--panel-solid);
@@ -2096,6 +2205,8 @@
     /* Bouton « Scanner » flottant : pas sur l'accueil (grande carte « Scanner un client »), ni sur « Ma fiche » et
        « Compléter » où il recouvrait des réglages (interrupteur de visibilité, boutons « Ajouter ») */
     #pro-space[data-tab="home"] .ps-scan-fab, #pro-space[data-tab="fiche"] .ps-scan-fab, #pro-space[data-tab="todo"] .ps-scan-fab { display: none; }
+    /* Onglets avec le bouton flottant « Scanner » : place en bas pour qu'il ne cache ni un bouton ni la fin d'un tableau */
+    #pro-space:not([data-tab="home"]):not([data-tab="fiche"]):not([data-tab="todo"]) .ps-pane:not([hidden]) { padding-bottom: 84px; }
     .ps-scan[hidden] { display: none; }
 
     /* Carte « Scanner un client » en tête de l'espace restaurateur */
@@ -2122,8 +2233,8 @@
     .scan-frame i:nth-child(2) { top: -2px; right: -2px; border-left: 0; border-bottom: 0; border-top-right-radius: 26px; }
     .scan-frame i:nth-child(3) { bottom: -2px; left: -2px; border-right: 0; border-top: 0; border-bottom-left-radius: 26px; }
     .scan-frame i:nth-child(4) { bottom: -2px; right: -2px; border-left: 0; border-top: 0; border-bottom-right-radius: 26px; }
-    .scan-line { position: absolute; left: 10%; right: 10%; top: 12%; height: 2px; border-radius: 1px; background: linear-gradient(90deg, transparent, #8ab4f8, transparent);
-      box-shadow: 0 0 12px 2px rgba(138, 180, 248, .7); animation: scan-sweep 2.2s ease-in-out infinite alternate; }
+    .scan-line { position: absolute; left: 10%; right: 10%; top: 12%; height: 2px; border-radius: 1px; background: linear-gradient(90deg, transparent, #ff9a5c, transparent);
+      box-shadow: 0 0 12px 2px rgba(255, 138, 76, .7); animation: scan-sweep 2.2s ease-in-out infinite alternate; }
     @keyframes scan-sweep { to { top: 88%; } }
     .scan.is-busy .scan-line, .scan.is-off .scan-line { display: none; }
     .scan.is-busy .scan-frame i { border-color: #81c995; }
@@ -2150,7 +2261,7 @@
     .scan-manual input { flex: 1; min-width: 0; height: 50px; padding: 0 16px; border: 1px solid rgba(255, 255, 255, .3); border-radius: 25px; color: #fff; background: rgba(255, 255, 255, .14);
       font: 600 19px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .08em; text-transform: uppercase; backdrop-filter: blur(8px); }
     .scan-manual input::placeholder { color: rgba(255, 255, 255, .45); }
-    .scan-manual input:focus { outline: 2px solid #8ab4f8; outline-offset: 1px; }
+    .scan-manual input:focus { outline: 2px solid #ff9a5c; outline-offset: 1px; }
     .scan-manual button { flex: none; height: 50px; padding: 0 20px; border-radius: 25px; font-size: 15px; font-weight: 600; color: #202124; background: #fff; }
     .scan-manual button[disabled] { opacity: .5; }
     .scan-type { height: 44px; padding: 0 18px; border-radius: 22px; font-size: 14.5px; font-weight: 500; color: #fff; background: rgba(255, 255, 255, .16); backdrop-filter: blur(8px); }
@@ -2173,6 +2284,8 @@
     .scan-result p { margin: 6px 0 0; font-size: 15px; color: var(--muted); }
     .sr-offer { padding: 12px 14px; border-radius: 14px; font-size: 17px !important; font-weight: 600; color: var(--green) !important; background: rgba(24, 128, 56, .1); }
     .sr-warn { padding: 10px 12px; border-radius: 12px; font-size: 14px !important; font-weight: 500; color: var(--amber) !important; background: rgba(227, 116, 0, .1); }
+    .sr-loyal { padding: 10px 12px; border-radius: 12px; font-size: 14.5px !important; font-weight: 600; color: var(--accent-strong) !important; background: var(--accent-soft); }
+    .sr-reward { display: block; margin: 10px auto 0; }
     .sr-offer[hidden], .sr-warn[hidden] { display: none; }
     .sr-next { position: relative; overflow: hidden; width: 100%; margin-top: 16px; }
     .sr-next i { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: rgba(255, 255, 255, .55); transform-origin: left; transform: scaleX(0); }
@@ -2320,7 +2433,7 @@
       body.is-guest .tabbar #notif-btn, body.is-guest .tabbar #profile-btn { display: none; }
       body.is-guest .tabbar #guest-login { display: flex; }
       body.is-guest .tabbar #guest-signup { display: flex; flex: 0 0 auto; flex-direction: row; gap: 6px; align-self: center; height: 48px; padding: 0 16px; border-radius: 24px;
-        font-size: 14.5px; white-space: nowrap; color: var(--on-accent); background: var(--accent); box-shadow: 0 2px 8px rgba(26, 115, 232, .35); }
+        font-size: 14.5px; white-space: nowrap; color: var(--on-accent); background: var(--accent); box-shadow: 0 2px 8px rgba(194, 65, 12, .35); }
       body.is-guest .tabbar #guest-signup::before { display: none; }
       body.is-guest .tabbar > .tab, body.is-guest .tabbar #offers-btn, body.is-guest .tabbar #guest-login { flex: 1 1 0; max-width: 76px; }
       body.is-guest .tabbar { justify-content: space-between; }
@@ -2428,7 +2541,7 @@
     .shop-actions .act svg { width: 46px; height: 46px; padding: 12px; overflow: visible; border-radius: 50%; color: var(--accent); background: var(--accent-soft); transition: background-color .2s, color .2s, transform .15s var(--ease-out); }
     .shop-actions .act:hover svg { transform: translateY(-1px); }
     .shop-actions .act-primary { color: var(--text); background: none; }
-    .shop-actions .act-primary svg { color: var(--on-accent); background: var(--accent); box-shadow: 0 3px 10px rgba(26, 115, 232, .35); }
+    .shop-actions .act-primary svg { color: var(--on-accent); background: var(--accent); box-shadow: 0 3px 10px rgba(194, 65, 12, .35); }
     .shop-actions .act[aria-pressed="true"] { color: var(--accent); background: none; }
     .shop-actions .act[aria-pressed="true"] svg { color: var(--on-accent); background: var(--accent); }
     .shop-actions .act:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -2651,6 +2764,16 @@
           <button class="chip glass" type="button" id="promo-only" aria-pressed="false">Promos</button>
           <button class="chip glass" type="button" id="mv-only" aria-pressed="false">Titres-resto</button>
         </div>
+        <div class="ft-group" role="group" aria-labelledby="ft-l-prat"><span class="ft-label" id="ft-l-prat">Pratique</span>
+          <button class="chip glass" type="button" data-amenity="dine_in" aria-pressed="false">Sur place</button>
+          <button class="chip glass" type="button" data-amenity="takeaway" aria-pressed="false">À emporter</button>
+          <button class="chip glass" type="button" data-amenity="delivery" aria-pressed="false">Livraison</button>
+          <button class="chip glass" type="button" data-amenity="terrace" aria-pressed="false">Terrasse</button>
+          <button class="chip glass" type="button" data-amenity="vegetarian" aria-pressed="false">Végétarien</button>
+          <button class="chip glass" type="button" data-amenity="halal" aria-pressed="false">Halal</button>
+          <button class="chip glass" type="button" data-amenity="gluten_free" aria-pressed="false">Sans gluten</button>
+          <button class="chip glass" type="button" data-amenity="wheelchair" aria-pressed="false">Accès fauteuil</button>
+        </div>
       </div>
       <div class="ft-row ft-cats" role="group" aria-labelledby="ft-l2">
         <span class="ft-label" id="ft-l2">Type de restaurant</span>
@@ -2658,8 +2781,16 @@
         <button class="chip glass" type="button" data-cat="Food-truck" aria-pressed="false">Food-truck</button>
         <button class="chip glass" type="button" data-cat="Kebab" aria-pressed="false">Kebab</button>
         <button class="chip glass" type="button" data-cat="Burger" aria-pressed="false">Burger</button>
-        <button class="chip glass" type="button" data-cat="Sweets" aria-pressed="false">Sweets</button>
         <button class="chip glass" type="button" data-cat="Pizza" aria-pressed="false">Pizza</button>
+        <button class="chip glass" type="button" data-cat="Asiatique" aria-pressed="false">Asiatique</button>
+        <button class="chip glass" type="button" data-cat="Tacos" aria-pressed="false">Tacos</button>
+        <button class="chip glass" type="button" data-cat="Crêperie" aria-pressed="false">Crêperie</button>
+        <button class="chip glass" type="button" data-cat="Sweets" aria-pressed="false">Sucré</button>
+        <button class="chip glass" type="button" data-cat="Boulangerie" aria-pressed="false">Boulangerie, snack</button>
+        <button class="chip glass" type="button" data-cat="Café" aria-pressed="false">Café</button>
+        <button class="chip glass" type="button" data-cat="Bar" aria-pressed="false">Bar</button>
+        <button class="chip glass" type="button" data-cat="Monde" aria-pressed="false">Cuisine du monde</button>
+        <button class="chip glass" type="button" data-cat="Traditionnel" aria-pressed="false">Traditionnel</button>
         <button class="chip glass" type="button" data-cat="Autre" aria-pressed="false">Autres</button>
       </div>
     </div>
@@ -2742,6 +2873,7 @@
       <button type="button" role="tab" id="tab-reviews" aria-controls="panel-reviews" aria-selected="false" tabindex="-1" data-tab="reviews" hidden>Avis</button>
     </div>
     <div class="tab-panel" id="panel-infos" role="tabpanel" aria-labelledby="tab-infos">
+    <p class="closure-note" id="shop-closure" role="status" hidden></p>
     <p class="demo-note" id="shop-demo-note" hidden>Restaurant imaginaire, pour découvrir FlashMiam en attendant les premiers restaurants partenaires de La Roche-sur-Yon : ses offres ne sont pas réelles.</p>
     <!-- Comptes clients : « Profiter de l'offre » (ou « Valider ma visite ») → QR code à montrer en caisse -->
     <div class="visit-box" id="shop-visit-box" hidden>
@@ -2755,6 +2887,12 @@
     <div class="gallery" id="shop-gallery" tabindex="0" role="group" aria-label="Photos du restaurant (faire défiler)" hidden></div>
     <p class="shop-desc" id="shop-desc" hidden></p>
     <div class="promos" id="shop-promos" hidden></div>
+    <!-- Carte de fidélité du restaurant : N visites validées en caisse = une récompense -->
+    <div class="loyal-box" id="shop-loyalty" hidden>
+      <p class="loyal-head"><span aria-hidden="true">🎟️</span> <b>Carte de fidélité</b><span id="shop-loyal-rule"></span></p>
+      <div class="loyal-dots" id="shop-loyal-dots" role="img"></div>
+      <p class="loyal-sub" id="shop-loyal-sub"></p>
+    </div>
     <ul class="meta">
       <li>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 1114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
@@ -2768,7 +2906,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM9 21l2-6 2.5 2.5V21M8 12l2-4.5 3.5 1 2 3.5 2.5 1M10 7.5L7.5 9 7 12"/></svg>
         <span id="shop-distance"></span>
       </li>
+      <li id="shop-amen-row" class="amen-row" hidden><ul class="amen-list" id="shop-amen" aria-label="Infos pratiques"></ul></li>
       <li id="shop-mv-row" class="mv-row" hidden><span class="mv-ico" aria-hidden="true">🎫</span><span>Titres-restaurant acceptés</span></li>
+      <li id="shop-links-row" class="links-row" hidden><div class="shop-links" id="shop-links"></div></li>
       <li id="shop-phone-row" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.4 1.8.7 2.7a2 2 0 01-.5 2.1L8 9.8a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.7.7a2 2 0 011.7 2z"/></svg>
         <a id="shop-phone" href="#"></a>
@@ -2786,6 +2926,11 @@
     </div>
     <div class="tab-panel" id="panel-reviews" role="tabpanel" aria-labelledby="tab-reviews" hidden>
       <div class="rv-summary" id="rv-summary"></div>
+      <!-- Information obligatoire sur le contrôle des avis (article L111-7-2 du Code de la consommation) -->
+      <details class="rv-how">
+        <summary>Comment les avis sont-ils contrôlés ?</summary>
+        <p>Les avis sont publiés par des clients inscrits sur FlashMiam, sans relecture préalable, ni contrepartie. Le badge <b>✓ Visite vérifiée</b> indique un client dont la visite a été validée en caisse par le restaurant (QR code FlashMiam). Un restaurateur ne peut ni modifier ni supprimer un avis : il peut y répondre ou le signaler à l'équipe FlashMiam, qui retire les avis contraires aux <a href="app/legal/cgu/#avis" target="_blank" rel="noopener">règles des avis</a>. Les avis sont classés du plus récent au plus ancien.</p>
+      </details>
       <a class="btn btn-ghost rv-google" id="rv-google" target="_blank" rel="noopener" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 1114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
         Voir les avis sur Google Maps<span class="rv-ext" aria-hidden="true">↗</span>
@@ -3093,6 +3238,12 @@
     <p class="pf-label">Mon compte</p>
     <div class="pf-group">
       <div class="pf-row"><span class="pf-ico" aria-hidden="true">📷</span><span class="pf-k">Photo de profil<small id="profile-photo-state"></small></span><button class="pf-link" type="button" id="profile-photo-remove" hidden>Retirer</button><button class="pf-pill" type="button" id="profile-photo-pick">Choisir</button></div>
+      <div class="pf-row"><span class="pf-ico" aria-hidden="true">✏️</span><span class="pf-k">Prénom et nom<small id="profile-fullname"></small></span><button class="pf-link" type="button" id="profile-name-edit" aria-label="Modifier votre prénom et votre nom">Modifier</button></div>
+      <div class="pf-row" id="profile-email-row"><span class="pf-ico" aria-hidden="true">✉️</span><span class="pf-k">Adresse e-mail<small id="profile-email-v"></small></span><button class="pf-link" type="button" id="profile-email-edit" aria-label="Changer d'adresse e-mail">Modifier</button></div>
+      <div class="pf-row" id="profile-pw-row"><span class="pf-ico" aria-hidden="true">🔑</span><span class="pf-k">Mot de passe<small>••••••••</small></span><button class="pf-link" type="button" id="profile-pw-edit" aria-label="Changer de mot de passe">Modifier</button></div>
+      <button class="pf-row" type="button" id="profile-staff" hidden><span class="pf-ico" aria-hidden="true">📷</span><span class="pf-k">Scanner les QR codes des clients<small id="profile-staff-sub"></small></span><span class="pf-chev" aria-hidden="true">›</span></button>
+      <button class="pf-row" type="button" id="profile-my-reviews"><span class="pf-ico" aria-hidden="true">⭐</span><span class="pf-k">Mes avis<small>Les avis que vous avez donnés</small></span><span class="pf-chev" aria-hidden="true">›</span></button>
+      <button class="pf-row" type="button" id="profile-my-visits"><span class="pf-ico" aria-hidden="true">🧾</span><span class="pf-k">Mes visites et offres utilisées<small>QR codes validés en caisse</small></span><span class="pf-chev" aria-hidden="true">›</span></button>
       <div class="pf-row" id="profile-about-row" hidden><span class="pf-ico" aria-hidden="true">👤</span><span class="pf-k">Vous<small id="profile-about"></small></span><button class="pf-link" type="button" id="profile-about-edit" aria-label="Modifier votre sexe et votre âge">Modifier</button></div>
       <button class="pf-row" type="button" id="profile-places"><span class="pf-ico" aria-hidden="true">🏢</span><span class="pf-k">Mes lieux (travail, école)<small id="profile-places-sub">Pour voir ce qui est proche du bureau ou de l'école</small></span><span class="pf-chev" aria-hidden="true">›</span></button>
       <div class="pf-row"><span class="pf-ico" aria-hidden="true">📍</span><span class="pf-k">Localisation<small id="profile-geo"></small></span><button class="pf-pill" type="button" id="profile-locate">Activer</button></div>
@@ -3123,6 +3274,17 @@
     </div>
     <button class="pf-delete" type="button" id="profile-delete">Supprimer mon compte</button>
     <p class="legal"><a href="app/legal/confidentialite/" target="_blank" rel="noopener">Confidentialité</a> · <a href="app/legal/cgu/" target="_blank" rel="noopener">Conditions d'utilisation</a> · <a href="app/legal/mentions-legales/" target="_blank" rel="noopener">Mentions légales</a> · <button class="link-btn" type="button" id="profile-cookies">Cookies</button></p>
+  </section>
+
+  <!-- ===================== MON COMPTE : prénom, e-mail, mot de passe, mes avis, mes visites ===================== -->
+  <section id="account-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="acc-title" aria-hidden="true">
+    <button class="sheet-grab" type="button" data-close aria-label="Fermer"></button>
+    <div class="sheet-head">
+      <button class="icon-btn acc-back" type="button" id="acc-back" aria-label="Revenir au profil">‹</button>
+      <div class="sheet-title"><h3 id="acc-title"></h3><p class="eyebrow" id="acc-sub"></p></div>
+      <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
+    </div>
+    <div class="acc-body" id="acc-body"></div>
   </section>
 
   <!-- ===================== ESPACE RESTAURATEUR ===================== -->
@@ -3194,6 +3356,8 @@
       <p id="sr-text"></p>
       <p class="sr-offer" id="sr-offer" hidden></p>
       <p class="sr-warn" id="sr-warn" hidden></p>
+      <p class="sr-loyal" id="sr-loyal" hidden></p>
+      <button class="pill-btn sr-reward" type="button" id="sr-reward" hidden>Récompense remise au client</button>
       <button class="btn btn-primary sr-next" type="button" id="sr-next"><i id="sr-bar"></i><span>Client suivant</span></button>
     </div>
     <!-- Mode service (téléphone) : le tableau de bord à portée de pouce, sous la caméra -->
@@ -3240,6 +3404,13 @@
             </div>
           </div>
           <div class="ps-alert" id="ps-alert" role="status" hidden><p></p><button class="pill-btn" type="button"></button></div>
+          <!-- Compte pas encore complet : les étapes qui restent, leur durée, et la suivante à reprendre -->
+          <section class="ps-setup" id="ps-home-setup" aria-labelledby="ps-setup-title" hidden>
+            <h3 id="ps-setup-title">Votre restaurant sur la carte en 3 étapes</h3>
+            <p class="hint">Vous pouvez vous arrêter à tout moment : ce qui est fait est gardé.</p>
+            <ol class="todo-steps" id="ps-home-steps"></ol>
+            <p class="hint" id="ps-setup-after">Ensuite : vos justificatifs (Kbis…), puis la vérification de l'équipe FlashMiam, en général sous 24 h.</p>
+          </section>
           <div id="ps-home-live">
             <button class="ps-scan" type="button" id="ps-scan">
               <span class="ps-scan-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8V5a2 2 0 012-2h3M16 3h3a2 2 0 012 2v3M21 16v3a2 2 0 01-2 2h-3M8 21H5a2 2 0 01-2-2v-3M7 12h10"/></svg></span>
@@ -3371,7 +3542,11 @@
           <section class="pd-block" id="pd-promos" aria-labelledby="pd-promos-title" hidden>
             <h3 id="pd-promos-title">Mes promotions</h3>
             <ul class="promo-admin" id="pd-promo-list"></ul>
+            <!-- Offres terminées (30 derniers jours) : « Republier » remplit le formulaire -->
+            <h4 class="pa-sub" id="pd-promo-old-title" hidden>Offres terminées</h4>
+            <ul class="promo-admin promo-old" id="pd-promo-old" hidden></ul>
             <form class="promo-form" id="pd-promo-form" novalidate>
+              <div class="pp-editing" id="pp-editing" role="status" hidden><span id="pp-editing-text"></span><button class="link-btn" type="button" id="pp-edit-cancel">Annuler</button></div>
               <div class="kind-pick" id="pp-kind" role="radiogroup" aria-label="Type de promotion"></div>
               <label class="field" id="field-pp-title">
                 <span>Offre <small class="counter" id="pp-title-count">0 / 60</small></span>
@@ -3431,7 +3606,11 @@
           </div>
           <div class="ps-rv-summary" id="ps-rv-summary"></div>
           <ul class="rv-list ps-rv-list" id="ps-rv-list"></ul>
-          <p class="hint">Votre réponse s'affiche sous l'avis, et le client est prévenu. Un avis abusif ? Signalez-le depuis votre fiche.</p>
+          <p class="hint">Votre réponse s'affiche sous l'avis, et le client est prévenu. Un avis abusif ? Signalez-le depuis votre fiche. <b>✓ Visite vérifiée</b> : client dont vous avez scanné le QR code.</p>
+          <div class="ps-switch-row ps-rv-only">
+            <div><b id="ps-rv-only-label">Avis réservés aux clients venus sur place</b><small>Seuls les clients dont vous avez scanné le QR code FlashMiam peuvent donner un avis.</small></div>
+            <button class="switch" type="button" role="switch" id="ps-rv-only" aria-checked="false" aria-labelledby="ps-rv-only-label"><i></i></button>
+          </div>
           <button class="btn btn-ghost" type="button" id="pd-reviews">Voir les avis sur ma fiche</button>
         </section>
 
@@ -3463,6 +3642,51 @@
             <div class="ps-switch-row">
               <div><b id="ps-vis-label">Fiche visible sur la carte</b><small id="ps-vis-hint"></small></div>
               <button class="switch" type="button" role="switch" id="ps-visible" aria-checked="true" aria-labelledby="ps-vis-label"><i></i></button>
+            </div>
+          </section>
+          <!-- Fermeture exceptionnelle : la fiche reste sur la carte avec la date de réouverture -->
+          <section class="ps-card ps-block" id="ps-close-card" aria-labelledby="ps-close-title" hidden>
+            <h4 id="ps-close-title">Fermeture exceptionnelle</h4>
+            <p class="hint">Congés, travaux, imprévu : votre fiche reste sur la carte avec « Fermé jusqu'au … », et vos clients savent quand vous rouvrez.</p>
+            <p class="closure-note" id="ps-close-state" role="status" hidden></p>
+            <button class="pill-btn ps-close-today" type="button" id="ps-close-today">Fermé aujourd'hui seulement</button>
+            <div class="ps-close-form">
+              <label class="field" id="field-ps-close-from"><span>Du</span><input type="date" id="ps-close-from" /><small class="field-error" id="err-ps-close-from" aria-live="polite"></small></label>
+              <label class="field" id="field-ps-close-until"><span>Au (inclus)</span><input type="date" id="ps-close-until" /><small class="field-error" id="err-ps-close-until" aria-live="polite"></small></label>
+            </div>
+            <label class="field" id="field-ps-close-note"><span>Raison, affichée sur la fiche (facultatif) <small class="counter" id="ps-close-count">0 / 80</small></span><input type="text" id="ps-close-note" maxlength="80" placeholder="Ex. : congés annuels" /></label>
+            <div class="ps-close-actions">
+              <button class="btn btn-primary" type="button" id="ps-close-save">Enregistrer la fermeture</button>
+              <button class="btn btn-ghost" type="button" id="ps-close-cancel" hidden>Annuler la fermeture</button>
+            </div>
+          </section>
+          <!-- Carte de fidélité : N visites validées en caisse = une récompense -->
+          <section class="ps-card ps-block" id="ps-loyal-card" aria-labelledby="ps-loyal-title" hidden>
+            <h4 id="ps-loyal-title">Carte de fidélité</h4>
+            <p class="hint">Vos clients gagnent un tampon à chaque visite validée (QR code scanné en caisse). Au dernier tampon, le scanner vous affiche la récompense à remettre.</p>
+            <div class="ps-switch-row">
+              <div><b id="ps-loyal-label">Carte de fidélité active</b><small id="ps-loyal-state"></small></div>
+              <button class="switch" type="button" role="switch" id="ps-loyal-on" aria-checked="false" aria-labelledby="ps-loyal-label"><i></i></button>
+            </div>
+            <div class="ps-loyal-form" id="ps-loyal-form" hidden>
+              <label class="field" id="field-ps-loyal-goal"><span>Nombre de visites</span>
+                <select id="ps-loyal-goal"></select></label>
+              <label class="field" id="field-ps-loyal-reward"><span>Récompense <small class="counter" id="ps-loyal-count">0 / 60</small></span>
+                <input id="ps-loyal-reward" type="text" maxlength="60" placeholder="Ex. : un menu offert" /><small class="field-error" id="err-ps-loyal-reward" aria-live="polite"></small></label>
+              <p class="hint">Changer le nombre de visites remet les tampons de vos clients à zéro.</p>
+              <button class="btn btn-primary" type="button" id="ps-loyal-save">Enregistrer</button>
+            </div>
+          </section>
+          <!-- Équipiers : peuvent scanner les QR codes des clients, rien d'autre -->
+          <section class="ps-card ps-block" id="ps-staff-card" aria-labelledby="ps-staff-title" hidden>
+            <h4 id="ps-staff-title">Équipiers</h4>
+            <p class="hint">Un serveur ou un caissier peut scanner les QR codes de vos clients avec son propre téléphone. Invitez son adresse e-mail : il crée un compte FlashMiam gratuit avec cette adresse (ou s'y connecte), puis « Scanner pour votre restaurant » apparaît dans son profil. Il ne voit ni vos statistiques ni votre fiche.</p>
+            <ul class="ps-staff" id="ps-staff-list"></ul>
+            <div class="ps-staff-add">
+              <label class="field" id="field-ps-staff-email"><span>Adresse e-mail de l'équipier</span>
+                <input id="ps-staff-email" type="email" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="254" placeholder="prenom@exemple.fr" />
+                <small class="field-error" id="err-ps-staff-email" aria-live="polite"></small></label>
+              <button class="btn btn-ghost" type="button" id="ps-staff-invite">Inviter</button>
             </div>
           </section>
           <section class="ps-card ps-block" aria-labelledby="ps-sub-title">
@@ -3670,6 +3894,15 @@
       <form id="ob-reset" class="ob-step" novalidate data-step="reset-password" hidden aria-labelledby="rs-title">
         <div class="mail-badge" aria-hidden="true">🔑</div>
         <h2 id="rs-title">Mot de passe <em>oublié</em></h2>
+        <!-- Étape 0 (adresse pas encore saisie sur l'écran de connexion) : l'adresse du compte -->
+        <div id="rs-phase-email" hidden>
+          <p class="lead">Indiquez l'adresse e-mail de votre compte : nous vous envoyons un code pour choisir un nouveau mot de passe.</p>
+          <label class="field" id="field-rs-mail">
+            <span>Adresse e-mail</span>
+            <input id="rs-mail" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" maxlength="254" placeholder="camille@exemple.fr" />
+            <small class="field-error" id="err-rs-mail" aria-live="polite"></small>
+          </label>
+        </div>
         <div id="rs-phase-code">
           <p class="lead" id="rs-lead">Si un compte FlashMiam existe avec l'adresse <b id="rs-email"></b>, un code vient d'y être envoyé. Saisissez-le pour choisir un nouveau mot de passe.</p>
           <label class="field" id="field-rs-code">
@@ -3786,6 +4019,7 @@
           <button type="button" data-jump="field-pl-address">Adresse</button>
           <button type="button" data-jump="field-pl-hours">Horaires</button>
           <button type="button" data-jump="field-pl-phone">Téléphone</button>
+          <button type="button" data-jump="field-pl-amen">Pratique</button>
         </nav>
 
         <label class="field" id="field-pl-name">
@@ -3852,9 +4086,19 @@
 
         <div class="field" id="field-pl-hours">
           <span>Horaires d'ouverture</span>
+          <div class="seg hours-mode" id="pl-hours-mode" role="group" aria-label="Type d'horaires">
+            <button type="button" data-hmode="same" aria-pressed="true">Pareil tous les jours</button><button type="button" data-hmode="days" aria-pressed="false">Selon les jours</button>
+          </div>
+          <div id="pl-hours-same">
           <div class="hours-row"><label class="check"><input type="checkbox" id="pl-h1-on" checked /> Service 1</label><input type="time" id="pl-h1-from" value="11:30" aria-label="Service 1 : ouverture" /><span>–</span><input type="time" id="pl-h1-to" value="14:30" aria-label="Service 1 : fermeture" /></div>
           <div class="hours-row"><label class="check"><input type="checkbox" id="pl-h2-on" checked /> Service 2</label><input type="time" id="pl-h2-from" value="18:30" aria-label="Service 2 : ouverture" /><span>–</span><input type="time" id="pl-h2-to" value="22:30" aria-label="Service 2 : fermeture" /></div>
           <div class="days" id="pl-closed" aria-label="Jours de fermeture"><span class="days-label">Fermé le :</span></div>
+          </div>
+          <!-- Horaires différents selon les jours : jusqu'à 3 créneaux par jour, ou fermé -->
+          <div class="hours-days" id="pl-hours-days" hidden>
+            <div id="pl-days-list"></div>
+            <button class="link-btn hd-copy" type="button" id="pl-days-copy">Copier les horaires du lundi sur les autres jours ouverts</button>
+          </div>
           <small class="field-error" id="err-pl-hours" aria-live="polite"></small>
         </div>
 
@@ -3864,6 +4108,18 @@
           <small class="field-error" id="err-pl-phone" aria-live="polite"></small>
         </label>
         <label class="check pl-mv" data-mode="edit"><input type="checkbox" id="pl-mv" /> J'accepte les titres-restaurant (papier ou carte)</label>
+        <!-- Infos pratiques : icônes sur la fiche et filtres « Pratique » de la carte -->
+        <fieldset class="field pl-amen" id="field-pl-amen">
+          <legend>Infos pratiques (facultatif)</legend>
+          <div class="pl-amen-grid" id="pl-amen"></div>
+        </fieldset>
+        <!-- Liens : boutons sur la fiche (les clics sont comptés dans les statistiques) -->
+        <fieldset class="field pl-links" id="field-pl-links">
+          <legend>Liens (facultatif)</legend>
+          <label class="field" id="field-pl-instagram"><span>Instagram</span><input id="pl-instagram" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="300" placeholder="@votrerestaurant" /><small class="field-error" id="err-pl-instagram" aria-live="polite"></small></label>
+          <label class="field" id="field-pl-website"><span>Site internet</span><input id="pl-website" type="url" inputmode="url" autocomplete="url" autocapitalize="off" spellcheck="false" maxlength="300" placeholder="www.votrerestaurant.fr" /><small class="field-error" id="err-pl-website" aria-live="polite"></small></label>
+          <label class="field" id="field-pl-order"><span>Commande en ligne ou livraison</span><input id="pl-order" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="300" placeholder="Lien de votre page Uber Eats, Deliveroo…" /><small class="field-error" id="err-pl-order" aria-live="polite"></small></label>
+        </fieldset>
         <p class="hint" data-mode="edit">Vos promotions (formule midi, afterwork, week-end, offre étudiante…) et vos stories se publient ensuite depuis votre espace restaurateur.</p>
 
         <p class="form-error" id="err-pro-listing" role="alert"></p>
@@ -4091,11 +4347,32 @@
     'Food-truck': { emoji: '🚚', label: 'Food-truck' },
     'Kebab':      { emoji: '🥙', label: 'Kebab' },
     'Burger':     { emoji: '🍔', label: 'Burger' },
-    'Sweets':     { emoji: '🧁', label: 'Sweets' },
+    'Sweets':     { emoji: '🧁', label: 'Sucré', keywords: 'dessert gaufre crêpe gâteau glace pâtisserie douceur sweets' },
     'Pizza':      { emoji: '🍕', label: 'Pizza' },
+    'Asiatique':  { emoji: '🍣', label: 'Asiatique', keywords: 'sushi japonais chinois thaï vietnamien wok ramen bobun poke' },
+    'Tacos':      { emoji: '🌮', label: 'Tacos', keywords: 'tacos mexicain burrito' },
+    'Crêperie':   { emoji: '🥞', label: 'Crêperie', keywords: 'crêpe galette crêperie' },
+    'Boulangerie': { emoji: '🥐', label: 'Boulangerie, snack', keywords: 'boulangerie sandwich snack viennoiserie panini' },
+    'Café':       { emoji: '☕', label: 'Café, salon de thé', keywords: 'café thé brunch salon' },
+    'Bar':        { emoji: '🍻', label: 'Bar', keywords: 'bar bière cocktail apéro tapas' },
+    'Monde':      { emoji: '🌍', label: 'Cuisine du monde', keywords: 'indien libanais africain italien oriental couscous' },
+    'Traditionnel': { emoji: '🍲', label: 'Traditionnel, brasserie', keywords: 'brasserie traditionnel bistrot restaurant français' },
     'Autre':      { emoji: '🍽️', label: 'Autre restauration' },
   };
   const catOf = (shop) => CATEGORIES[shop.category] || CATEGORIES.Autre;
+  /** Infos pratiques cochées par le restaurateur (colonne merchants.amenities) : icônes de la fiche et filtres « Pratique ». */
+  const AMENITIES = {
+    dine_in: { emoji: '🍽️', label: 'Sur place' }, takeaway: { emoji: '🥡', label: 'À emporter' }, delivery: { emoji: '🛵', label: 'Livraison' },
+    terrace: { emoji: '☀️', label: 'Terrasse' }, vegetarian: { emoji: '🥗', label: 'Végétarien' }, vegan: { emoji: '🌱', label: 'Vegan' },
+    halal: { emoji: '🌙', label: 'Halal' }, gluten_free: { emoji: '🌾', label: 'Sans gluten' }, card: { emoji: '💳', label: 'Carte bancaire' },
+    wheelchair: { emoji: '♿', label: 'Accès fauteuil roulant' },
+  };
+  /** Le restaurant a-t-il cette info pratique ? (« Végétarien » : aussi les restaurants vegan) */
+  /** Liens du restaurant (colonne merchants.links) : libellés des boutons de la fiche. */
+  const LINKS = { instagram: 'Instagram', website: 'Site internet', order: 'Commander en ligne' };
+  /** Étiquettes d'un plat (menu_json[].tags) */
+  const DISH_TAGS = { vege: 'Végé', vegan: 'Vegan', spicy: 'Épicé', new: 'Nouveau', homemade: 'Fait maison', halal: 'Halal' };
+  const hasAmenity = (shop, a) => (shop.amenities || []).includes(a) || (a === 'vegetarian' && (shop.amenities || []).includes('vegan'));
 
   /**
    * Commerces de démonstration (fictifs), placés sur les vraies rues de La Roche-sur-Yon.
@@ -4220,9 +4497,9 @@
   const missingDocs = (pro) => (pro && pro.merchantId ? DOC_TYPES.filter((t) => t.required && !(pro.docs || {})[t.key]) : []);
   /** Étapes d'inscription restant à faire (dans l'ordre), selon l'avancement du restaurateur. */
   const PRO_STEPS = [
-    { key: 'verification', step: 'pro-verify', label: 'Votre établissement (SIRET)' },
-    { key: 'payment', step: 'pro-payment', label: 'Votre abonnement' },
-    { key: 'listing', step: 'pro-listing', label: 'La fiche de votre restaurant' },
+    { key: 'verification', step: 'pro-verify', label: 'Votre établissement (SIRET)', time: '1 min', what: 'Votre numéro SIRET, vérifié tout de suite' },
+    { key: 'payment', step: 'pro-payment', label: 'Votre abonnement', time: '2 min', what: 'Formule et paiement en ligne, sans engagement' },
+    { key: 'listing', step: 'pro-listing', label: 'La fiche de votre restaurant', time: '10 min', what: 'Photos, carte, adresse et horaires' },
   ];
   function missingSteps(pro) {
     const i = PRO_STEPS.findIndex((st) => st.key === (pro && pro.status));
@@ -4531,7 +4808,8 @@
 
   /** Données chargées : compte connecté et restaurants inscrits (fiches en ligne + la sienne). */
   const cloud = { user: null, restaurants: {}, followerCounts: new Map(), ratings: new Map(), ready: Promise.resolve(), loaded: Promise.resolve(), fromCache: false };
-  const CAT_TO_DB = { 'Food-truck': 'food_truck', Kebab: 'kebab', Burger: 'burger', Sweets: 'sweets', Pizza: 'pizza', Autre: 'other' };
+  const CAT_TO_DB = { 'Food-truck': 'food_truck', Kebab: 'kebab', Burger: 'burger', Sweets: 'sweets', Pizza: 'pizza', Asiatique: 'asian', Tacos: 'tacos',
+    'Crêperie': 'creperie', Boulangerie: 'bakery', 'Café': 'cafe', Bar: 'bar', Monde: 'world', Traditionnel: 'traditional', Autre: 'other' };
   const CAT_FROM_DB = Object.fromEntries(Object.entries(CAT_TO_DB).map(([k, v]) => [v, k]));
   const TEST_SIREN = '999999999';
   const publicUrl = (bucket, path) => sb.storage.from(bucket).getPublicUrl(path).data.publicUrl;
@@ -4555,12 +4833,22 @@
     photoPath: pr.photo_path || null, photoUrl: pr.photo_path ? publicUrl('photos', pr.photo_path) : null,
     validDays: Array.isArray(pr.valid_days) && pr.valid_days.length ? pr.valid_days.map(Number) : null,
     validFrom: pr.valid_from ? String(pr.valid_from).slice(0, 5) : null, validTo: pr.valid_to ? String(pr.valid_to).slice(0, 5) : null });
+  /** Horaires par jour enregistrés ({ "0": [...], …, "6": [...] }) → tableau de 7 jours ; null : mêmes horaires chaque jour. */
+  function daysFromRow(days) {
+    if (!days || typeof days !== 'object') return null;
+    return [0, 1, 2, 3, 4, 5, 6].map((d) => (Array.isArray(days[d]) ? days[d].filter((sl) => Array.isArray(sl) && sl.length === 2) : []));
+  }
   function restaurantFromRow(m, promos = [], stories = [], rating = null) {
     const hours = m.opening_hours || {};
     return {
       id: m.id, ownerId: m.user_id, name: m.name, category: CAT_FROM_DB[m.category] || 'Autre', description: m.description || '',
       photos: m.photos_urls || [], menu: m.menu_json || [], address: m.address || '', coords: m.lat != null ? [m.lng, m.lat] : null,
-      hours: hours.services || [], closedOn: hours.closed_on || [], phone: m.phone || '',
+      hours: hours.services || [], closedOn: hours.closed_on || [], days: daysFromRow(hours.days), phone: m.phone || '',
+      reviewsVerifiedOnly: !!m.reviews_verified_only,
+      loyalty: m.loyalty_goal && m.loyalty_reward ? { goal: Number(m.loyalty_goal), reward: m.loyalty_reward } : null,
+      amenities: Array.isArray(m.amenities) ? m.amenities.filter((a) => AMENITIES[a]) : [],
+      links: m.links && typeof m.links === 'object' ? Object.fromEntries(Object.entries(m.links).filter(([k, v]) => LINKS[k] && /^https:\/\//.test(v))) : {},
+      closure: m.closed_from && m.closed_until ? { from: m.closed_from, until: m.closed_until, note: m.closure_note || '' } : null,
       status: m.status, isOpen: m.is_open !== false, mealVouchers: !!m.accepts_meal_vouchers, published: m.status === 'published' && m.is_open && m.lat != null, isTest: !!m.is_test, honorAt: m.honor_at,
       publishedAt: m.published_at, updatedAt: m.updated_at, promos: promos.map(promoFromRow), stories: stories.map(storyFromRow),
       rating: rating && rating.count ? rating : null,
@@ -5468,30 +5756,43 @@
   const toMin = (hhmm) => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
   const fmtTime = (min) => { const h = Math.floor(min / 60) % 24, m = min % 60; return h + 'h' + (m ? String(m).padStart(2, '0') : ''); };
 
+  /** Créneaux de chaque jour (0 = dimanche … 6 = samedi) : horaires par jour s'il y en a, sinon les mêmes chaque jour ouvert. */
+  function weekSlots(shop) {
+    if (Array.isArray(shop.days) && shop.days.length === 7) return shop.days;
+    return [0, 1, 2, 3, 4, 5, 6].map((d) => ((shop.closedOn || []).includes(d) ? [] : (shop.hours || [])));
+  }
+  /** Date du jour de l'appareil au format 2026-12-24 (les fermetures exceptionnelles sont des dates). */
+  const dateKey = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  /** Fermeture exceptionnelle (congés, travaux…) ce jour-là ? */
+  const closedOnDate = (shop, d) => !!(shop.closure && dateKey(d) >= shop.closure.from && dateKey(d) <= shop.closure.until);
+  const fmtDay = (key) => new Date(key + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+  /** Créneaux du jour `off` (0 = aujourd'hui) en minutes depuis minuit aujourd'hui ; [] s'il est fermé (jour ou congés). */
+  function slotsOn(shop, base, off) {
+    const d = new Date(base); d.setDate(d.getDate() + off);
+    if (closedOnDate(shop, d)) return [];
+    return weekSlots(shop)[d.getDay()].map(([s, e]) => {
+      const a = off * 1440 + toMin(s);
+      let b = off * 1440 + toMin(e);
+      if (b <= a) b += 1440;   // fermeture après minuit
+      return [a, b];
+    });
+  }
+
   /**
-   * Calcule le statut d'un commerce à l'instant `now`.
-   * Les créneaux sont projetés sur une semaine en minutes (gère les ouvertures après minuit).
+   * Calcule le statut d'un commerce à l'instant `now` : horaires de chaque jour, fermetures exceptionnelles, services
+   * qui finissent après minuit ou qui s'enchaînent.
    */
   function getStatus(shop, now = new Date()) {
     if (shop.closedTemporarily) return { open: false, label: 'Fermé temporairement' };
-    const WEEK = 7 * 1440;
-    const nowMin = now.getDay() * 1440 + now.getHours() * 60 + now.getMinutes();
-    const slots = [];
-    for (let d = 0; d < 7; d++) {
-      if (shop.closedOn.includes(d)) continue;
-      for (const [s, e] of shop.hours) {
-        const start = d * 1440 + toMin(s);
-        let end = d * 1440 + toMin(e);
-        if (end <= start) end += 1440;
-        slots.push([start, end], [start - WEEK, end - WEEK]); // copie décalée : gère la nuit de samedi à dimanche
-      }
-    }
-    const current = slots.find(([s, e]) => nowMin >= s && nowMin < e);
+    const base = new Date(now); base.setHours(0, 0, 0, 0);
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const near = [-1, 0, 1, 2].flatMap((off) => slotsOn(shop, base, off));
+    const current = near.find(([a, b]) => nowMin >= a && nowMin < b);
     if (current) {
       // créneaux qui s'enchaînent (ex. jusqu'à 23h59 puis dès minuit) : vraie heure de fermeture
       let end = current[1];
       for (let i = 0; i < 14; i++) {
-        const next = slots.find(([s, e]) => s >= current[0] && s <= end + 1 && e > end);
+        const next = near.find(([a, b]) => a >= current[0] && a <= end + 1 && b > end);
         if (!next) break;
         end = next[1];
       }
@@ -5499,23 +5800,59 @@
       if (left <= CONFIG.closingSoonMin) return { open: true, soon: true, minutesLeft: left, label: 'Ouvert · ferme dans ' + left + ' min' };
       return { open: true, label: 'Ouvert · ferme à ' + fmtTime(end % 1440) };
     }
-
-    let next = Infinity;
-    for (const [s] of slots) {
-      const delta = ((s - nowMin) % WEEK + WEEK) % WEEK;
-      if (delta > 0 && delta < next) next = delta;
+    // Prochaine ouverture (jusqu'à un peu plus d'un an : une fermeture exceptionnelle dure un an au plus)
+    let at = null;
+    for (let off = 0; off <= 400 && at === null; off++) {
+      const starts = slotsOn(shop, base, off).map(([a]) => a).filter((a) => a > nowMin).sort((x, y) => x - y);
+      if (starts.length) at = starts[0];
     }
-    if (next === Infinity) return { open: false, label: 'Fermé' };
-    const at = nowMin + next;
-    const dayDiff = Math.floor(at / 1440) - Math.floor(nowMin / 1440);
-    const when = dayDiff === 0 ? '' : dayDiff === 1 ? 'demain ' : DAYS[Math.floor(at / 1440) % 7] + ' ';
+    const closure = closedOnDate(shop, now);
+    if (at === null) return { open: false, closure, label: closure ? 'Fermé exceptionnellement' : 'Fermé' };
+    const dayDiff = Math.floor(at / 1440);
+    const atDay = new Date(base); atDay.setDate(atDay.getDate() + dayDiff);
+    const when = dayDiff === 0 ? '' : dayDiff === 1 ? 'demain ' : dayDiff < 7 ? DAYS[atDay.getDay()] + ' ' : 'le ' + fmtDay(dateKey(atDay)) + ' ';
+    if (closure) return { open: false, closure: true, label: 'Fermé exceptionnellement · rouvre ' + when + 'à ' + fmtTime(at % 1440) };
     return { open: false, label: 'Fermé · ouvre ' + when + 'à ' + fmtTime(at % 1440) };
   }
 
+  const DAYS_SHORT = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+  const slotsText = (slots) => slots.map(([s, e]) => fmtTime(toMin(s)) + ' – ' + fmtTime(toMin(e))).join(' · ');
+  /**
+   * Horaires lisibles. Mêmes créneaux chaque jour ouvert : « 11h – 14h30 · 18h – 22h30 (fermé le dimanche) ».
+   * Horaires par jour : une ligne par groupe de jours qui se suivent avec les mêmes créneaux (« lun. – ven. : 11h30 – 14h30 »).
+   */
   function formatHours(shop) {
-    const slots = shop.hours.map(([s, e]) => fmtTime(toMin(s)) + ' – ' + fmtTime(toMin(e))).join(' · ');
-    const closed = shop.closedOn.length ? ' (fermé le ' + shop.closedOn.map((d) => DAYS[d]).join(', ') + ')' : ' (7j/7)';
-    return slots + closed;
+    const week = weekSlots(shop);
+    const key = (d) => JSON.stringify(week[d]);
+    const open = [1, 2, 3, 4, 5, 6, 0].filter((d) => week[d].length);
+    if (!open.length) return 'Horaires non renseignés';
+    if (open.every((d) => key(d) === key(open[0]))) {
+      const closed = [1, 2, 3, 4, 5, 6, 0].filter((d) => !week[d].length);
+      return slotsText(week[open[0]]) + (closed.length ? ' (fermé le ' + closed.map((d) => DAYS[d]).join(', ') + ')' : ' (7j/7)');
+    }
+    const lines = [];
+    const order = [1, 2, 3, 4, 5, 6, 0];
+    for (let i = 0; i < 7;) {
+      let j = i;
+      while (j + 1 < 7 && key(order[j + 1]) === key(order[i])) j++;
+      const days = i === j ? DAYS_SHORT[order[i]] : DAYS_SHORT[order[i]] + ' – ' + DAYS_SHORT[order[j]];
+      lines.push(days + ' : ' + (week[order[i]].length ? slotsText(week[order[i]]) : 'fermé'));
+      i = j + 1;
+    }
+    return lines.join('\n');
+  }
+  /** Fermeture exceptionnelle en cours ou à venir (dans les 30 jours) : phrase pour la fiche, sinon ''. */
+  function closureText(shop, now = new Date()) {
+    const c = shop.closure;
+    if (!c) return '';
+    const today = dateKey(now);
+    if (c.until < today) return '';
+    const soon = new Date(now); soon.setDate(soon.getDate() + 30);
+    if (c.from > dateKey(soon)) return '';
+    const span = c.from === c.until ? 'le ' + fmtDay(c.from) : 'du ' + fmtDay(c.from) + ' au ' + fmtDay(c.until);
+    const head = c.from <= today ? (c.from === c.until ? 'Fermé exceptionnellement aujourd\'hui' : 'Fermé exceptionnellement jusqu\'au ' + fmtDay(c.until))
+      : 'Fermeture exceptionnelle ' + span;
+    return head + (c.note ? ' : ' + c.note : '') + '.';
   }
 
   /* ---------- Toast ---------- */
@@ -5629,7 +5966,7 @@
   };
   const URBAIN = {
     background: '#fff7ee', landuseBusy: '#ffe4c4', hospital: '#ffd3d8', education: '#d9e3ff',
-    landcover: '#e2f4d2', wood: '#9fdb84', park: '#86d06f', water: '#0a4fa0', waterway: '#0a4fa0',
+    landcover: '#e2f4d2', wood: '#9fdb84', park: '#86d06f', water: '#a9d6ec', waterway: '#8cc6e3',   // eau claire : les bassins ne dominent pas la carte
     building: '#f6e2cf', buildingLine: '#e8c9ab',
     motorway: '#ff3b2f', motorwayCase: '#b5221a', trunk: '#ff6338', trunkCase: '#c44522',
     primary: '#ff7f50', primaryCase: '#d4572c', secondary: '#ffb340', secondaryCase: '#d68d1c',
@@ -6078,7 +6415,7 @@
   function themePref() {
     let t = null;
     try { t = localStorage.getItem(CONFIG.themeKey); } catch (e) { /* stockage indisponible */ }
-    return t === 'dark' || t === 'system' ? t : 'light';
+    return t === 'dark' || t === 'light' ? t : 'system';   // par défaut : comme le téléphone
   }
   const resolveTheme = (pref) => (pref === 'system' ? (darkQuery && darkQuery.matches ? 'dark' : 'light') : pref);
   /** Applique et mémorise un choix du profil (jour, nuit, système). */
@@ -6212,7 +6549,7 @@
      ===================================================================== */
 
   const markers = new Map();          // id → { shop, marker, el, status }
-  const filters = { category: 'all', openOnly: false, promoOnly: false, minRating: 0, query: '', q: [], max: null, radius: null, when: '', mvOnly: false };
+  const filters = { category: 'all', openOnly: false, promoOnly: false, minRating: 0, query: '', q: [], max: null, radius: null, when: '', mvOnly: false, amenities: new Set() };
   /** Distance maximale choisie (mètres, null = partout) : sans position connue, le filtre ne retire rien. */
   const withinRadius = (m) => filters.radius === null || !here() || distance(here(), m.shop.coords) <= filters.radius;
   let selectedId = null;
@@ -6304,18 +6641,20 @@
   }
 
   /** Le restaurant est-il ouvert à un moment entre `from` et `to` (minutes depuis minuit) le jour `day` (0 = dimanche) ? */
-  function openDuring(shop, day, from, to) {
-    if (shop.closedTemporarily || (shop.closedOn || []).includes(day)) return false;
-    return (shop.hours || []).some(([a, b]) => { const s0 = toMin(a); let e0 = toMin(b); if (e0 <= s0) e0 += 1440; return s0 < to && e0 > from; });
+  function openDuring(shop, date, from, to) {
+    if (shop.closedTemporarily || closedOnDate(shop, date)) return false;
+    return weekSlots(shop)[date.getDay()].some(([a, b]) => { const s0 = toMin(a); let e0 = toMin(b); if (e0 <= s0) e0 += 1440; return s0 < to && e0 > from; });
   }
+  /** Prochain jour de la semaine `dow` (aujourd'hui compris). */
+  const nextDow = (d, dow) => { const x = new Date(d); x.setDate(x.getDate() + ((dow - d.getDay() + 7) % 7)); return x; };
   /**
    * Moments de la journée : ouvert ce midi (12 h - 14 h), ce soir (19 h - 22 h), ce week-end (samedi ou dimanche) ; ou une
    * offre de ce moment (formule midi, afterwork, promo du week-end).
    */
   const WHEN = {
-    lunch: { promo: 'lunch', ok: (sh, d) => openDuring(sh, d.getDay(), 720, 840) },
-    evening: { promo: 'afterwork', ok: (sh, d) => openDuring(sh, d.getDay(), 1140, 1320) },
-    weekend: { promo: 'weekend', ok: (sh) => openDuring(sh, 6, 0, 1440) || openDuring(sh, 0, 0, 1440) },
+    lunch: { promo: 'lunch', ok: (sh, d) => openDuring(sh, d, 720, 840) },
+    evening: { promo: 'afterwork', ok: (sh, d) => openDuring(sh, d, 1140, 1320) },
+    weekend: { promo: 'weekend', ok: (sh, d) => openDuring(sh, nextDow(d, 6), 0, 1440) || openDuring(sh, nextDow(d, 0), 0, 1440) },
   };
   /**
    * Filtre Midi / Ce soir / Ce week-end choisi et restaurant fermé maintenant : quand ouvre-t-il pour ce moment ?
@@ -6324,14 +6663,15 @@
    */
   function statusForWhen(shop, status, now = new Date()) {
     const key = filters.when;
-    if (!key || status.open || shop.closedTemporarily) return status;
+    if (!key || status.open || status.closure || shop.closedTemporarily) return status;
     const nowMin = now.getHours() * 60 + now.getMinutes();
     const win = key === 'lunch' ? [720, 840] : key === 'evening' ? [1140, 1320] : [0, 1440];
     for (let off = 0; off < 7; off++) {
       const day = (now.getDay() + off) % 7;
       if (key === 'weekend' && day !== 6 && day !== 0) continue;
-      if ((shop.closedOn || []).includes(day)) continue;
-      const starts = (shop.hours || []).map(([a, b]) => { const s0 = toMin(a); let e0 = toMin(b); if (e0 <= s0) e0 += 1440; return [s0, e0]; })
+      const date = new Date(now); date.setDate(date.getDate() + off);
+      if (closedOnDate(shop, date)) continue;
+      const starts = weekSlots(shop)[day].map(([a, b]) => { const s0 = toMin(a); let e0 = toMin(b); if (e0 <= s0) e0 += 1440; return [s0, e0]; })
         .filter(([s0, e0]) => s0 < win[1] && e0 > win[0] && (off > 0 || s0 > nowMin)).map(([s0]) => s0).sort((a, b) => a - b);
       if (!starts.length) continue;
       const when = off === 0 ? '' : off === 1 ? 'demain ' : DAYS[day] + ' ';
@@ -6350,12 +6690,13 @@
   const matchesChips = (m) =>
     (filters.category === 'all' || m.shop.category === filters.category) &&
     matchesWhen(m.shop) && (!filters.mvOnly || !!m.shop.mealVouchers) &&
+    [...filters.amenities].every((a) => hasAmenity(m.shop, a)) &&
     (!filters.openOnly || m.status.open) &&
     (!filters.promoOnly || activePromos(m.shop).length > 0) &&
     (!filters.minRating || !!(m.shop.rating && m.shop.rating.avg >= filters.minRating)) &&
     withinRadius(m);
   /** Une puce de filtre est-elle choisie (hors « Tout ») ? */
-  const chipsActive = () => filters.category !== 'all' || !!filters.when || filters.mvOnly || filters.openOnly || filters.promoOnly || filters.minRating > 0;
+  const chipsActive = () => filters.category !== 'all' || !!filters.when || filters.mvOnly || filters.amenities.size > 0 || filters.openOnly || filters.promoOnly || filters.minRating > 0;
   const matchesFilters = (m) => matchesChips(m) && Search.shopMatches(m.shop, filters.q, filters.max);
 
   function applyFilters() {
@@ -6462,6 +6803,10 @@
     } else if (chip.id === 'mv-only') {
       filters.mvOnly = !filters.mvOnly;
       chip.setAttribute('aria-pressed', String(filters.mvOnly));
+    } else if (chip.dataset.amenity) {
+      const a = chip.dataset.amenity;
+      if (filters.amenities.has(a)) filters.amenities.delete(a); else filters.amenities.add(a);
+      chip.setAttribute('aria-pressed', String(filters.amenities.has(a)));
     } else if (chip.dataset.when) {
       // Midi, Ce soir, Ce week-end : un seul moment à la fois (toucher le même le retire)
       filters.when = filters.when === chip.dataset.when ? '' : chip.dataset.when;
@@ -6513,7 +6858,7 @@
     const words = (s) => normalize(String(s || '')).split(/[^a-z0-9]+/).filter((w) => w && !STOP.has(w)).map(stem);
     const has = (hay, w) => hay.some((x) => x.startsWith(w) || (w.length >= 4 && x.includes(w)));
     const parse = (q) => [...new Set(words(q))];
-    const shopWords = (shop) => words([shop.name, catOf(shop).label, shop.description, shop.address, ...activePromos(shop).map((p) => p.title)].join(' '));
+    const shopWords = (shop) => words([shop.name, catOf(shop).label, catOf(shop).keywords || '', ...(shop.amenities || []).map((a) => (AMENITIES[a] || {}).label || ''), shop.description, shop.address, ...activePromos(shop).map((p) => p.title)].join(' '));
 
     /** Plats d'un restaurant qui correspondent à la recherche (tous les mots) et au budget, les plus pertinents d'abord. */
     function dishesOf(shop, q, max = null) {
@@ -6633,7 +6978,7 @@
       SEARCH_IDEAS.filter((w) => Search.run(w).dishes.length || Search.run(w).shops.length).forEach((w) => {
         const b = document.createElement('button');
         b.type = 'button'; b.className = 'chip'; b.textContent = w;
-        b.addEventListener('click', () => { $('search-m').value = w; Search.mobile.query = w; Search.mobile.limit = 30; renderSearchPanel(); });
+        b.addEventListener('click', () => { $('search-m').value = w; Search.mobile.query = w; Search.mobile.limit = 30; SearchFold.collapse(); renderSearchPanel(); });
         ideas.appendChild(b);
       });
       box.appendChild(ideas);
@@ -6804,12 +7149,24 @@
     $('search-m').addEventListener('input', (ev) => { if (!userChoice) set(!ev.target.value.trim()); });
     $('filters-track').addEventListener('click', () => setTimeout(render, 0));
     $('range-filters').addEventListener('input', () => setTimeout(render, 0));
-    return { reset() { userChoice = false; set(!$('search-m').value.trim()); } };
+    return {
+      reset() { userChoice = false; set(!$('search-m').value.trim()); },
+      /** Recherche lancée autrement qu'au clavier (idée, suggestion) : les résultats d'abord. */
+      collapse() { if (!userChoice) set(false); },
+    };
   })();
 
   /* ---------- Avis : note sur 5, commentaire, réponse du restaurateur ---------- */
+  /** Badge « Visite vérifiée » : l'auteur a une visite validée en caisse chez ce restaurant (tenu à jour par la base). */
+  function verifiedTag() {
+    const t = document.createElement('span');
+    t.className = 'rv-verified';
+    t.textContent = '✓ Visite vérifiée';
+    t.title = 'Visite de ce client validée en caisse par le QR code FlashMiam';
+    return t;
+  }
   // Colonnes lisibles des avis : l'identifiant du compte de l'auteur n'est jamais transmis (avis non reliables entre eux)
-  const REVIEW_COLS = 'id, merchant_id, rating, comment, author_name, created_at, updated_at, reply, replied_at, reported_at';
+  const REVIEW_COLS = 'id, merchant_id, rating, comment, author_name, created_at, updated_at, reply, replied_at, reported_at, verified';
   const Reviews = (() => {
     const cache = new Map();                 // id de la fiche → { list, at }
     let shopId = null, pick = 0, editing = false, replyFor = null;
@@ -6920,7 +7277,8 @@
       }
       const note = $('rv-note');
       note.hidden = false;
-      if (own) note.textContent = 'Répondez à vos clients : votre réponse s\'affiche sous leur avis. Un avis abusif ? Signalez-le.';
+      if (showForm && shop.reviewsVerifiedOnly && !editing) note.textContent = 'Ce restaurant n\'accepte que les avis des clients dont la visite a été validée en caisse (QR code FlashMiam).';
+      else if (own) note.textContent = 'Répondez à vos clients : votre réponse s\'affiche sous leur avis. Un avis abusif ? Signalez-le.';
       else if (me && me.role === 'pro') note.textContent = 'Les avis sont réservés aux comptes clients.';
       else if (!me && shop.isPro && Guest.on()) {
         note.textContent = 'Vous y avez mangé ? ';
@@ -6965,6 +7323,7 @@
       li.querySelector('.stars').textContent = starText(r.rating);
       li.querySelector('.stars').setAttribute('aria-label', r.rating + ' sur 5');
       li.querySelector('b').textContent = mine ? 'Votre avis' : r.author_name;
+      if (r.verified) li.querySelector('b').after(verifiedTag());
       li.querySelector('small').textContent = timeAgo(r.created_at) + (r.updated_at && new Date(r.updated_at) - new Date(r.created_at) > 60000 ? ' · modifié' : '');
       if (r.comment) { const p = document.createElement('p'); p.className = 'rv-text'; p.textContent = r.comment; li.appendChild(p); }
       if (r.reply && replyFor !== r.id) {
@@ -7102,7 +7461,9 @@
         : await Loader.run(sb.from('reviews').insert({ merchant_id: m.shop.id, ...row }).select('id').single(), 'Publication de votre avis…');
       btn.disabled = false;
       if (error) {
-        $('err-rv').textContent = error.code === '23505' ? 'Vous avez déjà donné votre avis sur ce restaurant.' : cloudError(error);
+        $('err-rv').textContent = error.code === '23505' ? 'Vous avez déjà donné votre avis sur ce restaurant.'
+          : error.code === '42501' && m.shop.reviewsVerifiedOnly ? 'Ce restaurant n\'accepte que les avis des clients dont la visite a été validée en caisse : montrez votre QR code FlashMiam lors de votre prochaine visite.'
+          : cloudError(error);
         if (error.code === '23505') myReviewIds = null;   // avis donné depuis un autre appareil : relu
         refresh(m.shop.id);
         return;
@@ -7338,7 +7699,14 @@
       $('offers-sub').textContent = all.length
         ? plural(items.length, 'offre', 'offres')
         : 'Aucune offre en cours';
-      document.querySelectorAll('#offers-kinds .chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.kind === kind)));
+      // Types d'offres : seulement ceux qui ont au moins une offre (et celui choisi) ; aucun choix s'il n'y a rien
+      const kinds = new Set(all.map(({ p }) => p.kind));
+      document.querySelectorAll('#offers-kinds .chip').forEach((c) => {
+        c.setAttribute('aria-pressed', String(c.dataset.kind === kind));
+        c.hidden = !!c.dataset.kind && !kinds.has(c.dataset.kind) && c.dataset.kind !== kind;
+      });
+      $('offers-kinds').hidden = kinds.size < 2 && !kind;
+      document.querySelector('.offers-open').hidden = !all.length;
       const ul = $('offers-list');
       ul.textContent = '';
       // Visiteur : les GUEST_PROMOS plus proches, les autres floutées
@@ -7350,10 +7718,15 @@
         b.type = 'button';
         b.className = 'offer-hit';
         b.dataset.id = m.shop.id;
-        b.innerHTML = '<span class="offer-body"><b></b><span class="offer-shop"></span></span>';
+        b.innerHTML = '<span class="offer-body"><b></b><span class="offer-shop"></span><span class="offer-meta"></span></span>';
         b.querySelector('b').textContent = p.title;
-        b.querySelector('.offer-shop').textContent = m.shop.name + (located ? ' · ' + formatDistance(d) : '') + (promoSlot(p) ? ' · ' + promoSlot(p) : '');
+        b.querySelector('.offer-shop').textContent = m.shop.name + (located ? ' · ' + formatDistance(d) : '');
         if (m.shop.isDemo || isShowcase(m.shop)) b.querySelector('.offer-shop').append(' ', demoTag());
+        // Sous le nom : ouvert ou fermé, créneau de validité et fin de l'offre (sans ouvrir les détails)
+        const meta = b.querySelector('.offer-meta');
+        meta.append(statusTag(m.status));
+        const extra = [promoSlot(p), promoUntil(p)].filter(Boolean).join(' · ');
+        if (extra) meta.append(' · ' + extra);
         if (p.photoUrl) {
           const img = document.createElement('img');
           img.className = 'offer-photo'; img.src = p.photoUrl; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
@@ -7437,20 +7810,21 @@
    */
   const GUEST_PROMOS = 3;
   const Guest = (() => {
-    let active = false, memo = null, memoAt = 0;
+    let active = false, memo = null;
     const on = () => active && !currentUser();
     const promoKey = (p, shop) => shop.id + '|' + p.id;
     /**
-     * Offres visibles sans compte (recalculées au plus toutes les 0,5 s) : les vraies offres dont le serveur a donné le
-     * texte (3 au plus, guest_promotions), puis les offres des restaurants d'exemple les plus proches jusqu'à GUEST_PROMOS.
+     * Offres visibles sans compte : les vraies offres dont le serveur a donné le texte (3 au plus, guest_promotions), puis
+     * les offres des restaurants d'exemple les plus proches jusqu'à GUEST_PROMOS. Calculées une fois par affichage (le
+     * résultat est oublié dès la tâche suivante : une fiche ouverte avant l'arrivée des offres ne les garde pas floutées).
      */
     function unlocked() {
-      if (!memo || Date.now() - memoAt > 500) {
+      if (!memo) {
+        setTimeout(() => { memo = null; }, 0);
         const all = Offers.list();
         const open = all.filter(({ p, m }) => !m.shop.isDemo && !p.locked).slice(0, GUEST_PROMOS);
         const demo = all.filter(({ m }) => m.shop.isDemo).slice(0, Math.max(0, GUEST_PROMOS - open.length));
         memo = new Set([...open, ...demo].map(({ p, m }) => promoKey(p, m.shop)));
-        memoAt = Date.now();
       }
       return memo;
     }
@@ -7658,10 +8032,20 @@
 
   /* ---------- Partage d'une fiche : lien direct ---------- */
   const shopLink = (id, tab) => location.origin + location.pathname + '?r=' + encodeURIComponent(id) + (tab ? '&t=' + tab : '');
+  /** Adresse de la page publique d'un restaurant : même calcul que scripts/restaurant-pages.mjs (slugOf). */
+  const restaurantSlug = (shop) => ((shop.name || 'restaurant').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'restaurant') + '-' + String(shop.id).slice(0, 8);
+  /**
+   * Lien à partager : la page publique du restaurant (aperçu avec son nom et sa photo dans WhatsApp, Instagram…), qui
+   * ouvre aussitôt la fiche sur la carte (?go=1). Fiches d'exemple et de test : le lien direct de la carte.
+   */
+  const shareLink = (shop) => (shop.isPro && !shop.isTest && !shop.isDemo
+    ? location.origin + location.pathname.replace(/[^/]*$/, '') + 'restaurants/' + restaurantSlug(shop) + '/?go=1'
+    : shopLink(shop.id));
   $('shop-share').addEventListener('click', async () => {
     const m = markers.get(selectedId);
     if (!m) return;
-    const url = shopLink(m.shop.id);
+    const url = shareLink(m.shop);
     Stats.track(m.shop.id, 'share');
     const best = activePromos(m.shop)[0];
     const text = m.shop.name + ' sur FlashMiam' + (best ? ' : ' + best.title : '');
@@ -7678,7 +8062,8 @@
   function openLink(link) {
     cloud.ready.then(() => whenMapReady(() => {
       syncShopMarkers();
-      const m = markers.get(link.id);
+      if (link.prefix && !link.id) link = { ...link, id: [...markers.keys()].find((id) => String(id).startsWith(link.prefix)) || null };
+      const m = link.id ? markers.get(link.id) : null;
       if (!m && cloud.fromCache) { cloud.loaded.then(() => { if (!cloud.fromCache) openLink(link); }); return; }   // pas encore dans les données de la dernière visite
       if (!m) { toast('Ce restaurant n\'est plus visible sur la carte.'); return; }
       if (link.tab === 'story' && liveStories(m.shop).length) { StoryViewer.open(m.shop.id, { only: true }); return; }
@@ -8055,7 +8440,9 @@
     if (hasStory) { $('shop-emoji').removeAttribute('aria-hidden'); $('shop-emoji').setAttribute('aria-label', 'Voir la story de ' + shop.name); }
     else { $('shop-emoji').setAttribute('aria-hidden', 'true'); $('shop-emoji').removeAttribute('aria-label'); }
     $('shop-name').textContent = shop.name;
-    $('shop-cat').textContent = catOf(shop).label;
+    const price = priceLevel(shop);
+    $('shop-cat').textContent = catOf(shop).label + (price ? ' · ' + price.level : '');
+    $('shop-cat').title = price ? 'Prix habituel d\'un plat : environ ' + formatPrice(price.median) : '';
     // Restaurants inscrits : badge « vérifié », description, photos, téléphone ; l'offre est facultative
     $('shop-verified').hidden = !shop.isPro && !shop.isDemo;
     $('shop-verified').classList.toggle('is-test', !!(shop.isTest || shop.isDemo));
@@ -8067,9 +8454,14 @@
     renderShopPromos(shop);
     VisitPass.renderEntry(shop);
     $('shop-phone-row').hidden = !shop.phone;
+    // Fiches d'exemple et de test : numéro fictif, jamais composé (le bouton explique à quoi il sert)
+    const fakePhone = !!(shop.isDemo || isShowcase(shop) || shop.isTest);
+    $('shop-call').dataset.example = $('shop-phone').dataset.example = fakePhone ? '1' : '';
     if (shop.phone) { $('shop-phone').textContent = formatPhone(shop.phone); $('shop-phone').href = 'tel:' + compactPhone(shop.phone); }
     $('shop-call').hidden = !shop.phone;
     $('shop-mv-row').hidden = !shop.mealVouchers;
+    renderPractical(shop);
+    Loyalty.render(shop);
     if (shop.phone) { $('shop-call').href = 'tel:' + compactPhone(shop.phone); $('shop-call').setAttribute('aria-label', 'Appeler ' + shop.name); }
     renderGallery(shop);
     renderMenu(shop);
@@ -8081,6 +8473,9 @@
     $('shop-status').className = 'status ' + (status.soon ? 'is-soon' : status.open ? 'is-open' : 'is-closed');
     $('shop-address').textContent = fullAddress(shop);
     $('shop-hours').textContent = formatHours(shop);
+    const closure = closureText(shop);
+    $('shop-closure').hidden = !closure;
+    $('shop-closure').textContent = closure;
 
     const dist = $('shop-distance');
     if (here()) {
@@ -8318,7 +8713,7 @@
 
   /* ---------- Statistiques de fréquentation (par restaurant inscrit, par jour) ---------- */
   const Stats = (() => {
-    const EVENTS = { views: 'view', walk: 'walk', car: 'car', phone: 'phone', menu: 'menu', photos: 'photos', stories: 'story',
+    const EVENTS = { views: 'view', walk: 'walk', car: 'car', phone: 'phone', menu: 'menu', photos: 'photos', stories: 'story', link: 'link',
       share: 'share', reviews: 'reviews', google: 'google', story_cta: 'story_cta', offer: 'offer' };
     /** Évènement sur une fiche inscrite (la base ignore les visites du restaurateur sur sa propre fiche,
      *  ne compte que les personnes connectées, et au plus 50 actions par personne, fiche et jour). */
@@ -8419,8 +8814,88 @@
 
   $('shop-go').addEventListener('click', () => selectedId && Stats.track(selectedId, 'walk'));
   $('shop-go-car').addEventListener('click', () => selectedId && Stats.track(selectedId, 'car'));
-  $('shop-phone').addEventListener('click', () => selectedId && Stats.track(selectedId, 'phone'));
-  $('shop-call').addEventListener('click', () => selectedId && Stats.track(selectedId, 'phone'));
+  /**
+   * Gamme de prix d'après la carte : prix médian des plats (hors boissons, desserts, sauces et suppléments).
+   * € : moins de 10 € ; €€ : 10 à 20 € ; €€€ : plus. null si la carte compte moins de 3 plats avec un prix.
+   */
+  function priceLevel(shop) {
+    const prices = (shop.menu || []).filter((it) => Number(it.price) > 0 && !/boisson|dessert|sauce|suppl|extra|accompagnement/i.test(it.section || ''))
+      .map((it) => Number(it.price)).sort((a, b) => a - b);
+    if (prices.length < 3) return null;
+    const median = prices[Math.floor(prices.length / 2)];
+    return { median, level: median < 10 ? '€' : median <= 20 ? '€€' : '€€€' };
+  }
+  /**
+   * Carte de fidélité sur la fiche : la règle pour tous ; pour un client connecté, ses tampons (my_loyalty) et ses
+   * récompenses à demander en caisse ; pour un visiteur, l'invitation à créer un compte.
+   */
+  const Loyalty = (() => {
+    const cache = new Map();   // id de la fiche → { at, data }
+    let shown = null;
+    function paint(shop, data) {
+      const L = shop.loyalty;
+      const goal = data ? data.goal : L.goal;
+      const stamps = data ? Math.min(Number(data.stamps) || 0, goal) : 0;
+      const dots = $('shop-loyal-dots');
+      dots.textContent = '';
+      dots.hidden = !data;
+      for (let i = 0; i < goal; i++) { const d = document.createElement('i'); if (i < stamps) d.className = 'is-on'; dots.appendChild(d); }
+      dots.setAttribute('aria-label', stamps + ' tampon' + (stamps > 1 ? 's' : '') + ' sur ' + goal);
+      const sub = $('shop-loyal-sub');
+      const me = currentUser();
+      if (data && Number(data.available) > 0) sub.textContent = '🎉 ' + plural(Number(data.available), 'récompense', 'récompenses') + ' à demander en caisse : montrez votre QR code de visite.';
+      else if (data) sub.textContent = 'Encore ' + plural(goal - stamps, 'visite validée', 'visites validées') + ' pour : ' + L.reward + '.';
+      else if (!me) sub.textContent = 'Créez votre compte gratuit : chaque visite validée en caisse (QR code) vous donne un tampon.';
+      else sub.textContent = me.role === 'pro' ? 'Vos clients cumulent un tampon à chaque visite validée en caisse.' : 'Chaque visite validée en caisse (QR code) vous donne un tampon.';
+    }
+    async function render(shop) {
+      const L = shop.loyalty;
+      $('shop-loyalty').hidden = !L;
+      if (!L) return;
+      shown = shop.id;
+      $('shop-loyal-rule').textContent = ' · ' + L.goal + ' visites = ' + L.reward;
+      const me = currentUser();
+      const c = cache.get(shop.id);
+      paint(shop, c ? c.data : null);
+      if (!me || me.role === 'pro' || (c && Date.now() - c.at < 30e3)) return;
+      const { data, error } = await sb.rpc('my_loyalty', { p_merchant_id: shop.id });
+      if (error || !data) return;
+      cache.set(shop.id, { at: Date.now(), data });
+      if (shown === shop.id && selectedId === shop.id) paint(shop, data);
+    }
+    return { render, forget: (id) => cache.delete(id) };
+  })();
+  /** Infos pratiques (icônes) et liens du restaurant (Instagram, site, commande en ligne) dans la fiche. */
+  function renderPractical(shop) {
+    const am = (shop.amenities || []).filter((a) => AMENITIES[a]);
+    $('shop-amen-row').hidden = !am.length;
+    $('shop-amen').textContent = '';
+    am.forEach((a) => {
+      const li = document.createElement('li');
+      li.innerHTML = '<span aria-hidden="true"></span><b></b>';
+      li.firstChild.textContent = AMENITIES[a].emoji;
+      li.lastChild.textContent = AMENITIES[a].label;
+      $('shop-amen').appendChild(li);
+    });
+    const links = Object.entries(shop.links || {}).filter(([k]) => LINKS[k]);
+    $('shop-links-row').hidden = !links.length;
+    $('shop-links').textContent = '';
+    links.forEach(([k, url]) => {
+      const a = document.createElement('a');
+      a.className = 'pill-link'; a.href = url; a.target = '_blank'; a.rel = 'noopener nofollow';
+      a.textContent = LINKS[k] + ' ↗';
+      a.addEventListener('click', () => Stats.track(shop.id, 'link'));
+      $('shop-links').appendChild(a);
+    });
+  }
+  const exampleCall = (ev) => {
+    if (ev.currentTarget.dataset.example !== '1') return false;
+    ev.preventDefault();
+    toast('Fiche d\'exemple : sur la fiche d\'un vrai restaurant, ce bouton l\'appelle directement.');
+    return true;
+  };
+  $('shop-call').addEventListener('click', (ev) => { if (!exampleCall(ev) && selectedId) Stats.track(selectedId, 'phone'); });
+  $('shop-phone').addEventListener('click', (ev) => { if (!exampleCall(ev) && selectedId) Stats.track(selectedId, 'phone'); });
 
   /* ---------- Promotions ---------- */
   /** Promotions en cours d'un commerce (l'ancienne « offre du moment » compte comme un bon plan), les plus urgentes d'abord. */
@@ -9030,14 +9505,29 @@
     if (!promos.length) { const li = document.createElement('li'); li.className = 'pa-empty'; li.textContent = 'Aucune promotion en cours.'; list.appendChild(li); }
     promos.forEach((p) => {
       const li = document.createElement('li');
-      li.innerHTML = '<span class="pa-ico" aria-hidden="true"></span><div><strong></strong><small></small></div><button class="icon-btn" type="button">&times;</button>';
+      li.innerHTML = '<span class="pa-ico" aria-hidden="true"></span><div><strong></strong><small></small></div>'
+        + '<span class="pa-acts"><button class="pill-btn pa-edit" type="button">Modifier</button><button class="pill-btn pa-more" type="button" hidden>+7 jours</button><button class="icon-btn pa-del" type="button">&times;</button></span>';
       li.querySelector('.pa-ico').textContent = PROMO_KINDS[p.kind].icon;
       li.querySelector('strong').textContent = p.title;
+      li.querySelector('.pa-edit').setAttribute('aria-label', 'Modifier la promotion « ' + p.title + ' »');
+      li.querySelector('.pa-edit').addEventListener('click', () => fillPromoForm(p, 'edit'));
+      // Prolonger d'une semaine (offres avec une date de fin)
+      const more = li.querySelector('.pa-more');
+      more.hidden = !p.endsAt;
+      more.setAttribute('aria-label', 'Prolonger la promotion « ' + p.title + ' » de 7 jours');
+      more.addEventListener('click', async () => {
+        const end = new Date(Math.min(Math.max(Date.now(), new Date(p.endsAt).getTime()) + 7 * 864e5, Date.now() + 365 * 864e5));
+        const { error } = await Loader.run(sb.from('promotions').update({ ends_at: end.toISOString() }).eq('id', p.id), 'Prolongation…');
+        if (error) { toast(cloudError(error)); return; }
+        await refreshCloud();
+        renderPromoAdmin(currentUser());
+        toast('Offre prolongée ' + promoUntil({ endsAt: end.toISOString() }) + '.');
+      });
       const until = promoUntil(p), slot = promoSlot(p);
       const stat = ProSpace.promoStats(p.id);
       li.querySelector('small').textContent = PROMO_KINDS[p.kind].label + (slot ? ' · ' + slot : '') + (until ? ' · ' + until : ' · sans date de fin') + (p.details ? ' · ' + p.details : '') + (stat ? ' · ' + plural(stat.clicks, 'clic', 'clics') : '');
-      li.querySelector('button').setAttribute('aria-label', 'Retirer la promotion « ' + p.title + ' »');
-      li.querySelector('button').addEventListener('click', async () => {
+      li.querySelector('.pa-del').setAttribute('aria-label', 'Retirer la promotion « ' + p.title + ' »');
+      li.querySelector('.pa-del').addEventListener('click', async () => {
         const { error } = await sb.from('promotions').delete().eq('id', p.id);
         if (error) { toast(cloudError(error)); return; }
         if (p.photoPath) removeFiles('photos', [p.photoPath]);
@@ -9047,10 +9537,78 @@
       });
       list.appendChild(li);
     });
-    const full = promos.length >= MAX_PROMOS;
+    const full = promos.length >= MAX_PROMOS && !promoEdit;
     $('pp-submit').disabled = full;
-    $('pp-submit').textContent = full ? MAX_PROMOS + ' promotions au maximum' : 'Publier la promotion';
+    $('pp-submit').textContent = full ? MAX_PROMOS + ' promotions au maximum' : promoEdit ? (promoEdit.mode === 'edit' ? 'Enregistrer les modifications' : 'Republier l\'offre') : 'Publier la promotion';
+    renderOldPromos(r);
   }
+  /** Offres terminées depuis moins de 30 jours (lues à la demande : la carte ne charge que les offres en cours). */
+  let oldPromosAt = 0, oldPromos = [];
+  async function renderOldPromos(r) {
+    const draw = () => {
+      $('pd-promo-old-title').hidden = $('pd-promo-old').hidden = !oldPromos.length;
+      $('pd-promo-old').textContent = '';
+      oldPromos.forEach((p) => {
+        const li = document.createElement('li');
+        li.innerHTML = '<span class="pa-ico" aria-hidden="true"></span><div><strong></strong><small></small></div><span class="pa-acts"><button class="pill-btn" type="button">Republier</button></span>';
+        li.querySelector('.pa-ico').textContent = (PROMO_KINDS[p.kind] || PROMO_KINDS.other).icon;
+        li.querySelector('strong').textContent = p.title;
+        li.querySelector('small').textContent = 'Terminée le ' + new Date(p.endsAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+        li.querySelector('button').setAttribute('aria-label', 'Republier la promotion « ' + p.title + ' »');
+        li.querySelector('button').addEventListener('click', () => fillPromoForm(p, 'republish'));
+        $('pd-promo-old').appendChild(li);
+      });
+    };
+    draw();
+    if (Date.now() - oldPromosAt < 60e3) return;
+    oldPromosAt = Date.now();
+    const now = new Date();
+    const { data, error } = await sb.from('promotions').select('*').eq('merchant_id', r.id).not('ends_at', 'is', null)
+      .lte('ends_at', now.toISOString()).gte('ends_at', new Date(now - 30 * 864e5).toISOString()).order('ends_at', { ascending: false }).limit(8);
+    if (error) { oldPromosAt = 0; return; }
+    oldPromos = (data || []).map(promoFromRow).filter((p) => PROMO_KINDS[p.kind]);
+    draw();
+  }
+
+  /**
+   * Formulaire d'offre prérempli : « edit » modifie l'offre en cours (sans prévenir les abonnés une seconde fois),
+   * « republish » crée une nouvelle offre à partir d'une offre terminée (abonnés prévenus, clics remis à zéro).
+   */
+  let promoEdit = null;   // { mode, id, keepPhoto, oldPhoto }
+  function fillPromoForm(p, mode) {
+    promoEdit = { mode, id: p.id, keepPhoto: p.photoPath || null, oldPhoto: p.photoPath || null };
+    promoEndTouched = false;
+    setPromoKind(p.kind);
+    if (mode === 'edit') { $('pp-end').value = p.endsAt ? localInput(new Date(p.endsAt)) : ''; promoEndTouched = true; syncPromoEnd(); }
+    $('pp-title').value = p.title; $('pp-title-count').textContent = p.title.length + ' / 60';
+    $('pp-details').value = p.details || '';
+    const slotOn = !!(p.validDays || p.validFrom);
+    $('pp-slot-on').checked = slotOn;
+    $('pp-days').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(!!(p.validDays && p.validDays.includes(Number(b.dataset.d))))));
+    if (p.validFrom) { $('pp-from').value = p.validFrom; $('pp-to').value = p.validTo; }
+    syncSlot();
+    setPromoPhoto(null);
+    if (p.photoUrl) {
+      $('pp-photo-preview').src = p.photoUrl; $('pp-photo-preview').hidden = false;
+      $('pp-photo-remove').hidden = false; $('pp-photo-btn').textContent = 'Changer';
+    }
+    ['pp-title', 'pp-end', 'pp-slot', 'pp-photo'].forEach((f) => setFieldError(f, ''));
+    $('pp-editing').hidden = false;
+    $('pp-editing-text').textContent = mode === 'edit' ? 'Modification de « ' + p.title + ' »' : 'Republier « ' + p.title + ' » : vérifiez la date de fin, puis publiez.';
+    renderPromoAdmin(currentUser());
+    $('pp-editing').scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
+    $('pp-title').focus({ preventScroll: true });
+  }
+  function resetPromoForm() {
+    promoEdit = null;
+    $('pp-editing').hidden = true;
+    $('pp-title').value = ''; $('pp-details').value = ''; $('pp-title-count').textContent = '0 / 60';
+    promoEndTouched = false; $('pp-slot-on').checked = false; $('pp-days').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    setPromoKind(promoKind); syncSlot();
+    setPromoPhoto(null);
+    ['pp-title', 'pp-end', 'pp-slot', 'pp-photo'].forEach((f) => setFieldError(f, ''));
+  }
+  $('pp-edit-cancel').addEventListener('click', () => { resetPromoForm(); renderPromoAdmin(currentUser()); });
   /* Photo d'une offre : recadrée en carré comme celles de la fiche, envoyée à la publication */
   let promoPhoto = null, promoPhotoUrl = null;
   function setPromoPhoto(blob) {
@@ -9061,7 +9619,7 @@
     $('pp-photo-remove').hidden = !blob;
     $('pp-photo-btn').textContent = blob ? 'Changer' : 'Ajouter une photo';
   }
-  $('pp-photo-remove').addEventListener('click', () => setPromoPhoto(null));
+  $('pp-photo-remove').addEventListener('click', () => { setPromoPhoto(null); if (promoEdit) promoEdit.keepPhoto = null; });
   $('pp-photo-input').addEventListener('change', async (ev) => {
     const file = ev.target.files[0];
     ev.target.value = '';
@@ -9072,7 +9630,7 @@
     try {
       bitmap = await decodeImage(file);
       const crop = isPhotoRatio(bitmap.width, bitmap.height) ? fullCrop(bitmap.width, bitmap.height) : await cropPhoto(bitmap, { index: 1, total: 1 });
-      if (crop) setPromoPhoto(await exportCrop(bitmap, crop));
+      if (crop) { setPromoPhoto(await exportCrop(bitmap, crop)); if (promoEdit) promoEdit.keepPhoto = null; }
     } catch (e) {
       setFieldError('pp-photo', 'Format d\'image non pris en charge (utilisez JPG ou PNG).');
     } finally {
@@ -9095,7 +9653,10 @@
     }
     const slot = readSlot();
     if (slot.error) { setFieldError('pp-slot', slot.error); return; }
-    const row = { merchant_id: r.id, kind: promoKind, title, details: details || null, ends_at: endsAt ? endsAt.toISOString() : null, ...slot };
+    const editing = promoEdit && promoEdit.mode === 'edit' ? promoEdit : null;
+    const row = { merchant_id: r.id, kind: promoKind, title, details: details || null, ends_at: endsAt ? endsAt.toISOString() : null,
+      valid_days: null, valid_from: null, valid_to: null, ...slot };
+    if (promoEdit && promoEdit.keepPhoto && !promoPhoto) row.photo_path = promoEdit.keepPhoto;   // photo gardée (modifier / republier)
     $('pp-submit').disabled = true;
     if (promoPhoto) {
       const path = r.id + '/promo-' + uid().replace(/[^A-Za-z0-9_-]/g, '') + '.' + photoExt(promoPhoto);
@@ -9103,16 +9664,31 @@
       if (up.error) { $('pp-submit').disabled = false; setFieldError('pp-photo', 'La photo n\'a pas pu être envoyée. ' + cloudError(up.error)); return; }
       row.photo_path = path;
     }
-    const { error } = await Loader.run(sb.from('promotions').insert(row), 'Publication de la promotion…');
+    let error;
+    if (editing) {
+      const { merchant_id: _m, ...fields } = row;
+      if (!('photo_path' in fields)) fields.photo_path = null;
+      ({ error } = await Loader.run(sb.from('promotions').update(fields).eq('id', editing.id), 'Enregistrement de l\'offre…'));
+    } else {
+      ({ error } = await Loader.run(sb.from('promotions').insert(row), 'Publication de la promotion…'));
+    }
     $('pp-submit').disabled = false;
-    if (error && row.photo_path) removeFiles('photos', [row.photo_path]);
-    if (error) { setFieldError('pp-title', /Six promotions/.test(error.message || '') ? MAX_PROMOS + ' promotions en cours au maximum.' : cloudError(error)); return; }
+    const uploaded = !!promoPhoto && row.photo_path;
+    if (error && uploaded) removeFiles('photos', [row.photo_path]);
+    if (error) { setFieldError('pp-title', /Six promotions/.test(error.message || '') ? MAX_PROMOS + ' promotions en cours au maximum.' : /date de fin/.test(error.message || '') ? 'Choisissez une date de fin à venir.' : cloudError(error)); return; }
+    if (editing) {
+      // Ancienne photo remplacée ou retirée : supprimée du stockage
+      if (editing.oldPhoto && editing.oldPhoto !== row.photo_path) removeFiles('photos', [editing.oldPhoto]);
+      await refreshCloud();
+      resetPromoForm();
+      renderPromoAdmin(currentUser());
+      toast('Offre modifiée.');
+      return;
+    }
     Push.send(r.id);
     await refreshCloud();
-    $('pp-title').value = ''; $('pp-details').value = ''; $('pp-title-count').textContent = '0 / 60';
-    promoEndTouched = false; $('pp-slot-on').checked = false; $('pp-days').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', 'false'));
-    setPromoKind(promoKind); syncSlot();
-    setPromoPhoto(null);
+    resetPromoForm();
+    oldPromosAt = 0;   // l'offre republiée quitte la liste des offres terminées
     renderPromoAdmin(currentUser());
     toast('Promotion publiée : elle apparaît sur votre fiche et vos abonnés sont prévenus.');
   });
@@ -10435,22 +11011,24 @@
   /** Étape affichée : « code » (saisie du code reçu) ou « password » (nouveau mot de passe + confirmation). */
   function setResetPhase(phase) {
     resetPhase = phase;
+    $('rs-phase-email').hidden = phase !== 'email';
     $('rs-phase-code').hidden = phase !== 'code';
     $('rs-phase-password').hidden = phase !== 'password';
     $('rs-resend-row').hidden = phase !== 'code';
-    $('rs-title').innerHTML = phase === 'code' ? 'Mot de passe <em>oublié</em>' : 'Nouveau <em>mot de passe</em>';
-    $('rs-submit').textContent = phase === 'code' ? 'Valider le code' : 'Changer mon mot de passe';
+    $('rs-title').innerHTML = phase === 'password' ? 'Nouveau <em>mot de passe</em>' : 'Mot de passe <em>oublié</em>';
+    $('rs-submit').textContent = phase === 'email' ? 'Recevoir un code' : phase === 'code' ? 'Valider le code' : 'Changer mon mot de passe';
     $('err-reset').textContent = '';
-    setTimeout(() => { const f = $(phase === 'code' ? 'rs-code' : 'rs-password'); if (f && !f.closest('[hidden]')) f.focus(); }, 60);
+    setTimeout(() => { const f = $(phase === 'email' ? 'rs-mail' : phase === 'code' ? 'rs-code' : 'rs-password'); if (f && !f.closest('[hidden]')) f.focus(); }, 60);
   }
   function showReset(email, { byLink = false } = {}) {
     resetEmail = email; resetByLink = byLink;
     $('rs-email').textContent = email || '';
     $('rs-code').value = ''; $('rs-password').value = ''; $('rs-password2').value = '';
-    ['rs-code', 'rs-password', 'rs-password2'].forEach((f) => setFieldError(f, ''));
+    ['rs-mail', 'rs-code', 'rs-password', 'rs-password2'].forEach((f) => setFieldError(f, ''));
     renderResetPassword();
     showAuthStep('reset-password');
-    setResetPhase(byLink ? 'password' : 'code');   // lien de l'e-mail : déjà vérifié, directement le mot de passe
+    // lien de l'e-mail : déjà vérifié, directement le mot de passe ; sans adresse : on la demande d'abord
+    setResetPhase(byLink ? 'password' : email ? 'code' : 'email');
   }
   async function sendResetCode(email) {
     const captchaToken = await Captcha.token().catch(() => null);
@@ -10459,7 +11037,9 @@
   }
   $('forgot-btn').addEventListener('click', async () => {
     const email = $('li-email').value.trim().toLowerCase();
-    if (!EMAIL_RE.test(email)) { setFieldError('li-email', 'Saisissez d\'abord l\'adresse e-mail de votre compte.'); $('li-email').focus(); return; }
+    setFieldError('li-email', '');
+    // Adresse pas (ou mal) saisie : l'écran « Mot de passe oublié » la demande lui-même
+    if (!EMAIL_RE.test(email)) { $('rs-mail').value = email; showReset(null); return; }
     const { error } = await sendResetCode(email);
     if (error) { $('err-login').textContent = error.captcha || captchaRefused(error) ? Captcha.failMessage : cloudError(error); return; }
     showReset(email);
@@ -10488,6 +11068,18 @@
   $('ob-reset').addEventListener('submit', async (ev) => {
     ev.preventDefault();
     if (resetBusy) return;
+    if (resetPhase === 'email') {
+      const email = $('rs-mail').value.trim().toLowerCase();
+      if (!EMAIL_RE.test(email)) { setFieldError('rs-mail', 'Saisissez une adresse e-mail valide, par exemple camille@exemple.fr.'); $('rs-mail').focus(); return; }
+      resetBusy = true;
+      const { error } = await sendResetCode(email).finally(() => { resetBusy = false; });
+      if (error) { $('err-reset').textContent = error.captcha || captchaRefused(error) ? Captcha.failMessage : cloudError(error); return; }
+      resetEmail = email;
+      $('rs-email').textContent = email;
+      $('li-email').value = email;
+      setResetPhase('code');
+      return;
+    }
     if (resetPhase === 'code') {
       const code = onlyDigits($('rs-code').value);
       if (code.length < 6 || code.length > 8) { setFieldError('rs-code', 'Saisissez le code reçu par e-mail (6 à 8 chiffres).'); return; }
@@ -10589,8 +11181,18 @@
   $('ob-guest-btn').addEventListener('click', () => {
     store.write({ guest: true });
     if (appStarted) { hideOnboarding(); return; }            // déjà sur la carte : on y retourne
-    if (!store.read().geoConsent) { showAuthStep('location'); return; }
+    // La carte tout de suite, sans écran « Activez votre localisation » : la position déjà autorisée est reprise sans
+    // rien demander (resumeLocation) ; sinon elle est demandée au besoin (bouton « me localiser », offres proches, distances)
+    const firstTime = !store.read().geoConsent;
     finishAuth({ fresh: false });
+    if (firstTime) {
+      const tip = () => setTimeout(() => {
+        if (Geo.position || activePanel || document.body.classList.contains('sheet-open') || !$('search-panel').hidden) return;
+        toast('Activez la localisation à tout moment avec le bouton ' + (isDesktop() ? 'en haut à droite.' : 'en bas à droite de la carte.'));
+      }, 2200);
+      if (navigator.permissions && navigator.permissions.query) navigator.permissions.query({ name: 'geolocation' }).then((st) => { if (st.state !== 'granted') tip(); }, tip);
+      else tip();
+    }
   });
 
   $('ob-later').addEventListener('click', () => {
@@ -10610,7 +11212,11 @@
     }
     hideOnboarding();
     startApp({ focus, intro: true });
-    if (fresh && !located && !focus) setTimeout(() => toast('Activez la localisation à tout moment avec le bouton ' + (isDesktop() ? 'en haut à droite.' : 'en bas à droite de la carte.')), 2200);
+    if (fresh && !located && !focus) setTimeout(() => {
+      // Conseil seulement sur la carte libre : pas par-dessus une fiche, un panneau ou la recherche
+      if (activePanel || document.body.classList.contains('sheet-open') || !$('search-panel').hidden) return;
+      toast('Activez la localisation à tout moment avec le bouton ' + (isDesktop() ? 'en haut à droite.' : 'en bas à droite de la carte.'));
+    }, 2200);
     if (!fresh) resumeLocation();
   }
   function hideOnboarding() {
@@ -10635,7 +11241,8 @@
   function remindIncomplete() {
     const me = currentUser();
     const n = proTodoCount(me);
-    if (!n) return;
+    // Espace restaurateur ouvert : son bandeau « Compléter » le dit déjà, pas de message en double par-dessus
+    if (!n || !$('pro-space').hidden) return;
     toast('Votre compte n\'est pas complet : ' + plural(n, 'élément', 'éléments') + ' à compléter.', { label: 'Compléter', run: () => ProSpace.open('todo') });
   }
   document.querySelectorAll('[data-pro-back]').forEach((btn) => btn.addEventListener('click', () => showAuthStep(btn.dataset.proBack)));
@@ -11111,6 +11718,169 @@
   }
   $('pl-desc').addEventListener('input', () => { $('pl-desc-count').textContent = $('pl-desc').value.length + ' / 600'; });
 
+  Object.entries(AMENITIES).forEach(([key, a]) => {
+    const label = document.createElement('label');
+    label.className = 'check';
+    label.innerHTML = '<input type="checkbox" /> <span></span>';
+    label.querySelector('input').value = key;
+    label.querySelector('span').textContent = a.emoji + ' ' + a.label;
+    $('pl-amen').appendChild(label);
+  });
+  /**
+   * Lien saisi par le restaurateur → adresse https complète (« @pizzeria » → page Instagram, « www.site.fr » → https://…).
+   * Renvoie '' (champ vide), null (adresse invalide) ou l'adresse.
+   */
+  function normalizeLink(kind, raw) {
+    let v = (raw || '').trim();
+    if (!v) return '';
+    if (kind === 'instagram') {
+      const handle = v.replace(/^@/, '').match(/^[A-Za-z0-9._]{1,30}$/);
+      if (handle) v = 'https://www.instagram.com/' + handle[0] + '/';
+    }
+    if (/^http:\/\//i.test(v)) v = 'https://' + v.slice(7);
+    if (!/^https:\/\//i.test(v)) v = 'https://' + v;
+    return /^https:\/\/[A-Za-z0-9.-]+\.[A-Za-z]{2,}(\/[^\s<>"']*)?$/.test(v) && v.length <= 300 ? v : null;
+  }
+  /**
+   * Horaires de la fiche : « Pareil tous les jours » (2 services + jours de fermeture) ou « Selon les jours » (jusqu'à
+   * 3 créneaux par jour). Contrôle : heures différentes, créneaux qui ne se chevauchent pas, au moins un jour ouvert.
+   */
+  const HoursEditor = (() => {
+    let mode = 'same';
+    const DAY_NAMES = { 0: 'Dimanche', 1: 'Lundi', 2: 'Mardi', 3: 'Mercredi', 4: 'Jeudi', 5: 'Vendredi', 6: 'Samedi' };
+    const list = $('pl-days-list');
+    function slotEl(from = '11:30', to = '14:30') {
+      const d = document.createElement('div');
+      d.className = 'hd-slot';
+      d.innerHTML = '<input type="time" class="hd-from" /><span>–</span><input type="time" class="hd-to" /><button class="hd-del" type="button">×</button>';
+      d.querySelector('.hd-from').value = from; d.querySelector('.hd-to').value = to;
+      return d;
+    }
+    function syncRow(row) {
+      const name = DAY_NAMES[row.dataset.d].toLowerCase();
+      const open = row.querySelector('.hd-open').checked;
+      const slots = row.querySelector('.hd-slots');
+      if (open && !slots.childElementCount) slots.appendChild(slotEl());
+      row.querySelector('.hd-body').hidden = !open;
+      row.querySelector('.hd-closed').hidden = open;
+      const n = slots.childElementCount;
+      row.querySelector('.hd-add').hidden = !open || n >= 3;
+      [...slots.children].forEach((sl, i) => {
+        sl.querySelector('.hd-from').setAttribute('aria-label', name + ', créneau ' + (i + 1) + ' : ouverture');
+        sl.querySelector('.hd-to').setAttribute('aria-label', name + ', créneau ' + (i + 1) + ' : fermeture');
+        sl.querySelector('.hd-del').setAttribute('aria-label', 'Retirer le créneau ' + (i + 1) + ' du ' + name);
+      });
+    }
+    DAY_ORDER.forEach((d) => {
+      const row = document.createElement('div');
+      row.className = 'hd-row'; row.dataset.d = String(d);
+      row.innerHTML = '<label class="hd-day"><input type="checkbox" class="hd-open" /><span class="hd-name"></span><span class="hd-closed">Fermé</span></label>'
+        + '<div class="hd-body"><div class="hd-slots"></div><button class="link-btn hd-add" type="button">+ Ajouter un créneau</button></div>';
+      row.querySelector('.hd-name').textContent = DAY_NAMES[d];
+      row.querySelector('.hd-open').setAttribute('aria-label', DAY_NAMES[d] + ' : ouvert');
+      list.appendChild(row);
+    });
+    list.addEventListener('change', (ev) => { const row = ev.target.closest('.hd-row'); if (row && ev.target.classList.contains('hd-open')) syncRow(row); setFieldError('pl-hours', ''); });
+    list.addEventListener('click', (ev) => {
+      const row = ev.target.closest('.hd-row');
+      if (!row) return;
+      const slots = row.querySelector('.hd-slots');
+      if (ev.target.closest('.hd-add')) {
+        const last = slots.lastElementChild;
+        slots.appendChild(last ? slotEl('18:30', '22:30') : slotEl());
+        syncRow(row);
+        slots.lastElementChild.querySelector('.hd-from').focus();
+      } else if (ev.target.closest('.hd-del')) {
+        ev.target.closest('.hd-slot').remove();
+        if (!slots.childElementCount) row.querySelector('.hd-open').checked = false;
+        syncRow(row);
+      }
+      setFieldError('pl-hours', '');
+    });
+    $('pl-days-copy').addEventListener('click', () => {
+      const monday = list.querySelector('[data-d="1"]');
+      if (!monday.querySelector('.hd-open').checked) { setFieldError('pl-hours', 'Le lundi est fermé : ouvrez-le d\'abord, ou réglez chaque jour.'); return; }
+      const slots = readRow(monday);
+      list.querySelectorAll('.hd-row').forEach((row) => {
+        if (row === monday || !row.querySelector('.hd-open').checked) return;
+        setRow(row, slots);
+      });
+      toast('Horaires du lundi copiés sur les autres jours ouverts.');
+    });
+    const readRow = (row) => [...row.querySelectorAll('.hd-slot')].map((sl) => [sl.querySelector('.hd-from').value, sl.querySelector('.hd-to').value]);
+    function setRow(row, slots) {
+      row.querySelector('.hd-open').checked = slots.length > 0;
+      const box = row.querySelector('.hd-slots');
+      box.textContent = '';
+      slots.forEach(([a, b]) => box.appendChild(slotEl(a, b)));
+      syncRow(row);
+    }
+    function setMode(m) {
+      mode = m;
+      $('pl-hours-mode').querySelectorAll('[data-hmode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.hmode === m)));
+      $('pl-hours-same').hidden = m !== 'same';
+      $('pl-hours-days').hidden = m !== 'days';
+      setFieldError('pl-hours', '');
+    }
+    /** Créneaux du mode « Pareil tous les jours », tels que saisis. */
+    function readSame() {
+      const services = [];
+      ['1', '2'].forEach((n) => { if ($('pl-h' + n + '-on').checked) services.push([$('pl-h' + n + '-from').value, $('pl-h' + n + '-to').value]); });
+      const closedOn = [...$('pl-closed').querySelectorAll('input:checked')].map((i) => Number(i.value));
+      return { services, closedOn };
+    }
+    $('pl-hours-mode').addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-hmode]');
+      if (!b || b.dataset.hmode === mode) return;
+      // Passage à « Selon les jours » : on part des horaires communs déjà saisis
+      if (b.dataset.hmode === 'days') {
+        const { services, closedOn } = readSame();
+        list.querySelectorAll('.hd-row').forEach((row) => setRow(row, closedOn.includes(Number(row.dataset.d)) ? [] : services.filter(([x, y]) => x && y)));
+      }
+      setMode(b.dataset.hmode);
+    });
+    /** Erreur d'une liste de créneaux d'un jour (heures vides ou identiques, chevauchement), sinon ''. */
+    function slotsError(slots, dayLabel) {
+      if (slots.some(([a, b]) => !a || !b || a === b)) return 'Indiquez une heure d\'ouverture et de fermeture différentes' + (dayLabel ? ' (' + dayLabel + ')' : '') + '.';
+      const mins = slots.map(([a, b]) => { const x = toMin(a); let y = toMin(b); if (y <= x) y += 1440; return [x, y]; }).sort((p, q) => p[0] - q[0]);
+      for (let i = 1; i < mins.length; i++) {
+        if (mins[i][0] < mins[i - 1][1]) return 'Deux créneaux se chevauchent' + (dayLabel ? ' le ' + dayLabel : '') + ' : le suivant doit commencer après la fin du précédent.';
+      }
+      return '';
+    }
+    return {
+      /** Remplit l'éditeur avec la fiche (ou des horaires par défaut). */
+      fill(r) {
+        const week = r ? weekSlots(r) : null;
+        list.querySelectorAll('.hd-row').forEach((row) => setRow(row, week ? week[Number(row.dataset.d)] : [['11:30', '14:30'], ['18:30', '22:30']]));
+        setMode(r && Array.isArray(r.days) ? 'days' : 'same');
+      },
+      /** { value: opening_hours à enregistrer } ou { error } */
+      read() {
+        if (mode === 'same') {
+          const { services, closedOn } = readSame();
+          if (!services.length) return { error: 'Activez au moins un service.' };
+          const err = slotsError(services, '');
+          if (err) return { error: err };
+          if (closedOn.length === 7) return { error: 'Votre restaurant ne peut pas être fermé tous les jours.' };
+          return { value: { services, closed_on: closedOn } };
+        }
+        const days = {};
+        for (const row of list.querySelectorAll('.hd-row')) {
+          const d = Number(row.dataset.d);
+          const slots = row.querySelector('.hd-open').checked ? readRow(row) : [];
+          const err = slotsError(slots, DAYS[d]);
+          if (err) return { error: err };
+          days[d] = slots;
+        }
+        const firstOpen = DAY_ORDER.find((d) => days[d].length);
+        if (firstOpen === undefined) return { error: 'Votre restaurant ne peut pas être fermé tous les jours.' };
+        // Résumé gardé pour les anciennes versions du site : créneaux du premier jour ouvert, jours fermés
+        return { value: { services: days[firstOpen], closed_on: DAY_ORDER.filter((d) => !days[d].length), days } };
+      },
+    };
+  })();
+
   const myRestaurant = (account = currentUser()) => (account && account.pro && account.pro.merchantId ? restaurants()[account.pro.merchantId] || null : null);
 
   /** Préremplit le formulaire : fiche existante, sinon données Sirene. */
@@ -11139,6 +11909,9 @@
     syncHoursInputs();
     const closed = listed ? r.closedOn : [];
     $('pl-closed').querySelectorAll('input').forEach((i) => { i.checked = closed.includes(Number(i.value)); });
+    HoursEditor.fill(listed && r.hours.length ? r : null);
+    $('pl-amen').querySelectorAll('input').forEach((i) => { i.checked = !!(listed && (r.amenities || []).includes(i.value)); });
+    ['instagram', 'website', 'order'].forEach((k) => { $('pl-' + k).value = (listed && r.links && r.links[k]) || ''; setFieldError('pl-' + k, ''); });
     $('pl-phone').value = listed ? r.phone || '' : (me.phone || '');
     $('pl-mv').checked = !!(listed && r.mealVouchers);
     setMenuScanStatus('', '');
@@ -11172,12 +11945,47 @@
       '<button class="icon-btn m-del" type="button">×</button>' +
       '<input class="m-name" maxlength="60" placeholder="Nom du plat" aria-label="Nom du plat" />' +
       '<input class="m-price" inputmode="decimal" maxlength="9" placeholder="Prix €" aria-label="Prix en euros" />' +
-      '<input class="m-desc" maxlength="120" placeholder="Détail (facultatif) : ingrédients, taille…" aria-label="Détail du plat" />';
+      '<input class="m-desc" maxlength="120" placeholder="Détail (facultatif) : ingrédients, taille…" aria-label="Détail du plat" />' +
+      '<div class="m-extra">' + Object.entries(DISH_TAGS).map(([k, t]) => '<button class="m-tag" type="button" data-tag="' + k + '" aria-pressed="false">' + t + '</button>').join('') +
+      '<label class="m-photo"><input type="file" accept="image/*" hidden /><img alt="" hidden /><span>Photo</span></label><button class="link-btn m-photo-x" type="button" hidden>Retirer la photo</button>' +
+      '<label class="m-out"><input type="checkbox" class="m-out-on" /> Épuisé aujourd\'hui</label></div>';
     // Nouvelle ligne : même rubrique que la précédente
     row.querySelector('.m-section').value = item.section != null ? item.section : (prev ? prev.querySelector('.m-section').value : '');
     row.querySelector('.m-name').value = item.name || '';
     row.querySelector('.m-price').value = item.price != null ? String(item.price.toFixed(2)).replace('.', ',') : '';
     row.querySelector('.m-desc').value = item.desc || '';
+    // Étiquettes, photo, « épuisé aujourd'hui » (la date du jour : le lendemain, le plat redevient disponible)
+    (item.tags || []).forEach((t) => { const b = row.querySelector('[data-tag="' + t + '"]'); if (b) b.setAttribute('aria-pressed', 'true'); });
+    row.querySelector('.m-out-on').checked = item.sold_out === dateKey(new Date());
+    setDishPhoto(row, item.photo || '');
+    row.querySelector('.m-extra').addEventListener('click', (ev) => {
+      const t = ev.target.closest('.m-tag');
+      if (t) t.setAttribute('aria-pressed', String(t.getAttribute('aria-pressed') !== 'true'));
+      if (ev.target.closest('.m-photo-x')) setDishPhoto(row, '');
+    });
+    row.querySelector('.m-photo input').addEventListener('change', async (ev) => {
+      const file = ev.target.files[0];
+      ev.target.value = '';
+      if (!file) return;
+      const me = currentUser();
+      const merchantId = me && me.pro && me.pro.merchantId;   // dossier de la fiche dans le stockage des photos
+      if (!merchantId) { setFieldError('pl-menu', 'Enregistrez d\'abord votre fiche, puis ajoutez les photos des plats.'); return; }
+      let bitmap;
+      try {
+        bitmap = await decodeImage(file);
+        const crop = isPhotoRatio(bitmap.width, bitmap.height) ? fullCrop(bitmap.width, bitmap.height) : await cropPhoto(bitmap, { index: 1, total: 1 });
+        if (!crop) return;
+        const blob = await exportCrop(bitmap, crop);
+        const path = merchantId + '/dish-' + uid().replace(/[^A-Za-z0-9_-]/g, '').slice(0, 32) + '.' + photoExt(blob);
+        const up = await Loader.run(sb.storage.from('photos').upload(path, blob, { contentType: blob.type, cacheControl: '31536000' }), 'Envoi de la photo…');
+        if (up.error) { setFieldError('pl-menu', 'La photo n\'a pas pu être envoyée. ' + cloudError(up.error)); return; }
+        setDishPhoto(row, publicUrl('photos', path));
+      } catch (e) {
+        setFieldError('pl-menu', 'Format d\'image non pris en charge (utilisez JPG ou PNG).');
+      } finally {
+        if (bitmap && bitmap.close) bitmap.close();
+      }
+    });
     row.querySelector('.m-del').addEventListener('click', () => {
       const next = row.nextElementSibling || row.previousElementSibling;
       row.remove();
@@ -11190,6 +11998,15 @@
     if (focus) row.querySelector(row.querySelector('.m-section').value ? '.m-name' : '.m-section').focus();
   }
 
+  /** Photo d'un plat (adresse publique) dans la ligne de l'éditeur ; '' : aucune. */
+  function setDishPhoto(row, url) {
+    row.dataset.photo = url || '';
+    const img = row.querySelector('.m-photo img');
+    img.hidden = !url;
+    if (url) img.src = url; else img.removeAttribute('src');
+    row.querySelector('.m-photo span').textContent = url ? 'Changer' : 'Photo';
+    row.querySelector('.m-photo-x').hidden = !url;
+  }
   function syncMenuEditor() {
     const rows = [...$('pl-menu').children];
     rows.forEach((row, i) => row.querySelector('.m-del').setAttribute('aria-label', 'Retirer le plat ' + (i + 1)));
@@ -11294,7 +12111,9 @@
       if (name.length < 2) { row.querySelector('.m-name').classList.add('is-invalid'); return { error: 'Plat n° ' + (i + 1) + ' : indiquez son nom.', input: row.querySelector('.m-name') }; }
       const price = parsePrice(priceText);
       if (price === null) { row.querySelector('.m-price').classList.add('is-invalid'); return { error: '« ' + name + ' » : prix invalide (ex. : 9,50).', input: row.querySelector('.m-price') }; }
-      items.push({ section, name, price, desc });
+      const tags = [...row.querySelectorAll('.m-tag[aria-pressed="true"]')].map((b) => b.dataset.tag);
+      items.push({ section, name, price, desc, ...(tags.length ? { tags } : {}), ...(row.dataset.photo ? { photo: row.dataset.photo } : {}),
+        ...(row.querySelector('.m-out-on').checked ? { sold_out: dateKey(new Date()) } : {}) });
     }
     return { items };
   }
@@ -11303,7 +12122,7 @@
   let menuFor = null;
   function renderMenu(shop) {
     const items = shop.menu || [];
-    const key = shop.id + ':' + (shop.updatedAt || '');
+    const key = shop.id + ':' + (shop.updatedAt || '') + ':' + dateKey(new Date());   // « épuisé aujourd'hui » change à minuit
     $('shop-menu-empty').hidden = !!items.length;
     if (key === menuFor) return;
     menuFor = key;
@@ -11324,6 +12143,21 @@
         li.querySelector('small').textContent = it.desc || '';
         li.querySelector('small').hidden = !it.desc;
         li.querySelector('.price').textContent = formatPrice(it.price);
+        if (it.sold_out === dateKey(new Date())) {
+          li.classList.add('is-out');
+          const out = document.createElement('span'); out.className = 'dish-out'; out.textContent = 'Épuisé aujourd\'hui';
+          li.querySelector('b').after(out);
+        }
+        const tags = (it.tags || []).filter((t) => DISH_TAGS[t]);
+        if (tags.length) {
+          const box = document.createElement('div'); box.className = 'dish-tags';
+          tags.forEach((t) => { const sp = document.createElement('span'); sp.textContent = DISH_TAGS[t]; box.appendChild(sp); });
+          li.firstChild.appendChild(box);
+        }
+        if (it.photo && /^https:\/\//.test(it.photo)) {
+          const img = document.createElement('img'); img.className = 'dish-img'; img.src = it.photo; img.alt = it.name; img.loading = 'lazy'; img.decoding = 'async';
+          li.prepend(img);
+        }
         ul.appendChild(li);
       });
       list.appendChild(ul);
@@ -11855,16 +12689,16 @@
     if (!proDraft.address) fail('pl-address', 'Choisissez l\'adresse de votre restaurant dans la liste des suggestions (La Roche-sur-Yon).');
     else if (!isInBounds(proDraft.address.coords)) fail('pl-address', 'L\'adresse doit se situer à La Roche-sur-Yon.');
 
-    const hours = [];
-    ['1', '2'].forEach((n) => {
-      if (!$('pl-h' + n + '-on').checked) return;
-      const from = $('pl-h' + n + '-from').value, to = $('pl-h' + n + '-to').value;
-      if (!from || !to || from === to) fail('pl-hours', 'Indiquez une heure d\'ouverture et de fermeture différentes.');
-      else hours.push([from, to]);
+    const hoursRead = HoursEditor.read();
+    if (hoursRead.error) fail('pl-hours', hoursRead.error);
+    const links = {};
+    [['instagram', 'Pseudo ou lien Instagram invalide (ex. : @pizzeriaduboulevard).'], ['website', 'Adresse de site invalide (ex. : www.monrestaurant.fr).'],
+      ['order', 'Lien de commande invalide (copiez l\'adresse complète de votre page).']].forEach(([k, msg]) => {
+      const v = normalizeLink(k, $('pl-' + k).value);
+      if (v === null) fail('pl-' + k, msg);
+      else if (v) links[k] = v;
     });
-    const closedOn = [...$('pl-closed').querySelectorAll('input:checked')].map((i) => Number(i.value));
-    if (!hours.length && !firstInvalid) fail('pl-hours', 'Activez au moins un service.');
-    if (closedOn.length === 7) fail('pl-hours', 'Votre restaurant ne peut pas être fermé tous les jours.');
+    const amenities = [...$('pl-amen').querySelectorAll('input:checked')].map((i) => i.value);
     if (phone && !PHONE_RE.test(compactPhone(phone))) fail('pl-phone', 'Numéro de téléphone invalide.');
     if (firstInvalid) {
       $('err-pro-listing').textContent = 'Certaines informations sont à compléter.';
@@ -11877,8 +12711,8 @@
     const update = {
       name, category: CAT_TO_DB[proDraft.category], description, photos_urls: [...proDraft.photos], menu_json: menu.items,
       address: proDraft.address.label, lng: proDraft.address.coords[0], lat: proDraft.address.coords[1],
-      opening_hours: { services: hours, closed_on: closedOn }, phone: phone ? formatPhone(phone) : null, status: 'published',
-      accepts_meal_vouchers: $('pl-mv').checked,
+      opening_hours: hoursRead.value, phone: phone ? formatPhone(phone) : null, status: 'published',
+      accepts_meal_vouchers: $('pl-mv').checked, amenities, links,
     };
     const submitBtn = ev.submitter || $('form-pro-listing').querySelector('[type=submit]');
     submitBtn.disabled = true;
@@ -11945,7 +12779,30 @@
     syncProfileBadge(account);
     $('profile-lbl').textContent = account.role === 'pro' ? 'Mon resto' : 'Profil';
     Scanner.renderEntry();
+    Staff.refresh(account);
   }
+  /**
+   * Équipier d'un restaurant (compte client invité par le restaurateur) : les invitations à son adresse sont acceptées à
+   * la connexion (accept_staff_invites) et « Scanner pour … » apparaît dans son profil.
+   */
+  const Staff = (() => {
+    let list = [], at = 0;
+    async function refresh(account) {
+      if (!account || account.role === 'pro' || !sb) { list = []; return; }
+      if (Date.now() - at < 60e3) return;
+      at = Date.now();
+      try {
+        const { data, error } = await sb.rpc('accept_staff_invites');
+        if (!error && Array.isArray(data)) { list = data; paint(); }
+      } catch (e) { at = 0; }
+    }
+    function paint() {
+      $('profile-staff').hidden = !list.length;
+      $('profile-staff-sub').textContent = list.map((x) => x.name).join(', ');
+    }
+    $('profile-staff').addEventListener('click', () => { closePanel($('profile-sheet')); Scanner.open({ home: false, staff: true }); });
+    return { refresh, paint, has: () => list.length > 0 };
+  })();
 
   function updateProfileGeo() {
     const state = locateBtn.dataset.state;
@@ -11996,6 +12853,8 @@
       if (activePanel) closePanel(activePanel);
       root.hidden = false;
       document.body.classList.add('pro-open');
+      // Le rappel « compte pas complet » de la carte ferait doublon avec le bandeau de l'espace
+      if (/pas complet/.test($('toast-text').textContent)) hideToast();
       setTab(t, { focus: true });
       $('ps-close').setAttribute('aria-label', ProHome.canScanHome() ? 'Retour au scanner' : 'Fermer l\'espace restaurateur');
       render();
@@ -12219,6 +13078,31 @@
       else if (s.reviewNote) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche n\'a pas pu être validée : ' + s.reviewNote + ' Corrigez-la puis remettez-la en ligne : elle sera revérifiée.'; btn.textContent = 'Corriger ma fiche'; btn.onclick = editListing; }
       else if (s.step || !s.listed) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre compte n\'est pas complet : votre restaurant n\'apparaît pas encore sur la carte.'; btn.textContent = 'Compléter mon compte'; btn.onclick = () => setTab('todo'); }
       else if (s.hidden) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche est masquée : les clients ne la voient plus sur la carte.'; btn.textContent = 'Remettre en ligne'; btn.onclick = () => setVisible(true); }
+      // Compte pas encore complet : les 3 étapes (faites, en cours, à venir) au lieu d'un accueil vide
+      const left = missingSteps(s.pro);
+      const setup = !s.listed && !s.suspended && left.length > 0;
+      $('ps-home-setup').hidden = !setup;
+      if (setup) {
+        alert.hidden = true;   // le bloc des étapes le dit déjà
+        const ol = $('ps-home-steps');
+        ol.textContent = '';
+        PRO_STEPS.forEach((st, i) => {
+          const done = !left.includes(st), current = st === left[0];
+          const li = document.createElement('li');
+          li.className = done ? 'is-done' : current ? 'is-current' : 'is-next';
+          li.innerHTML = '<span class="ts-num" aria-hidden="true"></span><span class="ts-txt"><span></span><small></small></span>';
+          li.querySelector('.ts-num').textContent = done ? '✓' : String(i + 1);
+          li.querySelector('.ts-txt span').textContent = st.label + (done ? ' : fait' : '');
+          li.querySelector('small').textContent = done ? '' : st.what + ' · environ ' + st.time;
+          if (current) {
+            const go = document.createElement('button');
+            go.type = 'button'; go.className = 'btn btn-primary ts-go'; go.textContent = 'Continuer';
+            go.addEventListener('click', () => { close(); showAuthStep(st.step); });
+            li.appendChild(go);
+          }
+          ol.appendChild(li);
+        });
+      }
       $('ps-home-live').hidden = !s.listed;
       if (!s.listed) return;
       // Chiffres clés
@@ -12461,6 +13345,7 @@
         { key: 'reviews', label: 'Avis lus', n: T.reviews_tab }, { key: 'walk', label: 'Itinéraire à pied', n: T.walk },
         { key: 'car', label: 'Itinéraire en voiture', n: T.car }, { key: 'phone', label: 'Appel', n: T.phone },
         { key: 'share', label: 'Partage de la fiche', n: T.shares }, { key: 'google', label: 'Avis Google ouverts', n: T.google },
+        { key: 'links', label: 'Liens ouverts (Instagram, site, commande)', n: T.links || 0 },
         { key: 'offer', label: 'Clic sur une de vos offres', n: T.offer_clicks }, { key: 'story_cta', label: 'Fiche ouverte depuis une story', n: T.story_cta },
         { key: 'story_like', label: '♥ « J\'aime » sur une story', n: T.story_likes },
       ], { empty: 'Aucune action sur la période.' });
@@ -12544,7 +13429,16 @@
       off.hidden = s.live;
       off.textContent = s.suspended ? 'Votre fiche est suspendue : publication impossible.'
         : s.hidden ? 'Votre fiche est masquée : remettez-la en ligne (onglet « Ma fiche ») pour publier des stories et des promotions.'
+        : s.awaitingReview ? 'Votre fiche est en cours de vérification par l\'équipe FlashMiam : vous pourrez publier des stories et des promotions dès qu\'elle sera en ligne.'
         : 'Terminez votre inscription pour publier des stories et des promotions.';
+      // Lien direct vers ce qui débloque la publication
+      const goTo = s.suspended || s.awaitingReview ? null : s.hidden ? ['Remettre en ligne', () => setTab('fiche')] : ['Compléter mon compte', () => setTab('todo')];
+      if (!s.live && goTo) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'pill-btn ps-off-go'; b.textContent = goTo[0];
+        b.addEventListener('click', goTo[1]);
+        off.append(' ', b);
+      }
       renderStoryAdmin(s.account);
       renderPromoAdmin(s.account);
     }
@@ -12600,6 +13494,7 @@
       li.querySelector('.stars').textContent = starText(x.rating);
       li.querySelector('.stars').setAttribute('aria-label', x.rating + ' sur 5');
       li.querySelector('b').textContent = x.author_name;
+      if (x.verified) li.querySelector('b').after(verifiedTag());
       li.querySelector('small').textContent = timeAgo(x.created_at);
       if (x.comment) { const p = document.createElement('p'); p.className = 'rv-text'; p.textContent = x.comment; li.appendChild(p); }
       if (x.reply && replyFor !== x.id) {
@@ -12668,7 +13563,7 @@
         ['Description', (r.description || '').length >= 30, (r.description || '').length ? plural(r.description.length, 'caractère', 'caractères') : 'à écrire', 'field-pl-desc'],
         ['Photos', r.photos.length > 0, r.photos.length ? plural(r.photos.length, 'photo', 'photos') : 'aucune', 'field-pl-photos'],
         ['Carte (menu)', r.menu.length > 0, r.menu.length ? plural(r.menu.length, 'plat', 'plats') : 'vide', 'field-pl-menu'],
-        ['Horaires d\'ouverture', r.hours.length > 0, r.hours.length ? plural(r.hours.length, 'service', 'services') : 'non renseignés', 'field-pl-hours'],
+        ['Horaires d\'ouverture', r.hours.length > 0, !r.hours.length ? 'non renseignés' : r.days ? 'selon les jours' : plural(r.hours.length, 'service', 'services'), 'field-pl-hours'],
         ['Téléphone', !!r.phone, r.phone ? formatPhone(r.phone) : 'non renseigné', 'field-pl-phone'],
         ['Justificatifs (Kbis, hygiène)', !s.missing.length, s.missing.length ? plural(s.missing.length, 'à ajouter', 'à ajouter') : 'déposés', 'todo'],
       ] : [];
@@ -12698,8 +13593,14 @@
         : s.awaitingDocs ? 'Disponible une fois vos justificatifs ajoutés (onglet « Compléter »).'
         : s.awaitingReview ? 'Disponible une fois votre fiche vérifiée par l\'équipe FlashMiam (en général sous 24 h).'
         : !s.listed ? 'Disponible une fois votre fiche publiée.'
-        : s.live ? 'Les clients voient votre fiche, vos stories et vos promotions. Masquez-la en cas de fermeture exceptionnelle.'
+        : s.live ? 'Les clients voient votre fiche, vos stories et vos promotions. Pour des congés, préférez « Fermeture exceptionnelle » ci-dessous.'
         : 'Masquée : personne ne la voit. Vos abonnés, vos avis et vos statistiques sont conservés.';
+      Closure.render(s);
+      LoyaltyCard.render(s);
+      StaffCard.render(s);
+      // Avis réservés aux visites validées (onglet « Avis »)
+      $('ps-rv-only').setAttribute('aria-checked', String(!!(s.r && s.r.reviewsVerifiedOnly)));
+      $('ps-rv-only').disabled = !s.listed;
     }
     /** Carte « Abonnement » : formule, échéance, paiement refusé, résiliation et reprise. */
     function renderSubscription(pro, date) {
@@ -12760,10 +13661,159 @@
     });
     $('ps-sub-choose').addEventListener('click', () => editListing());
 
+    /** Fermeture exceptionnelle (congés, travaux…) : dates du … au … inclus et raison, ou « Fermé aujourd'hui seulement ». */
+    const Closure = (() => {
+      const today = () => dateKey(new Date());
+      $('ps-close-note').addEventListener('input', () => { $('ps-close-count').textContent = $('ps-close-note').value.length + ' / 80'; });
+      ['ps-close-from', 'ps-close-until'].forEach((f) => $(f).addEventListener('input', () => setFieldError(f, '')));
+      async function save(fields, message) {
+        const { r } = stateOf();
+        if (!r) return;
+        const { error } = await Loader.run(sb.from('merchants').update(fields).eq('id', r.id), 'Enregistrement…');
+        if (error) { toast(cloudError(error)); return; }
+        await refreshCloud();
+        render();
+        toast(message);
+      }
+      $('ps-close-today').addEventListener('click', () => save({ closed_from: today(), closed_until: today(), closure_note: $('ps-close-note').value.trim() || null },
+        'Fermeture enregistrée : votre fiche indique « Fermé exceptionnellement aujourd\'hui ».'));
+      $('ps-close-save').addEventListener('click', () => {
+        const from = $('ps-close-from').value, until = $('ps-close-until').value;
+        let bad = false;
+        if (!from) { setFieldError('ps-close-from', 'Choisissez le premier jour de fermeture.'); bad = true; }
+        if (!until) { setFieldError('ps-close-until', 'Choisissez le dernier jour de fermeture.'); bad = true; }
+        if (!bad && until < today()) { setFieldError('ps-close-until', 'Cette date est déjà passée.'); bad = true; }
+        if (!bad && until < from) { setFieldError('ps-close-until', 'Le dernier jour doit venir après le premier.'); bad = true; }
+        if (!bad && (new Date(until) - new Date(from)) / 864e5 > 366) { setFieldError('ps-close-until', 'Une fermeture dure un an au plus.'); bad = true; }
+        if (bad) return;
+        save({ closed_from: from, closed_until: until, closure_note: $('ps-close-note').value.trim() || null },
+          'Fermeture enregistrée du ' + fmtDay(from) + ' au ' + fmtDay(until) + '.');
+      });
+      $('ps-close-cancel').addEventListener('click', () => save({ closed_from: null, closed_until: null, closure_note: null }, 'Fermeture annulée : vos horaires habituels s\'affichent de nouveau.'));
+      return {
+        render(s) {
+          const r = s.r;
+          $('ps-close-card').hidden = !(r && s.listed);
+          if (!r || !s.listed) return;
+          const c = r.closure && r.closure.until >= today() ? r.closure : null;
+          $('ps-close-state').hidden = !c;
+          $('ps-close-state').textContent = c ? closureText(r, new Date()) || ('Fermeture prévue du ' + fmtDay(c.from) + ' au ' + fmtDay(c.until) + (c.note ? ' : ' + c.note : '') + '.') : '';
+          $('ps-close-cancel').hidden = !c;
+          $('ps-close-save').textContent = c ? 'Modifier la fermeture' : 'Enregistrer la fermeture';
+          $('ps-close-from').min = today(); $('ps-close-until').min = today();
+          // Champs : la fermeture en cours, sinon vides (pas de valeur qui écraserait une saisie en cours)
+          const typing = document.activeElement && document.activeElement.matches && document.activeElement.matches('#ps-close-card input');
+          if (typing) return;
+          $('ps-close-from').value = c ? c.from : '';
+          $('ps-close-until').value = c ? c.until : '';
+          $('ps-close-note').value = c ? c.note : '';
+          $('ps-close-count').textContent = $('ps-close-note').value.length + ' / 80';
+        },
+      };
+    })();
+
+    /** Carte de fidélité du restaurant (réglage). */
+    const LoyaltyCard = (() => {
+      for (let n = 3; n <= 20; n++) { const o = document.createElement('option'); o.value = String(n); o.textContent = n + ' visites'; $('ps-loyal-goal').appendChild(o); }
+      $('ps-loyal-goal').value = '10';
+      $('ps-loyal-reward').addEventListener('input', () => { setFieldError('ps-loyal-reward', ''); $('ps-loyal-count').textContent = $('ps-loyal-reward').value.length + ' / 60'; });
+      async function save(fields, message) {
+        const { r } = stateOf();
+        if (!r) return false;
+        const { error } = await Loader.run(sb.from('merchants').update(fields).eq('id', r.id), 'Enregistrement…');
+        if (error) { toast(cloudError(error)); return false; }
+        await refreshCloud();
+        render();
+        toast(message);
+        return true;
+      }
+      $('ps-loyal-on').addEventListener('click', () => {
+        const on = $('ps-loyal-on').getAttribute('aria-checked') !== 'true';
+        if (on) { $('ps-loyal-on').setAttribute('aria-checked', 'true'); $('ps-loyal-form').hidden = false; $('ps-loyal-reward').focus(); return; }
+        const { r } = stateOf();
+        if (r && r.loyalty) save({ loyalty_goal: null, loyalty_reward: null }, 'Carte de fidélité désactivée.');
+        else { $('ps-loyal-on').setAttribute('aria-checked', 'false'); $('ps-loyal-form').hidden = true; }
+      });
+      $('ps-loyal-save').addEventListener('click', () => {
+        const reward = $('ps-loyal-reward').value.trim().replace(/\s+/g, ' ');
+        if (reward.length < 3) { setFieldError('ps-loyal-reward', 'Décrivez la récompense (ex. : un menu offert).'); $('ps-loyal-reward').focus(); return; }
+        const goal = Number($('ps-loyal-goal').value);
+        save({ loyalty_goal: goal, loyalty_reward: reward }, 'Carte de fidélité enregistrée : ' + goal + ' visites = ' + reward + '.');
+      });
+      return {
+        render(s) {
+          const r = s.r;
+          $('ps-loyal-card').hidden = !(r && s.listed);
+          if (!r || !s.listed) return;
+          const L = r.loyalty;
+          if (document.activeElement && document.activeElement.closest && document.activeElement.closest('#ps-loyal-card')) return;
+          $('ps-loyal-on').setAttribute('aria-checked', String(!!L));
+          $('ps-loyal-form').hidden = !L;
+          $('ps-loyal-state').textContent = L ? L.goal + ' visites = ' + L.reward : 'Désactivée';
+          if (L) { $('ps-loyal-goal').value = String(L.goal); $('ps-loyal-reward').value = L.reward; }
+          $('ps-loyal-count').textContent = $('ps-loyal-reward').value.length + ' / 60';
+        },
+      };
+    })();
+
+    /** Équipiers (adresses invitées, acceptées ou en attente). */
+    const StaffCard = (() => {
+      let rows = null, loadedFor = null;
+      async function load(r) {
+        const { data, error } = await sb.from('merchant_staff').select('email, user_id, accepted_at, invited_at').eq('merchant_id', r.id).order('invited_at');
+        if (error) return;
+        rows = data || []; loadedFor = r.id;
+        draw(r);
+      }
+      function draw(r) {
+        const ul = $('ps-staff-list');
+        ul.textContent = '';
+        (rows || []).forEach((x) => {
+          const li = document.createElement('li');
+          li.innerHTML = '<span></span><small></small><button class="icon-btn" type="button">&times;</button>';
+          li.querySelector('span').textContent = x.email;
+          li.querySelector('small').textContent = x.user_id ? 'actif' : 'invitation en attente';
+          li.querySelector('button').setAttribute('aria-label', 'Retirer l\'équipier ' + x.email);
+          li.querySelector('button').addEventListener('click', async () => {
+            const { error } = await Loader.run(sb.from('merchant_staff').delete().eq('merchant_id', r.id).eq('email', x.email), 'Retrait…');
+            if (error) { toast(cloudError(error)); return; }
+            toast(x.email + ' ne peut plus scanner pour votre restaurant.');
+            load(r);
+          });
+          ul.appendChild(li);
+        });
+        $('ps-staff-invite').disabled = (rows || []).length >= 5;
+      }
+      $('ps-staff-email').addEventListener('input', () => setFieldError('ps-staff-email', ''));
+      $('ps-staff-invite').addEventListener('click', async () => {
+        const { r } = stateOf();
+        if (!r) return;
+        const email = $('ps-staff-email').value.trim().toLowerCase();
+        if (!EMAIL_RE.test(email)) { setFieldError('ps-staff-email', 'Saisissez une adresse e-mail valide.'); return; }
+        const { error } = await Loader.run(sb.from('merchant_staff').insert({ merchant_id: r.id, email }), 'Invitation…');
+        if (error) {
+          setFieldError('ps-staff-email', error.code === '23505' ? 'Cette adresse est déjà invitée.' : /Cinq équipiers/.test(error.message || '') ? 'Cinq équipiers au maximum.'
+            : /propre compte/.test(error.message || '') ? 'C\'est l\'adresse de votre propre compte.' : cloudError(error));
+          return;
+        }
+        $('ps-staff-email').value = '';
+        toast('Invitation enregistrée : prévenez ' + email + ' de se connecter à FlashMiam avec cette adresse.');
+        load(r);
+      });
+      return {
+        render(s) {
+          const r = s.r;
+          $('ps-staff-card').hidden = !(r && s.listed);
+          if (!r || !s.listed) return;
+          if (loadedFor !== r.id) load(r); else draw(r);
+        },
+      };
+    })();
+
     async function setVisible(on) {
       const { r, listed } = stateOf();
       if (!r || !listed) return;
-      if (!on && !window.confirm('Masquer votre fiche ?\n\nElle n\'apparaîtra plus sur la carte, dans la recherche ni dans les offres, jusqu\'à ce que vous la remettiez en ligne.')) return;
+      if (!on && !window.confirm('Masquer votre fiche ?\n\nElle n\'apparaîtra plus sur la carte, dans la recherche ni dans les offres, jusqu\'à ce que vous la remettiez en ligne.\n\nPour des congés, utilisez plutôt « Fermeture exceptionnelle » : votre fiche reste visible avec la date de réouverture.')) return;
       $('ps-visible').disabled = true;
       const { error } = await Loader.run(sb.from('merchants').update({ is_open: on }).eq('id', r.id), on ? 'Remise en ligne…' : 'Masquage de la fiche…');
       $('ps-visible').disabled = false;
@@ -12774,6 +13824,18 @@
       toast(on ? 'Votre fiche est de nouveau visible sur la carte.' : 'Votre fiche est masquée. Remettez-la en ligne quand vous voulez.');
     }
     $('ps-visible').addEventListener('click', () => setVisible($('ps-visible').getAttribute('aria-checked') !== 'true'));
+    $('ps-rv-only').addEventListener('click', async () => {
+      const { r, listed } = stateOf();
+      if (!r || !listed) return;
+      const on = $('ps-rv-only').getAttribute('aria-checked') !== 'true';
+      $('ps-rv-only').disabled = true;
+      const { error } = await Loader.run(sb.from('merchants').update({ reviews_verified_only: on }).eq('id', r.id), 'Enregistrement…');
+      $('ps-rv-only').disabled = false;
+      if (error) { toast(cloudError(error)); return; }
+      await refreshCloud();
+      render();
+      toast(on ? 'Seuls les clients dont vous avez scanné le QR code peuvent maintenant donner un avis.' : 'Tous les clients peuvent de nouveau donner un avis.');
+    });
 
     /* ----- Actions ----- */
     /** Formulaire de la fiche ; field : rubrique à montrer directement (carte, horaires). */
@@ -12792,7 +13854,7 @@
     async function shareListing() {
       const r = myRestaurant();
       if (!r || !r.published) return;
-      const url = shopLink(r.id);
+      const url = shareLink(r);
       if (navigator.share) {
         try { await navigator.share({ title: r.name, text: r.name + ' sur FlashMiam', url }); return; }
         catch (e) { if (e && e.name === 'AbortError') return; }
@@ -13126,17 +14188,19 @@
       const pro = !!(me && me.role === 'pro');
       const ok = pro && VisitFeature.check(renderEntry);
       $('scan-fab').hidden = !(ok && listed());
-      $('ps-scan').hidden = !ok;
-      $('ps-scan-fab').hidden = !ok;
+      // Tant que la fiche n'est pas en ligne, aucun client ne peut montrer de QR code : pas de bouton « Scanner »
+      $('ps-scan').hidden = !(ok && listed());
+      $('ps-scan-fab').hidden = !(ok && listed());
       // Lecteur préparé à l'avance (sans ouvrir la caméra) : le scanner s'ouvre et lit tout de suite
       if (ok && listed() && !detectorPrep) (window.requestIdleCallback || setTimeout)(() => { if (!detectorPrep) detectorPrep = prepareDetector().catch(() => { detectorPrep = null; }); });
     }
     function help(text, warn = false) { $('scan-help').textContent = text; $('scan-help').classList.toggle('is-warn', warn); }
 
     /** home : « mode service » du téléphone (caméra en haut, tableau de bord en bas, pas de bouton Fermer). */
-    async function open({ code = null, home = null } = {}) {
+    async function open({ code = null, home = null, staff = false } = {}) {
       const me = currentUser();
-      if (!me || me.role !== 'pro') return;
+      // Restaurateur, ou équipier invité par un restaurateur (scanner seulement)
+      if (!me || (me.role !== 'pro' && !(staff && Staff.has()))) return;
       if (!isOpen()) lastFocus = document.activeElement;
       if (activePanel) closePanel(activePanel);
       homeMode = home === null ? ProHome.phone() && listed() : !!home;
@@ -13324,8 +14388,13 @@
         case 'ok': {
           const n = Number(d.visit_number) || 1;
           if (summary) { summary.today = (summary.today || 0) + 1; if (d.promo_title) summary.today_offers = (summary.today_offers || 0) + 1; renderCount(); }
+          const L = d.loyalty;
+          const loyal = !L ? '' : L.earned ? '🎉 Carte de fidélité complète : ' + L.reward
+            : Number(L.available) > 0 ? '🎟️ Récompense à remettre : ' + L.reward + ' (' + L.stamps + '/' + L.goal + ' tampons)'
+            : '🎟️ Fidélité : ' + L.stamps + '/' + L.goal + ' tampons';
           show('ok', d.promo_title ? 'Offre validée' : 'Visite validée', n > 1 ? nth(n) + ' visite de ce client chez vous' : 'Première visite de ce client chez vous', {
-            offer, warn: d.promo_used_today ? '⚠️ Ce client a déjà profité de cette offre aujourd\'hui.' : '', wait: d.promo_title || d.promo_used_today ? 7000 : 2600 });
+            offer, warn: d.promo_used_today ? '⚠️ Ce client a déjà profité de cette offre aujourd\'hui.' : '', loyal, reward: L && Number(L.available) > 0 ? code : null,
+            wait: d.promo_title || d.promo_used_today || (L && Number(L.available) > 0) ? 9000 : 2600 });
           setTimeout(loadSummary, 800);
           break;
         }
@@ -13345,7 +14414,20 @@
       warn: '<svg viewBox="0 0 24 24"><path d="M12 6v7.5M12 18v.01"/></svg>',
       bad: '<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg>',
     };
-    function show(kind, title, text, { offer = '', warn = '', wait = 3000 } = {}) {
+    function show(kind, title, text, { offer = '', warn = '', loyal = '', reward = null, wait = 3000 } = {}) {
+      $('sr-loyal').hidden = !loyal; $('sr-loyal').textContent = loyal;
+      // Récompense de fidélité : remise en caisse, notée (use_loyalty_reward) d'un geste
+      const rb = $('sr-reward');
+      rb.hidden = !reward; rb.disabled = false; rb.textContent = 'Récompense remise au client';
+      rb.onclick = !reward ? null : async () => {
+        rb.disabled = true;
+        clearTimeout(nextTimer); if (bar) { bar.cancel(); bar = null; }
+        const { data: r, error: e } = await sb.rpc('use_loyalty_reward', { p_token: reward });
+        if (e) { rb.disabled = false; toast(cloudError(e)); return; }
+        rb.textContent = r && r.status === 'ok' ? '✓ Récompense notée' : 'Plus de récompense à remettre';
+        $('sr-loyal').textContent = r && r.status === 'ok' ? (Number(r.remaining) ? '🎟️ Encore ' + plural(Number(r.remaining), 'récompense', 'récompenses') + ' à remettre' : '🎟️ Carte de fidélité : c\'est noté') : $('sr-loyal').textContent;
+        nextTimer = setTimeout(next, 2500);
+      };
       const box = $('scan-result');
       box.dataset.kind = kind;
       $('sr-ico').innerHTML = ICONS[kind];
@@ -13726,6 +14808,186 @@
     if (code) openVisitLink(code); else openShortcut(shortcut);
   });
 
+  /**
+   * Mon compte : prénom et nom, adresse e-mail (confirmée par un lien), mot de passe (code par e-mail si la base demande
+   * de confirmer l'identité), mes avis, mes visites validées en caisse.
+   */
+  const Account = (() => {
+    const body = $('acc-body');
+    const fullName = (a) => [a.name, a.lastName].filter(Boolean).join(' ');
+    function open(title, sub, build) {
+      closePanel($('profile-sheet'));
+      $('acc-title').textContent = title;
+      $('acc-sub').textContent = sub || '';
+      body.textContent = '';
+      build(body);
+      openPanel($('account-sheet'), { modal: true });
+      const first = body.querySelector('input');
+      if (first) setTimeout(() => first.focus(), 80);
+    }
+    const back = () => { closePanel($('account-sheet')); openProfileSheet(); };
+    $('acc-back').addEventListener('click', back);
+    const field = (id, label, type, extra = '') => '<label class="field" id="field-' + id + '"><span>' + label + '</span><input id="' + id + '" type="' + type + '" ' + extra + ' /><small class="field-error" id="err-' + id + '" aria-live="polite"></small></label>';
+
+    function editName() {
+      const a = currentUser();
+      open('Prénom et nom', 'Affichés avec vos avis (prénom et initiale du nom)', (box) => {
+        box.innerHTML = '<form novalidate>' + field('acc-first', 'Prénom', 'text', 'autocomplete="given-name" maxlength="40"')
+          + field('acc-last', 'Nom (facultatif)', 'text', 'autocomplete="family-name" maxlength="40"')
+          + '<p class="form-error" id="err-acc" role="alert"></p><button class="btn btn-primary" type="submit">Enregistrer</button></form>';
+        $('acc-first').value = a.name || ''; $('acc-last').value = a.lastName || '';
+        box.querySelector('form').addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          const first = $('acc-first').value.trim().replace(/\s+/g, ' '), last = $('acc-last').value.trim().replace(/\s+/g, ' ');
+          if (first.length < 1) { setFieldError('acc-first', 'Indiquez votre prénom.'); return; }
+          const { error } = await Loader.run(sb.from('profiles').update({ first_name: first, last_name: last || null }).eq('id', a.id), 'Enregistrement…');
+          if (error) { $('err-acc').textContent = cloudError(error); return; }
+          a.name = first; a.lastName = last;
+          applyAccount(a);
+          back();
+          toast('Prénom et nom enregistrés. Vos prochains avis les afficheront.');
+        });
+      });
+    }
+
+    function editEmail() {
+      const a = currentUser();
+      open('Adresse e-mail', 'Actuelle : ' + a.email, (box) => {
+        box.innerHTML = '<form novalidate>' + field('acc-email', 'Nouvelle adresse e-mail', 'email', 'inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" maxlength="254"')
+          + '<p class="hint">Un lien de confirmation est envoyé à la nouvelle adresse (et parfois aussi à l\'ancienne) : le changement prend effet après un clic sur ce lien.</p>'
+          + '<p class="form-error" id="err-acc" role="alert"></p><button class="btn btn-primary" type="submit">Recevoir le lien de confirmation</button></form>';
+        box.querySelector('form').addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          const email = $('acc-email').value.trim().toLowerCase();
+          if (!EMAIL_RE.test(email)) { setFieldError('acc-email', 'Saisissez une adresse e-mail valide.'); return; }
+          if (email === (a.email || '').toLowerCase()) { setFieldError('acc-email', 'C\'est déjà votre adresse actuelle.'); return; }
+          const { error } = await Loader.run(sb.auth.updateUser({ email }, { emailRedirectTo: location.origin + location.pathname }), 'Envoi du lien…');
+          if (error) { $('err-acc').textContent = /already|exists|registered/i.test(error.message || '') ? 'Cette adresse est déjà utilisée par un autre compte.' : cloudError(error); return; }
+          back();
+          toast('Lien envoyé à ' + email + ' : ouvrez-le pour confirmer le changement.');
+        });
+      });
+    }
+
+    function editPassword() {
+      let nonceAsked = false;
+      open('Mot de passe', 'Au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial', (box) => {
+        box.innerHTML = '<form novalidate>'
+          + '<label class="field" id="field-acc-pw"><span>Nouveau mot de passe</span><span class="pw-wrap"><input id="acc-pw" type="password" autocomplete="new-password" maxlength="128" /><button class="pw-toggle" type="button" data-toggle-pw="acc-pw">Afficher</button></span><small class="field-error" id="err-acc-pw" aria-live="polite"></small></label>'
+          + '<label class="field" id="field-acc-pw2"><span>Confirmer le mot de passe</span><span class="pw-wrap"><input id="acc-pw2" type="password" autocomplete="new-password" maxlength="128" /><button class="pw-toggle" type="button" data-toggle-pw="acc-pw2">Afficher</button></span><small class="field-error" id="err-acc-pw2" aria-live="polite"></small></label>'
+          + '<div id="acc-code-box" hidden>' + field('acc-code', 'Code reçu par e-mail', 'text', 'inputmode="numeric" autocomplete="one-time-code" maxlength="10"')
+          + '<p class="hint">Par sécurité, confirmez que c\'est bien vous : un code vient d\'être envoyé à ' + '<b id="acc-code-mail"></b>.</p></div>'
+          + '<p class="form-error" id="err-acc" role="alert"></p><button class="btn btn-primary" type="submit">Changer mon mot de passe</button></form>';
+        $('acc-code-mail').textContent = currentUser().email;
+        box.querySelectorAll('[data-toggle-pw]').forEach((b) => b.addEventListener('click', () => {
+          const i = $(b.dataset.togglePw); const show = i.type === 'password'; i.type = show ? 'text' : 'password'; b.textContent = show ? 'Masquer' : 'Afficher';
+        }));
+        box.querySelector('form').addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          const pw = $('acc-pw').value, pw2 = $('acc-pw2').value;
+          const missing = missingPasswordRules(pw);
+          if (missing.length) { setFieldError('acc-pw', 'Mot de passe trop faible : il manque ' + listFr(missing.map((r) => r.label)) + '.'); return; }
+          if (pw !== pw2) { setFieldError('acc-pw2', 'Les deux mots de passe ne sont pas identiques.'); return; }
+          const nonce = nonceAsked ? onlyDigits($('acc-code').value) : '';
+          if (nonceAsked && nonce.length < 6) { setFieldError('acc-code', 'Saisissez le code reçu par e-mail.'); return; }
+          const { error } = await Loader.run(sb.auth.updateUser(nonce ? { password: pw, nonce } : { password: pw }), 'Enregistrement du mot de passe…');
+          if (error && !nonceAsked && (error.code === 'reauthentication_needed' || /reauthenticat/i.test(error.message || ''))) {
+            const re = await Loader.run(sb.auth.reauthenticate(), 'Envoi du code…');
+            if (re.error) { $('err-acc').textContent = cloudError(re.error); return; }
+            nonceAsked = true;
+            $('acc-code-box').hidden = false;
+            $('acc-code').focus();
+            return;
+          }
+          if (error) {
+            $('err-acc').textContent = error.code === 'same_password' ? 'Choisissez un mot de passe différent de l\'actuel.'
+              : nonceAsked && /nonce|otp|code|expired|invalid/i.test(error.message || '') ? 'Code incorrect ou expiré.' : cloudError(error);
+            return;
+          }
+          back();
+          toast('Mot de passe modifié.');
+        });
+      });
+    }
+
+    async function myReviews() {
+      open('Mes avis', '', (box) => { box.innerHTML = '<p class="acc-empty">Chargement…</p>'; });
+      const ids = await sb.rpc('my_reviews');
+      const list = (ids.data || []).map((x) => x.id);
+      let rows = [];
+      if (list.length) {
+        const { data } = await sb.from('reviews').select(REVIEW_COLS).in('id', list).order('created_at', { ascending: false });
+        rows = data || [];
+      }
+      body.textContent = '';
+      if (ids.error) { body.innerHTML = '<p class="acc-empty">Vos avis n\'ont pas pu être chargés. Réessayez dans un instant.</p>'; return; }
+      $('acc-sub').textContent = rows.length ? plural(rows.length, 'avis', 'avis') : '';
+      if (!rows.length) { body.innerHTML = '<p class="acc-empty">Vous n\'avez pas encore donné d\'avis. Ouvrez la fiche d\'un restaurant, onglet « Avis ».</p>'; return; }
+      const ul = document.createElement('ul');
+      ul.className = 'acc-list';
+      rows.forEach((r) => {
+        const shop = restaurants()[r.merchant_id];
+        const li = document.createElement('li');
+        li.innerHTML = '<div class="acc-l1"><b></b><small></small></div><p><span class="stars"></span></p>';
+        li.querySelector('b').textContent = shop ? shop.name : 'Restaurant qui n\'est plus sur la carte';
+        li.querySelector('small').textContent = timeAgo(r.created_at);
+        li.querySelector('.stars').textContent = '★★★★★'.slice(0, r.rating) + '☆☆☆☆☆'.slice(0, 5 - r.rating);
+        li.querySelector('.stars').setAttribute('aria-label', r.rating + ' sur 5');
+        if (r.verified) li.querySelector('p').append(' ', verifiedTag());
+        if (r.comment) { const c = document.createElement('p'); c.textContent = r.comment; li.appendChild(c); }
+        if (r.reply) { const c = document.createElement('p'); c.className = 'hint'; c.textContent = 'Réponse du restaurant : ' + r.reply; li.appendChild(c); }
+        if (shop && markers.get(r.merchant_id)) {
+          const go = document.createElement('button');
+          go.type = 'button'; go.className = 'link-btn'; go.textContent = 'Modifier ou supprimer sur la fiche';
+          go.addEventListener('click', () => { closePanel($('account-sheet')); whenMapReady(() => { openShop(r.merchant_id, { source: 'list' }); setShopTab('reviews'); }); });
+          li.appendChild(go);
+        }
+        ul.appendChild(li);
+      });
+      body.appendChild(ul);
+    }
+
+    async function myVisits() {
+      open('Mes visites', 'Validées en caisse avec votre QR code', (box) => { box.innerHTML = '<p class="acc-empty">Chargement…</p>'; });
+      const { data, error } = await sb.from('visits').select('merchant_id, promo_title, visited_at').order('visited_at', { ascending: false }).limit(100);
+      body.textContent = '';
+      if (error) { body.innerHTML = '<p class="acc-empty">Vos visites n\'ont pas pu être chargées. Réessayez dans un instant.</p>'; return; }
+      if (!data.length) { body.innerHTML = '<p class="acc-empty">Aucune visite validée pour l\'instant. Au restaurant, touchez « Valider ma visite » (ou « Profiter de l\'offre ») sur sa fiche et montrez le QR code en caisse.</p>'; return; }
+      $('acc-sub').textContent = plural(data.length, 'visite validée', 'visites validées');
+      const ul = document.createElement('ul');
+      ul.className = 'acc-list';
+      data.forEach((v) => {
+        const shop = restaurants()[v.merchant_id];
+        const li = document.createElement('li');
+        li.innerHTML = '<div class="acc-l1"><b></b><small></small></div>';
+        li.querySelector('b').textContent = shop ? shop.name : 'Restaurant qui n\'est plus sur la carte';
+        li.querySelector('small').textContent = new Date(v.visited_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+        const p = document.createElement('p');
+        p.textContent = v.promo_title ? 'Offre utilisée : ' + v.promo_title : 'Visite validée';
+        li.appendChild(p);
+        ul.appendChild(li);
+      });
+      body.appendChild(ul);
+    }
+
+    $('profile-name-edit').addEventListener('click', editName);
+    $('profile-email-edit').addEventListener('click', editEmail);
+    $('profile-pw-edit').addEventListener('click', editPassword);
+    $('profile-my-reviews').addEventListener('click', myReviews);
+    $('profile-my-visits').addEventListener('click', myVisits);
+    return {
+      renderRows(a) {
+        $('profile-fullname').textContent = fullName(a) || 'Non renseigné';
+        $('profile-email-v').textContent = a.email || '';
+        // Compte Google : l'adresse et la connexion sont gérées par Google
+        $('profile-email-row').hidden = !!a.google;
+        $('profile-pw-row').hidden = !!a.google;
+        $('profile-my-reviews').hidden = a.role === 'pro';
+        $('profile-my-visits').hidden = a.role === 'pro';
+      },
+    };
+  })();
+
   /** Profil (compte) : pour un restaurateur, l'avatar ouvre d'abord son espace restaurateur. */
   function openProfileSheet() {
     const account = currentUser();
@@ -13740,6 +15002,7 @@
     if (account.role === 'pro') { const tag = document.createElement('span'); tag.className = 'role-tag'; tag.textContent = 'Restaurateur'; $('profile-email').append(' ', tag); }
     $('profile-since').textContent = new Date(account.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
     renderProfileAbout(account);
+    Account.renderRows(account);
     updateProfileGeo();
     $('pro-entry').hidden = account.role !== 'pro';
     renderFollows(account);
@@ -13921,6 +15184,10 @@
   // Lien direct vers une fiche (?r=…&t=reviews|menu|story) : ouverte après la connexion
   if (params.get('r')) {
     pendingLink = { id: params.get('r'), tab: params.get('t'), source: params.get('s') === 'notif' ? 'notif' : 'link' };
+    history.replaceState(null, '', location.pathname + location.hash);
+  } else if (/^[0-9a-f]{8}$/.test(params.get('rs') || '')) {
+    // Page publique d'un restaurant inscrit depuis la dernière publication (renvoyée ici par la page 404)
+    pendingLink = { prefix: params.get('rs'), source: 'link' };
     history.replaceState(null, '', location.pathname + location.hash);
   }
   // QR code de visite lu par l'appareil photo (#visite=…) : ouvert dans le scanner du restaurateur une fois connecté

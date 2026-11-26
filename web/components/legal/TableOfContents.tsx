@@ -38,7 +38,7 @@ export default function TableOfContents({ items, variant }: { items: TocItem[]; 
           <a
             href={`#${item.id}`}
             aria-current={variant === "aside" && active === item.id ? "location" : undefined}
-            className="flex gap-2.5 rounded-lg border-l-2 border-transparent py-1.5 pr-2 pl-3 text-sm leading-5 text-slate-500 transition-colors hover:text-slate-900 aria-[current=location]:border-blue-600 aria-[current=location]:font-medium aria-[current=location]:text-blue-700 dark:text-slate-400 dark:hover:text-white dark:aria-[current=location]:border-blue-400 dark:aria-[current=location]:text-blue-300"
+            className="flex gap-2.5 rounded-lg border-l-2 border-transparent py-1.5 pr-2 pl-3 text-sm leading-5 text-slate-500 transition-colors hover:text-slate-900 aria-[current=location]:border-orange-600 aria-[current=location]:font-medium aria-[current=location]:text-orange-700 dark:text-slate-400 dark:hover:text-white dark:aria-[current=location]:border-orange-400 dark:aria-[current=location]:text-orange-300"
           >
             <span className="w-5 flex-none text-xs leading-5 tabular-nums text-slate-500 dark:text-slate-400">{n + 1}.</span>
             <span>{item.title}</span>
@@ -52,7 +52,7 @@ export default function TableOfContents({ items, variant }: { items: TocItem[]; 
     return (
       <details className="group rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-4 font-medium text-slate-900 [&::-webkit-details-marker]:hidden dark:text-slate-50">
-          <ListTree aria-hidden className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          <ListTree aria-hidden className="h-5 w-5 text-orange-600 dark:text-orange-400" />
           Sommaire
           <span className="text-sm font-normal text-slate-500 dark:text-slate-400">{items.length} articles</span>
           <ChevronRight aria-hidden className="ml-auto h-5 w-5 text-slate-500 transition-transform group-open:rotate-90" />

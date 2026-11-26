@@ -14,9 +14,10 @@ import {
 } from "@/lib/signup/validation";
 
 /**
- * Inscription d'un client, une question par écran : prénom, sexe (facultatif) et âge (15 ans au moins), e-mail (ou Google), relecture de
- * l'adresse, mot de passe. « S'inscrire avec Google » est proposé à l'écran de l'e-mail seulement : le compte est créé
- * par Google, avec le prénom, le sexe et l'âge déjà répondus. Le compte est créé par la fonction serveur client-signup (adresse vérifiée, plafond
+ * Inscription d'un client, une question par écran : prénom, e-mail (ou Google), relecture de l'adresse, mot de passe,
+ * puis sexe (facultatif) et âge (15 ans au moins) : l'essentiel d'abord, le compte est créé à la dernière question.
+ * « S'inscrire avec Google » est proposé à l'écran de l'e-mail seulement : le compte est ouvert par Google, puis le sexe
+ * et l'âge sont demandés et enregistrés sur le profil. Le compte est créé par la fonction serveur client-signup (adresse vérifiée, plafond
  * anti-robots), puis la session est ouverte avec le mot de passe choisi, dans le stockage de la carte : la personne
  * arrive ensuite sur la carte déjà connectée (?bienvenue=1 : accueil et localisation).
  * Si la confirmation par e-mail est activée (réglage du serveur), un code à 6 chiffres est envoyé à l'adresse : la
@@ -33,9 +34,10 @@ type Reply = { ok: true; confirm: boolean } | { ok: false; code: string; message
 /** Délai avant de pouvoir redemander un code (comme Supabase : un envoi par minute). */
 const RESEND_DELAY = 60;
 
-const FLOW: Step[] = ["name", "gender", "age", "email", "confirm", "password"];
+// L'essentiel d'abord (prénom, e-mail, mot de passe), puis sexe et âge : le compte est créé à la dernière question
+const FLOW: Step[] = ["name", "email", "confirm", "password", "gender", "age"];
 /** Questions comptées dans la barre de progression (la relecture fait partie de la question de l'e-mail). */
-const QUESTIONS: Step[] = ["name", "gender", "age", "email", "password"];
+const QUESTIONS: Step[] = ["name", "email", "password", "gender", "age"];
 const GENDERS: { value: Gender; label: string }[] = [
   { value: "female", label: "Une femme" },
   { value: "male", label: "Un homme" },
@@ -101,11 +103,12 @@ export default function SignupWizard() {
 
 function Wizard() {
   const [step, setStep] = useState<Step>("name");
+  // Compte Google tout neuf : déjà ouvert, il reste le sexe et l'âge à enregistrer (pas de retour vers l'e-mail)
+  const [googleMode, setGoogleMode] = useState(false);
   const [dir, setDir] = useState<"next" | "prev">("next");
   const [name, setName] = useState("");
   const [gender, setGender] = useState<Gender | undefined>(undefined);
   const [age, setAge] = useState(20);
-  const [ageSet, setAgeSet] = useState(false);
   const [email, setEmail] = useState("");
   const [suggestion, setSuggestion] = useState<string | null>(null);
   const [password, setPassword] = useState("");
@@ -132,7 +135,7 @@ function Wizard() {
   const score = passwordScore(password);
   const flow = FLOW;
   const questions = QUESTIONS;
-  const question = questions.indexOf(step === "confirm" ? "email" : step === "code" ? "password" : step) + 1;
+  const question = questions.indexOf(step === "confirm" ? "email" : step === "code" ? "age" : step) + 1;
 
   // Arrivée sur un écran : focus sur sa réponse (sans faire défiler pendant le glissement)
   useEffect(() => {
@@ -173,6 +176,7 @@ function Wizard() {
   /** Retour : question précédente, ou accueil de la carte depuis la première (mauvais bouton touché). */
   const back = () => {
     const i = flow.indexOf(step);
+    if (googleMode && step === "gender") return;   // compte Google déjà ouvert : pas de retour vers l'e-mail
     if (i > 0) go(flow[i - 1], "prev");
     else if (i === 0) openMap();
   };
@@ -188,7 +192,7 @@ function Wizard() {
     if (!terms) return termsMissing();
     setName(capitalize(clean));
     setError("name", null);
-    go("gender");
+    go("email");
   }
   /** Case des conditions pas cochée : la case est encadrée en rouge, le message est dessous, et on l'amène sous les yeux. */
   function termsMissing() {
@@ -207,12 +211,31 @@ function Wizard() {
     ev.preventDefault();
     answerAge();
   }
-  /** Âge donné (obligatoire, 15 ans au moins) : question suivante. */
+  /** Âge donné (obligatoire, 15 ans au moins) : dernière question, le compte est créé (ou complété après Google). */
   function answerAge() {
+    if (busy) return;
     if (age < MIN_AGE) return setError("age", TOO_YOUNG);
     setError("age", null);
-    setAgeSet(true);
-    go("email");
+    if (googleMode) void saveGoogleAbout();
+    else void createAccount();
+  }
+  /** Mot de passe choisi : on passe au sexe et à l'âge (le compte est créé à la fin). */
+  function submitPassword(ev: FormEvent) {
+    ev.preventDefault();
+    if (score < PASSWORD_RULES.length) return;
+    setError("password", null);
+    go("gender");
+  }
+  /** Compte Google tout neuf : sexe et âge enregistrés sur le profil, puis la carte. */
+  async function saveGoogleAbout() {
+    setBusy(true);
+    const sb = siteClient();
+    const { data } = await sb.auth.getUser();
+    if (data.user) {
+      await sb.from("profiles").update({ gender: gender || null, birth_year: new Date().getFullYear() - age }).eq("id", data.user.id);
+    }
+    setBusy(false);
+    go("done");
   }
   async function submitEmail(ev: FormEvent) {
     ev.preventDefault();
@@ -240,21 +263,20 @@ function Wizard() {
     }
     go("confirm");
   }
-  async function createAccount(ev: FormEvent) {
-    ev.preventDefault();
+  async function createAccount() {
     if (score < PASSWORD_RULES.length || busy) return;
     askInstall();
     setBusy(true);
-    setError("password", null);
+    setError("age", null);
     const body: Record<string, string> = { action: "signup", email: cleanEmail, password, first_name: name.trim(), accept_terms: TERMS_VERSION };
     if (gender) body.gender = gender;
-    if (ageSet) body.birth_year = String(new Date().getFullYear() - age);
+    body.birth_year = String(new Date().getFullYear() - age);   // âge demandé juste avant (dernière question)
     try {
       const token = await captchaToken();
       if (token) body.captcha_token = token;
     } catch {
       setBusy(false);
-      return setError("password", CAPTCHA_FAILED);
+      return setError("age", CAPTCHA_FAILED);
     }
     const res = await callSignup(body);
     if (!res.ok) {
@@ -267,7 +289,8 @@ function Wizard() {
       if (res.code === "invalid_age") { go("age", "prev"); return setError("age", TOO_YOUNG); }
       if (res.code === "terms") { setTerms(false); go("name", "prev"); return termsMissing(); }
       if (res.code === "invalid_name") { go("name", "prev"); return setError("name", res.message); }
-      return setError("password", res.message);
+      if (res.code === "weak_password" || res.code === "password") { go("password", "prev"); return setError("password", res.message); }
+      return setError("age", res.message);
     }
     // Confirmation par e-mail activée : le code part vers l'adresse, la session s'ouvrira avec lui
     if (res.confirm) {
@@ -282,7 +305,7 @@ function Wizard() {
     try { loginToken = await captchaToken(); } catch { loginToken = undefined; }
     const { error } = await siteClient().auth.signInWithPassword({ email: cleanEmail, password, options: { captchaToken: loginToken } });
     setBusy(false);
-    if (error) return setError("password", <>Votre compte est créé, mais la connexion a échoué. <button type="button" className={linkClass} onClick={() => openLogin(cleanEmail)}>Se connecter sur la carte</button></>);
+    if (error) return setError("age", <>Votre compte est créé, mais la connexion a échoué. <button type="button" className={linkClass} onClick={() => openLogin(cleanEmail)}>Se connecter sur la carte</button></>);
     go("done");
   }
 
@@ -325,7 +348,7 @@ function Wizard() {
 
   /**
    * Inscription avec Google : Supabase vérifie le jeton et crée le compte client (ou ouvre celui qui existe). Compte tout
-   * neuf : le prénom, le sexe et l'âge déjà répondus sont enregistrés. Un compte restaurateur ne passe pas par Google.
+   * neuf : le prénom est enregistré, puis viennent le sexe et l'âge. Un compte restaurateur ne passe pas par Google.
    */
   async function googleSignIn(credential: string, nonce?: string) {
     const at: Step = "email";   // le bouton n'est proposé qu'à l'écran de l'e-mail
@@ -345,15 +368,9 @@ function Wizard() {
     const fresh = !!profile && isFresh(profile.created_at);
     // Compte créé à l'instant par Google : l'acceptation des conditions (case cochée) est enregistrée sur le compte
     if (fresh) await sb.rpc("accept_terms", { p_version: TERMS_VERSION });
-    if (fresh) {
-      await sb.from("profiles").update({
-        first_name: name.trim() || undefined,
-        gender: gender || null,
-        birth_year: ageSet ? new Date().getFullYear() - age : null,
-      }).eq("id", data.user.id);
-    }
+    if (fresh) await sb.from("profiles").update({ first_name: name.trim() || undefined }).eq("id", data.user.id);
     setBusy(false);
-    if (fresh) go("done");
+    if (fresh) { setGoogleMode(true); go("gender"); }   // reste le sexe et l'âge (obligatoire, 15 ans au moins)
     else openMap();   // compte déjà existant : directement la carte
   }
 
@@ -472,7 +489,7 @@ function Wizard() {
                 {errors.age}
               </p>
               </Body>
-              <Primary busy={busy}>{age < MIN_AGE ? "Continuer" : `J'ai ${age} ans`}</Primary>
+              <Primary busy={busy}>{busy ? (googleMode ? "Enregistrement…" : "Création du compte…") : age < MIN_AGE ? "Continuer" : googleMode ? `J'ai ${age} ans` : `J'ai ${age} ans · créer mon compte`}</Primary>
             </form>
           )}
 
@@ -534,7 +551,7 @@ function Wizard() {
           )}
 
           {step === "password" && (
-            <form onSubmit={createAccount} noValidate className="flex flex-1 flex-col">
+            <form onSubmit={submitPassword} noValidate className="flex flex-1 flex-col">
               <Body>
               <Head icon={LockKeyhole} id="q-password">Choisissez un <Em>mot de passe</Em></Head>
               {/* Identifiant caché : les gestionnaires de mots de passe l'associent à la bonne adresse */}
@@ -585,7 +602,7 @@ function Wizard() {
                   Rester connecté sur cet appareil
                 </label>
               </div>
-              <Primary busy={busy} disabled={score < PASSWORD_RULES.length} className="mt-0">{busy ? "Création du compte…" : "Créer mon compte"}</Primary>
+              <Primary disabled={score < PASSWORD_RULES.length} className="mt-0">Continuer</Primary>
             </form>
           )}
 

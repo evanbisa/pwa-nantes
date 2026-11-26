@@ -85,7 +85,8 @@ export const cgu: LegalDoc = {
         {
           list: [
             "**Qui peut publier** : seuls les titulaires d'un compte client, à raison d'un avis par restaurant, modifiable ou supprimable à tout moment. Un restaurateur ne peut pas noter son propre établissement.",
-            "**Contrôle** : les avis ne font pas l'objet d'une vérification préalable à leur publication ; FlashMiam ne vérifie pas que leur auteur a réellement consommé dans l'établissement. Ils sont contrôlés après publication, notamment à la suite d'un signalement.",
+            "**Contrôle** : les avis ne font pas l'objet d'une vérification préalable à leur publication. Ils sont contrôlés après publication, notamment à la suite d'un signalement.",
+            "**Visite vérifiée** : le badge « ✓ Visite vérifiée » accompagne l'avis d'un client dont la visite dans l'établissement a été validée en caisse (QR code FlashMiam scanné par le restaurateur), avant ou après la publication de l'avis. Les avis sans ce badge ne sont pas vérifiés de cette façon. Un restaurateur peut choisir de n'accepter que les avis de clients dont la visite a été validée ; cette règle s'applique alors à tous ses clients, quel que soit le contenu de leur avis.",
             "**Contrepartie** : aucun avis n'est rémunéré ni sollicité contre un avantage, par FlashMiam comme par les restaurateurs.",
             "**Classement** : les avis sont affichés du plus récent au plus ancien, avec leur date de publication ; la note moyenne tient compte de tous les avis publiés.",
             "**Contenu attendu** : un avis doit refléter une expérience réelle et rester courtois. Sont retirés : insultes, propos discriminatoires, informations personnelles sur des tiers, publicité, contenus sans rapport avec l'établissement, faux avis.",
@@ -132,7 +133,7 @@ export const cgu: LegalDoc = {
       title: "Propriété intellectuelle",
       icon: Copyright,
       blocks: [
-        "La marque, le logo, la présentation et le code de FlashMiam appartiennent à l'éditeur. Vous bénéficiez d'un droit d'utilisation personnel et non commercial du service ; toute reproduction ou extraction substantielle du contenu ou des données est interdite.",
+        "Le nom, le logo, la présentation et le code de FlashMiam appartiennent à l'éditeur. Vous bénéficiez d'un droit d'utilisation personnel et non commercial du service ; toute reproduction ou extraction substantielle du contenu ou des données est interdite.",
         "Les fonds de carte sont fournis par OpenStreetMap et ses contributeurs (licence ODbL) via OpenFreeMap. Les contenus des restaurateurs et les avis restent la propriété de leurs auteurs.",
       ],
     },

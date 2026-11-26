@@ -7,33 +7,33 @@
   body {
     position: relative; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #f4f4f5;
     background:
-      radial-gradient(520px 360px at 82% 30%, rgb(124 58 237 / .35), transparent 70%),
-      radial-gradient(420px 320px at 8% 95%, rgb(219 39 119 / .22), transparent 70%),
-      radial-gradient(420px 300px at 100% 100%, rgb(59 130 246 / .25), transparent 70%),
+      radial-gradient(520px 360px at 82% 30%, rgb(255 138 61 / .30), transparent 70%),
+      radial-gradient(420px 320px at 8% 95%, rgb(255 77 46 / .22), transparent 70%),
+      radial-gradient(420px 300px at 100% 100%, rgb(255 194 51 / .18), transparent 70%),
       #111113;
   }
   /* Rues de la carte, en néon discret */
   svg.map { position: absolute; inset: 0; opacity: .55; }
   .card { position: absolute; left: 80px; top: 92px; width: 640px; }
   .brand { display: flex; align-items: center; gap: 20px; }
-  .logo { width: 84px; height: 84px; border-radius: 22px; overflow: hidden; box-shadow: 0 12px 40px -10px rgb(167 139 250 / .7); }
+  .logo { width: 84px; height: 84px; border-radius: 22px; overflow: hidden; box-shadow: 0 12px 40px -10px rgb(255 138 61 / .6); }
   .logo img { display: block; width: 100%; height: 100%; }
   .name { font-size: 46px; font-weight: 700; letter-spacing: -.5px; }
   h1 { margin: 44px 0 0; font-size: 66px; line-height: 1.05; font-weight: 700; letter-spacing: -1.5px; }
-  h1 em { font-style: normal; background: linear-gradient(90deg, #e9a0e4, #a78bfa 55%, #7f95fb); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  h1 em { font-style: normal; background: linear-gradient(90deg, #ffd25e, #ff9a4d 50%, #ff6a4a); -webkit-background-clip: text; background-clip: text; color: transparent; }
   p { margin: 26px 0 0; font-size: 28px; line-height: 1.35; color: #a1a1aa; }
   .chips { display: flex; gap: 12px; margin-top: 34px; }
   .chip { padding: 10px 18px; border-radius: 999px; font-size: 22px; background: rgb(255 255 255 / .06); border: 1px solid rgb(255 255 255 / .12); }
-  .pin { position: absolute; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; font-size: 32px; background: #1c1a26; border: 2px solid #a78bfa; box-shadow: 0 0 30px rgb(167 139 250 / .55); }
+  .pin { position: absolute; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; font-size: 32px; background: #1f1714; border: 2px solid #ff8a3d; box-shadow: 0 0 30px rgb(255 138 61 / .5); }
 </style>
 <body>
   <svg class="map" viewBox="0 0 1200 630" fill="none" stroke-linecap="round">
-    <g stroke="#232859" stroke-width="3">
+    <g stroke="#2b211d" stroke-width="3">
       <path d="M760 0v630M860 0v630M960 0v630M1060 0v630M1160 0v630M700 80h500M700 200h500M700 320h500M700 440h500M700 560h500"/>
     </g>
-    <path d="M700 520 L860 260 L1010 140 L1200 90" stroke="#7d72d9" stroke-width="7"/>
-    <path d="M760 630 L900 420 L1200 380" stroke="#c86bb8" stroke-width="7"/>
-    <path d="M980 0 L1060 630" stroke="#5577c4" stroke-width="5"/>
+    <path d="M700 520 L860 260 L1010 140 L1200 90" stroke="#ff8a3d" stroke-width="7"/>
+    <path d="M760 630 L900 420 L1200 380" stroke="#ff4d2e" stroke-width="7"/>
+    <path d="M980 0 L1060 630" stroke="#ffc233" stroke-width="5"/>
   </svg>
   <div class="pin" style="left: 838px; top: 228px">🍔</div>
   <div class="pin" style="left: 1030px; top: 330px">🌯</div>
@@ -44,8 +44,8 @@
       <div class="logo"><img src="logo-flashmiam.png" alt=""></div>
       <div class="name">FlashMiam</div>
     </div>
-    <h1>Le street food de <em>La Roche-sur-Yon</em></h1>
-    <p>Food-trucks, kebabs, burgers et douceurs sur une carte, avec les bons plans du moment.</p>
+    <h1>Les restaurants de <em>La Roche-sur-Yon</em></h1>
+    <p>Restaurants, food-trucks et street food sur une carte, avec les bons plans du moment.</p>
     <div class="chips"><span class="chip">🗺️ Carte en direct</span><span class="chip">⚡ Bons plans</span><span class="chip">🎓 Gratuit</span></div>
   </div>
 </body>
