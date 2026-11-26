@@ -133,7 +133,7 @@ export const cgu: LegalDoc = {
       title: "Propriété intellectuelle",
       icon: Copyright,
       blocks: [
-        "La marque, le logo, la présentation et le code de FlashMiam appartiennent à l'éditeur. Vous bénéficiez d'un droit d'utilisation personnel et non commercial du service ; toute reproduction ou extraction substantielle du contenu ou des données est interdite.",
+        "Le nom, le logo, la présentation et le code de FlashMiam appartiennent à l'éditeur. Vous bénéficiez d'un droit d'utilisation personnel et non commercial du service ; toute reproduction ou extraction substantielle du contenu ou des données est interdite.",
         "Les fonds de carte sont fournis par OpenStreetMap et ses contributeurs (licence ODbL) via OpenFreeMap. Les contenus des restaurateurs et les avis restent la propriété de leurs auteurs.",
       ],
     },
