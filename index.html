@@ -1749,8 +1749,9 @@
     .sb-brand #notif-btn:hover { background: var(--hover); }
 
     /* Recherche plein écran (téléphone) */
-    .search-panel { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; background: var(--panel-solid); padding-top: var(--safe-top); animation: rise .25s var(--ease-out) both; }
-    .sp-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px 6px; }
+    /* Un seul défilement pour tout le panneau (filtres, puis résultats) ; la barre de recherche reste en haut */
+    .search-panel { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; background: var(--panel-solid); overflow-y: auto; overscroll-behavior: contain; animation: rise .25s var(--ease-out) both; }
+    .sp-head { position: sticky; top: 0; z-index: 2; flex: none; display: flex; align-items: center; gap: 8px; padding: calc(var(--safe-top) + 10px) 12px 6px; background: var(--panel-solid); }
     .sp-head .icon-btn { width: 44px; height: 44px; background: transparent; }
     .sp-head .icon-btn svg { width: 24px; height: 24px; }
     .sp-input { position: relative; flex: 1; min-width: 0; }
@@ -1765,7 +1766,7 @@
     .budget .chip { height: 32px; padding: 0 12px; font-size: 13px; border: 1px solid var(--line-strong); background: transparent; }
     /* filtre choisi : fond coloré aussi en mode nuit (le fond transparent ci-dessus ne doit pas l'effacer) */
     .budget .chip[aria-pressed="true"], .sb-filters .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-line); }
-    .sp-body { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 0 8px calc(var(--safe-bottom) + 20px); -webkit-user-select: none; user-select: none; }
+    .sp-body { flex: 1 0 auto; padding: 4px 8px calc(var(--safe-bottom) + 20px); -webkit-user-select: none; user-select: none; }
     .sr-title { margin: 14px 8px 4px; font-size: 12px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
     .sr-list { list-style: none; margin: 0; padding: 0; }
     .sr-hit { width: 100%; display: flex; gap: 12px; align-items: center; padding: 10px 8px; border-radius: 12px; text-align: left; transition: background-color .15s; }
@@ -2609,7 +2610,8 @@
     .sp-ft-sum { flex: 1; min-width: 0; font-weight: 500; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sp-ft-act { flex: none; font-weight: 600; color: var(--accent); }
     .sp-filter-box[hidden] { display: none; }
-    .sp-filter-box { max-height: 72vh; overflow-y: auto; overscroll-behavior: contain; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+    /* Filtres puis résultats : séparés par un trait épais, dans le même défilement */
+    .sp-filter-box { flex: none; border-bottom: 6px solid var(--hover); padding-bottom: 12px; margin-bottom: 4px; }
     .sp-filters .chip { height: 32px; padding: 0 12px; font-size: 13px; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; background: transparent; border: 1px solid var(--line-strong); }
     .sp-filters .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-line); }
     body.search-on .backdrop.is-visible { z-index: 70; }
