@@ -2649,7 +2649,7 @@
 
     /* --- Surfaces du navigateur et texte --- */
     html, body { font-synthesis: none; text-rendering: optimizeLegibility; }
-    ::selection { background: var(--flash); color: var(--on-flash); }
+    ::selection { background: var(--accent-soft); color: var(--text); }
     input, textarea { caret-color: var(--brand); }
     html { scrollbar-color: var(--line-strong) transparent; }
     :focus-visible { outline: 2px solid var(--focus-border); outline-offset: 2px; }
@@ -2697,24 +2697,28 @@
     .amen-list li { border-radius: 8px; }
     .pill-link { border-radius: 10px; color: var(--accent-strong); }
 
-    /* --- Étiquette flash : le signe des bons plans (jaune fluo, trou de perforation, lettres étroites et grasses) --- */
+    /* --- Bons plans (style « sobre », choisi le 26/11/2026) : cadre blanc net, carré « % » orange, titre en lettres d'étiquette --- */
     .promo, .promo.is-student, .promo.is-day, .promo.is-week {
-      position: relative; padding: 14px 16px 14px 34px; border-radius: 8px; color: var(--on-flash); background: var(--flash);
-      box-shadow: 0 1px 0 rgba(22, 33, 58, .12), 0 8px 18px -10px rgba(22, 33, 58, .45);
+      position: relative; padding: 14px 16px 14px 58px; border-radius: 12px; color: var(--text); background: var(--panel-solid);
+      border: 1px solid var(--line-strong); box-shadow: none;
     }
-    .promo::before { content: ""; position: absolute; left: 13px; top: 50%; width: 9px; height: 9px; margin-top: -4.5px; border-radius: 50%; background: var(--panel-solid); }
-    .promo small, .promo.is-student small, .promo.is-day small, .promo.is-week small { color: var(--on-flash); opacity: .78; font-weight: 650; }
+    .promo::before {
+      content: "%"; position: absolute; left: 14px; top: 50%; width: 30px; height: 30px; margin-top: -15px; border-radius: 9px;
+      font-family: var(--font-tag); font-stretch: 80%; font-weight: 850; font-size: 16px; line-height: 30px; text-align: center;
+      color: var(--on-brand); background: var(--brand);
+    }
+    .promo small, .promo.is-student small, .promo.is-day small, .promo.is-week small { color: var(--muted); font-weight: 600; }
     .promo strong { font-family: var(--font-tag); font-stretch: 80%; font-weight: 800; font-size: 19px; line-height: 1.1; }
-    .promo .promo-more, .promo-when { color: var(--on-flash); opacity: .78; }
+    .promo .promo-more, .promo-when { color: var(--muted); }
     .promo-use, .promo.is-student .promo-use, .promo.is-day .promo-use, .promo.is-week .promo-use,
     :root[data-theme="dark"] .promo.is-student .promo-use, :root[data-theme="dark"] .promo.is-day .promo-use, :root[data-theme="dark"] .promo.is-week .promo-use {
-      border-radius: 8px; color: var(--flash); background: var(--on-flash); }
+      border-radius: 8px; color: var(--on-brand); background: var(--brand); }
     .pin-flag {
-      top: -6px; right: -9px; min-width: 22px; height: 20px; padding: 0 5px; border-radius: 4px; border: 0;
-      font-family: var(--font-tag); font-stretch: 80%; font-weight: 850; font-size: 12.5px; color: var(--on-flash); background: var(--flash);
-      box-shadow: 0 1px 2px rgba(22, 33, 58, .45); transform: rotate(9deg);
+      top: -6px; right: -9px; min-width: 22px; height: 20px; padding: 0 5px; border-radius: 6px; border: 2px solid var(--panel-solid);
+      font-family: var(--font-tag); font-stretch: 80%; font-weight: 850; font-size: 12.5px; color: var(--on-brand); background: var(--brand);
+      box-shadow: 0 1px 2px rgba(22, 33, 58, .35);
     }
-    .offers-badge { color: var(--on-flash); background: var(--flash); font-weight: 800; }
+    .offers-badge { color: var(--on-brand); background: var(--brand); font-weight: 800; }
 
     /* --- Bouton « Valider ma visite / Profiter de l'offre » : orange plein, lettres encre --- */
     .visit-cta { border-radius: 14px; color: var(--on-brand); background: var(--brand); box-shadow: 0 10px 22px -12px var(--brand); }
@@ -2765,28 +2769,20 @@
     :root[data-theme="light"] .onboarding .field input:focus, :root[data-theme="dark"] .onboarding .field input:focus { border-color: var(--focus-border); box-shadow: 0 0 0 4px var(--focus-ring); }
     :root[data-theme="light"] .onboarding .role-check, :root[data-theme="dark"] .onboarding .role-check { border-radius: 14px; background: var(--hover); border-color: var(--line); }
     :root[data-theme="light"] .onboarding .role-check:has(input:checked), :root[data-theme="dark"] .onboarding .role-check:has(input:checked) { background: var(--accent-soft); border-color: var(--brand); }
-    /* Avantages de l'accueil : trois étiquettes de marché, posées un peu de travers comme sur un étal */
-    .onboarding .jn-perks { display: flex; flex-wrap: wrap; gap: 8px 10px; margin: 18px 0 22px; }
+    /* Avantages de l'accueil : une liste simple, coche orange, texte en lettres d'étiquette */
+    .onboarding .jn-perks { display: grid; gap: 10px; margin: 18px 0 24px; }
     :root[data-theme="light"] .onboarding .jn-perks li, :root[data-theme="dark"] .onboarding .jn-perks li {
-      position: relative; padding: 8px 13px 8px 27px; border: 0; border-radius: 6px; color: var(--on-flash); background: var(--flash);
-      font-family: var(--font-tag); font-stretch: 84%; font-weight: 750; font-size: 15.5px; line-height: 1.15;
-      box-shadow: 0 1px 0 rgba(22, 33, 58, .14), 0 8px 16px -10px rgba(22, 33, 58, .5);
+      display: flex; align-items: center; gap: 10px; padding: 0; border: 0; border-radius: 0; color: var(--text); background: none; box-shadow: none;
+      font-family: var(--font-tag); font-stretch: 86%; font-weight: 750; font-size: 17px; line-height: 1.2;
     }
-    .onboarding .jn-perks li::before {
-      position: absolute; left: 10px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%;
-      background: var(--panel-solid); -webkit-mask: none; mask: none;
-    }
-    .onboarding .jn-perks li:nth-child(1) { transform: rotate(-1.2deg); }
-    .onboarding .jn-perks li:nth-child(2) { transform: rotate(.9deg); }
-    .onboarding .jn-perks li:nth-child(3) { transform: rotate(-.6deg); }
-    @media (prefers-reduced-motion: reduce) { .onboarding .jn-perks li { animation: none; } }
+    .onboarding .jn-perks li::before { background: var(--brand); }
 
     /* --- Ordinateur : la barre « Créer mon compte » prend l'encre, comme la barre d'onglets du téléphone --- */
     .guest-bar { background: var(--shell); border-top: 0; }
     .guest-cta { border-radius: 12px; }
     .guest-login { border-radius: 12px; color: var(--on-shell); background: rgba(242, 244, 248, .12); }
     .guest-login:hover { background: rgba(242, 244, 248, .2); }
-    .guest-login:focus-visible { outline-color: var(--flash); }
+    .guest-login:focus-visible { outline-color: var(--on-shell); }
     .sb-search input { border-radius: 12px; }
     .sb-search input:focus { border-color: var(--focus-border); box-shadow: 0 0 0 3px var(--focus-ring); }
 
@@ -2802,7 +2798,7 @@
       body[data-panel="notif-sheet"] .tabbar #notif-btn, body[data-panel="profile-sheet"] .tabbar #profile-btn { color: var(--on-shell); }
       body:not([data-panel]) #nav-map > svg, body[data-panel="shop-sheet"] #nav-map > svg, body[data-panel="offers-sheet"] .tabbar #offers-btn > svg,
       body[data-panel="notif-sheet"] .tabbar #notif-btn > svg { color: var(--brand); }
-      .tabbar > button:focus-visible { outline-color: var(--flash); }
+      .tabbar > button:focus-visible { outline-color: var(--on-shell); }
       .tabbar .offers-badge, .tabbar .notif-badge { box-shadow: 0 0 0 2px var(--shell); }
       body.is-guest .tabbar #guest-signup { border-radius: 12px; font-weight: 750; color: var(--on-brand); background: var(--brand); box-shadow: none; }
     }
