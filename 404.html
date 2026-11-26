@@ -16,11 +16,9 @@
   <link rel="apple-touch-icon" href="{{BASE}}apple-touch-icon.png?v=2" sizes="180x180" />
   <style>
     :root { --bg: #f8fafc; --text: #0f172a; --muted: #475569; --card: #fff; --line: #e2e8f0; --accent: #c2410c; --on-accent: #fff; }
-    em { background: linear-gradient(90deg, #e67700, #f0501f 50%, #d9301a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    em { color: inherit; }   /* titre d'une seule couleur */
     @media (prefers-color-scheme: dark) {
       :root { --bg: #111113; --text: #fafafa; --muted: #a1a1aa; --card: rgb(255 255 255 / .05); --line: rgb(255 255 255 / .1); --accent: #ff8a4c; --on-accent: #1a0d07; }
-      body { background: radial-gradient(38rem 26rem at 50% 10%, rgb(255 138 61 / .14), transparent 70%) no-repeat fixed, var(--bg); }
-      em { background: linear-gradient(90deg, #ffd25e, #ff9a4d 50%, #ff6a4a); -webkit-background-clip: text; background-clip: text; color: transparent; }
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; min-height: 100%; }

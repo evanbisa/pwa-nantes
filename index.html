@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-YE7bstBMv+yOmyd5fne779LR56oZ5+vcujqsKl5TeVg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-lyfkgQNiMiDRdtCfjus5kbIeVm9hSirh14x5Nc9NN2I=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-YE7bstBMv+yOmyd5fne779LR56oZ5+vcujqsKl5TeVg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-hufsfB0J0d3ZAqtkhlcyDjs82ZiwrNhhdZUOxOitvIk=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -609,79 +609,55 @@
     .onboarding .field input:focus { box-shadow: none; }
     .ob-switch .link-btn { font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
     /*
-     * Couleurs du logo (icon-512.png) : jaune #ffc233, orange #ff8a3d, rouge #ff4d2e. Accueil, connexion et inscription
-     * (web/app/globals.css) les reprennent : dégradé jaune → orange → rouge (pastilles, barre de progression), mots clés
-     * et bouton principal orange → rouge (assez foncés pour rester lisibles), halos chauds dans la carte.
-     * --ob-grad : dégradé décoratif ; --ob-text : mots clés ; --ob-btn : fond du bouton principal (jour).
+     * Accueil, connexion et inscription (comme web/app/globals.css) : panneau uni, titres d'une seule couleur, orange
+     * uni réservé à ce qui se touche (bouton principal, liens, coches, progression). Pas de halo ni de dégradé.
+     * --ob-grad / --ob-btn : couleur pleine (gardés comme noms pour les éléments qui les utilisent).
      */
     :root[data-theme="light"] .onboarding {
       --accent: #c2410c; --accent-strong: #9a3412; --accent-soft: rgb(234 88 12 / .08); --accent-line: rgb(234 88 12 / .3); --on-accent: #fff;
-      --ob-grad: linear-gradient(100deg, #ffc233, #ff8a3d 50%, #ff4d2e);
-      --ob-text: linear-gradient(90deg, #e67700, #f0501f 50%, #d9301a);
-      --ob-btn: linear-gradient(100deg, #f2610c, #e8401c 55%, #d9301a);
+      --ob-grad: #c2410c; --ob-btn: #c2410c;
     }
     :root[data-theme="dark"] .onboarding {
-      --accent: #ff8a5c; --accent-strong: #ffab85; --accent-soft: rgb(255 122 69 / .14); --accent-line: rgb(255 122 69 / .45); --on-accent: #1a0d07;
-      --ob-grad: linear-gradient(100deg, #ffc233, #ff8a3d 50%, #ff4d2e);
-      --ob-text: linear-gradient(90deg, #ffd25e, #ff9a4d 50%, #ff6a4a);
+      --accent: #ff8a4c; --accent-strong: #ffab80; --accent-soft: rgb(255 138 76 / .12); --accent-line: rgb(255 138 76 / .4); --on-accent: #1a0d07;
+      --ob-grad: #ff8a4c; --ob-btn: #ff8a4c;
     }
     :root[data-theme="light"] .ob-panel {
-      border-color: rgb(255 255 255 / .9);
-      background:
-        radial-gradient(30rem 20rem at 88% -6%, rgb(255 194 51 / .22), transparent 70%),
-        radial-gradient(28rem 22rem at -8% 42%, rgb(255 138 61 / .12), transparent 70%),
-        radial-gradient(26rem 20rem at 100% 100%, rgb(255 77 46 / .10), transparent 70%),
-        rgb(255 253 250 / .95);
-      box-shadow: 0 30px 60px -20px rgb(150 50 10 / .25), 0 0 0 1px rgb(255 120 60 / .08);
+      border-color: #ebe6e2;
+      background: #fff;
+      box-shadow: 0 24px 48px -28px rgb(28 25 23 / .35);
     }
     :root[data-theme="dark"] .ob-panel {
-      border-color: rgb(255 255 255 / .1);
-      background:
-        radial-gradient(38rem 26rem at 50% 16%, rgb(255 138 61 / .13), transparent 70%),
-        radial-gradient(26rem 22rem at 6% 74%, rgb(255 77 46 / .09), transparent 70%),
-        radial-gradient(28rem 24rem at 96% 94%, rgb(255 194 51 / .07), transparent 70%),
-        rgb(20 16 14 / .78);
+      border-color: rgb(255 255 255 / .08);
+      background: #1c1917;
     }
-    .onboarding .ob-step h1 em, .onboarding .ob-step h2 em {
-      background: var(--ob-text);
-      -webkit-background-clip: text; background-clip: text; color: transparent;
-      -webkit-box-decoration-break: clone; box-decoration-break: clone;
-    }
-    :root[data-theme="light"] .onboarding .btn-primary {
-      border: 0; color: #fff; background: var(--ob-btn); text-shadow: 0 1px 1px rgb(120 30 0 / .25);
-      box-shadow: 0 14px 30px -12px rgb(232 64 28 / .5), inset 0 1px 0 rgb(255 255 255 / .25);
-      transition: transform .15s var(--ease-out), box-shadow .2s, filter .2s;
-    }
-    :root[data-theme="light"] .onboarding .btn-primary:hover { background: var(--ob-btn); filter: brightness(1.05); box-shadow: 0 18px 34px -12px rgb(232 64 28 / .55), inset 0 1px 0 rgb(255 255 255 / .25); }
+    /* Titres : une seule couleur (le mot mis en valeur garde la couleur du titre) */
+    .onboarding .ob-step h1 em, .onboarding .ob-step h2 em { font-style: normal; color: inherit; background: none; }
+    .onboarding .btn-primary { border: 0; color: var(--on-accent); background: var(--ob-btn); text-shadow: none; box-shadow: none; transition: background-color .15s, transform .15s var(--ease-out); }
+    :root[data-theme="light"] .onboarding .btn-primary:hover { background: #9a3412; }
+    :root[data-theme="dark"] .onboarding .btn-primary:hover { background: #ffab80; }
     .onboarding .btn-primary:active { transform: scale(.98); }
-    :root[data-theme="dark"] .onboarding .btn-primary {
-      border: 1.5px solid transparent; color: #fff;
-      background: linear-gradient(#17171b, #17171b) padding-box, var(--ob-grad) border-box;
-      box-shadow: 0 10px 36px -14px rgb(255 106 61 / .6);
-    }
-    :root[data-theme="dark"] .onboarding .btn-primary:hover {
-      background: linear-gradient(#1f1f25, #1f1f25) padding-box, var(--ob-grad) border-box;
-    }
-    :root[data-theme="light"] .onboarding .jn-perks li { background: rgb(255 255 255 / .85); border-color: rgb(255 120 60 / .16); box-shadow: 0 1px 2px rgb(150 50 10 / .05); }
+    :root[data-theme="light"] .onboarding .jn-perks li { background: #faf8f6; border-color: #ebe6e2; box-shadow: none; }
     :root[data-theme="dark"] .onboarding .jn-perks li, :root[data-theme="dark"] .onboarding .field input {
       background: rgb(255 255 255 / .04); border-color: rgb(255 255 255 / .1);
     }
-    :root[data-theme="light"] .onboarding .field input { background: #fff; border-color: #efe5dc; }
+    :root[data-theme="light"] .onboarding .field input { background: #fff; border-color: #e2dcd7; }
     /* Champ actif : contour orange et halo doux (le rouge reste réservé aux erreurs) */
     :root[data-theme="light"] .onboarding .field input:focus { border-color: #ea580c; box-shadow: 0 0 0 4px rgb(234 88 12 / .14); }
     :root[data-theme="dark"] .onboarding .field input:focus { border-color: #ff9a5c; box-shadow: 0 0 0 4px rgb(255 138 76 / .16); }
     :root .onboarding .field.has-error input:not([type="checkbox"]):not([type="radio"]), :root .onboarding .field.has-error input:not([type="checkbox"]):not([type="radio"]):focus { border-color: var(--danger); box-shadow: 0 0 0 4px rgb(217 48 37 / .12); }   /* l'erreur l'emporte sur le contour orange du champ actif */
-    :root[data-theme="light"] .onboarding .role-check { background: rgb(255 255 255 / .85); border-color: rgb(255 120 60 / .16); }
-    :root[data-theme="light"] .onboarding .role-check:has(input:checked) { background: rgb(255 138 61 / .08); border-color: rgb(255 77 46 / .35); }
+    :root[data-theme="light"] .onboarding .role-check { background: #faf8f6; border-color: #ebe6e2; }
+    :root[data-theme="light"] .onboarding .role-check:has(input:checked) { background: #fff; border-color: #c2410c; }
     :root[data-theme="dark"] .onboarding .role-check { background: rgb(255 255 255 / .04); border-color: rgb(255 255 255 / .1); }
-    :root[data-theme="dark"] .onboarding .role-check:has(input:checked) { background: rgb(255 122 69 / .1); border-color: rgb(255 122 69 / .45); }
+    :root[data-theme="dark"] .onboarding .role-check:has(input:checked) { background: rgb(255 138 76 / .08); border-color: #ff8a4c; }
     .ob-logo .avatar { color: #fff; background: var(--ob-grad, var(--accent)); }
-    /* Avantages : une coche dans une pastille en dégradé (jour et nuit) */
+    /* Avantages : une coche orange, sans pastille */
     .onboarding .jn-perks li::before {
-      content: ""; flex: none; width: 24px; height: 24px; border-radius: 50%;
-      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4L18 8.5'/%3E%3C/svg%3E") center / 14px no-repeat, var(--ob-grad, var(--accent));
+      content: ""; flex: none; width: 20px; height: 20px;
+      background: var(--accent);
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat;
     }
-    .onboarding .jn-bar i { background: var(--ob-grad, var(--accent)); }
+    .onboarding .jn-bar i { background: var(--accent); }
     .field { display: block; margin-top: 14px; }
     .field > span { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
     .field input {
@@ -870,7 +846,6 @@
     .jn-perks li:nth-child(3) { animation-delay: .16s; }
     .jn-perks li span { font-size: 22px; }
     .jn-go { min-height: 54px; font-size: 16.5px; }
-    .jn-go:not([disabled]) { box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 35%, transparent); }
     /* Choix du sexe */
     .jn-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
     .jn-choices button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 104px; padding: 12px 8px; border-radius: 18px; font-size: 15px; font-weight: 500; line-height: 1.25; text-align: center; color: var(--text); background: var(--panel-solid); border: 1.5px solid var(--line-strong); transition: transform .15s var(--ease-out), border-color .2s, background-color .2s, box-shadow .2s; }
@@ -3728,7 +3703,7 @@
       <div class="ob-top">
         <div class="ob-logo"><img class="ob-mark" src="icon-192.png?v=2" alt="" width="32" height="32" />FlashMiam</div>
         <!-- Visiteur : la carte sans compte (offres limitées) -->
-        <button class="ob-skip" type="button" id="ob-guest-btn" hidden>Voir la carte <span aria-hidden="true">→</span></button>
+        <button class="ob-skip" type="button" id="ob-guest-btn" hidden>Voir la carte</button>
         <div class="ob-progress" id="ob-progress" aria-hidden="true"><span class="is-active" id="ob-dot-1"></span><span id="ob-dot-2"></span></div>
       </div>
       <!-- Visiteur : pourquoi un compte est demandé (offre floutée, « Suivre », avis…) -->
@@ -10256,7 +10231,7 @@
     $('ob-reason').hidden = true;   // Guest.ask() l'affiche juste après
     // Visiteur : « Voir la carte » (sans compte) sur l'accueil et la connexion
     $('ob-guest-btn').hidden = !(Guest.on() && (step === 'signup' || step === 'login'));
-    $('ob-guest-btn').firstChild.textContent = appStarted ? 'Revenir à la carte ' : 'Voir la carte ';
+    $('ob-guest-btn').textContent = appStarted ? 'Revenir à la carte' : 'Voir la carte';
     $('ob-guest-btn').setAttribute('aria-label', appStarted ? 'Revenir à la carte' : 'Voir la carte sans créer de compte');
     if (step === 'login') GoogleAuth.mount();
     if (step === 'pro-verify') enterVerifyStep();
