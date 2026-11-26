@@ -3,15 +3,22 @@
 /* « dark: » suit le mode nuit choisi sur la carte (attribut data-theme), pas seulement le système */
 @custom-variant dark (&:where([data-theme="night"], [data-theme="night"] *));
 
+/*
+ * Monde « étiquette du marché » (comme la carte, index.html, et DESIGN.md) : police Archivo (servie par le site,
+ * /vendor/fonts), encre bleu marine à la place des gris, orange du logo #ff4d2e pour ce qui se touche.
+ */
+@font-face { font-family: "Archivo"; font-style: normal; font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; src: url(/vendor/fonts/archivo-latin-ext-wdth-normal.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Archivo"; font-style: normal; font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; src: url(/vendor/fonts/archivo-latin-wdth-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
 :root {
   --background: #ffffff;
-  --foreground: #202124;
+  --foreground: #16213a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /*
@@ -22,10 +29,17 @@
  * Passage d'une question à l'autre : l'écran glisse, et ses éléments apparaissent l'un après l'autre en sortant du flou.
  */
 @theme {
-  --color-brand: #c2410c;
-  --color-brand-strong: #9a3412;
-  --color-brand-night: #ff8a4c;
-  --color-night: #111113;
+  --color-brand: #ff4d2e;
+  --color-brand-strong: #d9361a;
+  --color-brand-night: #ff6a45;
+  --color-night: #0e1626;
+  /* Gris de Tailwind (slate, zinc) → encre bleu marine ; orange de Tailwind → orange du logo (#ff4d2e en 500) */
+  --color-slate-50: #f6f7fa; --color-slate-100: #eef0f4; --color-slate-200: #dfe3ea; --color-slate-300: #c5cbd7; --color-slate-400: #9aa3b5;
+  --color-slate-500: #6c7790; --color-slate-600: #55607a; --color-slate-700: #3a4560; --color-slate-800: #243049; --color-slate-900: #16213a; --color-slate-950: #0e1626;
+  --color-zinc-50: #f6f7fa; --color-zinc-100: #eef0f4; --color-zinc-200: #dfe3ea; --color-zinc-300: #c5cbd7; --color-zinc-400: #9aa3b5;
+  --color-zinc-500: #6c7790; --color-zinc-600: #55607a; --color-zinc-700: #3a4560; --color-zinc-800: #243049; --color-zinc-900: #16213a; --color-zinc-950: #0e1626;
+  --color-orange-50: #fff1ec; --color-orange-100: #ffdfd4; --color-orange-200: #ffbfaa; --color-orange-300: #ff9a7c; --color-orange-400: #ff6a45;
+  --color-orange-500: #ff4d2e; --color-orange-600: #d9361a; --color-orange-700: #b02a10; --color-orange-800: #8a220e; --color-orange-900: #6e1e10; --color-orange-950: #3d0f07;
   --animate-step-next: step-next 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-step-prev: step-prev 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-pop: pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
@@ -51,19 +65,19 @@
  */
 .su-glow { background: none; }
 .su-em { color: inherit; font-style: normal; }
-.su-cta { background: #c2410c; color: #fff; text-shadow: none; box-shadow: none; transition: background-color 0.15s; }
-.su-cta:hover:not(:disabled) { background: #9a3412; }
-.su-picked { border-color: #c2410c; background: #fff; box-shadow: none; }
-.su-gradient { background: #c2410c; }
-[data-theme="night"] .su-cta { background: #ff8a4c; color: #1a0d07; border: 0; }
-[data-theme="night"] .su-cta:hover:not(:disabled) { background: #ffab80; }
-[data-theme="night"] .su-picked { border-color: #ff8a4c; background: rgb(255 138 76 / 0.08); }
-[data-theme="night"] .su-gradient { background: #ff8a4c; }
+.su-cta { border-radius: 14px; background: #ff4d2e; color: #16213a; font-weight: 700; text-shadow: none; box-shadow: none; transition: background-color 0.15s; }
+.su-cta:hover:not(:disabled) { background: #e8401f; }
+.su-picked { border-color: #ff4d2e; background: #fff; box-shadow: none; }
+.su-gradient { background: #ff4d2e; }
+[data-theme="night"] .su-cta { background: #ff6a45; color: #0e1626; border: 0; }
+[data-theme="night"] .su-cta:hover:not(:disabled) { background: #ff8a73; }
+[data-theme="night"] .su-picked { border-color: #ff6a45; background: rgb(255 106 69 / 0.1); }
+[data-theme="night"] .su-gradient { background: #ff6a45; }
 
 /* Mode nuit seulement s'il a été choisi (par défaut : mode jour, quel que soit le réglage du téléphone) */
 [data-theme="night"] {
-  --background: #202124;
-  --foreground: #e8eaed;
+  --background: #0e1626;
+  --foreground: #f2f4f8;
 }
 
 html,
@@ -77,6 +91,10 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
 }
+
+/* Titres : la voix « étiquette » d'Archivo, étroite (la graisse reste celle de chaque page) */
+h1, h2 { font-stretch: 78%; letter-spacing: -0.005em; text-wrap: balance; }
+::selection { background: #ffe13a; color: #16213a; }
 
 /* ---------- Animation de chargement : burger, sushi et pizza en orbite ---------- */
 .food-loader {
@@ -98,7 +116,7 @@ body {
 .food-orbit-item:nth-child(1) svg { --base: 0deg; }
 .food-orbit-item:nth-child(2) svg { --base: -120deg; }
 .food-orbit-item:nth-child(3) svg { --base: -240deg; }
-.food-orbit-center { position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #e8501c; animation: food-pulse 1.3s ease-in-out infinite; }
+.food-orbit-center { position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #ff4d2e; animation: food-pulse 1.3s ease-in-out infinite; }
 @keyframes food-spin { to { transform: rotate(360deg); } }
 @keyframes food-self { from { transform: rotate(var(--base)); } to { transform: rotate(calc(var(--base) + 90deg)); } }
 @keyframes food-pulse { 50% { transform: scale(0.6); opacity: 0.5; } }
@@ -125,8 +143,8 @@ body {
 }
 /* La page entière défile (la carte, elle, bloque le rebond) ; fond de la page = celui des documents */
 html:has(.legal-root), html:has(.legal-root) body { height: auto; min-height: 100%; overscroll-behavior: auto; }
-html:has(.legal-root) body { background: #f8fafc; }
-html[data-theme="night"]:has(.legal-root) body { background: #020617; }
+html:has(.legal-root) body { background: #f6f7fa; }
+html[data-theme="night"]:has(.legal-root) body { background: #0e1626; }
 @media print {
   html:has(.legal-root) body { background: #fff; }
 }
@@ -134,7 +152,7 @@ html[data-theme="night"]:has(.legal-root) body { background: #020617; }
 /* ---------- Tableau de bord de l'équipe (/tableau-de-bord) ---------- */
 /* Couleurs des graphiques : bleu puis orange (lisibles par les daltoniens, jour et nuit), grille discrète */
 .dash { --viz-1: #2a78d6; --viz-2: #eb6834; --viz-grid: rgb(15 23 42 / 0.08); --dash-surface: #ffffff; }
-[data-theme="night"] .dash { --viz-1: #3987e5; --viz-2: #d95926; --viz-grid: rgb(255 255 255 / 0.09); --dash-surface: #1a1a1d; }
+[data-theme="night"] .dash { --viz-1: #3987e5; --viz-2: #d95926; --viz-grid: rgb(255 255 255 / 0.09); --dash-surface: #16223a; }
 /* Tableau de bord : entrée des sections, barre de chargement, squelettes (désactivés si « réduire les animations ») */
 @keyframes dash-enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .dash-enter { animation: dash-enter 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
@@ -148,7 +166,7 @@ html[data-theme="night"]:has(.legal-root) body { background: #020617; }
   .dash-enter, .dash-progress, .dash-skel, .dash-pop { animation: none; }
 }
 .btn-dash {
-  display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border-radius: 999px;
-  font-weight: 600; color: #fff; background: var(--color-brand); text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border-radius: 12px;
+  font-weight: 700; color: #16213a; background: var(--color-brand); text-decoration: none;
 }
-[data-theme="night"] .btn-dash { color: #111113; background: var(--color-brand-night); }
+[data-theme="night"] .btn-dash { color: #0e1626; background: var(--color-brand-night); }
