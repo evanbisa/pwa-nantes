@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-8qMq5Zi1kdFv2WS9RnuYwDW8lsowuoAwOy+mpGkr3t8=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-jBFWngpiSg2bnow4sy1huDjVSqxs3M8aPigwnDbpKjA=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -420,6 +420,14 @@
     .pill-link { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border-radius: 18px; font-size: 14px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); border: 1px solid var(--accent-line); text-decoration: none; }
     .pill-link:hover { background: var(--accent-line); }
     #shop-hours { white-space: pre-line; }
+    .loyal-box { margin: 0 0 12px; padding: 12px 14px; border-radius: 14px; background: var(--accent-soft); border: 1px solid var(--accent-line); }
+    .loyal-head { margin: 0; font-size: 14.5px; }
+    .loyal-head b { font-weight: 600; }
+    .loyal-dots { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; }
+    .loyal-dots[hidden] { display: none; }
+    .loyal-dots i { width: 20px; height: 20px; border-radius: 50%; border: 2px dashed var(--accent-line); }
+    .loyal-dots i.is-on { border: 0; background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4L18 8.5'/%3E%3C/svg%3E") center / 13px no-repeat; }
+    .loyal-sub { margin: 6px 0 0; font-size: 13.5px; color: var(--muted); }
     .acc-back { font-size: 26px; line-height: 1; }
     .acc-body form { display: grid; gap: 4px; margin-top: 8px; }
     .acc-body .btn { margin-top: 8px; }
@@ -433,6 +441,13 @@
     .acc-list .link-btn { margin-top: 6px; font-size: 13.5px; }
     .acc-empty { margin: 16px 0; text-align: center; color: var(--muted); font-size: 14px; }
     .ps-close-today { margin: 4px 0 10px; }
+    .ps-loyal-form { margin-top: 12px; }
+    .ps-loyal-form select { width: 100%; height: 46px; padding: 0 12px; border-radius: 8px; font: inherit; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); }
+    .ps-staff { margin: 8px 0 4px; padding: 0; list-style: none; }
+    .ps-staff li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+    .ps-staff li span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+    .ps-staff li small { color: var(--muted); }
+    .ps-staff-add .btn { margin-top: 0; }
     .ps-close-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .ps-close-form .field, #field-ps-close-note { margin-bottom: 8px; }
     .ps-close-actions { display: grid; gap: 8px; margin-top: 4px; }
@@ -1107,6 +1122,20 @@
     .menu-row .m-name { grid-column: 1; }
     .menu-row .m-price { grid-column: 2 / 4; text-align: right; font-variant-numeric: tabular-nums; }
     .menu-row .m-desc { grid-column: 1 / 4; }
+    .menu-row .m-extra { grid-column: 1 / 4; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .m-tag { height: 28px; padding: 0 10px; border-radius: 14px; font-size: 12.5px; border: 1px solid var(--line-strong); color: var(--muted); }
+    .m-tag[aria-pressed="true"] { color: var(--accent-strong); background: var(--accent-soft); border-color: var(--accent-line); }
+    .m-out { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 0 auto; font-size: 13px; }
+    .field .menu-row .m-out input { flex: none; width: 18px; height: 18px; margin: 0; padding: 0; accent-color: var(--accent); }
+    .m-photo { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 14px; font-size: 12.5px; border: 1px dashed var(--line-strong); cursor: pointer; }
+    .m-photo img { width: 22px; height: 22px; border-radius: 5px; object-fit: cover; }
+    .m-photo-x { font-size: 12.5px; }
+    .menu-list .dish-img { flex: none; width: 52px; height: 52px; border-radius: 10px; object-fit: cover; align-self: center; }
+    .menu-list .dish-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+    .menu-list .dish-tags span { padding: 0 7px; border-radius: 9px; font-size: 11.5px; line-height: 18px; color: var(--muted); background: var(--hover); }
+    .menu-list li.is-out b, .menu-list li.is-out .price { opacity: .55; }
+    .menu-list li.is-out .price { text-decoration: line-through; }
+    .menu-list .dish-out { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 9px; font-size: 11.5px; font-weight: 600; line-height: 18px; color: var(--danger); background: rgba(217, 48, 37, .1); }
     .field .menu-row input.is-invalid { border-color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
     .menu-add { margin-top: 8px; min-height: 42px; }
     .menu-scan { margin: 8px 0 12px; padding: 12px; border-radius: 12px; border: 1px dashed var(--line); background: var(--panel-solid); }
@@ -2255,6 +2284,8 @@
     .scan-result p { margin: 6px 0 0; font-size: 15px; color: var(--muted); }
     .sr-offer { padding: 12px 14px; border-radius: 14px; font-size: 17px !important; font-weight: 600; color: var(--green) !important; background: rgba(24, 128, 56, .1); }
     .sr-warn { padding: 10px 12px; border-radius: 12px; font-size: 14px !important; font-weight: 500; color: var(--amber) !important; background: rgba(227, 116, 0, .1); }
+    .sr-loyal { padding: 10px 12px; border-radius: 12px; font-size: 14.5px !important; font-weight: 600; color: var(--accent-strong) !important; background: var(--accent-soft); }
+    .sr-reward { display: block; margin: 10px auto 0; }
     .sr-offer[hidden], .sr-warn[hidden] { display: none; }
     .sr-next { position: relative; overflow: hidden; width: 100%; margin-top: 16px; }
     .sr-next i { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: rgba(255, 255, 255, .55); transform-origin: left; transform: scaleX(0); }
@@ -2856,6 +2887,12 @@
     <div class="gallery" id="shop-gallery" tabindex="0" role="group" aria-label="Photos du restaurant (faire défiler)" hidden></div>
     <p class="shop-desc" id="shop-desc" hidden></p>
     <div class="promos" id="shop-promos" hidden></div>
+    <!-- Carte de fidélité du restaurant : N visites validées en caisse = une récompense -->
+    <div class="loyal-box" id="shop-loyalty" hidden>
+      <p class="loyal-head"><span aria-hidden="true">🎟️</span> <b>Carte de fidélité</b><span id="shop-loyal-rule"></span></p>
+      <div class="loyal-dots" id="shop-loyal-dots" role="img"></div>
+      <p class="loyal-sub" id="shop-loyal-sub"></p>
+    </div>
     <ul class="meta">
       <li>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 1114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
@@ -3204,6 +3241,7 @@
       <div class="pf-row"><span class="pf-ico" aria-hidden="true">✏️</span><span class="pf-k">Prénom et nom<small id="profile-fullname"></small></span><button class="pf-link" type="button" id="profile-name-edit" aria-label="Modifier votre prénom et votre nom">Modifier</button></div>
       <div class="pf-row" id="profile-email-row"><span class="pf-ico" aria-hidden="true">✉️</span><span class="pf-k">Adresse e-mail<small id="profile-email-v"></small></span><button class="pf-link" type="button" id="profile-email-edit" aria-label="Changer d'adresse e-mail">Modifier</button></div>
       <div class="pf-row" id="profile-pw-row"><span class="pf-ico" aria-hidden="true">🔑</span><span class="pf-k">Mot de passe<small>••••••••</small></span><button class="pf-link" type="button" id="profile-pw-edit" aria-label="Changer de mot de passe">Modifier</button></div>
+      <button class="pf-row" type="button" id="profile-staff" hidden><span class="pf-ico" aria-hidden="true">📷</span><span class="pf-k">Scanner les QR codes des clients<small id="profile-staff-sub"></small></span><span class="pf-chev" aria-hidden="true">›</span></button>
       <button class="pf-row" type="button" id="profile-my-reviews"><span class="pf-ico" aria-hidden="true">⭐</span><span class="pf-k">Mes avis<small>Les avis que vous avez donnés</small></span><span class="pf-chev" aria-hidden="true">›</span></button>
       <button class="pf-row" type="button" id="profile-my-visits"><span class="pf-ico" aria-hidden="true">🧾</span><span class="pf-k">Mes visites et offres utilisées<small>QR codes validés en caisse</small></span><span class="pf-chev" aria-hidden="true">›</span></button>
       <div class="pf-row" id="profile-about-row" hidden><span class="pf-ico" aria-hidden="true">👤</span><span class="pf-k">Vous<small id="profile-about"></small></span><button class="pf-link" type="button" id="profile-about-edit" aria-label="Modifier votre sexe et votre âge">Modifier</button></div>
@@ -3318,6 +3356,8 @@
       <p id="sr-text"></p>
       <p class="sr-offer" id="sr-offer" hidden></p>
       <p class="sr-warn" id="sr-warn" hidden></p>
+      <p class="sr-loyal" id="sr-loyal" hidden></p>
+      <button class="pill-btn sr-reward" type="button" id="sr-reward" hidden>Récompense remise au client</button>
       <button class="btn btn-primary sr-next" type="button" id="sr-next"><i id="sr-bar"></i><span>Client suivant</span></button>
     </div>
     <!-- Mode service (téléphone) : le tableau de bord à portée de pouce, sous la caméra -->
@@ -3618,6 +3658,35 @@
             <div class="ps-close-actions">
               <button class="btn btn-primary" type="button" id="ps-close-save">Enregistrer la fermeture</button>
               <button class="btn btn-ghost" type="button" id="ps-close-cancel" hidden>Annuler la fermeture</button>
+            </div>
+          </section>
+          <!-- Carte de fidélité : N visites validées en caisse = une récompense -->
+          <section class="ps-card ps-block" id="ps-loyal-card" aria-labelledby="ps-loyal-title" hidden>
+            <h4 id="ps-loyal-title">Carte de fidélité</h4>
+            <p class="hint">Vos clients gagnent un tampon à chaque visite validée (QR code scanné en caisse). Au dernier tampon, le scanner vous affiche la récompense à remettre.</p>
+            <div class="ps-switch-row">
+              <div><b id="ps-loyal-label">Carte de fidélité active</b><small id="ps-loyal-state"></small></div>
+              <button class="switch" type="button" role="switch" id="ps-loyal-on" aria-checked="false" aria-labelledby="ps-loyal-label"><i></i></button>
+            </div>
+            <div class="ps-loyal-form" id="ps-loyal-form" hidden>
+              <label class="field" id="field-ps-loyal-goal"><span>Nombre de visites</span>
+                <select id="ps-loyal-goal"></select></label>
+              <label class="field" id="field-ps-loyal-reward"><span>Récompense <small class="counter" id="ps-loyal-count">0 / 60</small></span>
+                <input id="ps-loyal-reward" type="text" maxlength="60" placeholder="Ex. : un menu offert" /><small class="field-error" id="err-ps-loyal-reward" aria-live="polite"></small></label>
+              <p class="hint">Changer le nombre de visites remet les tampons de vos clients à zéro.</p>
+              <button class="btn btn-primary" type="button" id="ps-loyal-save">Enregistrer</button>
+            </div>
+          </section>
+          <!-- Équipiers : peuvent scanner les QR codes des clients, rien d'autre -->
+          <section class="ps-card ps-block" id="ps-staff-card" aria-labelledby="ps-staff-title" hidden>
+            <h4 id="ps-staff-title">Équipiers</h4>
+            <p class="hint">Un serveur ou un caissier peut scanner les QR codes de vos clients avec son propre téléphone. Invitez son adresse e-mail : il crée un compte FlashMiam gratuit avec cette adresse (ou s'y connecte), puis « Scanner pour votre restaurant » apparaît dans son profil. Il ne voit ni vos statistiques ni votre fiche.</p>
+            <ul class="ps-staff" id="ps-staff-list"></ul>
+            <div class="ps-staff-add">
+              <label class="field" id="field-ps-staff-email"><span>Adresse e-mail de l'équipier</span>
+                <input id="ps-staff-email" type="email" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="254" placeholder="prenom@exemple.fr" />
+                <small class="field-error" id="err-ps-staff-email" aria-live="polite"></small></label>
+              <button class="btn btn-ghost" type="button" id="ps-staff-invite">Inviter</button>
             </div>
           </section>
           <section class="ps-card ps-block" aria-labelledby="ps-sub-title">
@@ -4301,6 +4370,8 @@
   /** Le restaurant a-t-il cette info pratique ? (« Végétarien » : aussi les restaurants vegan) */
   /** Liens du restaurant (colonne merchants.links) : libellés des boutons de la fiche. */
   const LINKS = { instagram: 'Instagram', website: 'Site internet', order: 'Commander en ligne' };
+  /** Étiquettes d'un plat (menu_json[].tags) */
+  const DISH_TAGS = { vege: 'Végé', vegan: 'Vegan', spicy: 'Épicé', new: 'Nouveau', homemade: 'Fait maison', halal: 'Halal' };
   const hasAmenity = (shop, a) => (shop.amenities || []).includes(a) || (a === 'vegetarian' && (shop.amenities || []).includes('vegan'));
 
   /**
@@ -4774,6 +4845,7 @@
       photos: m.photos_urls || [], menu: m.menu_json || [], address: m.address || '', coords: m.lat != null ? [m.lng, m.lat] : null,
       hours: hours.services || [], closedOn: hours.closed_on || [], days: daysFromRow(hours.days), phone: m.phone || '',
       reviewsVerifiedOnly: !!m.reviews_verified_only,
+      loyalty: m.loyalty_goal && m.loyalty_reward ? { goal: Number(m.loyalty_goal), reward: m.loyalty_reward } : null,
       amenities: Array.isArray(m.amenities) ? m.amenities.filter((a) => AMENITIES[a]) : [],
       links: m.links && typeof m.links === 'object' ? Object.fromEntries(Object.entries(m.links).filter(([k, v]) => LINKS[k] && /^https:\/\//.test(v))) : {},
       closure: m.closed_from && m.closed_until ? { from: m.closed_from, until: m.closed_until, note: m.closure_note || '' } : null,
@@ -8389,6 +8461,7 @@
     $('shop-call').hidden = !shop.phone;
     $('shop-mv-row').hidden = !shop.mealVouchers;
     renderPractical(shop);
+    Loyalty.render(shop);
     if (shop.phone) { $('shop-call').href = 'tel:' + compactPhone(shop.phone); $('shop-call').setAttribute('aria-label', 'Appeler ' + shop.name); }
     renderGallery(shop);
     renderMenu(shop);
@@ -8752,6 +8825,46 @@
     const median = prices[Math.floor(prices.length / 2)];
     return { median, level: median < 10 ? '€' : median <= 20 ? '€€' : '€€€' };
   }
+  /**
+   * Carte de fidélité sur la fiche : la règle pour tous ; pour un client connecté, ses tampons (my_loyalty) et ses
+   * récompenses à demander en caisse ; pour un visiteur, l'invitation à créer un compte.
+   */
+  const Loyalty = (() => {
+    const cache = new Map();   // id de la fiche → { at, data }
+    let shown = null;
+    function paint(shop, data) {
+      const L = shop.loyalty;
+      const goal = data ? data.goal : L.goal;
+      const stamps = data ? Math.min(Number(data.stamps) || 0, goal) : 0;
+      const dots = $('shop-loyal-dots');
+      dots.textContent = '';
+      dots.hidden = !data;
+      for (let i = 0; i < goal; i++) { const d = document.createElement('i'); if (i < stamps) d.className = 'is-on'; dots.appendChild(d); }
+      dots.setAttribute('aria-label', stamps + ' tampon' + (stamps > 1 ? 's' : '') + ' sur ' + goal);
+      const sub = $('shop-loyal-sub');
+      const me = currentUser();
+      if (data && Number(data.available) > 0) sub.textContent = '🎉 ' + plural(Number(data.available), 'récompense', 'récompenses') + ' à demander en caisse : montrez votre QR code de visite.';
+      else if (data) sub.textContent = 'Encore ' + plural(goal - stamps, 'visite validée', 'visites validées') + ' pour : ' + L.reward + '.';
+      else if (!me) sub.textContent = 'Créez votre compte gratuit : chaque visite validée en caisse (QR code) vous donne un tampon.';
+      else sub.textContent = me.role === 'pro' ? 'Vos clients cumulent un tampon à chaque visite validée en caisse.' : 'Chaque visite validée en caisse (QR code) vous donne un tampon.';
+    }
+    async function render(shop) {
+      const L = shop.loyalty;
+      $('shop-loyalty').hidden = !L;
+      if (!L) return;
+      shown = shop.id;
+      $('shop-loyal-rule').textContent = ' · ' + L.goal + ' visites = ' + L.reward;
+      const me = currentUser();
+      const c = cache.get(shop.id);
+      paint(shop, c ? c.data : null);
+      if (!me || me.role === 'pro' || (c && Date.now() - c.at < 30e3)) return;
+      const { data, error } = await sb.rpc('my_loyalty', { p_merchant_id: shop.id });
+      if (error || !data) return;
+      cache.set(shop.id, { at: Date.now(), data });
+      if (shown === shop.id && selectedId === shop.id) paint(shop, data);
+    }
+    return { render, forget: (id) => cache.delete(id) };
+  })();
   /** Infos pratiques (icônes) et liens du restaurant (Instagram, site, commande en ligne) dans la fiche. */
   function renderPractical(shop) {
     const am = (shop.amenities || []).filter((a) => AMENITIES[a]);
@@ -11832,12 +11945,47 @@
       '<button class="icon-btn m-del" type="button">×</button>' +
       '<input class="m-name" maxlength="60" placeholder="Nom du plat" aria-label="Nom du plat" />' +
       '<input class="m-price" inputmode="decimal" maxlength="9" placeholder="Prix €" aria-label="Prix en euros" />' +
-      '<input class="m-desc" maxlength="120" placeholder="Détail (facultatif) : ingrédients, taille…" aria-label="Détail du plat" />';
+      '<input class="m-desc" maxlength="120" placeholder="Détail (facultatif) : ingrédients, taille…" aria-label="Détail du plat" />' +
+      '<div class="m-extra">' + Object.entries(DISH_TAGS).map(([k, t]) => '<button class="m-tag" type="button" data-tag="' + k + '" aria-pressed="false">' + t + '</button>').join('') +
+      '<label class="m-photo"><input type="file" accept="image/*" hidden /><img alt="" hidden /><span>Photo</span></label><button class="link-btn m-photo-x" type="button" hidden>Retirer la photo</button>' +
+      '<label class="m-out"><input type="checkbox" class="m-out-on" /> Épuisé aujourd\'hui</label></div>';
     // Nouvelle ligne : même rubrique que la précédente
     row.querySelector('.m-section').value = item.section != null ? item.section : (prev ? prev.querySelector('.m-section').value : '');
     row.querySelector('.m-name').value = item.name || '';
     row.querySelector('.m-price').value = item.price != null ? String(item.price.toFixed(2)).replace('.', ',') : '';
     row.querySelector('.m-desc').value = item.desc || '';
+    // Étiquettes, photo, « épuisé aujourd'hui » (la date du jour : le lendemain, le plat redevient disponible)
+    (item.tags || []).forEach((t) => { const b = row.querySelector('[data-tag="' + t + '"]'); if (b) b.setAttribute('aria-pressed', 'true'); });
+    row.querySelector('.m-out-on').checked = item.sold_out === dateKey(new Date());
+    setDishPhoto(row, item.photo || '');
+    row.querySelector('.m-extra').addEventListener('click', (ev) => {
+      const t = ev.target.closest('.m-tag');
+      if (t) t.setAttribute('aria-pressed', String(t.getAttribute('aria-pressed') !== 'true'));
+      if (ev.target.closest('.m-photo-x')) setDishPhoto(row, '');
+    });
+    row.querySelector('.m-photo input').addEventListener('change', async (ev) => {
+      const file = ev.target.files[0];
+      ev.target.value = '';
+      if (!file) return;
+      const me = currentUser();
+      const merchantId = me && me.pro && me.pro.merchantId;   // dossier de la fiche dans le stockage des photos
+      if (!merchantId) { setFieldError('pl-menu', 'Enregistrez d\'abord votre fiche, puis ajoutez les photos des plats.'); return; }
+      let bitmap;
+      try {
+        bitmap = await decodeImage(file);
+        const crop = isPhotoRatio(bitmap.width, bitmap.height) ? fullCrop(bitmap.width, bitmap.height) : await cropPhoto(bitmap, { index: 1, total: 1 });
+        if (!crop) return;
+        const blob = await exportCrop(bitmap, crop);
+        const path = merchantId + '/dish-' + uid().replace(/[^A-Za-z0-9_-]/g, '').slice(0, 32) + '.' + photoExt(blob);
+        const up = await Loader.run(sb.storage.from('photos').upload(path, blob, { contentType: blob.type, cacheControl: '31536000' }), 'Envoi de la photo…');
+        if (up.error) { setFieldError('pl-menu', 'La photo n\'a pas pu être envoyée. ' + cloudError(up.error)); return; }
+        setDishPhoto(row, publicUrl('photos', path));
+      } catch (e) {
+        setFieldError('pl-menu', 'Format d\'image non pris en charge (utilisez JPG ou PNG).');
+      } finally {
+        if (bitmap && bitmap.close) bitmap.close();
+      }
+    });
     row.querySelector('.m-del').addEventListener('click', () => {
       const next = row.nextElementSibling || row.previousElementSibling;
       row.remove();
@@ -11850,6 +11998,15 @@
     if (focus) row.querySelector(row.querySelector('.m-section').value ? '.m-name' : '.m-section').focus();
   }
 
+  /** Photo d'un plat (adresse publique) dans la ligne de l'éditeur ; '' : aucune. */
+  function setDishPhoto(row, url) {
+    row.dataset.photo = url || '';
+    const img = row.querySelector('.m-photo img');
+    img.hidden = !url;
+    if (url) img.src = url; else img.removeAttribute('src');
+    row.querySelector('.m-photo span').textContent = url ? 'Changer' : 'Photo';
+    row.querySelector('.m-photo-x').hidden = !url;
+  }
   function syncMenuEditor() {
     const rows = [...$('pl-menu').children];
     rows.forEach((row, i) => row.querySelector('.m-del').setAttribute('aria-label', 'Retirer le plat ' + (i + 1)));
@@ -11954,7 +12111,9 @@
       if (name.length < 2) { row.querySelector('.m-name').classList.add('is-invalid'); return { error: 'Plat n° ' + (i + 1) + ' : indiquez son nom.', input: row.querySelector('.m-name') }; }
       const price = parsePrice(priceText);
       if (price === null) { row.querySelector('.m-price').classList.add('is-invalid'); return { error: '« ' + name + ' » : prix invalide (ex. : 9,50).', input: row.querySelector('.m-price') }; }
-      items.push({ section, name, price, desc });
+      const tags = [...row.querySelectorAll('.m-tag[aria-pressed="true"]')].map((b) => b.dataset.tag);
+      items.push({ section, name, price, desc, ...(tags.length ? { tags } : {}), ...(row.dataset.photo ? { photo: row.dataset.photo } : {}),
+        ...(row.querySelector('.m-out-on').checked ? { sold_out: dateKey(new Date()) } : {}) });
     }
     return { items };
   }
@@ -11963,7 +12122,7 @@
   let menuFor = null;
   function renderMenu(shop) {
     const items = shop.menu || [];
-    const key = shop.id + ':' + (shop.updatedAt || '');
+    const key = shop.id + ':' + (shop.updatedAt || '') + ':' + dateKey(new Date());   // « épuisé aujourd'hui » change à minuit
     $('shop-menu-empty').hidden = !!items.length;
     if (key === menuFor) return;
     menuFor = key;
@@ -11984,6 +12143,21 @@
         li.querySelector('small').textContent = it.desc || '';
         li.querySelector('small').hidden = !it.desc;
         li.querySelector('.price').textContent = formatPrice(it.price);
+        if (it.sold_out === dateKey(new Date())) {
+          li.classList.add('is-out');
+          const out = document.createElement('span'); out.className = 'dish-out'; out.textContent = 'Épuisé aujourd\'hui';
+          li.querySelector('b').after(out);
+        }
+        const tags = (it.tags || []).filter((t) => DISH_TAGS[t]);
+        if (tags.length) {
+          const box = document.createElement('div'); box.className = 'dish-tags';
+          tags.forEach((t) => { const sp = document.createElement('span'); sp.textContent = DISH_TAGS[t]; box.appendChild(sp); });
+          li.firstChild.appendChild(box);
+        }
+        if (it.photo && /^https:\/\//.test(it.photo)) {
+          const img = document.createElement('img'); img.className = 'dish-img'; img.src = it.photo; img.alt = it.name; img.loading = 'lazy'; img.decoding = 'async';
+          li.prepend(img);
+        }
         ul.appendChild(li);
       });
       list.appendChild(ul);
@@ -12605,7 +12779,30 @@
     syncProfileBadge(account);
     $('profile-lbl').textContent = account.role === 'pro' ? 'Mon resto' : 'Profil';
     Scanner.renderEntry();
+    Staff.refresh(account);
   }
+  /**
+   * Équipier d'un restaurant (compte client invité par le restaurateur) : les invitations à son adresse sont acceptées à
+   * la connexion (accept_staff_invites) et « Scanner pour … » apparaît dans son profil.
+   */
+  const Staff = (() => {
+    let list = [], at = 0;
+    async function refresh(account) {
+      if (!account || account.role === 'pro' || !sb) { list = []; return; }
+      if (Date.now() - at < 60e3) return;
+      at = Date.now();
+      try {
+        const { data, error } = await sb.rpc('accept_staff_invites');
+        if (!error && Array.isArray(data)) { list = data; paint(); }
+      } catch (e) { at = 0; }
+    }
+    function paint() {
+      $('profile-staff').hidden = !list.length;
+      $('profile-staff-sub').textContent = list.map((x) => x.name).join(', ');
+    }
+    $('profile-staff').addEventListener('click', () => { closePanel($('profile-sheet')); Scanner.open({ home: false, staff: true }); });
+    return { refresh, paint, has: () => list.length > 0 };
+  })();
 
   function updateProfileGeo() {
     const state = locateBtn.dataset.state;
@@ -13399,6 +13596,8 @@
         : s.live ? 'Les clients voient votre fiche, vos stories et vos promotions. Pour des congés, préférez « Fermeture exceptionnelle » ci-dessous.'
         : 'Masquée : personne ne la voit. Vos abonnés, vos avis et vos statistiques sont conservés.';
       Closure.render(s);
+      LoyaltyCard.render(s);
+      StaffCard.render(s);
       // Avis réservés aux visites validées (onglet « Avis »)
       $('ps-rv-only').setAttribute('aria-checked', String(!!(s.r && s.r.reviewsVerifiedOnly)));
       $('ps-rv-only').disabled = !s.listed;
@@ -13509,6 +13708,104 @@
           $('ps-close-until').value = c ? c.until : '';
           $('ps-close-note').value = c ? c.note : '';
           $('ps-close-count').textContent = $('ps-close-note').value.length + ' / 80';
+        },
+      };
+    })();
+
+    /** Carte de fidélité du restaurant (réglage). */
+    const LoyaltyCard = (() => {
+      for (let n = 3; n <= 20; n++) { const o = document.createElement('option'); o.value = String(n); o.textContent = n + ' visites'; $('ps-loyal-goal').appendChild(o); }
+      $('ps-loyal-goal').value = '10';
+      $('ps-loyal-reward').addEventListener('input', () => { setFieldError('ps-loyal-reward', ''); $('ps-loyal-count').textContent = $('ps-loyal-reward').value.length + ' / 60'; });
+      async function save(fields, message) {
+        const { r } = stateOf();
+        if (!r) return false;
+        const { error } = await Loader.run(sb.from('merchants').update(fields).eq('id', r.id), 'Enregistrement…');
+        if (error) { toast(cloudError(error)); return false; }
+        await refreshCloud();
+        render();
+        toast(message);
+        return true;
+      }
+      $('ps-loyal-on').addEventListener('click', () => {
+        const on = $('ps-loyal-on').getAttribute('aria-checked') !== 'true';
+        if (on) { $('ps-loyal-on').setAttribute('aria-checked', 'true'); $('ps-loyal-form').hidden = false; $('ps-loyal-reward').focus(); return; }
+        const { r } = stateOf();
+        if (r && r.loyalty) save({ loyalty_goal: null, loyalty_reward: null }, 'Carte de fidélité désactivée.');
+        else { $('ps-loyal-on').setAttribute('aria-checked', 'false'); $('ps-loyal-form').hidden = true; }
+      });
+      $('ps-loyal-save').addEventListener('click', () => {
+        const reward = $('ps-loyal-reward').value.trim().replace(/\s+/g, ' ');
+        if (reward.length < 3) { setFieldError('ps-loyal-reward', 'Décrivez la récompense (ex. : un menu offert).'); $('ps-loyal-reward').focus(); return; }
+        const goal = Number($('ps-loyal-goal').value);
+        save({ loyalty_goal: goal, loyalty_reward: reward }, 'Carte de fidélité enregistrée : ' + goal + ' visites = ' + reward + '.');
+      });
+      return {
+        render(s) {
+          const r = s.r;
+          $('ps-loyal-card').hidden = !(r && s.listed);
+          if (!r || !s.listed) return;
+          const L = r.loyalty;
+          if (document.activeElement && document.activeElement.closest && document.activeElement.closest('#ps-loyal-card')) return;
+          $('ps-loyal-on').setAttribute('aria-checked', String(!!L));
+          $('ps-loyal-form').hidden = !L;
+          $('ps-loyal-state').textContent = L ? L.goal + ' visites = ' + L.reward : 'Désactivée';
+          if (L) { $('ps-loyal-goal').value = String(L.goal); $('ps-loyal-reward').value = L.reward; }
+          $('ps-loyal-count').textContent = $('ps-loyal-reward').value.length + ' / 60';
+        },
+      };
+    })();
+
+    /** Équipiers (adresses invitées, acceptées ou en attente). */
+    const StaffCard = (() => {
+      let rows = null, loadedFor = null;
+      async function load(r) {
+        const { data, error } = await sb.from('merchant_staff').select('email, user_id, accepted_at, invited_at').eq('merchant_id', r.id).order('invited_at');
+        if (error) return;
+        rows = data || []; loadedFor = r.id;
+        draw(r);
+      }
+      function draw(r) {
+        const ul = $('ps-staff-list');
+        ul.textContent = '';
+        (rows || []).forEach((x) => {
+          const li = document.createElement('li');
+          li.innerHTML = '<span></span><small></small><button class="icon-btn" type="button">&times;</button>';
+          li.querySelector('span').textContent = x.email;
+          li.querySelector('small').textContent = x.user_id ? 'actif' : 'invitation en attente';
+          li.querySelector('button').setAttribute('aria-label', 'Retirer l\'équipier ' + x.email);
+          li.querySelector('button').addEventListener('click', async () => {
+            const { error } = await Loader.run(sb.from('merchant_staff').delete().eq('merchant_id', r.id).eq('email', x.email), 'Retrait…');
+            if (error) { toast(cloudError(error)); return; }
+            toast(x.email + ' ne peut plus scanner pour votre restaurant.');
+            load(r);
+          });
+          ul.appendChild(li);
+        });
+        $('ps-staff-invite').disabled = (rows || []).length >= 5;
+      }
+      $('ps-staff-email').addEventListener('input', () => setFieldError('ps-staff-email', ''));
+      $('ps-staff-invite').addEventListener('click', async () => {
+        const { r } = stateOf();
+        if (!r) return;
+        const email = $('ps-staff-email').value.trim().toLowerCase();
+        if (!EMAIL_RE.test(email)) { setFieldError('ps-staff-email', 'Saisissez une adresse e-mail valide.'); return; }
+        const { error } = await Loader.run(sb.from('merchant_staff').insert({ merchant_id: r.id, email }), 'Invitation…');
+        if (error) {
+          setFieldError('ps-staff-email', error.code === '23505' ? 'Cette adresse est déjà invitée.' : /Cinq équipiers/.test(error.message || '') ? 'Cinq équipiers au maximum.'
+            : /propre compte/.test(error.message || '') ? 'C\'est l\'adresse de votre propre compte.' : cloudError(error));
+          return;
+        }
+        $('ps-staff-email').value = '';
+        toast('Invitation enregistrée : prévenez ' + email + ' de se connecter à FlashMiam avec cette adresse.');
+        load(r);
+      });
+      return {
+        render(s) {
+          const r = s.r;
+          $('ps-staff-card').hidden = !(r && s.listed);
+          if (!r || !s.listed) return;
+          if (loadedFor !== r.id) load(r); else draw(r);
         },
       };
     })();
@@ -13900,9 +14197,10 @@
     function help(text, warn = false) { $('scan-help').textContent = text; $('scan-help').classList.toggle('is-warn', warn); }
 
     /** home : « mode service » du téléphone (caméra en haut, tableau de bord en bas, pas de bouton Fermer). */
-    async function open({ code = null, home = null } = {}) {
+    async function open({ code = null, home = null, staff = false } = {}) {
       const me = currentUser();
-      if (!me || me.role !== 'pro') return;
+      // Restaurateur, ou équipier invité par un restaurateur (scanner seulement)
+      if (!me || (me.role !== 'pro' && !(staff && Staff.has()))) return;
       if (!isOpen()) lastFocus = document.activeElement;
       if (activePanel) closePanel(activePanel);
       homeMode = home === null ? ProHome.phone() && listed() : !!home;
@@ -14090,8 +14388,13 @@
         case 'ok': {
           const n = Number(d.visit_number) || 1;
           if (summary) { summary.today = (summary.today || 0) + 1; if (d.promo_title) summary.today_offers = (summary.today_offers || 0) + 1; renderCount(); }
+          const L = d.loyalty;
+          const loyal = !L ? '' : L.earned ? '🎉 Carte de fidélité complète : ' + L.reward
+            : Number(L.available) > 0 ? '🎟️ Récompense à remettre : ' + L.reward + ' (' + L.stamps + '/' + L.goal + ' tampons)'
+            : '🎟️ Fidélité : ' + L.stamps + '/' + L.goal + ' tampons';
           show('ok', d.promo_title ? 'Offre validée' : 'Visite validée', n > 1 ? nth(n) + ' visite de ce client chez vous' : 'Première visite de ce client chez vous', {
-            offer, warn: d.promo_used_today ? '⚠️ Ce client a déjà profité de cette offre aujourd\'hui.' : '', wait: d.promo_title || d.promo_used_today ? 7000 : 2600 });
+            offer, warn: d.promo_used_today ? '⚠️ Ce client a déjà profité de cette offre aujourd\'hui.' : '', loyal, reward: L && Number(L.available) > 0 ? code : null,
+            wait: d.promo_title || d.promo_used_today || (L && Number(L.available) > 0) ? 9000 : 2600 });
           setTimeout(loadSummary, 800);
           break;
         }
@@ -14111,7 +14414,20 @@
       warn: '<svg viewBox="0 0 24 24"><path d="M12 6v7.5M12 18v.01"/></svg>',
       bad: '<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg>',
     };
-    function show(kind, title, text, { offer = '', warn = '', wait = 3000 } = {}) {
+    function show(kind, title, text, { offer = '', warn = '', loyal = '', reward = null, wait = 3000 } = {}) {
+      $('sr-loyal').hidden = !loyal; $('sr-loyal').textContent = loyal;
+      // Récompense de fidélité : remise en caisse, notée (use_loyalty_reward) d'un geste
+      const rb = $('sr-reward');
+      rb.hidden = !reward; rb.disabled = false; rb.textContent = 'Récompense remise au client';
+      rb.onclick = !reward ? null : async () => {
+        rb.disabled = true;
+        clearTimeout(nextTimer); if (bar) { bar.cancel(); bar = null; }
+        const { data: r, error: e } = await sb.rpc('use_loyalty_reward', { p_token: reward });
+        if (e) { rb.disabled = false; toast(cloudError(e)); return; }
+        rb.textContent = r && r.status === 'ok' ? '✓ Récompense notée' : 'Plus de récompense à remettre';
+        $('sr-loyal').textContent = r && r.status === 'ok' ? (Number(r.remaining) ? '🎟️ Encore ' + plural(Number(r.remaining), 'récompense', 'récompenses') + ' à remettre' : '🎟️ Carte de fidélité : c\'est noté') : $('sr-loyal').textContent;
+        nextTimer = setTimeout(next, 2500);
+      };
       const box = $('scan-result');
       box.dataset.kind = kind;
       $('sr-ico').innerHTML = ICONS[kind];
