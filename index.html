@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-PXe7Ql/vmRRpsMPOBKTeH+MN3wi170hahaqPHPQiZmI=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-J66D/wHPv+Ev0dTk4QC27GxX6c5ivhKOxJyzKfOEuus=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -114,6 +114,7 @@
       --accent-soft: rgba(234, 88, 12, 0.1);
       --accent-line: rgba(234, 88, 12, 0.38);
       --focus-ring: rgba(234, 88, 12, 0.22);
+      --focus-border: #ea580c;   /* champ actif : orange vif, bien distinct du rouge des erreurs */
       --on-accent: #ffffff;
       --green: #188038;
       --green-soft: rgba(24, 128, 56, 0.1);
@@ -141,6 +142,7 @@
       --accent-soft: rgba(255, 138, 76, 0.14);
       --accent-line: rgba(255, 138, 76, 0.42);
       --focus-ring: rgba(255, 138, 76, 0.24);
+      --focus-border: #ff9a5c;
       --on-accent: #202124;
       --green: #81c995;
       --green-soft: rgba(129, 201, 149, 0.14);
@@ -418,6 +420,18 @@
     .pill-link { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border-radius: 18px; font-size: 14px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); border: 1px solid var(--accent-line); text-decoration: none; }
     .pill-link:hover { background: var(--accent-line); }
     #shop-hours { white-space: pre-line; }
+    .acc-back { font-size: 26px; line-height: 1; }
+    .acc-body form { display: grid; gap: 4px; margin-top: 8px; }
+    .acc-body .btn { margin-top: 8px; }
+    .acc-list { margin: 8px 0 0; padding: 0; list-style: none; }
+    .acc-list li { padding: 12px 2px; border-bottom: 1px solid var(--line); }
+    .acc-list li:last-child { border-bottom: 0; }
+    .acc-list .acc-l1 { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+    .acc-list b { font-weight: 600; }
+    .acc-list small { color: var(--muted); font-size: 12.5px; flex: none; }
+    .acc-list p { margin: 4px 0 0; font-size: 14px; }
+    .acc-list .link-btn { margin-top: 6px; font-size: 13.5px; }
+    .acc-empty { margin: 16px 0; text-align: center; color: var(--muted); font-size: 14px; }
     .ps-close-today { margin: 4px 0 10px; }
     .ps-close-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .ps-close-form .field, #field-ps-close-note { margin-bottom: 8px; }
@@ -654,7 +668,7 @@
       background: var(--input-bg); border: 1px solid var(--line-strong); outline: none; transition: border-color .2s, box-shadow .2s;
     }
     .field input::placeholder { color: var(--muted); opacity: .7; }
-    .field input:focus { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    .field input:focus { border-color: var(--focus-border); box-shadow: 0 0 0 3px var(--focus-ring); }
     .field.has-error input:not([type="checkbox"]):not([type="radio"]), .field.has-error input:not([type="checkbox"]):not([type="radio"]):focus { border-color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
     .field-error { display: block; min-height: 16px; margin-top: 4px; font-size: 12px; color: var(--danger); }
     .pw-wrap { position: relative; }
@@ -1033,7 +1047,7 @@
 
     /* Fiche restaurant : catégories, photos, adresse, horaires */
     .field textarea { width: 100%; padding: 12px 16px; border-radius: 8px; font: inherit; font-size: 15px; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); outline: none; resize: vertical; min-height: 96px; }
-    .field textarea:focus { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    .field textarea:focus { border-color: var(--focus-border); box-shadow: 0 0 0 3px var(--focus-ring); }
     .field.has-error textarea { border-color: var(--danger); }
     .counter { float: right; font-weight: 400; }
     .cat-picker { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -1137,7 +1151,7 @@
     .ob-address-toggle { display: block; margin: 12px auto 0; font-size: 14.5px; }
     .ob-address { margin-top: 10px; margin-bottom: 14px; text-align: left; }
     .addr-wrap input { width: 100%; height: 50px; padding: 0 16px; border-radius: 8px; font: inherit; font-size: 16px; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); outline: none; }
-    .addr-wrap input:focus { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    .addr-wrap input:focus { border-color: var(--focus-border); box-shadow: 0 0 0 3px var(--focus-ring); }
     .field.has-error .addr-wrap input { border-color: var(--danger); }
     .addr-list { position: absolute; z-index: 5; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px; list-style: none; border-radius: 10px; background: var(--panel-solid); box-shadow: var(--shadow); max-height: 240px; overflow-y: auto; }
     .addr-list li { padding: 10px 12px; border-radius: 8px; font-size: 14px; cursor: pointer; }
@@ -3180,6 +3194,11 @@
     <p class="pf-label">Mon compte</p>
     <div class="pf-group">
       <div class="pf-row"><span class="pf-ico" aria-hidden="true">📷</span><span class="pf-k">Photo de profil<small id="profile-photo-state"></small></span><button class="pf-link" type="button" id="profile-photo-remove" hidden>Retirer</button><button class="pf-pill" type="button" id="profile-photo-pick">Choisir</button></div>
+      <div class="pf-row"><span class="pf-ico" aria-hidden="true">✏️</span><span class="pf-k">Prénom et nom<small id="profile-fullname"></small></span><button class="pf-link" type="button" id="profile-name-edit" aria-label="Modifier votre prénom et votre nom">Modifier</button></div>
+      <div class="pf-row" id="profile-email-row"><span class="pf-ico" aria-hidden="true">✉️</span><span class="pf-k">Adresse e-mail<small id="profile-email-v"></small></span><button class="pf-link" type="button" id="profile-email-edit" aria-label="Changer d'adresse e-mail">Modifier</button></div>
+      <div class="pf-row" id="profile-pw-row"><span class="pf-ico" aria-hidden="true">🔑</span><span class="pf-k">Mot de passe<small>••••••••</small></span><button class="pf-link" type="button" id="profile-pw-edit" aria-label="Changer de mot de passe">Modifier</button></div>
+      <button class="pf-row" type="button" id="profile-my-reviews"><span class="pf-ico" aria-hidden="true">⭐</span><span class="pf-k">Mes avis<small>Les avis que vous avez donnés</small></span><span class="pf-chev" aria-hidden="true">›</span></button>
+      <button class="pf-row" type="button" id="profile-my-visits"><span class="pf-ico" aria-hidden="true">🧾</span><span class="pf-k">Mes visites et offres utilisées<small>QR codes validés en caisse</small></span><span class="pf-chev" aria-hidden="true">›</span></button>
       <div class="pf-row" id="profile-about-row" hidden><span class="pf-ico" aria-hidden="true">👤</span><span class="pf-k">Vous<small id="profile-about"></small></span><button class="pf-link" type="button" id="profile-about-edit" aria-label="Modifier votre sexe et votre âge">Modifier</button></div>
       <button class="pf-row" type="button" id="profile-places"><span class="pf-ico" aria-hidden="true">🏢</span><span class="pf-k">Mes lieux (travail, école)<small id="profile-places-sub">Pour voir ce qui est proche du bureau ou de l'école</small></span><span class="pf-chev" aria-hidden="true">›</span></button>
       <div class="pf-row"><span class="pf-ico" aria-hidden="true">📍</span><span class="pf-k">Localisation<small id="profile-geo"></small></span><button class="pf-pill" type="button" id="profile-locate">Activer</button></div>
@@ -3210,6 +3229,17 @@
     </div>
     <button class="pf-delete" type="button" id="profile-delete">Supprimer mon compte</button>
     <p class="legal"><a href="app/legal/confidentialite/" target="_blank" rel="noopener">Confidentialité</a> · <a href="app/legal/cgu/" target="_blank" rel="noopener">Conditions d'utilisation</a> · <a href="app/legal/mentions-legales/" target="_blank" rel="noopener">Mentions légales</a> · <button class="link-btn" type="button" id="profile-cookies">Cookies</button></p>
+  </section>
+
+  <!-- ===================== MON COMPTE : prénom, e-mail, mot de passe, mes avis, mes visites ===================== -->
+  <section id="account-sheet" class="sheet glass" role="dialog" aria-modal="true" aria-labelledby="acc-title" aria-hidden="true">
+    <button class="sheet-grab" type="button" data-close aria-label="Fermer"></button>
+    <div class="sheet-head">
+      <button class="icon-btn acc-back" type="button" id="acc-back" aria-label="Revenir au profil">‹</button>
+      <div class="sheet-title"><h3 id="acc-title"></h3><p class="eyebrow" id="acc-sub"></p></div>
+      <button class="icon-btn" type="button" data-close aria-label="Fermer">&times;</button>
+    </div>
+    <div class="acc-body" id="acc-body"></div>
   </section>
 
   <!-- ===================== ESPACE RESTAURATEUR ===================== -->
@@ -14393,6 +14423,186 @@
     if (code) openVisitLink(code); else openShortcut(shortcut);
   });
 
+  /**
+   * Mon compte : prénom et nom, adresse e-mail (confirmée par un lien), mot de passe (code par e-mail si la base demande
+   * de confirmer l'identité), mes avis, mes visites validées en caisse.
+   */
+  const Account = (() => {
+    const body = $('acc-body');
+    const fullName = (a) => [a.name, a.lastName].filter(Boolean).join(' ');
+    function open(title, sub, build) {
+      closePanel($('profile-sheet'));
+      $('acc-title').textContent = title;
+      $('acc-sub').textContent = sub || '';
+      body.textContent = '';
+      build(body);
+      openPanel($('account-sheet'), { modal: true });
+      const first = body.querySelector('input');
+      if (first) setTimeout(() => first.focus(), 80);
+    }
+    const back = () => { closePanel($('account-sheet')); openProfileSheet(); };
+    $('acc-back').addEventListener('click', back);
+    const field = (id, label, type, extra = '') => '<label class="field" id="field-' + id + '"><span>' + label + '</span><input id="' + id + '" type="' + type + '" ' + extra + ' /><small class="field-error" id="err-' + id + '" aria-live="polite"></small></label>';
+
+    function editName() {
+      const a = currentUser();
+      open('Prénom et nom', 'Affichés avec vos avis (prénom et initiale du nom)', (box) => {
+        box.innerHTML = '<form novalidate>' + field('acc-first', 'Prénom', 'text', 'autocomplete="given-name" maxlength="40"')
+          + field('acc-last', 'Nom (facultatif)', 'text', 'autocomplete="family-name" maxlength="40"')
+          + '<p class="form-error" id="err-acc" role="alert"></p><button class="btn btn-primary" type="submit">Enregistrer</button></form>';
+        $('acc-first').value = a.name || ''; $('acc-last').value = a.lastName || '';
+        box.querySelector('form').addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          const first = $('acc-first').value.trim().replace(/\s+/g, ' '), last = $('acc-last').value.trim().replace(/\s+/g, ' ');
+          if (first.length < 1) { setFieldError('acc-first', 'Indiquez votre prénom.'); return; }
+          const { error } = await Loader.run(sb.from('profiles').update({ first_name: first, last_name: last || null }).eq('id', a.id), 'Enregistrement…');
+          if (error) { $('err-acc').textContent = cloudError(error); return; }
+          a.name = first; a.lastName = last;
+          applyAccount(a);
+          back();
+          toast('Prénom et nom enregistrés. Vos prochains avis les afficheront.');
+        });
+      });
+    }
+
+    function editEmail() {
+      const a = currentUser();
+      open('Adresse e-mail', 'Actuelle : ' + a.email, (box) => {
+        box.innerHTML = '<form novalidate>' + field('acc-email', 'Nouvelle adresse e-mail', 'email', 'inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" maxlength="254"')
+          + '<p class="hint">Un lien de confirmation est envoyé à la nouvelle adresse (et parfois aussi à l\'ancienne) : le changement prend effet après un clic sur ce lien.</p>'
+          + '<p class="form-error" id="err-acc" role="alert"></p><button class="btn btn-primary" type="submit">Recevoir le lien de confirmation</button></form>';
+        box.querySelector('form').addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          const email = $('acc-email').value.trim().toLowerCase();
+          if (!EMAIL_RE.test(email)) { setFieldError('acc-email', 'Saisissez une adresse e-mail valide.'); return; }
+          if (email === (a.email || '').toLowerCase()) { setFieldError('acc-email', 'C\'est déjà votre adresse actuelle.'); return; }
+          const { error } = await Loader.run(sb.auth.updateUser({ email }, { emailRedirectTo: location.origin + location.pathname }), 'Envoi du lien…');
+          if (error) { $('err-acc').textContent = /already|exists|registered/i.test(error.message || '') ? 'Cette adresse est déjà utilisée par un autre compte.' : cloudError(error); return; }
+          back();
+          toast('Lien envoyé à ' + email + ' : ouvrez-le pour confirmer le changement.');
+        });
+      });
+    }
+
+    function editPassword() {
+      let nonceAsked = false;
+      open('Mot de passe', 'Au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial', (box) => {
+        box.innerHTML = '<form novalidate>'
+          + '<label class="field" id="field-acc-pw"><span>Nouveau mot de passe</span><span class="pw-wrap"><input id="acc-pw" type="password" autocomplete="new-password" maxlength="128" /><button class="pw-toggle" type="button" data-toggle-pw="acc-pw">Afficher</button></span><small class="field-error" id="err-acc-pw" aria-live="polite"></small></label>'
+          + '<label class="field" id="field-acc-pw2"><span>Confirmer le mot de passe</span><span class="pw-wrap"><input id="acc-pw2" type="password" autocomplete="new-password" maxlength="128" /><button class="pw-toggle" type="button" data-toggle-pw="acc-pw2">Afficher</button></span><small class="field-error" id="err-acc-pw2" aria-live="polite"></small></label>'
+          + '<div id="acc-code-box" hidden>' + field('acc-code', 'Code reçu par e-mail', 'text', 'inputmode="numeric" autocomplete="one-time-code" maxlength="10"')
+          + '<p class="hint">Par sécurité, confirmez que c\'est bien vous : un code vient d\'être envoyé à ' + '<b id="acc-code-mail"></b>.</p></div>'
+          + '<p class="form-error" id="err-acc" role="alert"></p><button class="btn btn-primary" type="submit">Changer mon mot de passe</button></form>';
+        $('acc-code-mail').textContent = currentUser().email;
+        box.querySelectorAll('[data-toggle-pw]').forEach((b) => b.addEventListener('click', () => {
+          const i = $(b.dataset.togglePw); const show = i.type === 'password'; i.type = show ? 'text' : 'password'; b.textContent = show ? 'Masquer' : 'Afficher';
+        }));
+        box.querySelector('form').addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          const pw = $('acc-pw').value, pw2 = $('acc-pw2').value;
+          const missing = missingPasswordRules(pw);
+          if (missing.length) { setFieldError('acc-pw', 'Mot de passe trop faible : il manque ' + listFr(missing.map((r) => r.label)) + '.'); return; }
+          if (pw !== pw2) { setFieldError('acc-pw2', 'Les deux mots de passe ne sont pas identiques.'); return; }
+          const nonce = nonceAsked ? onlyDigits($('acc-code').value) : '';
+          if (nonceAsked && nonce.length < 6) { setFieldError('acc-code', 'Saisissez le code reçu par e-mail.'); return; }
+          const { error } = await Loader.run(sb.auth.updateUser(nonce ? { password: pw, nonce } : { password: pw }), 'Enregistrement du mot de passe…');
+          if (error && !nonceAsked && (error.code === 'reauthentication_needed' || /reauthenticat/i.test(error.message || ''))) {
+            const re = await Loader.run(sb.auth.reauthenticate(), 'Envoi du code…');
+            if (re.error) { $('err-acc').textContent = cloudError(re.error); return; }
+            nonceAsked = true;
+            $('acc-code-box').hidden = false;
+            $('acc-code').focus();
+            return;
+          }
+          if (error) {
+            $('err-acc').textContent = error.code === 'same_password' ? 'Choisissez un mot de passe différent de l\'actuel.'
+              : nonceAsked && /nonce|otp|code|expired|invalid/i.test(error.message || '') ? 'Code incorrect ou expiré.' : cloudError(error);
+            return;
+          }
+          back();
+          toast('Mot de passe modifié.');
+        });
+      });
+    }
+
+    async function myReviews() {
+      open('Mes avis', '', (box) => { box.innerHTML = '<p class="acc-empty">Chargement…</p>'; });
+      const ids = await sb.rpc('my_reviews');
+      const list = (ids.data || []).map((x) => x.id);
+      let rows = [];
+      if (list.length) {
+        const { data } = await sb.from('reviews').select(REVIEW_COLS).in('id', list).order('created_at', { ascending: false });
+        rows = data || [];
+      }
+      body.textContent = '';
+      if (ids.error) { body.innerHTML = '<p class="acc-empty">Vos avis n\'ont pas pu être chargés. Réessayez dans un instant.</p>'; return; }
+      $('acc-sub').textContent = rows.length ? plural(rows.length, 'avis', 'avis') : '';
+      if (!rows.length) { body.innerHTML = '<p class="acc-empty">Vous n\'avez pas encore donné d\'avis. Ouvrez la fiche d\'un restaurant, onglet « Avis ».</p>'; return; }
+      const ul = document.createElement('ul');
+      ul.className = 'acc-list';
+      rows.forEach((r) => {
+        const shop = restaurants()[r.merchant_id];
+        const li = document.createElement('li');
+        li.innerHTML = '<div class="acc-l1"><b></b><small></small></div><p><span class="stars"></span></p>';
+        li.querySelector('b').textContent = shop ? shop.name : 'Restaurant qui n\'est plus sur la carte';
+        li.querySelector('small').textContent = timeAgo(r.created_at);
+        li.querySelector('.stars').textContent = '★★★★★'.slice(0, r.rating) + '☆☆☆☆☆'.slice(0, 5 - r.rating);
+        li.querySelector('.stars').setAttribute('aria-label', r.rating + ' sur 5');
+        if (r.verified) li.querySelector('p').append(' ', verifiedTag());
+        if (r.comment) { const c = document.createElement('p'); c.textContent = r.comment; li.appendChild(c); }
+        if (r.reply) { const c = document.createElement('p'); c.className = 'hint'; c.textContent = 'Réponse du restaurant : ' + r.reply; li.appendChild(c); }
+        if (shop && markers.get(r.merchant_id)) {
+          const go = document.createElement('button');
+          go.type = 'button'; go.className = 'link-btn'; go.textContent = 'Modifier ou supprimer sur la fiche';
+          go.addEventListener('click', () => { closePanel($('account-sheet')); whenMapReady(() => { openShop(r.merchant_id, { source: 'list' }); setShopTab('reviews'); }); });
+          li.appendChild(go);
+        }
+        ul.appendChild(li);
+      });
+      body.appendChild(ul);
+    }
+
+    async function myVisits() {
+      open('Mes visites', 'Validées en caisse avec votre QR code', (box) => { box.innerHTML = '<p class="acc-empty">Chargement…</p>'; });
+      const { data, error } = await sb.from('visits').select('merchant_id, promo_title, visited_at').order('visited_at', { ascending: false }).limit(100);
+      body.textContent = '';
+      if (error) { body.innerHTML = '<p class="acc-empty">Vos visites n\'ont pas pu être chargées. Réessayez dans un instant.</p>'; return; }
+      if (!data.length) { body.innerHTML = '<p class="acc-empty">Aucune visite validée pour l\'instant. Au restaurant, touchez « Valider ma visite » (ou « Profiter de l\'offre ») sur sa fiche et montrez le QR code en caisse.</p>'; return; }
+      $('acc-sub').textContent = plural(data.length, 'visite validée', 'visites validées');
+      const ul = document.createElement('ul');
+      ul.className = 'acc-list';
+      data.forEach((v) => {
+        const shop = restaurants()[v.merchant_id];
+        const li = document.createElement('li');
+        li.innerHTML = '<div class="acc-l1"><b></b><small></small></div>';
+        li.querySelector('b').textContent = shop ? shop.name : 'Restaurant qui n\'est plus sur la carte';
+        li.querySelector('small').textContent = new Date(v.visited_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+        const p = document.createElement('p');
+        p.textContent = v.promo_title ? 'Offre utilisée : ' + v.promo_title : 'Visite validée';
+        li.appendChild(p);
+        ul.appendChild(li);
+      });
+      body.appendChild(ul);
+    }
+
+    $('profile-name-edit').addEventListener('click', editName);
+    $('profile-email-edit').addEventListener('click', editEmail);
+    $('profile-pw-edit').addEventListener('click', editPassword);
+    $('profile-my-reviews').addEventListener('click', myReviews);
+    $('profile-my-visits').addEventListener('click', myVisits);
+    return {
+      renderRows(a) {
+        $('profile-fullname').textContent = fullName(a) || 'Non renseigné';
+        $('profile-email-v').textContent = a.email || '';
+        // Compte Google : l'adresse et la connexion sont gérées par Google
+        $('profile-email-row').hidden = !!a.google;
+        $('profile-pw-row').hidden = !!a.google;
+        $('profile-my-reviews').hidden = a.role === 'pro';
+        $('profile-my-visits').hidden = a.role === 'pro';
+      },
+    };
+  })();
+
   /** Profil (compte) : pour un restaurateur, l'avatar ouvre d'abord son espace restaurateur. */
   function openProfileSheet() {
     const account = currentUser();
@@ -14407,6 +14617,7 @@
     if (account.role === 'pro') { const tag = document.createElement('span'); tag.className = 'role-tag'; tag.textContent = 'Restaurateur'; $('profile-email').append(' ', tag); }
     $('profile-since').textContent = new Date(account.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
     renderProfileAbout(account);
+    Account.renderRows(account);
     updateProfileGeo();
     $('pro-entry').hidden = account.role !== 'pro';
     renderFollows(account);
