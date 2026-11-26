@@ -2357,7 +2357,9 @@
       .filters .ft-row { padding: 4px 28px 4px 0; scroll-padding-inline: 0;
         -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
       body.sheet-open .filters, body:not(.ui-ready) .filters { transform: translateY(-8px); }
-      .stories { top: calc(var(--safe-top) + 116px); max-width: calc(100% - 24px); }
+      /* Stories juste sous la recherche, puis le bouton « Filtres » (sous les stories s'il y en a) */
+      .stories { top: calc(var(--safe-top) + 68px); max-width: calc(100% - 24px); }
+      .stories:not([hidden]) ~ .filters { top: calc(var(--safe-top) + 156px); }
       /* Une seule rangée : bouton « Filtres » puis le rappel des filtres actifs (qui défile) */
       .fbar { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
       .fbar-btn { flex: none; gap: 6px; font-weight: 600; }
