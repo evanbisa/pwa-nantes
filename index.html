@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-jBFWngpiSg2bnow4sy1huDjVSqxs3M8aPigwnDbpKjA=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-YE7bstBMv+yOmyd5fne779LR56oZ5+vcujqsKl5TeVg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-lyfkgQNiMiDRdtCfjus5kbIeVm9hSirh14x5Nc9NN2I=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -11,7 +11,8 @@
   <meta name="theme-color" content="#f1f3f4" id="meta-theme" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <!-- Barre d'état de l'appli iPhone (écran d'accueil) : posée par le script ci-dessous selon le thème (claire le jour,
+       noire la nuit) ; iOS la lit au lancement de l'appli -->
   <meta name="apple-mobile-web-app-title" content="FlashMiam" />
   <title>FlashMiam · Les restaurants et le street food de La Roche-sur-Yon</title>
   <!-- Adresse principale et aperçu des liens partagés (réseaux sociaux, messageries) : l'adresse est remplacée à la
@@ -58,7 +59,12 @@
       // Par défaut (« system ») : suit le réglage du téléphone (mode sombre ou clair) ; jour ou nuit se choisit dans le profil
       if (t !== 'light' && t !== 'dark') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', t);
-      document.getElementById('meta-theme').setAttribute('content', t === 'dark' ? '#242f3e' : '#f1f3f4');
+      document.getElementById('meta-theme').setAttribute('content', t === 'dark' ? '#0a0b17' : '#f1f3f4');
+      var bar = document.createElement('meta');
+      bar.name = 'apple-mobile-web-app-status-bar-style';
+      bar.id = 'meta-statusbar';
+      bar.content = t === 'dark' ? 'black' : 'default';   // nuit : barre noire (plus de bande blanche en haut de l'écran)
+      document.head.appendChild(bar);
       // Feuille de style de la carte chargée sans bloquer l'affichage (l'écran de chargement peut apparaître tout de suite)
       var css = document.createElement('link');
       css.rel = 'stylesheet';
@@ -6432,6 +6438,8 @@
   function setTheme(theme, { persist = false } = {}) {
     document.documentElement.setAttribute('data-theme', theme);
     $('meta-theme').setAttribute('content', palette(theme).background);
+    // Barre d'état de l'appli iPhone : prise en compte au prochain lancement de l'appli
+    if ($('meta-statusbar')) $('meta-statusbar').setAttribute('content', theme === 'dark' ? 'black' : 'default');
     $('theme-btn').setAttribute('aria-label', theme === 'dark' ? 'Passer en mode jour' : 'Passer en mode nuit');
     if (persist) { try { localStorage.setItem(CONFIG.themeKey, theme); } catch (e) { /* ignore */ } }
     const pref = themePref();
