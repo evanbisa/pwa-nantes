@@ -21,7 +21,7 @@ import { ModerationButtons } from "./moderation";
 
 /* ---------- Libellés ---------- */
 
-export const CATEGORY: Record<string, string> = { food_truck: "Food-truck", kebab: "Kebab", burger: "Burger", sweets: "Douceurs", pizza: "Pizza", other: "Autre" };
+export const CATEGORY: Record<string, string> = { food_truck: "Food-truck", kebab: "Kebab", burger: "Burger", sweets: "Sucré", pizza: "Pizza", asian: "Asiatique", tacos: "Tacos", creperie: "Crêperie", bakery: "Boulangerie, snack", cafe: "Café", bar: "Bar", world: "Cuisine du monde", traditional: "Traditionnel", other: "Autre" };
 export const STATUS: Record<string, [string, "good" | "warning" | "critical" | "neutral"]> = {
   published: ["En ligne", "good"], draft: ["Brouillon", "neutral"], awaiting_docs: ["Attend ses justificatifs", "warning"],
   awaiting_review: ["À vérifier par l'équipe", "warning"],

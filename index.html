@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-DWKEeokSFqJh8EFVhL4GTLg8sa8KEXTMZGfXrUirifU=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-NfB1+hP43xT2d1xXZiUfLFYqJcpes8Qvcnuy61SJSnw=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="description" content="Food-trucks, kebabs, burgers et douceurs de La Roche-sur-Yon sur une carte interactive, avec les bons plans du moment. Gratuit pour les clients." />
+  <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
   <meta name="color-scheme" content="light dark" />
   <meta name="theme-color" content="#f1f3f4" id="meta-theme" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="FlashMiam" />
-  <title>FlashMiam · Le street food de La Roche-sur-Yon sur une carte</title>
+  <title>FlashMiam · Les restaurants et le street food de La Roche-sur-Yon</title>
   <!-- Adresse principale et aperçu des liens partagés (réseaux sociaux, messageries) : l'adresse est remplacée à la
        publication par SITE_URL (scripts/seo.mjs) -->
   <link rel="canonical" href="https://flashmiam.fr/" />
@@ -21,12 +21,12 @@
   <meta property="og:site_name" content="FlashMiam" />
   <meta property="og:locale" content="fr_FR" />
   <meta property="og:url" content="https://flashmiam.fr/" />
-  <meta property="og:title" content="FlashMiam · Le street food de La Roche-sur-Yon" />
-  <meta property="og:description" content="Food-trucks, kebabs, burgers et douceurs sur une carte, avec les bons plans du moment." />
+  <meta property="og:title" content="FlashMiam · Les restaurants de La Roche-sur-Yon" />
+  <meta property="og:description" content="Restaurants, food-trucks et street food sur une carte, avec les bons plans du moment." />
   <meta property="og:image" content="https://flashmiam.fr/og-image.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="FlashMiam : le street food de La Roche-sur-Yon sur une carte" />
+  <meta property="og:image:alt" content="FlashMiam : les restaurants de La Roche-sur-Yon sur une carte" />
   <meta name="twitter:card" content="summary_large_image" />
   <!-- Nom du site et logo dans les résultats Google (au lieu du nom de domaine et d'un globe) -->
   <script type="application/ld+json">
@@ -411,6 +411,12 @@
     .promo strong { font-size: 16px; font-weight: 500; }
     .meta { display: grid; gap: 12px; margin: 16px 0 0; padding: 16px 0 0; list-style: none; color: var(--text); font-size: 14px; border-top: 1px solid var(--line); }
     .meta li { display: flex; gap: 14px; align-items: flex-start; }
+    .amen-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .amen-list li { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 13px; background: var(--hover); border: 1px solid var(--line); }
+    .amen-list b { font-weight: 500; }
+    .shop-links { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill-link { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border-radius: 18px; font-size: 14px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); border: 1px solid var(--accent-line); text-decoration: none; }
+    .pill-link:hover { background: var(--accent-line); }
     #shop-hours { white-space: pre-line; }
     .ps-close-today { margin: 4px 0 10px; }
     .ps-close-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -1163,6 +1169,10 @@
     .hours-row input[type="time"] { width: 100%; min-width: 0; height: 40px; padding: 0 6px; border-radius: 8px; font: inherit; font-size: 14px; color: var(--text); background: var(--input-bg); border: 1px solid var(--line-strong); }
     .hours-row input[type="time"]:disabled { opacity: .45; }
     .hours-mode { margin: 6px 0 12px; }
+    .pl-amen, .pl-links { border: 0; padding: 0; margin: 18px 0 0; min-width: 0; }
+    .pl-amen legend, .pl-links legend { padding: 0; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+    .pl-amen-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 12px; }
+    .pl-amen-grid .check { margin: 0; }
     .hd-row { display: grid; gap: 6px; padding: 10px 0; border-top: 1px solid var(--line); }
     .hd-row:first-child { border-top: 0; }
     .hd-day { display: flex; align-items: center; gap: 10px; min-height: 36px; font-size: 14.5px; font-weight: 600; cursor: pointer; }
@@ -1925,6 +1935,8 @@
     }
     .toast.is-visible { opacity: 1; transform: none; pointer-events: auto; }
     html.kb-open .toast { bottom: auto; top: calc(var(--safe-top) + 12px); }   /* clavier ouvert : le bas de l'écran est caché */
+    /* Téléphone, fiche ou panneau ouvert en bas : le message passe en haut pour ne pas cacher ses boutons */
+    @media (max-width: 899px) { body.sheet-open .toast, body.pro-open .toast { bottom: auto; top: calc(var(--safe-top) + 12px); right: 12px; transform: translateY(-12px); } body.sheet-open .toast.is-visible, body.pro-open .toast.is-visible { transform: none; } }
     /* État de la connexion : discret, en bas de l'écran (téléphone) ou en haut de la carte (ordinateur) */
     .net { position: fixed; z-index: 125; left: 12px; right: 12px; bottom: calc(var(--safe-bottom) + 76px); width: fit-content; max-width: min(480px, calc(100% - 24px)); margin: 0 auto; display: flex; align-items: center; gap: 8px;
       padding: 8px 14px; border-radius: 18px; font-size: 13px; font-weight: 500; color: var(--text); background: var(--panel-solid);
@@ -2685,6 +2697,16 @@
           <button class="chip glass" type="button" id="promo-only" aria-pressed="false">Promos</button>
           <button class="chip glass" type="button" id="mv-only" aria-pressed="false">Titres-resto</button>
         </div>
+        <div class="ft-group" role="group" aria-labelledby="ft-l-prat"><span class="ft-label" id="ft-l-prat">Pratique</span>
+          <button class="chip glass" type="button" data-amenity="dine_in" aria-pressed="false">Sur place</button>
+          <button class="chip glass" type="button" data-amenity="takeaway" aria-pressed="false">À emporter</button>
+          <button class="chip glass" type="button" data-amenity="delivery" aria-pressed="false">Livraison</button>
+          <button class="chip glass" type="button" data-amenity="terrace" aria-pressed="false">Terrasse</button>
+          <button class="chip glass" type="button" data-amenity="vegetarian" aria-pressed="false">Végétarien</button>
+          <button class="chip glass" type="button" data-amenity="halal" aria-pressed="false">Halal</button>
+          <button class="chip glass" type="button" data-amenity="gluten_free" aria-pressed="false">Sans gluten</button>
+          <button class="chip glass" type="button" data-amenity="wheelchair" aria-pressed="false">Accès fauteuil</button>
+        </div>
       </div>
       <div class="ft-row ft-cats" role="group" aria-labelledby="ft-l2">
         <span class="ft-label" id="ft-l2">Type de restaurant</span>
@@ -2692,8 +2714,16 @@
         <button class="chip glass" type="button" data-cat="Food-truck" aria-pressed="false">Food-truck</button>
         <button class="chip glass" type="button" data-cat="Kebab" aria-pressed="false">Kebab</button>
         <button class="chip glass" type="button" data-cat="Burger" aria-pressed="false">Burger</button>
-        <button class="chip glass" type="button" data-cat="Sweets" aria-pressed="false">Sweets</button>
         <button class="chip glass" type="button" data-cat="Pizza" aria-pressed="false">Pizza</button>
+        <button class="chip glass" type="button" data-cat="Asiatique" aria-pressed="false">Asiatique</button>
+        <button class="chip glass" type="button" data-cat="Tacos" aria-pressed="false">Tacos</button>
+        <button class="chip glass" type="button" data-cat="Crêperie" aria-pressed="false">Crêperie</button>
+        <button class="chip glass" type="button" data-cat="Sweets" aria-pressed="false">Sucré</button>
+        <button class="chip glass" type="button" data-cat="Boulangerie" aria-pressed="false">Boulangerie, snack</button>
+        <button class="chip glass" type="button" data-cat="Café" aria-pressed="false">Café</button>
+        <button class="chip glass" type="button" data-cat="Bar" aria-pressed="false">Bar</button>
+        <button class="chip glass" type="button" data-cat="Monde" aria-pressed="false">Cuisine du monde</button>
+        <button class="chip glass" type="button" data-cat="Traditionnel" aria-pressed="false">Traditionnel</button>
         <button class="chip glass" type="button" data-cat="Autre" aria-pressed="false">Autres</button>
       </div>
     </div>
@@ -2803,7 +2833,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM9 21l2-6 2.5 2.5V21M8 12l2-4.5 3.5 1 2 3.5 2.5 1M10 7.5L7.5 9 7 12"/></svg>
         <span id="shop-distance"></span>
       </li>
+      <li id="shop-amen-row" class="amen-row" hidden><ul class="amen-list" id="shop-amen" aria-label="Infos pratiques"></ul></li>
       <li id="shop-mv-row" class="mv-row" hidden><span class="mv-ico" aria-hidden="true">🎫</span><span>Titres-restaurant acceptés</span></li>
+      <li id="shop-links-row" class="links-row" hidden><div class="shop-links" id="shop-links"></div></li>
       <li id="shop-phone-row" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.4 1.8.7 2.7a2 2 0 01-.5 2.1L8 9.8a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.7.7a2 2 0 011.7 2z"/></svg>
         <a id="shop-phone" href="#"></a>
@@ -3846,6 +3878,7 @@
           <button type="button" data-jump="field-pl-address">Adresse</button>
           <button type="button" data-jump="field-pl-hours">Horaires</button>
           <button type="button" data-jump="field-pl-phone">Téléphone</button>
+          <button type="button" data-jump="field-pl-amen">Pratique</button>
         </nav>
 
         <label class="field" id="field-pl-name">
@@ -3934,6 +3967,18 @@
           <small class="field-error" id="err-pl-phone" aria-live="polite"></small>
         </label>
         <label class="check pl-mv" data-mode="edit"><input type="checkbox" id="pl-mv" /> J'accepte les titres-restaurant (papier ou carte)</label>
+        <!-- Infos pratiques : icônes sur la fiche et filtres « Pratique » de la carte -->
+        <fieldset class="field pl-amen" id="field-pl-amen">
+          <legend>Infos pratiques (facultatif)</legend>
+          <div class="pl-amen-grid" id="pl-amen"></div>
+        </fieldset>
+        <!-- Liens : boutons sur la fiche (les clics sont comptés dans les statistiques) -->
+        <fieldset class="field pl-links" id="field-pl-links">
+          <legend>Liens (facultatif)</legend>
+          <label class="field" id="field-pl-instagram"><span>Instagram</span><input id="pl-instagram" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="300" placeholder="@votrerestaurant" /><small class="field-error" id="err-pl-instagram" aria-live="polite"></small></label>
+          <label class="field" id="field-pl-website"><span>Site internet</span><input id="pl-website" type="url" inputmode="url" autocomplete="url" autocapitalize="off" spellcheck="false" maxlength="300" placeholder="www.votrerestaurant.fr" /><small class="field-error" id="err-pl-website" aria-live="polite"></small></label>
+          <label class="field" id="field-pl-order"><span>Commande en ligne ou livraison</span><input id="pl-order" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="300" placeholder="Lien de votre page Uber Eats, Deliveroo…" /><small class="field-error" id="err-pl-order" aria-live="polite"></small></label>
+        </fieldset>
         <p class="hint" data-mode="edit">Vos promotions (formule midi, afterwork, week-end, offre étudiante…) et vos stories se publient ensuite depuis votre espace restaurateur.</p>
 
         <p class="form-error" id="err-pro-listing" role="alert"></p>
@@ -4161,11 +4206,30 @@
     'Food-truck': { emoji: '🚚', label: 'Food-truck' },
     'Kebab':      { emoji: '🥙', label: 'Kebab' },
     'Burger':     { emoji: '🍔', label: 'Burger' },
-    'Sweets':     { emoji: '🧁', label: 'Sweets' },
+    'Sweets':     { emoji: '🧁', label: 'Sucré', keywords: 'dessert gaufre crêpe gâteau glace pâtisserie douceur sweets' },
     'Pizza':      { emoji: '🍕', label: 'Pizza' },
+    'Asiatique':  { emoji: '🍣', label: 'Asiatique', keywords: 'sushi japonais chinois thaï vietnamien wok ramen bobun poke' },
+    'Tacos':      { emoji: '🌮', label: 'Tacos', keywords: 'tacos mexicain burrito' },
+    'Crêperie':   { emoji: '🥞', label: 'Crêperie', keywords: 'crêpe galette crêperie' },
+    'Boulangerie': { emoji: '🥐', label: 'Boulangerie, snack', keywords: 'boulangerie sandwich snack viennoiserie panini' },
+    'Café':       { emoji: '☕', label: 'Café, salon de thé', keywords: 'café thé brunch salon' },
+    'Bar':        { emoji: '🍻', label: 'Bar', keywords: 'bar bière cocktail apéro tapas' },
+    'Monde':      { emoji: '🌍', label: 'Cuisine du monde', keywords: 'indien libanais africain italien oriental couscous' },
+    'Traditionnel': { emoji: '🍲', label: 'Traditionnel, brasserie', keywords: 'brasserie traditionnel bistrot restaurant français' },
     'Autre':      { emoji: '🍽️', label: 'Autre restauration' },
   };
   const catOf = (shop) => CATEGORIES[shop.category] || CATEGORIES.Autre;
+  /** Infos pratiques cochées par le restaurateur (colonne merchants.amenities) : icônes de la fiche et filtres « Pratique ». */
+  const AMENITIES = {
+    dine_in: { emoji: '🍽️', label: 'Sur place' }, takeaway: { emoji: '🥡', label: 'À emporter' }, delivery: { emoji: '🛵', label: 'Livraison' },
+    terrace: { emoji: '☀️', label: 'Terrasse' }, vegetarian: { emoji: '🥗', label: 'Végétarien' }, vegan: { emoji: '🌱', label: 'Vegan' },
+    halal: { emoji: '🌙', label: 'Halal' }, gluten_free: { emoji: '🌾', label: 'Sans gluten' }, card: { emoji: '💳', label: 'Carte bancaire' },
+    wheelchair: { emoji: '♿', label: 'Accès fauteuil roulant' },
+  };
+  /** Le restaurant a-t-il cette info pratique ? (« Végétarien » : aussi les restaurants vegan) */
+  /** Liens du restaurant (colonne merchants.links) : libellés des boutons de la fiche. */
+  const LINKS = { instagram: 'Instagram', website: 'Site internet', order: 'Commander en ligne' };
+  const hasAmenity = (shop, a) => (shop.amenities || []).includes(a) || (a === 'vegetarian' && (shop.amenities || []).includes('vegan'));
 
   /**
    * Commerces de démonstration (fictifs), placés sur les vraies rues de La Roche-sur-Yon.
@@ -4601,7 +4665,8 @@
 
   /** Données chargées : compte connecté et restaurants inscrits (fiches en ligne + la sienne). */
   const cloud = { user: null, restaurants: {}, followerCounts: new Map(), ratings: new Map(), ready: Promise.resolve(), loaded: Promise.resolve(), fromCache: false };
-  const CAT_TO_DB = { 'Food-truck': 'food_truck', Kebab: 'kebab', Burger: 'burger', Sweets: 'sweets', Pizza: 'pizza', Autre: 'other' };
+  const CAT_TO_DB = { 'Food-truck': 'food_truck', Kebab: 'kebab', Burger: 'burger', Sweets: 'sweets', Pizza: 'pizza', Asiatique: 'asian', Tacos: 'tacos',
+    'Crêperie': 'creperie', Boulangerie: 'bakery', 'Café': 'cafe', Bar: 'bar', Monde: 'world', Traditionnel: 'traditional', Autre: 'other' };
   const CAT_FROM_DB = Object.fromEntries(Object.entries(CAT_TO_DB).map(([k, v]) => [v, k]));
   const TEST_SIREN = '999999999';
   const publicUrl = (bucket, path) => sb.storage.from(bucket).getPublicUrl(path).data.publicUrl;
@@ -4636,6 +4701,8 @@
       id: m.id, ownerId: m.user_id, name: m.name, category: CAT_FROM_DB[m.category] || 'Autre', description: m.description || '',
       photos: m.photos_urls || [], menu: m.menu_json || [], address: m.address || '', coords: m.lat != null ? [m.lng, m.lat] : null,
       hours: hours.services || [], closedOn: hours.closed_on || [], days: daysFromRow(hours.days), phone: m.phone || '',
+      amenities: Array.isArray(m.amenities) ? m.amenities.filter((a) => AMENITIES[a]) : [],
+      links: m.links && typeof m.links === 'object' ? Object.fromEntries(Object.entries(m.links).filter(([k, v]) => LINKS[k] && /^https:\/\//.test(v))) : {},
       closure: m.closed_from && m.closed_until ? { from: m.closed_from, until: m.closed_until, note: m.closure_note || '' } : null,
       status: m.status, isOpen: m.is_open !== false, mealVouchers: !!m.accepts_meal_vouchers, published: m.status === 'published' && m.is_open && m.lat != null, isTest: !!m.is_test, honorAt: m.honor_at,
       publishedAt: m.published_at, updatedAt: m.updated_at, promos: promos.map(promoFromRow), stories: stories.map(storyFromRow),
@@ -6337,7 +6404,7 @@
      ===================================================================== */
 
   const markers = new Map();          // id → { shop, marker, el, status }
-  const filters = { category: 'all', openOnly: false, promoOnly: false, minRating: 0, query: '', q: [], max: null, radius: null, when: '', mvOnly: false };
+  const filters = { category: 'all', openOnly: false, promoOnly: false, minRating: 0, query: '', q: [], max: null, radius: null, when: '', mvOnly: false, amenities: new Set() };
   /** Distance maximale choisie (mètres, null = partout) : sans position connue, le filtre ne retire rien. */
   const withinRadius = (m) => filters.radius === null || !here() || distance(here(), m.shop.coords) <= filters.radius;
   let selectedId = null;
@@ -6478,12 +6545,13 @@
   const matchesChips = (m) =>
     (filters.category === 'all' || m.shop.category === filters.category) &&
     matchesWhen(m.shop) && (!filters.mvOnly || !!m.shop.mealVouchers) &&
+    [...filters.amenities].every((a) => hasAmenity(m.shop, a)) &&
     (!filters.openOnly || m.status.open) &&
     (!filters.promoOnly || activePromos(m.shop).length > 0) &&
     (!filters.minRating || !!(m.shop.rating && m.shop.rating.avg >= filters.minRating)) &&
     withinRadius(m);
   /** Une puce de filtre est-elle choisie (hors « Tout ») ? */
-  const chipsActive = () => filters.category !== 'all' || !!filters.when || filters.mvOnly || filters.openOnly || filters.promoOnly || filters.minRating > 0;
+  const chipsActive = () => filters.category !== 'all' || !!filters.when || filters.mvOnly || filters.amenities.size > 0 || filters.openOnly || filters.promoOnly || filters.minRating > 0;
   const matchesFilters = (m) => matchesChips(m) && Search.shopMatches(m.shop, filters.q, filters.max);
 
   function applyFilters() {
@@ -6590,6 +6658,10 @@
     } else if (chip.id === 'mv-only') {
       filters.mvOnly = !filters.mvOnly;
       chip.setAttribute('aria-pressed', String(filters.mvOnly));
+    } else if (chip.dataset.amenity) {
+      const a = chip.dataset.amenity;
+      if (filters.amenities.has(a)) filters.amenities.delete(a); else filters.amenities.add(a);
+      chip.setAttribute('aria-pressed', String(filters.amenities.has(a)));
     } else if (chip.dataset.when) {
       // Midi, Ce soir, Ce week-end : un seul moment à la fois (toucher le même le retire)
       filters.when = filters.when === chip.dataset.when ? '' : chip.dataset.when;
@@ -6641,7 +6713,7 @@
     const words = (s) => normalize(String(s || '')).split(/[^a-z0-9]+/).filter((w) => w && !STOP.has(w)).map(stem);
     const has = (hay, w) => hay.some((x) => x.startsWith(w) || (w.length >= 4 && x.includes(w)));
     const parse = (q) => [...new Set(words(q))];
-    const shopWords = (shop) => words([shop.name, catOf(shop).label, shop.description, shop.address, ...activePromos(shop).map((p) => p.title)].join(' '));
+    const shopWords = (shop) => words([shop.name, catOf(shop).label, catOf(shop).keywords || '', ...(shop.amenities || []).map((a) => (AMENITIES[a] || {}).label || ''), shop.description, shop.address, ...activePromos(shop).map((p) => p.title)].join(' '));
 
     /** Plats d'un restaurant qui correspondent à la recherche (tous les mots) et au budget, les plus pertinents d'abord. */
     function dishesOf(shop, q, max = null) {
@@ -7569,20 +7641,21 @@
    */
   const GUEST_PROMOS = 3;
   const Guest = (() => {
-    let active = false, memo = null, memoAt = 0;
+    let active = false, memo = null;
     const on = () => active && !currentUser();
     const promoKey = (p, shop) => shop.id + '|' + p.id;
     /**
-     * Offres visibles sans compte (recalculées au plus toutes les 0,5 s) : les vraies offres dont le serveur a donné le
-     * texte (3 au plus, guest_promotions), puis les offres des restaurants d'exemple les plus proches jusqu'à GUEST_PROMOS.
+     * Offres visibles sans compte : les vraies offres dont le serveur a donné le texte (3 au plus, guest_promotions), puis
+     * les offres des restaurants d'exemple les plus proches jusqu'à GUEST_PROMOS. Calculées une fois par affichage (le
+     * résultat est oublié dès la tâche suivante : une fiche ouverte avant l'arrivée des offres ne les garde pas floutées).
      */
     function unlocked() {
-      if (!memo || Date.now() - memoAt > 500) {
+      if (!memo) {
+        setTimeout(() => { memo = null; }, 0);
         const all = Offers.list();
         const open = all.filter(({ p, m }) => !m.shop.isDemo && !p.locked).slice(0, GUEST_PROMOS);
         const demo = all.filter(({ m }) => m.shop.isDemo).slice(0, Math.max(0, GUEST_PROMOS - open.length));
         memo = new Set([...open, ...demo].map(({ p, m }) => promoKey(p, m.shop)));
-        memoAt = Date.now();
       }
       return memo;
     }
@@ -8187,7 +8260,9 @@
     if (hasStory) { $('shop-emoji').removeAttribute('aria-hidden'); $('shop-emoji').setAttribute('aria-label', 'Voir la story de ' + shop.name); }
     else { $('shop-emoji').setAttribute('aria-hidden', 'true'); $('shop-emoji').removeAttribute('aria-label'); }
     $('shop-name').textContent = shop.name;
-    $('shop-cat').textContent = catOf(shop).label;
+    const price = priceLevel(shop);
+    $('shop-cat').textContent = catOf(shop).label + (price ? ' · ' + price.level : '');
+    $('shop-cat').title = price ? 'Prix habituel d\'un plat : environ ' + formatPrice(price.median) : '';
     // Restaurants inscrits : badge « vérifié », description, photos, téléphone ; l'offre est facultative
     $('shop-verified').hidden = !shop.isPro && !shop.isDemo;
     $('shop-verified').classList.toggle('is-test', !!(shop.isTest || shop.isDemo));
@@ -8205,6 +8280,7 @@
     if (shop.phone) { $('shop-phone').textContent = formatPhone(shop.phone); $('shop-phone').href = 'tel:' + compactPhone(shop.phone); }
     $('shop-call').hidden = !shop.phone;
     $('shop-mv-row').hidden = !shop.mealVouchers;
+    renderPractical(shop);
     if (shop.phone) { $('shop-call').href = 'tel:' + compactPhone(shop.phone); $('shop-call').setAttribute('aria-label', 'Appeler ' + shop.name); }
     renderGallery(shop);
     renderMenu(shop);
@@ -8456,7 +8532,7 @@
 
   /* ---------- Statistiques de fréquentation (par restaurant inscrit, par jour) ---------- */
   const Stats = (() => {
-    const EVENTS = { views: 'view', walk: 'walk', car: 'car', phone: 'phone', menu: 'menu', photos: 'photos', stories: 'story',
+    const EVENTS = { views: 'view', walk: 'walk', car: 'car', phone: 'phone', menu: 'menu', photos: 'photos', stories: 'story', link: 'link',
       share: 'share', reviews: 'reviews', google: 'google', story_cta: 'story_cta', offer: 'offer' };
     /** Évènement sur une fiche inscrite (la base ignore les visites du restaurateur sur sa propre fiche,
      *  ne compte que les personnes connectées, et au plus 50 actions par personne, fiche et jour). */
@@ -8557,6 +8633,40 @@
 
   $('shop-go').addEventListener('click', () => selectedId && Stats.track(selectedId, 'walk'));
   $('shop-go-car').addEventListener('click', () => selectedId && Stats.track(selectedId, 'car'));
+  /**
+   * Gamme de prix d'après la carte : prix médian des plats (hors boissons, desserts, sauces et suppléments).
+   * € : moins de 10 € ; €€ : 10 à 20 € ; €€€ : plus. null si la carte compte moins de 3 plats avec un prix.
+   */
+  function priceLevel(shop) {
+    const prices = (shop.menu || []).filter((it) => Number(it.price) > 0 && !/boisson|dessert|sauce|suppl|extra|accompagnement/i.test(it.section || ''))
+      .map((it) => Number(it.price)).sort((a, b) => a - b);
+    if (prices.length < 3) return null;
+    const median = prices[Math.floor(prices.length / 2)];
+    return { median, level: median < 10 ? '€' : median <= 20 ? '€€' : '€€€' };
+  }
+  /** Infos pratiques (icônes) et liens du restaurant (Instagram, site, commande en ligne) dans la fiche. */
+  function renderPractical(shop) {
+    const am = (shop.amenities || []).filter((a) => AMENITIES[a]);
+    $('shop-amen-row').hidden = !am.length;
+    $('shop-amen').textContent = '';
+    am.forEach((a) => {
+      const li = document.createElement('li');
+      li.innerHTML = '<span aria-hidden="true"></span><b></b>';
+      li.firstChild.textContent = AMENITIES[a].emoji;
+      li.lastChild.textContent = AMENITIES[a].label;
+      $('shop-amen').appendChild(li);
+    });
+    const links = Object.entries(shop.links || {}).filter(([k]) => LINKS[k]);
+    $('shop-links-row').hidden = !links.length;
+    $('shop-links').textContent = '';
+    links.forEach(([k, url]) => {
+      const a = document.createElement('a');
+      a.className = 'pill-link'; a.href = url; a.target = '_blank'; a.rel = 'noopener nofollow';
+      a.textContent = LINKS[k] + ' ↗';
+      a.addEventListener('click', () => Stats.track(shop.id, 'link'));
+      $('shop-links').appendChild(a);
+    });
+  }
   const exampleCall = (ev) => {
     if (ev.currentTarget.dataset.example !== '1') return false;
     ev.preventDefault();
@@ -10770,7 +10880,11 @@
     }
     hideOnboarding();
     startApp({ focus, intro: true });
-    if (fresh && !located && !focus) setTimeout(() => toast('Activez la localisation à tout moment avec le bouton ' + (isDesktop() ? 'en haut à droite.' : 'en bas à droite de la carte.')), 2200);
+    if (fresh && !located && !focus) setTimeout(() => {
+      // Conseil seulement sur la carte libre : pas par-dessus une fiche, un panneau ou la recherche
+      if (activePanel || document.body.classList.contains('sheet-open') || !$('search-panel').hidden) return;
+      toast('Activez la localisation à tout moment avec le bouton ' + (isDesktop() ? 'en haut à droite.' : 'en bas à droite de la carte.'));
+    }, 2200);
     if (!fresh) resumeLocation();
   }
   function hideOnboarding() {
@@ -11272,6 +11386,29 @@
   }
   $('pl-desc').addEventListener('input', () => { $('pl-desc-count').textContent = $('pl-desc').value.length + ' / 600'; });
 
+  Object.entries(AMENITIES).forEach(([key, a]) => {
+    const label = document.createElement('label');
+    label.className = 'check';
+    label.innerHTML = '<input type="checkbox" /> <span></span>';
+    label.querySelector('input').value = key;
+    label.querySelector('span').textContent = a.emoji + ' ' + a.label;
+    $('pl-amen').appendChild(label);
+  });
+  /**
+   * Lien saisi par le restaurateur → adresse https complète (« @pizzeria » → page Instagram, « www.site.fr » → https://…).
+   * Renvoie '' (champ vide), null (adresse invalide) ou l'adresse.
+   */
+  function normalizeLink(kind, raw) {
+    let v = (raw || '').trim();
+    if (!v) return '';
+    if (kind === 'instagram') {
+      const handle = v.replace(/^@/, '').match(/^[A-Za-z0-9._]{1,30}$/);
+      if (handle) v = 'https://www.instagram.com/' + handle[0] + '/';
+    }
+    if (/^http:\/\//i.test(v)) v = 'https://' + v.slice(7);
+    if (!/^https:\/\//i.test(v)) v = 'https://' + v;
+    return /^https:\/\/[A-Za-z0-9.-]+\.[A-Za-z]{2,}(\/[^\s<>"']*)?$/.test(v) && v.length <= 300 ? v : null;
+  }
   /**
    * Horaires de la fiche : « Pareil tous les jours » (2 services + jours de fermeture) ou « Selon les jours » (jusqu'à
    * 3 créneaux par jour). Contrôle : heures différentes, créneaux qui ne se chevauchent pas, au moins un jour ouvert.
@@ -11441,6 +11578,8 @@
     const closed = listed ? r.closedOn : [];
     $('pl-closed').querySelectorAll('input').forEach((i) => { i.checked = closed.includes(Number(i.value)); });
     HoursEditor.fill(listed && r.hours.length ? r : null);
+    $('pl-amen').querySelectorAll('input').forEach((i) => { i.checked = !!(listed && (r.amenities || []).includes(i.value)); });
+    ['instagram', 'website', 'order'].forEach((k) => { $('pl-' + k).value = (listed && r.links && r.links[k]) || ''; setFieldError('pl-' + k, ''); });
     $('pl-phone').value = listed ? r.phone || '' : (me.phone || '');
     $('pl-mv').checked = !!(listed && r.mealVouchers);
     setMenuScanStatus('', '');
@@ -12159,6 +12298,14 @@
 
     const hoursRead = HoursEditor.read();
     if (hoursRead.error) fail('pl-hours', hoursRead.error);
+    const links = {};
+    [['instagram', 'Pseudo ou lien Instagram invalide (ex. : @pizzeriaduboulevard).'], ['website', 'Adresse de site invalide (ex. : www.monrestaurant.fr).'],
+      ['order', 'Lien de commande invalide (copiez l\'adresse complète de votre page).']].forEach(([k, msg]) => {
+      const v = normalizeLink(k, $('pl-' + k).value);
+      if (v === null) fail('pl-' + k, msg);
+      else if (v) links[k] = v;
+    });
+    const amenities = [...$('pl-amen').querySelectorAll('input:checked')].map((i) => i.value);
     if (phone && !PHONE_RE.test(compactPhone(phone))) fail('pl-phone', 'Numéro de téléphone invalide.');
     if (firstInvalid) {
       $('err-pro-listing').textContent = 'Certaines informations sont à compléter.';
@@ -12172,7 +12319,7 @@
       name, category: CAT_TO_DB[proDraft.category], description, photos_urls: [...proDraft.photos], menu_json: menu.items,
       address: proDraft.address.label, lng: proDraft.address.coords[0], lat: proDraft.address.coords[1],
       opening_hours: hoursRead.value, phone: phone ? formatPhone(phone) : null, status: 'published',
-      accepts_meal_vouchers: $('pl-mv').checked,
+      accepts_meal_vouchers: $('pl-mv').checked, amenities, links,
     };
     const submitBtn = ev.submitter || $('form-pro-listing').querySelector('[type=submit]');
     submitBtn.disabled = true;
@@ -12757,6 +12904,7 @@
         { key: 'reviews', label: 'Avis lus', n: T.reviews_tab }, { key: 'walk', label: 'Itinéraire à pied', n: T.walk },
         { key: 'car', label: 'Itinéraire en voiture', n: T.car }, { key: 'phone', label: 'Appel', n: T.phone },
         { key: 'share', label: 'Partage de la fiche', n: T.shares }, { key: 'google', label: 'Avis Google ouverts', n: T.google },
+        { key: 'links', label: 'Liens ouverts (Instagram, site, commande)', n: T.links || 0 },
         { key: 'offer', label: 'Clic sur une de vos offres', n: T.offer_clicks }, { key: 'story_cta', label: 'Fiche ouverte depuis une story', n: T.story_cta },
         { key: 'story_like', label: '♥ « J\'aime » sur une story', n: T.story_likes },
       ], { empty: 'Aucune action sur la période.' });

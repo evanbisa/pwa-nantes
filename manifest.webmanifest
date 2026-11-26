@@ -2,7 +2,7 @@
   "id": "./",
   "name": "FlashMiam",
   "short_name": "FlashMiam",
-  "description": "Le street food de La Roche-sur-Yon sur une carte : food-trucks, kebabs, burgers, douceurs et bons plans du moment.",
+  "description": "Les restaurants et le street food de La Roche-sur-Yon sur une carte, avec les bons plans du moment.",
   "lang": "fr",
   "dir": "ltr",
   "start_url": "./",
