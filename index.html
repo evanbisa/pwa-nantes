@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-J66D/wHPv+Ev0dTk4QC27GxX6c5ivhKOxJyzKfOEuus=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-5aLsaXETEzUS5bqCp70qcNxirpwAt88dzplZjBenSiA=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1722,6 +1722,13 @@
     .todo-steps .ts-num { flex: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-size: 13px; font-weight: 700; color: var(--on-accent); background: var(--accent); }
     .todo-steps li.is-next .ts-num { color: var(--muted); background: transparent; border: 1.5px solid var(--line-strong); }
     .todo-steps .ts-txt { flex: 1; min-width: 0; }
+    .todo-steps .ts-txt small { display: block; margin-top: 2px; font-size: 12.5px; font-weight: 400; color: var(--muted); }
+    .todo-steps li.is-done { color: var(--muted); }
+    .todo-steps li.is-done .ts-num { color: #fff; background: var(--green); }
+    .ps-setup { margin: 4px 0 16px; }
+    .ps-off-go { display: block; margin-top: 10px; }
+    .ps-setup h3 { margin: 0; font-size: 18px; }
+    .ps-setup > .hint { margin: 4px 0 12px; }
     .todo-steps .ts-go { flex: none; width: auto; min-height: 38px; margin: 0; padding: 0 16px; font-size: 14px; }
     .todo-sub { margin: 4px 0 8px; font-size: 15px; font-weight: 600; }
     #notif-btn.ring svg { animation: ring 1s var(--ease-out); transform-origin: 50% 10%; }
@@ -3357,6 +3364,13 @@
             </div>
           </div>
           <div class="ps-alert" id="ps-alert" role="status" hidden><p></p><button class="pill-btn" type="button"></button></div>
+          <!-- Compte pas encore complet : les étapes qui restent, leur durée, et la suivante à reprendre -->
+          <section class="ps-setup" id="ps-home-setup" aria-labelledby="ps-setup-title" hidden>
+            <h3 id="ps-setup-title">Votre restaurant sur la carte en 3 étapes</h3>
+            <p class="hint">Vous pouvez vous arrêter à tout moment : ce qui est fait est gardé.</p>
+            <ol class="todo-steps" id="ps-home-steps"></ol>
+            <p class="hint" id="ps-setup-after">Ensuite : vos justificatifs (Kbis…), puis la vérification de l'équipe FlashMiam, en général sous 24 h.</p>
+          </section>
           <div id="ps-home-live">
             <button class="ps-scan" type="button" id="ps-scan">
               <span class="ps-scan-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8V5a2 2 0 012-2h3M16 3h3a2 2 0 012 2v3M21 16v3a2 2 0 01-2 2h-3M8 21H5a2 2 0 01-2-2v-3M7 12h10"/></svg></span>
@@ -4412,9 +4426,9 @@
   const missingDocs = (pro) => (pro && pro.merchantId ? DOC_TYPES.filter((t) => t.required && !(pro.docs || {})[t.key]) : []);
   /** Étapes d'inscription restant à faire (dans l'ordre), selon l'avancement du restaurateur. */
   const PRO_STEPS = [
-    { key: 'verification', step: 'pro-verify', label: 'Votre établissement (SIRET)' },
-    { key: 'payment', step: 'pro-payment', label: 'Votre abonnement' },
-    { key: 'listing', step: 'pro-listing', label: 'La fiche de votre restaurant' },
+    { key: 'verification', step: 'pro-verify', label: 'Votre établissement (SIRET)', time: '1 min', what: 'Votre numéro SIRET, vérifié tout de suite' },
+    { key: 'payment', step: 'pro-payment', label: 'Votre abonnement', time: '2 min', what: 'Formule et paiement en ligne, sans engagement' },
+    { key: 'listing', step: 'pro-listing', label: 'La fiche de votre restaurant', time: '10 min', what: 'Photos, carte, adresse et horaires' },
   ];
   function missingSteps(pro) {
     const i = PRO_STEPS.findIndex((st) => st.key === (pro && pro.status));
@@ -11043,8 +11057,18 @@
   $('ob-guest-btn').addEventListener('click', () => {
     store.write({ guest: true });
     if (appStarted) { hideOnboarding(); return; }            // déjà sur la carte : on y retourne
-    if (!store.read().geoConsent) { showAuthStep('location'); return; }
+    // La carte tout de suite, sans écran « Activez votre localisation » : la position déjà autorisée est reprise sans
+    // rien demander (resumeLocation) ; sinon elle est demandée au besoin (bouton « me localiser », offres proches, distances)
+    const firstTime = !store.read().geoConsent;
     finishAuth({ fresh: false });
+    if (firstTime) {
+      const tip = () => setTimeout(() => {
+        if (Geo.position || activePanel || document.body.classList.contains('sheet-open') || !$('search-panel').hidden) return;
+        toast('Activez la localisation à tout moment avec le bouton ' + (isDesktop() ? 'en haut à droite.' : 'en bas à droite de la carte.'));
+      }, 2200);
+      if (navigator.permissions && navigator.permissions.query) navigator.permissions.query({ name: 'geolocation' }).then((st) => { if (st.state !== 'granted') tip(); }, tip);
+      else tip();
+    }
   });
 
   $('ob-later').addEventListener('click', () => {
@@ -12846,6 +12870,31 @@
       else if (s.reviewNote) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche n\'a pas pu être validée : ' + s.reviewNote + ' Corrigez-la puis remettez-la en ligne : elle sera revérifiée.'; btn.textContent = 'Corriger ma fiche'; btn.onclick = editListing; }
       else if (s.step || !s.listed) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre compte n\'est pas complet : votre restaurant n\'apparaît pas encore sur la carte.'; btn.textContent = 'Compléter mon compte'; btn.onclick = () => setTab('todo'); }
       else if (s.hidden) { alert.hidden = false; alert.querySelector('p').textContent = 'Votre fiche est masquée : les clients ne la voient plus sur la carte.'; btn.textContent = 'Remettre en ligne'; btn.onclick = () => setVisible(true); }
+      // Compte pas encore complet : les 3 étapes (faites, en cours, à venir) au lieu d'un accueil vide
+      const left = missingSteps(s.pro);
+      const setup = !s.listed && !s.suspended && left.length > 0;
+      $('ps-home-setup').hidden = !setup;
+      if (setup) {
+        alert.hidden = true;   // le bloc des étapes le dit déjà
+        const ol = $('ps-home-steps');
+        ol.textContent = '';
+        PRO_STEPS.forEach((st, i) => {
+          const done = !left.includes(st), current = st === left[0];
+          const li = document.createElement('li');
+          li.className = done ? 'is-done' : current ? 'is-current' : 'is-next';
+          li.innerHTML = '<span class="ts-num" aria-hidden="true"></span><span class="ts-txt"><span></span><small></small></span>';
+          li.querySelector('.ts-num').textContent = done ? '✓' : String(i + 1);
+          li.querySelector('.ts-txt span').textContent = st.label + (done ? ' : fait' : '');
+          li.querySelector('small').textContent = done ? '' : st.what + ' · environ ' + st.time;
+          if (current) {
+            const go = document.createElement('button');
+            go.type = 'button'; go.className = 'btn btn-primary ts-go'; go.textContent = 'Continuer';
+            go.addEventListener('click', () => { close(); showAuthStep(st.step); });
+            li.appendChild(go);
+          }
+          ol.appendChild(li);
+        });
+      }
       $('ps-home-live').hidden = !s.listed;
       if (!s.listed) return;
       // Chiffres clés
@@ -13172,7 +13221,16 @@
       off.hidden = s.live;
       off.textContent = s.suspended ? 'Votre fiche est suspendue : publication impossible.'
         : s.hidden ? 'Votre fiche est masquée : remettez-la en ligne (onglet « Ma fiche ») pour publier des stories et des promotions.'
+        : s.awaitingReview ? 'Votre fiche est en cours de vérification par l\'équipe FlashMiam : vous pourrez publier des stories et des promotions dès qu\'elle sera en ligne.'
         : 'Terminez votre inscription pour publier des stories et des promotions.';
+      // Lien direct vers ce qui débloque la publication
+      const goTo = s.suspended || s.awaitingReview ? null : s.hidden ? ['Remettre en ligne', () => setTab('fiche')] : ['Compléter mon compte', () => setTab('todo')];
+      if (!s.live && goTo) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'pill-btn ps-off-go'; b.textContent = goTo[0];
+        b.addEventListener('click', goTo[1]);
+        off.append(' ', b);
+      }
       renderStoryAdmin(s.account);
       renderPromoAdmin(s.account);
     }
