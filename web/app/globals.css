@@ -45,58 +45,20 @@
   .su-cascade > * > :nth-child(n + 6) { animation-delay: 250ms; }
 }
 
-/* Jour : halos chauds dans la carte, mots clés et bouton principal orange → rouge, choix coché au contour dégradé */
-.su-glow {
-  background:
-    radial-gradient(30rem 20rem at 88% -6%, rgb(255 194 51 / 0.22), transparent 70%),
-    radial-gradient(28rem 22rem at -8% 45%, rgb(255 138 61 / 0.12), transparent 70%),
-    radial-gradient(26rem 20rem at 100% 100%, rgb(255 77 46 / 0.10), transparent 70%);
-}
-.su-em {
-  background: linear-gradient(90deg, #e67700, #f0501f 50%, #d9301a);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  -webkit-box-decoration-break: clone; box-decoration-break: clone;
-}
-.su-cta {
-  background: linear-gradient(100deg, #f2610c, #e8401c 55%, #d9301a);
-  text-shadow: 0 1px 1px rgb(120 30 0 / 0.25);
-  box-shadow: 0 14px 30px -12px rgb(232 64 28 / 0.5), inset 0 1px 0 rgb(255 255 255 / 0.25);
-}
-.su-cta:hover:not(:disabled) { filter: brightness(1.05); }
-.su-cta:disabled { box-shadow: none; }
-.su-picked {
-  border-color: transparent;
-  background: linear-gradient(#fff6ef, #fff6ef) padding-box, linear-gradient(135deg, #ffc233, #ff8a3d 50%, #ff4d2e) border-box;
-  box-shadow: 0 8px 24px -12px rgb(232 64 28 / 0.4);
-}
-.su-gradient { background: linear-gradient(90deg, #ffc233, #ff8a3d 50%, #ff4d2e); }
-
-/* Nuit : halos chauds très doux derrière la page */
-[data-theme="night"] .su-glow {
-  background:
-    radial-gradient(38rem 26rem at 50% 16%, rgb(255 138 61 / 0.13), transparent 70%),
-    radial-gradient(26rem 22rem at 6% 74%, rgb(255 77 46 / 0.09), transparent 70%),
-    radial-gradient(28rem 24rem at 96% 94%, rgb(255 194 51 / 0.07), transparent 70%);
-}
-/* Nuit : mots clés en dégradé, plus lumineux */
-[data-theme="night"] .su-em { background: linear-gradient(90deg, #ffd25e, #ff9a4d 50%, #ff6a4a); -webkit-background-clip: text; background-clip: text; }
-/* Nuit : bouton principal sombre au contour dégradé, avec une lueur orangée */
-[data-theme="night"] .su-cta {
-  border: 1.5px solid transparent;
-  background: linear-gradient(#17171b, #17171b) padding-box, linear-gradient(100deg, #ffc233, #ff8a3d 50%, #ff4d2e) border-box;
-  color: #fff; text-shadow: none;
-  box-shadow: 0 10px 36px -14px rgb(255 106 61 / 0.6);
-}
-[data-theme="night"] .su-cta:hover:not(:disabled) {
-  filter: none;
-  background: linear-gradient(#1f1f25, #1f1f25) padding-box, linear-gradient(100deg, #ffc233, #ff8a3d 50%, #ff4d2e) border-box;
-}
-[data-theme="night"] .su-cta:disabled { box-shadow: none; }
-/* Nuit : choix coché (sexe), contour dégradé */
-[data-theme="night"] .su-picked {
-  background: linear-gradient(#1f1915, #1f1915) padding-box, linear-gradient(135deg, #ffc233, #ff8a3d 50%, #ff4d2e) border-box;
-  box-shadow: 0 8px 30px -12px rgb(255 106 61 / 0.55);
-}
+/*
+ * Inscription : panneau uni, titres d'une seule couleur, orange uni réservé à ce qui se touche (bouton principal,
+ * choix coché, progression). Pas de halo ni de dégradé (comme l'écran de compte de la carte, index.html).
+ */
+.su-glow { background: none; }
+.su-em { color: inherit; font-style: normal; }
+.su-cta { background: #c2410c; color: #fff; text-shadow: none; box-shadow: none; transition: background-color 0.15s; }
+.su-cta:hover:not(:disabled) { background: #9a3412; }
+.su-picked { border-color: #c2410c; background: #fff; box-shadow: none; }
+.su-gradient { background: #c2410c; }
+[data-theme="night"] .su-cta { background: #ff8a4c; color: #1a0d07; border: 0; }
+[data-theme="night"] .su-cta:hover:not(:disabled) { background: #ffab80; }
+[data-theme="night"] .su-picked { border-color: #ff8a4c; background: rgb(255 138 76 / 0.08); }
+[data-theme="night"] .su-gradient { background: #ff8a4c; }
 
 /* Mode nuit seulement s'il a été choisi (par défaut : mode jour, quel que soit le réglage du téléphone) */
 [data-theme="night"] {

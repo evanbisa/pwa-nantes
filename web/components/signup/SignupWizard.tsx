@@ -382,7 +382,7 @@ function Wizard() {
     >
       <MapBackdrop />
       {/* Carte de l'inscription posée sur la carte de la ville, comme l'écran d'accueil */}
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col relative isolate overflow-hidden rounded-[28px] bg-white/80 shadow-2xl ring-1 ring-black/5 backdrop-blur-[6px] dark:bg-night/75 dark:ring-white/10">
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col relative isolate overflow-hidden rounded-[28px] bg-white shadow-xl ring-1 ring-black/5 dark:bg-[#1c1917] dark:ring-white/10">
       <div aria-hidden className="su-glow pointer-events-none absolute inset-0 -z-10" />
       <header className="flex w-full items-center gap-3 px-5 pt-4 pb-2">
         <button
@@ -397,7 +397,7 @@ function Wizard() {
           <>
             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10" aria-hidden>
               <div
-                className="su-gradient h-full rounded-full bg-gradient-to-r from-brand to-orange-400 transition-[width] duration-500 ease-out"
+                className="su-gradient h-full rounded-full bg-brand transition-[width] duration-500 ease-out"
                 style={{ width: `${(question / questions.length) * 100}%` }}
               />
             </div>
@@ -705,7 +705,7 @@ const Body = ({ children }: { children: ReactNode }) => <div className="flex fle
 function Head({ icon: Icon, id, children }: { icon: LucideIcon; id: string; children: ReactNode }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <span aria-hidden className="mb-4 grid h-16 w-16 place-items-center rounded-[22px] [@media(max-height:760px)]:mb-2.5 [@media(max-height:760px)]:h-11 [@media(max-height:760px)]:w-11 [@media(max-height:760px)]:rounded-2xl [@media(max-height:620px)]:hidden bg-gradient-to-br from-orange-400 to-brand text-white shadow-lg shadow-brand/25 motion-safe:animate-pop dark:shadow-brand-night/30">
+      <span aria-hidden className="mb-4 grid h-16 w-16 place-items-center rounded-[22px] [@media(max-height:760px)]:mb-2.5 [@media(max-height:760px)]:h-11 [@media(max-height:760px)]:w-11 [@media(max-height:760px)]:rounded-2xl [@media(max-height:620px)]:hidden bg-brand/10 text-brand motion-safe:animate-pop dark:bg-brand-night/15 dark:text-brand-night">
         <Icon className="h-8 w-8 [@media(max-height:760px)]:h-6 [@media(max-height:760px)]:w-6" strokeWidth={2.2} />
       </span>
       <Title id={id}>{children}</Title>
