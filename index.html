@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-GYc3dsZIZ/AjD4dEskxtP3gdqLHzmPLs8FaB2ddQmoI=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-8LoM94FRrTZ8eTkl1NHAFPRZOsIUTVZ7BoH8FiFZ/cw=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-PXe7Ql/vmRRpsMPOBKTeH+MN3wi170hahaqPHPQiZmI=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1454,6 +1454,13 @@
     .story-admin .sa-empty, .promo-admin .pa-empty { width: auto; flex: 1; padding: 12px 0; font-size: 13.5px; color: var(--muted); }
     .promo-admin { margin: 10px 0 0; padding: 0; list-style: none; }
     .promo-admin li { display: flex; align-items: center; gap: 12px; padding: 10px 2px; border-bottom: 1px solid var(--line); }
+    .promo-admin li { flex-wrap: wrap; }
+    .promo-admin li > div { flex: 1 1 55%; min-width: 0; }
+    .pa-acts { display: flex; flex: none; align-items: center; gap: 6px; margin-left: auto; }
+    .pa-acts .pill-btn { height: 32px; padding: 0 12px; font-size: 13px; }
+    .pa-sub { margin: 16px 0 0; font-size: 14px; color: var(--muted); font-weight: 600; }
+    .promo-old li { opacity: .85; }
+    .pp-editing { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 14px 0 4px; padding: 10px 12px; border-radius: 12px; font-size: 14px; font-weight: 500; color: var(--accent-strong); background: var(--accent-soft); border: 1px solid var(--accent-line); }
     .promo-admin .pa-ico { font-size: 22px; }
     .promo-admin div { flex: 1; min-width: 0; }
     .promo-admin strong { display: block; font-size: 14.5px; font-weight: 500; }
@@ -1925,6 +1932,8 @@
     .offer-dist small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
     .offer-use { display: block; height: 32px; margin: -6px 0 12px 0; padding: 0 14px; border-radius: 16px; font-size: 13px; font-weight: 600; color: var(--on-accent); background: var(--accent); }
     .offers-empty { margin: 22px 6px 6px; text-align: center; font-size: 14px; color: var(--muted); }
+    .offer-meta { display: block; margin-top: 2px; font-size: 12.5px; color: var(--muted); }
+    .offer-meta .is-open { color: var(--green); font-weight: 500; } .offer-meta .is-closed { color: var(--danger); font-weight: 500; } .offer-meta .is-soon { color: var(--amber); font-weight: 500; }
 
     /* =====================================================================
        9. TOAST, ÉCRAN D'ERREUR, ATTRIBUTION
@@ -1940,7 +1949,7 @@
     .toast.is-visible { opacity: 1; transform: none; pointer-events: auto; }
     html.kb-open .toast { bottom: auto; top: calc(var(--safe-top) + 12px); }   /* clavier ouvert : le bas de l'écran est caché */
     /* Téléphone, fiche ou panneau ouvert en bas : le message passe en haut pour ne pas cacher ses boutons */
-    @media (max-width: 899px) { body.sheet-open .toast, body.pro-open .toast { bottom: auto; top: calc(var(--safe-top) + 12px); right: 12px; transform: translateY(-12px); } body.sheet-open .toast.is-visible, body.pro-open .toast.is-visible { transform: none; } }
+    @media (max-width: 899px) { body.sheet-open .toast, body.pro-open .toast, body.scan-open .toast { bottom: auto; top: calc(var(--safe-top) + 12px); right: 12px; transform: translateY(-12px); } body.sheet-open .toast.is-visible, body.pro-open .toast.is-visible, body.scan-open .toast.is-visible { transform: none; } }
     /* État de la connexion : discret, en bas de l'écran (téléphone) ou en haut de la carte (ordinateur) */
     .net { position: fixed; z-index: 125; left: 12px; right: 12px; bottom: calc(var(--safe-bottom) + 76px); width: fit-content; max-width: min(480px, calc(100% - 24px)); margin: 0 auto; display: flex; align-items: center; gap: 8px;
       padding: 8px 14px; border-radius: 18px; font-size: 13px; font-weight: 500; color: var(--text); background: var(--panel-solid);
@@ -2146,6 +2155,8 @@
     /* Bouton « Scanner » flottant : pas sur l'accueil (grande carte « Scanner un client »), ni sur « Ma fiche » et
        « Compléter » où il recouvrait des réglages (interrupteur de visibilité, boutons « Ajouter ») */
     #pro-space[data-tab="home"] .ps-scan-fab, #pro-space[data-tab="fiche"] .ps-scan-fab, #pro-space[data-tab="todo"] .ps-scan-fab { display: none; }
+    /* Onglets avec le bouton flottant « Scanner » : place en bas pour qu'il ne cache ni un bouton ni la fin d'un tableau */
+    #pro-space:not([data-tab="home"]):not([data-tab="fiche"]):not([data-tab="todo"]) .ps-pane:not([hidden]) { padding-bottom: 84px; }
     .ps-scan[hidden] { display: none; }
 
     /* Carte « Scanner un client » en tête de l'espace restaurateur */
@@ -3447,7 +3458,11 @@
           <section class="pd-block" id="pd-promos" aria-labelledby="pd-promos-title" hidden>
             <h3 id="pd-promos-title">Mes promotions</h3>
             <ul class="promo-admin" id="pd-promo-list"></ul>
+            <!-- Offres terminées (30 derniers jours) : « Republier » remplit le formulaire -->
+            <h4 class="pa-sub" id="pd-promo-old-title" hidden>Offres terminées</h4>
+            <ul class="promo-admin promo-old" id="pd-promo-old" hidden></ul>
             <form class="promo-form" id="pd-promo-form" novalidate>
+              <div class="pp-editing" id="pp-editing" role="status" hidden><span id="pp-editing-text"></span><button class="link-btn" type="button" id="pp-edit-cancel">Annuler</button></div>
               <div class="kind-pick" id="pp-kind" role="radiogroup" aria-label="Type de promotion"></div>
               <label class="field" id="field-pp-title">
                 <span>Offre <small class="counter" id="pp-title-count">0 / 60</small></span>
@@ -7568,7 +7583,14 @@
       $('offers-sub').textContent = all.length
         ? plural(items.length, 'offre', 'offres')
         : 'Aucune offre en cours';
-      document.querySelectorAll('#offers-kinds .chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.kind === kind)));
+      // Types d'offres : seulement ceux qui ont au moins une offre (et celui choisi) ; aucun choix s'il n'y a rien
+      const kinds = new Set(all.map(({ p }) => p.kind));
+      document.querySelectorAll('#offers-kinds .chip').forEach((c) => {
+        c.setAttribute('aria-pressed', String(c.dataset.kind === kind));
+        c.hidden = !!c.dataset.kind && !kinds.has(c.dataset.kind) && c.dataset.kind !== kind;
+      });
+      $('offers-kinds').hidden = kinds.size < 2 && !kind;
+      document.querySelector('.offers-open').hidden = !all.length;
       const ul = $('offers-list');
       ul.textContent = '';
       // Visiteur : les GUEST_PROMOS plus proches, les autres floutées
@@ -7580,10 +7602,15 @@
         b.type = 'button';
         b.className = 'offer-hit';
         b.dataset.id = m.shop.id;
-        b.innerHTML = '<span class="offer-body"><b></b><span class="offer-shop"></span></span>';
+        b.innerHTML = '<span class="offer-body"><b></b><span class="offer-shop"></span><span class="offer-meta"></span></span>';
         b.querySelector('b').textContent = p.title;
-        b.querySelector('.offer-shop').textContent = m.shop.name + (located ? ' · ' + formatDistance(d) : '') + (promoSlot(p) ? ' · ' + promoSlot(p) : '');
+        b.querySelector('.offer-shop').textContent = m.shop.name + (located ? ' · ' + formatDistance(d) : '');
         if (m.shop.isDemo || isShowcase(m.shop)) b.querySelector('.offer-shop').append(' ', demoTag());
+        // Sous le nom : ouvert ou fermé, créneau de validité et fin de l'offre (sans ouvrir les détails)
+        const meta = b.querySelector('.offer-meta');
+        meta.append(statusTag(m.status));
+        const extra = [promoSlot(p), promoUntil(p)].filter(Boolean).join(' · ');
+        if (extra) meta.append(' · ' + extra);
         if (p.photoUrl) {
           const img = document.createElement('img');
           img.className = 'offer-photo'; img.src = p.photoUrl; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
@@ -9310,14 +9337,29 @@
     if (!promos.length) { const li = document.createElement('li'); li.className = 'pa-empty'; li.textContent = 'Aucune promotion en cours.'; list.appendChild(li); }
     promos.forEach((p) => {
       const li = document.createElement('li');
-      li.innerHTML = '<span class="pa-ico" aria-hidden="true"></span><div><strong></strong><small></small></div><button class="icon-btn" type="button">&times;</button>';
+      li.innerHTML = '<span class="pa-ico" aria-hidden="true"></span><div><strong></strong><small></small></div>'
+        + '<span class="pa-acts"><button class="pill-btn pa-edit" type="button">Modifier</button><button class="pill-btn pa-more" type="button" hidden>+7 jours</button><button class="icon-btn pa-del" type="button">&times;</button></span>';
       li.querySelector('.pa-ico').textContent = PROMO_KINDS[p.kind].icon;
       li.querySelector('strong').textContent = p.title;
+      li.querySelector('.pa-edit').setAttribute('aria-label', 'Modifier la promotion « ' + p.title + ' »');
+      li.querySelector('.pa-edit').addEventListener('click', () => fillPromoForm(p, 'edit'));
+      // Prolonger d'une semaine (offres avec une date de fin)
+      const more = li.querySelector('.pa-more');
+      more.hidden = !p.endsAt;
+      more.setAttribute('aria-label', 'Prolonger la promotion « ' + p.title + ' » de 7 jours');
+      more.addEventListener('click', async () => {
+        const end = new Date(Math.min(Math.max(Date.now(), new Date(p.endsAt).getTime()) + 7 * 864e5, Date.now() + 365 * 864e5));
+        const { error } = await Loader.run(sb.from('promotions').update({ ends_at: end.toISOString() }).eq('id', p.id), 'Prolongation…');
+        if (error) { toast(cloudError(error)); return; }
+        await refreshCloud();
+        renderPromoAdmin(currentUser());
+        toast('Offre prolongée ' + promoUntil({ endsAt: end.toISOString() }) + '.');
+      });
       const until = promoUntil(p), slot = promoSlot(p);
       const stat = ProSpace.promoStats(p.id);
       li.querySelector('small').textContent = PROMO_KINDS[p.kind].label + (slot ? ' · ' + slot : '') + (until ? ' · ' + until : ' · sans date de fin') + (p.details ? ' · ' + p.details : '') + (stat ? ' · ' + plural(stat.clicks, 'clic', 'clics') : '');
-      li.querySelector('button').setAttribute('aria-label', 'Retirer la promotion « ' + p.title + ' »');
-      li.querySelector('button').addEventListener('click', async () => {
+      li.querySelector('.pa-del').setAttribute('aria-label', 'Retirer la promotion « ' + p.title + ' »');
+      li.querySelector('.pa-del').addEventListener('click', async () => {
         const { error } = await sb.from('promotions').delete().eq('id', p.id);
         if (error) { toast(cloudError(error)); return; }
         if (p.photoPath) removeFiles('photos', [p.photoPath]);
@@ -9327,10 +9369,78 @@
       });
       list.appendChild(li);
     });
-    const full = promos.length >= MAX_PROMOS;
+    const full = promos.length >= MAX_PROMOS && !promoEdit;
     $('pp-submit').disabled = full;
-    $('pp-submit').textContent = full ? MAX_PROMOS + ' promotions au maximum' : 'Publier la promotion';
+    $('pp-submit').textContent = full ? MAX_PROMOS + ' promotions au maximum' : promoEdit ? (promoEdit.mode === 'edit' ? 'Enregistrer les modifications' : 'Republier l\'offre') : 'Publier la promotion';
+    renderOldPromos(r);
   }
+  /** Offres terminées depuis moins de 30 jours (lues à la demande : la carte ne charge que les offres en cours). */
+  let oldPromosAt = 0, oldPromos = [];
+  async function renderOldPromos(r) {
+    const draw = () => {
+      $('pd-promo-old-title').hidden = $('pd-promo-old').hidden = !oldPromos.length;
+      $('pd-promo-old').textContent = '';
+      oldPromos.forEach((p) => {
+        const li = document.createElement('li');
+        li.innerHTML = '<span class="pa-ico" aria-hidden="true"></span><div><strong></strong><small></small></div><span class="pa-acts"><button class="pill-btn" type="button">Republier</button></span>';
+        li.querySelector('.pa-ico').textContent = (PROMO_KINDS[p.kind] || PROMO_KINDS.other).icon;
+        li.querySelector('strong').textContent = p.title;
+        li.querySelector('small').textContent = 'Terminée le ' + new Date(p.endsAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+        li.querySelector('button').setAttribute('aria-label', 'Republier la promotion « ' + p.title + ' »');
+        li.querySelector('button').addEventListener('click', () => fillPromoForm(p, 'republish'));
+        $('pd-promo-old').appendChild(li);
+      });
+    };
+    draw();
+    if (Date.now() - oldPromosAt < 60e3) return;
+    oldPromosAt = Date.now();
+    const now = new Date();
+    const { data, error } = await sb.from('promotions').select('*').eq('merchant_id', r.id).not('ends_at', 'is', null)
+      .lte('ends_at', now.toISOString()).gte('ends_at', new Date(now - 30 * 864e5).toISOString()).order('ends_at', { ascending: false }).limit(8);
+    if (error) { oldPromosAt = 0; return; }
+    oldPromos = (data || []).map(promoFromRow).filter((p) => PROMO_KINDS[p.kind]);
+    draw();
+  }
+
+  /**
+   * Formulaire d'offre prérempli : « edit » modifie l'offre en cours (sans prévenir les abonnés une seconde fois),
+   * « republish » crée une nouvelle offre à partir d'une offre terminée (abonnés prévenus, clics remis à zéro).
+   */
+  let promoEdit = null;   // { mode, id, keepPhoto, oldPhoto }
+  function fillPromoForm(p, mode) {
+    promoEdit = { mode, id: p.id, keepPhoto: p.photoPath || null, oldPhoto: p.photoPath || null };
+    promoEndTouched = false;
+    setPromoKind(p.kind);
+    if (mode === 'edit') { $('pp-end').value = p.endsAt ? localInput(new Date(p.endsAt)) : ''; promoEndTouched = true; syncPromoEnd(); }
+    $('pp-title').value = p.title; $('pp-title-count').textContent = p.title.length + ' / 60';
+    $('pp-details').value = p.details || '';
+    const slotOn = !!(p.validDays || p.validFrom);
+    $('pp-slot-on').checked = slotOn;
+    $('pp-days').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(!!(p.validDays && p.validDays.includes(Number(b.dataset.d))))));
+    if (p.validFrom) { $('pp-from').value = p.validFrom; $('pp-to').value = p.validTo; }
+    syncSlot();
+    setPromoPhoto(null);
+    if (p.photoUrl) {
+      $('pp-photo-preview').src = p.photoUrl; $('pp-photo-preview').hidden = false;
+      $('pp-photo-remove').hidden = false; $('pp-photo-btn').textContent = 'Changer';
+    }
+    ['pp-title', 'pp-end', 'pp-slot', 'pp-photo'].forEach((f) => setFieldError(f, ''));
+    $('pp-editing').hidden = false;
+    $('pp-editing-text').textContent = mode === 'edit' ? 'Modification de « ' + p.title + ' »' : 'Republier « ' + p.title + ' » : vérifiez la date de fin, puis publiez.';
+    renderPromoAdmin(currentUser());
+    $('pp-editing').scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
+    $('pp-title').focus({ preventScroll: true });
+  }
+  function resetPromoForm() {
+    promoEdit = null;
+    $('pp-editing').hidden = true;
+    $('pp-title').value = ''; $('pp-details').value = ''; $('pp-title-count').textContent = '0 / 60';
+    promoEndTouched = false; $('pp-slot-on').checked = false; $('pp-days').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    setPromoKind(promoKind); syncSlot();
+    setPromoPhoto(null);
+    ['pp-title', 'pp-end', 'pp-slot', 'pp-photo'].forEach((f) => setFieldError(f, ''));
+  }
+  $('pp-edit-cancel').addEventListener('click', () => { resetPromoForm(); renderPromoAdmin(currentUser()); });
   /* Photo d'une offre : recadrée en carré comme celles de la fiche, envoyée à la publication */
   let promoPhoto = null, promoPhotoUrl = null;
   function setPromoPhoto(blob) {
@@ -9341,7 +9451,7 @@
     $('pp-photo-remove').hidden = !blob;
     $('pp-photo-btn').textContent = blob ? 'Changer' : 'Ajouter une photo';
   }
-  $('pp-photo-remove').addEventListener('click', () => setPromoPhoto(null));
+  $('pp-photo-remove').addEventListener('click', () => { setPromoPhoto(null); if (promoEdit) promoEdit.keepPhoto = null; });
   $('pp-photo-input').addEventListener('change', async (ev) => {
     const file = ev.target.files[0];
     ev.target.value = '';
@@ -9352,7 +9462,7 @@
     try {
       bitmap = await decodeImage(file);
       const crop = isPhotoRatio(bitmap.width, bitmap.height) ? fullCrop(bitmap.width, bitmap.height) : await cropPhoto(bitmap, { index: 1, total: 1 });
-      if (crop) setPromoPhoto(await exportCrop(bitmap, crop));
+      if (crop) { setPromoPhoto(await exportCrop(bitmap, crop)); if (promoEdit) promoEdit.keepPhoto = null; }
     } catch (e) {
       setFieldError('pp-photo', 'Format d\'image non pris en charge (utilisez JPG ou PNG).');
     } finally {
@@ -9375,7 +9485,10 @@
     }
     const slot = readSlot();
     if (slot.error) { setFieldError('pp-slot', slot.error); return; }
-    const row = { merchant_id: r.id, kind: promoKind, title, details: details || null, ends_at: endsAt ? endsAt.toISOString() : null, ...slot };
+    const editing = promoEdit && promoEdit.mode === 'edit' ? promoEdit : null;
+    const row = { merchant_id: r.id, kind: promoKind, title, details: details || null, ends_at: endsAt ? endsAt.toISOString() : null,
+      valid_days: null, valid_from: null, valid_to: null, ...slot };
+    if (promoEdit && promoEdit.keepPhoto && !promoPhoto) row.photo_path = promoEdit.keepPhoto;   // photo gardée (modifier / republier)
     $('pp-submit').disabled = true;
     if (promoPhoto) {
       const path = r.id + '/promo-' + uid().replace(/[^A-Za-z0-9_-]/g, '') + '.' + photoExt(promoPhoto);
@@ -9383,16 +9496,31 @@
       if (up.error) { $('pp-submit').disabled = false; setFieldError('pp-photo', 'La photo n\'a pas pu être envoyée. ' + cloudError(up.error)); return; }
       row.photo_path = path;
     }
-    const { error } = await Loader.run(sb.from('promotions').insert(row), 'Publication de la promotion…');
+    let error;
+    if (editing) {
+      const { merchant_id: _m, ...fields } = row;
+      if (!('photo_path' in fields)) fields.photo_path = null;
+      ({ error } = await Loader.run(sb.from('promotions').update(fields).eq('id', editing.id), 'Enregistrement de l\'offre…'));
+    } else {
+      ({ error } = await Loader.run(sb.from('promotions').insert(row), 'Publication de la promotion…'));
+    }
     $('pp-submit').disabled = false;
-    if (error && row.photo_path) removeFiles('photos', [row.photo_path]);
-    if (error) { setFieldError('pp-title', /Six promotions/.test(error.message || '') ? MAX_PROMOS + ' promotions en cours au maximum.' : cloudError(error)); return; }
+    const uploaded = !!promoPhoto && row.photo_path;
+    if (error && uploaded) removeFiles('photos', [row.photo_path]);
+    if (error) { setFieldError('pp-title', /Six promotions/.test(error.message || '') ? MAX_PROMOS + ' promotions en cours au maximum.' : /date de fin/.test(error.message || '') ? 'Choisissez une date de fin à venir.' : cloudError(error)); return; }
+    if (editing) {
+      // Ancienne photo remplacée ou retirée : supprimée du stockage
+      if (editing.oldPhoto && editing.oldPhoto !== row.photo_path) removeFiles('photos', [editing.oldPhoto]);
+      await refreshCloud();
+      resetPromoForm();
+      renderPromoAdmin(currentUser());
+      toast('Offre modifiée.');
+      return;
+    }
     Push.send(r.id);
     await refreshCloud();
-    $('pp-title').value = ''; $('pp-details').value = ''; $('pp-title-count').textContent = '0 / 60';
-    promoEndTouched = false; $('pp-slot-on').checked = false; $('pp-days').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', 'false'));
-    setPromoKind(promoKind); syncSlot();
-    setPromoPhoto(null);
+    resetPromoForm();
+    oldPromosAt = 0;   // l'offre republiée quitte la liste des offres terminées
     renderPromoAdmin(currentUser());
     toast('Promotion publiée : elle apparaît sur votre fiche et vos abonnés sont prévenus.');
   });
