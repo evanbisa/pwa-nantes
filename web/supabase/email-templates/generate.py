@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """
+Codes à 8 chiffres (réglage du projet Supabase) : police et espacement prévus pour tenir sur un téléphone.
 Modèles des e-mails envoyés par Supabase Auth (codes de vérification), aux couleurs de FlashMiam.
 À coller dans Supabase › Authentication › Emails › Templates (voir README.md). Regénérer : python3 generate.py
 Mise en page en tableaux et styles en ligne : lue correctement par Gmail, Outlook, Apple Mail.
@@ -15,7 +16,7 @@ def code_block(note):
           <tr><td style="padding:8px 32px 4px">
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fff7f2;border:1px solid #f3d9cc;border-radius:14px">
               <tr><td align="center" style="padding:22px 12px 8px;font:600 13px {FONT};color:{MUTED};letter-spacing:.02em">Votre code</td></tr>
-              <tr><td align="center" style="padding:0 12px 20px;font:700 36px/1.1 'SF Mono',Menlo,Consolas,monospace;color:{INK};letter-spacing:10px">{{{{ .Token }}}}</td></tr>
+              <tr><td align="center" style="padding:0 12px 20px;font:700 32px/1.1 'SF Mono',Menlo,Consolas,monospace;color:{INK};letter-spacing:6px;white-space:nowrap">{{{{ .Token }}}}</td></tr>
             </table>
           </td></tr>
           <tr><td style="padding:10px 32px 0;font:14px/1.55 {FONT};color:{MUTED}">{note}</td></tr>"""
