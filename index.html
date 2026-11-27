@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-nYmxK99IDcxULtYMqf7dsLzhTNikuPz9qo0tG757i+Y=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-VJWFKbNrpWXHauy5mtDvFd9q9dfSIFn0wKaeihwYzQs=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -409,10 +409,11 @@
     .sheet {
       position: fixed; z-index: 50; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 560px; max-height: 85dvh; overflow-y: auto;
       padding: 10px 20px calc(var(--safe-bottom) + 20px); border-radius: 20px 20px 0 0; border-bottom: 0;
-      transform: translateY(110%); visibility: hidden;
-      transition: transform .35s var(--ease-out), visibility 0s linear .35s, background-color .4s;
+      transform: translateY(110%); visibility: hidden; overscroll-behavior: contain;
+      transition: transform .38s cubic-bezier(.32, .72, 0, 1), visibility 0s linear .38s, background-color .4s;
     }
-    .sheet.is-open { transform: translateY(0); visibility: visible; transition: transform .35s var(--ease-out), visibility 0s, background-color .4s; }
+    /* Courbe des feuilles d'iPhone : départ vif, arrivée très douce ; la fermeture est plus rapide que l'ouverture */
+    .sheet.is-open { transform: translateY(0); visibility: visible; transition: transform .5s cubic-bezier(.32, .72, 0, 1), visibility 0s, background-color .4s; }
     .sheet.is-dragging { transition: none; }
     .sheet-grab { display: block; width: 100%; padding: 8px 0 16px; cursor: grab; touch-action: none; }   /* zone de 28 px : facile à attraper au doigt */
     .sheet-grab::before { content: ""; display: block; width: 36px; height: 4px; border-radius: 2px; margin: 0 auto; background: var(--line-strong); }
@@ -2318,7 +2319,7 @@
     @keyframes tour-pulse { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.18); } }
     .tour-card { position: absolute; left: 16px; right: 16px; top: 50%; max-width: 380px; margin: 0 auto; padding: 18px 18px 14px; border-radius: 22px; color: var(--text); background: var(--panel-solid);
       box-shadow: 0 18px 50px rgba(0, 0, 0, .35); overflow: hidden;
-      transition: top .65s cubic-bezier(.65, 0, .35, 1), height .65s cubic-bezier(.65, 0, .35, 1); animation: rise .35s var(--ease-out) both; }
+      transition: translate .65s cubic-bezier(.65, 0, .35, 1), height .65s cubic-bezier(.65, 0, .35, 1); animation: rise .35s var(--ease-out) both; }
     /* Changement d'étape : la bulle reste visible, glisse et change de taille ; seul son contenu fait un fondu */
     .tour-card > * { transition: opacity .22s ease, transform .35s cubic-bezier(.22, 1, .36, 1); }
     .tour-card.is-swap > * { opacity: 0; transform: translateY(6px); }
@@ -2792,6 +2793,35 @@
       font-family: var(--font-tag); font-stretch: 86%; font-weight: 750; font-size: 17px; line-height: 1.2;
     }
     .onboarding .jn-perks li::before { background: var(--brand); }
+
+    /* --- Retour au toucher (skill apple-design) : tout ce qui se touche réagit dès l'appui ---
+       « scale » (propriété à part) se combine aux « transform » existants sans les remplacer. Les lignes de liste
+       s'assombrissent au lieu de rétrécir (un grand bloc qui rétrécit bouge trop). Liens texte : légère transparence. */
+    .chip:active, .pill-btn:active, .icon-btn:active, .offer-more:active, .sr-toggle:active, .ob-skip:active, .guest-login:active,
+    .dish-like:active, .story-chip:active .story-ring, .fbar-sum:active { scale: .95; }
+    .offer-hit:active, .sr-hit:active, .sr-dish:active, .shop-item:active { background-color: var(--line); }
+    .link-btn:active { opacity: .6; }
+    /* Pas d'attente du double-tapotement sur les commandes (le zoom de la page reste possible ailleurs) */
+    button, a[href], [role="button"], summary, label, .chip { touch-action: manipulation; }
+
+    /* --- Réglages d'accessibilité du téléphone --- */
+    /* « Réduire les animations » : les fiches apparaissent en fondu court au lieu de glisser (pas d'arrêt brutal) */
+    @media (prefers-reduced-motion: reduce) and (max-width: 899.98px) {
+      .sheet { transform: none; opacity: 0; transition: opacity .2s ease, visibility 0s linear .2s, background-color .4s !important; }
+      .sheet.is-open { opacity: 1; transition: opacity .2s ease, visibility 0s, background-color .4s !important; }
+    }
+    /* « Augmenter le contraste » : filets et textes secondaires plus marqués, contour de focus plus épais */
+    @media (prefers-contrast: more) {
+      :root[data-theme="light"] { --line: rgba(22, 33, 58, .3); --line-strong: rgba(22, 33, 58, .58); --muted: #3a4560; --hover: rgba(22, 33, 58, .1); }
+      :root[data-theme="dark"] { --line: rgba(242, 244, 248, .3); --line-strong: rgba(242, 244, 248, .58); --muted: #c5cbd7; --hover: rgba(242, 244, 248, .14); }
+      :focus-visible { outline-width: 3px; }
+      .glass, .sheet, .tour-card { border: 1px solid var(--line-strong); }
+    }
+    /* « Réduire la transparence » : panneaux et voiles entièrement opaques */
+    @media (prefers-reduced-transparency: reduce) {
+      :root[data-theme="light"] { --panel: #ffffff; --scrim: #eef0f4; }
+      :root[data-theme="dark"] { --panel: #16223a; --scrim: #0e1626; }
+    }
 
     /* --- Ordinateur : la barre « Créer mon compte » prend l'encre, comme la barre d'onglets du téléphone --- */
     .guest-bar { background: var(--shell); border-top: 0; }
@@ -8570,13 +8600,77 @@
   })();
 
   /* =====================================================================
+     Mouvement physique (comme sur iPhone, d'après les conférences design d'Apple) : ressort réglé par
+     amortissement + réactivité, projection de l'élan d'un geste lancé, résistance élastique aux limites.
+     ===================================================================== */
+  const Physics = (() => {
+    const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+    /** Ressort de `from` à `to`, en partant de la vitesse `velocity` (px/s) : interruptible (cancel), sans durée fixe.
+     *  damping 1 = sans rebond (par défaut) ; ~0,85 = léger rebond, seulement après un geste lancé. */
+    function spring({ from, to, velocity = 0, damping = 1, response = 0.35, onUpdate, onDone }) {
+      let raf = 0, t0 = 0, over = false;
+      const finish = () => { over = true; onUpdate(to); if (onDone) onDone(); };
+      if (reduced() || from === to && !velocity) { finish(); return { cancel() {} }; }
+      const z = Math.min(1, damping), w0 = 2 * Math.PI / response, x0 = from - to;
+      const wd = w0 * Math.sqrt(Math.max(0, 1 - z * z));
+      const at = (t) => (z < 1
+        ? Math.exp(-z * w0 * t) * (x0 * Math.cos(wd * t) + ((velocity + z * w0 * x0) / wd) * Math.sin(wd * t))
+        : Math.exp(-w0 * t) * (x0 + (velocity + w0 * x0) * t));
+      const tick = (now) => {
+        if (!t0) t0 = now;
+        const t = (now - t0) / 1000, x = at(t), v = (at(t + 0.004) - x) / 0.004;
+        if ((Math.abs(x) < 0.5 && Math.abs(v) < 20) || t > 3) { finish(); return; }
+        onUpdate(to + x);
+        raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+      return { cancel() { if (!over) { over = true; cancelAnimationFrame(raf); } } };
+    }
+    /** Distance que parcourrait un geste lancé à `v` px/s (formule d'Apple, décélération exponentielle). */
+    const project = (v, rate = 0.998) => (v / 1000) * rate / (1 - rate);   // 0,998 : décélération normale d'iOS
+    /** Au-delà d'une limite, l'élément suit de moins en moins le doigt. */
+    const rubberband = (over, dim, c = 0.55) => (over * dim * c) / (dim + c * Math.abs(over));
+    /** Vitesse du doigt (px/s) mesurée sur ses 100 dernières ms (0 s'il s'est arrêté avant de lâcher). */
+    function tracker() {
+      let pts = [];
+      return {
+        add(v, t) { pts.push([v, t]); while (pts.length > 2 && t - pts[0][1] > 100) pts.shift(); },
+        velocity(now) {
+          if (pts.length < 2) return 0;
+          const [v0, t0] = pts[0], [v1, t1] = pts[pts.length - 1];
+          if (now - t1 > 80 || t1 <= t0) return 0;
+          return (v1 - v0) / (t1 - t0) * 1000;
+        },
+      };
+    }
+    /** Position verticale affichée (transform en cours, transition comprise) : un geste repart toujours de là. */
+    const liveY = (el) => { const tf = getComputedStyle(el).transform; return tf && tf !== 'none' ? new DOMMatrixReadOnly(tf).m42 : 0; };
+    return { spring, project, rubberband, tracker, liveY, reduced };
+  })();
+  // iPhone (Safari) n'applique les états « appuyé » (:active) que si un écouteur « touchstart » existe :
+  // sans lui, aucun bouton ne réagit au doigt (le surlignage gris du navigateur est désactivé).
+  document.body.addEventListener('touchstart', () => {}, { passive: true });
+
+  /* =====================================================================
      8. PANNEAUX (fiche commerce, profil, aide) — ouverture, fermeture, glisser
      ===================================================================== */
 
   let activePanel = null;
+  /** Ressorts des fiches en cours (glisser au doigt) : arrêtés dès qu'une fiche s'ouvre ou se ferme autrement. */
+  const SheetMotion = (() => {
+    const running = new WeakMap();
+    const stop = (panel) => {
+      const anim = running.get(panel);
+      if (anim) { anim.cancel(); running.delete(panel); }
+      if (!panel.dataset.grabbed) panel.classList.remove('is-dragging');   // les transitions CSS repartent de la position affichée
+    };
+    return { stop, running };
+  })();
 
   function openPanel(panel, { modal = false } = {}) {
     if (activePanel && activePanel !== panel) closePanel(activePanel, { silent: true });
+    SheetMotion.stop(panel);
+    if (!panel.dataset.grabbed) panel.style.transform = '';
     activePanel = panel;
     document.body.dataset.panel = panel.id;   // onglet actif de la barre du bas (CSS)
     panel.classList.add('is-open');
@@ -8591,9 +8685,13 @@
 
   function closePanel(panel, { silent = false } = {}) {
     if (!panel || !panel.classList.contains('is-open')) return;
+    SheetMotion.stop(panel);
     panel.classList.remove('is-open');
     panel.setAttribute('aria-hidden', 'true');
-    panel.style.transform = '';
+    delete panel.dataset.grabbed;
+    // « Réduire les animations » : la fiche lâchée vers le bas reste hors de l'écran pendant son fondu
+    if (Physics.reduced() && panel.style.transform) setTimeout(() => { if (!panel.classList.contains('is-open')) panel.style.transform = ''; }, 250);
+    else panel.style.transform = '';
     if (activePanel === panel) { activePanel = null; delete document.body.dataset.panel; }
     if (panel.id === 'shop-sheet') deselectShop();
     if (!silent) {
@@ -8613,30 +8711,91 @@
     if (ev.key === 'Escape' && activePanel && ev.target !== $('search')) closePanel(activePanel);
   });
 
-  /** Téléphone : glisser la poignée vers le bas pour fermer le panneau. */
+  /**
+   * Téléphone : les fiches se manipulent au doigt, comme sur iPhone.
+   * - Elles suivent le doigt à l'identique (poignée, en-tête, ou contenu quand il est tout en haut), en partant de leur
+   *   position affichée : on peut les rattraper pendant qu'elles s'ouvrent ou se referment.
+   * - Au lâcher, l'élan compte : la fiche se ferme si le geste l'aurait emmenée assez bas (projection), sinon elle revient
+   *   avec un ressort qui garde la vitesse du doigt. Tirée vers le haut, elle résiste (élastique).
+   */
   function enableDragToClose(panel) {
     const grab = panel.querySelector('.sheet-grab');
-    let startY = 0, dy = 0, startT = 0, dragging = false;
-    grab.addEventListener('pointerdown', (ev) => {
-      dragging = true; startY = ev.clientY; dy = 0; startT = performance.now();
+    const phone = () => matchMedia('(max-width: 899.98px)').matches;
+    const setY = (y) => { panel.style.transform = 'translateY(' + y + 'px)'; };
+    let g = null;          // geste en cours
+    let suppressClick = false;
+    function begin(clientY, t) {
+      if (!phone() || !panel.classList.contains('is-open')) return false;
+      const anim = SheetMotion.running.get(panel);
+      if (anim) { anim.cancel(); SheetMotion.running.delete(panel); }
+      const y = Physics.liveY(panel);            // rattrapée en plein mouvement : on repart d'où elle est affichée
       panel.classList.add('is-dragging');
-      grab.setPointerCapture(ev.pointerId);
-    });
-    grab.addEventListener('pointermove', (ev) => {
-      if (!dragging) return;
-      dy = Math.max(0, ev.clientY - startY);
-      panel.style.transform = 'translateY(' + dy + 'px)';
-    });
-    const end = () => {
-      if (!dragging) return;
-      dragging = false;
-      panel.classList.remove('is-dragging');
-      const velocity = dy / Math.max(1, performance.now() - startT);
-      panel.style.transform = '';
-      if (dy > 90 || velocity > 0.6) closePanel(panel);
+      panel.dataset.grabbed = '1';
+      setY(y);
+      g = { offset: clientY - y, h: panel.offsetHeight, y, trk: Physics.tracker(), moved: 0 };
+      g.trk.add(y, t);
+      return true;
+    }
+    function move(clientY, t) {
+      if (!panel.classList.contains('is-open')) { g = null; panel.classList.remove('is-dragging'); return; }   // fermée autrement (Échap…)
+      let y = clientY - g.offset;
+      if (y < 0) y = -Physics.rubberband(-y, g.h);  // vers le haut : résistance élastique
+      g.moved = Math.max(g.moved, Math.abs(y - g.y));
+      g.y = y; g.trk.add(y, t); setY(y);
+    }
+    function release(t) {
+      if (!panel.classList.contains('is-open')) { g = null; delete panel.dataset.grabbed; panel.classList.remove('is-dragging'); return; }
+      const { y, h } = g, v = g.trk.velocity(t);
+      if (g.moved > 6) suppressClick = true;
+      g = null;
+      delete panel.dataset.grabbed;
+      const close = y + Physics.project(v) > Math.min(h * 0.4, 240);
+      const anim = close
+        ? Physics.spring({ from: y, to: h + 24, velocity: Math.max(v, 0), damping: 1, response: 0.3, onUpdate: setY,
+          onDone: () => { SheetMotion.running.delete(panel); closePanel(panel); requestAnimationFrame(() => panel.classList.remove('is-dragging')); } })
+        : Physics.spring({ from: y, to: 0, velocity: v, damping: Math.abs(v) > 300 ? 0.85 : 1, response: 0.35, onUpdate: setY,
+          onDone: () => { SheetMotion.running.delete(panel); panel.style.transform = ''; panel.classList.remove('is-dragging'); } });
+      SheetMotion.running.set(panel, anim);
+    }
+    // Poignée : souris ou doigt
+    grab.addEventListener('pointerdown', (ev) => { if (begin(ev.clientY, ev.timeStamp)) grab.setPointerCapture(ev.pointerId); });
+    grab.addEventListener('pointermove', (ev) => { if (g) move(ev.clientY, ev.timeStamp); });
+    const up = (ev) => { if (g) release(ev.timeStamp); setTimeout(() => { suppressClick = false; }, 300); };
+    grab.addEventListener('pointerup', up);
+    grab.addEventListener('pointercancel', up);
+    // Après un glissé, le « clic » de la poignée (qui ferme la fiche) ne compte pas
+    grab.addEventListener('click', (ev) => { if (suppressClick) { suppressClick = false; ev.stopPropagation(); ev.preventDefault(); } }, true);
+
+    // En-tête et contenu (doigt) : on tire vers le bas quand le contenu est tout en haut ; sinon, il défile normalement
+    const NO_DRAG = 'input, textarea, select, [contenteditable], .rf, .sheet-grab, .no-sheet-drag';
+    const scrolledAbove = (el) => {
+      for (let n = el; n && n !== panel.parentNode; n = n.parentNode) {
+        if (n.nodeType === 1 && n.scrollTop > 0 && /(auto|scroll)/.test(getComputedStyle(n).overflowY)) return true;
+      }
+      return false;
     };
-    grab.addEventListener('pointerup', end);
-    grab.addEventListener('pointercancel', end);
+    let touch = null;
+    panel.addEventListener('touchstart', (ev) => {
+      if (ev.touches.length !== 1 || !phone() || ev.target.closest(NO_DRAG)) { touch = null; return; }
+      const p = ev.touches[0];
+      touch = { x: p.clientX, y: p.clientY, target: ev.target, mode: null };
+    }, { passive: true });
+    panel.addEventListener('touchmove', (ev) => {
+      if (!touch) return;
+      const p = ev.touches[0];
+      if (!touch.mode) {
+        const dx = p.clientX - touch.x, dy = p.clientY - touch.y;
+        if (Math.abs(dx) < 3 && Math.abs(dy) < 3) return;
+        // Décidé dès le premier vrai mouvement : sur iPhone, un défilement commencé ne peut plus être arrêté
+        touch.mode = (ev.cancelable && dy > 0 && Math.abs(dy) >= Math.abs(dx) && !scrolledAbove(touch.target) && begin(touch.y, ev.timeStamp)) ? 'drag' : 'scroll';
+      }
+      if (touch.mode !== 'drag') return;
+      ev.preventDefault();                                                // la fiche bouge, le contenu ne défile pas
+      move(p.clientY, ev.timeStamp);
+    }, { passive: false });
+    const touchEnd = (ev) => { if (touch && touch.mode === 'drag' && g) release(ev.timeStamp); touch = null; setTimeout(() => { suppressClick = false; }, 300); };
+    panel.addEventListener('touchend', touchEnd);
+    panel.addEventListener('touchcancel', touchEnd);
   }
 
   /* ---------- Fiche commerce ---------- */
@@ -9381,6 +9540,7 @@
       clearInterval(clock);
       token++;
       root.hidden = true;
+      $('sv-frame').style.transform = $('sv-frame').style.borderRadius = root.style.backgroundColor = '';
       if (url) { URL.revokeObjectURL(url); url = null; }
       renderStories();
       if (selectedId) renderShop(markers.get(selectedId));
@@ -9476,19 +9636,47 @@
     }
     $('sv-cta').addEventListener('click', openCurrentShop);
     $('sv-profile').addEventListener('click', openCurrentShop);
-    // Appui court : story suivante / précédente ; appui long : pause ; glisser vers le bas : fermer
+    // Appui court : story suivante / précédente ; appui long : pause ; glisser vers le bas : la story suit le doigt,
+    // rétrécit un peu et se ferme si le geste l'emmène assez bas (élan compris), sinon elle revient avec un ressort
+    const frame = $('sv-frame');
+    let fling = null;
+    const setDrag = (y) => {
+      const k = Math.max(0, Math.min(1, y / 600));
+      frame.style.transform = y ? 'translateY(' + y + 'px) scale(' + (1 - 0.12 * k) + ')' : '';
+      frame.style.borderRadius = y ? Math.round(18 * Math.min(1, y / 120)) + 'px' : '';
+      root.style.backgroundColor = y > 0 ? 'rgba(0, 0, 0, ' + (1 - 0.65 * k).toFixed(3) + ')' : '';
+    };
+    const settle = (y, v) => {
+      const out = y + Physics.project(v) > Math.min(innerHeight * 0.25, 220);
+      fling = Physics.spring({ from: y, to: out ? innerHeight : 0, velocity: out ? Math.max(v, 0) : v, damping: out ? 1 : 0.9, response: out ? 0.3 : 0.35, onUpdate: setDrag,
+        onDone: () => { fling = null; if (out) { close(); setDrag(0); } else setPaused(false); } });
+    };
     ['sv-prev', 'sv-next'].forEach((id) => {
       const el = $(id);
-      el.addEventListener('pointerdown', (ev) => { press = { t: Date.now(), y: ev.clientY }; setTimeout(() => { if (press && Date.now() - press.t >= 240) setPaused(true); }, 250); });
+      el.addEventListener('pointerdown', (ev) => {
+        if (fling) { fling.cancel(); fling = null; setDrag(0); }
+        press = { t: Date.now(), y: ev.clientY, drag: false, dy: 0, trk: Physics.tracker() };
+        el.setPointerCapture(ev.pointerId);
+        setTimeout(() => { if (press && Date.now() - press.t >= 240) setPaused(true); }, 250);
+      });
+      el.addEventListener('pointermove', (ev) => {
+        if (!press) return;
+        const dy = ev.clientY - press.y;
+        if (!press.drag && dy > 10) { press.drag = true; setPaused(true); }   // petit seuil : un appui qui bouge à peine reste un appui
+        if (!press.drag) return;
+        press.dy = dy > 0 ? dy : -Physics.rubberband(-dy, innerHeight);
+        press.trk.add(press.dy, ev.timeStamp);
+        setDrag(press.dy);
+      });
       el.addEventListener('pointerup', (ev) => {
         if (!press) return;
-        const long = Date.now() - press.t >= 240, dy = ev.clientY - press.y;
+        const long = Date.now() - press.t >= 240, p = press;
         press = null;
-        if (dy > 80) { close(); return; }
+        if (p.drag) { settle(p.dy, p.trk.velocity(ev.timeStamp)); return; }
         if (long) { setPaused(false); return; }
         if (id === 'sv-next') next(); else prev();
       });
-      el.addEventListener('pointercancel', () => { press = null; setPaused(false); });
+      el.addEventListener('pointercancel', () => { const p = press; press = null; if (p && p.drag) settle(p.dy, 0); else setPaused(false); });
       el.addEventListener('click', (ev) => { if (ev.detail === 0) { if (id === 'sv-next') next(); else prev(); } });   // clavier (Entrée / Espace)
     });
     document.addEventListener('keydown', (ev) => {
@@ -14959,8 +15147,13 @@
         else top = (floor - below) >= (r.top - ceil) ? below : above;
       }
       card.style.bottom = 'auto';
-      const px = Math.round(Math.max(ceil, Math.min(Math.max(ceil, floor - ch), top))) + 'px';
-      if (card.style.top !== px) card.style.top = px;
+      card.style.top = '0px';
+      const tr = '0px ' + Math.round(Math.max(ceil, Math.min(Math.max(ceil, floor - ch), top))) + 'px';
+      if (card.style.translate === tr) return;
+      const first = !card.style.translate;
+      if (first) card.style.transition = 'none';                  // première place : directement, sans glisser depuis le haut
+      card.style.translate = tr;                                   // « translate » : déplacement sans recalcul de la page
+      if (first) { void card.offsetHeight; card.style.transition = ''; }
     }
     function place() { placeCard(placeSpot()); }
     /** Étapes dont la cible bouge (fiche qui défile, QR code qui s'ouvre) : projecteur et bulle la suivent à chaque image,
@@ -15061,6 +15254,7 @@
       root.hidden = true;
       document.body.classList.remove('tour-open');
       $('tour-next').hidden = false;
+      card.style.translate = '';
       if (lastFocus && document.contains(lastFocus) && !VisitPass.isOpen()) lastFocus.focus({ preventScroll: true });
     }
     /** Étape « touchez un restaurant » : la fiche s'ouvre, puis le guide montre le bouton du QR code. */

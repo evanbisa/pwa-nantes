@@ -53,6 +53,27 @@ Une seule famille, **Archivo** (variable, licence OFL, servie par le site : `ven
 - Même orange pour le « % » des repères de la carte (`.pin-flag`) et la pastille du nombre d'offres. À l'accueil, les
   avantages sont une simple liste à coches orange.
 
+## Mouvement et gestes (skill `apple-design`, 27/11/2026)
+
+- **Retour au toucher immédiat** : tout ce qui se touche réagit dès l'appui (boutons et puces rétrécissent un peu avec
+  la propriété `scale`, lignes de liste qui s'assombrissent, liens texte qui pâlissent). Un écouteur `touchstart` sur
+  `body` est indispensable : sans lui, Safari sur iPhone n'applique jamais `:active`.
+- **Fiches (téléphone)** : elles suivent le doigt à l'identique (poignée, en-tête, ou contenu quand il est en haut), en
+  partant de leur position affichée (on les rattrape en plein mouvement). Au lâcher : projection de l'élan
+  (décélération 0,998, celle d'iOS) ; fermeture si le point d'arrivée dépasse 40 % de la hauteur (240 px au plus), sinon
+  retour par un ressort qui garde la vitesse du doigt (amortissement 1, ou 0,85 après un geste lancé ; réactivité
+  0,35 s). Tirées vers le haut : résistance élastique. Ouverture 0,5 s et fermeture 0,38 s sur la courbe des feuilles
+  d'iPhone `cubic-bezier(.32, .72, 0, 1)`.
+- **Stories** : tirées vers le bas, elles suivent le doigt, rétrécissent un peu et le fond s'éclaircit ; elles se
+  ferment avec l'élan, sinon reviennent avec un ressort.
+- **Outils** : `Physics` dans `index.html` (ressort d'Apple à deux réglages, projection, élastique, vitesse du doigt).
+  Animer `transform`, `opacity`, `translate` ou `scale` ; jamais `top`, `left`, `width` pour un déplacement.
+- **Réglages du téléphone** : « Réduire les animations » remplace les glissements des fiches par un fondu court ;
+  « Augmenter le contraste » renforce filets, textes secondaires et contour de focus ; « Réduire la transparence » rend
+  panneaux et voiles opaques.
+- Pas de verre dépoli ni de barres translucides malgré l'usage d'Apple : le monde « étiquette du marché » garde ses
+  surfaces pleines (choix de la refonte du 26/11/2026).
+
 ## Ce qui ne change pas
 
 - Le logo (épingle orange avec couverts), l'orange comme couleur de marque, les emojis des catégories sur la carte
