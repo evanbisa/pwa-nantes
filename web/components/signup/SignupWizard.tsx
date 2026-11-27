@@ -127,7 +127,8 @@ function Wizard() {
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suggestedFor = useRef("");
   const checkedEmail = useRef("");
-  const keyboard = useKeyboardInset();   // clavier ouvert : marge sous la page
+  const mainRef = useRef<HTMLElement>(null);
+  useKeyboardInset(mainRef, step);   // clavier ouvert : le contenu de l'étape remonte au-dessus de lui, en glissant
 
   const firstName = capitalize(name.trim().split(/\s+/)[0] ?? "");
   const cleanEmail = email.trim().toLowerCase();
@@ -377,7 +378,6 @@ function Wizard() {
   /* ---------- Rendu ---------- */
   return (
     <div
-      data-kb={keyboard ? "" : undefined} style={keyboard ? { paddingBottom: keyboard } : undefined}
       className="group/page relative isolate flex min-h-full flex-col px-3 pt-[max(12px,env(safe-area-inset-top))] pb-[max(12px,env(safe-area-inset-bottom))] text-slate-900 antialiased dark:text-zinc-50 dark:[color-scheme:dark]"
     >
       <MapBackdrop />
@@ -418,7 +418,9 @@ function Wizard() {
         </p>
       )}
 
-      <main className={`flex w-full flex-1 flex-col overflow-x-hidden px-5 ${canSwitchToLogin ? "pt-3" : "pt-6"} pb-6`}>
+      {/* Clavier ouvert : la carte blanche garde toute sa hauteur (derrière le clavier, jamais de plan de la ville
+          entre les deux) ; seul son contenu remonte au-dessus du clavier (marge du bas posée par useKeyboardInset). */}
+      <main ref={mainRef} className={`flex w-full flex-1 flex-col overflow-x-hidden px-5 ${canSwitchToLogin ? "pt-3" : "pt-6"} pb-6`}>
         <div key={step} className={`su-cascade flex flex-1 flex-col ${dir === "next" ? "motion-safe:animate-step-next" : "motion-safe:animate-step-prev"}`}>
           {step === "name" && (
             <form onSubmit={submitName} noValidate className="flex flex-1 flex-col">
