@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-VJWFKbNrpWXHauy5mtDvFd9q9dfSIFn0wKaeihwYzQs=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-Fsz51HM4UK0T0ZFOdi25oNtiYVQcNUL9ge7d1CM4hyQ=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -2803,6 +2803,17 @@
     .link-btn:active { opacity: .6; }
     /* Pas d'attente du double-tapotement sur les commandes (le zoom de la page reste possible ailleurs) */
     button, a[href], [role="button"], summary, label, .chip { touch-action: manipulation; }
+
+    /* --- Fluidité (skill animation-performance) ---
+       Fiche ouverte ou tenue : sa propre couche graphique (un déplacement ne la fait pas redessiner) ; pas de rebond du
+       contenu, pour que tirer vers le bas tout en haut déplace la fiche sans bloquer le défilement. Story : même chose.
+       Halos des restaurants ouverts : en pause sous une fiche ouverte (moins d'animations à composer pendant les gestes). */
+    @media (max-width: 899.98px) {
+      .sheet.is-open, .sheet.is-dragging { will-change: transform; overscroll-behavior-y: none; }
+    }
+    .story-viewer:not([hidden]) .sv-frame { will-change: transform; }
+    body.sheet-open .pin.is-open .pin-badge::before { animation: none; opacity: 0; }
+    .sv-bars i { width: 100%; transform: scaleX(0); transform-origin: 0 50%; }
 
     /* --- Réglages d'accessibilité du téléphone --- */
     /* « Réduire les animations » : les fiches apparaissent en fondu court au lieu de glisser (pas d'arrêt brutal) */
@@ -8605,26 +8616,30 @@
      ===================================================================== */
   const Physics = (() => {
     const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-    /** Ressort de `from` à `to`, en partant de la vitesse `velocity` (px/s) : interruptible (cancel), sans durée fixe.
-     *  damping 1 = sans rebond (par défaut) ; ~0,85 = léger rebond, seulement après un geste lancé. */
-    function spring({ from, to, velocity = 0, damping = 1, response = 0.35, onUpdate, onDone }) {
-      let raf = 0, t0 = 0, over = false;
-      const finish = () => { over = true; onUpdate(to); if (onDone) onDone(); };
-      if (reduced() || from === to && !velocity) { finish(); return { cancel() {} }; }
+    /** Ressort de `from` à `to` partant de la vitesse `velocity` (px/s), réglé comme chez Apple : amortissement (1 = sans
+     *  rebond ; ~0,85 = léger rebond, seulement après un geste lancé) et réactivité (s). Précalculé puis confié au
+     *  navigateur (Web Animations) : joué hors du fil principal, il reste fluide même quand la page travaille. `frames` : [élément, (valeur) => image clé] ;
+     *  `apply(valeur)` pose l'état final en style direct. Interruptible : lire la position affichée, puis cancel(). */
+    function play({ from, to, velocity = 0, damping = 1, response = 0.35, frames, apply, onDone }) {
+      const end = () => { apply(to); if (onDone) onDone(); };
+      if (reduced() || (from === to && !velocity)) { end(); return { cancel() {} }; }
       const z = Math.min(1, damping), w0 = 2 * Math.PI / response, x0 = from - to;
       const wd = w0 * Math.sqrt(Math.max(0, 1 - z * z));
       const at = (t) => (z < 1
         ? Math.exp(-z * w0 * t) * (x0 * Math.cos(wd * t) + ((velocity + z * w0 * x0) / wd) * Math.sin(wd * t))
         : Math.exp(-w0 * t) * (x0 + (velocity + w0 * x0) * t));
-      const tick = (now) => {
-        if (!t0) t0 = now;
-        const t = (now - t0) / 1000, x = at(t), v = (at(t + 0.004) - x) / 0.004;
-        if ((Math.abs(x) < 0.5 && Math.abs(v) < 20) || t > 3) { finish(); return; }
-        onUpdate(to + x);
-        raf = requestAnimationFrame(tick);
-      };
-      raf = requestAnimationFrame(tick);
-      return { cancel() { if (!over) { over = true; cancelAnimationFrame(raf); } } };
+      const step = 1 / 60, values = [];
+      for (let t = 0; t < 3; t += step) {
+        const x = at(t), v = (at(t + 0.004) - x) / 0.004;
+        values.push(to + x);
+        if (Math.abs(x) < 0.5 && Math.abs(v) < 20) break;
+      }
+      values.push(to);
+      const duration = (values.length - 1) * step * 1000;
+      let over = false;
+      const anims = frames.map(([el, frame]) => el.animate(values.map(frame), { duration, easing: 'linear', fill: 'forwards' }));
+      anims[0].onfinish = () => { if (over) return; over = true; apply(to); anims.forEach((a) => a.cancel()); if (onDone) onDone(); };
+      return { cancel() { if (!over) { over = true; anims.forEach((a) => a.cancel()); } } };
     }
     /** Distance que parcourrait un geste lancé à `v` px/s (formule d'Apple, décélération exponentielle). */
     const project = (v, rate = 0.998) => (v / 1000) * rate / (1 - rate);   // 0,998 : décélération normale d'iOS
@@ -8645,7 +8660,7 @@
     }
     /** Position verticale affichée (transform en cours, transition comprise) : un geste repart toujours de là. */
     const liveY = (el) => { const tf = getComputedStyle(el).transform; return tf && tf !== 'none' ? new DOMMatrixReadOnly(tf).m42 : 0; };
-    return { spring, project, rubberband, tracker, liveY, reduced };
+    return { play, project, rubberband, tracker, liveY, reduced };
   })();
   // iPhone (Safari) n'applique les états « appuyé » (:active) que si un écouteur « touchstart » existe :
   // sans lui, aucun bouton ne réagit au doigt (le surlignage gris du navigateur est désactivé).
@@ -8661,8 +8676,12 @@
     const running = new WeakMap();
     const stop = (panel) => {
       const anim = running.get(panel);
-      if (anim) { anim.cancel(); running.delete(panel); }
-      if (!panel.dataset.grabbed) panel.classList.remove('is-dragging');   // les transitions CSS repartent de la position affichée
+      if (anim) {                                     // la fiche reste exactement où elle est affichée, puis le CSS prend le relais
+        const y = Physics.liveY(panel);
+        anim.cancel(); running.delete(panel);
+        panel.style.transform = 'translateY(' + y + 'px)';
+      }
+      if (!panel.dataset.grabbed) panel.classList.remove('is-dragging');
     };
     return { stop, running };
   })();
@@ -8726,9 +8745,9 @@
     let suppressClick = false;
     function begin(clientY, t) {
       if (!phone() || !panel.classList.contains('is-open')) return false;
+      const y = Physics.liveY(panel);            // rattrapée en plein mouvement : on repart d'où elle est affichée (lu avant d'arrêter)
       const anim = SheetMotion.running.get(panel);
       if (anim) { anim.cancel(); SheetMotion.running.delete(panel); }
-      const y = Physics.liveY(panel);            // rattrapée en plein mouvement : on repart d'où elle est affichée
       panel.classList.add('is-dragging');
       panel.dataset.grabbed = '1';
       setY(y);
@@ -8750,10 +8769,11 @@
       g = null;
       delete panel.dataset.grabbed;
       const close = y + Physics.project(v) > Math.min(h * 0.4, 240);
+      const frames = [[panel, (val) => ({ transform: 'translateY(' + val + 'px)' })]];
       const anim = close
-        ? Physics.spring({ from: y, to: h + 24, velocity: Math.max(v, 0), damping: 1, response: 0.3, onUpdate: setY,
+        ? Physics.play({ from: y, to: h + 24, velocity: Math.max(v, 0), damping: 1, response: 0.3, frames, apply: setY,
           onDone: () => { SheetMotion.running.delete(panel); closePanel(panel); requestAnimationFrame(() => panel.classList.remove('is-dragging')); } })
-        : Physics.spring({ from: y, to: 0, velocity: v, damping: Math.abs(v) > 300 ? 0.85 : 1, response: 0.35, onUpdate: setY,
+        : Physics.play({ from: y, to: 0, velocity: v, damping: Math.abs(v) > 300 ? 0.85 : 1, response: 0.35, frames, apply: setY,
           onDone: () => { SheetMotion.running.delete(panel); panel.style.transform = ''; panel.classList.remove('is-dragging'); } });
       SheetMotion.running.set(panel, anim);
     }
@@ -8766,7 +8786,10 @@
     // Après un glissé, le « clic » de la poignée (qui ferme la fiche) ne compte pas
     grab.addEventListener('click', (ev) => { if (suppressClick) { suppressClick = false; ev.stopPropagation(); ev.preventDefault(); } }, true);
 
-    // En-tête et contenu (doigt) : on tire vers le bas quand le contenu est tout en haut ; sinon, il défile normalement
+    // En-tête et contenu (doigt) : quand le contenu est tout en haut, tirer vers le bas emmène la fiche ; sinon il défile.
+    // Écouteurs passifs : le défilement ne dépend jamais du JavaScript (il reste fluide même si la page travaille).
+    // Pas besoin de bloquer le geste : la fiche n'a pas de rebond (overscroll-behavior: none), donc tout en haut, tirer
+    // vers le bas ne fait rien d'autre que déplacer la fiche.
     const NO_DRAG = 'input, textarea, select, [contenteditable], .rf, .sheet-grab, .no-sheet-drag';
     const scrolledAbove = (el) => {
       for (let n = el; n && n !== panel.parentNode; n = n.parentNode) {
@@ -8778,24 +8801,28 @@
     panel.addEventListener('touchstart', (ev) => {
       if (ev.touches.length !== 1 || !phone() || ev.target.closest(NO_DRAG)) { touch = null; return; }
       const p = ev.touches[0];
-      touch = { x: p.clientX, y: p.clientY, target: ev.target, mode: null };
+      touch = { x: p.clientX, y: p.clientY, lastY: p.clientY, target: ev.target, mode: null };
     }, { passive: true });
     panel.addEventListener('touchmove', (ev) => {
-      if (!touch) return;
+      if (!touch || ev.touches.length !== 1) return;
       const p = ev.touches[0];
       if (!touch.mode) {
         const dx = p.clientX - touch.x, dy = p.clientY - touch.y;
-        if (Math.abs(dx) < 3 && Math.abs(dy) < 3) return;
-        // Décidé dès le premier vrai mouvement : sur iPhone, un défilement commencé ne peut plus être arrêté
-        touch.mode = (ev.cancelable && dy > 0 && Math.abs(dy) >= Math.abs(dx) && !scrolledAbove(touch.target) && begin(touch.y, ev.timeStamp)) ? 'drag' : 'scroll';
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;               // petit seuil : un tapotement reste un tapotement
+        if (Math.abs(dx) > Math.abs(dy)) { touch.mode = 'scroll'; return; }   // geste horizontal (photos, puces)
       }
-      if (touch.mode !== 'drag') return;
-      ev.preventDefault();                                                // la fiche bouge, le contenu ne défile pas
-      move(p.clientY, ev.timeStamp);
-    }, { passive: false });
+      if (touch.mode === 'scroll') return;
+      if (touch.mode !== 'drag') {
+        // Le contenu défile tant qu'il n'est pas tout en haut ; arrivé en haut, le même geste vers le bas emmène la fiche
+        if (p.clientY > touch.lastY && !scrolledAbove(touch.target) && begin(p.clientY, ev.timeStamp)) touch.mode = 'drag';
+        touch.lastY = p.clientY;
+        return;
+      }
+      move(Math.max(p.clientY, g ? g.offset : p.clientY), ev.timeStamp);   // par le contenu : jamais au-dessus de sa place
+    }, { passive: true });
     const touchEnd = (ev) => { if (touch && touch.mode === 'drag' && g) release(ev.timeStamp); touch = null; setTimeout(() => { suppressClick = false; }, 300); };
-    panel.addEventListener('touchend', touchEnd);
-    panel.addEventListener('touchcancel', touchEnd);
+    panel.addEventListener('touchend', touchEnd, { passive: true });
+    panel.addEventListener('touchcancel', touchEnd, { passive: true });
   }
 
   /* ---------- Fiche commerce ---------- */
@@ -9518,7 +9545,8 @@
   /** Visionneuse plein écran : progression, appui = suivante / précédente, maintien = pause, Échap ou glisser vers le bas = fermer. */
   const StoryViewer = (() => {
     const root = $('story-viewer');
-    let groups = [], gi = 0, si = 0, start = 0, elapsed = 0, raf = 0, paused = false, url = null, token = 0;
+    let groups = [], gi = 0, si = 0, paused = false, url = null, token = 0;
+    let barAnim = null;   // barre de la story en cours : animation jouée par le navigateur (pause, reprise, fin = story suivante)
     let returnFocus = null, press = null, clock = 0;
     const current = () => groups[gi] && groups[gi].stories[si];
     function open(shopId, { only = false } = {}) {
@@ -9536,7 +9564,7 @@
       $('sv-close').focus();
     }
     function close() {
-      cancelAnimationFrame(raf);
+      if (barAnim) { barAnim.cancel(); barAnim = null; }
       clearInterval(clock);
       token++;
       root.hidden = true;
@@ -9549,10 +9577,10 @@
     async function show() {
       const g = groups[gi], st = current();
       const my = ++token;
-      cancelAnimationFrame(raf);
+      if (barAnim) { barAnim.cancel(); barAnim = null; }
       const bars = $('sv-bars');
       bars.textContent = '';
-      g.stories.forEach((_, i) => { const b = document.createElement('span'); b.innerHTML = '<i></i>'; if (i < si) b.firstChild.style.width = '100%'; bars.appendChild(b); });
+      g.stories.forEach((_, i) => { const b = document.createElement('span'); b.innerHTML = '<i></i>'; if (i < si) b.firstChild.style.transform = 'scaleX(1)'; bars.appendChild(b); });
       $('sv-avatar').textContent = catOf(g.shop).emoji;
       $('sv-name').textContent = g.shop.name;
       if (g.shop.isDemo || isShowcase(g.shop)) $('sv-name').append(' ', demoTag());
@@ -9572,9 +9600,11 @@
       if (!seen[st.id]) { seen[st.id] = Date.now(); Object.keys(seen).forEach((k) => { if (Date.now() - seen[k] > 14 * STORY_TTL) delete seen[k]; }); writeJson(SEEN_KEY, seen); }
       if (!isOwnShop(g.shop.id) && !st.example) Stats.track(g.shop.id, 'stories', { ref: st.id });
       StoryLikes.paint(g.shop, st);
-      elapsed = 0; start = performance.now();
-      setPaused(false);
-      raf = requestAnimationFrame(tick);
+      // Barre de progression : une animation du navigateur (aucun travail du fil principal pendant la lecture)
+      const bar = bars.children[si];
+      barAnim = bar ? bar.firstChild.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: STORY_DURATION, fill: 'forwards' }) : null;
+      if (barAnim) barAnim.onfinish = () => { if (my === token && !root.hidden) next(); };
+      if (paused) setPaused(false);
     }
     /**
      * « 450 m · 6 min à pied » (en voiture au-delà de 30 min de marche, distance seule hors de la ville : le temps est
@@ -9597,20 +9627,11 @@
       el.className = 'sv-status ' + (status.soon ? 'is-soon' : status.open ? 'is-open' : 'is-closed');
       el.textContent = status.label;
     }
-    function tick(t) {
-      const bar = $('sv-bars').children[si];
-      const p = Math.min(1, (elapsed + (paused ? 0 : t - start)) / STORY_DURATION);
-      if (bar) bar.firstChild.style.width = (p * 100) + '%';
-      if (p >= 1) { next(); return; }
-      raf = requestAnimationFrame(tick);
-    }
     function setPaused(on) {
       if (on === paused) return;
-      if (on) elapsed += performance.now() - start; else start = performance.now();
       paused = on;
-      // La barre s'arrête exactement là où en est la story
-      const bar = $('sv-bars').children[si];
-      if (on && bar) bar.firstChild.style.width = Math.min(100, elapsed / STORY_DURATION * 100) + '%';
+      // La barre s'arrête exactement là où en est la story, et repart de là
+      if (barAnim) { if (on) barAnim.pause(); else barAnim.play(); }
       $('sv-pause').textContent = on ? '▶' : '❚❚';
       $('sv-pause').setAttribute('aria-label', on ? 'Reprendre' : 'Mettre en pause');
     }
@@ -9640,28 +9661,37 @@
     // rétrécit un peu et se ferme si le geste l'emmène assez bas (élan compris), sinon elle revient avec un ressort
     const frame = $('sv-frame');
     let fling = null;
-    const setDrag = (y) => {
+    const look = (y) => {
       const k = Math.max(0, Math.min(1, y / 600));
-      frame.style.transform = y ? 'translateY(' + y + 'px) scale(' + (1 - 0.12 * k) + ')' : '';
-      frame.style.borderRadius = y ? Math.round(18 * Math.min(1, y / 120)) + 'px' : '';
-      root.style.backgroundColor = y > 0 ? 'rgba(0, 0, 0, ' + (1 - 0.65 * k).toFixed(3) + ')' : '';
+      return { transform: 'translateY(' + y + 'px) scale(' + (1 - 0.12 * Math.max(0, k)) + ')', borderRadius: Math.round(18 * Math.max(0, Math.min(1, y / 120))) + 'px',
+        backgroundColor: 'rgba(0, 0, 0, ' + (1 - 0.65 * k).toFixed(3) + ')' };
     };
+    const setDrag = (y) => {
+      const l = look(y);
+      frame.style.transform = y ? l.transform : '';
+      frame.style.borderRadius = y ? l.borderRadius : '';
+      root.style.backgroundColor = y > 0 ? l.backgroundColor : '';
+    };
+    // Retour ou fermeture : ressort joué par le navigateur (fluide même si la page travaille)
     const settle = (y, v) => {
       const out = y + Physics.project(v) > Math.min(innerHeight * 0.25, 220);
-      fling = Physics.spring({ from: y, to: out ? innerHeight : 0, velocity: out ? Math.max(v, 0) : v, damping: out ? 1 : 0.9, response: out ? 0.3 : 0.35, onUpdate: setDrag,
+      fling = Physics.play({ from: y, to: out ? innerHeight : 0, velocity: out ? Math.max(v, 0) : v, damping: out ? 1 : 0.9, response: out ? 0.3 : 0.35,
+        frames: [[frame, (val) => { const l = look(val); return { transform: l.transform, borderRadius: l.borderRadius }; }], [root, (val) => ({ backgroundColor: look(val).backgroundColor })]],
+        apply: setDrag,
         onDone: () => { fling = null; if (out) { close(); setDrag(0); } else setPaused(false); } });
     };
     ['sv-prev', 'sv-next'].forEach((id) => {
       const el = $(id);
       el.addEventListener('pointerdown', (ev) => {
-        if (fling) { fling.cancel(); fling = null; setDrag(0); }
-        press = { t: Date.now(), y: ev.clientY, drag: false, dy: 0, trk: Physics.tracker() };
+        let base = 0;
+        if (fling) { base = Math.max(0, Physics.liveY(frame)); fling.cancel(); fling = null; setDrag(base); }   // rattrapée : elle repart d'où elle est
+        press = { t: Date.now(), y: ev.clientY, base, drag: base > 0, dy: base, trk: Physics.tracker() };
         el.setPointerCapture(ev.pointerId);
-        setTimeout(() => { if (press && Date.now() - press.t >= 240) setPaused(true); }, 250);
+        setTimeout(() => { if (press && !press.drag && Date.now() - press.t >= 240) setPaused(true); }, 250);
       });
       el.addEventListener('pointermove', (ev) => {
         if (!press) return;
-        const dy = ev.clientY - press.y;
+        const dy = press.base + ev.clientY - press.y;
         if (!press.drag && dy > 10) { press.drag = true; setPaused(true); }   // petit seuil : un appui qui bouge à peine reste un appui
         if (!press.drag) return;
         press.dy = dy > 0 ? dy : -Physics.rubberband(-dy, innerHeight);

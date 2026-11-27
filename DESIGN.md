@@ -67,7 +67,16 @@ Une seule famille, **Archivo** (variable, licence OFL, servie par le site : `ven
 - **Stories** : tirées vers le bas, elles suivent le doigt, rétrécissent un peu et le fond s'éclaircit ; elles se
   ferment avec l'élan, sinon reviennent avec un ressort.
 - **Outils** : `Physics` dans `index.html` (ressort d'Apple à deux réglages, projection, élastique, vitesse du doigt).
-  Animer `transform`, `opacity`, `translate` ou `scale` ; jamais `top`, `left`, `width` pour un déplacement.
+  `Physics.play` précalcule le ressort et le confie au navigateur (Web Animations) : il reste fluide même quand la carte
+  se dessine. Animer `transform`, `opacity`, `translate` ou `scale` ; jamais `top`, `left`, `width` pour un déplacement.
+- **Fluidité (skill `animation-performance`, 27/11/2026)** :
+  - écouteurs de toucher **passifs** sur les fiches : leur défilement n'attend jamais le JavaScript ; pas de rebond dans
+    les fiches (`overscroll-behavior-y: none`), si bien que tout en haut, tirer vers le bas déplace la fiche sans rien
+    bloquer (iOS 16 et plus) ;
+  - fiche ouverte ou tenue, et story ouverte : leur propre couche graphique (`will-change: transform`) ;
+  - barre de progression des stories : une animation du navigateur (`scaleX`), mise en pause et reprise, sans travail
+    du fil principal ; halos des restaurants ouverts en pause sous une fiche ouverte ;
+  - mesuré (Chrome, mêmes gestes) : retour d'une fiche 31 → 8 recalculs de style ; story 120 mises en page / 2 s → 0.
 - **Réglages du téléphone** : « Réduire les animations » remplace les glissements des fiches par un fondu court ;
   « Augmenter le contraste » renforce filets, textes secondaires et contour de focus ; « Réduire la transparence » rend
   panneaux et voiles opaques.
