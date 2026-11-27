@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=540" />
+<title>FlashMiam · vidéo de présentation</title>
+<!--
+  Vidéo de présentation de FlashMiam (format vertical 9:16, 24,5 s, sans son).
+  Chaque image est calculée à partir du temps (window.seek(t)) : le rendu image par image (render.mjs) est parfaitement fluide.
+  Ouverte dans un navigateur, la page joue l'animation en boucle (ajouter ?t=12 pour s'arrêter sur un instant).
+  Couleurs, police et formes : DESIGN.md (monde « étiquette du marché »). Restaurants et offres : exemples fictifs.
+-->
+<style>
+  @font-face { font-family: "Archivo"; font-style: normal; font-weight: 100 900; font-stretch: 62% 125%; src: url(/vendor/fonts/archivo-latin-wdth-normal.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: "Archivo"; font-style: normal; font-weight: 100 900; font-stretch: 62% 125%; src: url(/vendor/fonts/archivo-latin-ext-wdth-normal.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+A720-A7FF; }
+  :root {
+    --ink: #16213a; --ink-2: #0e1626; --brand: #ff4d2e; --brand-night: #ff6a45; --accent: #d9361a;
+    --paper: #ffffff; --bg: #eef0f4; --muted: #55607a; --green: #0e7c45; --green-soft: rgba(14, 124, 69, .1);
+    --line: rgba(22, 33, 58, .1); --line-strong: rgba(22, 33, 58, .22); --accent-soft: rgba(255, 77, 46, .12);
+    --emoji: "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Emoji", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #000; }
+  body { display: grid; place-items: center; min-height: 100vh; }
+  #stage { position: relative; width: 540px; height: 960px; overflow: hidden; background: var(--ink); color: var(--ink);
+    font-family: "Archivo", system-ui, sans-serif; font-size: 16px; -webkit-font-smoothing: antialiased; }
+  .scene { position: absolute; inset: 0; overflow: hidden; }
+  .tag { font-family: "Archivo"; font-stretch: 72%; font-weight: 850; letter-spacing: -.01em; line-height: .98; }
+  .emoji { font-family: var(--emoji); font-stretch: 100%; }
+  .nw { white-space: nowrap; }
+
+  /* ---------- 1. Accroche ---------- */
+  #s1 { background: var(--ink); color: #f2f4f8; }
+  .hook { position: absolute; left: 40px; right: 40px; top: 300px; }
+  .hook p { margin: 0; overflow: hidden; padding: 4px 0; }
+  .hook span { display: block; font-size: 68px; }
+  .hook .l3 span { color: var(--brand-night); }
+
+  /* ---------- 2. Carte ---------- */
+  #s2 { background: #f3f4f1; }
+  #world { position: absolute; left: 0; top: 0; width: 540px; height: 960px; transform-origin: 0 0; }
+  #world svg { position: absolute; inset: 0; }
+  .pin { position: absolute; width: 46px; height: 56px; transform: translate(-50%, -100%); transform-origin: 50% 100%; }
+  .pin .pb { position: absolute; left: 0; top: 0; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
+    font-size: 22px; background: #fff; border: 3px solid var(--green); box-shadow: 0 1px 0 rgba(22, 33, 58, .2), 0 6px 14px -5px rgba(22, 33, 58, .55); }
+  .pin .pb::after { content: ""; position: absolute; left: 50%; bottom: -9px; width: 12px; height: 12px; margin-left: -6px; background: #fff;
+    border: 0 solid; border-right-width: 3px; border-bottom-width: 3px; border-color: inherit; transform: rotate(45deg); border-radius: 0 0 3px 0; }
+  .pin.is-closed .pb { border-color: #9aa3b5; filter: grayscale(.85); }
+  .pin .pf { position: absolute; top: -6px; right: -10px; min-width: 22px; height: 20px; padding: 0 5px; border-radius: 6px; border: 2px solid #fff;
+    font: 850 12.5px/16px "Archivo"; font-stretch: 80%; text-align: center; color: var(--ink); background: var(--brand); box-shadow: 0 1px 2px rgba(22, 33, 58, .35); }
+  .search { position: absolute; left: 20px; right: 20px; top: 64px; height: 54px; display: flex; align-items: center; gap: 12px; padding: 0 16px 0 10px;
+    border-radius: 14px; background: #fff; box-shadow: 0 1px 2px rgba(22, 33, 58, .1), 0 8px 22px -8px rgba(22, 33, 58, .22); color: var(--muted); font-size: 16.5px; font-weight: 500; }
+  .search img { width: 34px; height: 34px; border-radius: 9px; background: var(--bg); padding: 4px; object-fit: contain; }
+  .search svg { margin-left: auto; width: 22px; height: 22px; color: var(--ink); }
+  .caption { position: absolute; left: 24px; right: 60px; text-wrap: balance; padding: 14px 18px 15px; border-radius: 14px; background: var(--ink); color: #f2f4f8;
+    font-size: 36px; box-shadow: 0 18px 40px -16px rgba(14, 22, 38, .6); }
+  .caption.light { background: #fff; color: var(--ink); }
+  #cap2 { top: 640px; }
+  #dim { position: absolute; inset: 0; background: rgba(22, 33, 58, .2); }
+
+  /* Fiche */
+  #sheet { position: absolute; left: 0; right: 0; top: 410px; bottom: 0; padding: 10px 22px 0; border-radius: 22px 22px 0 0; background: #fff;
+    box-shadow: 0 -12px 30px -14px rgba(22, 33, 58, .45); }
+  .grab { width: 40px; height: 5px; margin: 0 auto 16px; border-radius: 3px; background: var(--line-strong); }
+  .sh-head { display: flex; gap: 14px; align-items: flex-start; }
+  .sh-emoji { flex: none; width: 60px; height: 60px; border-radius: 16px; display: grid; place-items: center; font-size: 30px; background: var(--accent-soft); }
+  .sh-title { font-size: 31px; }
+  .sh-meta { margin-top: 4px; display: flex; gap: 8px; align-items: center; font-size: 15px; color: var(--muted); }
+  .ex { padding: 1px 7px; border-radius: 5px; font-size: 12.5px; font-weight: 650; color: #a85a00; background: rgba(176, 96, 0, .1); }
+  .sh-status { margin-top: 6px; font-size: 15.5px; font-weight: 650; color: var(--green); }
+  .acts { display: flex; gap: 22px; margin: 18px 0 16px 4px; }
+  .act { display: grid; justify-items: center; gap: 6px; font-size: 13.5px; font-weight: 500; color: var(--ink); }
+  .act i { width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; color: var(--accent); background: var(--accent-soft); }
+  .act i.p { color: #fff; background: var(--brand); box-shadow: 0 6px 14px -6px var(--brand); }
+  .act svg { width: 22px; height: 22px; }
+  .offer { display: flex; align-items: center; gap: 14px; margin-top: 12px; padding: 13px 14px; border-radius: 14px; color: var(--ink); background: var(--brand);
+    box-shadow: 0 10px 22px -12px var(--brand); }
+  .offer .qi { flex: none; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: rgba(22, 33, 58, .12); }
+  .offer .qi svg { width: 24px; height: 24px; }
+  .offer b { display: block; font-size: 20px; }
+  .offer small { display: block; margin-top: 2px; font-size: 13.5px; font-weight: 500; opacity: .82; }
+  .offer > svg { margin-left: auto; width: 20px; height: 20px; opacity: .8; }
+  #cap3 { top: 150px; }
+  #tap { position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; background: rgba(255, 255, 255, .55);
+    border: 3px solid rgba(255, 255, 255, .95); box-shadow: 0 4px 16px rgba(14, 22, 38, .35); }
+
+  /* ---------- 3. QR code ---------- */
+  #s4 { background: #fff; text-align: center; }
+  .x { position: absolute; right: 22px; top: 60px; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; color: var(--ink); background: var(--bg); }
+  .shop-pill { display: inline-flex; align-items: center; gap: 10px; margin-top: 112px; padding: 9px 18px; border-radius: 999px; background: var(--bg); font-size: 16px; font-weight: 500; }
+  .qr-title { position: relative; height: 70px; margin: 16px 40px 0; }
+  .qr-title h2 { position: absolute; inset: 0; margin: 0; font-size: 32px; text-wrap: balance; }
+  .offer-pill { display: inline-block; margin-top: 10px; padding: 7px 14px; border-radius: 10px; font-size: 15px; font-weight: 650; color: var(--green); background: var(--green-soft); }
+  .qr-stage { position: relative; width: 300px; height: 300px; margin: 22px auto 0; }
+  .qr-card { position: absolute; inset: 0; border-radius: 22px; background: #fff; box-shadow: 0 10px 30px -12px rgba(0, 0, 0, .35); display: grid; place-items: center; }
+  .qr-card svg { width: 236px; height: 236px; }
+  .qr-ring { position: absolute; inset: 0; z-index: 2; }
+  .qr-ring rect { fill: none; stroke-width: 4; }
+  .qr-ring .bg { stroke: var(--line); }
+  .qr-ring .fg { stroke: var(--accent); stroke-linecap: round; }
+  .done { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; }
+  .done svg { width: 150px; height: 150px; }
+  .done circle { fill: #1e8e3e; }
+  .done path { fill: none; stroke: #fff; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+  .code { margin-top: 18px; font-size: 14px; color: var(--muted); }
+  .code b { display: block; margin-top: 4px; font: 700 30px/1.1 ui-monospace, "DejaVu Sans Mono", monospace; letter-spacing: .08em; color: var(--ink); }
+  #cap4 { top: 735px; right: 24px; text-align: left; }
+
+  /* ---------- 4. Stories ---------- */
+  #s5 { background: #f3f4f1; }
+  #s5 .mapcopy { position: absolute; inset: 0; }
+  .stories { position: absolute; left: 20px; top: 132px; display: flex; gap: 14px; padding: 12px 14px 10px; border-radius: 16px; background: #fff;
+    box-shadow: 0 1px 2px rgba(22, 33, 58, .1), 0 8px 22px -8px rgba(22, 33, 58, .22); }
+  .chip { width: 74px; display: grid; justify-items: center; gap: 5px; }
+  .ring { width: 70px; height: 70px; border-radius: 50%; padding: 3px; background: var(--brand); }
+  .ring span { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; border: 3px solid #fff; background: #fff; font-size: 30px; }
+  .chip small { max-width: 74px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; font-weight: 600; }
+  #cap5 { top: 640px; }
+  #story { position: absolute; inset: 0; background: linear-gradient(160deg, #ff6a45, #d9361a 70%); color: #fff; }
+  .bars { position: absolute; left: 14px; right: 14px; top: 58px; display: flex; gap: 5px; }
+  .bars span { flex: 1; height: 4px; border-radius: 2px; overflow: hidden; background: rgba(255, 255, 255, .35); }
+  .bars i { display: block; height: 100%; background: #fff; transform-origin: 0 50%; }
+  .st-head { position: absolute; left: 16px; right: 16px; top: 78px; display: flex; align-items: center; gap: 12px; }
+  .st-av { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; background: #fff; box-shadow: 0 0 0 2px rgba(255, 255, 255, .9); }
+  .st-head b { display: block; font-size: 17px; font-weight: 650; }
+  .st-head small { font-size: 13.5px; opacity: .85; }
+  .st-text { position: absolute; left: 36px; right: 36px; top: 300px; font-size: 64px; text-align: left; color: #fff; }
+  .st-cta { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%); padding: 14px 24px; border-radius: 14px; background: #fff; color: var(--ink);
+    font-size: 17px; font-weight: 750; white-space: nowrap; }
+
+  /* ---------- 5. Fin ---------- */
+  #s6 { background: var(--ink); color: #f2f4f8; text-align: center; }
+  #s6 img { position: absolute; left: 50%; top: 170px; width: 170px; margin-left: -85px; }
+  .brand { position: absolute; left: 0; right: 0; top: 380px; font-size: 92px; }
+  .tagline { position: absolute; left: 50px; right: 50px; top: 488px; margin: 0; font-size: 22px; line-height: 1.35; font-weight: 500; color: #c5cbd7; text-wrap: balance; }
+  .cta { position: absolute; left: 50%; top: 590px; transform: translateX(-50%); padding: 16px 30px; border-radius: 14px; background: var(--brand); color: var(--ink);
+    font-size: 30px; white-space: nowrap; }
+  .free { position: absolute; left: 0; right: 0; top: 670px; font-size: 16px; font-weight: 500; color: #9aa3b5; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- 1. Accroche -->
+  <section class="scene" id="s1">
+    <div class="hook">
+      <p><span class="tag" id="h1">12 h 15.</span></p>
+      <p><span class="tag" id="h2">Vous avez faim.</span></p>
+      <p class="l3"><span class="tag" id="h3">Mais où manger&nbsp;?</span></p>
+    </div>
+  </section>
+
+  <!-- 2. Carte, puis fiche d'un restaurant -->
+  <section class="scene" id="s2">
+    <div id="world">
+      <svg viewBox="0 0 540 960" width="540" height="960" aria-hidden="true">
+        <defs><clipPath id="penta"><polygon id="pentaPoly" points=""/></clipPath></defs>
+        <rect width="540" height="960" fill="#f3f4f1"/>
+        <g id="outside"></g>
+        <path id="river" d="M-20 735 C 70 690, 120 760, 200 720 S 330 640, 400 700 S 520 760, 560 720" fill="none" stroke="#a7d0ee" stroke-width="16" stroke-linecap="round" pathLength="1"/>
+        <path d="M410 600 q40 -20 70 10 q20 40 -20 60 q-50 10 -60 -30 z" fill="#b9e0a8" id="park2"/>
+        <path d="M40 180 q50 -30 90 0 q10 50 -40 60 q-60 0 -50 -60 z" fill="#c4e2b4" id="park3"/>
+        <g clip-path="url(#penta)" id="blocks">
+          <rect width="540" height="960" fill="#e4e6ea"/>
+          <g id="grid" stroke="#ffffff" stroke-width="7"></g>
+        </g>
+        <g id="avenues" fill="none" stroke-linecap="round"></g>
+        <rect x="243" y="382" width="54" height="38" rx="4" fill="#b9e0a8" stroke="#ffffff" stroke-width="4" id="placeNap"/>
+        <path id="boulevard-case" d="" fill="none" stroke="#d9a826" stroke-width="13" stroke-linejoin="round" pathLength="1"/>
+        <path id="boulevard" d="" fill="none" stroke="#ffd75e" stroke-width="8" stroke-linejoin="round" pathLength="1"/>
+        <text id="napLabel" x="270" y="440" text-anchor="middle" font-family="Archivo" font-size="11" font-weight="650" fill="#3a4560" letter-spacing=".02em">Place Napoléon</text>
+      </svg>
+      <div id="pins"></div>
+    </div>
+    <div class="search" id="search">
+      <img src="logo-pin.png" alt="" />Un plat, un restaurant…
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    </div>
+    <div class="caption tag" id="cap2">Tous les restos de <span class="nw">La Roche-sur-Yon</span>, sur une carte.</div>
+    <div id="dim"></div>
+    <div id="sheet">
+      <div class="grab"></div>
+      <div class="sh-head">
+        <div class="sh-emoji emoji">🚚</div>
+        <div>
+          <div class="sh-title tag">Le Camion Vendéen</div>
+          <div class="sh-meta">Food-truck · € <span class="ex">Exemple</span></div>
+          <div class="sh-status">Ouvert · ferme à 14 h</div>
+        </div>
+      </div>
+      <div class="acts">
+        <div class="act"><i class="p"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM9 21l2-6 2.5 2.5V21M8 12l2-4.5 3.5 1 2 3.5 2.5 1M10 7.5L7.5 9 7 12"/></svg></i>À pied</div>
+        <div class="act"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></i>Appeler</div>
+        <div class="act"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></i>Suivre</div>
+        <div class="act"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 002 2h10a2 2 0 002-2v-5"/></svg></i>Partager</div>
+      </div>
+      <div class="offer" id="offer1">
+        <span class="qi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17.5 20.5h3v-3"/></svg></span>
+        <span><b class="tag">Galette saucisse + boisson</b><small>Ce midi · jusqu'à 14 h</small></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </div>
+      <div class="offer" id="offer2">
+        <span class="qi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17.5 20.5h3v-3"/></svg></span>
+        <span><b class="tag">-15 % pour les étudiants</b><small>Offre étudiante</small></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </div>
+    </div>
+    <div class="caption tag" id="cap3">Les bons plans du moment, à deux pas.</div>
+    <div id="tap"></div>
+  </section>
+
+  <!-- 3. QR code en caisse -->
+  <section class="scene" id="s4">
+    <div class="x">×</div>
+    <div class="shop-pill"><span class="emoji">🚚</span>Le Camion Vendéen</div>
+    <div class="qr-title">
+      <h2 class="tag" id="qrt1">Montrez ce QR code pour profiter de l'offre</h2>
+      <h2 class="tag" id="qrt2">Offre validée&nbsp;!</h2>
+    </div>
+    <div class="offer-pill">Galette saucisse + boisson</div>
+    <div class="qr-stage">
+      <svg class="qr-ring" viewBox="0 0 300 300"><rect class="bg" x="2" y="2" width="296" height="296" rx="20" pathLength="100"/><rect class="fg" id="ring" x="2" y="2" width="296" height="296" rx="20" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"/></svg>
+      <div class="qr-card" id="qrcard"><svg id="qr" viewBox="0 0 10 10" shape-rendering="crispEdges"></svg></div>
+      <div class="done" id="done"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48"/><path id="check" d="M29 52l14 14 28-30" pathLength="1" stroke-dasharray="1"/></svg></div>
+    </div>
+    <div class="code" id="code">ou donnez ce code<b>7K2D-RX4M-P9</b></div>
+    <div class="caption tag" id="cap4">Montrez-le en caisse&nbsp;: l'offre est pour vous.</div>
+  </section>
+
+  <!-- 4. Stories -->
+  <section class="scene" id="s5">
+    <div class="mapcopy" id="mapcopy"></div>
+    <div class="search"><img src="logo-pin.png" alt="" />Un plat, un restaurant…<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></div>
+    <div class="stories" id="stories">
+      <div class="chip" id="chip1"><div class="ring"><span class="emoji">🚚</span></div><small>Le Camion…</small></div>
+      <div class="chip"><div class="ring"><span class="emoji">🍕</span></div><small>Pizzeria du…</small></div>
+      <div class="chip"><div class="ring"><span class="emoji">🧁</span></div><small>La Gaufrerie</small></div>
+      <div class="chip"><div class="ring"><span class="emoji">🥙</span></div><small>Kebab Cl…</small></div>
+    </div>
+    <div class="caption tag" id="cap5">Suivez les stories de vos restos préférés.</div>
+    <div id="story">
+      <div class="bars"><span><i id="bar1"></i></span><span><i style="transform:scaleX(0)"></i></span></div>
+      <div class="st-head"><div class="st-av emoji">🚚</div><div><b>Le Camion Vendéen</b><small>il y a 5 min</small></div></div>
+      <div class="st-text tag" id="sttext">Le préfou sort du four&nbsp;: venez le goûter tout chaud&nbsp;!</div>
+      <div class="st-cta">Voir la fiche</div>
+    </div>
+  </section>
+
+  <!-- 5. Fin -->
+  <section class="scene" id="s6">
+    <img src="logo-pin.png" alt="" id="logo" />
+    <div class="brand tag" id="brand">FlashMiam</div>
+    <p class="tagline" id="tagline">Les restaurants de <span class="nw">La Roche-sur-Yon</span>, à deux pas.</p>
+    <div class="cta tag" id="cta">flashmiam.fr</div>
+    <div class="free" id="free">Gratuit · sans application à télécharger</div>
+  </section>
+</div>
+
+<script src="/vendor/qrcode-generator-2.0.4/qrcode.js"></script>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const DURATION = 24.5;
+const NS = 'http://www.w3.org/2000/svg';
+const OUT = 'cubic-bezier(.16, 1, .3, 1)';      // arrivée franche qui ralentit
+const INOUT = 'cubic-bezier(.65, 0, .35, 1)';  // déplacement doux au départ et à l'arrivée
+const IN = 'cubic-bezier(.5, 0, .75, 0)';      // sortie, plus rapide que l'entrée
+
+/* ---------- Plan de La Roche-sur-Yon : le pentagone napoléonien ---------- */
+const C = [270, 400], R = 190;
+const V = [0, 1, 2, 3, 4].map((k) => { const a = (-90 + 72 * k) * Math.PI / 180; return [C[0] + R * Math.cos(a), C[1] + R * Math.sin(a)]; });
+const pentaD = 'M' + V.map((p) => p.map((n) => n.toFixed(1)).join(' ')).join(' L') + ' Z';
+$('pentaPoly').setAttribute('points', V.map((p) => p.join(',')).join(' '));
+$('boulevard').setAttribute('d', pentaD);
+$('boulevard-case').setAttribute('d', pentaD);
+for (let x = 70; x <= 470; x += 34) { const l = document.createElementNS(NS, 'line'); l.setAttribute('x1', x); l.setAttribute('x2', x); l.setAttribute('y1', 180); l.setAttribute('y2', 600); $('grid').appendChild(l); }
+for (let y = 196; y <= 600; y += 34) { const l = document.createElementNS(NS, 'line'); l.setAttribute('y1', y); l.setAttribute('y2', y); l.setAttribute('x1', 60); l.setAttribute('x2', 480); $('grid').appendChild(l); }
+const road = (g, d, w, color) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.setAttribute('stroke', color); p.setAttribute('stroke-width', w); p.setAttribute('fill', 'none'); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('pathLength', '1'); g.appendChild(p); return p; };
+const outer = [];
+V.forEach((p) => {   // routes qui partent de chaque angle du pentagone
+  const dx = p[0] - C[0], dy = p[1] - C[1], k = 3.2;
+  const d = 'M' + p.join(' ') + ' L' + (C[0] + dx * k).toFixed(1) + ' ' + (C[1] + dy * k).toFixed(1);
+  outer.push(road($('outside'), d, 12, '#e1e4ea'), road($('outside'), d, 8, '#ffffff'));
+});
+const avenues = [];
+V.forEach((p) => { const d = 'M' + C.join(' ') + ' L' + p.join(' '); avenues.push(road($('avenues'), d, 9, '#d8dce3'), road($('avenues'), d, 6, '#ffffff')); });
+
+/* Restaurants (exemples fictifs) */
+const PINS = [
+  { x: 215, y: 300, e: '🍕', promo: true }, { x: 330, y: 282, e: '🍔' }, { x: 372, y: 405, e: '🚚', promo: true, sel: true },
+  { x: 178, y: 430, e: '🥙' }, { x: 292, y: 478, e: '🌮', closed: true }, { x: 228, y: 535, e: '🧁', promo: true },
+  { x: 345, y: 528, e: '☕' }, { x: 140, y: 345, e: '🍣' }, { x: 470, y: 250, e: '🍻' }, { x: 95, y: 630, e: '🥞', promo: true },
+];
+const pinEls = PINS.map((p) => {
+  const el = document.createElement('div');
+  el.className = 'pin' + (p.closed ? ' is-closed' : '');
+  el.style.left = p.x + 'px'; el.style.top = p.y + 'px';
+  el.innerHTML = '<div class="pb emoji">' + p.e + '</div>' + (p.promo ? '<i class="pf">%</i>' : '');
+  $('pins').appendChild(el);
+  return el;
+});
+const selPin = pinEls[PINS.findIndex((p) => p.sel)];
+$('mapcopy').appendChild($('world').cloneNode(true)).removeAttribute('id');
+
+/* QR code de démonstration : il mène à flashmiam.fr */
+(function drawQr() {
+  const qr = qrcode(0, 'M'); qr.addData('https://flashmiam.fr'); qr.make();
+  const n = qr.getModuleCount(), svg = $('qr');
+  svg.setAttribute('viewBox', '0 0 ' + n + ' ' + n);
+  let d = '';
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) d += 'M' + c + ' ' + r + 'h1v1h-1z';
+  const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.setAttribute('fill', '#111'); svg.appendChild(p);
+})();
+
+/* ---------- Mesures (avant toute animation) ---------- */
+const stageBox = $('stage').getBoundingClientRect();
+const rel = (el) => { const r = el.getBoundingClientRect(); return { x: r.left - stageBox.left, y: r.top - stageBox.top, w: r.width, h: r.height }; };
+const offer1 = rel($('offer1'));
+const chip1 = rel($('chip1').querySelector('.ring'));
+
+/* ---------- Ligne de temps ---------- */
+const count = new WeakMap();
+/** Anime `el` de `start` à `start + dur` secondes. La première animation d'un élément s'applique aussi avant son début (état de départ). */
+function A(el, frames, start, dur, easing = OUT) {
+  const n = count.get(el) || 0; count.set(el, n + 1);
+  return el.animate(frames, { delay: start * 1000, duration: dur * 1000, easing, fill: n === 0 ? 'both' : 'forwards' });
+}
+const show = (el, t0, t1) => { A(el, [{ visibility: 'hidden' }, { visibility: 'visible' }], t0, 0.001, 'linear'); if (t1 != null) A(el, [{ visibility: 'visible' }, { visibility: 'hidden' }], t1, 0.001, 'linear'); };
+const captionIn = (el, t, out) => {
+  A(el, [{ opacity: 0, transform: 'translateY(22px)', clipPath: 'inset(0 0 100% 0 round 14px)' }, { opacity: 1, transform: 'none', clipPath: 'inset(0 0 0 0 round 14px)' }], t, .6);
+  if (out) A(el, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-10px)' }], out, .3, IN);
+};
+
+// 1. Accroche (0 → 3,2 s) : chaque ligne monte depuis son masque
+show($('s1'), 0, 3.5);
+[['h1', .15], ['h2', .75], ['h3', 1.35]].forEach(([id, t]) => {
+  A($(id), [{ transform: 'translateY(110%)' }, { transform: 'none' }], t, .7);
+  A($(id), [{ transform: 'none' }, { transform: 'translateY(-115%)' }], 2.75 + (t - .15) * .25, .45, IN);
+});
+
+// 2. Carte (2,9 → 12,4 s) : le plan se dessine, les restaurants s'allument
+A($('s2'), [{ clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], 2.9, .6, INOUT);
+show($('s2'), 2.9, 12.9);
+A($('boulevard-case'), [{ strokeDasharray: '1', strokeDashoffset: 1 }, { strokeDasharray: '1', strokeDashoffset: 0 }], 3.2, 1.3, INOUT);
+A($('boulevard'), [{ strokeDasharray: '1', strokeDashoffset: 1 }, { strokeDasharray: '1', strokeDashoffset: 0 }], 3.2, 1.3, INOUT);
+avenues.forEach((p, k) => A(p, [{ strokeDasharray: '1', strokeDashoffset: 1 }, { strokeDasharray: '1', strokeDashoffset: 0 }], 3.6 + (k >> 1) * .06, .7));
+outer.forEach((p, k) => A(p, [{ strokeDasharray: '1', strokeDashoffset: 1 }, { strokeDasharray: '1', strokeDashoffset: 0 }], 3.4 + (k >> 1) * .05, .9));
+A($('river'), [{ strokeDasharray: '1', strokeDashoffset: 1 }, { strokeDasharray: '1', strokeDashoffset: 0 }], 3.5, 1.2);
+A($('blocks'), [{ opacity: 0 }, { opacity: 1 }], 3.85, .8);
+A($('grid'), [{ opacity: 0 }, { opacity: 1 }], 3.7, .6);
+['placeNap', 'napLabel', 'park2', 'park3'].forEach((id, k) => A($(id), [{ opacity: 0 }, { opacity: 1 }], 4.0 + k * .1, .5));
+A($('search'), [{ transform: 'translateY(-90px)' }, { transform: 'none' }], 3.5, .7);
+pinEls.forEach((el, k) => {
+  const t = 4.45 + k * .09;
+  A(el, [{ transform: 'translate(-50%, -100%) scale(0)', opacity: 0 }, { transform: 'translate(-50%, -100%) scale(1.08)', opacity: 1, offset: .65 }, { transform: 'translate(-50%, -100%) scale(1)', opacity: 1 }], t, .55);
+});
+captionIn($('cap2'), 5.6, 7.7);
+
+// Zoom sur un restaurant, puis sa fiche (7,9 → 12,4 s)
+const s = 1.7, tx = 270 - s * 372, ty = 384 - s * 405;   // le restaurant choisi se pose juste au-dessus de la fiche, sous la légende
+A($('world'), [{ transform: 'none' }, { transform: `translate(${tx}px, ${ty}px) scale(${s})` }], 7.9, 1.0, INOUT);
+A(selPin, [{ transform: 'translate(-50%, -100%) scale(1)' }, { transform: 'translate(-50%, calc(-100% - 6px)) scale(1.15)' }], 8.5, .4);
+A(selPin.querySelector('.pb'), [{ borderColor: '#0e7c45' }, { borderColor: '#ff4d2e' }], 8.5, .3);
+A($('dim'), [{ opacity: 0 }, { opacity: 1 }], 8.75, .5);
+A($('sheet'), [{ transform: 'translateY(100%)' }, { transform: 'none' }], 8.8, .7);
+[['offer1', 9.35], ['offer2', 9.5]].forEach(([id, t]) => A($(id), [{ opacity: 0, transform: 'translateY(16px)' }, { opacity: 1, transform: 'none' }], t, .5));
+captionIn($('cap3'), 9.7);
+
+// Le client touche l'offre (11,3 s) : le bloc orange s'ouvre en écran du QR code
+const tap = $('tap');
+tap.style.left = (offer1.x + offer1.w * .62) + 'px'; tap.style.top = (offer1.y + offer1.h / 2) + 'px';
+A(tap, [{ opacity: 0, transform: 'scale(1.6)' }, { opacity: 1, transform: 'scale(1)' }], 11.0, .35);
+A(tap, [{ transform: 'scale(1)' }, { transform: 'scale(.82)' }, { transform: 'scale(1)' }], 11.4, .3, 'ease-in-out');
+A(tap, [{ opacity: 1 }, { opacity: 0 }], 11.75, .2, IN);
+A($('offer1'), [{ transform: 'none' }, { transform: 'scale(.97)' }, { transform: 'none' }], 11.45, .3, 'ease-in-out');
+
+// 3. QR code (11,9 → 16,5 s)
+const ins = (r) => `inset(${r.y}px ${540 - r.x - r.w}px ${960 - r.y - r.h}px ${r.x}px round 14px)`;
+show($('s4'), 11.9, 16.9);
+A($('s4'), [{ clipPath: ins(offer1), backgroundColor: '#ff4d2e' }, { clipPath: 'inset(0 0 0 0 round 0px)', backgroundColor: '#ff4d2e', offset: .55 }, { clipPath: 'inset(0 0 0 0 round 0px)', backgroundColor: '#ffffff' }], 11.9, .85, INOUT);
+const s4kids = [...$('s4').children].filter((el) => el.id !== 'cap4');
+s4kids.forEach((el, k) => A(el, [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], 12.45 + k * .05, .5));
+A($('ring'), [{ strokeDashoffset: 0 }, { strokeDashoffset: 38 }], 12.7, 2.6, 'linear');
+captionIn($('cap4'), 13.0);
+// Le restaurateur scanne : « Offre validée ! »
+A($('qrcard'), [{ transform: 'none', opacity: 1, filter: 'blur(0px)' }, { transform: 'scale(.86)', opacity: .12, filter: 'blur(6px)' }], 15.0, .45);
+A($('ring').parentNode, [{ opacity: 1 }, { opacity: 0 }], 15.0, .3);
+A($('done'), [{ opacity: 0, transform: 'scale(.4)' }, { opacity: 1, transform: 'scale(1.06)', offset: .7 }, { opacity: 1, transform: 'scale(1)' }], 15.1, .55);
+A($('check'), [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], 15.45, .45);
+A($('qrt1'), [{ opacity: 1 }, { opacity: 0 }], 15.0, .25, IN);
+A($('qrt2'), [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], 15.15, .45);
+A($('code'), [{ opacity: 1 }, { opacity: 0 }], 15.0, .3, IN);
+
+// 4. Stories (16,4 → 20,6 s)
+show($('s5'), 16.4, 20.9);
+A($('s5'), [{ transform: 'translateY(100%)' }, { transform: 'none' }], 16.4, .7, INOUT);
+A($('s4'), [{ transform: 'none', opacity: 1 }, { transform: 'scale(.94)', opacity: .4 }], 16.4, .7, INOUT);
+[...$('stories').children].forEach((el, k) => A(el, [{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'none' }], 16.9 + k * .08, .5));
+captionIn($('cap5'), 17.15, 18.6);
+A($('chip1').querySelector('.ring'), [{ transform: 'none' }, { transform: 'scale(.9)' }, { transform: 'scale(1.04)' }], 18.25, .35, 'ease-in-out');
+const cx = chip1.x + chip1.w / 2, cy = chip1.y + chip1.h / 2;
+show($('story'), 18.55);
+A($('story'), [{ clipPath: `circle(${chip1.w / 2}px at ${cx}px ${cy}px)` }, { clipPath: `circle(1150px at ${cx}px ${cy}px)` }], 18.55, .75, INOUT);
+A($('bar1'), [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], 18.9, 1.8, 'linear');
+A($('sttext'), [{ opacity: 0, transform: 'translateY(26px)' }, { opacity: 1, transform: 'none' }], 18.95, .6);
+
+// 5. Fin (20,4 → 24,5 s)
+A($('s6'), [{ clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], 20.4, .65, INOUT);
+A($('logo'), [{ opacity: 0, transform: 'translateY(-50px) scale(.8)' }, { opacity: 1, transform: 'none' }], 20.95, .7);
+A($('brand'), [{ opacity: 0, transform: 'translateY(26px)', clipPath: 'inset(0 0 100% 0)' }, { opacity: 1, transform: 'none', clipPath: 'inset(0 0 0 0)' }], 21.3, .65);
+A($('tagline'), [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], 21.65, .55);
+A($('cta'), [{ opacity: 0, transform: 'translateX(-50%) scale(.85)' }, { opacity: 1, transform: 'translateX(-50%) scale(1)' }], 22.05, .55);
+A($('free'), [{ opacity: 0 }, { opacity: 1 }], 22.4, .5);
+
+/* ---------- Lecture ---------- */
+const anims = document.getAnimations();
+anims.forEach((a) => a.pause());
+window.seek = (t) => { anims.forEach((a) => { a.currentTime = Math.max(0, t) * 1000; }); };
+window.DURATION = DURATION;
+const fixed = new URLSearchParams(location.search).get('t');
+if (fixed !== null) seek(+fixed);
+else if (!navigator.webdriver) {   // dans un navigateur : lecture en boucle
+  const t0 = performance.now();
+  const loop = (now) => { seek(((now - t0) / 1000) % (DURATION + 1)); requestAnimationFrame(loop); };
+  requestAnimationFrame(loop);
+} else seek(0);
+</script>
+</body>
+</html>
