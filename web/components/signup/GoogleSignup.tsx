@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 /**
@@ -60,6 +61,16 @@ async function makeNonce(): Promise<{ raw: string; hashed: string }> {
   return { raw, hashed };
 }
 
+/** Prénom lu dans la réponse de Google, pour accueillir la personne tout de suite (affichage seulement : Supabase vérifie le jeton). */
+export function googleFirstName(credential: string): string {
+  try {
+    const b64 = credential.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const bytes = Uint8Array.from(atob(b64 + "===".slice((b64.length + 3) % 4)), (c) => c.charCodeAt(0));
+    const p = JSON.parse(new TextDecoder().decode(bytes)) as { given_name?: string; name?: string };
+    return String(p.given_name || (p.name ?? "").split(" ")[0] || "").trim().slice(0, 40);
+  } catch { return ""; }
+}
+
 /** Accord Google déjà donné sur cet appareil (rendu sur le serveur : supposé donné, pour n'afficher aucune mention). */
 const noSubscribe = () => () => {};
 const useGoogleConsent = () => useSyncExternalStore(noSubscribe, () => readConsent()?.google ?? false, () => true);
@@ -67,8 +78,10 @@ const useGoogleConsent = () => useSyncExternalStore(noSubscribe, () => readConse
 /**
  * locked : case des conditions pas encore cochée. Le vrai bouton de Google est alors retiré (un toucher ne peut pas
  * créer de compte) et notre bouton appelle onLocked, qui rappelle de cocher la case.
+ * busy : connexion en cours après le retour de Google ; le bouton l'annonce (« Bonjour Camille, connexion… ») au lieu
+ * de rester inchangé pendant que la session s'ouvre.
  */
-export default function GoogleSignup({ onCredential, locked = false, onLocked }: { onCredential: (credential: string, nonce: string) => void; locked?: boolean; onLocked?: () => void }) {
+export default function GoogleSignup({ onCredential, locked = false, onLocked, busy = null }: { onCredential: (credential: string, nonce: string) => void; locked?: boolean; onLocked?: () => void; busy?: string | null }) {
   const box = useRef<HTMLButtonElement>(null);
   const slot = useRef<HTMLDivElement>(null);
   const callback = useRef(onCredential);
@@ -77,6 +90,7 @@ export default function GoogleSignup({ onCredential, locked = false, onLocked }:
   const [note, setNote] = useState("");
   const consented = useGoogleConsent();
   const needsConsent = !consented && !granted;
+  const live = mounted && !locked && !busy;   // vrai bouton de Google posé sur le nôtre
 
   useEffect(() => { callback.current = onCredential; }, [onCredential]);
 
@@ -129,9 +143,11 @@ export default function GoogleSignup({ onCredential, locked = false, onLocked }:
       <p className="flex items-center gap-3 text-sm text-slate-500 before:h-px before:flex-1 before:bg-slate-200 after:h-px after:flex-1 after:bg-slate-200 dark:text-zinc-400 dark:before:bg-white/10 dark:after:bg-white/10">ou</p>
       <div className="group relative">
         <button
-          ref={box} id="su-google-btn" type="button" onClick={click} tabIndex={mounted && !locked ? -1 : 0} aria-hidden={(mounted && !locked) || undefined}
+          ref={box} id="su-google-btn" type="button" onClick={click} disabled={!!busy} aria-busy={!!busy || undefined}
+          tabIndex={live ? -1 : 0} aria-hidden={live || undefined}
           className="flex h-14 w-full items-center justify-center gap-3 rounded-full border-[1.5px] border-slate-300 bg-white text-[15.5px] font-medium text-slate-900 shadow-sm transition group-focus-within:ring-2 group-focus-within:ring-brand group-focus-within:ring-offset-2 [@media(hover:hover)]:group-hover:bg-slate-50 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-100 dark:backdrop-blur-xl dark:ring-offset-night dark:group-focus-within:ring-brand-night [@media(hover:hover)]:dark:group-hover:bg-white/[0.08]"
         >
+          {busy ? <><Loader2 className="h-5 w-5 animate-spin text-slate-500" aria-hidden />{busy}</> : <>
           <svg viewBox="0 0 48 48" aria-hidden className="h-[22px] w-[22px]">
             <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
             <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
@@ -139,8 +155,9 @@ export default function GoogleSignup({ onCredential, locked = false, onLocked }:
             <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
           </svg>
           S&apos;inscrire avec Google
+          </>}
         </button>
-        <div ref={slot} id="su-google" className={`absolute inset-0 flex items-center justify-center overflow-hidden rounded-full opacity-[0.01] ${mounted && !locked ? "" : "hidden"}`} />
+        <div ref={slot} id="su-google" className={`absolute inset-0 flex items-center justify-center overflow-hidden rounded-full opacity-[0.01] ${live ? "" : "hidden"}`} />
       </div>
       {(needsConsent || note) && (
         <p id="su-google-note" aria-live="polite" className="text-center text-[13px] leading-relaxed text-slate-500 dark:text-zinc-400">
