@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-Fsz51HM4UK0T0ZFOdi25oNtiYVQcNUL9ge7d1CM4hyQ=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-Xgpc0llO66GjWJ2FATvRlOmYkgOmWIm6CErRJYtpARM=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -414,7 +414,7 @@
       transition: transform .38s cubic-bezier(.32, .72, 0, 1), visibility 0s linear .38s, background-color .4s;
     }
     /* Courbe des feuilles d'iPhone : départ vif, arrivée très douce ; la fermeture est plus rapide que l'ouverture */
-    .sheet.is-open { transform: translateY(0); visibility: visible; transition: transform .5s cubic-bezier(.32, .72, 0, 1), visibility 0s, background-color .4s; }
+    .sheet.is-open { transform: translateY(0); visibility: visible; transition: transform .5s cubic-bezier(.32, .72, 0, 1), visibility 0s, background-color .4s, bottom .25s cubic-bezier(.32, .72, 0, 1); }
     .sheet.is-dragging { transition: none; }
     .sheet-grab { display: block; width: 100%; padding: 8px 0 16px; cursor: grab; touch-action: none; }   /* zone de 28 px : facile à attraper au doigt */
     .sheet-grab::before { content: ""; display: block; width: 36px; height: 4px; border-radius: 2px; margin: 0 auto; background: var(--line-strong); }
@@ -5807,7 +5807,7 @@
     window.addEventListener('resize', () => setTimeout(remember, 0));
     window.addEventListener('orientationchange', () => { base.portrait = 0; base.landscape = 0; setTimeout(remember, 400); });
 
-    let open = false, timer = null;
+    let open = false, raf = 0, timer = null, lastVars = '';
     function update() {
       if (!touch.matches && !open) return;
       if (!vv) { reveal(); return; }
@@ -5817,9 +5817,14 @@
       const ref = Math.max(base[orient()], window.innerHeight);
       const lost = Math.max(0, Math.round(ref - vv.height));
       const now = editable(document.activeElement) && (covered > 60 || lost > 120);
-      root.style.setProperty('--vv-top', Math.round(vv.offsetTop) + 'px');
-      root.style.setProperty('--vv-h', Math.round(vv.height) + 'px');
-      root.style.setProperty('--kb', covered + 'px');
+      // Variables sur <html> : tout le document recalcule son style quand elles changent → seulement si elles changent
+      const vars = Math.round(vv.offsetTop) + '|' + Math.round(vv.height) + '|' + covered;
+      if (vars !== lastVars) {
+        lastVars = vars;
+        root.style.setProperty('--vv-top', Math.round(vv.offsetTop) + 'px');
+        root.style.setProperty('--vv-h', Math.round(vv.height) + 'px');
+        root.style.setProperty('--kb', covered + 'px');
+      }
       if (now !== open) {
         open = now;
         root.classList.toggle('kb-open', open);
@@ -5840,14 +5845,19 @@
         el.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
       }
     }
-    const soon = () => { clearTimeout(timer); timer = setTimeout(update, 60); };
-    if (vv) { vv.addEventListener('resize', soon); vv.addEventListener('scroll', soon); }
+    // Clavier qui s'ouvre ou se ferme : réaction à l'image suivante (Safari signale l'ouverture au début de
+    // l'animation du clavier, on part avec lui). Page qu'on fait glisser, clavier ouvert : une fois le geste posé.
+    const soon = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(update); };
+    const later = () => { clearTimeout(timer); timer = setTimeout(update, 60); };
+    if (vv) { vv.addEventListener('resize', soon); vv.addEventListener('scroll', later); }
     document.addEventListener('focusin', (ev) => {
       if (!editable(ev.target)) return;
       // le clavier met 250 à 500 ms à s'ouvrir selon les téléphones : on vérifie pendant et après son animation
       soon(); setTimeout(update, 320); setTimeout(update, 650); setTimeout(update, 1000);
     });
-    document.addEventListener('focusout', () => setTimeout(update, 80));
+    // Fermeture : dès que le champ perd le focus (le clavier part au même moment ; Safari ne le signale que ~0,4 s
+    // après la fin). D'un champ à l'autre, le clavier reste : focusin s'en occupe.
+    document.addEventListener('focusout', (ev) => { if (!editable(ev.relatedTarget)) soon(); });
     return { update, isOpen: () => open };
   })();
 

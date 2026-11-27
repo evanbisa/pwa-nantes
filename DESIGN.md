@@ -114,6 +114,19 @@ Les tailles, graisses et interlignes suivent les styles de texte d'iOS ; la hié
   - barre de progression des stories : une animation du navigateur (`scaleX`), mise en pause et reprise, sans travail
     du fil principal ; halos des restaurants ouverts en pause sous une fiche ouverte ;
   - mesuré (Chrome, mêmes gestes) : retour d'une fiche 31 → 8 recalculs de style ; story 120 mises en page / 2 s → 0.
+- **Clavier (27/11/2026, vidéo sur iPhone)** : Safari ne signale l'ouverture du clavier qu'au début de son animation
+  (~0,17 s), et sa fermeture ~0,4 s après la fin. On n'attend pas Safari :
+  - la page suit la fermeture dès que le champ perd le focus ;
+  - elle suit l'ouverture dès que le doigt touche un champ, si la hauteur du clavier est déjà connue (sinon au
+    premier signal) ;
+  - le contenu glisse sur la courbe d'iOS en 0,25 s par `transform` (technique FLIP : nouvelle mise en page posée
+    d'un coup, puis chaque bloc glisse de son ancienne place à la nouvelle) ;
+  - la carte blanche de l'inscription garde toute sa hauteur derrière le clavier : jamais de plan de la ville entre
+    les deux ;
+  - le décalage de la vue (`visualViewport.offsetTop`) n'entre pas dans le calcul de l'inscription : il faisait
+    sauter le contenu ;
+  - le code est dans `web/components/signup/useKeyboardInset.ts` et le module `Keyboard` de `index.html` ; sur la
+    carte, les fiches glissent au-dessus du clavier (`bottom`, 0,25 s).
 - **Réglages du téléphone** : « Réduire les animations » remplace les glissements des fiches par un fondu court ;
   « Augmenter le contraste » renforce filets, textes secondaires et contour de focus ; « Réduire la transparence » rend
   panneaux et voiles opaques.
