@@ -4,9 +4,9 @@ import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent, type
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { ArrowLeft, Cake, Check, Eye, EyeOff, Inbox, Loader2, LockKeyhole, Mail, MailCheck, Smile, Sparkles, type LucideIcon } from "lucide-react";
 import { setRemember, siteClient } from "@/lib/supabase/site-session";
-import { CAPTCHA_FAILED, captchaRefused, captchaToken } from "@/lib/captcha";
+import { CAPTCHA_FAILED, captchaRefused, captchaToken, prefetchCaptcha } from "@/lib/captcha";
 import AgePicker from "@/components/signup/AgePicker";
-import GoogleSignup from "@/components/signup/GoogleSignup";
+import GoogleSignup, { googleFirstName } from "@/components/signup/GoogleSignup";
 import { useKeyboardInset } from "@/components/signup/useKeyboardInset";
 import { canAddToHome, isPersonalDevice, promptInstall, type InstallResult } from "@/lib/install";
 import {
@@ -115,6 +115,7 @@ function Wizard() {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRememberChoice] = useState(isPersonalDevice);
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState<string | null>(null);   // connexion Google en cours : texte du bouton
   const [terms, setTerms] = useState(false);   // « J'accepte les conditions d'utilisation »
   const [termsError, setTermsError] = useState(false);   // case pas cochée : la case est encadrée en rouge
   const [code, setCode] = useState("");
@@ -138,9 +139,11 @@ function Wizard() {
   const questions = QUESTIONS;
   const question = questions.indexOf(step === "confirm" ? "email" : step === "code" ? "age" : step) + 1;
 
-  // Arrivée sur un écran : focus sur sa réponse (sans faire défiler pendant le glissement)
+  // Arrivée sur un écran : focus sur sa réponse (sans faire défiler pendant le glissement). L'anti-robots se prépare
+  // en même temps : son jeton est prêt quand la personne valide ou revient de Google (au lieu de 1 à 3 s d'attente).
   useEffect(() => {
     document.getElementById(FOCUS[step])?.focus({ preventScroll: true });
+    if (step !== "done") prefetchCaptcha();
   }, [step]);
   useEffect(() => () => { if (advanceTimer.current) clearTimeout(advanceTimer.current); }, []);
   // Compte à rebours avant de pouvoir redemander un code
@@ -353,10 +356,12 @@ function Wizard() {
    */
   async function googleSignIn(credential: string, nonce?: string) {
     const at: Step = "email";   // le bouton n'est proposé qu'à l'écran de l'e-mail
+    const who = googleFirstName(credential);
+    setGoogleBusy(who ? `Bonjour ${who}, connexion…` : "Connexion avec Google…");   // tout de suite, au retour de Google
     setBusy(true);
     setError(at, null);
     const sb = siteClient();
-    const fail = (message: ReactNode) => { setBusy(false); setError(at, message); };
+    const fail = (message: ReactNode) => { setBusy(false); setGoogleBusy(null); setError(at, message); };
     let token: string | undefined;
     try { token = await captchaToken(); } catch { return fail(CAPTCHA_FAILED); }
     const { data, error } = await sb.auth.signInWithIdToken({ provider: "google", token: credential, nonce, options: { captchaToken: token } });
@@ -367,12 +372,20 @@ function Wizard() {
       return fail(<>Cette adresse est celle d&apos;un compte restaurateur : <button type="button" className={linkClass} onClick={() => openLogin(data.user.email ?? "", "pro")}>connectez-vous sur la carte</button> avec votre mot de passe.</>);
     }
     const fresh = !!profile && isFresh(profile.created_at);
-    // Compte créé à l'instant par Google : l'acceptation des conditions (case cochée) est enregistrée sur le compte
-    if (fresh) await sb.rpc("accept_terms", { p_version: TERMS_VERSION });
-    if (fresh) await sb.from("profiles").update({ first_name: name.trim() || undefined }).eq("id", data.user.id);
-    setBusy(false);
-    if (fresh) { setGoogleMode(true); go("gender"); }   // reste le sexe et l'âge (obligatoire, 15 ans au moins)
-    else openMap();   // compte déjà existant : directement la carte
+    if (fresh) {
+      // Compte créé à l'instant par Google : acceptation des conditions (case cochée) et prénom, enregistrés ensemble
+      await Promise.all([
+        sb.rpc("accept_terms", { p_version: TERMS_VERSION }),
+        sb.from("profiles").update({ first_name: name.trim() || undefined }).eq("id", data.user.id),
+      ]);
+      setBusy(false);
+      setGoogleBusy(null);
+      setGoogleMode(true);
+      go("gender");   // reste le sexe et l'âge (obligatoire, 15 ans au moins)
+    } else {
+      setGoogleBusy("Connecté ! Ouverture de la carte…");   // reste affiché jusqu'au changement de page
+      openMap();   // compte déjà existant : directement la carte
+    }
   }
 
   /* ---------- Rendu ---------- */
@@ -528,8 +541,9 @@ function Wizard() {
                 </div>
               )}
               </Body>
-              <Primary busy={busy}>{busy ? "Vérification…" : "Continuer"}</Primary>
-              <GoogleSignup onCredential={googleSignIn} />
+              {/* Connexion Google en cours : seul le bouton Google l'annonce ; « Continuer » attend, sans tourner */}
+              <Primary busy={busy && !googleBusy} disabled={!!googleBusy}>{busy && !googleBusy ? "Vérification…" : "Continuer"}</Primary>
+              <GoogleSignup onCredential={googleSignIn} busy={googleBusy} />
             </form>
           )}
 

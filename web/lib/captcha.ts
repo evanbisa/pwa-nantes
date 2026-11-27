@@ -3,6 +3,9 @@
  * NEXT_PUBLIC_TURNSTILE_SITE_KEY est renseignée (clé de SITE, publique par nature). Chaque envoi sensible (inscription,
  * connexion, nouvel envoi de code, Google) reçoit un jeton à usage unique, vérifié par Supabase et par la fonction
  * client-signup. Le plus souvent invisible ; une case à cocher n'apparaît que si Cloudflare a un doute.
+ * Préparé à l'avance (prefetchCaptcha) dès l'arrivée sur une étape : la vérification (souvent 1 à 3 s) se fait pendant
+ * que la personne remplit l'écran ou choisit son compte Google, et non plus après. Jeton gardé 4 min 30 au plus
+ * (Cloudflare le refuse après 5 min), une seule fois.
  */
 type Turnstile = {
   render(el: HTMLElement, options: Record<string, unknown>): string;
@@ -19,6 +22,9 @@ export const CAPTCHA_FAILED = "La vérification anti-robots n'a pas abouti. Vér
 
 let loading: Promise<Turnstile> | null = null;
 let widget: string | null = null;
+const TTL = 270_000;
+let ready: { token: string; at: number } | null = null;
+let inflight: Promise<void> | null = null;
 
 export const captchaEnabled = () => SITE_KEY !== "";
 
@@ -47,9 +53,8 @@ function slot(): HTMLElement {
   return box;
 }
 
-/** Jeton à usage unique ; undefined si l'anti-robots n'est pas activé. Rejette si la vérification échoue. */
-export async function captchaToken(): Promise<string | undefined> {
-  if (!captchaEnabled()) return undefined;
+/** Nouvelle vérification (le widget précédent est retiré). */
+async function solve(): Promise<string> {
   const ts = await load();
   return new Promise<string>((resolve, reject) => {
     let settled = false;
@@ -65,6 +70,21 @@ export async function captchaToken(): Promise<string | undefined> {
     });
     ts.execute(widget);
   });
+}
+
+/** Prépare un jeton en arrière-plan (rien si un jeton récent attend déjà, ou si une préparation est en cours). */
+export function prefetchCaptcha(): void {
+  if (!captchaEnabled() || inflight || (ready && Date.now() - ready.at < TTL)) return;
+  inflight = solve().then((t) => { ready = { token: t, at: Date.now() }; }, () => {}).finally(() => { inflight = null; });
+}
+
+/** Jeton à usage unique ; undefined si l'anti-robots n'est pas activé. Rejette si la vérification échoue. */
+export async function captchaToken(): Promise<string | undefined> {
+  if (!captchaEnabled()) return undefined;
+  if (inflight) await inflight;   // préparation en cours : on l'attend, sans en relancer une
+  const fresh = ready && Date.now() - ready.at < TTL ? ready.token : null;
+  ready = null;
+  return fresh ?? solve();
 }
 
 /** Erreur de l'anti-robots renvoyée par Supabase (jeton absent, expiré ou refusé). */

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-Xgpc0llO66GjWJ2FATvRlOmYkgOmWIm6CErRJYtpARM=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-vWeQgAHYmFGnigNuonBqYwpnd98DaEt836a2jbshZcA=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -5464,10 +5464,14 @@
    * (connexion, inscription, mot de passe oublié, nouvel envoi de code, Google) reçoit un jeton à usage unique, vérifié
    * par Supabase. Le plus souvent invisible ; une case à cocher n'apparaît que si Cloudflare a un doute.
    * Sans clé : rien n'est chargé et token() renvoie undefined (aucun changement).
+   * Préparé à l'avance (prefetch) dès qu'un écran de connexion s'affiche : la vérification (souvent 1 à 3 s) se fait
+   * pendant que la personne lit l'écran ou choisit son compte Google, et non plus après. Jeton gardé 4 min 30 au plus
+   * (Cloudflare le refuse après 5 min), une seule fois.
    */
   const Captcha = (() => {
     const API = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-    let loading = null, widget = null, box = null;
+    const TTL = 270000;
+    let loading = null, widget = null, box = null, ready = null, inflight = null;
     const enabled = () => !!CONFIG.turnstileSiteKey;
     function load() {
       if (!loading) loading = new Promise((resolve, reject) => {
@@ -5483,9 +5487,8 @@
       if (!box) { box = document.createElement('div'); box.id = 'captcha-box'; box.className = 'captcha-box'; document.body.appendChild(box); }
       return box;
     }
-    /** Jeton à usage unique (undefined si l'anti-robots n'est pas activé). Rejette si la vérification échoue. */
-    async function token() {
-      if (!enabled()) return undefined;
+    /** Nouvelle vérification (le widget précédent est retiré). */
+    async function solve() {
       const ts = await load();
       return new Promise((resolve, reject) => {
         let settled = false;
@@ -5501,8 +5504,21 @@
         ts.execute(widget);
       });
     }
+    /** Prépare un jeton en arrière-plan (rien si un jeton récent attend déjà, ou si une préparation est en cours). */
+    function prefetch() {
+      if (!enabled() || inflight || (ready && Date.now() - ready.at < TTL)) return;
+      inflight = solve().then((t) => { ready = { token: t, at: Date.now() }; }, () => {}).finally(() => { inflight = null; });
+    }
+    /** Jeton à usage unique (undefined si l'anti-robots n'est pas activé). Rejette si la vérification échoue. */
+    async function token() {
+      if (!enabled()) return undefined;
+      if (inflight) await inflight;   // préparation en cours : on l'attend, sans en relancer une
+      const fresh = ready && Date.now() - ready.at < TTL ? ready.token : null;
+      ready = null;
+      return fresh || solve();
+    }
     const failMessage = 'La vérification anti-robots n\'a pas abouti. Vérifiez votre connexion puis réessayez.';
-    return { token, enabled, failMessage };
+    return { token, prefetch, enabled, failMessage };
   })();
   /** Erreur de l'anti-robots renvoyée par Supabase (jeton absent, expiré ou refusé). */
   const captchaRefused = (e) => !!e && (/captcha/i.test(e.code || '') || /captcha/i.test(e.message || ''));
@@ -5737,11 +5753,13 @@
       shownAt = 0;
     }
     const booting = () => el().classList.contains('is-boot');
-    async function run(promise, label, detail = '') {
+    /** now : affiché sans attendre (retour d'une fenêtre extérieure, comme celle de Google : la personne attend une suite). */
+    async function run(promise, label, detail = '', { now = false } = {}) {
       pending++;
       text = label; sub = detail;
       if (booting()) { /* l'écran de démarrage prend le relais (voir endBoot) */ }
       else if (shownAt) setText();
+      else if (now) { if (timer) { clearTimeout(timer); timer = null; } show(); }
       else if (!timer) timer = setTimeout(() => { timer = null; show(); }, DELAY);
       try {
         return await promise;
@@ -10822,6 +10840,7 @@
     $('ob-guest-btn').textContent = appStarted ? 'Revenir à la carte' : 'Voir la carte';
     $('ob-guest-btn').setAttribute('aria-label', appStarted ? 'Revenir à la carte' : 'Voir la carte sans créer de compte');
     if (step === 'login') GoogleAuth.mount();
+    if (step === 'login' || step === 'signup' || step === 'reset-password') Captcha.prefetch();
     if (step === 'pro-verify') enterVerifyStep();
     if (step === 'pro-payment') enterPaymentStep();
     if (step === 'pro-listing') enterListingStep(mode);
@@ -11527,12 +11546,18 @@
     const errBox = $('err-login');
     errBox.textContent = '';
     authStorage.setRemember($('li-remember').checked);
-    const captchaToken = await Captcha.token().catch(() => null);
-    if (captchaToken === null) { errBox.textContent = Captcha.failMessage; return; }
-    const { data, error } = await Loader.run(sb.auth.signInWithIdToken({ provider: 'google', token: response.credential, nonce: GoogleAuth.takeNonce() || undefined, options: { captchaToken } }), 'Connexion avec Google…');
-    if (error || !data.user) { errBox.textContent = captchaRefused(error) ? Captcha.failMessage : 'La connexion avec Google a échoué. Réessayez.'; return; }
-    let user;
-    try { user = await loadUser(data.user); } catch (e) { errBox.textContent = cloudError(e); return; }
+    // Dès le retour de Google, la personne voit que ça avance (avant : écran figé pendant l'anti-robots, puis le profil)
+    const who = googleFirstName(response.credential);
+    const nonce = GoogleAuth.takeNonce() || undefined;
+    const outcome = await Loader.run((async () => {
+      const captchaToken = await Captcha.token().catch(() => null);
+      if (captchaToken === null) return { err: Captcha.failMessage };
+      const { data, error } = await sb.auth.signInWithIdToken({ provider: 'google', token: response.credential, nonce, options: { captchaToken } });
+      if (error || !data.user) return { err: captchaRefused(error) ? Captcha.failMessage : 'La connexion avec Google a échoué. Réessayez.' };
+      try { return { user: await loadUser(data.user) }; } catch (e) { return { err: cloudError(e) }; }
+    })(), who ? 'Bonjour ' + who + ' !' : 'Connexion avec Google…', who ? 'Connexion à votre compte…' : '', { now: true });
+    if (outcome.err) { errBox.textContent = outcome.err; return; }
+    const user = outcome.user;
     if (user.role === 'pro') {
       await sb.auth.signOut().catch(() => {});
       cloud.user = null;
@@ -11553,6 +11578,16 @@
       return;
     }
     then();
+  }
+
+  /** Prénom lu dans la réponse de Google, pour l'accueillir tout de suite (affichage seulement : Supabase vérifie le jeton). */
+  function googleFirstName(credential) {
+    try {
+      const b64 = credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const bytes = Uint8Array.from(atob(b64 + '==='.slice((b64.length + 3) % 4)), (c) => c.charCodeAt(0));
+      const p = JSON.parse(new TextDecoder().decode(bytes));
+      return String(p.given_name || (p.name || '').split(' ')[0] || '').trim().slice(0, 40);
+    } catch (e) { return ''; }
   }
 
   /**
@@ -15871,8 +15906,13 @@
       let user = null, idleEmail = null;
       try {
         const { data } = await sb.auth.getSession();
-        if (data.session && await IdleCheck.needsCode()) idleEmail = data.session.user.email;
-        else if (data.session) user = await bootUser(data.session.user);
+        if (data.session) {
+          // Compte en sommeil ? et profil : les deux lectures partent ensemble (avant : l'une après l'autre)
+          const pendingUser = bootUser(data.session.user);
+          pendingUser.catch(() => {});   // son erreur n'est traitée que si le compte n'est pas en sommeil
+          if (await IdleCheck.needsCode()) { idleEmail = data.session.user.email; cloud.user = null; }
+          else user = await pendingUser;
+        }
       } catch (e) { await sb.auth.signOut().catch(() => {}); }
       if (currentStep === 'reset-password') { /* lien de réinitialisation : déjà affiché */ }
       else if (idleEmail) {
