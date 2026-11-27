@@ -52,7 +52,7 @@ export default function LegalLayout({ children }: { children: ReactNode }) {
               <LegalNav variant="side" />
               <div className="rounded-2xl border border-slate-200/80 bg-white p-4 text-sm dark:border-slate-800 dark:bg-slate-900">
                 <p className="flex items-center gap-2 font-medium text-slate-900 dark:text-white">
-                  <Mail aria-hidden className="h-4 w-4 text-orange-600 dark:text-orange-400" /> Une question ?
+                  <Mail aria-hidden className="h-4 w-4 text-slate-700 dark:text-slate-300" /> Une question ?
                 </p>
                 <p className="mt-1.5 leading-6 text-slate-500 dark:text-slate-400">
                   Écrivez-nous : <RichText text={`{{${LEGAL.email}|mailto:${LEGAL.email}}}`} />

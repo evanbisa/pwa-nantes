@@ -7,10 +7,10 @@ export default function LegalHome() {
   return (
     <div className="space-y-8">
       <header className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-10 dark:border-slate-800 dark:bg-slate-900">
-        <span className="relative grid h-12 w-12 place-items-center rounded-2xl bg-orange-600 text-white shadow-lg shadow-orange-600/25 dark:bg-orange-500">
+        <span className="relative grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white">
           <Scale aria-hidden className="h-6 w-6" />
         </span>
-        <h1 className="relative mt-5 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl dark:text-white">Informations légales</h1>
+        <h1 className="relative mt-5 text-3xl font-semibold text-slate-900 sm:text-4xl dark:text-white">Informations légales</h1>
         <p className="relative mt-3 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300">
           Tout ce qu&apos;il faut savoir sur FlashMiam : qui nous sommes, les règles d&apos;utilisation, l&apos;abonnement des
           restaurateurs et la protection de vos données. Écrit pour être lu, pas seulement pour être signé.
@@ -23,9 +23,9 @@ export default function LegalHome() {
             <li key={doc.slug}>
               <Link
                 href={`/legal/${doc.slug}/`}
-                className="group flex h-full flex-col rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-orange-500/50"
+                className="group flex h-full flex-col rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-white/30"
               >
-                <span className="grid h-11 w-11 place-items-center rounded-xl bg-orange-50 text-orange-600 ring-1 ring-orange-100 ring-inset dark:bg-orange-500/10 dark:text-orange-300 dark:ring-orange-400/20">
+                <span className="grid h-11 w-11 place-items-center rounded-xl bg-slate-100 text-slate-700 ring-1 ring-slate-200 ring-inset dark:bg-white/5 dark:text-slate-200 dark:ring-white/10">
                   <Icon aria-hidden className="h-5 w-5" />
                 </span>
                 <span className="mt-4 text-lg font-semibold text-slate-900 dark:text-white">{doc.title}</span>
