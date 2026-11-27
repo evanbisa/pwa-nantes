@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-Q0kT6zXiDVi5vzZ8PytWWTyyQtAqyQW7IwFA2bDeyF4=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-nYmxK99IDcxULtYMqf7dsLzhTNikuPz9qo0tG757i+Y=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -2159,8 +2159,9 @@
     .vp-offer { margin: 0; padding: 8px 14px; border-radius: 12px; font-size: 14.5px; font-weight: 600; color: var(--green); background: rgba(24, 128, 56, .1); }
     .vp-offer[hidden] { display: none; }
     .vp-stage { position: relative; width: min(300px, 76vw); aspect-ratio: 1; margin: 14px 0 4px; }
-    .vp-ring { position: absolute; inset: -12px; width: calc(100% + 24px); height: calc(100% + 24px); overflow: visible; }
-    .vp-ring rect { fill: none; stroke-width: 1.6; }
+    /* Temps restant : le trait fait le tour exact du cadre blanc du QR code (même arrondi), par-dessus son bord */
+    .vp-ring { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+    .vp-ring rect { fill: none; stroke-width: 4; }
     .vp-ring .ring-bg { stroke: var(--line); }
     .vp-ring .ring-fg { stroke: var(--accent); stroke-linecap: round; transition: stroke .3s; }
     .vp-stage.is-late .ring-fg { stroke: var(--amber); }
@@ -3502,7 +3503,7 @@
         <h2 id="vp-title">Montrez ce QR code au restaurateur</h2>
         <p class="vp-offer" id="vp-offer" hidden></p>
         <div class="vp-stage" id="vp-stage" data-state="loading">
-          <svg class="vp-ring" viewBox="0 0 120 120" preserveAspectRatio="none" aria-hidden="true"><rect class="ring-bg" x="2" y="2" width="116" height="116" rx="24" pathLength="100"/><rect class="ring-fg" id="vp-ring" x="2" y="2" width="116" height="116" rx="24" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"/></svg>
+          <svg class="vp-ring" viewBox="0 0 300 300" aria-hidden="true"><rect class="ring-bg" x="2" y="2" width="296" height="296" rx="20" pathLength="100"/><rect class="ring-fg" id="vp-ring" x="2" y="2" width="296" height="296" rx="20" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"/></svg>
           <div class="vp-card" id="vp-card">
             <div class="vp-skel" aria-hidden="true"></div>
             <div class="vp-err"><span id="vp-err-text"></span><button class="pill-btn" type="button" id="vp-retry">Réessayer</button></div>
@@ -14281,6 +14282,15 @@
       if (!prefetched) { prefetched = true; (window.requestIdleCallback || setTimeout)(() => loadQrMaker().catch(() => { prefetched = false; })); }
     }
     function setState(s) { stage.dataset.state = s; }
+    /** Trait du temps restant aux dimensions réelles du cadre (en pixels) : il suit exactement son bord et son arrondi (22 px). */
+    function fitRing() {
+      const w = stage.clientWidth, h = stage.clientHeight;
+      if (!w || !h) return;
+      const svg = stage.querySelector('.vp-ring');
+      svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+      svg.querySelectorAll('rect').forEach((r) => { r.setAttribute('width', w - 4); r.setAttribute('height', h - 4); });
+    }
+    addEventListener('resize', () => { if (!root.hidden) fitRing(); });
     function stopTimers() { clearInterval(tick); clearTimeout(poll); tick = poll = null; if (ring) { ring.cancel(); ring = null; } }
     async function keepAwake(on) {
       try {
@@ -14368,6 +14378,7 @@
       $('vp-code').append(prettyVisitCode(token));
       stage.classList.remove('is-late');
       if (ring) ring.cancel();
+      fitRing();
       ring = $('vp-ring').animate([{ strokeDashoffset: 0 }, { strokeDashoffset: 100 }], { duration: ROTATE_MS, easing: 'linear', fill: 'forwards' });
       setState('ready');
       onTick();
