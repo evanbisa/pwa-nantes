@@ -84,11 +84,8 @@
   </noscript>
 
   <style>
-    /* Typographie : Roboto (police de Google Maps), servie par le site lui-même : aucun appel à Google (licence OFL, vendor/fonts) */
-    /* Archivo (Omnibus-Type, licence OFL) : une seule famille, deux voix — largeur normale pour l'interface,
-       étroite et grasse pour les titres, les prix et les étiquettes. Police variable : graisse 100–900, largeur 62–125 %. */
-    @font-face { font-family: 'Archivo'; font-style: normal; font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; src: url(vendor/fonts/archivo-latin-ext-wdth-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
-    @font-face { font-family: 'Archivo'; font-style: normal; font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; src: url(vendor/fonts/archivo-latin-wdth-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+    /* Police du système, comme Apple (skill apple-design) : SF Pro sur iPhone et Mac, avec ses tailles optiques et sa
+       table d'espacement des lettres appliquées par Safari ; Roboto sur Android, Segoe sur Windows. Rien à télécharger. */
 
     /* =====================================================================
        1. DESIGN TOKENS — mode jour (défaut) et mode nuit, palette Google
@@ -98,8 +95,8 @@
       --sidebar-w: 372px;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --font-ui: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
-      --font-tag: "Archivo", system-ui, sans-serif;   /* titres, prix, étiquettes : même famille, étroite et grasse (font-stretch) */
+      --font-ui: -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-tag: var(--font-ui);   /* ancien nom gardé : une seule police, celle du système */
       --ease-out: cubic-bezier(.2, .8, .2, 1);
       --blue: #1a73e8;
     }
@@ -123,12 +120,14 @@
       --accent-strong: #b02a10;
       --accent-soft: rgba(255, 77, 46, 0.1);
       --accent-line: rgba(255, 77, 46, 0.4);
-      --focus-ring: rgba(255, 77, 46, 0.24);
-      --focus-border: #ff4d2e;
+      --focus-ring: rgba(22, 33, 58, 0.16);   /* focus à l'encre (contraste 15:1, et l'orange reste à l'action) */
+      --focus-border: #16213a;
       --on-accent: #ffffff;
       --flash: #ffe13a;                 /* jaune fluo des étiquettes de bons plans */
       --on-flash: #16213a;
       --shell: #16213a;                 /* barre d'onglets : encre pleine */
+      --strong: #16213a;                /* actions secondaires pleines (Valider ma visite, À pied…) : encre, pas orange */
+      --on-strong: #ffffff;
       --on-shell: #f2f4f8;
       --green: #0e7c45;
       --green-soft: rgba(14, 124, 69, 0.1);
@@ -158,12 +157,14 @@
       --accent-strong: #ffb19f;
       --accent-soft: rgba(255, 106, 69, 0.16);
       --accent-line: rgba(255, 106, 69, 0.45);
-      --focus-ring: rgba(255, 106, 69, 0.28);
-      --focus-border: #ff6a45;
+      --focus-ring: rgba(242, 244, 248, 0.24);
+      --focus-border: #f2f4f8;
       --on-accent: #0e1626;
       --flash: #ffe13a;
       --on-flash: #16213a;
       --shell: #0a111e;
+      --strong: #2a3858;
+      --on-strong: #ffffff;
       --on-shell: #f2f4f8;
       --green: #5fd39a;
       --green-soft: rgba(95, 211, 154, 0.14);
@@ -2663,29 +2664,39 @@
     .sr-price, .offers-badge, .notif-badge, .fbar-count, .pin-flag, .kpi strong, .ps-cards strong, .menu-list .price { font-variant-numeric: tabular-nums; }
     .onboarding { font-family: var(--font-ui); }
 
-    /* --- Voix « étiquette » : Archivo étroite et grasse pour les titres, les prix et les bons plans --- */
-    .sheet h2 { font-family: var(--font-tag); font-stretch: 74%; font-weight: 800; font-size: 28px; line-height: 1.04; letter-spacing: -.005em; text-wrap: balance; }
-    .sheet h3 { font-stretch: 88%; font-weight: 700; font-size: 19px; line-height: 1.2; }
-    .tour-card h2 { font-family: var(--font-tag); font-stretch: 76%; font-weight: 800; font-size: 25px; line-height: 1.04; text-wrap: balance; }
-    .ob-step h1, .ob-step h2 { font-family: var(--font-tag); font-stretch: 70%; font-weight: 850; letter-spacing: -.01em; line-height: 1; text-wrap: balance; }
-    .ob-step h1 { font-size: 40px; }
-    .ob-step h2 { font-size: 32px; }
-    .sr-title { margin: 18px 8px 6px; font-family: var(--font-tag); font-stretch: 80%; font-weight: 800; font-size: 17px; letter-spacing: 0; text-transform: none; color: var(--text); }
-    .sr-price, .menu-list .price { font-family: var(--font-tag); font-stretch: 82%; font-weight: 800; font-size: 17px; }
+    /* --- Typographie Apple (skill apple-design, 27/11/2026) : police du système et styles de texte d'iOS (taille, graisse,
+       interligne) ; la hiérarchie vient de la graisse, de la taille et de l'interligne, pris ensemble.
+       Espacement des lettres : celui du système (« normal »). Sur iPhone et Mac, Safari applique de lui-même la table
+       d'espacement de SF Pro, propre à chaque taille (comme dans les applis d'Apple) : en ajouter un doublerait l'effet,
+       et Roboto (Android) ou Segoe (Windows) gardent le leur. --- */
+    .sheet h2 { font-weight: 700; font-size: 28px; line-height: 1.21; letter-spacing: normal; text-wrap: balance; }      /* Title 1 */
+    .sheet h3 { font-weight: 700; font-size: 22px; line-height: 1.27; letter-spacing: normal; }                        /* Title 2 */
+    .tour-card h2 { font-weight: 700; font-size: 22px; line-height: 1.27; letter-spacing: normal; text-wrap: balance; } /* Title 2 */
+    .ob-step h1, .ob-step h2 { font-weight: 700; letter-spacing: normal; line-height: 1.2; text-wrap: balance; }
+    .ob-step h1 { font-size: 34px; }                                                                                   /* Large Title */
+    .ob-step h2 { font-size: 28px; }                                                                                   /* Title 1 */
+    .sr-title { margin: 20px 8px 6px; font-weight: 600; font-size: 20px; line-height: 1.25; letter-spacing: normal; text-transform: none; color: var(--text); }   /* Title 3 */
+    .sr-price, .menu-list .price { font-weight: 600; font-size: 17px; letter-spacing: normal; }                       /* Headline */
+    .sr-body b { font-weight: 500; font-size: 17px; letter-spacing: normal; }                                         /* Body */
+    .sr-body small { font-size: 15px; letter-spacing: normal; }                                                       /* Subheadline */
+    .eyebrow { font-size: 15px; }
+    .status { font-weight: 600; }
+    #shop-desc { font-size: 17px; line-height: 1.41; letter-spacing: normal; }                                        /* Body */
+    .meta { font-size: 15px; }
 
     /* --- Boutons, puces, champs : coins nets (12 px), plus de pilules partout --- */
-    .btn { border-radius: 12px; font-weight: 700; font-size: 16px; }
+    .btn { border-radius: 12px; font-weight: 600; font-size: 17px; letter-spacing: normal; }                        /* bouton : Headline */
     .btn-primary { color: var(--on-brand); background: var(--brand); }
     .btn-primary:hover { background: color-mix(in oklab, var(--brand) 86%, #000); box-shadow: none; }
     .btn-ghost, .btn-danger { border-width: 1.5px; }
     .btn-ghost { color: var(--text); }
     .btn-ghost:hover { background: var(--hover); }
     .btn-inline { border-radius: 10px; font-weight: 700; color: var(--on-brand); background: var(--brand); }
-    .pill-btn { border-radius: 10px; font-weight: 650; color: var(--on-brand); background: var(--brand); }
+    .pill-btn { border-radius: 10px; font-weight: 600; color: var(--panel-solid); background: var(--text); }
     .ob-skip { border-radius: 10px; font-weight: 600; }
     .link-btn { color: var(--accent); font-weight: 600; text-underline-offset: 3px; }
-    .chip { border-radius: 10px; font-weight: 600; }
-    .chip[aria-pressed="true"], :root[data-theme="light"] .chip[aria-pressed="true"] { color: var(--panel-solid); background: var(--text); border-color: var(--text); }
+    .chip { border-radius: 10px; font-weight: 500; font-size: 15px; letter-spacing: normal; }                      /* Subheadline */
+    .chip[aria-pressed="true"], :root[data-theme="light"] .chip[aria-pressed="true"], :root[data-theme="dark"] .chip[aria-pressed="true"] { color: var(--panel-solid); background: var(--text); border-color: var(--text); }
     .field input, .field textarea, .field select { border-radius: 10px; }
     .field input:focus, .field textarea:focus { border-color: var(--focus-border); box-shadow: 0 0 0 3px var(--focus-ring); }
     .field > span { color: var(--text); font-weight: 600; }
@@ -2695,14 +2706,13 @@
     .sheet { border-radius: 22px 22px 0 0; }
     .sheet-grab::before { width: 40px; height: 5px; border-radius: 3px; }
     .icon-btn { color: var(--text); }
-    .sheet-emoji { border-radius: 16px; background: var(--accent-soft); }
-    .status { font-weight: 650; }
-    .avatar { color: var(--on-brand); background: var(--brand); font-weight: 750; }
-    .ob-logo .avatar { color: var(--on-brand); background: var(--brand); }
-    .verified { border-radius: 6px; font-weight: 650; }
-    .demo-tag { border-radius: 5px; font-weight: 650; }
+    .sheet-emoji { border-radius: 16px; background: var(--hover); }
+    .avatar { color: var(--on-strong); background: var(--strong); font-weight: 600; }
+    .ob-logo .avatar { color: var(--on-strong); background: var(--strong); }
+    .verified { border-radius: 6px; font-weight: 600; }
+    .demo-tag { border-radius: 5px; font-weight: 600; }
     .amen-list li { border-radius: 8px; }
-    .pill-link { border-radius: 10px; color: var(--accent-strong); }
+    .pill-link { border-radius: 10px; color: var(--text); background: var(--hover); border-color: var(--line); }
 
     /* --- Bons plans (style « sobre », choisi le 26/11/2026) : cadre blanc net, carré « % » orange, titre en lettres d'étiquette --- */
     .promo, .promo.is-student, .promo.is-day, .promo.is-week {
@@ -2711,32 +2721,33 @@
     }
     .promo::before {
       content: "%"; position: absolute; left: 14px; top: 50%; width: 30px; height: 30px; margin-top: -15px; border-radius: 9px;
-      font-family: var(--font-tag); font-stretch: 80%; font-weight: 850; font-size: 16px; line-height: 30px; text-align: center;
+      font-weight: 700; font-size: 16px; line-height: 30px; text-align: center;
       color: var(--on-brand); background: var(--brand);
     }
     .promo small, .promo.is-student small, .promo.is-day small, .promo.is-week small { color: var(--muted); font-weight: 600; }
-    .promo strong { font-family: var(--font-tag); font-stretch: 80%; font-weight: 800; font-size: 19px; line-height: 1.1; }
+    .promo strong { font-weight: 600; font-size: 17px; line-height: 1.29; letter-spacing: normal; }                 /* Headline */
     .promo .promo-more, .promo-when { color: var(--muted); }
     .promo-use, .promo.is-student .promo-use, .promo.is-day .promo-use, .promo.is-week .promo-use,
     :root[data-theme="dark"] .promo.is-student .promo-use, :root[data-theme="dark"] .promo.is-day .promo-use, :root[data-theme="dark"] .promo.is-week .promo-use {
       border-radius: 8px; color: var(--on-brand); background: var(--brand); }
     .pin-flag {
       top: -6px; right: -9px; min-width: 22px; height: 20px; padding: 0 5px; border-radius: 6px; border: 2px solid var(--panel-solid);
-      font-family: var(--font-tag); font-stretch: 80%; font-weight: 850; font-size: 12.5px; color: var(--on-brand); background: var(--brand);
+      font-weight: 700; font-size: 12px; color: var(--on-brand); background: var(--brand);
       box-shadow: 0 1px 2px rgba(22, 33, 58, .35);
     }
-    .offers-badge { color: var(--on-brand); background: var(--brand); font-weight: 800; }
+    .offers-badge { color: var(--on-brand); background: var(--brand); font-weight: 700; }
 
-    /* --- Bouton « Valider ma visite / Profiter de l'offre » : orange plein, lettres encre --- */
-    .visit-cta { border-radius: 14px; color: var(--on-brand); background: var(--brand); box-shadow: 0 10px 22px -12px var(--brand); }
-    .visit-cta-ico { background: rgba(22, 33, 58, .12); }
-    .visit-cta-txt strong { font-family: var(--font-tag); font-stretch: 82%; font-weight: 800; font-size: 18px; }
-    .visit-cta-txt small { opacity: .82; font-weight: 500; }
+    /* --- « Valider ma visite » : bloc à l'encre ; l'orange est réservé aux offres (blocs juste en dessous) --- */
+    .visit-cta { border-radius: 14px; color: var(--on-strong); background: var(--strong); box-shadow: 0 10px 22px -14px rgba(14, 22, 38, .55); }
+    .visit-cta-ico { background: rgba(255, 255, 255, .14); }
+    .visit-cta-txt strong { font-weight: 600; font-size: 17px; letter-spacing: normal; }                             /* Headline */
+    .visit-cta-txt small { opacity: .8; font-size: 13px; font-weight: 400; letter-spacing: normal; }                 /* Footnote */
     /* --- Offres de la fiche : même gros bloc orange que « Valider ma visite » (une offre = un bloc qui ouvre son QR code) --- */
     .promo-block { margin-top: 12px; }
-    .promo-cta { margin: 0; }
+    .promo-cta { margin: 0; color: var(--on-brand); background: var(--brand); box-shadow: 0 10px 22px -12px var(--brand); }
+    .promo-cta .visit-cta-ico { background: rgba(22, 33, 58, .12); }
     .promo-cta.is-later { opacity: .8; }
-    .promo-cta .visit-cta-txt strong { font-size: 19px; line-height: 1.1; overflow-wrap: anywhere; }
+    .promo-cta .visit-cta-txt strong { line-height: 1.29; overflow-wrap: anywhere; }
     .promo-cta-photo { flex: none; width: 48px; height: 48px; border-radius: 10px; object-fit: cover; }
     .promo-cta > .pc-chev { flex: none; width: 20px; height: 20px; opacity: .8; }
     .promo-cta-toggle { display: inline-block; margin: 8px 4px 0; font-size: 14px; }
@@ -2745,7 +2756,7 @@
     /* --- Carte : repères nets, étiquettes de nom à l'encre --- */
     .pin-badge { box-shadow: 0 1px 0 rgba(22, 33, 58, .2), 0 6px 14px -5px rgba(22, 33, 58, .55); }
     .pin.is-selected .pin-badge { border-color: var(--brand); }
-    .pin-label { padding: 3px 8px; border-radius: 6px; font-weight: 650; font-size: 12.5px; color: var(--text); background: var(--panel-solid); box-shadow: 0 1px 3px rgba(22, 33, 58, .3); }
+    .pin-label { padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 12px; color: var(--text); background: var(--panel-solid); box-shadow: 0 1px 3px rgba(22, 33, 58, .3); }
     .pin.is-demo .pin-label::after { color: var(--muted); }
 
     /* --- Stories : anneau orange plein (plus le dégradé d'Instagram) --- */
@@ -2755,31 +2766,31 @@
     .stories { border-radius: 14px; }
 
     /* --- Carte du restaurant (menu) : prix à l'encre, en lettres d'étiquette, sans pastille --- */
-    .menu-list h4 { font-family: var(--font-tag); font-stretch: 80%; font-weight: 800; font-size: 19px; }
+    .menu-list h4 { font-weight: 600; font-size: 20px; letter-spacing: normal; }                                      /* Title 3 */
     .menu-list b { font-weight: 600; }
     .menu-list .price, :root[data-theme="dark"] .menu-list .price { padding: 0; border-radius: 0; color: var(--text); background: none; }
     /* --- Panneau des filtres : intitulés de rubrique en minuscules, lettres d'étiquette --- */
-    .sp-filters .ft-label, .sb-filters .ft-label { margin: 8px 0 2px; font-family: var(--font-tag); font-stretch: 82%; font-weight: 800; font-size: 15.5px; letter-spacing: 0; text-transform: none; color: var(--text); }
+    .sp-filters .ft-label, .sb-filters .ft-label { margin: 10px 0 2px; font-weight: 600; font-size: 17px; letter-spacing: normal; text-transform: none; color: var(--text); }   /* Headline */
 
     /* --- Résultats et listes --- */
-    .offer-body b { font-weight: 650; font-size: 15.5px; }
+    .offer-body b { font-weight: 600; font-size: 17px; letter-spacing: normal; }                                    /* Headline */
     .offer-hit, .sr-hit, .shop-item { border-radius: 10px; }
     .fbar-tag { border-radius: 8px; font-weight: 600; color: var(--panel-solid); background: var(--text); border-color: var(--text); }
-    .fbar-count { border-radius: 6px; font-weight: 800; color: var(--on-brand); background: var(--brand); }
+    .fbar-count { border-radius: 6px; font-weight: 700; color: var(--panel-solid); background: var(--text); }
 
     /* --- Guide --- */
     .tour-card { border-radius: 18px; }
     .tour-card:focus { outline: none; }
     .tour-step { letter-spacing: 0; text-transform: none; font-variant-numeric: tabular-nums; }
     /* --- Intitulés de rubrique : plus de petites capitales espacées, la voix d'étiquette suffit --- */
-    .pf-label, .rf-head label { font-family: var(--font-tag); font-stretch: 82%; font-weight: 800; font-size: 15.5px; letter-spacing: 0; text-transform: none; color: var(--text); }
+    .pf-label, .rf-head label { font-weight: 600; font-size: 17px; letter-spacing: normal; text-transform: none; color: var(--text); }   /* Headline */
 
     /* --- Accueil, inscription et connexion : même monde (remplace le fond crème et l'orange terre cuite) --- */
     :root[data-theme="light"] .onboarding { --accent: #d9361a; --accent-strong: #b02a10; --accent-soft: rgba(255, 77, 46, .1); --accent-line: rgba(255, 77, 46, .4); --on-accent: #fff; --ob-grad: var(--brand); --ob-btn: var(--brand); }
     :root[data-theme="dark"] .onboarding { --accent: #ff8a73; --accent-strong: #ffb19f; --accent-soft: rgba(255, 106, 69, .16); --accent-line: rgba(255, 106, 69, .45); --on-accent: #0e1626; --ob-grad: var(--brand); --ob-btn: var(--brand); }
     :root[data-theme="light"] .ob-panel, :root[data-theme="dark"] .ob-panel { border-color: var(--line); background: var(--panel-solid); box-shadow: var(--shadow-lift); }
     .ob-panel { border-radius: 22px; }
-    .onboarding .btn { border-radius: 14px; font-size: 17px; font-weight: 750; }
+    .onboarding .btn { border-radius: 14px; font-size: 17px; font-weight: 600; }
     .onboarding .btn-primary { color: var(--on-brand); background: var(--brand); }
     :root[data-theme="light"] .onboarding .btn-primary:hover, :root[data-theme="dark"] .onboarding .btn-primary:hover { background: color-mix(in oklab, var(--brand) 86%, #000); }
     :root[data-theme="light"] .onboarding .field input, :root[data-theme="dark"] .onboarding .field input { border-radius: 12px; border-color: var(--line-strong); }
@@ -2790,9 +2801,72 @@
     .onboarding .jn-perks { display: grid; gap: 10px; margin: 18px 0 24px; }
     :root[data-theme="light"] .onboarding .jn-perks li, :root[data-theme="dark"] .onboarding .jn-perks li {
       display: flex; align-items: center; gap: 10px; padding: 0; border: 0; border-radius: 0; color: var(--text); background: none; box-shadow: none;
-      font-family: var(--font-tag); font-stretch: 86%; font-weight: 750; font-size: 17px; line-height: 1.2;
+      font-weight: 600; font-size: 17px; line-height: 1.29; letter-spacing: normal;
     }
-    .onboarding .jn-perks li::before { background: var(--brand); }
+    .onboarding .jn-perks li::before { background: var(--text); }
+
+    /* --- Orange parcimonieux (27/11/2026) : réservé au bouton principal, aux offres, au restaurant choisi sur la carte,
+       à « Créer mon compte », à l'onglet actif, aux stories non vues et aux liens. Le reste : encre ou gris. --- */
+    .shop-actions .act svg { color: var(--text); background: var(--hover); box-shadow: none; }
+    .shop-actions .act-primary svg, .shop-actions .act[aria-pressed="true"] svg { color: var(--panel-solid); background: var(--text); box-shadow: none; }
+    .shop-actions .act[aria-pressed="true"] { color: var(--text); }
+    .meta svg { color: var(--muted); }
+    .shop-item[aria-current="true"] { background: var(--line); }
+    .ob-skip { color: var(--text); background: var(--hover); border-color: var(--line); }
+    .sheet-emoji.has-story { background: var(--brand); }
+    .place-chip.is-place { color: var(--text); border-color: var(--line-strong); }
+
+    /* Badge de formule (jaune, hors du système) → encre ; étoiles des avis à l'encre (comme l'App Store) */
+    .plan-tag { border-radius: 6px; font-size: 12px; font-weight: 600; letter-spacing: normal; text-transform: none; color: var(--on-strong); background: var(--strong); }
+    .stars { color: var(--text); }
+    /* Curseurs : remplissage à l'encre, pastille blanche ombrée comme sur iPhone */
+    .rf, .jn-range, .ob-progress, .tour-dots { --accent: var(--text); }
+    .rf input[type="range"]::-webkit-slider-thumb { border: 0; box-shadow: 0 .5px 4px rgba(0, 0, 0, .14), 0 6px 13px rgba(0, 0, 0, .14), 0 0 0 .5px rgba(0, 0, 0, .06); }
+    .rf input[type="range"]::-moz-range-thumb { border: 0; box-shadow: 0 .5px 4px rgba(0, 0, 0, .14), 0 6px 13px rgba(0, 0, 0, .14), 0 0 0 .5px rgba(0, 0, 0, .06); }
+    .jn-thumb { border: 0; box-shadow: 0 .5px 4px rgba(0, 0, 0, .14), 0 6px 13px rgba(0, 0, 0, .14), 0 0 0 .5px rgba(0, 0, 0, .06); }
+    .tour-step { color: var(--muted); }
+    /* Choix sélectionnés (inscription, espace restaurateur) : encre, comme les puces */
+    .jn-choices, .jn-step, .kind-pick, .m-tag, .cat-picker, .pro-steps, .todo-steps, .plan-card, .place-pick, .help-steps {
+      --accent: var(--text); --accent-strong: var(--text); --accent-soft: var(--hover); --accent-line: var(--line-strong); --on-accent: var(--panel-solid); }
+    .plan-card[aria-checked="true"] .plan-check { background-color: var(--strong); border-color: var(--strong); }   /* coche blanche dessinée : fond toujours foncé */
+    .todo-steps .ts-num, .pro-steps li.is-current span { color: var(--panel-solid); background-color: var(--text); border-color: var(--text); }
+    .jn-choices button[aria-checked="true"]::after { color: var(--panel-solid); background: var(--text); }
+    .cat-picker button[aria-checked="true"], :root[data-theme="dark"] .cat-picker button[aria-checked="true"],
+    .kind-pick button[aria-checked="true"], .m-tag[aria-pressed="true"] { color: var(--panel-solid); background: var(--text); border-color: var(--text); }
+    .pp-days button[aria-pressed="true"], .follow-btn[aria-pressed="true"] { color: var(--panel-solid); background: var(--text); border-color: var(--text); }
+    :root[data-theme="light"] .onboarding .role-check:has(input:checked), :root[data-theme="dark"] .onboarding .role-check:has(input:checked) { background: var(--hover); border-color: var(--text); }
+    .role-check input:checked ~ .rc-box { background-color: var(--strong); }
+    .ps-tabs button[aria-selected="true"] .ps-ico { background: var(--line); }
+    @media (min-width: 900px) { .ps-tabs button[aria-selected="true"] { background: var(--line); } }
+    /* Encarts et pastilles d'information : gris neutre */
+    .ob-welcome, .jn-live, .follow-btn, .rv-reply b, .role-tag, .ins-ico, .sb-ft-sum { color: var(--text); }
+    .ob-welcome, .ob-reason, .offers-geo, .rv-item.is-mine, .ins-steps, .pf-head, .mail-badge, .role-tag, .pl-jump button, .ps-tile i,
+    .nudge-go, #net-retry { background: var(--hover); }
+    .ob-reason { border-color: var(--line); }
+    .nudge-go, #net-retry, .ps-tile i { color: var(--text); }
+    .ins-steps li::before, .pf-pill, .pf-cam, .photo-num.is-main { color: var(--panel-solid); background: var(--text); }
+    .demo-tag, .verified.is-test { color: var(--muted); background: var(--line); }
+    .photo-add { color: var(--muted); border-color: var(--line-strong); }
+    @media (hover: hover) {
+      button.pf-row:hover, a.pf-row:hover, .pf-follows li button:hover, .ps-todo button:hover, .ps-check li > button:hover, .jn-back:hover { background: var(--hover); }
+      .pl-jump button:hover { border-color: var(--line-strong); }
+    }
+    .preview-bar { color: var(--on-strong); background: var(--strong); }
+    .preview-bar button { color: #16213a; }
+    .sp-input input:focus { border-color: var(--text); box-shadow: inset 0 0 0 1px var(--text); }
+    /* « Ma position » : le bleu, comme sur Plans (et l'orange reste aux restaurants) */
+    :root[data-theme="dark"] #locate-btn[data-state="active"] { color: #6ea8ff; }
+    :root #locate-btn[data-state="active"][data-follow="true"] { color: #fff; background: var(--blue); }
+    .place-pin { border-color: var(--text); }
+    #locate-btn { --accent: var(--blue); --accent-soft: rgba(26, 115, 232, .2); }
+    :root[data-theme="dark"] #locate-btn { --accent: #6ea8ff; --accent-soft: rgba(110, 168, 255, .25); }
+    /* Cases à cocher et curseurs natifs : encre (blanc en mode nuit) */
+    .check input, .hd-day input, .field .menu-row .m-out input, .crop-zoom input, .sc-dur input[type=range] { accent-color: var(--text); }
+    /* Alertes non lues : seule la pastille du nombre reste orange (pas la cloche en plus) */
+    #notif-btn.has-unread { color: var(--text); }
+    /* Boutons d'action restants : même orange que le bouton principal (texte encre) */
+    .offer-use, .cs-btn { color: var(--on-brand); background: var(--brand); }
+    .cs-btn:hover { background: color-mix(in oklab, var(--brand) 86%, #000); }
 
     /* --- Retour au toucher (skill apple-design) : tout ce qui se touche réagit dès l'appui ---
        « scale » (propriété à part) se combine aux « transform » existants sans les remplacer. Les lignes de liste
@@ -2845,11 +2919,12 @@
 
     @media (max-width: 899.98px) {
       /* Recherche du haut : bloc net, coins de 14 px */
-      #search-open { border-radius: 14px; height: 52px; font-weight: 500; }
+      #search-open { border-radius: 14px; height: 52px; font-size: 17px; font-weight: 400; letter-spacing: normal; }   /* Body */
       #search-open svg { color: var(--text); }
       /* Barre d'onglets à l'encre pleine : la couleur de la marque tient le bas de l'écran */
       .tabbar { background: var(--shell); border-top: 0; box-shadow: 0 -8px 24px -16px rgba(22, 33, 58, .6); }
-      .tabbar > button { color: rgba(242, 244, 248, .66); font-weight: 600; }
+      .tabbar > button, .tabbar #notif-btn.has-unread { color: rgba(242, 244, 248, .66); font-size: 11px; font-weight: 500; }
+      .tabbar .avatar { color: #fff; background: rgba(242, 244, 248, .18); }
       .tabbar > button::before { background: rgba(242, 244, 248, .12); }
       body:not([data-panel]) #nav-map, body[data-panel="shop-sheet"] #nav-map, body[data-panel="offers-sheet"] .tabbar #offers-btn,
       body[data-panel="notif-sheet"] .tabbar #notif-btn, body[data-panel="profile-sheet"] .tabbar #profile-btn { color: var(--on-shell); }
@@ -2857,7 +2932,7 @@
       body[data-panel="notif-sheet"] .tabbar #notif-btn > svg { color: var(--brand); }
       .tabbar > button:focus-visible { outline-color: var(--on-shell); }
       .tabbar .offers-badge, .tabbar .notif-badge { box-shadow: 0 0 0 2px var(--shell); }
-      body.is-guest .tabbar #guest-signup { border-radius: 12px; font-weight: 750; color: var(--on-brand); background: var(--brand); box-shadow: none; }
+      body.is-guest .tabbar #guest-signup { border-radius: 12px; font-size: 15px; font-weight: 600; letter-spacing: normal; color: var(--on-brand); background: var(--brand); box-shadow: none; }
     }
   </style>
 </head>

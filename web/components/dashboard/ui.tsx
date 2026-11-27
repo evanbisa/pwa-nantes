@@ -19,7 +19,7 @@ export function Notice({ title, text, action }: { title: string; text: string; a
   return (
     <Centered>
       <div className="max-w-sm text-center">
-        <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+        <h1 className="text-2xl font-bold">{title}</h1>
         <p className="mt-2 text-slate-600 dark:text-zinc-400">{text}</p>
         <div className="mt-6">{action}</div>
       </div>
@@ -54,7 +54,7 @@ export function Tile({ label, value, note, change, upIsGood = true, href }: { la
   return (
     <Box href={href} className={`block min-w-0 rounded-2xl bg-white p-4 ring-1 ring-slate-200 dark:bg-white/[0.04] dark:ring-white/10 ${href ? "transition hover:-translate-y-px hover:ring-slate-300 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-[var(--viz-1)] focus-visible:outline-none dark:hover:ring-white/20" : ""}`}>
       <p className="truncate text-xs font-medium text-slate-600 dark:text-zinc-400">{label}</p>
-      <p className="mt-1 text-[28px] leading-tight font-bold tracking-tight tabular-nums">{value}</p>
+      <p className="mt-1 text-[28px] leading-tight font-bold tabular-nums">{value}</p>
       {change !== undefined && (
         <p className={`mt-0.5 inline-flex items-center gap-0.5 text-xs font-medium ${change == null || change === 0 ? "text-slate-600 dark:text-zinc-400" : good ? "text-[#006300] dark:text-[#0ca30c]" : "text-[#d03b3b] dark:text-[#f06a6a]"}`}>
           {change == null ? "nouveau" : change === 0 ? "= période préc." : <>{change > 0 ? <ArrowUpRight className="h-3.5 w-3.5" aria-hidden /> : <ArrowDownRight className="h-3.5 w-3.5" aria-hidden />}{change > 0 ? "+" : ""}{change} %<span className="font-normal text-slate-600 dark:text-zinc-400">&nbsp;vs préc.</span></>}

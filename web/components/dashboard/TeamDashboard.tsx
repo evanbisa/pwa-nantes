@@ -184,7 +184,7 @@ function Dashboard() {
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-slate-50/85 pt-[env(safe-area-inset-top)] backdrop-blur-md dark:border-white/10 dark:bg-night/85">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 sm:px-6">
             <div className="min-w-0 flex-1">
-              <h1 className="truncate text-lg font-bold tracking-tight sm:text-xl">{route.section === "directory" && route.id ? "Fiche du restaurant" : section.label}</h1>
+              <h1 className="truncate text-lg font-bold sm:text-xl">{route.section === "directory" && route.id ? "Fiche du restaurant" : section.label}</h1>
               {d && section.usesPeriod && <p className="text-xs text-slate-600 dark:text-zinc-400">Du {dayLabel(d.since)} à aujourd&apos;hui</p>}
             </div>
             {(section.usesPeriod || route.id) && (

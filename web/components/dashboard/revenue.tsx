@@ -89,7 +89,7 @@ export function RevenuePanel() {
 
       <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_1.25fr]">
         <Card title="Revenu récurrent (HT)" hint="Abonnements payés en cours, formule à l'année ramenée au mois.">
-          <p className="text-[34px] leading-tight font-bold tracking-tight tabular-nums">{euroCents(mrr)}<span className="ml-1 text-base font-medium text-slate-600 dark:text-zinc-400">/ mois</span></p>
+          <p className="text-[34px] leading-tight font-bold tabular-nums">{euroCents(mrr)}<span className="ml-1 text-base font-medium text-slate-600 dark:text-zinc-400">/ mois</span></p>
           <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
             <Kv k="Sur un an" v={euroCents(mrr * 12)} />
             <Kv k="Abonnements payés" v={n(paid.length)} sub={quote ? `dont ${n(quote)} sur devis` : undefined} />
@@ -109,7 +109,7 @@ export function RevenuePanel() {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-xs text-slate-600 dark:text-zinc-400">Revenu récurrent prévu (HT)</p>
-              <p className="text-[34px] leading-tight font-bold tracking-tight tabular-nums">{euroCents(forecast)}<span className="ml-1 text-base font-medium text-slate-600 dark:text-zinc-400">/ mois</span></p>
+              <p className="text-[34px] leading-tight font-bold tabular-nums">{euroCents(forecast)}<span className="ml-1 text-base font-medium text-slate-600 dark:text-zinc-400">/ mois</span></p>
               <p className={`mt-0.5 inline-flex items-center gap-1 text-xs font-medium ${forecast >= mrr ? "text-[#006300] dark:text-[#0ca30c]" : "text-[#a82626] dark:text-[#ff9b9b]"}`}>
                 <TrendingUp className="h-3.5 w-3.5" aria-hidden />{forecast >= mrr ? "+" : ""}{euroCents(forecast - mrr)} par rapport à aujourd&apos;hui
               </p>

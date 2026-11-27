@@ -15,7 +15,7 @@ export default function Blocks({ blocks }: { blocks: Block[] }) {
             <List key={i} className={`space-y-2 pl-1 ${b.ordered ? "list-decimal pl-6" : ""}`}>
               {b.list.map((item, j) => (
                 <li key={j} className={b.ordered ? "pl-1" : "flex gap-3"}>
-                  {!b.ordered && <span aria-hidden className="mt-[11px] h-1.5 w-1.5 flex-none rounded-full bg-orange-500/70 dark:bg-orange-400/70" />}
+                  {!b.ordered && <span aria-hidden className="mt-[11px] h-1.5 w-1.5 flex-none rounded-full bg-slate-400 dark:bg-slate-500" />}
                   <span><RichText text={item} /></span>
                 </li>
               ))}
@@ -31,7 +31,7 @@ export default function Blocks({ blocks }: { blocks: Block[] }) {
               key={i}
               className={`flex gap-3 rounded-xl border p-4 ${warning
                 ? "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100"
-                : "border-orange-200 bg-orange-50 text-orange-900 dark:border-orange-400/20 dark:bg-orange-400/10 dark:text-orange-100"}`}
+                : "border-slate-200 bg-slate-50 text-slate-800 dark:border-white/10 dark:bg-white/5 dark:text-slate-100"}`}
             >
               <Icon aria-hidden className="mt-1 h-5 w-5 flex-none" />
               <p><RichText text={b.callout} /></p>

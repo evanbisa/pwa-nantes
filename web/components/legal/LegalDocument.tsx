@@ -24,10 +24,10 @@ export default function LegalDocument({ doc }: { doc: LegalDoc }) {
     <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_220px]">
       <article className="min-w-0 space-y-6">
         <header className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
-          <span className="relative grid h-12 w-12 place-items-center rounded-2xl bg-orange-600 text-white shadow-lg shadow-orange-600/25 dark:bg-orange-500">
+          <span className="relative grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white">
             <Icon aria-hidden className="h-6 w-6" />
           </span>
-          <h1 className="relative mt-5 text-3xl font-semibold tracking-tight text-balance text-slate-900 sm:text-4xl dark:text-white">{doc.title}</h1>
+          <h1 className="relative mt-5 text-3xl font-semibold text-balance text-slate-900 sm:text-4xl dark:text-white">{doc.title}</h1>
           <p className="relative mt-3 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300">{doc.summary}</p>
           <div className="relative mt-6 flex flex-wrap gap-2 text-sm">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
@@ -46,7 +46,7 @@ export default function LegalDocument({ doc }: { doc: LegalDoc }) {
             )}
           </div>
           {doc.notice && (
-            <p className="relative mt-6 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm leading-6 text-orange-900 dark:border-orange-400/20 dark:bg-orange-400/10 dark:text-orange-100">
+            <p className="relative mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-800 dark:border-white/10 dark:bg-white/5 dark:text-slate-100">
               <RichText text={doc.notice} />
             </p>
           )}
@@ -66,13 +66,13 @@ export default function LegalDocument({ doc }: { doc: LegalDoc }) {
               className="scroll-mt-36 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8 lg:scroll-mt-24 dark:border-slate-800 dark:bg-slate-900 print:break-inside-avoid print:shadow-none"
             >
               <div className="mb-5 flex items-center gap-4">
-                <span className="grid h-11 w-11 flex-none place-items-center rounded-xl bg-orange-50 text-orange-600 ring-1 ring-orange-100 ring-inset dark:bg-orange-500/10 dark:text-orange-300 dark:ring-orange-400/20">
+                <span className="grid h-11 w-11 flex-none place-items-center rounded-xl bg-slate-100 text-slate-700 ring-1 ring-slate-200 ring-inset dark:bg-white/5 dark:text-slate-200 dark:ring-white/10">
                   <SectionIcon aria-hidden className="h-5 w-5" />
                 </span>
                 <div>
-                  <h2 id={`${section.id}-titre`} className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
-                    <a href={`#${section.id}`} className="hover:text-orange-700 dark:hover:text-orange-300">
-                      <span className="mr-1.5 text-orange-700 tabular-nums dark:text-orange-300">
+                  <h2 id={`${section.id}-titre`} className="text-xl font-semibold text-slate-900 dark:text-white">
+                    <a href={`#${section.id}`} className="hover:text-slate-600 dark:hover:text-slate-300">
+                      <span className="mr-1.5 text-slate-400 tabular-nums dark:text-slate-500">
                         <span className="sr-only">Article </span>
                         {n + 1}.
                       </span>
@@ -95,12 +95,12 @@ export default function LegalDocument({ doc }: { doc: LegalDoc }) {
                 <Link
                   key={d.slug}
                   href={`/legal/${d.slug}/`}
-                  className="group flex flex-col rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-orange-500/50"
+                  className="group flex flex-col rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-white/30"
                 >
-                  <DocIcon aria-hidden className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                  <DocIcon aria-hidden className="h-5 w-5 text-slate-700 dark:text-slate-300" />
                   <span className="mt-3 font-medium text-slate-900 dark:text-white">{d.title}</span>
                   <span className="mt-1 flex-1 text-sm leading-6 text-slate-500 dark:text-slate-400">{d.summary}</span>
-                  <ArrowRight aria-hidden className="mt-3 h-4 w-4 text-slate-500 transition-transform group-hover:translate-x-1 group-hover:text-orange-600" />
+                  <ArrowRight aria-hidden className="mt-3 h-4 w-4 text-slate-500 transition-transform group-hover:translate-x-1 group-hover:text-slate-900" />
                 </Link>
               );
             })}

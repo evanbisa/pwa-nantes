@@ -210,7 +210,7 @@ export function RestaurantDetail({ id, days }: { id: string; days: number }) {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
           <BackLink href={sectionHref("directory")}>Toutes les fiches</BackLink>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight break-words sm:text-3xl">{m.name}</h2>
+          <h2 className="mt-2 text-2xl font-bold break-words sm:text-3xl">{m.name}</h2>
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             <Pill tone={tone}>{label}</Pill>
             {m.is_test && <Pill>fiche de test</Pill>}
@@ -242,7 +242,7 @@ export function RestaurantDetail({ id, days }: { id: string; days: number }) {
         <Fiche m={m} />
       </div>
 
-      <h2 className="mt-8 text-lg font-bold tracking-tight">Statistiques du restaurant</h2>
+      <h2 className="mt-8 text-lg font-bold">Statistiques du restaurant</h2>
       <p className="text-sm text-slate-600 dark:text-zinc-400">Les mêmes chiffres que dans l&apos;espace du restaurateur, sur {Math.min(days, 90)} jours.</p>
       {d.analytics ? <Stats a={d.analytics} visits={d.visits} /> : <Muted>Pas encore de statistiques.</Muted>}
 

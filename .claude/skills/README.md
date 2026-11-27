@@ -15,7 +15,7 @@ données ailleurs.
 | `webapp-testing` | Tester le site dans un navigateur automatique (Playwright) | [anthropics/skills](https://github.com/anthropics/skills) (`e4bb5d9`) | Apache 2.0 |
 | `frontend-design` | Nouveaux écrans : choix visuels assumés, textes clairs | [anthropics/skills](https://github.com/anthropics/skills) (`e4bb5d9`) | Apache 2.0 |
 | `impeccable` | Design « comme un vrai designer » : refonte, critique, finitions ; a servi à la refonte du 26/11/2026 (voir `DESIGN.md`) | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) (`2fc5e14`) — **guides seulement** : son programme (`scripts/`, qui télécharge un binaire) n'est pas installé, le skill lit alors directement `PRODUCT.md` et `DESIGN.md` | Apache 2.0 |
-| `apple-design` | Interfaces « comme sur iPhone » : réactivité, gestes, ressorts, fiches qu'on glisse, typographie, accessibilité ; a servi aux gestes du 27/11/2026 (voir `DESIGN.md`) | [emilkowalski/skills](https://github.com/emilkowalski/skills) (`64eb3de`) | MIT |
+| `apple-design` | Interfaces « comme sur iPhone » : réactivité, gestes, ressorts, fiches qu'on glisse, typographie, accessibilité ; a servi aux gestes et à la typographie du 27/11/2026 (voir `DESIGN.md`) | [emilkowalski/skills](https://github.com/emilkowalski/skills) (`64eb3de`) | MIT |
 | `animation-performance` | Animations fluides sur téléphone (propriétés à animer, saccades) ; référencé par `apple-design` | [emilkowalski/skills](https://github.com/emilkowalski/skills) (`64eb3de`) | MIT |
 
 ## Ce qui prime sur les skills
@@ -27,8 +27,10 @@ Les règles du projet passent avant les conseils génériques des skills :
   (« itérer avec `execute_sql` ») vaut pour une base locale de développement.
 - Tests navigateur : le projet utilise Playwright en JavaScript (Node). Les exemples de `webapp-testing` sont en
   Python : s'en servir pour la méthode, pas forcément pour le langage.
-- `apple-design` conseille le verre dépoli et la police du système : pour FlashMiam, `DESIGN.md` prime (surfaces
-  pleines, police Archivo) ; on en retient les gestes, les ressorts, la réactivité et l'accessibilité.
+- `apple-design` conseille le verre dépoli et la police du système. Depuis le 27/11/2026 (demande de l'utilisateur), on
+  suit sa typographie : police du système, styles de texte d'iOS, espacement des lettres laissé au système. Le verre
+  dépoli reste écarté : `DESIGN.md` garde des surfaces pleines. On en retient aussi les gestes, les ressorts, la
+  réactivité et l'accessibilité.
 - `web-design-guidelines` parle anglais (« Title Case », guillemets) : l'interface FlashMiam est en français, donc
   majuscule au premier mot seulement et guillemets « ».
 - Le site principal (`index.html`) est en JavaScript sans React : `react-best-practices` ne concerne que `web/`.

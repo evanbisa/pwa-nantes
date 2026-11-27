@@ -22,4 +22,5 @@
 - `index.html` : l'animation (textes, couleurs, minutage dans le `<script>`). Pour la voir : servir le dépôt
   (`python3 -m http.server` à la racine) et ouvrir `/marketing/motion/index.html` ; `?t=12` s'arrête à 12 s.
 - `node marketing/motion/render.mjs` : refait le MP4, image par image (Playwright et ffmpeg, environ 1 min 30).
-- Style : celui de l'appli (`DESIGN.md`), police Archivo servie depuis `vendor/fonts/`.
+- Style : celui de l'appli au 27/11/2026 (`DESIGN.md`), avec la police Archivo servie depuis `vendor/fonts/` (l'appli est passée
+  depuis à la police du système : la vidéo garde Archivo tant qu'elle n'est pas refaite).

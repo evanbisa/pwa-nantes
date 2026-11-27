@@ -431,7 +431,7 @@ function Wizard() {
                   aria-describedby="err-name" className={inputClass(!!errors.name)}
                 />
               </Field>
-              <p className="mt-3 min-h-6 text-base font-medium text-brand-strong" aria-live="polite">
+              <p className="mt-3 min-h-6 text-base font-medium text-slate-700 dark:text-slate-200" aria-live="polite">
                 {firstName.length >= 2 && <><span className="su-em">Bienvenue, {firstName} !</span></>}
               </p>
               <label className={`mt-2 flex cursor-pointer items-start gap-3 rounded-2xl border-2 bg-white p-4 text-[15px] leading-relaxed text-slate-700 transition-colors dark:bg-white/[0.04] dark:text-zinc-300 ${termsError ? "border-red-500" : "border-slate-200 dark:border-white/10"}`}>
@@ -440,7 +440,7 @@ function Wizard() {
                   onChange={(e) => { setTerms(e.target.checked); if (e.target.checked) setTermsError(false); }}
                   // Entrée sur la case passe à la suite, comme dans les champs (sinon il faut traverser les deux liens)
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); e.currentTarget.form?.requestSubmit(); } }}
-                  className="mt-0.5 h-5 w-5 flex-none rounded accent-brand dark:accent-brand-night"
+                  className="mt-0.5 h-5 w-5 flex-none rounded accent-slate-900 dark:accent-white"
                 />
                 <span>
                   J&apos;accepte les{" "}
@@ -598,7 +598,7 @@ function Wizard() {
               <div className="mt-auto flex flex-col gap-3 pt-6 pb-4">
                 {homeOffer && <HomeShortcut checked={addToHome} onChange={setAddToHome} />}
                 <label className="flex items-center gap-3 text-[15px] text-slate-700 dark:text-zinc-300">
-                  <input id="su-remember" type="checkbox" checked={remember} onChange={(e) => setRememberChoice(e.target.checked)} className="h-5 w-5 rounded accent-brand dark:accent-brand-night" />
+                  <input id="su-remember" type="checkbox" checked={remember} onChange={(e) => setRememberChoice(e.target.checked)} className="h-5 w-5 rounded accent-slate-900 dark:accent-white" />
                   Rester connecté sur cet appareil
                 </label>
               </div>
@@ -644,7 +644,7 @@ function Wizard() {
 
           {step === "done" && (
             <div className="flex flex-1 flex-col items-center justify-center text-center">
-              <h1 id="su-done" tabIndex={-1} className="text-3xl font-bold tracking-tight text-balance focus:outline-none">
+              <h1 id="su-done" tabIndex={-1} className="text-3xl font-bold text-balance focus:outline-none">
                 Bienvenue sur <Em>FlashMiam</Em>, {firstName} !
               </h1>
               <p className="mt-10 inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-zinc-400" aria-live="polite">
@@ -682,13 +682,13 @@ const primaryClass =
 const inputClass = (invalid: boolean) =>
   `h-14 w-full rounded-2xl border-2 bg-white px-4 text-lg text-slate-900 transition placeholder:text-slate-400 focus:outline-none dark:bg-white/[0.04] dark:text-zinc-50 dark:backdrop-blur-xl dark:placeholder:text-zinc-500 ${invalid
     ? "border-red-500 focus:border-red-500"
-    : "border-slate-200 focus:border-brand dark:border-white/10 dark:focus:border-brand-night dark:focus:shadow-[0_0_0_4px_rgb(255_122_69/0.18)]"}`;
+    : "border-slate-200 focus:border-slate-900 dark:border-white/10 dark:focus:border-white/70 dark:focus:shadow-[0_0_0_4px_rgb(242_244_248/0.14)]"}`;
 
 /** « Ajouter FlashMiam à mon écran d'accueil », cochée par défaut : on peut la décocher. */
 function HomeShortcut({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-[15px] leading-snug text-slate-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300">
-      <input id="su-home" type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-0.5 h-5 w-5 flex-none rounded accent-brand dark:accent-brand-night" />
+      <input id="su-home" type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-0.5 h-5 w-5 flex-none rounded accent-slate-900 dark:accent-white" />
       <span>
         <span className="font-medium text-slate-900 dark:text-zinc-50">Ajouter FlashMiam à mon écran d&apos;accueil</span>
       </span>
@@ -697,7 +697,7 @@ function HomeShortcut({ checked, onChange }: { checked: boolean; onChange: (v: b
 }
 
 function Title({ id, children }: { id: string; children: ReactNode }) {
-  return <h1 id={id} className="text-[28px] leading-tight font-bold tracking-tight text-balance">{children}</h1>;
+  return <h1 id={id} className="text-[28px] leading-tight font-bold text-balance">{children}</h1>;
 }
 /** Contenu d'une étape, centré verticalement entre l'en-tête et le bouton : l'écran paraît moins vide. */
 const Body = ({ children }: { children: ReactNode }) => <div className="flex flex-1 flex-col justify-center py-4 [@media(max-height:760px)]:py-0">{children}</div>;
@@ -705,7 +705,7 @@ const Body = ({ children }: { children: ReactNode }) => <div className="flex fle
 function Head({ icon: Icon, id, children }: { icon: LucideIcon; id: string; children: ReactNode }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <span aria-hidden className="mb-4 grid h-16 w-16 place-items-center rounded-[22px] [@media(max-height:760px)]:mb-2.5 [@media(max-height:760px)]:h-11 [@media(max-height:760px)]:w-11 [@media(max-height:760px)]:rounded-2xl [@media(max-height:620px)]:hidden bg-brand/10 text-brand motion-safe:animate-pop dark:bg-brand-night/15 dark:text-brand-night">
+      <span aria-hidden className="mb-4 grid h-16 w-16 place-items-center rounded-[22px] [@media(max-height:760px)]:mb-2.5 [@media(max-height:760px)]:h-11 [@media(max-height:760px)]:w-11 [@media(max-height:760px)]:rounded-2xl [@media(max-height:620px)]:hidden bg-slate-100 text-slate-900 motion-safe:animate-pop dark:bg-white/10 dark:text-white">
         <Icon className="h-8 w-8 [@media(max-height:760px)]:h-6 [@media(max-height:760px)]:w-6" strokeWidth={2.2} />
       </span>
       <Title id={id}>{children}</Title>
