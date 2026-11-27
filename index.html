@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-NTsLcSyZ25zMA567ppqaSzrXVJ8KYuUNjlffMUVxtM8=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-Q0kT6zXiDVi5vzZ8PytWWTyyQtAqyQW7IwFA2bDeyF4=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -2730,6 +2730,15 @@
     .visit-cta-ico { background: rgba(22, 33, 58, .12); }
     .visit-cta-txt strong { font-family: var(--font-tag); font-stretch: 82%; font-weight: 800; font-size: 18px; }
     .visit-cta-txt small { opacity: .82; font-weight: 500; }
+    /* --- Offres de la fiche : même gros bloc orange que « Valider ma visite » (une offre = un bloc qui ouvre son QR code) --- */
+    .promo-block { margin-top: 12px; }
+    .promo-cta { margin: 0; }
+    .promo-cta.is-later { opacity: .8; }
+    .promo-cta .visit-cta-txt strong { font-size: 19px; line-height: 1.1; overflow-wrap: anywhere; }
+    .promo-cta-photo { flex: none; width: 48px; height: 48px; border-radius: 10px; object-fit: cover; }
+    .promo-cta > .pc-chev { flex: none; width: 20px; height: 20px; opacity: .8; }
+    .promo-cta-toggle { display: inline-block; margin: 8px 4px 0; font-size: 14px; }
+    .promo-cta-more { margin: 4px 4px 0; font-size: 14px; line-height: 1.45; color: var(--muted); overflow-wrap: anywhere; }
 
     /* --- Carte : repères nets, étiquettes de nom à l'encre --- */
     .pin-badge { box-shadow: 0 1px 0 rgba(22, 33, 58, .2), 0 6px 14px -5px rgba(22, 33, 58, .55); }
@@ -9176,7 +9185,47 @@
     box.hidden = !promos.length;
     box.textContent = '';
     const locked = promos.filter((p) => !Guest.canSee(p, shop));   // visiteur : offres réservées aux membres
+    const QR_ICO = '<span class="visit-cta-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17.5 20.5h3v-3"/></svg></span>';
+    const CHEVRON = '<svg class="pc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
     promos.filter((p) => Guest.canSee(p, shop)).forEach((p) => {
+      // Offre utilisable (compte client) ou visiteur sur une vraie fiche : gros bloc orange, comme « Valider ma visite » ;
+      // le toucher affiche le QR code avec cette offre (visiteur : invitation à créer son compte)
+      const usable = UUID_RE.test(p.id) && VisitPass.canUse(shop) && VisitFeature.check();
+      const guestOffer = !usable && Guest.on() && shop.isPro && UUID_RE.test(p.id);
+      if (usable || guestOffer) {
+        const wrap = document.createElement('div');
+        wrap.className = 'promo-block';
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'visit-cta promo-cta';
+        b.innerHTML = QR_ICO + '<span class="visit-cta-txt"><strong></strong><small></small></span>' + CHEVRON;
+        b.querySelector('strong').textContent = p.title;
+        b.querySelector('small').textContent = (promoWhen(p) || PROMO_KINDS[p.kind].label) + (guestOffer ? ' · avec un compte gratuit' : '');
+        if (promoSlot(p) && !promoNow(p)) b.classList.add('is-later');
+        if (p.photoUrl) {
+          const img = document.createElement('img');
+          img.className = 'promo-cta-photo'; img.src = p.photoUrl; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
+          b.insertBefore(img, b.querySelector('.pc-chev'));
+        }
+        b.setAttribute('aria-label', 'Profiter de l\'offre « ' + p.title + ' » : ' + (usable ? 'afficher mon QR code' : 'créer un compte'));
+        b.addEventListener('click', () => (usable ? VisitPass.open(shop.id, p) : Guest.ask('Créez votre compte gratuit pour profiter des offres en caisse avec votre QR code.')));
+        wrap.appendChild(b);
+        if (p.details) {
+          const more = document.createElement('p');
+          more.className = 'promo-cta-more';
+          more.textContent = p.details;
+          more.hidden = true;
+          const toggle = document.createElement('button');
+          toggle.type = 'button';
+          toggle.className = 'link-btn promo-cta-toggle';
+          toggle.textContent = 'Voir les conditions';
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.addEventListener('click', () => { more.hidden = !more.hidden; toggle.setAttribute('aria-expanded', String(!more.hidden)); toggle.textContent = more.hidden ? 'Voir les conditions' : 'Masquer les conditions'; });
+          wrap.append(toggle, more);
+        }
+        box.appendChild(wrap);
+        return;
+      }
       const card = document.createElement('div');
       card.className = 'promo is-' + p.kind;
       card.innerHTML = '<div class="promo-main"><strong></strong><small></small></div>';
@@ -14222,14 +14271,13 @@
       const ok = canUse(shop) && VisitFeature.check(() => { const m = selectedId && markers.get(selectedId); if (m) { renderShopPromos(m.shop); renderEntry(m.shop); } });
       $('shop-visit-box').hidden = !ok;
       if (!ok) return;
+      // Les offres ont chacune leur gros bloc (plus bas) : ce bouton valide la visite, sans offre (pas de doublon)
       const offers = usablePromos(shop);
-      entryPromo = offers[0] || null;
-      $('shop-visit-title').textContent = entryPromo ? 'Profiter de l\'offre' : 'Valider ma visite';
-      $('shop-visit-sub').textContent = entryPromo
-        ? entryPromo.title + (offers.length > 1 ? ' · et ' + plural(offers.length - 1, 'autre offre', 'autres offres') + ' plus bas' : '')
-        : 'Un QR code à montrer en caisse';
-      $('shop-visit').setAttribute('aria-label', (entryPromo ? 'Profiter de l\'offre « ' + entryPromo.title + ' »' : 'Valider ma visite') + ' chez ' + shop.name + ' : afficher mon QR code');
-      $('shop-visit-plain').hidden = !entryPromo;
+      entryPromo = null;
+      $('shop-visit-title').textContent = 'Valider ma visite';
+      $('shop-visit-sub').textContent = 'Un QR code à montrer en caisse' + (offers.length ? ' · ' + plural(offers.length, 'offre', 'offres') + ' plus bas' : '');
+      $('shop-visit').setAttribute('aria-label', 'Valider ma visite chez ' + shop.name + ' : afficher mon QR code');
+      $('shop-visit-plain').hidden = true;
       if (!prefetched) { prefetched = true; (window.requestIdleCallback || setTimeout)(() => loadQrMaker().catch(() => { prefetched = false; })); }
     }
     function setState(s) { stage.dataset.state = s; }

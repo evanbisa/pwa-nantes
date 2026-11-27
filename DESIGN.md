@@ -41,11 +41,17 @@ Une seule famille, **Archivo** (variable, licence OFL, servie par le site : `ven
 - Ombres portées vers le bas, teintées d'encre (`--shadow`, `--shadow-lift`) ; jamais de halo coloré ni de verre dépoli.
 - Puce active (filtres, types d'offres) : remplie d'encre, texte papier.
 
-## Les bons plans (style « sobre », choisi par l'utilisateur le 26/11/2026)
+## Les bons plans
 
-Cadre papier (`--panel-solid`) bordé d'un filet (`--line-strong`), coins de 12 px, carré « % » orange (`--brand`, texte encre)
-à gauche, titre de l'offre en lettres d'étiquette (Archivo étroite, 800). Même orange pour le « % » des repères de la
-carte (`.pin-flag`) et la pastille du nombre d'offres. À l'accueil, les avantages sont une simple liste à coches orange.
+- **Dans une fiche, offre utilisable** (compte client, ou visiteur sur une vraie fiche) : chaque offre est un **gros bloc orange**,
+  le même que « Valider ma visite » (`.visit-cta.promo-cta`) : icône du QR code, titre de l'offre en lettres d'étiquette,
+  horaires ou type d'offre, flèche. Le toucher ouvre le QR code avec cette offre (visiteur : invitation à créer son compte).
+  Conditions sous le bloc (« Voir les conditions »). Le bloc du haut redevient alors « Valider ma visite » (sans offre),
+  avec « N offres plus bas » (choix de l'utilisateur, 27/11/2026).
+- **Ailleurs** (restaurant d'exemple, aperçu restaurateur) : style « sobre » : cadre papier bordé d'un filet, coins de 12 px,
+  carré « % » orange (`--brand`, texte encre) à gauche (choix du 26/11/2026).
+- Même orange pour le « % » des repères de la carte (`.pin-flag`) et la pastille du nombre d'offres. À l'accueil, les
+  avantages sont une simple liste à coches orange.
 
 ## Ce qui ne change pas
 
