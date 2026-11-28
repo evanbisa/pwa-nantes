@@ -201,6 +201,15 @@ vrais comptes et ses vraies données. Pour cela, le site accepte d'être affich�
 seulement** (`X-Frame-Options: SAMEORIGIN`, `frame-ancestors 'self'`) ; un autre site ne peut toujours pas
 l'afficher. Le modèle choisi indique au site s'il est sur iPhone ou Android (`FLASHMIAM_SIM.platform`).
 
+## Mesurer la fluidité sur un vrai téléphone
+
+`https://flashmiam.fr/?mesure` ouvre le site avec un petit panneau de mesure (`mesure.js`, téléchargé seulement avec ce
+lien). On fait 5 gestes (glisser la carte, zoomer à deux doigts, ouvrir une fiche, la fermer, ouvrir les offres) ; chaque
+case se coche toute seule, puis « Voir le résultat » affiche, pour chaque geste, les images par seconde, la part
+d'images en retard (saccades), la pire image et le temps de réaction au toucher, avec le modèle et le système du
+téléphone. Rien n'est envoyé : capture d'écran ou bouton « Copier le résultat ». Les gestes de la mesure ne comptent pas
+dans les statistiques des restaurants. Désactiver le mode Économie d'énergie avant (il limite l'écran à 30 images/s).
+
 ## Tester en local
 
 La géolocalisation et la connexion exigent HTTPS ou `localhost` :
