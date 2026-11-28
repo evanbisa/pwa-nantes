@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-Gi7O5Z/SLOjdptNxXnW9aTz6pPlfjT93fqsxR8UHB2A=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-TtnoTXf+DJcKYvzSk0/k0gyR2VFMqiMJ3JX9xaPx2SI=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -1536,8 +1536,11 @@
     .g-overlay:empty { display: none; }
     .g-box:focus-within .g-btn { outline: 2px solid var(--accent); outline-offset: 2px; }   /* focus sur le bouton de Google, invisible */
     /* Anti-robots (Cloudflare Turnstile) : invisible, sauf si une vérification manuelle est demandée */
-    .captcha-box { position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 2147483000; }
-    .captcha-box.is-open { background: var(--panel-solid); padding: 12px; border-radius: 16px; box-shadow: var(--shadow); }
+    /* Anti-robots : la case de Cloudflare (rare) s'affiche au centre de l'écran, sur un voile, et s'efface dès que la
+       vérification est terminée (28/11/2026 : elle restait affichée, « Réussite ! », tout le reste de la visite). */
+    .captcha-box { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2147483000; transition: opacity .2s ease; }
+    .captcha-box.is-open { background: var(--panel-solid); padding: 12px; border-radius: 16px; border: 1px solid var(--line); box-shadow: 0 0 0 100vmax rgba(10, 12, 16, .45); }
+    .captcha-box.is-done { opacity: 0; pointer-events: none; }
     .terms-check { align-items: flex-start; line-height: 1.45; }
     .terms-check input { margin-top: 2px; }
     .g-note { margin: 0; font-size: 13px; line-height: 1.45; text-align: center; color: var(--muted); }
@@ -2890,7 +2893,7 @@
     .glass, .visit-cta, .promo-cta, .vp-card, .tour-card, .tour-hello, .ob-panel, .ob-logo .ob-mark, .ins-app, .loader-card,
     .orbit-item, .orbit.is-small .orbit-item, .shop-tabs button[aria-selected="true"], .seg button[aria-pressed="true"],
     .bill-pill, .tabbar, .guest-bar, .install-nudge, .net, .toast, .scan-dock, .dock-main, .preview-bar, .ps-tile, .ps-tile:hover,
-    .cs-panel, .addr-list, .captcha-box.is-open, .photo-item.is-dragging, .jn-choices button:hover, .btn-primary:hover,
+    .cs-panel, .addr-list, .photo-item.is-dragging, .jn-choices button:hover, .btn-primary:hover,
     #pro-space .ps-cards button, .ps-quick button, .ps-todo li, #pro-space .ps-cards button:hover, .ps-quick button:hover, .ps-todo li:hover,
     .pin-label, .place-pin { box-shadow: none; }
     @media (min-width: 900px) { .vp-panel { box-shadow: none; } }
@@ -5529,9 +5532,24 @@
       const ts = await load();
       return new Promise((resolve, reject) => {
         let settled = false;
-        const end = (fn, v) => { if (!settled) { settled = true; clearTimeout(timer); slot().classList.remove('is-open'); fn(v); } };
+        // Vérification terminée (réussie ou non) : la case s'efface tout de suite, puis le widget est retiré de la page
+        // (le jeton reçu reste valable). Sans ça, la case « Réussite ! » restait affichée tout le reste de la visite.
+        const end = (fn, v) => {
+          if (settled) return;
+          settled = true; clearTimeout(timer);
+          const b = slot(), id = widget;
+          b.classList.add('is-done');
+          setTimeout(() => {
+            if (widget !== id) return;   // une nouvelle vérification a déjà pris la place
+            try { ts.remove(id); } catch (e) { /* déjà retiré */ }
+            widget = null;
+            b.classList.remove('is-open', 'is-done');
+          }, 220);
+          fn(v);
+        };
         const timer = setTimeout(() => end(reject, new Error('captcha_timeout')), 90000);
         if (widget !== null) { try { ts.remove(widget); } catch (e) { /* déjà retiré */ } }
+        slot().classList.remove('is-open', 'is-done');
         widget = ts.render(slot(), {
           sitekey: CONFIG.turnstileSiteKey, execution: 'execute', appearance: 'interaction-only', language: 'fr',
           callback: (t) => end(resolve, t),
@@ -10383,6 +10401,29 @@
     if (fly) view.flyTo({ center: m.shop.coords, zoom: Math.max(view.getZoom(), 16), padding: shopPadding(), duration: fly === 'jump' ? 0 : 900 });
   }
 
+  /**
+   * Toute la ville (fin du guide) : la carte recule pour montrer tous les restaurants affichés, jamais plus près que la
+   * vue d'ensemble de La Roche-sur-Yon (deux restaurants voisins ne doivent pas rapprocher la carte).
+   */
+  function showAllShops() {
+    whenMapReady(() => {
+      const pts = [...markers.values()].filter((m) => !m.el.classList.contains('is-filtered')).map((m) => m.shop.coords);
+      let center = CONFIG.center, zoom = CONFIG.overviewZoom;
+      if (pts.length) {
+        const lng = pts.map((c) => c[0]), lat = pts.map((c) => c[1]);
+        const w = Math.min(...lng), e = Math.max(...lng), so = Math.min(...lat), no = Math.max(...lat);
+        center = [(w + e) / 2, (so + no) / 2];
+        const raw = view.engine === 'maplibre' ? view.raw : null;
+        const cam = raw && raw.cameraForBounds([[w, so], [e, no]], { padding: { top: 150, bottom: 170, left: 60, right: 60 } });
+        if (cam && Number.isFinite(cam.zoom)) zoom = cam.zoom;
+      }
+      zoom = Math.max(CONFIG.minZoom, Math.min(zoom, CONFIG.overviewZoom + 0.5));
+      setFollow(false);
+      view.setPadding(basePadding());
+      view.flyTo({ center, zoom, duration: 1600 });
+    });
+  }
+
   function deselectShop() {
     if (!selectedId) return;
     markers.get(selectedId).el.classList.remove('is-selected');
@@ -14904,7 +14945,9 @@
       // Retour dans l'application : QR périmé renouvelé tout de suite, sinon on regarde s'il a été scanné entre-temps
       if (token && !renewing && Date.now() - issuedAt >= ROTATE_MS) issue(); else if (token) check();
     });
-    return { open, close, isOpen, canUse, renderEntry, armButton };
+    /** Bouton « Valider ma visite » de la fiche ouverte : demande préparée (le guide le touche à travers son voile). */
+    const prepareEntry = () => { if (selectedId && !Guest.on()) prepare(selectedId, entryPromo); };
+    return { open, close, isOpen, canUse, renderEntry, armButton, prepareEntry };
   })();
 
   const Scanner = (() => {
@@ -15395,8 +15438,10 @@
         { el: () => $('profile-btn'), title: 'Votre profil et vos réglages, avec ce guide' },
         // Pour finir : le client ouvre lui-même une fiche, touche le bouton du QR code, puis on lui montre son QR code
         { el: examplePin, title: 'Touchez un restaurant pour ouvrir sa fiche', round: true, example: true, tap: 'shop' },
-        { el: () => $('shop-visit'), title: 'Touchez ce bouton pour afficher votre QR code', tap: 'qr', demo: true, follow: true, reveal: revealVisit },
+        { el: () => $('shop-visit'), title: 'Touchez ce bouton pour afficher votre QR code', tap: 'qr', demo: true, follow: true },
         { el: () => $('vp-stage'), title: 'Montrez ce QR code en caisse pour profiter de l\'offre', follow: true, qr: true },
+        // Pour finir : la croix ferme le QR code et la fiche, puis la carte recule sur tous les restaurants de la ville
+        { el: () => $('vp-close'), title: 'Touchez la croix pour revenir à la carte', circle: true, tap: 'close' },
       ];
     }
     let cardH = 0;          // hauteur visée de la bulle (pendant qu'elle change de taille)
@@ -15411,7 +15456,7 @@
       $('tour-demo').hidden = !(st && st.demo && !r);   // bouton de la fiche introuvable : exemple dessiné dans la bulle
       if (r) {
         const w = r.width + pad * 2, h = r.height + pad * 2;
-        Object.assign(spot.style, { left: r.left - pad + 'px', top: r.top - pad + 'px', width: w + 'px', height: h + 'px', borderRadius: st.round ? '50%' : Math.min(h / 2, 26) + 'px' });
+        Object.assign(spot.style, { left: r.left - pad + 'px', top: r.top - pad + 'px', width: w + 'px', height: h + 'px', borderRadius: st.round || st.circle ? '50%' : Math.min(h / 2, 26) + 'px' });
       } else Object.assign(spot.style, { left: innerWidth / 2 + 'px', top: innerHeight * 0.42 + 'px', width: '0px', height: '0px' });
       return { r, pad };
     }
@@ -15470,21 +15515,77 @@
       setFollow(false);
       whenMapReady(() => view.flyTo({ center: m.shop.coords, zoom: Math.max(view.getZoom(), 16), duration: 900, offset: [0, -Math.round(innerHeight * 0.18)] }));
     }
-    /** Étape du QR code : la fiche descend en douceur jusqu'au bouton « Valider ma visite / Profiter de l'offre ». */
+    const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const wait = (ms) => new Promise((res) => setTimeout(res, ms));
+    /** Attend (image par image) que `ok()` soit vrai, `max` ms au plus ; renvoie true si c'est le cas. */
+    function until(ok, max) {
+      const t0 = performance.now();
+      return new Promise((res) => { const f = () => (ok() ? res(true) : performance.now() - t0 > max ? res(false) : requestAnimationFrame(f)); requestAnimationFrame(f); });
+    }
+    /** Fiche (ou écran du QR code) arrivée à sa place : plus de glissement ni d'animation en cours. */
+    const settled = (box) => !!box && Math.abs(slideY(box)) < 1 && !box.getAnimations().some((a) => a.playState === 'running' && a.effect && a.effect.target === box);
+    /**
+     * Étape du QR code : la fiche, une fois arrivée, descend en douceur jusqu'au bouton « Valider ma visite » (au tiers
+     * de sa hauteur, la bulle tient dessous). Défilement image par image plutôt que scrollTo({ behavior: 'smooth' }) :
+     * sur iPhone, la fiche lancée pendant qu'elle montait restait en haut (bouton hors de l'écran, vidéo du 28/11/2026).
+     */
     function revealVisit() {
       const sheet = $('shop-sheet'), btn = $('shop-visit');
-      if (!sheet || !btn || btn.offsetParent === null) return;
-      const top = sheet.scrollTop + btn.getBoundingClientRect().top - sheet.getBoundingClientRect().top - sheet.clientHeight * 0.3;
-      // Fiche encore en train de monter : elle arrive déjà à la bonne hauteur (pas de défilement en plus après)
-      const moving = Math.abs(slideY(sheet)) > 1;
-      sheet.scrollTo({ top: Math.max(0, top), behavior: moving || matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      if (!sheet || !btn || btn.offsetParent === null) return Promise.resolve();
+      const max = sheet.scrollHeight - sheet.clientHeight;
+      const to = Math.max(0, Math.min(max, sheet.scrollTop + btn.getBoundingClientRect().top - sheet.getBoundingClientRect().top - sheet.clientHeight * 0.3));
+      const from = sheet.scrollTop;
+      if (Math.abs(to - from) < 2) return Promise.resolve();
+      if (reducedMotion()) { sheet.scrollTop = to; return Promise.resolve(); }
+      const t0 = performance.now(), ms = 520;
+      const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+      return new Promise((res) => {
+        const f = (now) => {
+          const k = Math.min(1, (now - t0) / ms);
+          sheet.scrollTop = from + (to - from) * ease(k);
+          if (k < 1 && isOpen()) requestAnimationFrame(f); else { if (Math.abs(sheet.scrollTop - to) > 2) sheet.scrollTop = to; res(); }
+        };
+        requestAnimationFrame(f);
+      });
+    }
+    /**
+     * Changement d'étape qui fait bouger l'écran (fiche qui s'ouvre, QR code qui s'affiche, retour à la carte) : les
+     * mouvements se suivent au lieu de se chevaucher. 1. Bulle et projecteur s'effacent ; 2. l'écran change et se pose
+     * (`change`) ; 3. projecteur et bulle réapparaissent directement sur la nouvelle cible, avec la nouvelle consigne.
+     */
+    let busy = false, fades = [];
+    function fadeOut() {
+      fades.forEach((a) => a.cancel());
+      const ms = reducedMotion() ? 0 : 200;
+      fades = [spot, card].map((el) => el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: ms, easing: 'ease', fill: 'forwards' }));
+      return wait(ms);
+    }
+    function fadeIn() {
+      const old = fades;
+      fades = [];
+      if (!reducedMotion()) {
+        spot.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, easing: 'ease' });
+        card.animate([{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], { duration: 380, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+      }
+      old.forEach((a) => a.cancel());   // après les nouvelles : aucun clignotement
+    }
+    async function moveTo(n, change) {
+      if (busy) return;
+      busy = true;
+      trackMap(false);
+      let ok = false;
+      try { await fadeOut(); ok = isOpen() && await change(); } catch (e) { console.warn('[guide]', e); ok = false; }
+      busy = false;
+      if (!isOpen()) return;
+      if (ok === false) { finish(); return; }
+      show(n, { animate: false, fresh: true });
+      fadeIn();
     }
     let swapTimer = 0;
-    function show(n, { animate = true } = {}) {
+    function show(n, { animate = true, fresh = false } = {}) {
       i = n;
       const st = steps[i];
       focusExample(!!st.example);
-      if (st.reveal) st.reveal();
       safeTopPx = safeTop();
       clearTimeout(swapTimer);
       // 1. Le projecteur part tout de suite vers la nouvelle cible ; le contenu de la bulle s'efface
@@ -15497,8 +15598,8 @@
         $('tour-text').hidden = !st.text;   // une seule phrase par étape
         $('tour-hello').hidden = !st.hello;
         card.classList.toggle('is-hello', !!st.hello);
-        // « Touchez le bouton » : on attend le geste (le bouton Suivant disparaît), sauf si le bouton est introuvable
-        const mustTap = st.tap === 'qr' && !!(st.el && visible(st.el()));
+        // « Touchez le bouton / la croix » : on attend le geste (le bouton Suivant disparaît), sauf si l'élément est introuvable
+        const mustTap = (st.tap === 'qr' || st.tap === 'close') && !!(st.el && visible(st.el()));
         $('tour-next').hidden = mustTap;
         $('tour-next').textContent = i === steps.length - 1 || (st.tap === 'qr' && !mustTap) ? 'C\'est parti !' : st.tap === 'shop' ? 'Ouvrir la fiche' : 'Suivant';
         $('tour-dots').innerHTML = steps.map((_, k) => '<i' + (k === i ? ' class="is-on"' : '') + '></i>').join('');
@@ -15511,13 +15612,20 @@
           card.style.height = cardH + 'px';
           swapTimer = setTimeout(() => { card.style.height = 'auto'; }, 700);
         }
-        placeCard(placeSpot());
+        if (fresh) {   // nouvelle cible après un changement d'écran : projecteur et bulle y sont posés directement (invisibles)
+          spot.classList.add('is-glued');
+          card.style.transition = 'none';
+          placeCard(placeSpot());
+          void card.offsetHeight;
+          spot.classList.remove('is-glued');
+          card.style.transition = '';
+        } else placeCard(placeSpot());
         trackMap(!!(st.round || st.follow));
         // 3. Le nouveau texte apparaît pendant le glissement
         requestAnimationFrame(() => card.classList.remove('is-swap'));
         if (mustTap) { card.tabIndex = -1; card.focus({ preventScroll: true }); } else $('tour-next').focus({ preventScroll: true });   // geste attendu : le focus reste dans la bulle, sans cadre sur « Passer »
       };
-      if (animate) { card.classList.add('is-swap'); placeCard(target); swapTimer = setTimeout(fill, 170); } else fill();
+      if (animate) { card.classList.add('is-swap'); placeCard(target); swapTimer = setTimeout(fill, 170); } else { card.classList.remove('is-swap'); fill(); }
     }
     function start({ force = false } = {}) {
       const me = currentUser();
@@ -15538,6 +15646,9 @@
       if (!isOpen()) return;
       markSeen();
       trackMap(false);
+      busy = false;
+      fades.forEach((a) => a.cancel());
+      fades = [];
       focusExample(false);
       root.hidden = true;
       document.body.classList.remove('tour-open');
@@ -15545,54 +15656,59 @@
       card.style.translate = '';
       if (lastFocus && document.contains(lastFocus) && !VisitPass.isOpen()) lastFocus.focus({ preventScroll: true });
     }
-    /** Étape « touchez un restaurant » : la fiche s'ouvre, puis le guide montre le bouton du QR code. */
-    let opening = false;
+    /** Étape « touchez un restaurant » : la fiche monte, descend jusqu'au bouton du QR code, puis le guide le montre. */
     function openFromTour() {
-      if (opening) return;
       const pin = steps[i].el && steps[i].el();
       const m = exampleShop() || [...markers.values()].find((x) => pin && x.el.contains(pin));
       if (!m) { show(i + 1); return; }
-      opening = true;
-      card.classList.add('is-swap');
-      openShop(m.shop.id, { fly: false });   // la carte reste où elle est
-      // Sans attendre la fin de l'ouverture : projecteur et bulle partent tout de suite vers la place d'arrivée du bouton
-      afterOpen(() => $('shop-sheet').classList.contains('is-open'), () => show(i + 1), () => show(i + 1));
+      moveTo(i + 1, async () => {
+        openShop(m.shop.id, { fly: false });   // la carte reste où elle est
+        const sheet = $('shop-sheet');
+        await until(() => sheet.classList.contains('is-open') && settled(sheet), 900);   // la fiche a fini de monter
+        await revealVisit();
+        await until(() => settled(sheet), 300);
+      });
     }
-    /** Dès que la fenêtre est ouverte (vérifié à chaque image, 0,6 s au plus) : étape suivante ; sinon « fail ». */
-    function afterOpen(isReady, then, fail) {
-      const t0 = performance.now();
-      const tick = () => {
-        if (!isOpen()) { opening = false; return; }
-        if (isReady()) { opening = false; then(); }
-        else if (performance.now() - t0 < 600) requestAnimationFrame(tick);
-        else { opening = false; fail(); }
-      };
-      requestAnimationFrame(tick);
-    }
-    /** Étape « touchez ce bouton » : le QR code s'ouvre (comme hors du guide), puis le guide le montre. */
+    /** Étape « touchez ce bouton » : le QR code s'ouvre (comme hors du guide) ; le guide le montre une fois affiché. */
     function openQrFromTour() {
-      if (opening) return;
       const btn = $('shop-visit');
-      if (!visible(btn)) { end(); return; }   // pas de bouton (restaurant fictif…) : le guide se termine sur l'exemple dessiné
-      opening = true;
-      card.classList.add('is-swap');
-      btn.click();
-      afterOpen(() => VisitPass.isOpen(), () => show(i + 1), end);
+      if (!visible(btn)) { moveTo(i, async () => false); return; }   // pas de bouton (restaurant fictif…) : fin du guide
+      moveTo(i + 1, async () => {
+        btn.click();
+        if (!await until(() => VisitPass.isOpen(), 600)) return false;
+        const panel = document.querySelector('#visit-pass .vp-panel');
+        await until(() => settled(panel), 700);                                                 // l'écran a fini de monter
+        await until(() => $('vp-stage').dataset.state !== 'loading', 1500);                     // le QR code est dessiné
+        return true;
+      });
     }
-    const act = () => (steps[i].tap === 'qr' ? openQrFromTour() : openFromTour());
-    const next = () => (steps[i].tap ? act() : i < steps.length - 1 ? show(i + 1) : end());
+    /**
+     * Fin du guide (croix du QR code) : le QR code et la fiche se ferment, puis la carte recule pour montrer tous les
+     * restaurants de La Roche-sur-Yon. Un mouvement après l'autre : la fiche descend, puis la carte recule.
+     */
+    function finish() {
+      end();
+      if (VisitPass.isOpen()) VisitPass.close();
+      const sheetOpen = $('shop-sheet').classList.contains('is-open');
+      if (sheetOpen) closeShop();
+      setTimeout(showAllShops, sheetOpen && !reducedMotion() ? 380 : 0);
+    }
+    const act = () => (steps[i].tap === 'qr' ? openQrFromTour() : steps[i].tap === 'close' ? moveTo(i, async () => false) : openFromTour());
+    const next = () => { if (busy) return; if (steps[i].tap) act(); else if (i < steps.length - 1) show(i + 1); else end(); };
     const prev = () => {
-      if (i <= 0) return;
+      if (i <= 0 || busy) return;
       if (steps[i].qr && VisitPass.isOpen()) VisitPass.close();
       if (steps[i - 1].tap === 'shop' && $('shop-sheet').classList.contains('is-open')) closeShop();
       show(i - 1);
     };
-    // L'élément éclairé se touche à travers le voile du guide (repère, bouton du QR code)
+    const inSpot = (ev) => { const r = spot.getBoundingClientRect(); return ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom; };
+    // Doigt posé sur le bouton éclairé du QR code : la demande du QR code part déjà (comme hors du guide)
+    root.addEventListener('pointerdown', (ev) => { const st = steps[i]; if (st && st.tap === 'qr' && !busy && !card.contains(ev.target) && inSpot(ev)) VisitPass.prepareEntry(); }, { passive: true });
+    // L'élément éclairé se touche à travers le voile du guide (repère, bouton du QR code, croix)
     root.addEventListener('click', (ev) => {
       const st = steps[i];
-      if (!st || !st.tap || card.contains(ev.target)) return;
-      const r = spot.getBoundingClientRect();
-      if (ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom) act();
+      if (!st || !st.tap || busy || card.contains(ev.target)) return;
+      if (inSpot(ev)) act();
     });
     /** Premier passage sur la carte : guide montré dès que rien d'autre n'est ouvert (2 minutes au plus). */
     function maybeStart(delay = CONFIG.tourDelay) {

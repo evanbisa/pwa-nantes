@@ -143,6 +143,14 @@ Les tailles, graisses et interlignes suivent les styles de texte d'iOS ; la hié
     sauter le contenu ;
   - le code est dans `web/components/signup/useKeyboardInset.ts` et le module `Keyboard` de `index.html` ; sur la
     carte, les fiches glissent au-dessus du clavier (`bottom`, 0,25 s).
+- **Guide de démarrage, fin du parcours (28/11/2026)** : 9 étapes pour un client. 6. toucher un restaurant ; 7. toucher
+  « Valider ma visite » ; 8. le QR code ; 9. toucher la croix. Quand l'écran change (fiche qui s'ouvre, QR code qui
+  s'affiche), les mouvements se suivent sans se chevaucher : bulle et projecteur s'effacent (0,2 s), la fiche monte puis
+  descend toute seule jusqu'au bouton (défilement image par image, après son arrivée : sur iPhone, un défilement lancé
+  pendant la montée était perdu), et seulement ensuite projecteur et nouvelle consigne apparaissent sur la cible. La
+  croix ferme le QR code et la fiche, puis la carte recule sur tous les restaurants de la ville (zoom 14 au plus près).
+- **Anti-robots (Cloudflare Turnstile)** : invisible le plus souvent ; si Cloudflare demande une action, la case
+  s'affiche au centre de l'écran sur un voile, et s'efface dès la fin de la vérification (réussie ou non).
 - **Réglages du téléphone** : « Réduire les animations » remplace les glissements des fiches par un fondu court ;
   « Augmenter le contraste » renforce filets, textes secondaires et contour de focus ; « Réduire la transparence » rend
   panneaux et voiles opaques.
