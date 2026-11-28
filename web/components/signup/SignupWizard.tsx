@@ -421,14 +421,17 @@ function Wizard() {
           </>
         )}
       </header>
+      {/* <aside> : la ligne fait partie d'une zone repérable par les lecteurs d'écran (accessibilité, 28/11/2026) */}
       {canSwitchToLogin && (
-        <p className="px-5 text-right text-sm text-slate-600 dark:text-zinc-400">
-          J&apos;ai déjà un compte ·{" "}
-          <button type="button" onClick={() => openLogin(emailValid ? cleanEmail : "")}
-            className="rounded font-semibold text-brand-strong underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-brand-night">
-            Se connecter
-          </button>
-        </p>
+        <aside aria-label="Déjà inscrit">
+          <p className="px-5 text-right text-sm text-slate-600 dark:text-zinc-400">
+            J&apos;ai déjà un compte ·{" "}
+            <button type="button" onClick={() => openLogin(emailValid ? cleanEmail : "")}
+              className="rounded font-semibold text-brand-strong underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:text-brand-night">
+              Se connecter
+            </button>
+          </p>
+        </aside>
       )}
 
       {/* Clavier ouvert : la carte blanche garde toute sa hauteur (derrière le clavier, jamais de plan de la ville

@@ -2,9 +2,13 @@
 
 Ces skills sont chargés automatiquement par Claude Code dans toutes les sessions ouvertes sur ce dépôt.
 Ils viennent de dépôts publics officiels, copiés tels quels (seule une licence a été ajoutée à côté des skills
-Supabase). Ils ont été relus avant l'installation (25/11/2026 ; skills de sécurité le 28/11/2026) : ce sont des conseils en texte, plus un petit script
+Supabase et de `modern-web-guidance`). Ils ont été relus avant l'installation (25/11/2026 ; skills de sécurité et
+`modern-web-guidance` le 28/11/2026) : ce sont des conseils en texte, plus un petit script
 Python (`webapp-testing/scripts/with_server.py`) qui démarre un serveur local le temps d'un test. Aucun n'envoie de
-données ailleurs.
+données ailleurs, à une exception près : `modern-web-guidance` lance son programme de recherche par
+`npx -y modern-web-guidance@latest` (téléchargé depuis npm, publié par l'équipe Chrome de Google), et ce programme
+envoie à Google des statistiques d'usage anonymes (recherche tapée, guide lu, système, durée) sauf si
+`DISABLE_TELEMETRY=1` est placé devant la commande. `CLAUDE.md` demande de toujours le mettre.
 
 | Skill | À quoi il sert pour FlashMiam | Source (commit) | Licence |
 |---|---|---|---|
@@ -23,6 +27,7 @@ données ailleurs.
 | `variant-analysis` | Une faille trouvée : cherche les autres endroits du code qui ont la même | [trailofbits/skills](https://github.com/trailofbits/skills) (`149d7b2`) | CC BY-SA 4.0 |
 | `differential-review` | Relecture de sécurité d'une modification (PR, commit) | [trailofbits/skills](https://github.com/trailofbits/skills) (`149d7b2`) | CC BY-SA 4.0 |
 | `audit-context-building` | Comprendre le code (hypothèses, garanties) avant de chercher des failles | [trailofbits/skills](https://github.com/trailofbits/skills) (`149d7b2`) | CC BY-SA 4.0 |
+| `modern-web-guidance` | Bonnes pratiques web à jour de l'équipe Chrome : vitesse (LCP, INP, CLS), priorité des scripts et des images, longues tâches, accessibilité, formulaires, CSS récent, avec la compatibilité des navigateurs ; a servi à l'audit de vitesse et d'accessibilité du 28/11/2026 (voir `DESIGN.md`) | [GoogleChrome/modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance) (`2b4aa13`, v1.0.2) — `SKILL.md` et ses 211 guides ; le programme de recherche n'est pas copié, `npx` le télécharge à l'usage | Apache 2.0 |
 | `supply-chain-risk-auditor` | Risque des dépendances (failles connues, paquets abandonnés, scripts d'installation) ; ses scripts Python interrogent les bases publiques (osv.dev, npm, GitHub) avec les seuls noms des paquets | [trailofbits/skills](https://github.com/trailofbits/skills) (`149d7b2`) | CC BY-SA 4.0 |
 
 ## Ce qui prime sur les skills

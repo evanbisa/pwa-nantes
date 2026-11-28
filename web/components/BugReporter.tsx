@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
-import { siteClient } from "@/lib/supabase/site-session";
 
 /**
  * Bugs vus sur l'appareil (inscription, pages juridiques, tableau de bord), pour l'onglet « Bugs » du tableau de bord
  * de l'équipe. Même règle que la carte (BugReport dans ../index.html) : erreurs JavaScript non rattrapées, sans rien
  * qui désigne la personne ou l'appareil (message, fichier, page sans ses paramètres, type d'appareil, navigateur,
  * version publiée) ; au plus 10 envois par visite, un seul par bug ; bruit ignoré (extensions, autres sites, réseau).
+ *
+ * Vitesse (audit du 28/11/2026) : le client Supabase (61 Ko compressés) n'est chargé qu'au premier bug à envoyer.
+ * Importé ici d'office, il était téléchargé et exécuté sur toutes les pages, y compris les pages juridiques qui ne
+ * s'en servent pas (l'inscription et le tableau de bord le chargent de toute façon pour eux-mêmes).
  */
 const MAX = 10;
 const IGNORE = /^(Script error\.?|ResizeObserver loop|Failed to fetch|Load failed|NetworkError when attempting|network error|The operation was aborted|AbortError|TimeoutError|cancelled)/i;
@@ -54,8 +57,8 @@ export default function BugReporter() {
       if (seen.has(key)) return;
       seen.add(key);
       sent++;
-      void version()
-        .then((rel) => siteClient().rpc("report_client_error", {
+      void Promise.all([version(), import("@/lib/supabase/site-session")])
+        .then(([rel, { siteClient }]) => siteClient().rpc("report_client_error", {
           p_kind: kind, p_app: "app", p_message: message.slice(0, 1000), p_source: source.slice(0, 1000) || null,
           p_stack: stack?.slice(0, 4000) || null, p_page: location.pathname, p_platform: platform(), p_browser: browser(), p_release: rel,
         }))

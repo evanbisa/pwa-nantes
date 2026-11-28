@@ -41,8 +41,9 @@ const useHydrated = () => useSyncExternalStore(noSubscribe, () => true, () => fa
 export default function TeamDashboard() {
   return useHydrated() ? <App /> : <Splash />;
 }
+// <main> (et non <div>) : zone principale pour les lecteurs d'écran, même avant la connexion (accessibilité, 28/11/2026)
 const Splash = () => (
-  <div className="dash min-h-full bg-slate-50 dark:bg-night"><Centered><Loader2 className="h-7 w-7 animate-spin text-slate-500" aria-label="Chargement" /></Centered></div>
+  <main className="dash min-h-full bg-slate-50 dark:bg-night"><Centered><Loader2 className="h-7 w-7 animate-spin text-slate-500" aria-label="Chargement" /></Centered></main>
 );
 
 function App() {
@@ -60,7 +61,7 @@ function App() {
 }
 
 const Plain = ({ children }: { children: ReactNode }) => (
-  <div className="dash min-h-full bg-slate-50 px-4 text-slate-900 dark:bg-night dark:text-zinc-50">{children}</div>
+  <main className="dash min-h-full bg-slate-50 px-4 text-slate-900 dark:bg-night dark:text-zinc-50">{children}</main>
 );
 
 function Dashboard() {
