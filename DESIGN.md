@@ -151,6 +151,19 @@ Les tailles, graisses et interlignes suivent les styles de texte d'iOS ; la hié
   croix ferme le QR code et la fiche, puis la carte recule sur tous les restaurants de la ville (zoom 14 au plus près).
 - **Anti-robots (Cloudflare Turnstile)** : invisible le plus souvent ; si Cloudflare demande une action, la case
   s'affiche au centre de l'écran sur un voile, et s'efface dès la fin de la vérification (réussie ou non).
+- **Espace restaurateur (28/11/2026, skill `apple-design`)** : fond groupé gris doux (`--bg`) et cartes blanches sans
+  bordure (`--panel-solid`), comme les listes groupées d'iPhone ; grand titre « Bonjour … » (28 px, 34 px sur
+  ordinateur), titres de partie en 20 px gras, chiffres en SF Pro Rounded (`ui-rounded`) aux chiffres alignés,
+  tendances en flèches colorées sans pastille. Accueil dans l'ordre : période (commande segmentée pleine largeur),
+  « Scanner un client » (orange plein, texte encre), 6 chiffres clés avec icônes dessinées, « À faire » et
+  « Ce qu'il faut retenir » en listes groupées (filet décalé), raccourcis en 4 colonnes d'icônes, courbe des vues.
+  Barre d'onglets du téléphone à l'encre pleine, comme celle de la carte. Mouvement : ouverture et fermeture par le
+  même chemin (montée de 26 px, 0,44 s / descente 0,24 s), fondu court entre onglets, curseur de la commande segmentée
+  qui glisse (0,34 s, courbe d'iOS), barres qui poussent à l'ouverture et au changement de période, anciens chiffres
+  estompés pendant le chargement d'une autre période (retour à la précédente si elle ne charge pas), filet sous
+  l'en-tête seulement quand le contenu défile dessous. Focus posé sur le panneau (aucun cadre de focus après un toucher).
+- **Titre de l'accueil** : 2 ou 3 lignes sur tous les téléphones ; taille selon la largeur du cadre (`cqi`, plafond
+  34 px, 28 px sur écran bas), puis ajustée par `fitWelcomeTitle` si la police du téléphone est plus large.
 - **Réglages du téléphone** : « Réduire les animations » remplace les glissements des fiches par un fondu court ;
   « Augmenter le contraste » renforce filets, textes secondaires et contour de focus ; « Réduire la transparence » rend
   panneaux et voiles opaques.

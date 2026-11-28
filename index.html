@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-TtnoTXf+DJcKYvzSk0/k0gyR2VFMqiMJ3JX9xaPx2SI=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-oKa5MqYZRoSEiUbSfx+D8WVWMIjEGcAzg4o7s65Ri7c=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -2974,6 +2974,238 @@
       .tabbar .offers-badge, .tabbar .notif-badge { box-shadow: 0 0 0 2px var(--shell); }
       body.is-guest .tabbar #guest-signup { border-radius: 12px; font-size: 15px; font-weight: 600; letter-spacing: normal; color: var(--on-brand); background: var(--brand); box-shadow: none; }
     }
+
+    /* --- Titre de l'accueil (28/11/2026) : 2 ou 3 lignes sur tous les téléphones, jamais 4 ---
+       « Les restaurants de » et « La Roche-sur-Yon, » doivent tenir chacun sur une ligne : la taille suit la largeur
+       du cadre (unités du conteneur, cqi). En gras, SF Pro mesure environ 9,4 fois la taille du texte pour ces deux
+       morceaux (mesuré sur une capture d'iPhone de 393 points : à 34 px, « Les » passait seul sur sa ligne) ; on divise
+       par 9,8 pour garder de la marge, avec un plafond de 34 px (Large Title), 28 px sur les écrans bas. Repli sans
+       unités de conteneur : même calcul sur la largeur de l'écran (marges du cadre : 16 + 22 px de chaque côté).
+       Filet de sécurité en JavaScript (fitWelcomeTitle) : autre police, texte agrandi… la taille baisse encore si besoin. */
+
+    /* =====================================================================
+       ESPACE RESTAURATEUR — refonte « Apple » (28/11/2026, skill apple-design)
+       - Fond groupé gris doux et cartes blanches sans bordure, comme les listes groupées de l'iPhone (Réglages,
+         Santé) : la hiérarchie vient des espaces et du contraste des surfaces, plus des traits.
+       - Typographie : grand titre (28 px, gras, approche resserrée), titres de partie en Title 3 (20 px), chiffres
+         en SF Pro Rounded (ui-rounded) aux chiffres alignés, textes secondaires en 13 px.
+       - Mouvement : ouverture et fermeture par le même chemin, fondu court entre onglets, curseur de la commande
+         segmentée qui glisse, barres des graphiques qui poussent, retour au toucher. « Réduire les animations » :
+         fondus seulement.
+       - En-tête : il prend un filet seulement quand le contenu défile dessous (effet de bord de défilement).
+       ===================================================================== */
+    #pro-space {
+      --ps-bg: var(--bg); --ps-card: var(--panel-solid); --ps-r: 16px; --ps-ease: cubic-bezier(.32, .72, 0, 1);
+      --ps-fill: color-mix(in srgb, var(--text) 7%, transparent); --ps-fill-2: color-mix(in srgb, var(--text) 12%, transparent);
+      animation: ps-backdrop .3s ease both;
+    }
+    @keyframes ps-backdrop { from { background-color: transparent; } }
+    #pro-space .ps-panel { background: var(--ps-bg); outline: none; animation: ps-open .44s var(--ps-ease) both; }
+    @keyframes ps-open { from { opacity: 0; transform: translateY(26px); } }
+    /* Fermeture : même chemin qu'à l'ouverture, en sens inverse (et le voile se lève) */
+    #pro-space.is-closing { pointer-events: none; background-color: transparent; transition: background-color .24s ease; }
+    #pro-space.is-closing .ps-panel { animation: ps-close .24s cubic-bezier(.4, 0, 1, 1) both; }
+    @keyframes ps-close { to { opacity: 0; transform: translateY(26px); } }
+
+    /* En-tête : sur le fond, puis en surface pleine avec un filet quand le contenu passe dessous */
+    #pro-space .ps-head { gap: 12px; padding: calc(var(--safe-top) + 10px) 16px 10px; background: var(--ps-bg); border-bottom: 1px solid transparent; transition: border-color .2s ease, background-color .2s ease; }
+    #pro-space.is-scrolled .ps-head { background: var(--ps-card); border-bottom-color: var(--line); }
+    #pro-space .ps-emoji { width: 40px; height: 40px; border-radius: 11px; font-size: 22px; background: var(--ps-card); transition: background-color .2s ease; }
+    #pro-space.is-scrolled .ps-emoji { background: var(--ps-fill); }
+    #pro-space .ps-title h2 { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }   /* Headline */
+    #pro-space .ps-title p { margin-top: 2px; font-size: 13px; }
+    #pro-space .ps-title p .is-on, #pro-space .ps-title p .is-off { font-weight: 600; }
+    #ps-close { position: relative; width: 32px; height: 32px; font-size: 19px; color: var(--muted); background: var(--ps-fill-2); }
+    #ps-close::after { content: ""; position: absolute; inset: -6px; }   /* zone de toucher de 44 px */
+
+    /* Contenu */
+    #pro-space .ps-body { padding-top: 4px; padding-left: 16px; padding-right: 16px; background: var(--ps-bg); }
+    #pro-space .ps-pane:not([hidden]) { animation: ps-pane .24s ease both; }
+    @keyframes ps-pane { from { opacity: 0; transform: translateY(6px); } }
+    #pro-space .ps-pane h3, #pro-space .ps-block > h3 { margin: 0 4px 10px; font-size: 20px; font-weight: 700; line-height: 1.25; letter-spacing: -.01em; }   /* Title 3 */
+    #pro-space .ps-block { margin-top: 28px; }
+    #pro-space .hint { font-size: 13px; line-height: 1.4; }
+
+    /* Accueil : grand titre, puis la période en commande segmentée pleine largeur */
+    #pro-space .ps-home-head { flex-direction: column; align-items: stretch; gap: 14px; padding-top: 4px; }
+    #pro-space .ps-hello { font-size: 28px; font-weight: 700; line-height: 1.15; letter-spacing: -.02em; }        /* Large Title (téléphone) */
+    #pro-space .ps-hello small { margin-top: 4px; font-size: 15px; font-weight: 400; line-height: 1.35; letter-spacing: 0; color: var(--muted); }
+
+    /* Commande segmentée : un curseur glisse sous le choix (variables posées par syncSegs) */
+    #pro-space .seg { position: relative; isolation: isolate; display: flex; padding: 2px; border-radius: 9px; background: var(--ps-fill); }
+    #pro-space .seg button { position: relative; z-index: 1; flex: 0 0 auto; height: 32px; padding: 0 12px; border-radius: 7px; font-size: 13px; font-weight: 600; white-space: nowrap; color: var(--text); background: none; box-shadow: none; transition: opacity .15s ease; }
+    #pro-space #ph-period button { flex: 1 1 0; }   /* période de l'accueil : trois parts égales, pleine largeur */
+    #pro-space .seg button:active { opacity: .5; scale: 1; }
+    #pro-space .seg::before { content: ""; position: absolute; z-index: 0; top: 2px; bottom: 2px; left: 0; width: var(--seg-w, 0px); transform: translateX(var(--seg-x, 0px));
+      border-radius: 7px; background: var(--ps-card); box-shadow: 0 1px 3px rgba(0, 0, 0, .12), 0 0 0 .5px rgba(0, 0, 0, .04); opacity: 0; }
+    #pro-space .seg.has-thumb::before { opacity: 1; }
+    #pro-space .seg.is-ready::before { transition: transform .34s var(--ps-ease), width .34s var(--ps-ease); }
+    #pro-space .seg:not(.has-thumb) button[aria-pressed="true"] { background: var(--ps-card); }
+    :root[data-theme="dark"] #pro-space .seg::before, :root[data-theme="dark"] #pro-space .seg:not(.has-thumb) button[aria-pressed="true"] { background: color-mix(in srgb, var(--text) 22%, var(--ps-card)); box-shadow: none; }
+
+    /* Scanner : l'action principale, pleine et nette */
+    #pro-space .ps-scan { margin: 18px 0 0; padding: 14px 16px; border-radius: 20px; color: var(--on-brand); background: var(--brand); box-shadow: none; transition: scale .15s ease, filter .15s ease; }
+    #pro-space .ps-scan:hover { transform: none; filter: brightness(1.04); }
+    #pro-space .ps-scan:active { transform: none; scale: .985; }
+    #pro-space .ps-scan-ico { width: 48px; height: 48px; border-radius: 14px; background: rgba(22, 33, 58, .1); }
+    #pro-space .ps-scan-txt small { opacity: .8; }
+    #pro-space .ps-scan-today { border-radius: 12px; background: rgba(22, 33, 58, .1); }
+    #pro-space .ps-scan-today b { font-family: ui-rounded, var(--font-ui); }
+
+    /* Chiffres clés : cartes blanches, icône et libellé discrets, valeur en police arrondie */
+    #pro-space .ps-cards { gap: 10px; margin-top: 16px; }
+    #pro-space .ps-cards button { position: relative; min-height: 92px; padding: 12px 12px 11px; border: 0; border-radius: var(--ps-r); background: var(--ps-card); box-shadow: none; transition: scale .15s ease, background-color .2s ease; }
+    #pro-space .ps-cards button:active { scale: .97; }
+    #pro-space .ps-cards .kpi-label { display: flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+    #pro-space .kpi-ico { flex: none; width: 14px; height: 14px; }
+    #pro-space .ps-cards strong, #pro-space .kpi strong { font-family: ui-rounded, var(--font-ui); font-weight: 700; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+    #pro-space .ps-cards strong { margin-top: 6px; font-size: 26px; line-height: 1.1; }
+    #pro-space .trend { margin-top: 5px; padding: 0; border-radius: 0; background: none; font-size: 12.5px; font-weight: 600; }
+    #pro-space .trend.is-up { background: none; }
+    #pro-space .trend.is-down { background: none; }
+
+    /* Listes groupées (À faire, À retenir) : une carte, des lignes séparées par un filet décalé */
+    #pro-space .ps-todo, #pro-space .ps-insights { display: block; overflow: hidden; border-radius: var(--ps-r); background: var(--ps-card); }
+    #pro-space .ps-todo li, #pro-space .ps-insights li { position: relative; }
+    #pro-space .ps-todo li, #pro-space .ps-todo li:hover { border: 0; border-radius: 0; background: none; box-shadow: none; transform: none; }
+    #pro-space .ps-todo li + li::before, #pro-space .ps-insights li + li::before { content: ""; position: absolute; z-index: 1; top: 0; left: 16px; right: 0; height: 1px; background: var(--line); }
+    #pro-space .ps-todo button { min-height: 60px; gap: 12px; padding: 12px 14px 12px 16px; border: 0; border-radius: 0; background: none; box-shadow: none; transition: background-color .15s ease; }
+    #pro-space .ps-todo button:hover { background: var(--ps-fill); transform: none; box-shadow: none; }
+    #pro-space .ps-todo button:active { background: var(--ps-fill-2); }
+    #pro-space .ps-todo .td-txt b { font-size: 15px; font-weight: 600; }
+    #pro-space .ps-todo .td-txt small { margin-top: 2px; font-size: 13px; line-height: 1.35; }
+    #pro-space .ps-todo .td-go { font-size: 15px; font-weight: 400; color: var(--muted); }
+    #pro-space .ps-todo .is-done { padding: 14px 16px; border-radius: 0; font-size: 15px; font-weight: 500; background: none; }
+    #pro-space .ps-insights li { padding: 13px 16px; border: 0; border-radius: 0; background: none; box-shadow: none; font-size: 15px; line-height: 1.4; }
+    #pro-space .ps-insights b { font-weight: 600; }
+    #pro-space .ps-insights li.ps-retry { padding: 0; }
+    #pro-space #ps-more-stats { margin-top: 12px; min-height: 50px; border: 0; border-radius: var(--ps-r); font-size: 15px; font-weight: 600; color: var(--text); background: var(--ps-card); transition: scale .15s ease, background-color .15s ease; }
+    #pro-space #ps-more-stats:active { scale: .98; background: color-mix(in srgb, var(--text) 4%, var(--ps-card)); }
+
+    /* Raccourcis : une carte, quatre colonnes d'icônes (comme les actions rapides d'iPhone) */
+    #pro-space .ps-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 4px; margin: 0; padding: 16px 6px 14px; border-radius: var(--ps-r); background: var(--ps-card); }
+    #pro-space .ps-tile { flex-direction: column; align-items: center; gap: 7px; min-height: 0; padding: 0; text-align: center; background: none; border: 0; border-radius: 12px; box-shadow: none; transform: none; }
+    #pro-space .ps-tile:active { transform: none; }
+    #pro-space .ps-tile i { width: 50px; height: 50px; border-radius: 15px; color: var(--text); background: var(--ps-fill); transition: scale .15s ease, background-color .15s ease; }
+    #pro-space .ps-tile:active i { scale: .9; background: var(--ps-fill-2); }
+    #pro-space .ps-tile i svg { width: 23px; height: 23px; }
+    #pro-space .ps-tile strong { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; max-width: 86px; font-size: 12px; font-weight: 500; line-height: 1.25; }
+    #pro-space .ps-tile small { display: none; }
+
+    /* Graphiques : cartes blanches, quadrillage en pointillés, barres qui poussent à l'ouverture */
+    #pro-space .chart { margin-top: 12px; padding: 14px 16px 10px; border: 0; border-radius: var(--ps-r); background: var(--ps-card); box-shadow: none; }
+    #pro-space .ps-home-chart { margin-top: 28px; }
+    #pro-space .chart figcaption { font-size: 15px; font-weight: 600; }
+    #pro-space .chart figcaption small { margin-top: 1px; font-size: 13px; }
+    #pro-space .chart-box .grid-line { stroke-dasharray: 2 3; }
+    #pro-space .chart-box.is-grow .bar { transform-box: fill-box; transform-origin: 50% 100%; animation: ps-bar .62s var(--ps-ease) both; }
+    @keyframes ps-bar { from { transform: scaleY(0); } }
+    /* Autre période en cours de chargement : les chiffres affichés s'estompent (ni trou, ni saut), puis reviennent */
+    #pro-space :is(.ps-cards strong, .ps-cards .trend, .kpi strong, .kpi .trend, .kpi .kpi-sub, .chart-box, .hbars, .kv dd, #ps-insights) { transition: opacity .2s ease; }
+    #pro-space.is-refreshing :is(.ps-cards strong, .ps-cards .trend, .kpi strong, .kpi .trend, .kpi .kpi-sub, .chart-box, .hbars, .kv dd, #ps-insights) { opacity: .35; }
+
+    /* Statistiques : barre du haut sur le fond, chiffres et parties en cartes blanches */
+    #pro-space .ps-stats-top { background: var(--ps-bg); border-bottom: 1px solid transparent; transition: border-color .2s ease; }
+    #pro-space[data-tab="stats"].is-scrolled .ps-head { background: var(--ps-bg); border-bottom-color: transparent; }
+    #pro-space[data-tab="stats"].is-scrolled .ps-stats-top { border-bottom-color: var(--line); }
+    #pro-space .ps-stats-top .seg { flex: none; }
+    #pro-space .ps-stats-top .seg button { flex: none; padding: 0 11px; }
+    #pro-space .ps-jump button { height: 32px; border: 0; font-weight: 500; background: var(--ps-card); transition: scale .15s ease, background-color .15s ease; }
+    #pro-space .ps-jump button:active { scale: .95; }
+    #pro-space .kpi { min-height: 96px; padding: 12px 14px; border: 0; border-radius: var(--ps-r); background: var(--ps-card); box-shadow: none; }
+    #pro-space .kpi strong { margin-top: 4px; font-size: 26px; line-height: 1.15; }
+    #pro-space .kpi.is-hero strong { font-size: 40px; }
+    #pro-space .kpi-label { font-size: 12.5px; font-weight: 600; }
+    #pro-space .ps-card { padding: 16px; border: 0; border-radius: var(--ps-r); background: var(--ps-card); box-shadow: none; }
+    #pro-space .ps-block.ps-card { margin-top: 12px; }
+    #pro-space .ps-card h4 { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+    #pro-space .ps-card > .hint:first-of-type { margin-top: 4px; }
+    #pro-space .kv { border-top: 0; }
+    #pro-space .kv div { padding: 11px 0; font-size: 15px; }
+    #pro-space .kv div:last-child { border-bottom: 0; }
+    #pro-space .kv dd { font-family: ui-rounded, var(--font-ui); font-weight: 600; font-variant-numeric: tabular-nums; }
+    #pro-space .hbar { font-size: 14px; }
+    #pro-space .hbar > i { height: 6px; border-radius: 3px; background: var(--ps-fill); }
+    #pro-space .hbar > i > u { border-radius: 3px; }
+    #pro-space .ps-privacy { margin: 20px 4px 0; }
+
+    /* Publier, Avis, Ma fiche : mêmes cartes blanches sur le fond */
+    #pro-space .pd-block { margin-top: 12px; padding: 16px; border: 0; border-radius: var(--ps-r); background: var(--ps-card); box-shadow: none; }
+    #pro-space #psp-publish .pd-block:first-of-type { margin-top: 4px; }
+    #pro-space .pd-block h3, #pro-space .stats-head h3 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+    /* Formulaire d'offre : dans la carte, séparé par un filet (pas de cadre dans le cadre) */
+    #pro-space .promo-form { margin-top: 14px; padding: 16px 0 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; }
+    #pro-space .promo-admin li:last-child { border-bottom: 0; }
+    #pro-space .ps-alert { border-radius: 14px; }
+    #pro-space #psp-reviews > .stats-head { padding: 4px 4px 0; }
+    #pro-space .ps-rv-summary { margin-top: 14px; padding: 16px; border-radius: var(--ps-r); background: var(--ps-card); }
+    #pro-space .ps-rv-summary strong { font-family: ui-rounded, var(--font-ui); font-size: 40px; font-weight: 700; }
+    #pro-space .ps-rv-list { margin-top: 12px; padding: 2px 16px; border-radius: var(--ps-r); background: var(--ps-card); }
+    #pro-space .ps-rv-list:empty { display: none; }
+    #pro-space .ps-rv-list .rv-item:last-child { border-bottom: 0; }
+    #pro-space .ps-rv-list .rv-item.is-todo { box-shadow: none; padding-left: 0; }
+    #pro-space .ps-rv-list .rv-item.is-todo::before { content: ""; float: left; width: 8px; height: 8px; margin: 7px 8px 0 0; border-radius: 50%; background: var(--accent); }
+    #pro-space #psp-reviews > .hint { margin: 12px 4px 0; }
+    #pro-space .ps-switch-row { margin-top: 12px; padding: 14px 16px; border-radius: var(--ps-r); background: var(--ps-card); }
+    #pro-space .ps-switch-row b { font-size: 15px; font-weight: 600; }
+    #pro-space .ps-switch-row small { margin-top: 2px; font-size: 13px; }
+    #pro-space #psp-fiche > .ps-card + .ps-card, #pro-space #psp-todo > .ps-card + .ps-card { margin-top: 12px; }
+    #pro-space .ps-check li > button { min-height: 48px; font-size: 15px; transition: background-color .15s ease; }
+    #pro-space .ps-check li > button:active { background: var(--ps-fill); }
+    #pro-space .ps-meter { height: 6px; border-radius: 3px; background: var(--ps-fill); }
+
+    /* Barre d'onglets (téléphone) : à l'encre pleine, comme celle de la carte ; onglet actif en orange */
+    @media (max-width: 899.98px) {
+      #pro-space .ps-tabs { background: var(--shell); border-top: 0; }
+      #pro-space .ps-tabs button { color: rgba(242, 244, 248, .66); transition: color .2s ease; }
+      #pro-space .ps-tabs button[aria-selected="true"] { color: var(--on-shell); }
+      #pro-space .ps-tabs .ps-ico { transition: background-color .2s ease, scale .15s ease; }
+      #pro-space .ps-tabs button[aria-selected="true"] .ps-ico { color: var(--brand); background: rgba(242, 244, 248, .12); }
+      #pro-space .ps-tabs button:active .ps-ico { scale: .9; }
+      #pro-space .ps-tabs button:focus-visible { outline-color: var(--on-shell); }
+      #pro-space .ps-badge { box-shadow: 0 0 0 2px var(--shell); }
+    }
+
+    /* Ordinateur : menu à gauche sur surface pleine, sélection en rectangle arrondi, survol sans soulèvement */
+    @media (min-width: 900px) {
+      #pro-space .ps-head { padding: 14px 24px; }
+      #pro-space .ps-tabs { background: var(--ps-card); border-right: 1px solid var(--line); }
+      #pro-space .ps-tabs button { border-radius: 10px; }
+      #pro-space .ps-tabs button[aria-selected="true"] { background: var(--ps-fill); }
+      #pro-space .ps-tabs button[aria-selected="true"] .ps-ico { color: var(--accent); background: none; }
+      #pro-space .ps-body { padding: 24px 40px 40px; }
+      #pro-space .ps-home-head { flex-direction: row; align-items: flex-end; justify-content: space-between; }
+      #pro-space .ps-hello { font-size: 34px; }                                                                       /* Large Title */
+      #pro-space .ps-home-head .ps-period { flex: none; width: 320px; }
+      #pro-space .ps-cards button:hover, #pro-space .ps-tile:hover i, #pro-space .ps-jump button:hover { background: color-mix(in srgb, var(--text) 4%, var(--ps-card)); transform: none; box-shadow: none; }
+      #pro-space .ps-tile:hover i { background: var(--ps-fill-2); }
+      #pro-space .ps-cards strong { font-size: 30px; }
+      #pro-space .ps-tiles { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+      #pro-space .ps-insights { display: block; }
+    }
+    @media (min-width: 1200px) {
+      #pro-space #ps-home-live { grid-template-areas: "scan scan" "cards cards" "chart todo" "tiles tiles" "ins ins"; }
+      #pro-space #ps-home-live > .ps-scan { grid-area: scan; }
+      #pro-space #ps-home-live > .ps-cards { grid-area: cards; }
+      #pro-space #ps-home-live > .ps-home-chart { grid-area: chart; margin-top: 28px; }
+      #pro-space #ps-home-live > .ps-todo-block { grid-area: todo; }
+      #pro-space #ps-home-live > .ps-tiles-block { grid-area: tiles; }
+      #pro-space #ps-home-live > .ps-ins-block { grid-area: ins; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #pro-space, #pro-space .ps-panel, #pro-space .ps-pane:not([hidden]) { animation: ps-fade .2s ease both; }
+      #pro-space.is-closing .ps-panel { animation: ps-fade-out .2s ease both; }
+      @keyframes ps-fade { from { opacity: 0; } }
+      @keyframes ps-fade-out { to { opacity: 0; } }
+      #pro-space .seg.is-ready::before { transition: none; }
+      #pro-space .chart-box.is-grow .bar { animation: none; }
+    }
+
+    .jn-title-fit { container-type: inline-size; }
+    #jn-title { font-size: clamp(20px, calc((min(100vw, 472px) - 76px) / 9.8), 34px); font-size: clamp(20px, calc(100cqi / 9.8), 34px); }
+    @media (max-height: 740px) {
+      #jn-title { font-size: clamp(20px, calc((min(100vw, 472px) - 76px) / 9.8), 28px); font-size: clamp(20px, calc(100cqi / 9.8), 28px); }
+    }
   </style>
 </head>
 
@@ -3717,7 +3949,7 @@
   </div>
 
   <div id="pro-space" class="pro-space" role="dialog" aria-modal="true" aria-labelledby="ps-title" hidden>
-    <div class="ps-panel">
+    <div class="ps-panel" tabindex="-1">
       <header class="ps-head">
         <span class="ps-emoji" id="ps-emoji" aria-hidden="true">🍽️</span>
         <div class="ps-title">
@@ -3741,9 +3973,9 @@
           <div class="ps-home-head">
             <p class="ps-hello" id="ps-hello"></p>
             <div class="seg ps-period" id="ph-period" role="group" aria-label="Période des chiffres">
-              <button type="button" data-days="7" aria-pressed="true" aria-label="7 jours">7 j</button>
-              <button type="button" data-days="30" aria-pressed="false" aria-label="30 jours">30 j</button>
-              <button type="button" data-days="90" aria-pressed="false" aria-label="90 jours">90 j</button>
+              <button type="button" data-days="7" aria-pressed="true">7 jours</button>
+              <button type="button" data-days="30" aria-pressed="false">30 jours</button>
+              <button type="button" data-days="90" aria-pressed="false">90 jours</button>
             </div>
           </div>
           <div class="ps-alert" id="ps-alert" role="status" hidden><p></p><button class="pill-btn" type="button"></button></div>
@@ -3760,27 +3992,30 @@
               <span class="ps-scan-txt"><strong>Scanner un client</strong><small id="ps-scan-sub">Visite ou offre : scannez le QR code de son téléphone</small></span>
               <span class="ps-scan-today"><b id="ps-scan-n">–</b><small>aujourd'hui</small></span>
             </button>
-            <div class="ps-tiles ps-wide" id="ps-tiles" role="group" aria-label="Accès rapides">
-              <button class="ps-tile" type="button" data-act="story"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></i><strong>Publier une story</strong><small>Photo ou texte, jusqu'à 1 semaine</small></button>
-              <button class="ps-tile" type="button" data-act="promo"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0L2 12V2h10l8.6 8.6a2 2 0 010 2.8zM7 7h.01"/></svg></i><strong>Créer une offre</strong><small>Promo pour attirer du monde</small></button>
-              <button class="ps-tile" type="button" data-act="menu"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg></i><strong>Ma carte</strong><small>Plats et prix</small></button>
-              <button class="ps-tile" type="button" data-act="hours"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v5l3 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></i><strong>Horaires</strong><small>Ouverture et fermeture</small></button>
-              <button class="ps-tile" type="button" data-act="stats"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></i><strong>Statistiques</strong><small>Vues, visites, clients</small></button>
-              <button class="ps-tile" type="button" data-act="reviews"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></i><strong>Avis</strong><small>Lire et répondre</small></button>
-              <button class="ps-tile" type="button" data-act="preview"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zM12 15a3 3 0 100-6 3 3 0 000 6z"/></svg></i><strong>Voir comme un client</strong><small>Ma fiche côté client</small></button>
-              <button class="ps-tile" type="button" data-act="edit"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></i><strong>Toute ma fiche</strong><small>Photos, description, adresse</small></button>
-            </div>
             <div class="ps-cards" id="ps-cards"></div>
+            <section class="ps-block ps-todo-block" aria-labelledby="ps-todo-title">
+              <h3 id="ps-todo-title">À faire</h3>
+              <ul class="ps-todo" id="ps-todo"></ul>
+            </section>
+            <section class="ps-block ps-wide ps-tiles-block" aria-labelledby="ps-tiles-title">
+              <h3 id="ps-tiles-title">Raccourcis</h3>
+              <div class="ps-tiles" id="ps-tiles" role="group" aria-labelledby="ps-tiles-title">
+                <button class="ps-tile" type="button" data-act="story"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></i><strong>Publier une story</strong><small>Photo ou texte, jusqu'à 1 semaine</small></button>
+                <button class="ps-tile" type="button" data-act="promo"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0L2 12V2h10l8.6 8.6a2 2 0 010 2.8zM7 7h.01"/></svg></i><strong>Créer une offre</strong><small>Promo pour attirer du monde</small></button>
+                <button class="ps-tile" type="button" data-act="menu"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg></i><strong>Ma carte</strong><small>Plats et prix</small></button>
+                <button class="ps-tile" type="button" data-act="hours"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v5l3 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></i><strong>Horaires</strong><small>Ouverture et fermeture</small></button>
+                <button class="ps-tile" type="button" data-act="stats"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></i><strong>Statistiques</strong><small>Vues, visites, clients</small></button>
+                <button class="ps-tile" type="button" data-act="reviews"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></i><strong>Avis</strong><small>Lire et répondre</small></button>
+                <button class="ps-tile" type="button" data-act="preview"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zM12 15a3 3 0 100-6 3 3 0 000 6z"/></svg></i><strong>Voir comme un client</strong><small>Ma fiche côté client</small></button>
+                <button class="ps-tile" type="button" data-act="edit"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></i><strong>Toute ma fiche</strong><small>Photos, description, adresse</small></button>
+              </div>
+            </section>
             <figure class="chart ps-home-chart">
               <figcaption>Vues de la fiche par jour<small id="ph-chart-sub"></small></figcaption>
               <div class="chart-box" id="ph-chart"></div>
               <div class="chart-tip" id="ph-tip" role="status" hidden></div>
             </figure>
-            <section class="ps-block" aria-labelledby="ps-todo-title">
-              <h3 id="ps-todo-title">À faire</h3>
-              <ul class="ps-todo" id="ps-todo"></ul>
-            </section>
-            <section class="ps-block ps-wide" aria-labelledby="ps-insights-title">
+            <section class="ps-block ps-wide ps-ins-block" aria-labelledby="ps-insights-title">
               <h3 id="ps-insights-title">Ce qu'il faut retenir</h3>
               <ul class="ps-insights" id="ps-insights"></ul>
               <button class="btn btn-ghost" type="button" id="ps-more-stats">Voir toutes les statistiques</button>
@@ -4091,7 +4326,7 @@
 
         <section class="jn-screen" data-q="hello" aria-labelledby="jn-title">
           <div class="jn-hero" aria-hidden="true"><span>🍔</span><span>🌯</span><span>🍕</span><span>🧁</span><span>🚚</span><span>🍟</span></div>
-          <h1 id="jn-title">Les restaurants de <span class="nw">La Roche-sur-Yon</span>, <em>à deux pas</em></h1>
+          <div class="jn-title-fit"><h1 id="jn-title">Les restaurants de <span class="nw">La Roche-sur-Yon</span>, <em>à deux pas</em></h1></div>
           <ul class="jn-perks" aria-label="Avec FlashMiam">
             <li>Les bons plans autour de vous</li>
             <li>Les promos de vos restos préférés</li>
@@ -11210,6 +11445,29 @@
     const existing = !!(data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0);
     startEmailVerification({ email, back: 'signup', onSuccess: opened, fromSignup: true, sent: !existing });
   });
+  /**
+   * Titre de l'accueil : jamais plus de 3 lignes, quelle que soit la police du téléphone (Android, texte agrandi…).
+   * La taille posée par le CSS (selon la largeur du cadre) suffit d'habitude ; sinon elle baisse d'un pixel à la fois
+   * jusqu'à tenir en 3 lignes sans déborder. Recalculé à chaque changement de largeur (rotation, fenêtre redimensionnée).
+   */
+  (() => {
+    const h = $('jn-title'), box = h && h.parentElement;
+    if (!h || !box || !('ResizeObserver' in window)) return;
+    let width = 0;
+    const fitWelcomeTitle = () => {
+      if (!box.offsetWidth) return;
+      h.style.fontSize = '';
+      const cs = getComputedStyle(h);
+      let size = parseFloat(cs.fontSize);
+      const lines = () => Math.round(h.offsetHeight / (parseFloat(getComputedStyle(h).lineHeight) || size * 1.2));
+      while (size > 18 && (lines() > 3 || h.scrollWidth > h.clientWidth + 1)) { size -= 1; h.style.fontSize = size + 'px'; }
+    };
+    new ResizeObserver(([e]) => {
+      const w = Math.round(e.contentRect.width);
+      if (w && w !== width) { width = w; fitWelcomeTitle(); }   // largeur seulement : la hauteur change quand on ajuste la taille
+    }).observe(box);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (width) fitWelcomeTitle(); });
+  })();
   /* ---------- Inscription d'un client : accueil (la suite dans l'application), questions sexe et âge seules ---------- */
   /* ---------- Inscription d'un client : e-mail et mot de passe, puis une question par écran (prénom, sexe, âge) ---------- */
   const Join = (() => {
@@ -13551,6 +13809,8 @@
     const TABS = ['home', 'todo', 'stats', 'publish', 'reviews', 'fiche'];
     let tab = 'home', days = 7, data = null, token = 0, timer = null, lastFocus = null;
     let rvList = null, rvFilter = 'todo', replyFor = null, rvToken = 0, failed = false;
+    let closeTimer = 0, growNext = false;
+    const panel = root.querySelector('.ps-panel');
     /** Statistiques indisponibles (serveur saturé) : message et bouton « Réessayer ». */
     function retryBox(text) {
       const p = document.createElement('div');
@@ -13560,7 +13820,7 @@
       p.querySelector('button').addEventListener('click', () => { failed = false; renderHome(); if (tab === 'stats') renderStatsTab(); load(); });
       return p;
     }
-    const isOpen = () => !root.hidden;
+    const isOpen = () => !root.hidden && !root.classList.contains('is-closing');
     const nf = (n) => Number(n || 0).toLocaleString('fr-FR');
     const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
     const shortDate = (d) => new Date(d + (String(d).length === 10 ? 'T12:00:00' : '')).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
@@ -13580,15 +13840,21 @@
     function open(t = 'home') {
       const account = currentUser();
       if (!account || account.role !== 'pro') return;
-      if (!isOpen()) lastFocus = document.activeElement;
+      if (!isOpen()) lastFocus = root.hidden ? document.activeElement : lastFocus;
+      clearTimeout(closeTimer);
+      root.classList.remove('is-closing', 'is-refreshing');   // rouvert pendant sa fermeture : il remonte d'où il est
       if (activePanel) closePanel(activePanel);
       root.hidden = false;
       document.body.classList.add('pro-open');
       // Le rappel « compte pas complet » de la carte ferait doublon avec le bandeau de l'espace
       if (/pas complet/.test($('toast-text').textContent)) hideToast();
-      setTab(t, { focus: true });
+      setTab(t);
+      // Focus sur le panneau (lecteurs d'écran : la fenêtre est annoncée) ; pas sur un onglet, qui garderait un cadre
+      // de focus visible après un simple toucher
+      panel.focus({ preventScroll: true });
       $('ps-close').setAttribute('aria-label', ProHome.canScanHome() ? 'Retour au scanner' : 'Fermer l\'espace restaurateur');
       render();
+      if (data) growCharts(); else growNext = true;   // barres qui poussent à l'ouverture
       load();
       Scanner.loadSummary();
       const mine = myRestaurant(account);
@@ -13597,14 +13863,22 @@
       timer = setInterval(() => { if (!document.hidden && tab !== 'publish') load(); }, 60 * 1000);
     }
     /** toHome : sur téléphone, on revient au scanner (écran d'accueil du restaurateur) au lieu de la carte. */
+    /** Fermeture par le même chemin que l'ouverture (le panneau redescend en s'effaçant), puis masqué. */
     function close({ toHome = false } = {}) {
       if (!isOpen()) return;
-      root.hidden = true;
       clearInterval(timer);
       replyFor = null;
       document.body.classList.remove('pro-open');
-      if (toHome && ProHome.scanHome()) return;
-      if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+      const done = () => {
+        root.classList.remove('is-closing');
+        root.hidden = true;
+        if (toHome && ProHome.scanHome()) return;
+        if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+      };
+      if (reduceMotion) { done(); return; }
+      root.classList.add('is-closing');
+      clearTimeout(closeTimer);
+      closeTimer = setTimeout(done, 240);
     }
 
     function setTab(t, { focus = false } = {}) {
@@ -13617,9 +13891,11 @@
         $('psp-' + k).hidden = k !== tab;
       });
       $('ps-body').scrollTop = 0;
+      root.classList.remove('is-scrolled');
       if (focus) $('pst-' + tab).focus({ preventScroll: true });
-      if (tab === 'stats') requestAnimationFrame(renderStatsTab);
-      if (tab === 'home') requestAnimationFrame(renderHomeChart);
+      if (tab === 'stats') requestAnimationFrame(() => { renderStatsTab(); growCharts(); });
+      if (tab === 'home') requestAnimationFrame(() => { renderHomeChart(); growCharts(); });
+      requestAnimationFrame(syncSegs);
       if (tab === 'publish') renderPublish();
       if (tab === 'reviews') loadReviews();
       if (tab === 'fiche') renderFiche();
@@ -13648,7 +13924,17 @@
       const t = ++token;
       const { data: d, error } = await sb.rpc('my_merchant_analytics', { p_days: days });
       if (t !== token || !isOpen()) return;
+      root.classList.remove('is-refreshing');
       if (error || !d) {
+        // Autre période demandée, mais pas de réponse : on revient à celle des chiffres affichés
+        if (data && data.period && Number(data.period.days) !== days) {
+          days = Number(data.period.days);
+          syncPeriod();
+          renderHome();
+          if (tab === 'stats') renderStatsTab();
+          toast('Les chiffres de cette période n\'ont pas pu être chargés. Réessayez dans un instant.');
+          return;
+        }
         failed = !data;
         if (failed) { renderHome(); if (tab === 'stats') renderStatsTab(); }
         return;
@@ -13659,7 +13945,46 @@
       badge();
       if (tab === 'stats') renderStatsTab();
       if (tab === 'publish') renderPublish();
+      if (growNext) { growNext = false; growCharts(); }
     }
+    /** Barres des graphiques affichés : elles poussent depuis la ligne de base, l'une après l'autre (0,6 s en tout). */
+    function growCharts() {
+      if (reduceMotion || !isOpen()) return;
+      const boxes = tab === 'home' ? [$('ph-chart')] : tab === 'stats' ? [$('pd-chart'), $('ps-hours')] : [];
+      boxes.forEach((box) => {
+        const bars = box.querySelectorAll('.bar');
+        if (!bars.length) return;
+        bars.forEach((b, i) => { b.style.animationDelay = Math.min(i * 14, 320) + 'ms'; });
+        box.classList.remove('is-grow');
+        void box.offsetWidth;
+        box.classList.add('is-grow');
+        clearTimeout(box.growTimer);
+        box.growTimer = setTimeout(() => box.classList.remove('is-grow'), 1100);
+      });
+    }
+    /**
+     * Commandes segmentées de l'espace (période, filtre des avis) : un curseur glisse sous le choix, comme sur iPhone,
+     * au lieu de sauter d'un bouton à l'autre. Premier placement sans glissement ; ensuite il suit chaque choix.
+     */
+    function syncSegs() {
+      root.querySelectorAll('.seg').forEach((seg) => {
+        const on = seg.querySelector('button[aria-pressed="true"]');
+        if (!on || !seg.offsetWidth) return;
+        seg.style.setProperty('--seg-x', on.offsetLeft + 'px');
+        seg.style.setProperty('--seg-w', on.offsetWidth + 'px');
+        if (!seg.classList.contains('has-thumb')) { seg.classList.add('has-thumb'); requestAnimationFrame(() => seg.classList.add('is-ready')); }
+      });
+    }
+    let segFrame = 0;
+    const queueSegs = () => { if (!segFrame) segFrame = requestAnimationFrame(() => { segFrame = 0; if (!root.hidden) syncSegs(); }); };
+    new MutationObserver(queueSegs).observe(root, { subtree: true, attributes: true, attributeFilter: ['aria-pressed', 'hidden'] });
+    addEventListener('resize', queueSegs);
+    // En-tête : un filet seulement quand le contenu défile dessous
+    let edgeFrame = 0;
+    $('ps-body').addEventListener('scroll', () => {
+      if (edgeFrame) return;
+      edgeFrame = requestAnimationFrame(() => { edgeFrame = 0; root.classList.toggle('is-scrolled', $('ps-body').scrollTop > 2); });
+    }, { passive: true });
 
     function render() {
       if (!isOpen()) return;
@@ -13774,14 +14099,14 @@
       el.className = 'trend';
       const ref = plural(days, 'jour', 'jours') + ' précédents : ' + nf(prev);
       if (!cur && !prev) { el.textContent = '='; el.title = ref; el.setAttribute('aria-label', 'Stable (' + ref + ')'); return el; }
-      if (!prev) { el.classList.add('is-up'); el.textContent = '▲ +' + nf(cur); }
+      if (!prev) { el.classList.add('is-up'); el.textContent = '↑ +' + nf(cur); }
       else {
         const p = Math.round(((cur - prev) / prev) * 100);
         el.classList.add(p > 0 ? 'is-up' : p < 0 ? 'is-down' : 'is-flat');
-        el.textContent = (p > 0 ? '▲ +' : p < 0 ? '▼ ' : '= ') + p + ' %';
+        el.textContent = (p > 0 ? '↑ ' : p < 0 ? '↓ ' : '= ') + Math.abs(p) + ' %';
       }
       el.title = ref;
-      el.setAttribute('aria-label', el.textContent.replace('▲', 'en hausse').replace('▼', 'en baisse') + ' (' + ref + ')');
+      el.setAttribute('aria-label', el.textContent.replace('↑', 'en hausse de').replace('↓', 'en baisse de') + ' (' + ref + ')');
       return el;
     }
 
@@ -13851,9 +14176,8 @@
         const b = document.createElement('button');
         b.type = 'button';
         b.id = 'hk-' + c.key;
-        b.innerHTML = '<span class="kpi-label"><span aria-hidden="true"></span><span></span></span><strong></strong>';
-        b.querySelector('.kpi-label span').textContent = c.ico;
-        b.querySelector('.kpi-label span:last-child').textContent = c.label;
+        b.innerHTML = '<span class="kpi-label"><svg class="kpi-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + KPI_ICO[c.key] + '</svg><span></span></span><strong></strong>';
+        b.querySelector('.kpi-label span').textContent = c.label;
         b.querySelector('strong').textContent = T ? c.v : failed ? '–' : '…';
         if (!T && !failed) b.querySelector('strong').classList.add('skel-text');
         if (T && c.trend) b.appendChild(trend(c.trend[0], c.trend[1]));
@@ -13867,6 +14191,15 @@
       renderInsights(s);
     }
 
+    /** Icônes des chiffres clés (tracés fixes, aucune donnée insérée). */
+    const KPI_ICO = {
+      views: '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>',
+      visitors: '<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+      routes: '<path d="M3 11l19-9-9 19-2-8-8-2z"/>',
+      calls: '<path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.4 1.8.7 2.7a2 2 0 01-.5 2.1L8 9.8a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.5c.9.3 1.8.6 2.7.7a2 2 0 011.7 2z"/>',
+      followers: '<path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1 1.1L12 21l7.8-7.6 1-1.1a5.5 5.5 0 000-7.7z"/>',
+      rating: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+    };
     /** Accueil : les vues jour par jour, pour voir la tendance d'un coup d'œil (détail dans « Statistiques »). */
     function renderHomeChart() {
       if (!isOpen() || tab !== 'home') return;
@@ -14123,12 +14456,14 @@
       hbars($('ps-dishes'), (data.dishes || []).map((d) => ({ label: d.dish, n: d.likes })),
         { empty: stateOf().r.menu.length ? 'Pas encore de « j\'aime » sur vos plats.' : 'Ajoutez votre carte (Ma fiche › Modifier) pour que les clients puissent aimer vos plats.' });
     }
+    // Autre période : les chiffres affichés restent en place, estompés, jusqu'à l'arrivée des nouveaux (pas de trou
+    // ni de saut de mise en page), puis les barres poussent de nouveau
     root.querySelectorAll('.ps-period button').forEach((b) => b.addEventListener('click', () => {
       if (Number(b.dataset.days) === days) return;
       days = Number(b.dataset.days);
-      data = null;
-      renderHome();
-      renderStatsTab();
+      syncPeriod();
+      if (!data) { renderHome(); renderStatsTab(); } else root.classList.add('is-refreshing');
+      growNext = true;
       load();
     }));
     // Sommaire des statistiques : fait défiler jusqu'à la partie choisie
