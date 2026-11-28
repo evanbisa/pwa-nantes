@@ -34,6 +34,75 @@
 | 19 | Confirmation par e-mail à l'inscription | ✅ restaurateurs, ⏳ clients | Restaurateurs : code par e-mail. Clients : interrupteur prêt et testé (`app_settings.client_email_confirmation` : écran du code, renvoi, rien ne trahit un compte existant), **à activer quand l'envoi d'e-mails sera fiable** (Resend). Comptes jamais confirmés supprimés après 7 jours. |
 | 20 | Sauvegarde automatique | ✅ prête, ⏳ à brancher | Chaque nuit : copie complète par un rôle en lecture seule, chiffrée (AES-256), gardée 30 jours, **restaurée pour vérification** ; ticket d'alerte en cas d'échec ; restauration en un clic (`restauration.yml`). Mode d'emploi : `web/supabase/backup/README.md` (3 étapes à faire une fois). |
 
+## Audit du 28 novembre 2026
+
+Méthode du skill `security-audit` (Cloudflare) : une faille doit franchir une vraie limite de confiance et être
+prouvée par le code. Relecture critique avec les skills de Trail of Bits (`sharp-edges`, `fp-check`,
+`supply-chain-risk-auditor`). Lecture seule de la base en production (outil Supabase), aucun test sur le site en
+ligne.
+
+**Périmètre**
+- Base : règles RLS de toutes les tables, droits par colonne, déclencheurs, fonctions à droits élevés, espaces de
+  stockage, contraintes.
+- Les 8 fonctions serveur.
+- Pages : injection de script, liens, redirections, messages entre fenêtres, service worker.
+- En-têtes HTTP et CSP de la carte et de `web/`.
+- Workflows GitHub Actions, dépendances npm et `vendor/`.
+
+**Corrigé**
+
+| Constat | Correction |
+|---|---|
+| 9 alertes « modérées » sur les outils de développement (ESLint → `minimatch`, déni de service par motif). Non exploitable : rien n'est envoyé aux visiteurs. | `npm audit fix` et ESLint 10.16 : `npm audit` → 0 faille, outils compris. |
+
+**Vérifié, rien à corriger**
+- **Tables** : RLS sur toutes. Seules 7 acceptent des écritures des comptes connectés, et seulement sur les colonnes
+  prévues (droits par colonne).
+- **Rôles** : un client ne peut pas changer son rôle. À l'inscription, seuls « client » et « restaurateur » sont
+  possibles (`handle_new_user`).
+- **Fiches** : impossible de se publier sans SIRET vérifié, attestation, abonnement et validation de l'équipe
+  (`merchants_guard`).
+- **Avis** : l'auteur ne peut pas écrire la réponse, et le restaurateur ne peut ni changer la note ni le texte d'un
+  client (`reviews_guard`).
+- **QR code de visite** :
+  - code de 10 caractères, impossible à deviner ;
+  - valable 75 s, utilisable une fois ;
+  - validé seulement par le restaurant concerné ou son équipe ;
+  - pas de double validation en 20 minutes.
+- **Fonctions privilégiées** : toutes ont `search_path` vide. Celles du site sont des relais vers `private`, qui
+  vérifient l'appelant.
+- **Fonctions serveur** :
+  - session vérifiée quand il le faut, taille des requêtes bornée, CORS limité aux sites FlashMiam ;
+  - signature des webhooks Whop vérifiée (HMAC, comparaison en temps constant, 5 min contre le rejeu) ;
+  - retour après paiement limité au site ;
+  - `send-push` sans session : il n'envoie que des alertes déjà écrites par la base, vers les services d'alertes
+    officiels.
+- **Pages** : aucun texte venant de l'extérieur n'est inséré comme HTML. Les liens des restaurants sont imposés en
+  `https://` par la base. Les redirections ne mènent qu'au site ou à Whop.
+- **En-têtes** : CSP à empreintes (aucun script inline libre), HSTS, `frame-ancestors`, `nosniff`,
+  `Permissions-Policy`.
+- **Actions GitHub** : épinglées par empreinte, permissions minimales, pas de `pull_request_target`, aucun texte
+  extérieur injecté dans une commande.
+
+**Écarté (pas de risque réel)**
+- `merchants.review_note` lisible par les visiteurs : la note est effacée à la validation, et une fiche refusée
+  repasse en brouillon, invisible des visiteurs (0 cas en base).
+- `merchants.user_id` lisible : un identifiant n'ouvre aucun accès. La page s'en sert pour reconnaître la fiche de son
+  propriétaire.
+- Rapports d'erreurs et statistiques ouverts aux visiteurs : longueurs bornées, données personnelles effacées,
+  plafonds par jour.
+
+**À vérifier ou régler par toi** (impossible d'ici : réglages du tableau de bord)
+1. Supabase › Edge Functions › Secrets : `ALLOW_TEST_SIRET` doit être absent, ou différent de `true`, avant le
+   lancement. Sinon, n'importe quel compte restaurateur peut créer une fiche « test » publiée sans validation de
+   l'équipe (un abonnement payé reste exigé).
+2. Supabase › Edge Functions › Secrets : `TURNSTILE_SECRET_KEY` doit être renseigné, sinon l'anti-robots de
+   l'inscription des clients est inactif.
+3. Supabase › Authentication › Password security :
+   - longueur minimale de 8 et exigences (majuscule, chiffre, symbole), comme sur le site : l'inscription des
+     restaurateurs passe par Supabase Auth, qui applique ses propres règles ;
+   - « Leaked password protection » (offre Pro).
+
 ## Ce qui est fait ✅
 
 ### Base de données Supabase (projet « FlashMiam project », `fnypgfyxbyaqrnklhjxc`, région Stockholm, UE)

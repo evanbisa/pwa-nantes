@@ -2,7 +2,7 @@
 
 Ces skills sont chargés automatiquement par Claude Code dans toutes les sessions ouvertes sur ce dépôt.
 Ils viennent de dépôts publics officiels, copiés tels quels (seule une licence a été ajoutée à côté des skills
-Supabase). Ils ont été relus avant l'installation (25/11/2026) : ce sont des conseils en texte, plus un petit script
+Supabase). Ils ont été relus avant l'installation (25/11/2026 ; skills de sécurité le 28/11/2026) : ce sont des conseils en texte, plus un petit script
 Python (`webapp-testing/scripts/with_server.py`) qui démarre un serveur local le temps d'un test. Aucun n'envoie de
 données ailleurs.
 
@@ -17,6 +17,13 @@ données ailleurs.
 | `impeccable` | Design « comme un vrai designer » : refonte, critique, finitions ; a servi à la refonte du 26/11/2026 (voir `DESIGN.md`) | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) (`2fc5e14`) — **guides seulement** : son programme (`scripts/`, qui télécharge un binaire) n'est pas installé, le skill lit alors directement `PRODUCT.md` et `DESIGN.md` | Apache 2.0 |
 | `apple-design` | Interfaces « comme sur iPhone » : réactivité, gestes, ressorts, fiches qu'on glisse, typographie, accessibilité ; a servi aux gestes et à la typographie du 27/11/2026 (voir `DESIGN.md`) | [emilkowalski/skills](https://github.com/emilkowalski/skills) (`64eb3de`) | MIT |
 | `animation-performance` | Animations fluides sur téléphone (propriétés à animer, saccades) ; référencé par `apple-design` | [emilkowalski/skills](https://github.com/emilkowalski/skills) (`64eb3de`) | MIT |
+| `security-audit` | Audit de sécurité en 6 étapes (reconnaissance, chasse par classe d'attaque, validation, rapport) ; a servi à l'audit du 28/11/2026 (`web/docs/SECURITE-ETAT.md`) | [cloudflare/security-audit-skill](https://github.com/cloudflare/security-audit-skill) (`c1c8a8c`) — 2 petits scripts Node de validation, sans réseau | MIT |
+| `sharp-edges` | Repère les réglages et API « pièges » (valeurs par défaut dangereuses, erreurs faciles) | [trailofbits/skills](https://github.com/trailofbits/skills) (`149d7b2`) | CC BY-SA 4.0 |
+| `fp-check` | Vérifie qu'une faille supposée est réelle (et pas un faux positif) avant de la corriger | [trailofbits/skills](https://github.com/trailofbits/skills) (`149d7b2`) — sans ses « hooks » (non installés) | CC BY-SA 4.0 |
+| `variant-analysis` | Une faille trouvée : cherche les autres endroits du code qui ont la même | [trailofbits/skills](https://github.com/trailofbits/skills) (`149d7b2`) | CC BY-SA 4.0 |
+| `differential-review` | Relecture de sécurité d'une modification (PR, commit) | [trailofbits/skills](https://github.com/trailofbits/skills) (`149d7b2`) | CC BY-SA 4.0 |
+| `audit-context-building` | Comprendre le code (hypothèses, garanties) avant de chercher des failles | [trailofbits/skills](https://github.com/trailofbits/skills) (`149d7b2`) | CC BY-SA 4.0 |
+| `supply-chain-risk-auditor` | Risque des dépendances (failles connues, paquets abandonnés, scripts d'installation) ; ses scripts Python interrogent les bases publiques (osv.dev, npm, GitHub) avec les seuls noms des paquets | [trailofbits/skills](https://github.com/trailofbits/skills) (`149d7b2`) | CC BY-SA 4.0 |
 
 ## Ce qui prime sur les skills
 
