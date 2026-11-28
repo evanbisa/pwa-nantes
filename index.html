@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-hkFwFC68+X2OdanZAgwBdFgXxF5FVkWnrtLq6EOhNVk=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-7ygh4lW/jW5VJdgvCD2ukQaWr5QOkAih//KasPCimvQ=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -2532,7 +2532,14 @@
     .tab-panel:not([hidden]) { animation: tab-in .25s var(--ease-out) both; }
     /* Fiche : les onglets restent en haut pendant le défilement ; un contenu court (menu de 3 plats) laisse quand même
        les onglets remonter en haut quand on en touche un */
-    #shop-sheet .shop-tabs { position: sticky; top: 4px; z-index: 3; background: linear-gradient(var(--hover), var(--hover)), var(--panel-solid); box-shadow: 0 -6px 0 2px var(--panel-solid); }
+    /* Onglets collés en haut de la fiche : une bande blanche pleine largeur (jusqu'aux bords de la fiche, et 16 px
+       au-dessus) passe derrière eux, pour que photos et textes qui défilent ne dépassent ni dessus ni sur les côtés ;
+       le fond gris des onglets est dessiné par-dessus. Collés à 8 px du haut (la fiche a 10 px de marge au-dessus sur
+       téléphone, 20 px sur ordinateur ; ses côtés font 20 px). */
+    #shop-sheet .shop-tabs { position: sticky; top: -2px; z-index: 3; background: none; box-shadow: none; }
+    #shop-sheet .shop-tabs::before { content: ""; position: absolute; z-index: -2; inset: -16px -20px 0; background: var(--panel-solid); pointer-events: none; }
+    #shop-sheet .shop-tabs::after { content: ""; position: absolute; z-index: -1; inset: 0; border-radius: inherit; background: var(--hover); pointer-events: none; }
+    @media (min-width: 900px) { #shop-sheet .shop-tabs { top: -12px; } }
     #shop-sheet .tab-panel { min-height: 55vh; }
     @keyframes tab-in { from { opacity: 0; transform: translateY(4px); } }
     .menu-list { padding-top: 6px; }
@@ -8123,11 +8130,7 @@
           });
           box.appendChild(use);
         }
-        more.addEventListener('click', () => {
-          const openNow = box.hidden;
-          box.hidden = !openNow;
-          more.setAttribute('aria-expanded', String(openNow));
-        });
+        foldable(more, box, 'offer:' + m.shop.id + ':' + p.id);
         li.append(more, box);
         ul.appendChild(li);
       });
@@ -9469,6 +9472,22 @@
     const slot = promoSlot(p);
     return [slot ? 'Valable ' + slot : '', promoUntil(p)].filter(Boolean).join(' · ');
   }
+  /** Détails d'offre dépliés (« Voir les conditions », petite flèche) : gardés quand la fiche ou la liste des offres se
+   *  redessinent (nouvelle position GPS, horloge de la minute, mise à jour en direct). Sans elle, ils se refermaient
+   *  une seconde après le toucher, au premier relevé GPS. */
+  const openDetails = new Set();
+  /** Bouton qui déplie `box` ; l'état est retenu sous `key`. */
+  function foldable(toggle, box, key, onChange) {
+    const set = (open) => {
+      box.hidden = !open;
+      toggle.setAttribute('aria-expanded', String(open));
+      if (open) openDetails.add(key); else openDetails.delete(key);
+      if (onChange) onChange(open);
+    };
+    set(openDetails.has(key));
+    toggle.addEventListener('click', () => set(box.hidden));
+  }
+
   function renderShopPromos(shop) {
     const box = $('shop-promos');
     const promos = activePromos(shop);
@@ -9508,9 +9527,7 @@
           const toggle = document.createElement('button');
           toggle.type = 'button';
           toggle.className = 'link-btn promo-cta-toggle';
-          toggle.textContent = 'Voir les conditions';
-          toggle.setAttribute('aria-expanded', 'false');
-          toggle.addEventListener('click', () => { more.hidden = !more.hidden; toggle.setAttribute('aria-expanded', String(!more.hidden)); toggle.textContent = more.hidden ? 'Voir les conditions' : 'Masquer les conditions'; });
+          foldable(toggle, more, 'shop:' + shop.id + ':' + p.id, (open) => { toggle.textContent = open ? 'Masquer les conditions' : 'Voir les conditions'; });
           wrap.append(toggle, more);
         }
         box.appendChild(wrap);
@@ -9537,8 +9554,7 @@
         const more = document.createElement('p');
         more.className = 'promo-more';
         more.textContent = p.details;
-        more.hidden = true;
-        toggle.addEventListener('click', () => { more.hidden = !more.hidden; toggle.setAttribute('aria-expanded', String(!more.hidden)); });
+        foldable(toggle, more, 'shop:' + shop.id + ':' + p.id);
         card.querySelector('.promo-main').appendChild(more);
         card.appendChild(toggle);
       }
@@ -10431,9 +10447,15 @@
     Geo.accuracy = pos.coords.accuracy;
     whenMapReady(drawUserLocation);
     setLocateState('active');
-    if (filters.radius !== null) applyFilters(); else renderList();
-    Offers.refresh();
-    StoryViewer.refreshDistance();
+    // Le GPS donne une position à peu près chaque seconde : listes et fiche ne sont redessinées que si l'on a bougé
+    // d'au moins 20 m (distances et temps à pied inchangés sinon ; la fiche ouverte ne « clignote » plus).
+    const moved = !Geo.drawnAt || fly || distance(Geo.drawnAt, Geo.position) >= 20;
+    if (moved) {
+      Geo.drawnAt = Geo.position;
+      if (filters.radius !== null) applyFilters(); else renderList();
+      Offers.refresh();
+      StoryViewer.refreshDistance();
+    }
 
     if (!isInBounds(Geo.position)) {
       if (fly || !Geo.outsideWarned) {
@@ -10446,7 +10468,7 @@
     const touring = document.body.classList.contains('tour-open');   // pendant le guide, la carte ne bouge pas
     if (fly && !touring) whenMapReady(flyToUser);
     else if (Geo.follow && !touring && view && !view.isMoving()) view.panTo(Geo.position);
-    if (selectedId) renderShop(markers.get(selectedId));
+    if (moved && selectedId) renderShop(markers.get(selectedId));
   }
 
   function onLocationError(err, { fromButton, elapsed }) {
