@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-EWByjJeSAbs+J1tQp7kEcYfPKc2gWGiVaho/CEG+YZ4=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-iB5EYR5wdnieOkfYcDfo3Rt3CUJv9/waiAh1mloskWU=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -4821,6 +4821,12 @@
 
 (function () {
 
+  // Mesure de la fluidité sur un vrai téléphone : lien spécial « ?mesure » (mesure.js, téléchargé seulement dans ce cas ;
+  // rien n'est envoyé, le résultat s'affiche à l'écran). Les gestes faits pendant la mesure ne comptent pas dans les
+  // statistiques des restaurants (voir Stats.track).
+  const MESURE = /[?&]mesure(?:[=&]|$)/.test(location.search);
+  if (MESURE) { const s = document.createElement('script'); s.src = 'mesure.js'; document.head.appendChild(s); }
+
   /* =====================================================================
      1. CONFIGURATION
      ===================================================================== */
@@ -9592,7 +9598,7 @@
     /** Évènement sur une fiche inscrite (la base ignore les visites du restaurateur sur sa propre fiche,
      *  ne compte que les personnes connectées, et au plus 50 actions par personne, fiche et jour). */
     function track(shopId, event, { ref = null, source = null } = {}) {
-      if (previewAsClient || !Consent.has('stats') || !currentUser() || !restaurants()[shopId] || !EVENTS[event]) return;   // statistiques refusées : rien n'est envoyé
+      if (MESURE || previewAsClient || !Consent.has('stats') || !currentUser() || !restaurants()[shopId] || !EVENTS[event]) return;   // statistiques refusées (ou mesure de fluidité) : rien n'est envoyé
       sb.rpc('track_visit', { p_merchant_id: shopId, p_event: EVENTS[event], p_ref: ref && UUID_RE.test(ref) ? ref : null, p_source: source })
         .then(() => {}, () => {});
     }
