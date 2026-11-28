@@ -107,7 +107,7 @@ h1, h2 { text-wrap: balance; }
 .food-orbit-ring { position: absolute; inset: 0; animation: food-spin 2.6s linear infinite; }
 .food-orbit-item {
   position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px;
-  display: grid; place-items: center; border-radius: 50%; background: #fff; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  display: grid; place-items: center; border-radius: 50%; background: #fff; border: 1px solid rgba(0, 0, 0, 0.08);
 }
 .food-orbit-item svg { width: 34px; height: 34px; animation: food-self 2.6s linear infinite; }
 .food-orbit-item:nth-child(1) { transform: rotate(0deg) translateY(-48px); }

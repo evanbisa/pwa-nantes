@@ -6,7 +6,7 @@ import { LEGAL_DOCS } from "@/lib/legal";
 export default function LegalHome() {
   return (
     <div className="space-y-8">
-      <header className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-10 dark:border-slate-800 dark:bg-slate-900">
+      <header className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-10 dark:border-slate-800 dark:bg-slate-900">
         <span className="relative grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white">
           <Scale aria-hidden className="h-6 w-6" />
         </span>
@@ -23,7 +23,7 @@ export default function LegalHome() {
             <li key={doc.slug}>
               <Link
                 href={`/legal/${doc.slug}/`}
-                className="group flex h-full flex-col rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-white/30"
+                className="group flex h-full flex-col rounded-3xl border border-slate-200/80 bg-white p-6 transition hover:-translate-y-0.5 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-white/30"
               >
                 <span className="grid h-11 w-11 place-items-center rounded-xl bg-slate-100 text-slate-700 ring-1 ring-slate-200 ring-inset dark:bg-white/5 dark:text-slate-200 dark:ring-white/10">
                   <Icon aria-hidden className="h-5 w-5" />

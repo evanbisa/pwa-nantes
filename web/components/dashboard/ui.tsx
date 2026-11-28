@@ -52,7 +52,7 @@ export function Tile({ label, value, note, change, upIsGood = true, href }: { la
   const good = change != null && change !== 0 && (change > 0) === upIsGood;
   const Box = href ? "a" : "div";
   return (
-    <Box href={href} className={`block min-w-0 rounded-2xl bg-white p-4 ring-1 ring-slate-200 dark:bg-white/[0.04] dark:ring-white/10 ${href ? "transition hover:-translate-y-px hover:ring-slate-300 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-[var(--viz-1)] focus-visible:outline-none dark:hover:ring-white/20" : ""}`}>
+    <Box href={href} className={`block min-w-0 rounded-2xl bg-white p-4 ring-1 ring-slate-200 dark:bg-white/[0.04] dark:ring-white/10 ${href ? "transition hover:-translate-y-px hover:ring-slate-300 focus-visible:ring-2 focus-visible:ring-[var(--viz-1)] focus-visible:outline-none dark:hover:ring-white/20" : ""}`}>
       <p className="truncate text-xs font-medium text-slate-600 dark:text-zinc-400">{label}</p>
       <p className="mt-1 text-[28px] leading-tight font-bold tabular-nums">{value}</p>
       {change !== undefined && (
@@ -139,7 +139,7 @@ export function Bars({ labels, series, extra, dates = true, height = "h-40", axi
           ))}
         </div>
         {active !== null && (
-          <div role="status" className="pointer-events-none absolute -top-2 z-10 -translate-x-1/2 -translate-y-full rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs whitespace-nowrap text-white shadow-lg dark:bg-zinc-100 dark:text-zinc-900"
+          <div role="status" className="pointer-events-none absolute -top-2 z-10 -translate-x-1/2 -translate-y-full rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs whitespace-nowrap text-white dark:bg-zinc-100 dark:text-zinc-900"
             style={{ left: `calc(2rem + (100% - 2rem) * ${Math.min(0.85, Math.max(0.15, (active + 0.5) / labels.length))})` }}>
             <p className="font-semibold">{label(active, true)}</p>
             {series.map((s) => <p key={s.name}>{s.name} : {format(s.values[active])}</p>)}

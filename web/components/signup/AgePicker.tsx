@@ -114,7 +114,7 @@ function HoldButton({ label, disabled, onStep, children }: { label: string; disa
       type="button" aria-label={label} disabled={disabled}
       onPointerDown={start} onPointerUp={stop} onPointerLeave={stop} onPointerCancel={stop}
       onClick={() => { if (held.current) { held.current = false; return; } step.current(); }}
-      className="grid h-14 w-14 place-items-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:opacity-30 dark:bg-white/[0.05] dark:text-zinc-200 dark:ring-white/10 dark:backdrop-blur-xl dark:hover:bg-white/10 dark:focus-visible:ring-brand-night"
+      className="grid h-14 w-14 place-items-center rounded-full bg-white text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:opacity-30 dark:bg-white/[0.05] dark:text-zinc-200 dark:ring-white/10 dark:backdrop-blur-xl dark:hover:bg-white/10 dark:focus-visible:ring-brand-night"
     >
       {children}
     </button>

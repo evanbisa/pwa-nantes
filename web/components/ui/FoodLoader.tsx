@@ -60,7 +60,7 @@ export function FoodOrbit({ small = false }: { small?: boolean }) {
 export default function FoodLoader({ label = "Chargement…", detail }: { label?: string; detail?: string }) {
   return (
     <div className="food-loader" role="status" aria-live="polite">
-      <div className="flex flex-col items-center gap-4 rounded-3xl bg-white px-8 pb-6 pt-7 text-center shadow-lg dark:bg-[#202124]">
+      <div className="flex flex-col items-center gap-4 rounded-3xl bg-white px-8 pb-6 pt-7 text-center dark:bg-[#202124]">
         <FoodOrbit />
         <p className="text-[15px] font-medium text-[#202124] dark:text-[#e8eaed]">
           {label}
