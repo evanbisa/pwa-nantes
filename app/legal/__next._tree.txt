@@ -1,0 +1,5 @@
+:HL["/pwa-nantes/app/_next/static/chunks/00hk-po7w-_08.css","style"]
+:HL["/icon-192.png?v=2","image"]
+2:[["children",{"s":"__PAGE__","h":160}]]
+1:[["children",{"s":"legal","h":96,"c":"$Q2"}]]
+0:{"b":"2gpuJIz2VE_p0dW75RgO3","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
