@@ -50,7 +50,7 @@ export default function TableOfContents({ items, variant }: { items: TocItem[]; 
 
   if (variant === "inline") {
     return (
-      <details className="group rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <details className="group rounded-2xl border border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900">
         <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-4 font-medium text-slate-900 [&::-webkit-details-marker]:hidden dark:text-slate-50">
           <ListTree aria-hidden className="h-5 w-5 text-slate-700 dark:text-slate-300" />
           Sommaire

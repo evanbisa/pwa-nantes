@@ -145,7 +145,7 @@ export default function GoogleSignup({ onCredential, locked = false, onLocked, b
         <button
           ref={box} id="su-google-btn" type="button" onClick={click} disabled={!!busy} aria-busy={!!busy || undefined}
           tabIndex={live ? -1 : 0} aria-hidden={live || undefined}
-          className="flex h-14 w-full items-center justify-center gap-3 rounded-full border-[1.5px] border-slate-300 bg-white text-[15.5px] font-medium text-slate-900 shadow-sm transition group-focus-within:ring-2 group-focus-within:ring-brand group-focus-within:ring-offset-2 [@media(hover:hover)]:group-hover:bg-slate-50 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-100 dark:backdrop-blur-xl dark:ring-offset-night dark:group-focus-within:ring-brand-night [@media(hover:hover)]:dark:group-hover:bg-white/[0.08]"
+          className="flex h-14 w-full items-center justify-center gap-3 rounded-full border-[1.5px] border-slate-300 bg-white text-[15.5px] font-medium text-slate-900 transition group-focus-within:ring-2 group-focus-within:ring-brand group-focus-within:ring-offset-2 [@media(hover:hover)]:group-hover:bg-slate-50 dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-100 dark:backdrop-blur-xl dark:ring-offset-night dark:group-focus-within:ring-brand-night [@media(hover:hover)]:dark:group-hover:bg-white/[0.08]"
         >
           {busy ? <><Loader2 className="h-5 w-5 animate-spin text-slate-500" aria-hidden />{busy}</> : <>
           <svg viewBox="0 0 48 48" aria-hidden className="h-[22px] w-[22px]">

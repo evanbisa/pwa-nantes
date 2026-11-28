@@ -23,7 +23,7 @@ export default function LegalDocument({ doc }: { doc: LegalDoc }) {
   return (
     <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_220px]">
       <article className="min-w-0 space-y-6">
-        <header className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
+        <header className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900">
           <span className="relative grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-slate-900 dark:bg-white/10 dark:text-white">
             <Icon aria-hidden className="h-6 w-6" />
           </span>
@@ -63,7 +63,7 @@ export default function LegalDocument({ doc }: { doc: LegalDoc }) {
               key={section.id}
               id={section.id}
               aria-labelledby={`${section.id}-titre`}
-              className="scroll-mt-36 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8 lg:scroll-mt-24 dark:border-slate-800 dark:bg-slate-900 print:break-inside-avoid print:shadow-none"
+              className="scroll-mt-36 rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 lg:scroll-mt-24 dark:border-slate-800 dark:bg-slate-900 print:break-inside-avoid"
             >
               <div className="mb-5 flex items-center gap-4">
                 <span className="grid h-11 w-11 flex-none place-items-center rounded-xl bg-slate-100 text-slate-700 ring-1 ring-slate-200 ring-inset dark:bg-white/5 dark:text-slate-200 dark:ring-white/10">
@@ -95,7 +95,7 @@ export default function LegalDocument({ doc }: { doc: LegalDoc }) {
                 <Link
                   key={d.slug}
                   href={`/legal/${d.slug}/`}
-                  className="group flex flex-col rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-white/30"
+                  className="group flex flex-col rounded-2xl border border-slate-200/80 bg-white p-4 transition hover:-translate-y-0.5 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-white/30"
                 >
                   <DocIcon aria-hidden className="h-5 w-5 text-slate-700 dark:text-slate-300" />
                   <span className="mt-3 font-medium text-slate-900 dark:text-white">{d.title}</span>

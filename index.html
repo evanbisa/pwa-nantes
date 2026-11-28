@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-7ygh4lW/jW5VJdgvCD2ukQaWr5QOkAih//KasPCimvQ=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-Gi7O5Z/SLOjdptNxXnW9aTz6pPlfjT93fqsxR8UHB2A=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -392,6 +392,7 @@
     .pin.is-demo .pin-label::after { content: " · exemple"; font-weight: 400; color: var(--amber); }
     #map.zoom-far .pin-badge { scale: .62; }
     #map.zoom-far .pin.is-open .pin-badge::before { animation: none; opacity: 0; }
+    #map.is-moving .pin-badge::before { animation-play-state: paused; }
 
     .me { position: relative; width: 22px; height: 22px; pointer-events: none; }
     /* Marqueurs MapLibre : toujours positionnés en absolu par le moteur. « position: relative » (.pin, .me, déclarées
@@ -2169,12 +2170,19 @@
     .vp-stage.is-late .ring-fg { stroke: var(--amber); }
     .vp-card { position: absolute; inset: 0; border-radius: 22px; background: #fff; box-shadow: 0 10px 30px -12px rgba(0, 0, 0, .35); overflow: hidden;
       transition: transform .45s var(--ease-out), opacity .35s, filter .35s; }
-    .vp-qr { position: absolute; inset: 0; display: grid; place-items: center; animation: vp-in .35s var(--ease-out) both; }
+    /* Fluidité (28/11/2026) : apparition par opacité et échelle seulement (le flou animé redessinait le QR à chaque
+       image) ; QR prêt dès l'ouverture : il monte avec l'écran, sans apparition à part ; dégradé d'attente déplacé par
+       transform (animé par la carte graphique) au lieu de background-position (repeint à chaque image). */
+    .vp-qr { position: absolute; inset: 0; display: grid; place-items: center; animation: vp-in .24s var(--ease-out) both; }
+    .vp-qr.is-instant { animation: none; }
     .vp-qr svg { width: 100%; height: 100%; display: block; }
-    .vp-qr.is-leaving { animation: vp-out .3s ease forwards; }
-    @keyframes vp-in { from { opacity: 0; transform: scale(.94); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
-    @keyframes vp-out { to { opacity: 0; transform: scale(1.04); filter: blur(4px); } }
-    .vp-skel { position: absolute; inset: 14%; border-radius: 12px; background: linear-gradient(90deg, #eceff1 25%, #f6f7f8 50%, #eceff1 75%) 0 0 / 200% 100%; animation: skel 1.2s linear infinite; }
+    .vp-qr.is-leaving { animation: vp-out .24s ease forwards; }
+    @keyframes vp-in { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
+    @keyframes vp-out { to { opacity: 0; transform: scale(1.03); } }
+    .vp-skel { position: absolute; inset: 14%; border-radius: 12px; overflow: hidden; background: #eceff1; }
+    .vp-skel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, #f6f7f8 50%, transparent); transform: translateX(-100%); animation: skel-x 1.2s linear infinite; }
+    @keyframes skel-x { to { transform: translateX(100%); } }
+    @media (prefers-reduced-motion: reduce) { .vp-skel::after { animation: none; opacity: 0; } }
     .vp-err { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; color: #202124; font-size: 14.5px; }
     .vp-stage[data-state="error"] .vp-err { display: flex; }
     .vp-stage[data-state="error"] .vp-qr, .vp-stage:not([data-state="loading"]) .vp-skel { display: none; }
@@ -2875,6 +2883,28 @@
     .offer-use, .cs-btn { color: var(--on-brand); background: var(--brand); }
     .cs-btn:hover { background: color-mix(in oklab, var(--brand) 86%, #000); }
 
+    /* --- Sans ombres (28/11/2026, demande de l'utilisateur) : cartes, blocs et panneaux à plat, séparés par un filet.
+       Restent les ombres qui ont un rôle : anneaux de focus, voile du guide et du cadrage photo, contour des pastilles,
+       boules des interrupteurs et curseurs (on voit qu'elles se touchent), repères sur la carte. --- */
+    :root[data-theme="light"], :root[data-theme="dark"] { --shadow: none; --shadow-lift: none; }
+    .glass, .visit-cta, .promo-cta, .vp-card, .tour-card, .tour-hello, .ob-panel, .ob-logo .ob-mark, .ins-app, .loader-card,
+    .orbit-item, .orbit.is-small .orbit-item, .shop-tabs button[aria-selected="true"], .seg button[aria-pressed="true"],
+    .bill-pill, .tabbar, .guest-bar, .install-nudge, .net, .toast, .scan-dock, .dock-main, .preview-bar, .ps-tile, .ps-tile:hover,
+    .cs-panel, .addr-list, .captcha-box.is-open, .photo-item.is-dragging, .jn-choices button:hover, .btn-primary:hover,
+    #pro-space .ps-cards button, .ps-quick button, .ps-todo li, #pro-space .ps-cards button:hover, .ps-quick button:hover, .ps-todo li:hover,
+    .pin-label, .place-pin { box-shadow: none; }
+    @media (min-width: 900px) { .vp-panel { box-shadow: none; } }
+    .plan-card, .plan-card.is-premium { box-shadow: none; }
+    .plan-card[aria-checked="true"] { box-shadow: 0 0 0 3px var(--accent-soft); }
+    .plan-card.is-premium[aria-checked="true"] { box-shadow: 0 0 0 3px rgba(245, 193, 92, .25); }
+    /* Sur la carte : un filet un peu plus marqué remplace l'ombre (recherche, stories, Filtres, boutons) */
+    :root[data-theme="light"] .ui.glass, :root[data-theme="light"] .ctrl.glass, :root[data-theme="light"] .zoom-group.glass,
+    :root[data-theme="light"] .fbar .chip.glass { border: 1px solid rgba(22, 33, 58, .16); }
+    /* Noms des restaurants : filet tracé à l'intérieur (même taille qu'avant, le tri des noms qui se chevauchent ne change pas) */
+    :root[data-theme="light"] .pin-label { box-shadow: inset 0 0 0 1px rgba(22, 33, 58, .16); }
+    .toast, .net, .install-nudge, .loader-card { border: 1px solid var(--line-strong); }
+    .orbit-item { border: 1px solid var(--line); }   /* pastilles du chargement : cercle visible sur la carte blanche */
+
     /* --- Retour au toucher (skill apple-design) : tout ce qui se touche réagit dès l'appui ---
        « scale » (propriété à part) se combine aux « transform » existants sans les remplacer. Les lignes de liste
        s'assombrissent au lieu de rétrécir (un grand bloc qui rétrécit bouge trop). Liens texte : légère transparence. */
@@ -2929,7 +2959,7 @@
       #search-open { border-radius: 14px; height: 52px; font-size: 17px; font-weight: 400; letter-spacing: normal; }   /* Body */
       #search-open svg { color: var(--text); }
       /* Barre d'onglets à l'encre pleine : la couleur de la marque tient le bas de l'écran */
-      .tabbar { background: var(--shell); border-top: 0; box-shadow: 0 -8px 24px -16px rgba(22, 33, 58, .6); }
+      .tabbar { background: var(--shell); border-top: 0; box-shadow: none; }
       .tabbar > button, .tabbar #notif-btn.has-unread { color: rgba(242, 244, 248, .66); font-size: 11px; font-weight: 500; }
       .tabbar .avatar { color: #fff; background: rgba(242, 244, 248, .18); }
       .tabbar > button::before { background: rgba(242, 244, 248, .12); }
@@ -6612,6 +6642,10 @@
           container: 'map', style: MAP_STYLE.url || buildStyle(theme),
           center: CONFIG.center, zoom: CONFIG.overviewZoom, minZoom: CONFIG.minZoom, maxZoom: CONFIG.maxZoom,
           maxBounds: CONFIG.bounds, renderWorldCopies: false, attributionControl: false, fadeDuration: 150,
+          // Fluidité (28/11/2026) : rendu à 2× au plus. Sur un écran 3× (iPhone), 2,25 fois moins de pixels à dessiner
+          // à chaque image, pour un trait qui reste net ; mesuré : glissement au doigt 26 → 35 images par seconde,
+          // zoom 9 → 20 images (processeur ralenti 4×).
+          pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
           // Carte à plat : ni inclinaison, ni rotation
           pitch: 0, maxPitch: 0, bearing: 0, dragRotate: false, pitchWithRotate: false, touchPitch: false,
         });
@@ -6619,6 +6653,12 @@
       map.touchZoomRotate.disableRotation();
       map.keyboard.disableRotation();
       map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+
+      // Pendant un glissement ou un zoom, les anneaux « ouvert » des repères s'arrêtent (repris à la fin) : chaque
+      // image restait à recalculer 40 animations, en plus du déplacement des repères (style : 660 → 300 ms par geste).
+      const mapEl = map.getContainer();
+      map.on('movestart', () => mapEl.classList.add('is-moving'));
+      map.on('moveend', () => mapEl.classList.remove('is-moving'));
 
       let networkWarned = false;
       map.on('error', (e) => {
@@ -6721,7 +6761,7 @@
     }
     $('profile-engine').textContent = view.engine === 'google' ? 'Google Maps' : MAP_STYLE.label + ' (OpenStreetMap)';
     view.on('zoom', updateLabelVisibility);
-    view.on('moveend', declutterLabels);
+    view.on('moveend', () => queueDeclutter(true));
     view.on('dragstart', () => setFollow(false));
     view.on('click', (domEvent) => {
       if (domEvent && domEvent.target && domEvent.target.closest && domEvent.target.closest('.pin')) return;
@@ -6740,25 +6780,42 @@
   // Libellés visibles de près, marqueurs compacts de loin
   function updateLabelVisibility() {
     const z = view.getZoom(), el = $('map');
+    const appear = z >= 15.3 && !el.classList.contains('show-labels');
     el.classList.toggle('show-labels', z >= 15.3);
     el.classList.toggle('zoom-far', z < 14.2);
-    if (!declutterQueued) { declutterQueued = true; requestAnimationFrame(() => { declutterQueued = false; declutterLabels(); }); }
+    // Pendant un zoom, le tri des noms qui se chevauchent passe au plus ~7 fois par seconde (au lieu de chaque image :
+    // ~1/3 du temps de calcul du zoom d'arrivée) ; les noms qui apparaissent sont triés tout de suite.
+    queueDeclutter(appear);
   }
-  let declutterQueued = false;
+  let declutterQueued = false, declutterAt = -Infinity;
+  /**
+   * Tri des noms à l'image suivante ; `now` : sans attendre 140 ms depuis le précédent. À l'image suivante, MapLibre a
+   * posé les repères à leur place finale (arrondie au pixel à la fin d'un mouvement, après les écouteurs « moveend »).
+   */
+  function queueDeclutter(now) {
+    if (declutterQueued || (!now && performance.now() - declutterAt < 140)) return;
+    declutterQueued = true;
+    requestAnimationFrame(() => { declutterQueued = false; declutterAt = performance.now(); declutterLabels(); });
+  }
 
-  /** Libellés qui se chevauchent : priorité au commerce sélectionné, puis aux commerces ouverts. */
+  /**
+   * Libellés qui se chevauchent : priorité au commerce sélectionné, puis aux commerces ouverts.
+   * Fluidité (28/11/2026) : toutes les positions sont lues d'abord, les classes posées ensuite. Lire puis écrire repère
+   * par repère obligeait le navigateur à recalculer le style à chaque lecture (40 fois par image pendant un zoom).
+   */
   function declutterLabels() {
     if (!$('map').classList.contains('show-labels')) return;
     const rank = (el) => (el.classList.contains('is-selected') ? 0 : el.classList.contains('is-open') ? 1 : 2);
-    const kept = [];
-    [...markers.values()].map((m) => m.el).filter((el) => !el.classList.contains('is-filtered'))
+    const items = [...markers.values()].map((m) => m.el).filter((el) => !el.classList.contains('is-filtered'))
       .sort((a, b) => rank(a) - rank(b))
-      .forEach((el) => {
-        const r = el.querySelector('.pin-label').getBoundingClientRect();
-        const hit = kept.some((k) => r.left < k.right + 4 && r.right > k.left - 4 && r.top < k.bottom + 2 && r.bottom > k.top - 2);
-        el.classList.toggle('label-hidden', hit);
-        if (!hit && r.width) kept.push(r);
-      });
+      .map((el) => ({ el, r: (el.__label || (el.__label = el.querySelector('.pin-label'))).getBoundingClientRect(), hit: false }));
+    const kept = [];
+    items.forEach((it) => {
+      const r = it.r;
+      it.hit = kept.some((k) => r.left < k.right + 4 && r.right > k.left - 4 && r.top < k.bottom + 2 && r.bottom > k.top - 2);
+      if (!it.hit && r.width) kept.push(r);
+    });
+    items.forEach((it) => { if (it.el.classList.contains('label-hidden') !== it.hit) it.el.classList.toggle('label-hidden', it.hit); });
   }
 
   $('zoom-in').addEventListener('click', () => whenMapReady(() => view.zoomBy(1)));
@@ -8126,8 +8183,10 @@
           use.addEventListener('click', () => {
             closePanel($('offers-sheet'));
             Stats.track(m.shop.id, 'offer', { ref: p.id });
-            whenMapReady(() => { openShop(m.shop.id, { source: 'offers' }); VisitPass.open(m.shop.id, p); });
+            // Le QR code couvre la carte : le commerce y est placé d'un coup (un vol de 0,9 s dessous prenait des images à l'écran du QR)
+            whenMapReady(() => { openShop(m.shop.id, { source: 'offers', fly: 'jump' }); VisitPass.open(m.shop.id, p); });
           });
+          VisitPass.armButton(use, m.shop.id, p);
           box.appendChild(use);
         }
         foldable(more, box, 'offer:' + m.shop.id + ':' + p.id);
@@ -9518,6 +9577,7 @@
         }
         b.setAttribute('aria-label', 'Profiter de l\'offre « ' + p.title + ' » : ' + (usable ? 'afficher mon QR code' : 'créer un compte'));
         b.addEventListener('click', () => (usable ? VisitPass.open(shop.id, p) : Guest.ask('Créez votre compte gratuit pour profiter des offres en caisse avec votre QR code.')));
+        if (usable) VisitPass.armButton(b, shop.id, p);
         wrap.appendChild(b);
         if (p.details) {
           const more = document.createElement('p');
@@ -9566,6 +9626,7 @@
         use.textContent = 'En profiter';
         use.setAttribute('aria-label', 'Utiliser l\'offre « ' + p.title + ' » : afficher mon QR code');
         use.addEventListener('click', () => VisitPass.open(shop.id, p));
+        VisitPass.armButton(use, shop.id, p);
         card.appendChild(use);
       }
       box.appendChild(card);
@@ -10306,6 +10367,7 @@
   }
 
   /** Ouvre la fiche ; `source` : d'où vient la visite (carte, liste, recherche, offres, story, notification, lien partagé). */
+  /** `fly` : true (vol de 0,9 s jusqu'au commerce), 'jump' (placé d'un coup : un écran couvre la carte) ou false. */
   function openShop(id, { source = null, fly = true } = {}) {
     const m = markers.get(id);
     if (!m) return;
@@ -10318,7 +10380,7 @@
     renderList();
     openPanel($('shop-sheet'));
     setFollow(false);
-    if (fly) view.flyTo({ center: m.shop.coords, zoom: Math.max(view.getZoom(), 16), padding: shopPadding(), duration: 900 });
+    if (fly) view.flyTo({ center: m.shop.coords, zoom: Math.max(view.getZoom(), 16), padding: shopPadding(), duration: fly === 'jump' ? 0 : 900 });
   }
 
   function deselectShop() {
@@ -14611,6 +14673,7 @@
     const ROTATE_MS = 60 * 1000;           // nouveau QR code chaque minute (chacun vaut 75 s côté base)
     let shopId = null, promo = null, token = null, prevToken = null, prevUntil = 0, issuedAt = 0, seq = 0;
     let tick = null, poll = null, ring = null, lock = null, lastFocus = null, done = false, failures = 0, prefetched = false, renewing = false;
+    let openedAt = 0, warm = null;
     const isOpen = () => !root.hidden;
     const canUse = (shop, me = currentUser()) => !!(shop && shop.isPro && UUID_RE.test(shop.id) && me && (me.role === 'client' || previewAsClient) && !isOwnShop(shop.id, me));
 
@@ -14661,12 +14724,42 @@
       } catch (e) { lock = null; }      // refusé (économie d'énergie) : sans importance
     }
 
+    const promoOf = (p) => (p && UUID_RE.test(p.id) && PROMO_KINDS[p.kind] ? p : null);
+    const keyOf = (id, p) => id + '|' + (p ? p.id : '');
+    /** Demande d'un QR code à la base, pendant que le générateur de QR se charge : { row, error }, jamais d'exception. */
+    function request(id, p) {
+      const pass = new Promise((ok) => ok(sb.rpc('issue_visit_pass', { p_merchant_id: id, p_promo_id: p ? p.id : null })));   // part tout de suite ; une exception devient une erreur affichée
+      return Promise.all([pass, loadQrMaker()])
+        .then(([res]) => ({ error: res.error, row: Array.isArray(res.data) ? res.data[0] : res.data }), (e) => ({ error: e }));
+    }
+    /**
+     * Fluidité (28/11/2026) : le doigt se pose sur un bouton « QR code » → la demande part tout de suite, sans attendre
+     * qu'il se lève (~0,1 s) ni que l'écran du QR s'ouvre. Le plus souvent, le QR code est prêt dès l'ouverture et monte
+     * avec l'écran au lieu d'apparaître après un gris d'attente. Une demande préparée mais pas utilisée (le doigt
+     * faisait défiler la fiche) ne sert à rien d'autre : elle expire seule côté base (75 s, usage unique).
+     */
+    function prepare(id, promoObj = null) {
+      const m = markers.get(id);
+      if (!m || !canUse(m.shop) || !sb || isOpen()) return;
+      const p = promoOf(promoObj), key = keyOf(id, p);
+      if (warm && warm.key === key && Date.now() - warm.at < 3000) return;
+      const w = { key, at: Date.now(), result: null };
+      w.promise = request(id, p).then((r) => (w.result = r));
+      warm = w;
+    }
+    /** Bouton qui ouvre le QR code : demande préparée dès que le doigt se pose. */
+    function armButton(el, id, promoObj = null) {
+      el.addEventListener('pointerdown', (e) => { if (e.isPrimary && e.button === 0) prepare(typeof id === 'function' ? id() : id, promoObj); }, { passive: true });
+    }
+
     function open(id, promoObj = null) {
       const m = markers.get(id);
       if (!m || !canUse(m.shop)) return;
       if (!isOpen()) lastFocus = document.activeElement;
       shopId = id;
-      promo = promoObj && UUID_RE.test(promoObj.id) && PROMO_KINDS[promoObj.kind] ? promoObj : null;
+      promo = promoOf(promoObj);
+      const w = warm && warm.key === keyOf(id, promo) && Date.now() - warm.at < 4000 ? warm : null;
+      warm = null;
       token = prevToken = null; done = false; failures = 0; renewing = false;
       stopTimers();
       card.querySelectorAll('.vp-qr').forEach((el) => el.remove());
@@ -14684,11 +14777,13 @@
       stage.classList.remove('is-late');
       setState('loading');
       root.hidden = false;
+      openedAt = Date.now();
       document.body.classList.add('vp-open');
       $('vp-close').focus({ preventScroll: true });
       keepAwake(true);
       tick = setInterval(onTick, 500);
-      issue();
+      if (w && w.result) { renewing = true; receive(++seq, w.result, w.at); }   // déjà prêt : affiché avec l'écran
+      else issue(w);
     }
     function close() {
       if (!isOpen()) return;
@@ -14701,22 +14796,21 @@
       if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
     }
 
-    async function issue() {
+    /** Nouveau QR code ; `w` : demande déjà partie (doigt posé sur le bouton). */
+    async function issue(w = null) {
       const s = ++seq;
       clearTimeout(poll);
       renewing = true;
-      let row = null, error = null;
-      try {
-        await loadQrMaker();
-        const res = await sb.rpc('issue_visit_pass', { p_merchant_id: shopId, p_promo_id: promo ? promo.id : null });
-        error = res.error;
-        row = Array.isArray(res.data) ? res.data[0] : res.data;
-      } catch (e) { error = e; }
+      const at = w ? w.at : Date.now();
+      receive(s, await (w ? w.promise : request(shopId, promo)), at);
+    }
+    /** Réponse de la base (`at` : heure de la demande, d'où part la durée de validité). */
+    function receive(s, { row, error }, at) {
       if (s !== seq || !isOpen() || done) return;
       if (error || !row || !VISIT_CODE_RE.test(row.token)) {
         failures++;
         // Le QR affiché vaut encore quelques secondes : on réessaie discrètement avant d'afficher l'erreur
-        if (token && failures < 3 && Date.now() - issuedAt < 70 * 1000) { poll = setTimeout(issue, 3000); return; }
+        if (token && failures < 3 && Date.now() - issuedAt < 70 * 1000) { poll = setTimeout(() => issue(), 3000); return; }
         token = null;
         renewing = false;
         $('vp-err-text').textContent = error && error.message && !/Failed to fetch|NetworkError|Load failed|qrcode/i.test(error.message)
@@ -14731,8 +14825,8 @@
       renewing = false;
       if (token) { prevToken = token; prevUntil = Date.now() + 12 * 1000; }   // l'ancien vaut encore 10 s côté base
       token = row.token;
-      issuedAt = Date.now();
-      draw(token);
+      issuedAt = at;
+      draw(token, Date.now() - openedAt < 200);
       $('vp-code').hidden = false;
       $('vp-code').innerHTML = '<small>ou donnez ce code</small>';
       $('vp-code').append(prettyVisitCode(token));
@@ -14740,15 +14834,17 @@
       if (ring) ring.cancel();
       fitRing();
       ring = $('vp-ring').animate([{ strokeDashoffset: 0 }, { strokeDashoffset: 100 }], { duration: ROTATE_MS, easing: 'linear', fill: 'forwards' });
+      ring.currentTime = Math.min(ROTATE_MS, Math.max(0, Date.now() - at));   // demandé un peu plus tôt (doigt posé) : même départ que le compte à rebours
       setState('ready');
       onTick();
       poll = setTimeout(check, 1500);
     }
-    function draw(t) {
+    /** `withPanel` : l'écran du QR est encore en train de monter, le QR monte avec lui (pas d'apparition à part). */
+    function draw(t, withPanel = false) {
       const old = card.querySelectorAll('.vp-qr');
       old.forEach((el) => { el.classList.add('is-leaving'); setTimeout(() => el.remove(), 320); });
       const box = document.createElement('div');
-      box.className = 'vp-qr';
+      box.className = withPanel ? 'vp-qr is-instant' : 'vp-qr';
       box.innerHTML = qrSvg(visitLink(t));    // uniquement des nombres et le lien du site : rien venant d'un tiers
       card.appendChild(box);
     }
@@ -14794,7 +14890,9 @@
       if (Guest.on()) { Guest.ask('Créez votre compte gratuit pour profiter des offres en caisse avec votre QR code.'); return; }
       if (selectedId) open(selectedId, entryPromo);
     });
+    $('shop-visit').addEventListener('pointerdown', (e) => { if (e.isPrimary && e.button === 0 && selectedId && !Guest.on()) prepare(selectedId, entryPromo); }, { passive: true });
     $('shop-visit-plain').addEventListener('click', () => selectedId && open(selectedId));
+    armButton($('shop-visit-plain'), () => selectedId);
     $('vp-close').addEventListener('click', close);
     $('vp-finish').addEventListener('click', close);
     $('vp-retry').addEventListener('click', () => { failures = 0; setState('loading'); issue(); });
@@ -14806,7 +14904,7 @@
       // Retour dans l'application : QR périmé renouvelé tout de suite, sinon on regarde s'il a été scanné entre-temps
       if (token && !renewing && Date.now() - issuedAt >= ROTATE_MS) issue(); else if (token) check();
     });
-    return { open, close, isOpen, canUse, renderEntry };
+    return { open, close, isOpen, canUse, renderEntry, armButton };
   })();
 
   const Scanner = (() => {

@@ -137,7 +137,7 @@ export function RestaurantList() {
         <div role="radiogroup" aria-label="Filtre" className="flex max-w-full overflow-x-auto rounded-full bg-slate-200/70 p-1 dark:bg-white/[0.06]">
           {FILTERS.map((f) => (
             <button key={f.id} type="button" role="radio" aria-checked={filter === f.id} onClick={() => setFilter(f.id)}
-              className="shrink-0 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap text-slate-600 aria-checked:bg-white aria-checked:text-slate-900 aria-checked:shadow-sm dark:text-zinc-400 dark:aria-checked:bg-white/15 dark:aria-checked:text-white">
+              className="shrink-0 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap text-slate-600 aria-checked:bg-white aria-checked:text-slate-900 dark:text-zinc-400 dark:aria-checked:bg-white/15 dark:aria-checked:text-white">
               {f.label} · {n(rows.filter(f.test).length)}
             </button>
           ))}

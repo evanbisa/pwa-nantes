@@ -75,7 +75,12 @@ Les tailles, graisses et interlignes suivent les styles de texte d'iOS ; la hié
 
 - Coins nets : 10 à 12 px pour les boutons, puces et champs ; 14 px pour la recherche et les gros boutons ; 22 px pour le
   haut des fiches. Plus de pilules partout (seuls les repères et avatars restent ronds).
-- Ombres portées vers le bas, teintées d'encre (`--shadow`, `--shadow-lift`) ; jamais de halo coloré ni de verre dépoli.
+- **Sans ombres sous les cartes (28/11/2026, demande de l'utilisateur)** : cartes, blocs, fiches, barres et panneaux
+  sont à plat, séparés par un filet (`--line`, `--line-strong`) ; `--shadow` et `--shadow-lift` valent `none`. Sur la
+  carte (mode jour), un filet un peu plus marqué remplace l'ombre de la recherche, des stories, des boutons et des noms
+  des restaurants (ces derniers tracés à l'intérieur : même taille, donc même tri des noms qui se chevauchent).
+  Restent les ombres qui ont un rôle : anneaux de focus et de sélection, voile du guide et du cadrage photo, contour
+  des pastilles, boules des interrupteurs et curseurs, repères de la carte. Jamais de halo coloré ni de verre dépoli.
 - Puce active (filtres, types d'offres) : remplie d'encre, texte papier.
 
 ## Les bons plans
@@ -114,6 +119,17 @@ Les tailles, graisses et interlignes suivent les styles de texte d'iOS ; la hié
   - barre de progression des stories : une animation du navigateur (`scaleX`), mise en pause et reprise, sans travail
     du fil principal ; halos des restaurants ouverts en pause sous une fiche ouverte ;
   - mesuré (Chrome, mêmes gestes) : retour d'une fiche 31 → 8 recalculs de style ; story 120 mises en page / 2 s → 0.
+- **Fluidité de la carte et du QR code (28/11/2026)** :
+  - carte dessinée à 2× au plus (`pixelRatio`) : sur un écran 3×, 2,25 fois moins de pixels par image ;
+  - halos des restaurants ouverts en pause pendant un glissement ou un zoom (`#map.is-moving`) ;
+  - tri des noms qui se chevauchent : positions lues d'abord, classes posées ensuite (un seul recalcul de style), au
+    plus ~7 fois par seconde pendant un zoom, puis à la fin du mouvement ;
+  - QR code : la demande part dès que le doigt se pose sur le bouton (en même temps que le chargement du générateur),
+    le QR monte avec l'écran s'il est déjà prêt ; apparition par opacité et échelle (plus de flou animé), dégradé
+    d'attente par `transform` ;
+  - « En profiter » depuis la liste des offres : le commerce est placé d'un coup sur la carte, cachée par le QR code ;
+  - mesuré (Chrome, écran 3×, processeur ralenti 4×) : glissement 25 → 36 images, zoom 7 → 21 images, ouverture d'une
+    fiche 25 → 41 images ; QR code net et immobile 0,78 → 0,51 s après le toucher (base qui répond en 0,18 s).
 - **Clavier (27/11/2026, vidéo sur iPhone)** : Safari ne signale l'ouverture du clavier qu'au début de son animation
   (~0,17 s), et sa fermeture ~0,4 s après la fin. On n'attend pas Safari :
   - la page suit la fermeture dès que le champ perd le focus ;

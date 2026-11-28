@@ -191,7 +191,7 @@ function Dashboard() {
               <div role="radiogroup" aria-label="Période" className="flex rounded-full bg-slate-200/70 p-0.5 dark:bg-white/[0.06]">
                 {PERIODS.map(([p, label]) => (
                   <button key={p} type="button" role="radio" aria-checked={days === p} onClick={() => setDays(p)}
-                    className="rounded-full px-3 py-1 text-xs font-medium text-slate-600 transition aria-checked:bg-white aria-checked:text-slate-900 aria-checked:shadow-sm sm:text-sm dark:text-zinc-400 dark:aria-checked:bg-white/15 dark:aria-checked:text-white">
+                    className="rounded-full px-3 py-1 text-xs font-medium text-slate-600 transition aria-checked:bg-white aria-checked:text-slate-900 sm:text-sm dark:text-zinc-400 dark:aria-checked:bg-white/15 dark:aria-checked:text-white">
                     {label}
                   </button>
                 ))}

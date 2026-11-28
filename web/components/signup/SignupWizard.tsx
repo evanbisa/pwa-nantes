@@ -395,14 +395,14 @@ function Wizard() {
     >
       <MapBackdrop />
       {/* Carte de l'inscription posée sur la carte de la ville, comme l'écran d'accueil */}
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col relative isolate overflow-hidden rounded-[22px] bg-white shadow-xl ring-1 ring-black/5 dark:bg-[#16223a] dark:ring-white/10">
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col relative isolate overflow-hidden rounded-[22px] bg-white ring-1 ring-black/5 dark:bg-[#16223a] dark:ring-white/10">
       <div aria-hidden className="su-glow pointer-events-none absolute inset-0 -z-10" />
       <header className="flex w-full items-center gap-3 px-5 pt-4 pb-2">
         <button
           type="button"
           onClick={back}
           aria-label={atStart ? "Retour à l'accueil" : "Question précédente"}
-          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:bg-white/[0.05] dark:text-zinc-200 dark:ring-white/10 dark:backdrop-blur-xl dark:hover:bg-white/10 dark:focus-visible:ring-brand-night ${(flow.indexOf(step) > 0 || atStart) && step !== "done" ? "" : "invisible"}`}
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:bg-white/[0.05] dark:text-zinc-200 dark:ring-white/10 dark:backdrop-blur-xl dark:hover:bg-white/10 dark:focus-visible:ring-brand-night ${(flow.indexOf(step) > 0 || atStart) && step !== "done" ? "" : "invisible"}`}
         >
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </button>
@@ -551,7 +551,7 @@ function Wizard() {
             <div className="flex flex-1 flex-col">
               <Body>
               <Head icon={MailCheck} id="q-confirm">Confirmez votre <Em>adresse</Em></Head>
-              <p className="mt-6 rounded-2xl bg-white px-5 py-6 text-center text-2xl font-semibold break-all shadow-sm ring-1 ring-slate-200 dark:bg-white/[0.04] dark:ring-white/10 dark:backdrop-blur-xl">
+              <p className="mt-6 rounded-2xl bg-white px-5 py-6 text-center text-2xl font-semibold break-all ring-1 ring-slate-200 dark:bg-white/[0.04] dark:ring-white/10 dark:backdrop-blur-xl">
                 {cleanEmail.slice(0, cleanEmail.lastIndexOf("@"))}
                 <span className="text-slate-400">@</span>
                 <span className="su-em text-brand">{cleanEmail.slice(cleanEmail.lastIndexOf("@") + 1)}</span>
@@ -693,7 +693,7 @@ function MapBackdrop() {
 /* ---------- Petits composants de mise en page ---------- */
 
 const primaryClass =
-  "su-cta h-14 rounded-full bg-brand text-base font-semibold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-strong active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none dark:ring-offset-night dark:focus-visible:ring-brand-night";
+  "su-cta h-14 rounded-full bg-brand text-base font-semibold text-white transition hover:bg-brand-strong active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 dark:ring-offset-night dark:focus-visible:ring-brand-night";
 
 const inputClass = (invalid: boolean) =>
   `h-14 w-full rounded-2xl border-2 bg-white px-4 text-lg text-slate-900 transition placeholder:text-slate-400 focus:outline-none dark:bg-white/[0.04] dark:text-zinc-50 dark:backdrop-blur-xl dark:placeholder:text-zinc-500 ${invalid
