@@ -107,7 +107,9 @@ Les tailles, graisses et interlignes suivent les styles de texte d'iOS ; la hié
   0,35 s). Tirées vers le haut : résistance élastique. Ouverture 0,5 s et fermeture 0,38 s sur la courbe des feuilles
   d'iPhone `cubic-bezier(.32, .72, 0, 1)`.
 - **Stories** : tirées vers le bas, elles suivent le doigt, rétrécissent un peu et le fond s'éclaircit ; elles se
-  ferment avec l'élan, sinon reviennent avec un ressort.
+  ferment avec l'élan, sinon reviennent avec un ressort. Dans la fiche, l'avatar du restaurant ouvre ses stories, les
+  mêmes que la barre du haut (celles d'exemple de la fiche d'exemple comprises) : anneau orange tant qu'il en reste à
+  voir, gris ensuite, comme dans la barre ; il s'enfonce légèrement sous le doigt (28/11/2026).
 - **Outils** : `Physics` dans `index.html` (ressort d'Apple à deux réglages, projection, élastique, vitesse du doigt).
   `Physics.play` précalcule le ressort et le confie au navigateur (Web Animations) : il reste fluide même quand la carte
   se dessine. Animer `transform`, `opacity`, `translate` ou `scale` ; jamais `top`, `left`, `width` pour un déplacement.
