@@ -34,7 +34,9 @@
   --color-night: #0e1626;
   /* Gris de Tailwind (slate, zinc) → encre bleu marine ; orange de Tailwind → orange du logo (#ff4d2e en 500) */
   --color-slate-50: #f6f7fa; --color-slate-100: #eef0f4; --color-slate-200: #dfe3ea; --color-slate-300: #c5cbd7; --color-slate-400: #9aa3b5;
-  --color-slate-500: #6c7790; --color-slate-600: #55607a; --color-slate-700: #3a4560; --color-slate-800: #243049; --color-slate-900: #16213a; --color-slate-950: #0e1626;
+  /* slate-500 (texte secondaire) : #6c7790 → #67728a le 28/11/2026, 2 % plus foncé, pour le contraste minimum des petits
+     textes (4,5:1 ; il était à 4,49 sur blanc et 4,19 sur le fond gris des pages juridiques). Mode nuit : voir plus bas. */
+  --color-slate-500: #67728a; --color-slate-600: #55607a; --color-slate-700: #3a4560; --color-slate-800: #243049; --color-slate-900: #16213a; --color-slate-950: #0e1626;
   --color-zinc-50: #f6f7fa; --color-zinc-100: #eef0f4; --color-zinc-200: #dfe3ea; --color-zinc-300: #c5cbd7; --color-zinc-400: #9aa3b5;
   --color-zinc-500: #6c7790; --color-zinc-600: #55607a; --color-zinc-700: #3a4560; --color-zinc-800: #243049; --color-zinc-900: #16213a; --color-zinc-950: #0e1626;
   --color-orange-50: #fff1ec; --color-orange-100: #ffdfd4; --color-orange-200: #ffbfaa; --color-orange-300: #ff9a7c; --color-orange-400: #ff6a45;
@@ -77,6 +79,7 @@
 [data-theme="night"] {
   --background: #0e1626;
   --foreground: #f2f4f8;
+  --color-slate-500: #6c7790;   /* la nuit, slate-500 sert sur fond sombre : on garde l'ancien gris (plus clair = plus lisible) */
 }
 
 html,

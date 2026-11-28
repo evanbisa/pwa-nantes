@@ -170,6 +170,32 @@ Les tailles, graisses et interlignes suivent les styles de texte d'iOS ; la hié
 - Pas de verre dépoli ni de barres translucides malgré l'usage d'Apple : le monde « étiquette du marché » garde ses
   surfaces pleines (choix de la refonte du 26/11/2026).
 
+## Vitesse et accessibilité (skill `modern-web-guidance`, 28/11/2026)
+
+Audit demandé sans rien changer à l'apparence : captures avant/après comparées au pixel près (site, pages `/app/`).
+Mesures en 4G lente (1,6 Mbit/s, 150 ms) sur téléphone moyen (processeur 4× plus lent), HTTP/2 comme sur Vercel.
+
+- **Ordre des téléchargements** (`index.html`, en tête) : Supabase (`preload`, `fetchpriority="high"`) passe avant le
+  moteur de carte (`modulepreload`, `fetchpriority="low"`) ; connexion à Supabase ouverte d'avance (`preconnect`) ;
+  calcul des tuiles demandé dès la page chargée (`prefetch`, même adresse que MapLibre, `?v=` = sa version). Mesuré :
+  démarrage du site 3,7 → 1,9 s, premier affichage 3,8 → 2,3 s, restaurants sur la carte 0,3 à 0,5 s plus tôt. En
+  changeant une bibliothèque de `vendor/`, changer aussi ces adresses.
+- **Une image = une adresse** : le logo `icon-192.png?v=2` partout (il était téléchargé deux fois, avec et sans `?v=2`).
+- **Pas de texte qui saute au chargement** : la mention « © OpenStreetMap » est repliée en bouton « i » dès que MapLibre
+  la remplit (elle s'affichait dépliée puis sautait : décalage de mise en page 0,05 → 0).
+- **Fiche ouverte ou fermée** : la liste des restaurants n'est plus reconstruite, seule la marque de sélection change
+  (4 à 6 fois moins de travail ; le bouton touché garde le focus clavier, Échap y ramène).
+- **Pages `/app/` (Next.js)** : rien de lourd dans la mise en page commune. Le client Supabase n'est chargé par
+  `BugReporter` qu'au premier bug à envoyer (−62 Ko compressés sur l'accueil et les pages juridiques). Zones pour les
+  lecteurs d'écran : `<main>` au tableau de bord avant connexion, `<aside>` autour de « J'ai déjà un compte ».
+- **Contraste** : gris secondaire `slate-500` de `/app/` en `#67728a` le jour (4,5:1 au moins ; 2 % plus foncé,
+  invisible à l'œil), `#6c7790` gardé la nuit. Reste à décider (changement visible, donc pas fait) : les numéros
+  d'articles des sommaires juridiques en gris clair (`text-slate-400`, 2,5:1 ; il faudrait `slate-500`).
+- **Déjà bons, vérifiés** : aucune erreur axe-core sur le site (téléphone, ordinateur, jour, nuit), animations
+  permanentes en `transform`/`opacity` seulement, images en chargement différé, écouteurs de toucher passifs.
+- **Écarté** : `<meta name="text-scale">` (taille de texte du téléphone) : Chrome 146 seulement, et le site est en
+  pixels fixes ; l'adopter changerait l'apparence.
+
 ## Ce qui ne change pas
 
 - Le logo (épingle orange avec couverts), l'orange comme couleur de marque, les emojis des catégories sur la carte
