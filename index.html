@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Sources autorisées (CSP) : générée par scripts/csp.mjs, à relancer après toute modification d'un script de la page -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-HXEWGeT0ok06AJgnfw1BiylkwzrzuzZgMR+9/HR45FY=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-tfRMYFy3N/W/RNDSFtU48z5SHLmAsp2VLPjZ1EChC70=' 'sha256-aW1U8DUWi1hfyoLjjr2+vvY1jdn70QBlXK2+RRnh8tg=' 'sha256-Y6GSibUZXgeceIaN+k577iZs6vKrcmW5fkplGtBw4/s=' 'sha256-EWByjJeSAbs+J1tQp7kEcYfPKc2gWGiVaho/CEG+YZ4=' https://accounts.google.com/gsi/client https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; img-src 'self' data: blob: https://fnypgfyxbyaqrnklhjxc.supabase.co; font-src 'self'; connect-src 'self' https://fnypgfyxbyaqrnklhjxc.supabase.co wss://fnypgfyxbyaqrnklhjxc.supabase.co https://tiles.openfreemap.org https://data.geopf.fr https://recherche-entreprises.api.gouv.fr https://accounts.google.com/gsi/ https://challenges.cloudflare.com; frame-src https://accounts.google.com/gsi/ https://challenges.cloudflare.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self' blob:; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <!-- Mobile-first : plein écran ; le zoom de la page reste possible (accessibilité : agrandir le texte à deux doigts) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Restaurants, food-trucks, kebabs, pizzas, burgers et douceurs de La Roche-sur-Yon sur une carte, avec les bons plans du moment. Gratuit pour les clients." />
@@ -2841,6 +2841,7 @@
     .shop-item[aria-current="true"] { background: var(--line); }
     .ob-skip { color: var(--text); background: var(--hover); border-color: var(--line); }
     .sheet-emoji.has-story { background: var(--brand); }
+    .sheet-emoji.has-story.is-seen { background: var(--line-strong); }   /* stories déjà vues : anneau gris, comme dans la barre */
     .place-chip.is-place { color: var(--text); border-color: var(--line-strong); }
 
     /* Badge de formule (jaune, hors du système) → encre ; étoiles des avis à l'encre (comme l'App Store) */
@@ -2921,7 +2922,7 @@
        « scale » (propriété à part) se combine aux « transform » existants sans les remplacer. Les lignes de liste
        s'assombrissent au lieu de rétrécir (un grand bloc qui rétrécit bouge trop). Liens texte : légère transparence. */
     .chip:active, .pill-btn:active, .icon-btn:active, .offer-more:active, .sr-toggle:active, .ob-skip:active, .guest-login:active,
-    .dish-like:active, .story-chip:active .story-ring, .fbar-sum:active { scale: .95; }
+    .dish-like:active, .story-chip:active .story-ring, .sheet-emoji.has-story:active, .fbar-sum:active { scale: .95; }
     .offer-hit:active, .sr-hit:active, .sr-dish:active, .shop-item:active { background-color: var(--line); }
     .link-btn:active { opacity: .6; }
     /* Pas d'attente du double-tapotement sur les commandes (le zoom de la page reste possible ailleurs) */
@@ -9285,8 +9286,13 @@
     const { shop } = m;
     const status = statusForWhen(shop, m.status || getStatus(shop));
     $('shop-emoji-in').textContent = catOf(shop).emoji;
-    const hasStory = liveStories(shop).length > 0;
+    // Avatar de la fiche = entrée vers les stories du restaurant, les mêmes que la barre du haut : les siennes, ou celles
+    // d'exemple de la fiche d'exemple quand aucune story n'est en ligne (avant, seules les vraies comptaient : la fiche
+    // d'exemple montrait ses stories dans la barre, mais son avatar ne réagissait pas). Anneau gris une fois tout vu.
+    const storyGroup = storyGroups().find((g) => g.shop.id === shop.id);
+    const hasStory = !!storyGroup;
     $('shop-emoji').classList.toggle('has-story', hasStory);
+    $('shop-emoji').classList.toggle('is-seen', hasStory && !storyGroup.unseen);
     $('shop-emoji').tabIndex = hasStory ? 0 : -1;
     if (hasStory) { $('shop-emoji').removeAttribute('aria-hidden'); $('shop-emoji').setAttribute('aria-label', 'Voir la story de ' + shop.name); }
     else { $('shop-emoji').setAttribute('aria-hidden', 'true'); $('shop-emoji').removeAttribute('aria-label'); }
