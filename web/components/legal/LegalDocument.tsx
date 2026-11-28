@@ -72,7 +72,9 @@ export default function LegalDocument({ doc }: { doc: LegalDoc }) {
                 <div>
                   <h2 id={`${section.id}-titre`} className="text-xl font-semibold text-slate-900 dark:text-white">
                     <a href={`#${section.id}`} className="hover:text-slate-600 dark:hover:text-slate-300">
-                      <span className="mr-1.5 text-slate-400 tabular-nums dark:text-slate-500">
+                      {/* Numéro d'article : couleur des textes secondaires (comme le sommaire), contraste ≥ 4,5:1 jour et
+                          nuit (il était en gris clair, 2,5:1 le jour et 3,6:1 la nuit ; corrigé le 28/11/2026) */}
+                      <span className="mr-1.5 text-slate-500 tabular-nums dark:text-slate-400">
                         <span className="sr-only">Article </span>
                         {n + 1}.
                       </span>

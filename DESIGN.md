@@ -189,8 +189,10 @@ Mesures en 4G lente (1,6 Mbit/s, 150 ms) sur téléphone moyen (processeur 4× p
   `BugReporter` qu'au premier bug à envoyer (−62 Ko compressés sur l'accueil et les pages juridiques). Zones pour les
   lecteurs d'écran : `<main>` au tableau de bord avant connexion, `<aside>` autour de « J'ai déjà un compte ».
 - **Contraste** : gris secondaire `slate-500` de `/app/` en `#67728a` le jour (4,5:1 au moins ; 2 % plus foncé,
-  invisible à l'œil), `#6c7790` gardé la nuit. Reste à décider (changement visible, donc pas fait) : les numéros
-  d'articles des sommaires juridiques en gris clair (`text-slate-400`, 2,5:1 ; il faudrait `slate-500`).
+  invisible à l'œil), `#6c7790` gardé la nuit. Numéros d'articles des pages juridiques (« 1. », « 2. »… devant les
+  titres) : couleur des textes secondaires, comme dans le sommaire (`text-slate-500 dark:text-slate-400`) ; ils
+  étaient en gris clair (2,5:1 le jour, 3,6:1 la nuit). Changement visible, validé par l'utilisateur le 28/11/2026.
+  Règle : tout texte, même un numéro, à 4,5:1 au moins sur son fond (3:1 au-delà de 24 px, ou 18,7 px en gras).
 - **Déjà bons, vérifiés** : aucune erreur axe-core sur le site (téléphone, ordinateur, jour, nuit), animations
   permanentes en `transform`/`opacity` seulement, images en chargement différé, écouteurs de toucher passifs.
 - **Écarté** : `<meta name="text-scale">` (taille de texte du téléphone) : Chrome 146 seulement, et le site est en
