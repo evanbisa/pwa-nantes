@@ -47,7 +47,8 @@ function slot(): HTMLElement {
   if (!box) {
     box = document.createElement("div");
     box.id = "captcha-box";
-    box.className = "fixed bottom-6 left-1/2 z-[2147483000] -translate-x-1/2 rounded-2xl data-[open]:bg-white data-[open]:p-3 data-[open]:shadow-2xl dark:data-[open]:bg-zinc-900";
+    // Au centre de l'écran, sur un voile, seulement quand Cloudflare demande une action (rare) ; effacée dès la fin
+    box.className = "fixed left-1/2 top-1/2 z-[2147483000] -translate-x-1/2 -translate-y-1/2 rounded-2xl transition-opacity duration-200 data-[open]:bg-white data-[open]:p-3 data-[open]:ring-1 data-[open]:ring-black/5 data-[open]:shadow-[0_0_0_100vmax_rgba(10,12,16,0.45)] dark:data-[open]:bg-zinc-900 dark:data-[open]:ring-white/10 data-[done]:pointer-events-none data-[done]:opacity-0";
     document.body.appendChild(box);
   }
   return box;
@@ -59,9 +60,27 @@ async function solve(): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     let settled = false;
     const box = slot();
-    const end = (fn: () => void) => { if (!settled) { settled = true; clearTimeout(timer); box.removeAttribute("data-open"); fn(); } };
+    // Vérification terminée (réussie ou non) : la case s'efface tout de suite, puis le widget est retiré de la page
+    // (le jeton reçu reste valable). Sans ça, la case « Réussite ! » restait affichée tout le reste de la visite.
+    const end = (fn: () => void) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      const id = widget;
+      box.setAttribute("data-done", "");
+      setTimeout(() => {
+        if (widget !== id) return;   // une nouvelle vérification a déjà pris la place
+        if (id !== null) { try { ts.remove(id); } catch { /* déjà retiré */ } }
+        widget = null;
+        box.removeAttribute("data-open");
+        box.removeAttribute("data-done");
+      }, 220);
+      fn();
+    };
     const timer = setTimeout(() => end(() => reject(new Error("captcha_timeout"))), 90_000);
     if (widget !== null) { try { ts.remove(widget); } catch { /* déjà retiré */ } }
+    box.removeAttribute("data-open");
+    box.removeAttribute("data-done");
     widget = ts.render(box, {
       sitekey: SITE_KEY, execution: "execute", appearance: "interaction-only", language: "fr",
       callback: (t: string) => end(() => resolve(t)),
